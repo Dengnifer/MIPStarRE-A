@@ -1,5 +1,9 @@
-import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
+import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
+import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
+import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions
@@ -96,17 +100,17 @@ coordinate-index restrictions.
 `lem:restricted-line-mixture-bounds`, formalizing the
 unlabelled observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
-`Distribution.bind` is the finite uniform-mixture operation.  The proof is
-tracked by issue #18.  Discharge: expand the pre-decoding restrictions and the
-equal fibers of `chiIndex`. -/
+`Distribution.bind` is the finite uniform-mixture operation.  The two halves
+are proved from the equal-fiber decomposition of `chiIndex` and the fact that
+every line conditioning map retains the shared scalar seed. -/
 theorem linePointDist_eq_mixture_restricted (L : LdParams) :
     aLinePointDist L =
         Distribution.bind (uniformDistribution (Fin L.m))
           (restrictedALineDist L) ∧
       dLinePointDist L =
         Distribution.bind (uniformDistribution (Fin L.m))
-          (restrictedDLineDist L) := by
-  sorry
+          (restrictedDLineDist L) :=
+  ⟨aLinePointDist_eq_bind_restricted L, dLinePointDist_eq_bind_restricted L⟩
 
 /-- Restricting a nonnegative average from the line-point distribution to one
 fixed line kind and coordinate inflates its bound by at most `2m`.
@@ -115,9 +119,8 @@ fixed line kind and coordinate inflates its bound by at most `2m`.
 `lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`.
-The proof is tracked by issue #18.  Discharge: use
-`linePointDist_eq_mixture_restricted`, nonnegativity, and the equal outer
-mixture weights. -/
+The restricted component carries mixture weight `1 / (2m)`, so a nonnegative
+average bounded by `δ` bounds it by `2mδ`. -/
 theorem avg_restricted_le {P : AdmissibleParams}
     (f : (LineDesc P.toLdParams × (Fin P.m -> PauliScalar P)) -> ℝ)
     (hf : ∀ sample, 0 ≤ f sample) {δ : ℝ}
@@ -125,7 +128,8 @@ theorem avg_restricted_le {P : AdmissibleParams}
     (kind : LineKind) (i : Fin P.m) :
     avgOver (restrictedLinePointDist P kind i) f ≤
       2 * (P.m : ℝ) * δ := by
-  sorry
+  refine (avgOver_restrictedLinePointDist_le f hf kind i).trans ?_
+  exact mul_le_mul_of_nonneg_left havg (by positivity)
 
 /-- Restricting both variables of a nonnegative average over two independent
 line-point samples inflates its bound by at most `4m^2`.
@@ -134,8 +138,8 @@ line-point samples inflates its bound by at most `4m^2`.
 `lem:restricted-line-mixture-bounds`, from the unlabelled
 estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`.
-The proof is tracked by issue #18.  Discharge: apply the one-variable mixture
-estimate successively to the two product coordinates. -/
+The one-variable estimate is applied successively to the two product
+coordinates. -/
 theorem avg_restricted_prod_le {P : AdmissibleParams}
     (f : ((LineDesc P.toLdParams × (Fin P.m -> PauliScalar P)) ×
       (LineDesc P.toLdParams × (Fin P.m -> PauliScalar P))) -> ℝ)
@@ -148,7 +152,44 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
       (Distribution.prod (restrictedLinePointDist P kindX i)
         (restrictedLinePointDist P kindZ j)) f ≤
       4 * (P.m : ℝ) ^ 2 * δ := by
-  sorry
+  refine (avgOver_prod_restrictedLinePointDist_le f hf kindX kindZ i j).trans ?_
+  exact mul_le_mul_of_nonneg_left havg (by positivity)
+
+/-- Formalization-only auxiliary for item 3 of
+`lem:restricted-line-mixture-bounds`: a consistency defect of two complete
+measurements placed on opposite registers inflates by at most `4m^2` when
+both line-point coordinates are restricted.  Blueprint
+`lem:restricted-line-mixture-bounds`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`. -/
+private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
+    {ε δ : ℝ} {α : Type*} [Fintype α] [DecidableEq α]
+    (S : ProjectiveSetting P ε) (p₁ p₂ : Placement) (hopp : p₁.IsOpposite p₂)
+    (M₁ : ((LineDesc P.toLdParams × (Fin P.m -> PauliScalar P)) ×
+        (LineDesc P.toLdParams × (Fin P.m -> PauliScalar P))) ->
+      MIPStarRE.Quantum.Measurement α (S.ExpandedLocalSpace p₁.side))
+    (M₂ : ((LineDesc P.toLdParams × (Fin P.m -> PauliScalar P)) ×
+        (LineDesc P.toLdParams × (Fin P.m -> PauliScalar P))) ->
+      MIPStarRE.Quantum.Measurement α (S.ExpandedLocalSpace p₂.side))
+    (hbound : consistencyDefect
+      (Distribution.prod (linePointDist P.toLdParams)
+        (linePointDist P.toLdParams))
+      (fun sample answer => S.place p₁ ((M₁ sample).effect answer))
+      (fun sample answer => S.place p₂ ((M₂ sample).effect answer))
+      S.psiHat ≤ δ)
+    (kindX kindZ : LineKind) (i j : Fin P.m) :
+    consistencyDefect
+      (Distribution.prod (restrictedLinePointDist P kindX i)
+        (restrictedLinePointDist P kindZ j))
+      (fun sample answer => S.place p₁ ((M₁ sample).effect answer))
+      (fun sample answer => S.place p₂ ((M₂ sample).effect answer))
+      S.psiHat ≤ 4 * (P.m : ℝ) ^ 2 * δ := by
+  unfold consistencyDefect at hbound ⊢
+  refine le_trans
+    (avgOver_prod_restrictedLinePointDist_le _ ?_ kindX kindZ i j) ?_
+  · intro sample
+    exact consistencyDefect_integrand_nonneg S p₁ p₂ hopp (M₁ sample)
+      (M₂ sample)
+  · exact mul_le_mul_of_nonneg_left hbound (by positivity)
 
 /-- The evaluated joint line measurement remains consistent with the joint
 point measurement on every product of restricted line distributions.
@@ -159,10 +200,8 @@ blueprint
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
 Here `consistencyDefect` is the finite POVM form of the displayed expectation
 against `Id - Q` after both measurements are postprocessed by evaluation.
-The universal constant is outside all strategy and parameter quantifiers.  The
-proof is tracked by issue #18.  Discharge: apply
-`avg_restricted_prod_le` to `CombinedLinesWitness.consistent` and unfold
-`consistencyDefect`. -/
+The universal constant is outside all strategy and parameter quantifiers, and
+is the exact inflation factor `4` of `avg_restricted_prod_le`. -/
 theorem restricted_lines_consistency_bound :
     ∃ C : ℝ, 0 < C ∧
       ∀ {P : AdmissibleParams} {ε δQ δP : ℝ}
@@ -182,7 +221,14 @@ theorem restricted_lines_consistency_bound :
               (((points.Q p2.side sample.1.2 sample.2.2).postprocess fun ab =>
                 (some ab.1, some ab.2)).effect answer))
             S.psiHat ≤ C * (P.m : ℝ) ^ 2 * δP := by
-  sorry
+  refine ⟨4, by norm_num, ?_⟩
+  intro P ε δQ δP S points lines p1 p2 hopp kindX kindZ i j
+  exact consistencyDefect_restricted_prod_le S p1 p2 hopp
+    (fun sample => (lines.T p1.side sample.1.1 sample.2.1).postprocess fun fs =>
+      (evalOpt sample.1.1 sample.1.2 fs.1, evalOpt sample.2.1 sample.2.2 fs.2))
+    (fun sample => (points.Q p2.side sample.1.2 sample.2.2).postprocess fun ab =>
+      (some ab.1, some ab.2))
+    (lines.consistent p1 p2 hopp) kindX kindZ i j
 
 /-! ## The sub-line distribution -/
 
