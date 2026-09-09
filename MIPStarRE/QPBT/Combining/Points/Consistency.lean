@@ -55,7 +55,8 @@ theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq 
     (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
     stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
   unfold stateQForm
-  rw [applyOperatorToState_mul', applyOperatorToState_mul']
+  rw [DistanceCalculus.applyOperatorToState_mul,
+    DistanceCalculus.applyOperatorToState_mul]
   congr 1
   change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
     inner ℂ (Matrix.toEuclideanLin W ψ) _
@@ -248,8 +249,8 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
               Z₂.effect ab.2 * X₂.effect ab.1) ψ‖ ^ 2) := by
     intro ab
     obtain ⟨a, b⟩ := ab
-    rw [← applyOperatorToState_mul', sub_mul_mul_eq_add_commutators _ _ _ _
-      (hXZ a b) (hZX a b) (hZZ b)]
+    rw [← DistanceCalculus.applyOperatorToState_mul,
+      sub_mul_mul_eq_add_commutators _ _ _ _ (hXZ a b) (hZX a b) (hZZ b)]
     have hlin : applyOperatorToState
         (Z₁.effect b * Z₂.effect b * (X₁.effect a - X₂.effect a) +
           Z₂.effect b * (X₁.effect a * Z₁.effect b - Z₁.effect b * X₁.effect a) -
@@ -260,8 +261,9 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
             (X₁.effect a * Z₁.effect b - Z₁.effect b * X₁.effect a) ψ) -
           applyOperatorToState (Z₁.effect b) (applyOperatorToState
             (X₂.effect a * Z₂.effect b - Z₂.effect b * X₂.effect a) ψ) := by
-      rw [← applyOperatorToState_mul', ← applyOperatorToState_mul',
-        ← applyOperatorToState_mul', Matrix.mul_assoc]
+      rw [← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul,
+        ← DistanceCalculus.applyOperatorToState_mul, Matrix.mul_assoc]
       unfold applyOperatorToState
       simp only [map_add, map_sub, LinearMap.add_apply, LinearMap.sub_apply]
     rw [hlin]
