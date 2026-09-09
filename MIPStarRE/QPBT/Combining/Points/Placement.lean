@@ -136,15 +136,6 @@ theorem place_one (S : ProjectiveSetting P ε) (p : Placement) :
     · simp only [ProjectiveSetting.place, Matrix.one_apply, Prod.ext_iff]
       split_ifs <;> simp_all
 
-/-- A placement is additive over finite sums of local operators. -/
-theorem place_finsetSum (S : ProjectiveSetting P ε) (p : Placement) {γ : Type*}
-    (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ x ∈ s, O x) = ∑ x ∈ s, S.place p (O x) := by
-  ext i j
-  cases p <;>
-    simp only [ProjectiveSetting.place, Matrix.sum_apply, Finset.sum_mul,
-      Finset.mul_sum]
-
 /-- A placement commutes with the conjugate transpose. -/
 theorem place_conjTranspose (S : ProjectiveSetting P ε) :
     ∀ (p : Placement) (A : Op (S.ExpandedLocalSpace p.side)),
@@ -262,7 +253,7 @@ def placedMeasurement (S : ProjectiveSetting P ε) (p : Placement) {α : Type*}
     Measurement α (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
   Measurement.ofSumEqOne (fun a => S.place p (M.effect a))
     (fun a => S.place_nonneg p (M.pos a))
-    (by rw [← place_finsetSum, M.sum_eq_one, place_one])
+    (by rw [← place_finset_sum, M.sum_eq_one, place_one])
 
 /-- The effects of a placed measurement are the placed effects. -/
 @[simp] theorem placedMeasurement_effect (S : ProjectiveSetting P ε)

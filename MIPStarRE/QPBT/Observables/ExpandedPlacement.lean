@@ -218,6 +218,16 @@ theorem place_sub (S : ProjectiveSetting P ε) (p : Placement)
   ext i j
   cases p <;> simp only [place, Matrix.sub_apply, sub_mul, mul_sub]
 
+/-- A register placement respects finite sums of operators.
+Formalization-only auxiliary for the register placements of
+`def:symmetric-equivalents`; the source uses this additivity without stating
+it. -/
+theorem place_finset_sum (S : ProjectiveSetting P ε) (p : Placement)
+    {γ : Type*} (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
+    S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
+  ext i j
+  cases p <;> simp only [place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
+
 /-! ## The action of a placement on the expanded state -/
 
 /-- The expanded state is the shuffle of the coordinate tensor of the strategy

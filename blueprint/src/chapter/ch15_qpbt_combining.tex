@@ -1112,6 +1112,44 @@ linearity route is retained in Remark~\ref{rem:combined-points-linearity-route}.
 	Lemma~\ref{lem:combined-point-line-marginal-distance} to each coordinate.
 \end{proof}
 
+\begin{lemma}[Point self-consistency under line-point sampling]
+	\label{lem:combined-point-self-consistency-line-point}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
+		def:symmetric-equivalents}
+	This formalization-only auxiliary records the second pasting hypothesis
+	used in \cite{Ji2020MIPStar}, following the source display
+	\texttt{eq:pasting-q1}. Let $(q,m,d)$ be admissible, let
+	$\eps,\delta_Q\in\mathbb R$, and let $\mathcal S$ be a projective
+	strategy of value at least $1-\eps$. Suppose joint point measurements
+	$\{\hat Q^{x,z}_{a,b}\}_{a,b\in\F_q}$ are supplied on both expanded
+	local spaces, are projective, and satisfy the three comparisons of
+	Lemma~\ref{lem:qld-4-10} on all opposite placements, each with averaged
+	squared distance at most $\delta_Q$. Sample $(\ell_X,x)$ and
+	$(\ell_Z,z)$ independently from the line-point distribution, and write
+	$\mu=D_{\mathrm{Line}}\times D_{\mathrm{Line}}$ for their law.
+	For every directed opposite placement pair $(p_1,p_2)$ of
+	Definition~\ref{def:symmetric-equivalents},
+	\[
+		\E_{\mu}\sum_{\substack{(a,b),(c,d)\in\F_q^2\\(a,b)\ne(c,d)}}
+		\Re\bra{\hat\psi}(\hat Q^{x,z}_{a,b})_{p_1}
+		(\hat Q^{x,z}_{c,d})_{p_2}\ket{\hat\psi}
+		\leq\delta_Q.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:agreement, lem:alnf, lem:dlnf, def:line-point-dist}
+	Placement preserves projectivity, so Fact~\ref{fact:agreement} bounds
+	the consistency defect by the supplied squared-distance bound for
+	uniform point pairs. Lemmas~\ref{lem:alnf} and~\ref{lem:dlnf} give
+	uniform point marginals for both components of the line-point
+	distribution, hence also for their equal mixture. Independence of the
+	two samples makes $(x,z)$ a uniform point pair. Since the integrand
+	depends only on $(x,z)$, this change of sampling preserves the defect.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
@@ -1148,7 +1186,8 @@ linearity route is retained in Remark~\ref{rem:combined-points-linearity-route}.
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents, lem:combined-point-line-marginal-defect}
+		def:symmetric-equivalents, lem:combined-point-line-marginal-defect,
+		lem:combined-point-self-consistency-line-point}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
 	operator
@@ -1202,7 +1241,10 @@ linearity route is retained in Remark~\ref{rem:combined-points-linearity-route}.
 	Schwartz--Zippel bound (Lemma~\ref{lem:schwartz-zippel-total-degree})
 	applied to the polynomials $f_X, f_Z$ of total degree at most $md$; the
 	two hypotheses of the pasting lemma are supplied by the preceding display
-	and by \eqref{eq:qld-q-self-cons}, and the distribution over
+	and by \eqref{eq:qld-q-self-cons}, whose consistency-defect form under
+	the required sampling is proved in
+	Lemma~\ref{lem:combined-point-self-consistency-line-point}.
+	The distribution over
 	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines. The
 	register-exchanged comparison \eqref{eq:pasting-1-sym} is supplied by the
 	symmetric equivalents of that preceding display, which

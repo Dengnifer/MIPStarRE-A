@@ -181,7 +181,7 @@ theorem sum_place_pointMeasExp_conjTranspose_mul_self (S : ProjectiveSetting P �
         rw [← place_conjTranspose, ← place_mul, pointMeasExp_effect_conjTranspose,
           pointMeasExp_effect_mul_self]
     _ = 1 := by
-        rw [← place_finsetSum, (S.pointMeasExp p.side W u).sum_eq_one, place_one]
+        rw [← place_finset_sum, (S.pointMeasExp p.side W u).sum_eq_one, place_one]
 
 /-- The ordered product `M^Z_b M^X_a` on one placement is close to the
 reversed ordered product `M^X_a M^Z_b` on the opposite placement, on average

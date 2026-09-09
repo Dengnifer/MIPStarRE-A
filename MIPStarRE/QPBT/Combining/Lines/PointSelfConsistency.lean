@@ -124,7 +124,8 @@ theorem avgOver_prod_linePointDist_points (L : LdParams)
 
 /-- Transport joint point self-consistency to the point coordinates of two
 independent line-point samples. This is the formalization-only sampling step
-for the second pasting hypothesis at paper lines 955--963. -/
+for the second pasting hypothesis at paper lines 955--963, recorded in blueprint
+`lem:combined-point-self-consistency-line-point`. -/
 theorem CombinedPointsWitness.self_consistency_linePoint_defect_le
     {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δQ)

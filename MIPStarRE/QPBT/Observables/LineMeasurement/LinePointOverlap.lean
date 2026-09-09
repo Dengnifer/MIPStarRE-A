@@ -50,16 +50,6 @@ namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- A register placement respects finite sums of operators.
-Formalization-only auxiliary for the register placements of
-`def:symmetric-equivalents`; the source uses this additivity without stating
-it. -/
-theorem place_finset_sum (S : ProjectiveSetting P ε) (p : Placement)
-    {γ : Type*} (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
-  ext i j
-  cases p <;> simp only [place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
-
 /-- A register placement of the zero operator is zero. -/
 theorem place_zero (S : ProjectiveSetting P ε) (p : Placement) :
     S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
