@@ -6396,3 +6396,18 @@ not actual commit/publication hooks. No productive session was killed.
   a budget reset or an additional mathematical attempt; B8 remains exhausted
   at the previously recorded 13 attempts and 26509 working seconds. No
   mathematical proof attempt, additional model session, or full build ran.
+
+## 2026-09-09 - PR424 merged and existing review findings assigned (07:28Z)
+
+- GitHub confirms PR424 merged at07:24:41Z as0ee46930fd6fbd2017e84e2115ad171c031327de
+  from exact head09682990cef329ebe8fde59b23aa516dc7253a5f; all ten CI/review statuses
+  are success. The daemon completed its record at07:25:53Z and published snapshot550b392f.
+- Current findings on existing PRs212/442/483 were opted into serialized autofix through
+  gh_common after confirming no active loop owned them. Launchers1021496-1021498 own
+  those repairs; no new packet or approved-PR refresh was started by main.
+- PR479's missing CI evidence was restored and its independent reviewer admitted.
+  PR404's unreviewed tail reached publication. Saved-publication recoveries400/398/470
+  remain owned; the transient upstream disconnect in470 was not treated as termination.
+- B9/B10 still have no owner disposition. Main made no manual telemetry commit or push,
+  daemon change, one-off merge/refresh command or proof-budget reset. The verified merge
+  is reported on #27.
