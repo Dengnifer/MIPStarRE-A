@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points.Closeness
+import MIPStarRE.QPBT.Combining.Points.WitnessMarginals
 import MIPStarRE.QPBT.Combining.PointsDataProcessing
 
 /-!
@@ -58,11 +59,11 @@ close to the ordered product by the field-valued commutation estimate
 (`sandwich_offDiagonal_le_sandwichDefectBound`), and is made projective for
 each point pair by the orthonormalization lemma
 (`exists_projective_close_sandwich`); the three consistency conclusions follow
-by the triangle inequality (`chain_bounds`).  The source's route through the
-binary refinements and the quantum linearity theorem is not used, because
-that route needs zero-state padding of the strategy, which is not part of the
-setting; see `rem:linearity-import` and
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.  The error is
+by the triangle inequality (`chain_bounds`).  This replacement for the source's
+binary-refinement and quantum-linearity argument is explained in
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`.  It uses no additional
+ancillary space and does not require the common-extension construction of
+`rem:linearity-import`.  The error is
 `K ε^{1/8}` for a universal constant `K`. -/
 theorem exists_combinedPointsWitness :
     ∃ deltaQ : ℝ -> ℝ, IsPolyErr deltaQ ∧

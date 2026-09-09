@@ -33,7 +33,7 @@ The commutation estimate for the binary refinements is item 2 of
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`; the
 Fourier form of the point effects is `def:expanded-point-measurement`, paper
 lines 384--418.  The role of the transfer in the proof of `lem:qld-4-10` is
-explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+explained in `docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -366,7 +366,7 @@ of the source by the Parseval identity, without loss in the field size.  Paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`,
 blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1210`; the
 role of this form in the proof of `lem:qld-4-10` is explained in
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`. -/
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`. -/
 theorem expPoint_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)

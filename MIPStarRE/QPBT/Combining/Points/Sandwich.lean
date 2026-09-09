@@ -27,7 +27,7 @@ the self-consistency of each factor.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-748`
 (the sandwich and display `eq:qld-r-2`), blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960` (`lem:qld-4-10`); the
-route is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+route is explained in `docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -38,16 +38,6 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 
 noncomputable section
-
-/-- Formalization-only auxiliary: applying a product of operators to a state
-applies the factors in sequence. -/
-theorem applyOperatorToState_mul' {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (A B : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (A * B) ψ =
-      applyOperatorToState A (applyOperatorToState B ψ) := by
-  ext k
-  change ((A * B) *ᵥ ψ.ofLp) k = (A *ᵥ (B *ᵥ ψ.ofLp)) k
-  rw [Matrix.mulVec_mulVec]
 
 namespace ProjectiveSetting
 
@@ -108,7 +98,7 @@ point measurements, with outcomes in `F_q × F_q`.  This is the POVM of the
 first step of the proof of `lem:qld-4-10`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-736`,
 formed directly with field-valued outcomes rather than from the binary
-refinements; see `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`. -/
+refinements; see `docs/paper-gaps/qpbt_combined-points-field-valued.tex`. -/
 def sandwichPoint (S : ProjectiveSetting P ε) (side : PlayerSide)
     (x z : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
@@ -171,7 +161,7 @@ theorem sandwichPoint_ordered_dist_le :
   unfold opFamilyDistSq
   refine avgOver_mono _ _ _ fun xz => Finset.sum_le_sum fun ab _ => ?_
   rw [← place_sub, sandwichPoint_effect_sub_ordered, place_mul,
-    applyOperatorToState_mul', ← place_sub]
+    DistanceCalculus.applyOperatorToState_mul, ← place_sub]
   exact pow_le_pow_left₀ (norm_nonneg _)
     (MagicSquareRigidity.norm_applyOperatorToState_le
       (S.place_conjTranspose_mul_self_le_one p
