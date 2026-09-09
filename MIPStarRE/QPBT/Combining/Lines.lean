@@ -14,6 +14,7 @@ import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 import MIPStarRE.QPBT.Combining.Lines.FiberCollision
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions
