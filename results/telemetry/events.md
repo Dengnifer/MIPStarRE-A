@@ -6065,3 +6065,18 @@ not actual commit/publication hooks. No productive session was killed.
   remain null rather than being inferred as zero latency. These are read-only
   cache artifacts, not selected-window occupancy, API-utilization, or runtime
   acceptance claims.
+- 2026-09-09T16:53:06+08:00: PR #400's final author repair committed as
+  `d688e60edb187f73d0cec004cb497eda921de060`. Canonical checked publication
+  passed the changed-file Lean checks, statement-integrity audits, and
+  blueprint rendering/synchronization, then failed before transport in the
+  reverse-coverage warning check: `git diff --merge-base origin/main HEAD`
+  reported multiple merge bases. At diagnosis, `origin/main` was
+  `1c297a4b8fb8a74b64784ba4c8fe7e10d0ffc6ee`; the bases were
+  `a111c34ab3ca8b0db115b73156ddcd5bf886e9f8` and
+  `d9be57dedd4ea3a3321943539f0785fde00f172d`. The remote PR remained at
+  `0ddc67e8923f8d2c27cbb2fbce6ea9d495861257`. The author retained all commits
+  and did not bypass the hook, alter shared refs, merge, or patch workflow
+  code. Main must reconcile the ancestry/publication precondition through
+  its authorized integration workflow; any multiple-base guard correction
+  belongs in a separate workflow change. Four full reviews and all earlier
+  attempts remain charged; B8 is still 13 attempts and 26509 working seconds.

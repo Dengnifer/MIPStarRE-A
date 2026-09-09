@@ -89,3 +89,20 @@ must still be satisfied: the primary `pr_merge.py` requires a marker-bound
 review on the final head even for adjudication. This author neither launches
 a fifth review nor manufactures that evidence. The current-main ancestry
 gate must also be checked by main before integration.
+
+### Checked publication outcome
+
+At 2026-09-09T16:53:06+08:00, checked publication of repair commit
+`d688e60edb187f73d0cec004cb497eda921de060` had failed before push transport.
+Every changed Lean file, the integrity audits, and blueprint rendering and
+synchronization passed. The subsequent reverse-coverage warning check failed
+on `git diff --merge-base origin/main HEAD`: Git reported multiple merge bases.
+At diagnosis, `origin/main` was `1c297a4b8fb8a74b64784ba4c8fe7e10d0ffc6ee`;
+the two bases were `a111c34ab3ca8b0db115b73156ddcd5bf886e9f8` and
+`d9be57dedd4ea3a3321943539f0785fde00f172d`.
+
+The remote PR head remained `0ddc67e8923f8d2c27cbb2fbce6ea9d495861257`.
+No hook bypass, shared-ref change, integration merge, or workflow patch was
+attempted. Main must resolve the publication precondition through its
+authorized integration workflow before exact-head CI can run. The full-build
+lock was not taken by this author repair, since no full build was started.
