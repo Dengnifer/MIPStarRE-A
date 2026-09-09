@@ -88,7 +88,7 @@ theorem lineConsistency_eq_mismatch {P : AdmissibleParams} {ε : ℝ}
         (fun sample c => heteroKron 1
           (((S.toStrategy.B (q sample)).postprocess (f sample)).effect c))
         S.toStrategy.ψ :=
-          WinImplications.consistencyDefect_congr _ _ _ _ _ _ hA hB
+          consistencyDefect_congr _ _ _ _ _ _ hA hB
     _ = avgOver (linePointDist P.toLdParams) (fun sample =>
         outcomeEventWeight S.toStrategy (q sample) (q sample)
           (fun A B => f sample A ≠ f sample B)) := h
@@ -266,7 +266,7 @@ theorem norm_reindexState_psiHat (S : ProjectiveSetting P ε)
         ((S.toStrategy.ιB × PauliRegister P) ×
           (PauliRegister P × PauliRegister P))) :
     ‖reindexState e S.psiHat‖ = 1 := by
-  rw [norm_reindexState, psiHat_norm]
+  rw [reindexState_norm_eq, psiHat_norm]
 
 /-! ## Fine-product consistency on the two bipartitions -/
 
@@ -675,7 +675,7 @@ theorem expLineDist_aaBa_le (S : ProjectiveSetting P ε) (W : PauliKind) :
             ((coarseB sample).effect f))
           (reindexState e S.psiHat) ≤ (Fintype.card PauliEdge : ℝ) * ε := by
     refine le_of_eq_of_le
-      (WinImplications.consistencyDefect_congr _ _ _ _ _ _ ?_ ?_) hcoarse
+      (consistencyDefect_congr _ _ _ _ _ _ ?_ ?_) hcoarse
     · intro sample f
       rw [hAeff]
     · intro sample f
@@ -760,7 +760,7 @@ theorem expLineDist_abBb_le (S : ProjectiveSetting P ε) (W : PauliKind) :
             ((coarseB sample).effect f))
           (reindexState e S.psiHat) ≤ (Fintype.card PauliEdge : ℝ) * ε := by
     refine le_of_eq_of_le
-      (WinImplications.consistencyDefect_congr _ _ _ _ _ _ ?_ ?_) hcoarse
+      (consistencyDefect_congr _ _ _ _ _ _ ?_ ?_) hcoarse
     · intro sample f
       rw [hAeff]
     · intro sample f

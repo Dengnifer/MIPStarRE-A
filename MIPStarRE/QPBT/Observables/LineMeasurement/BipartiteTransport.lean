@@ -46,14 +46,7 @@ theorem effect_mul_postprocess_effect_self {α β ι : Type*} [Fintype α]
     (M : MIPStarRE.Quantum.Measurement α ι)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) (g : α → β) (a : α) :
     M.effect a * (M.postprocess g).effect (g a) = M.effect a := by
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, Finset.mul_sum,
-    Finset.sum_eq_single a]
-  · exact (hM a).isIdempotentElem.eq
-  · intro b _ hba
-    exact projective_effect_mul_effect_eq_zero M hM (Ne.symm hba)
-  · intro hnot
-    exact absurd (Finset.mem_filter.mpr
-      (⟨Finset.mem_univ a, rfl⟩ : a ∈ Finset.univ ∧ g a = g a)) hnot
+  simpa using SandwichProduct.effect_mul_postprocess_effect M hM g (g a) a
 
 /-- The distance between two oppositely placed complete measurements is at
 most twice their inconsistency, expressed through the diagonal overlap. This

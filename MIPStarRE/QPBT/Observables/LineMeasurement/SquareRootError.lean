@@ -26,73 +26,33 @@ open MIPStarRE.Quantum
 
 namespace DistanceCalculus
 
-/-- The adjoint squares of the effects of a complete measurement sum to at
-most the identity. Formalization-only auxiliary for the trivial distance
-bound. The same statement is proved as `measurement_sum_adjoint_mul_le_one` in
-`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
-therefore invisible from this file; consolidating the two copies is tracked by
-issue #204. -/
+/-- The adjoint squares of a complete measurement sum to at most the identity.
+This is the existing public measurement bound, used here for the uniform
+distance estimate. -/
 theorem measurement_sum_adjoint_mul_le_one {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement α ι) :
-    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  calc
-    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ ∑ a : α, M.effect a := by
-      refine Finset.sum_le_sum fun a _ => ?_
-      rw [measurement_effect_hermitian M a]
-      exact MIPStarRE.Quantum.sq_le_self (M.pos a) (measurement_effect_le_one M a)
-    _ = 1 := M.sum_eq_one
+    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 :=
+  MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M
 
 /-- A left-placed complete measurement is square-summable on the product
-space. Formalization-only auxiliary for the trivial distance bound. The same
-statement, phrased through `leftTensor`, is proved as
-`leftPlacedMeasurement_sum_adjoint_mul_le_one` in
-`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
-therefore invisible from this file; consolidating the two copies is tracked by
-issue #204. -/
+space, by the public measurement bound applied to its tensor placement. -/
 theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιA) :
     ∑ a : α, (heteroKron (M.effect a) (1 : Op ιB))ᴴ *
-      heteroKron (M.effect a) (1 : Op ιB) ≤ 1 := by
-  calc
-    ∑ a : α, (heteroKron (M.effect a) (1 : Op ιB))ᴴ *
-          heteroKron (M.effect a) (1 : Op ιB) =
-        ∑ a : α, leftTensor (ι₂ := ιB) ((M.effect a)ᴴ * M.effect a) := by
-      refine Finset.sum_congr rfl fun a _ => ?_
-      change (leftTensor (ι₂ := ιB) (M.effect a))ᴴ *
-        leftTensor (ι₂ := ιB) (M.effect a) = _
-      rw [leftTensor_conjTranspose, leftTensor_mul_leftTensor]
-    _ = leftTensor (ι₂ := ιB) (∑ a : α, (M.effect a)ᴴ * M.effect a) :=
-      leftTensor_finset_sum Finset.univ _
-    _ ≤ leftTensor (ι₂ := ιB) (1 : Op ιA) :=
-      leftTensor_mono (measurement_sum_adjoint_mul_le_one M)
-    _ = 1 := leftTensor_one
+      heteroKron (M.effect a) (1 : Op ιB) ≤ 1 :=
+  MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
+    (leftPlacedMeasurement (ιB := ιB) M)
 
 /-- A right-placed complete measurement is square-summable on the product
-space. Formalization-only auxiliary for the trivial distance bound. The same
-statement, phrased through `rightTensor`, is proved as
-`rightPlacedMeasurement_sum_adjoint_mul_le_one` in
-`MIPStarRE/QPBT/Games/DistanceTheorems.lean`, where it is `private` and
-therefore invisible from this file; consolidating the two copies is tracked by
-issue #204. -/
+space, by the public measurement bound applied to its tensor placement. -/
 theorem rightPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιB) :
     ∑ a : α, (heteroKron (1 : Op ιA) (M.effect a))ᴴ *
-      heteroKron (1 : Op ιA) (M.effect a) ≤ 1 := by
-  calc
-    ∑ a : α, (heteroKron (1 : Op ιA) (M.effect a))ᴴ *
-          heteroKron (1 : Op ιA) (M.effect a) =
-        ∑ a : α, rightTensor (ι₁ := ιA) ((M.effect a)ᴴ * M.effect a) := by
-      refine Finset.sum_congr rfl fun a _ => ?_
-      change (rightTensor (ι₁ := ιA) (M.effect a))ᴴ *
-        rightTensor (ι₁ := ιA) (M.effect a) = _
-      rw [rightTensor_conjTranspose, rightTensor_mul_rightTensor]
-    _ = rightTensor (ι₁ := ιA) (∑ a : α, (M.effect a)ᴴ * M.effect a) :=
-      rightTensor_finset_sum Finset.univ _
-    _ ≤ rightTensor (ι₁ := ιA) (1 : Op ιB) :=
-      rightTensor_mono (measurement_sum_adjoint_mul_le_one M)
-    _ = 1 := rightTensor_one
+      heteroKron (1 : Op ιA) (M.effect a) ≤ 1 :=
+  MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
+    (rightPlacedMeasurement (ιA := ιA) M)
 
 /-- The squared distance between two square-summable operator families is at
 most four on a unit vector. Formalization-only auxiliary bounding the

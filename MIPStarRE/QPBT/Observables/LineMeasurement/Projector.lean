@@ -43,18 +43,6 @@ noncomputable def tauLineProj (P : AdmissibleParams) (W : PauliKind)
       restrictToLine P.toLdParams line (lowDegreeEncoding h) = f),
     pauliProj W h
 
-/-- Each generalized Pauli eigenspace projector is positive semidefinite, being
-the outer product of a vector with its own conjugate. Formalization-only
-auxiliary for the positivity of the ancillary line measurement of
-`def:expanded-line-measurement`. The same statement is proved as
-`pauliProj_nonneg` in `MIPStarRE/QPBT/Observables/ExpandedDefs.lean`, where it
-is `private` and therefore invisible from this file; consolidating the two
-copies into a single shared statement is tracked by issue #204. -/
-private theorem pauliProj_nonneg (P : AdmissibleParams) (W : PauliKind)
-    (e : PauliRegister P) : 0 ≤ pauliProj W e :=
-  Matrix.nonneg_iff_posSemidef.mpr
-    (Matrix.posSemidef_vecMulVec_self_star (pauliVec W e))
-
 /-- Pauli line projectors are positive semidefinite. This is the positivity of
 the ancillary measurement in `def:expanded-line-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
@@ -63,7 +51,7 @@ theorem tauLineProj_nonneg (P : AdmissibleParams) (W : PauliKind)
     0 ≤ tauLineProj P W line f := by
   classical
   unfold tauLineProj
-  exact Finset.sum_nonneg fun e _ => pauliProj_nonneg P W e
+  exact Finset.sum_nonneg fun e _ => (posSemidef_pauliProj W e).nonneg
 
 /-- The line coarse-graining of the generalized Pauli projectors is a
 symmetric matrix. Symmetry is what makes the projector act identically on
@@ -109,25 +97,6 @@ theorem tauLineProj_mul_tauLineProj (P : AdmissibleParams) (W : PauliKind)
     apply hfg
     rw [← (Finset.mem_filter.mp he).2, ← (Finset.mem_filter.mp he').2, hee']
 
-/-- The generalized Pauli eigenspace projectors of one register sum to the
-identity: they are the spectral projections of the trivial Pauli observable,
-which is the identity because `tauObservable W 0` squares to itself and to the
-identity. Formalization-only auxiliary for the completeness of the ancillary
-line measurement of `def:expanded-line-measurement`. The same statement is
-proved as `sum_pauliProj_eq_one`, from `tauObservable_zero`, in
-`MIPStarRE/QPBT/Observables/ExpandedDefs.lean`, where both are `private` and
-therefore invisible from this file; consolidating the copies is tracked by
-issue #204. -/
-private theorem sum_pauliProj_eq_one (P : AdmissibleParams) (W : PauliKind) :
-    ∑ e : PauliRegister P, pauliProj W e = 1 := by
-  have hzero : tauObservable W (0 : PauliRegister P) = 1 := by
-    have hmul := tauObservable_mul W (0 : PauliRegister P) 0
-    rw [add_zero, tauObservable_sq] at hmul
-    exact hmul.symm
-  have h := tauObservable_eq_sum_pauliProj W (0 : PauliRegister P)
-  rw [hzero] at h
-  simpa [dotProduct, phaseSign] using h.symm
-
 /-- The line fibers partition the complete family of Pauli eigenspace
 projectors. This is the completeness of the ancillary measurement in
 `def:expanded-line-measurement`, paper
@@ -143,7 +112,7 @@ theorem sum_tauLineProj_eq_one (P : AdmissibleParams) (W : PauliKind)
       (fun e : PauliRegister P =>
         restrictToLine P.toLdParams line (lowDegreeEncoding e))
       (fun e => pauliProj W e)]
-  exact sum_pauliProj_eq_one P W
+  exact sum_pauliProj_eq_one W
 
 /-- The projective line measurement on one Pauli register obtained by
 measuring the generalized Pauli basis and restricting the low-degree encoding

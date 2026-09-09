@@ -69,16 +69,15 @@ variable {P : AdmissibleParams} {ε : ℝ}
 /-- The line measurement of a projective strategy is again projective: folding
 the answers of a line question into a coefficient list is a postprocessing, and
 postprocessing preserves projectivity. This is the line analogue of the point
-statement `pointMeas_isProjective` of
-`MIPStarRE/QPBT/Observables/Defs.lean`, which is `private` there and so cannot
-be reused; the line form is what the projectivity assertion of
+measurement projectivity; both follow because postprocessing preserves
+projectivity. The line form is what the projectivity assertion of
 `def:expanded-line-measurement` needs, paper
 `14_analysis_of_the_pauli_basis_test.tex:552-556`. Stating the two uniformly
 in one place is tracked by issue #204. -/
 theorem lineMeas_isProjective (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :
     MIPStarRE.QPBT.Measurement.IsProjective (S.lineMeas side W line) := by
-  apply WinImplications.postprocess_isProjective
+  apply SandwichProduct.postprocess_isProjective
   cases side with
   | alice => exact S.isProjective.1 _
   | bob => exact S.isProjective.2 _

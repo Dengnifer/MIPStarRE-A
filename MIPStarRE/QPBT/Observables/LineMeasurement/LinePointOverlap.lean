@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Observables.LineMeasurement.SelfConsistency
+import MIPStarRE.QPBT.Observables.LineMeasurement.Evaluation
 
 /-!
 # Overlap of expanded line and expanded point measurements
