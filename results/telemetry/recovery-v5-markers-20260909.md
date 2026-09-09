@@ -118,6 +118,7 @@ was performed.
   PID `2578309`, started `11:48:29`, was observed at `11:50:38`;
   PID `2776406`, started `11:58:37`, was observed at `12:00:35`.
   PID `3124194`, started `12:08:46`, was observed at `12:09:07`.
+  PID `3226327`, started `12:18:58`, was observed at `12:20:47`.
   The parent remained PID `2339020` throughout.
 - At `2026-09-09T03:28:14Z` through `03:28:15Z`, stack-watch recognized merged
   bases and launched lane tails for issues 115, 116, and 117. Its current stack
@@ -150,7 +151,8 @@ was performed.
   `watchdog/daemon/pr195.failed`, `watchdog/daemon/pr238.failed`, and
   `watchdog/lanes/118.needs-attention`.
 - A post-check at `2026-09-09T12:09:07+08:00` confirmed all three remain
-  absent. No wildcard or directory-wide deletion was used.
+  absent, and a final check at `2026-09-09T12:20:47+08:00` reconfirmed their
+  absence. No wildcard or directory-wide deletion was used.
 - The primary checkout's pre-existing dirty telemetry was preserved. Main moved
   concurrently during inspection; this session did not create a main commit,
   push main, or invoke a merge command.

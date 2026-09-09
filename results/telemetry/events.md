@@ -6263,3 +6263,51 @@ not actual commit/publication hooks. No productive session was killed.
   CHANGES_REQUESTED with two findings on ab9e275b605b99316d0a2525f7d219a6d794f0e5.
   Main enabled its auto-fix label through gh_common and started serialized repair PID3161793.
   A completed single prose lane for PR400 is not treated as a combined published verdict.
+
+## 2026-09-09 - Owner corrects the bottleneck: approved refresh wave (04:22Z)
+
+- The owner-session04:12Z message briefly imposed a three-build ceiling and no new
+  work-lane tails. The later04:15Z correction explicitly supersedes it: prepare approved
+  PRs in waves of four to six, staggered by two minutes, leaving358/375/377 to the daemon.
+  Main followed the later instruction, rather than retaining the superseded CPU diagnosis.
+- GitHub heads and Git's worktree registry identified the six clean, unowned checkouts
+  for PRs384,417,431,443,453,458. The443 and453 checkouts are under /tmp, so main created
+  /tmp/lane-v19.sh with only an optional LANE_WORKTREE override relative to v18; its
+  canonical build lock and all gates remain unchanged. No running script was edited and
+  no duplicate worktree was created. The six detached launchers are PIDs3217517-3217522,
+  delayed0,120,240,360,480,600 seconds respectively. PR384's merge-loss guard passed and
+  it reached its locked build. PRs473,483,487 remain the next approved wave; the three
+  daemon-owned PRs were not duplicated. Existing stack bases were not changed implicitly.
+- Completed workers handed off published repairs for PRs320,349,213,449,359 with their
+  remaining independent reviews. Main verified no corresponding review process remained
+  before starting review.sh on each, PIDs3237998,3238017,3238089,3238212,3238253. These
+  handoffs preserve prior proof budgets and do not reopen implementation work. PR212's
+  long publication preflight remains a separate incomplete handoff, not green CI evidence.
+- PR392's current-head review reported three findings. After scheduling the approved
+  wave, main enabled its review-fix label through gh_common and launched serialized
+  autofix PID3256290; a prover was admitted. The closing snapshot still counted18 workers.
+  PR343 was separately verified open at de1303ac0f9baa02d767cc3740311272e68441c4 with
+  both exact-head summaries green; it was missed by the daemon's earlier candidate
+  snapshot while its old refresh was still running. No manual merge was attempted.
+- The active daemon remains PID3107859 and logs to daemon9.log. It is refreshing PR358.
+  No first merge is claimed; that event will be reported on #27 after verification.
+
+## 2026-09-09 - First daemon merge after detached recovery: PR358 (04:26Z)
+
+- GitHub confirms PR358 merged at04:22:34Z as875b97dc7dbca734338aa44bb24ca8074984f1db
+  from exact reviewed head a3ee382d30d002add23947c414e9133bedd9e17b. All eight CI step
+  statuses, local-ci/summary and local-review/summary are success on that head. The
+  daemon log records its completed merge action at04:24:33Z. This is the first verified
+  merge since the detached v5 recovery, not an inference from a local commit title.
+- The ordinary gate confirmed zero unresolved findings and no open child of issue351;
+  the daemon merged, fast-forwarded main, removed the completed worktree and branch,
+  and launched the cache warmer. Main did not invoke pr_merge.py. The snapshot observed
+  18 workers, and the closing count remained18; the approved refresh wave continues.
+- Post-merge local telemetry commits7cd37e61 and1d75b579 remained ahead of github/main
+  in the daemon's closing log. Source merge success is separate from telemetry transport
+  success. Main is publishing the accumulated post-merge records through the existing
+  guarded github-sync path, preserving concurrent rows and the staged owner history.
+- The first-merge milestone is reported on #27. Next priority remains approved PRs,
+  followed by current-head repair findings and missing reviews. The remaining approved
+  successors473/483/487 are retained for the next wave rather than duplicating six live
+  approved-tail launchers or daemon-owned work.
