@@ -11,8 +11,8 @@ the genuine bipartite POVMs underlying the completed line-point defect.
 ## References
 
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:689-709`
-- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1279-1288`
-- Blueprint `lem:qld-4-10` and `lem:qld-4-7`.
+- `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`
+- Blueprint `lem:qld-4-10` and `lem:qld-4-13`.
 - Issue #335.
 -/
 
@@ -27,7 +27,9 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The error parameter of a supplied combined-point witness is nonnegative. -/
+/-- This formalization-only auxiliary records that the error parameter of a supplied
+`CombinedPointsWitness` is nonnegative. It supports `lem:qld-4-10`, paper lines
+689--709, and does not construct or assert existence of the witness. -/
 theorem CombinedPointsWitness.delta_nonneg {P : AdmissibleParams} {epsilon deltaQ : ℝ}
     {setting : ProjectiveSetting P epsilon}
     (points : CombinedPointsWitness setting deltaQ) :
@@ -47,8 +49,10 @@ variable {P : AdmissibleParams} {epsilon deltaQ deltaL : ℝ}
 variable {setting : ProjectiveSetting P epsilon}
 variable {points : CombinedPointsWitness setting deltaQ}
 
-/-- The completed `AA'`--`BA''` line-point defect is nonnegative because its
-correlation terms are those of genuine POVMs on `pairState setting`. -/
+/-- This formalization-only auxiliary records nonnegativity of the completed
+`AA'`--`BA''` line-point defect for a supplied `ExtendedLinesWitness`. It supports
+`lem:qld-4-13`, paper lines 1020--1034, by expressing the correlation terms as
+those of genuine POVMs on `pairState setting`; it does not construct the witness. -/
 theorem completedLinePointDefect_aaBa_nonneg
     (lines : ExtendedLinesWitness setting points deltaL)
     (mu : Distribution
@@ -99,7 +103,9 @@ theorem completedLinePointDefect_aaBa_nonneg
 
 end ExtendedLineGame
 
-/-- The error parameter of a supplied extended-line witness is nonnegative. -/
+/-- This formalization-only auxiliary records that the error parameter of a supplied
+`ExtendedLinesWitness` is nonnegative. It supports `lem:qld-4-13`, paper lines
+1020--1034, and does not construct or assert existence of the witness. -/
 theorem ExtendedLinesWitness.delta_nonneg {P : AdmissibleParams}
     {epsilon deltaQ deltaL : ℝ} {setting : ProjectiveSetting P epsilon}
     {points : CombinedPointsWitness setting deltaQ}
