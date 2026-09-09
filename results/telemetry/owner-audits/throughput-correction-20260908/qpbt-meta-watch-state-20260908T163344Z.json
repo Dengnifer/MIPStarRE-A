@@ -1,0 +1,328 @@
+{
+  "schema": 1,
+  "meta_thread_id": "01a073cc-be45-7220-86f3-9c56354931ff",
+  "main_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "automation_id": "qpbt-track-a-meta-watch",
+  "status": "active_verification",
+  "started_at": "2026-09-08T12:06:48.768657+00:00",
+  "last_checked_at": "2026-09-08T16:30:01.255452+00:00",
+  "cadence_minutes": 5,
+  "role_boundary": {
+    "meta": "Observe, diagnose, guide main, verify results, preserve audit evidence; supported recovery only under existing authorization.",
+    "main": "Choose/decompose proofs, assign workers, implement workflow changes, operate CI/reviews/merges, and publish telemetry."
+  },
+  "allocation": {
+    "total": 10,
+    "main": 1,
+    "worker_slots": 9,
+    "useful_worker_floor": 8,
+    "extra_reserved": 0,
+    "source": "current conversation and owner-verified runtime allocation; reread current receipt on every policy change"
+  },
+  "metrics": {
+    "api_concurrency": "Provider-dashboard observation6-8 from owner; direct current API telemetry unavailable. Do not infer from tasks.",
+    "worker_activity": "Fresh root-scoped lifecycle with attributable activity; passive polling does not establish proof productivity.",
+    "delivery": "Typed proof artifacts, canonical gate results, review publication and merged source changes; tracked debt is a separate measure.",
+    "historical_worker_count_correction": {
+      "prior_51_of_170_included_queue_alert_records": true,
+      "snapshot_only_same_period": {
+        "at_floor": 51,
+        "count": 139,
+        "distribution": {
+          "8": 40,
+          "9": 11,
+          "7": 43,
+          "6": 24,
+          "5": 16,
+          "4": 4,
+          "3": 1
+        }
+      },
+      "time_coverage": "Change-only journal; snapshot proportions are not a time percentage. Two-hour stability is not established."
+    },
+    "worker_count_distinction": {
+      "fresh_output_workers": 7,
+      "observed_nonterminal_workers": 7,
+      "quiet_or_starting_workers": 0,
+      "usefulness_requires_assignment_and_progress_check": true
+    }
+  },
+  "stability": {
+    "window_seconds": 7200,
+    "minimum_floor_fraction_of_valid_observed_time": 0.95,
+    "minimum_valid_time_coverage": 0.9,
+    "criterion_origin": "Meta operational interpretation of sustained almost-all-time behavior; no change to owner capacity/floor.",
+    "proof_progress_required": true,
+    "delivery_pipeline_advancing_required": true,
+    "unowned_repeated_stalls_allowed": false,
+    "verified": false,
+    "stable_since": null
+  },
+  "baseline": {
+    "worker_snapshot": {
+      "active_agents": [
+        "/root/space_sol_publication_finish",
+        "/root/sol_refresh343_parent",
+        "/root/astra_refill_coordinator",
+        "/root/sol_resume_native_review_publication",
+        "/root/sol_prove_combine_individual_degree",
+        "/root/sol_prove_combine_line_polynomial",
+        "/root/sol_prove_extended_point_spec",
+        "/root/sol_prove_tilde_measurement"
+      ],
+      "active_count": 8,
+      "active_threads": [
+        "01a07f4f-c9e8-7103-b007-ff6c713246e0",
+        "01a07ffd-2a9a-7a92-bce9-d4933629d26f",
+        "01a08017-2dc3-7bc3-904c-b390030026c6",
+        "01a080cc-4d59-7a12-a58c-7a6d0b9b383f",
+        "01a080e2-8b8b-7d00-864d-2fe522c1ef4c",
+        "01a080e3-0e22-7530-af72-a3679688fe61",
+        "01a080e3-7b73-7062-964f-d404b21da8e5",
+        "01a080e3-e91d-70d3-9e6b-abbfc4945a91"
+      ],
+      "floor": 8,
+      "handoff": {
+        "followup_task_ok": false,
+        "list_agents_ok": false,
+        "observation_ack": false,
+        "queue_exit": null,
+        "successful": false,
+        "useful_activity_ok": false
+      },
+      "observed_at": "2026-09-08T12:06:26.925260+00:00",
+      "root_identity": "3846730:187183661",
+      "root_thread": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "signature": "8b7fdbc64cb0bad7e968e39fe01bc7d491206cb90881f3bc65e474e6057fd8ba",
+      "state_counts": {
+        "running": 8,
+        "task_complete": 4
+      },
+      "status": "healthy",
+      "workers": [
+        {
+          "agent_path": "/root/space_sol_pr249",
+          "last_output_at": "2026-09-08T11:55:16.490000+00:00",
+          "session_started_at": "2026-09-07T18:21:49.201Z",
+          "state": "task_complete",
+          "thread_id": "01a07d1a-e2d6-7580-a2c4-5970d4bef3ab",
+          "turn_id": "01a080d8-d729-7771-8ace-541e525c4e31"
+        },
+        {
+          "agent_path": "/root/space_sol_publication_finish",
+          "last_output_at": "2026-09-08T12:04:34.338000+00:00",
+          "output_age": 112.587,
+          "session_started_at": "2026-09-08T04:38:50.660Z",
+          "state": "running",
+          "thread_id": "01a07f4f-c9e8-7103-b007-ff6c713246e0",
+          "turn_id": "01a080e7-1ffa-7252-aea0-396aff0cb388"
+        },
+        {
+          "agent_path": "/root/sol_direct_soundness_compression",
+          "last_output_at": "2026-09-08T11:51:50.092000+00:00",
+          "session_started_at": "2026-09-08T05:24:44.493Z",
+          "state": "task_complete",
+          "thread_id": "01a07f79-cf14-7203-9b64-6b89ce05d3ce",
+          "turn_id": "01a080c5-23e2-74b2-81a5-ab19491aa63f"
+        },
+        {
+          "agent_path": "/root/sol_ci213_resume",
+          "last_output_at": "2026-09-08T12:03:39.996000+00:00",
+          "session_started_at": "2026-09-08T06:27:46.422Z",
+          "state": "task_complete",
+          "thread_id": "01a07fb3-8433-7f21-b59c-2472ce701ff2",
+          "turn_id": "01a080c1-9cc8-7990-b401-4debb99fa8fc"
+        },
+        {
+          "agent_path": "/root/sol_refresh343_parent",
+          "last_output_at": "2026-09-08T12:06:21.005000+00:00",
+          "output_age": 5.92,
+          "session_started_at": "2026-09-08T07:48:13.144Z",
+          "state": "running",
+          "thread_id": "01a07ffd-2a9a-7a92-bce9-d4933629d26f",
+          "turn_id": "01a080d0-c0cf-72f1-baa3-511f61035333"
+        },
+        {
+          "agent_path": "/root/sol_review310_b37",
+          "last_output_at": "2026-09-08T11:55:24.434000+00:00",
+          "session_started_at": "2026-09-08T07:54:28.210Z",
+          "state": "task_complete",
+          "thread_id": "01a08002-e3af-7990-9d6b-a5a4807c1039",
+          "turn_id": "01a080da-5288-76f3-ad63-0299bc5c054b"
+        },
+        {
+          "agent_path": "/root/astra_refill_coordinator",
+          "last_output_at": "2026-09-08T12:05:48.263000+00:00",
+          "output_age": 38.662,
+          "session_started_at": "2026-09-08T08:16:37.884Z",
+          "state": "running",
+          "thread_id": "01a08017-2dc3-7bc3-904c-b390030026c6",
+          "turn_id": "01a08017-2ded-7021-bb87-587e0581aa9f"
+        },
+        {
+          "agent_path": "/root/sol_resume_native_review_publication",
+          "last_output_at": "2026-09-08T12:06:19.629000+00:00",
+          "output_age": 7.296,
+          "session_started_at": "2026-09-08T11:34:28.209Z",
+          "state": "running",
+          "thread_id": "01a080cc-4d59-7a12-a58c-7a6d0b9b383f",
+          "turn_id": "01a080cc-4de4-7541-863c-505015896c4e"
+        },
+        {
+          "agent_path": "/root/sol_prove_combine_individual_degree",
+          "last_output_at": "2026-09-08T12:06:24.732000+00:00",
+          "output_age": 2.193,
+          "session_started_at": "2026-09-08T11:58:45.700Z",
+          "state": "running",
+          "thread_id": "01a080e2-8b8b-7d00-864d-2fe522c1ef4c",
+          "turn_id": "01a080e2-8bb5-79e2-872f-d50638cda800"
+        },
+        {
+          "agent_path": "/root/sol_prove_combine_line_polynomial",
+          "last_output_at": "2026-09-08T12:06:07.665000+00:00",
+          "output_age": 19.26,
+          "session_started_at": "2026-09-08T11:59:19.115Z",
+          "state": "running",
+          "thread_id": "01a080e3-0e22-7530-af72-a3679688fe61",
+          "turn_id": "01a080e3-0e42-7c11-a1b4-4b040787582c"
+        },
+        {
+          "agent_path": "/root/sol_prove_extended_point_spec",
+          "last_output_at": "2026-09-08T12:06:16.895000+00:00",
+          "output_age": 10.03,
+          "session_started_at": "2026-09-08T11:59:47.111Z",
+          "state": "running",
+          "thread_id": "01a080e3-7b73-7062-964f-d404b21da8e5",
+          "turn_id": "01a080e3-7b98-7992-b948-8338b6a87161"
+        },
+        {
+          "agent_path": "/root/sol_prove_tilde_measurement",
+          "last_output_at": "2026-09-08T12:06:21.803000+00:00",
+          "output_age": 5.122,
+          "session_started_at": "2026-09-08T12:00:15.172Z",
+          "state": "running",
+          "thread_id": "01a080e3-e91d-70d3-9e6b-abbfc4945a91",
+          "turn_id": "01a080e3-e93c-7880-8796-95f2b1ca919d"
+        }
+      ]
+    },
+    "source_main_head": "93f0ae4",
+    "latest_published_telemetry_pin": "3c06c1f3",
+    "QPBT_sorry_count_at_1144": 47,
+    "source_merges_last_six_hours": [
+      310,
+      356,
+      344
+    ],
+    "previous_worker_checks": {
+      "from": "2026-09-08T09:46:26.147247+00:00",
+      "to": "2026-09-08T11:46:04.575572+00:00",
+      "at_floor": 51,
+      "total": 170,
+      "unit": "checks, not time percentage"
+    },
+    "proof_lanes": [
+      {
+        "issue": 368,
+        "worker": "sol_prove_combine_individual_degree",
+        "state": "actual proof work and owned worktree verified"
+      },
+      {
+        "issue": 367,
+        "worker": "sol_prove_combine_line_polynomial",
+        "state": "two target theorem-body edits; first local typecheck passed12:04:01Z; independent kernel dependency audit and canonical review/merge not yet verified"
+      },
+      {
+        "issue": 369,
+        "worker": "sol_prove_extended_point_spec",
+        "state": "actual proof work and owned worktree verified"
+      },
+      {
+        "issue": 370,
+        "worker": "sol_prove_tilde_measurement",
+        "state": "recovering preserved proof bodies, new isolated worktree started12:04:24Z; no duplicated proof attempt requested"
+      }
+    ]
+  },
+  "open_corrections": [
+    "Verify sustained useful occupancy instead of short snapshots.",
+    "Verify proof delivery after four genuine proof lanes started; do not count starts alone as completion.",
+    "Verify focused repair of dead review publication waiters for358/359.",
+    "Verify publication does not starve behind continuous CI writer activity.",
+    "Ensure actual dispatch capability before any refill handoff and keep existing capable coverage until then.",
+    "Remove stale three-within-five allocation text in main persona through normal reviewed correction; do not change live settings from old examples."
+  ],
+  "prior_evidence": [
+    "/tmp/qpbt-meta-throughput-audit-20260908.json",
+    "results/telemetry/owner-audits/occupancy-enforcement-20260908/"
+  ],
+  "publication_policy": "Meta writes only this outside-checkout directory. Main sole coordinator adopts snapshots/events into project telemetry in normal batch; never race primary quiet/stash/index.",
+  "last_guidance": {
+    "at": "2026-09-08T16:26:49.964942+00:00",
+    "text": "META CORRECTION: Refill remains reactive. Regular 30s lifecycle samples (counting quiet live turns as occupied) met >=8 occupied workers for only40% of65 valid minutes; genuine gaps lasted10.5min and then >6min. Coordinator reads return promptly, but serial receipt/tail inspection precedes successor activation. A closing9 snapshot is not sustained recovery. Make the minimal durable completion-handoff correction: prevalidate useful disjoint successors while slots are full, activate prepared successors promptly on actual completion before lengthy receipt adoption, and verify actual task starts rather than handoff acknowledgments. Main retains task selection and implementation; preserve the9 cap,8 floor, gates and budgets. Record completion-to-start latency for the next batch and any real blocking prerequisite. Do not create filler or treat quiet live turns as vacancies.",
+    "delivery": "submitted after composer verification",
+    "kind": "serial_triage_before_successor_activation_correction"
+  },
+  "prior_watch_state_retained": false,
+  "last_check_receipt": "/home/drx/.cache/mipstarre-dev/owner-tools/meta-watch/check-20260908T163001Z.json",
+  "last_progress": {
+    "source_merge": "VerifiedPR390merged1d214035at15:36:57. Primary restores/publishes normaltelemetry afterservice; no newmain-sourceclaim beyondthat.",
+    "source_head": "628e3b53",
+    "proof_prs_pending_gates": [
+      372,
+      374,
+      375,
+      377,
+      383
+    ],
+    "repair_ci_passed": 371,
+    "occupancy": "16:10:57Z root closing sample verified nine occupied and nine fresh-output workers. Readback16:12:00 showed nine occupied, seven fresh plus two quiet live turns. This is not API-provider concurrency evidence.",
+    "repair_review371": "Merged6f73345e14:02:32; telemetry4dd57324/445d2587 published14:09:48/14:10:43. Guarded deployment attempted358/359 and rejected both on reconstructed prompt-digest mismatch. No parser/ledger/status/review output for either; preserved responses untouched.",
+    "current_worker_count": 7,
+    "proof372": "canonical CI passed; review and remaining integration gates pending",
+    "proof369": "extendedQ_spec and three public helpers raw standard-axiom output verified13:32:03; public theorem typed, unchanged statement. Publication-only worker resumed13:34:31, commit989702f7 clean; PR not yet verified.",
+    "proof384": "CanonicalCI success reported on9dd327f3 in283s. Hard-review request noncefc48ea90127e4c348b4f1d2370addece exists; actual reviewer not yet verified.",
+    "review374": "Canonical APPROVED publication verified13:51:20, zero unresolved findings. Old merge base needs normal preservation/refresh; no claim of merge.",
+    "proof382": "Checked-published8bf3e26a with377 dependency actually merged; receipt says four named targets standardaxioms on publishedhead. B8 receipt incorrectly calls26509 tokens: actual inherited unit is working_seconds.",
+    "budget371_provenance": "Verified #26 comment5557148036 records Sep6access-only owner-escalation delegation, corroborated by direct inherited user instruction. Main receipt grants30min completion13:57:30\u219214:27:30 withoutreset, no sourcegrowth or gateweakening. No meta budget action.",
+    "unassigned_review_requests": "As13:55 primary reports372/375/377/384 publishers live and unassigned. Main keeps reviewer binding duty; other continuations are replenishing pool.",
+    "proof386": "Published13:46:33 atf4f9c9e7: exists_subLineWitness validated against real committed stack, standardaxioms, exactremote/PRreadback succeeded despite ambiguous wrapperexit.",
+    "proof390": "Published13:59:41 at989702f7: extendedQ_spec, unchangedstatementhash and prior rawstandardaxiom evidence.",
+    "proof385": "Publishedc22f7788 forClaim17-1; currentZ-overlap Claim17-3 continuation has no newlyverifiedclosure.",
+    "issue389": "Current point-error-domain repair typechecked, commithooks underway14:08; a statement/domainrepair with remainingconstructionwork, not a newtheoremclosure.",
+    "review_admission": "All four372/375/377/384 now have accepted nonce-bound responses, published local-review/summary=success, zero unresolved findings, publisher exits0 collected14:24. ReviewIDs372:5142931520;375:5142954477;377:5142947989;384:5142947889. Normal freshness/service merge remains separate.",
+    "main_cycle": "Closing turn lasted13m54; next turn consumed an old monitor notice. Native root identity and active goal preserved. Autonomous goal-only continuation after queue drain remains unverified.",
+    "deployment_guard": "Primary reports358 expected e39bc561 versus rebuilt9b7d7b06;359 also fails unchanged strict digest gate. Prefer main evaluation of minimal normal workflow route; no meta implementation or guard bypass.",
+    "review384": "Former astra_review371_round2 actually reviewed384 at9dd327f3 with noncefc48ea90127e4c348b4f1d2370addece; approved14:22:02.",
+    "review372_format": "Same reviewer corrected missing literal binding prefix after revalidating unchanged head/digests; accepted. No remaining format/policy failure for this batch.",
+    "queue_repair": "Notifier restarted only with existing--no-send14:41:35; main/workers unchanged. Supported API audit14:53 found69pending entries, all exact monitorjournal IDs plusfixedprefix, no otherpendinginput. Archive created; no delete executed.",
+    "queue_cleanup_permission": "Historicalmonitorqueue untouched. Noowneranswer; no deletionorindirectclearing. Newnotices remain disabled.",
+    "review390": "Canonical APPROVED14:56:48 withzero findings; root promptly handed off returned review toexistingpublisher.",
+    "proof387": "Claim17-3 worker is formerastra_review371_round2. Whole Claims file typed15:05:46; Claims17-1/17-3 standardaxioms verified15:07:11; commit37a2e268 passedhooks. Publication stillchecking inheritedfiles at15:14:42; no PRreceipt yet.",
+    "main_publication": "Cleana1b589ea onprimary following390merge andnormaltelemetry; new383code/prose wrapperbeingprepared onverifiedstackedhead withauthorprovenance.",
+    "metric_correction": "Previous public references to6-7active/occupancy overstated vacancies where quiet live workers remained. This correction applies to those fresh-only samples, not earlier terminal-confirmed gaps.",
+    "quiet_workers": "sol_recover_subline_distribution: live turn,lastsuccessfulpublicationchecks15:19:48 and reasoning15:20:09, no outstandingtool/terminalobserved. sol_prove_combine_line_polynomial: newturn15:23:22, reasoning15:23:30, firsttool notyetobserved. Their work progress remainsunknown; neither is proven vacant.",
+    "capacity_clarification": "Existingcap9nativeunchanged. Normalusefuloccupancytarget9;minimumfloor8. Preparedsuccessors reducecompletion gaps; main retainsselection.",
+    "review299": "Prosecompleted16:15:45 withtwo documentationfindings; fixeractivated16:21:18. Do notmisstate codeapproval aswholePRapproval.",
+    "claim17_2": "Independentaudit reportsconcrete mathematicalcountermodel togenericwitness statement. Notkernelcertified; mainowns mathematicaldisposition andfaithfulsource repair.",
+    "current_worker_count_kind": "fresh-output lower bound",
+    "observed_occupied_workers": 7,
+    "refill": "Root started independent Claim17-2 audit, point postprocessing proof and PR299 prose review16:05-16:06. Existing coordinator refilled two further disjoint proof tasks by16:10. No additional meta steer was sent during this completion handoff.",
+    "publication": "Sole publisher reports PR358 canonical review publication16:11:56, zero findings, review5144183188, then verification and PR374 preservation publication. Latest verified main remainsa1b589ea including sourcePR390. Primary has two normal telemetry diffs; meta leaves them untouched.",
+    "retirement": "Stillnotverified. Maincontinuesproof/reviewpublication; systematiccompletionhandoff correction nowreceived but execution remainsnextverificationtarget.",
+    "occupancy_measurement": "Regular30s samples15:18:27\u201316:23:27 cover65.01validminutes. Observed nonterminal occupancy>=8 for40.03% ofvalidtime. Includes stale/awaiting asoccupied; not useful-progress certification or API concurrency. Two-hour coverage54.17%; retirement notestablished.",
+    "refill_diagnosis": "Independent readback found coordinator serial receipt/tail inspections16:12\u201316:21 before activating preparedsuccessors. Tools returned<1s, noaccess/capabilityfailure. PR299prose completed16:15:45, observed16:18:02, fixerfollowup16:21:18. Replenishment is advancing but repeated multiminute handoffs prevent sustainedfloor.",
+    "proof411": "Publishedf054a7f7 correctlystackedonissue388: two pointpostprocessingidentities,29linechange, focusedcheck andstandardaxiomaudits. Workercompleted16:20.",
+    "proof374": "Preservationhead104e8f0e checkedpublished; localandgithubtrackingrefsagree, worktreeclean. Solepublisher owns one currentheadCI andnormalreviewfreshnessgates.",
+    "proof408": "Marginalproof typed/audited andcommitteda9051a2d; publicationblockedbymultiplemergebases, currentownerhandling.",
+    "role_boundary": "Meta suppliesdiagnosis andacceptanceevidence; mainchoosesproofs, successorassignment, minimalworkflowrepair, CIreviewmerge andtelemetrypublication.",
+    "handoff_correction_delivery": "TUI16:28:47 shows the full META CORRECTION as current input, no longer pending after next tool call. Actual durable repair or acknowledgment not yet verified; do not resend while main processes it.",
+    "occupancy_latest": "Last16:27:22 snapshot seven running andtwo completed. Prior16:25:58 eight running was followedby PR299 fixercompletion. Eightornine closing snapshots do not establish sustainedoccupancy."
+  },
+  "vacancy_notifier": {
+    "mode": "observe_only",
+    "reason": "Non-coalescing queued notices outlived their observations and triggered obsolete control input.",
+    "receipt": "/home/drx/.cache/mipstarre-dev/owner-tools/meta-watch/monitor-queue-fix-20260908T144117Z.json",
+    "pending_old_notices": "Not removed yet; supported selective removal being checked."
+  }
+}
