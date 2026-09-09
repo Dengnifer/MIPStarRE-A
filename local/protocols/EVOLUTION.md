@@ -930,6 +930,23 @@ its recorded 15:40Z boundary and extension request5572932276, not a fresh two-ho
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
 
+## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
+
+**Trigger:** `events.md`, "PR #350 blueprint PDF false success", records a
+fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
+and later successful renderer commands.
+
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
+
+**Expected effect:** fatal TeX errors remain blocking exact-head evidence even
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.
+
 ## 2026-09-08 - Resume completed native code-review publication (#366)
 
 **Trigger:** `results/telemetry/events.md` entries "Native review publisher
