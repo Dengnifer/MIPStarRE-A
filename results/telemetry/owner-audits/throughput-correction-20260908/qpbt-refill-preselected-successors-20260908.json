@@ -1,0 +1,90 @@
+{
+  "schema": "qpbt-preselected-successors-v1",
+  "observed_policy": "9 useful workers is the normal target;8 is the floor. Runtime occupancy and fresh-activity lower bound are separate.",
+  "mechanics_owner": "/root/astra_refill_coordinator",
+  "rules": [
+    "Dispatch only after actual completion and capacity admission; stale output alone never creates a vacancy.",
+    "All named dependencies must actually be typed and published before dependent publication; no premise or placeholder is introduced to simulate readiness.",
+    "All old attempts, stalls, publication overruns and predecessor identities remain cumulative; a new calendar date is not a reset.",
+    "Independent native reviews require exact green CI, trusted request, actual author exclusions and direct-root binding.",
+    "If the selected successor is not ready, retain the readiness gate and choose another genuinely ready authorized task; do not count a reservation or a passive watcher."
+  ],
+  "successors": [
+    {
+      "owner": "/root/space_sol_publication_finish",
+      "after": "current finite service-publication batch",
+      "next": "Release the actual published clean main pin, then process the next already-authorized source service and exact-head CI/review gates from375,377,384,397,398,399,400,401,404.",
+      "bound": "One finite normal integration batch; existing episode costs retained.",
+      "guard": "Sole manual primary writer; one owner for passive CI and publishers; preserve every automatic suffix and stash. No wait for all future CI writers."
+    },
+    {
+      "owner": "/root/astra_refill_coordinator",
+      "after": "each real completion or control boundary",
+      "next": "Count occupied runtime and fresh evidence, execute an authorized ready successor, verify actual model and tool activity, and record the transition.",
+      "bound": "Existing owner-required continuation has no expiry until a successor proves actual list_agents and followup_task capability.",
+      "guard": "No nested pool, allocation change, duplicate root-bound review or primary manual telemetry."
+    },
+    {
+      "owner": "/root/sol_prove_combine_individual_degree",
+      "after": "marginal_X_distance_le and marginal_Z_distance_le publication",
+      "next": "Recover the exact small point-to-line marginal defect assembly ending at exists_combinedPoints_line_marginal_defect_le.",
+      "bound": "At most20min initial routine recovery plus<=10min validation only if typed; no full conditioned/restored-pasting block.",
+      "inputs": ["published witness marginal distances", "published line-point marginal transport", "published completed-answer transport", "current expanded-line consistency APIs"],
+      "guard": "Read exact old0f4ef/source936-941 contract before activation; stop at missing genuine premise and preserve the actual point-error parameter. No B8/globalPair."
+    },
+    {
+      "owner": "/root/sol_review377_seed_closures",
+      "after": "four self-consistency and averaging lemmas publication",
+      "next": "Recover marginal_X_linePoint_distance_le and marginal_Z_linePoint_distance_le.",
+      "bound": "20min proof plus<=10min only if both typed.",
+      "inputs": ["published marginal_X_distance_le and marginal_Z_distance_le", "published postprocess_fst_effect and postprocess_snd_effect", "published avgOver_prod_linePointDist_points"],
+      "guard": "Preserve4*deltaQ and all directed opposite placements; exact carriers, no new field-model assumption."
+    },
+    {
+      "owner": "/root/sol_review358_format",
+      "after": "postprocess identities succeed and publish, or its exhausted attempt is genuinely checkpointed",
+      "next": "After successful parent publication, recover marginal_X_option_linePoint_distance_le and marginal_Z_option_linePoint_distance_le; after a failed finite attempt, escalate the exact gap rather than retrying automatically.",
+      "bound": "10min routine assembly plus<=10min only if typed; any retry of the exhausted current target needs an explicit additional allowance.",
+      "inputs": ["published line-point marginal distances", "published opFamilyDistSq_postprocess_some"],
+      "guard": "Completed answers only; no changed outcome law, source hypothesis or B8 attempt."
+    },
+    {
+      "owner": "/root/sol_prove_tilde_measurement",
+      "after": "combinedLineMeasurement_sum_Z publication",
+      "next": "Recover ProjectiveSetting.opFamilyDistSq_postprocess_some as the exact generic completed-answer distance identity.",
+      "bound": "10min proof plus<=10min only if typed.",
+      "inputs": ["current Measurement.postprocess and place_zero APIs", "published392 or398 stack"],
+      "guard": "Read old0f4ef Lines798-819 and source936-941; search for an existing generic injective-postprocessing identity first. Do not duplicate the separately owned fst/snd identities."
+    },
+    {
+      "owner": "/root/sol_prove_subline_claim2",
+      "after": "its exact finite C2 attempt and publication or checkpoint",
+      "next": "Recover only linePointDist_zero_direction_mass_le from the unchanged A/D mixture, after targeted verification of existing current geometry APIs.",
+      "bound": "At most20min new routine geometric-probability slice plus<=10min only if typed; no continuation of expired C2 without explicit allowance.",
+      "inputs": ["unchanged linePointDist", "current a-line unit-direction and d-line uniform-direction APIs", "paper943-963 and targeted old0f4ef proof"],
+      "guard": "This is a proof-only mass estimate. No conditioning theorem, sampler change, full pasting or B8/Bob obligation."
+    },
+    {
+      "owner": "/root/sol_review374_degree_closure",
+      "after": "PR358 review canonical acceptance",
+      "next": "Independent routine PR397 review on its actual single-leaf stacked diff.",
+      "bound": "15min initial full review of the exact scope; checkpoint a real gap rather than approving unreviewed material.",
+      "inputs": ["exact397 green unique CI", "actual trusted nonce/head/prompt digest", "author list excluding this reviewer"],
+      "guard": "ROOT binding only; no author edits and no review while the prior identity is held for canonical acceptance."
+    },
+    {
+      "owner": "/root/astra_review299_honest_current",
+      "after": "PR299 code review canonical acceptance",
+      "next": "Fresh root-bound PR299 prose lane at its actual current canonical request, if this identity remains independent.",
+      "bound": "Existing hard-review scope and finite normal review allowance; all code-lane costs retained.",
+      "inputs": ["actual code consumer acceptance", "current prose nonce/head/prompt digest", "exact green CI and author exclusions"],
+      "guard": "No blank reservation while acceptance is pending; preserve old output and do not fabricate a response or carry an old head."
+    }
+  ],
+  "blocked_integrations": [
+    {"pr": 363, "local_validated_head": "84e5fda67928fb97b98e98ee7f985df8d20b4088", "guard": "Actual new primary pin and valid remaining or explicitly extended operation budget; no shared origin/main rewind."},
+    {"pr": 359, "guard": "Actual current primary pin after1d214 service;51f was already stale. All earlier safe-head blocked operation costs retained."},
+    {"pr": 375, "guard": "Actual current primary pin; source author switched to an independent ready constructor identity after51f was known stale."}
+  ],
+  "b8": {"attempts": 13, "working_seconds": 26509, "new_attempts": 0, "reset": false}
+}
