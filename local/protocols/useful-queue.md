@@ -24,6 +24,14 @@ when its head, dependency, role, ownership, or deadline changes. Each expected c
 has a separately validated alternate; if none exists, record the exact frontier blocker
 and do not call that completion fully prepared.
 
+Ordinary proof and CI-handoff records may replace their long literal activation body with
+the #471 contract form. Such a record adds an immutable absolute `contract_path`, its
+64-hex `contract_sha256`, and the exact `short_activation` message sealed before completion.
+The short message contains only actor, operation id, contract path and hash, and a
+conservative absolute deadline. The hashed full contract retains all ordinary readiness,
+scope, input, ownership, model, effort, completion, cumulative-cost, and budget fields.
+Existing full activation messages remain valid.
+
 After a real terminal event, recheck only the capacity, target identity, unchanged intent,
 owned operation or worktree, and deadline conditions that could not be settled earlier.
 Put an absolute source deadline no later than the native call time plus the authorized
@@ -33,6 +41,14 @@ rollout-tail reads, hashes, broad censuses, or PR-history inspection. If the sel
 successor is blocked or its activation call fails, record the exact reason and try the
 prepared alternate in the same completion cycle. Do not reclaim a quiet live turn until
 assignment, budget, and ownership checks establish actual completion or stall.
+
+Immediately before a contract-form native call, verify the exact contract bytes and hash,
+the presealed short message, and unchanged capacity, identity, head or source snapshot,
+published inputs, owner, unique operation, actor/model/effort, and deadline prerequisites.
+Send the stored short message without rebuilding the long arguments. A missing or wrong
+hash, changed prerequisite, or expired deadline invalidates the candidate and records its
+blocker before another prevalidated useful alternative is selected. An already-authorized
+ordinary mechanical activation needs no new root round trip.
 
 The root creates every new canonical native reviewer child so its direct parent matches
 the review request's root; the coordinator does not spawn that child or represent itself
@@ -52,6 +68,15 @@ never serializes activation-first handling of another real completion. Initial r
 a pre-existing gap is backlog, not evidence of reaction time under this rule. A later
 eight- or nine-worker snapshot does not establish sustained coverage. Occupied runtime,
 fresh-output lower bounds, API usage, and proof delivery remain separate measurements.
+Before mutation, the ordinary actor verifies the same hash, reads the full contract, and
+rechecks its identity, model and effort, scope, inputs, ownership, and effective deadline.
+That deadline is the earliest of the presealed absolute deadline, actual `task_started`
+plus the authorized duration, and any inherited deadline.
+
+Canonical review assignments are not ordinary contract-form records. They retain the
+literal nonce, head, prompt digest and root-assignment format, direct-root parentage and
+independence validation, and consumer identity holds required by `review.md`. Neither a
+contract reference nor a short activation message substitutes for those bindings.
 
 Runtime acceptance requires a natural post-merge completion whose coordinator-owned batch
 shows `ready_at` before completion, the actual activation call before detailed adoption,
