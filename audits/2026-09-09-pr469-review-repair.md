@@ -100,3 +100,14 @@ source-distribution correspondence are not claimed complete. The gap note
 
 PR478 and its descendants will need to reconcile their claim names and source
 scope with this repair. No review was dispatched or published by this author.
+
+## Publication Checkpoint
+
+The first checked publication of repair commit `ed064873` passed changed-file
+Lean, blueprint rendering, and statement-integrity checks, then stopped before
+transport because the reverse blueprint-coverage check found three merge bases
+with `origin/main`. To preserve the history without bypassing that check, the
+issue branch merged verified published main
+`1c297a4b8fb8a74b64784ba4c8fe7e10d0ffc6ee`. Only the append-only event log
+conflicted; both sides were retained. Incoming Lean changes were preserved.
+The primary checkout was not modified by this repair.

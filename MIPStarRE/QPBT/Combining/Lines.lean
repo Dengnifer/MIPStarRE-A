@@ -5,6 +5,7 @@ import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions
