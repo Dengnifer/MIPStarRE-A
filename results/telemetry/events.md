@@ -7104,6 +7104,23 @@ not actual commit/publication hooks. No productive session was killed.
   second account had six free slots. The meta session sent SIGCONT to the routers (workers 4 -> 8 within a minute), removed the HOLD file
   (kept as HOLD.removed-by-meta), found the queue supervisor already dead, and filed issue #505 to strip the Space-era admission
   machinery from the router. The main session must never run qpbt-switch. (Entry rewritten: the first append mangled its backticks.)
+
+## 2026-09-09 - Issue #505 router simplification (orc-505-20260909-01)
+
+- The 11:22Z stale-HOLD incident above motivates marker-only worker reservations.
+  This branch removes the router's retired admission machinery and the shim's
+  obsolete gates, preserving model policy, resume affinity and session telemetry.
+  Lease-backed native review and useful-queue entrypoints now reject execution;
+  nine historical queue scenarios are skipped, with a new retirement regression.
+  No installed command, live cap, HOLD/STOP file or account setting was modified.
+  The meta session must retire the installed qpbt-switch or make it report-only;
+  branch publication, canonical CI and independent review remain with the lane.
+- Validation: unittest discovery completed 611 tests in 195.582 seconds, with
+  nine historical queue tests skipped. The test process cleared inherited
+  MIPSTARRE_JOB_CLASS, MIPSTARRE_HARDNESS_REASON and MIPSTARRE_CODEX_MODEL as
+  required by the 11:05Z fixture incident. Shell syntax, git whitespace and
+  installed-hook checks pass. No Lean or blueprint files changed.
+
 ### 2026-09-09T11:40:10Z - Apply owner four-orc limit and reserve daemon review capacity
 - Owner-session10:45Z supersedes the earlier unqualified worker-floor rule:
   at most four active orc workers, two of the nine worker slots reserved for
