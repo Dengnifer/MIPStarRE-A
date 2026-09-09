@@ -134,8 +134,9 @@ webhook redelivery); an ambiguous write stays pending for adoption.
 
 ## 3. The merge gate
 
-`pr_merge.py <number>` is the only path to `main`: never `git merge` to main,
-never push `main`. The merge is a REST `PUT …/pulls/{n}/merge` with the exact
+Single-PR merges use `pr_merge.py <number>`; reviewed batches use `pr_train.py`
+as described below. Workers never merge or publish main directly. A single-PR
+merge is a REST `PUT …/pulls/{n}/merge` with the exact
 `sha` guard, issued by `gh_common.merge_pr` and verified against the merge
 commit's topology (two parents, the frozen head second), behind seven gates
 that refuse by default:
@@ -164,6 +165,45 @@ an exact-head `ADJUDICATION` comment backs it; gate 5 is never adjudicable.
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
+
+### Reviewed merge trains
+
+After independent review and deployment, the daemon/operator may invoke
+`local/bin/pr_train.py N M [K ...]` from the clean primary checkout at
+`github/main`. Development and tests use fixture repositories exclusively.
+Every member passes the existing open, local-tip, exact-head CI, independent
+review, changes-requested, fix-lock, and dependency gates. Repeat
+`--adjudicated N` only for members with the existing exact-head adjudication
+record. A precondition failure refuses the entire batch and names the member.
+The individual-head base-ancestry requirement is replaced by mandatory CI of
+the combined commit; member review evidence is neither copied nor rewritten.
+
+The tool creates `train/<UTC-stamp>` and a private worktree under the runtime
+cache, merging frozen member SHAs with two-parent merge commits in argument
+order. A conflict aborts only that merge, verifies restoration of the accepted
+train, and drops that member; fewer than two accepted members refuses the batch.
+The primary merge-loss guard checks each accepted merge. Existing developer
+branches and worktrees are preserved. Failed train worktrees remain for diagnosis.
+
+`ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
+against the combined commit, using one locked build of `MIPStarRE.QPBT` and
+`MIPStarRE.LDT.Test.AxiomAudit`. It rejects skip flags and dirty or moved train
+heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
+cache. Bootstrap and build telemetry are transferred to the primary telemetry
+files after publication or refusal so their appends cannot dirty the primary
+during gating. CI warming uses `--no-build` to avoid a nested build lock, and
+step execution stops at its first failing command.
+
+Publication uses `checked-push.sh --train-manifest PATH` with one explicit
+train-to-main ref mapping. After preflight, it rechecks the combined CI manifest,
+member gates and heads, primary cleanliness, and frozen main; the existing exact
+remote-tip lease protects the final fast-forward. Hook bypass is forbidden.
+GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
+It posts one idempotent train comment per member, records one merge event,
+fast-forwards local main and its origin alias, and removes only the train branch
+and worktree. A failure after publication is reported as such and requires
+operator reconciliation; it must not be retried as a new merge. Deployment and
+daemon wiring remain separate from development of this tool (issue #502).
 
 ### Main-cycle integration checkpoint
 

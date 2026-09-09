@@ -1041,3 +1041,21 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Reviewed merge trains (issue #502)
+
+**Trigger:** the 09:05Z meta decision in `results/telemetry/design-decisions.md`
+(D1, issue #502) records that each single-PR merge invalidates other refreshed
+heads. See the issue #502 development entry in `results/telemetry/events.md`.
+
+**Change:** add `pr_train.py`, a non-publishing integration mode in `ci.sh`,
+and a train-manifest check after `checked-push.sh` preflight. Reuse the existing
+member gates and CI steps; replace only individual-head base ancestry with
+mandatory combined-commit validation. Preserve exact-head independent review,
+dependency gates, checked fast-forward publication, and the full-build lock.
+CI step bodies stop on command failure; cache warming cannot start a nested
+full build. `issues-prs.md` documents the operator-owned invocation and recovery.
+
+**Expected effect:** two or more ready PRs share one integration build and CI
+run without losing a member's evidence or silently discarding accepted work.
+Activation remains subject to independent review and daemon-owner deployment.

@@ -6605,3 +6605,20 @@ not actual commit/publication hooks. No productive session was killed.
   successor; partial CI is not claimed as published CI, and B8 remains parked.
 - Snapshot08:54:15Z showed17 live workers and final census18. No main commit/push,
   manual merge or native worker was used; new telemetry stays uncommitted.
+
+- 2026-09-09 - Issue #502 development, session `orc-502-20260909-01`:
+  the 09:05Z D1 decision identified repeated invalidation of ready PRs by
+  single-PR merges. Added a reviewed-member train with combined-commit CI and
+  post-preflight freshness checks. Fixture tests exercise conflict exclusion,
+  failed member gates, build failure, live build lock, dirty primary, and moved
+  main/member refs. Early CI command failure must stop the step; warming inside
+  the CI lock must use `--no-build`. No live train, publication, independent
+  review, or child session was invoked. Development retains the original
+  11:38:45Z deadline; deployment and daemon wiring remain operator-owned.
+  Implementation froze before that deadline. The already-running commit hook
+  finished afterward: 626 Python tests, one error in
+  `ModelPolicyTests.test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra`
+  (`test_dispatch.py:238`, fixture `dispatch.sh --dry-run` exited 4). All ten
+  new train tests and the targeted 36 publication/workflow tests passed.
+  The hook refused the commit; changes are preserved for the operator, with
+  no hook bypass or model-policy repair attempted in this episode.

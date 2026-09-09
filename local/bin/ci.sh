@@ -18,6 +18,9 @@
 #                      from `git worktree list` / .worktrees/<branch>.
 #   --base REF         Override the base branch reported by GitHub (default:
 #                      the PR's base ref, else main).
+#   --integration-head SHA  Check a local train commit, without a PR argument.
+#                      Requires --worktree and --base SHA; runs every step and
+#                      publishes no PR statuses or reviews. No skip flags allowed.
 #   --only STEP        Run only STEP (repeatable).  Gating still applies unless
 #                      --force-all is given.  Makes the run PARTIAL.
 #   --force-all        Ignore change gating; run every step.
@@ -414,12 +417,14 @@ ONLY_STEPS=""
 FORCE_ALL=0
 SKIP_BUILD=0
 DRY_RUN=0
+INTEGRATION_HEAD=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     --worktree) [ $# -ge 2 ] || die "--worktree needs a path"; WORKTREE_OVERRIDE="$2"; shift 2 ;;
     --base) [ $# -ge 2 ] || die "--base needs a ref"; BASE_OVERRIDE="$2"; shift 2 ;;
+    --integration-head) [ $# -ge 2 ] || die "--integration-head needs a SHA"; INTEGRATION_HEAD="$2"; shift 2 ;;
     --only) [ $# -ge 2 ] || die "--only needs a step name"; ONLY_STEPS="$ONLY_STEPS $2"; shift 2 ;;
     --force-all) FORCE_ALL=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
@@ -432,7 +437,15 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-[ -n "$PR_ARG" ] || { usage >&2; die "a PR id is required"; }
+if [ -n "$INTEGRATION_HEAD" ]; then
+  [ -z "$PR_ARG$ONLY_STEPS" ] && [ "$SKIP_BUILD" = 0 ] || die "integration checks cannot use PR/skip/only arguments"
+  [[ "$INTEGRATION_HEAD" =~ ^[0-9a-f]{40}$ && "$BASE_OVERRIDE" =~ ^[0-9a-f]{40}$ ]] || die "integration head and base must be full SHAs"
+  [ -n "$WORKTREE_OVERRIDE" ] || die "integration checks require --worktree"
+  PR_ARG=0
+  FORCE_ALL=1
+else
+  [ -n "$PR_ARG" ] || { usage >&2; die "a PR id is required"; }
+fi
 
 for _only in $ONLY_STEPS; do
   case " $STEP_NAMES " in
@@ -509,6 +522,12 @@ sys.stdout.write("%s\n%s\n%s\n" % (head.get("ref") or "",
 PY
 }
 
+if [ -n "$INTEGRATION_HEAD" ]; then
+  PR_ID="train-$INTEGRATION_HEAD"
+  BRANCH="$(git -C "$WORKTREE_OVERRIDE" symbolic-ref --short HEAD)"
+  GH_BASE="$BASE_OVERRIDE"
+  GH_HEAD_SHA="$INTEGRATION_HEAD"
+else
 gh_pr_view "$RUN_TMP/pr.json"
 pr_fields "$RUN_TMP/pr.json" > "$RUN_TMP/pr-fields.txt" \
   || die "PR #$PR_ID: could not parse the pr-view payload"
@@ -517,6 +536,7 @@ pr_fields "$RUN_TMP/pr.json" > "$RUN_TMP/pr-fields.txt" \
   IFS= read -r GH_BASE
   IFS= read -r GH_HEAD_SHA
 } < "$RUN_TMP/pr-fields.txt"
+fi
 
 [ -n "$BRANCH" ] || die "PR #$PR_ID has no head ref; it has no branch to test"
 [ -n "$GH_HEAD_SHA" ] || die "PR #$PR_ID has no head SHA; refusing to test an unresolvable head"
@@ -570,12 +590,17 @@ fi
 
 HEAD_SHA="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
 [ -n "$HEAD_SHA" ] || die "$WORKTREE has no commits to test"
+if [ -n "$INTEGRATION_HEAD" ]; then
+  [ "$HEAD_SHA" = "$INTEGRATION_HEAD" ] || die "integration head changed"
+  [ -z "$(git -C "$WORKTREE" status --porcelain)" ] || die "integration worktree is dirty"
+  git -C "$WORKTREE" merge-base --is-ancestor "$BASE_OVERRIDE" "$HEAD_SHA" || die "integration head does not contain its base"
+fi
 
 # Invariant 8: origin/main must resolve.  The diff-based audits and the change
 # gating below silently self-disable without a base, which is exactly the
 # "checks stopped running and nobody noticed" failure the parent repo hit.
 BASE_REF=""
-for _cand in "origin/$BASE" "$BASE"; do
+for _cand in ${INTEGRATION_HEAD:+"$BASE_OVERRIDE"} "origin/$BASE" "$BASE"; do
   if git -C "$WORKTREE" rev-parse --verify --quiet "$_cand^{commit}" >/dev/null 2>&1; then
     BASE_REF="$_cand"
     break
@@ -805,7 +830,7 @@ step_build() {
   if [ ! -d .lake/build ]; then
     if [ -x "$SCRIPT_DIR/warm-worktree.sh" ]; then
       echo "+ warm-worktree.sh $WORKTREE"
-      if ! "$SCRIPT_DIR/warm-worktree.sh" "$WORKTREE"; then
+      if ! "$SCRIPT_DIR/warm-worktree.sh" "$WORKTREE" --no-build; then
         note_warning "warm-worktree.sh failed for $WORKTREE; falling back to a cold build"
       fi
     elif [ "${MIPSTARRE_CI_REQUIRE_WARMER:-}" = "1" ]; then
@@ -839,12 +864,15 @@ step_build() {
     exit "$EXIT_TOOL_MISSING"
   fi
 
-  echo "+ lake build"
-  run_outside_git_env lake build
-
-  # pr-ci.yml:155-156
-  echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit"
-  run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit
+  if [ -n "$INTEGRATION_HEAD" ]; then
+    echo "+ lake build MIPStarRE.QPBT MIPStarRE.LDT.Test.AxiomAudit"
+    run_outside_git_env lake build MIPStarRE.QPBT MIPStarRE.LDT.Test.AxiomAudit
+  else
+    echo "+ lake build"
+    run_outside_git_env lake build
+    echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit"
+    run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit
+  fi
 
   # pr-ci.yml:158-159
   echo "+ scripts/comparator/check_challenge_drift.py"
@@ -1060,7 +1088,7 @@ for STEP in $STEP_NAMES; do
     _rc="$EXIT_TOOL_MISSING"
   else
     set +e
-    ( run_step_body "$STEP" ) >> "$LOG" 2>&1
+    ( set -e; run_step_body "$STEP" ) >> "$LOG" 2>&1
     _rc=$?
     set -e
     if [ "$STEP" = build ]; then
@@ -1139,8 +1167,13 @@ helper manifest \
 
 # meta.md telemetry duty: every full build lands in builds.jsonl.
 if [ -n "$BUILD_OUTCOME" ] && [ "$BUILD_OUTCOME" != skipped ]; then
+  BUILD_TELEMETRY="$REPO_ROOT/results/telemetry/builds.jsonl"
+  if [ -n "$INTEGRATION_HEAD" ]; then
+    # pr_train.py transfers this after publication/refusal, keeping primary clean.
+    BUILD_TELEMETRY="$CACHE_ROOT/ci-manifests/train-$HEAD_SHA.builds.jsonl"
+  fi
   helper telemetry \
-    --out "$REPO_ROOT/results/telemetry/builds.jsonl" \
+    --out "$BUILD_TELEMETRY" \
     --field "ts=$RUN_FINISHED" \
     --field "kind=ci-build" \
     --field "trigger=ci.sh pr=$PR_ID" \
@@ -1208,6 +1241,10 @@ publish_manifest_comment() {
     || die "could not publish the CI manifest comment on PR #$PR_ID"
 }
 
+if [ -n "$INTEGRATION_HEAD" ]; then
+  [ "$(git -C "$WORKTREE" rev-parse HEAD)" = "$INTEGRATION_HEAD" ] || die "integration head changed during CI"
+  [ -z "$(git -C "$WORKTREE" status --porcelain)" ] || die "integration worktree became dirty during CI"
+fi
 if [ "$PARTIAL" = 1 ]; then
   info "partial run: nothing posted to GitHub (the statuses on $SHORT_SHA still reflect the last full run)"
 else
