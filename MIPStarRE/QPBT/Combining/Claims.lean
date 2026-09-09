@@ -113,57 +113,15 @@ private theorem regroup_placed_line_answer_sum {P : AdmissibleParams} {ε δQ δ
         (S.place .AA' ((lines.T .alice lineX lineZ).effect (fX, fZ)) *
           S.place .BA'' (G (evalOpt lineX x fX) (evalOpt lineZ z fZ))) := by
   classical
-  have hsum : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)))
-      (M : DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d) →
-        Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB))
-      (N : Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB)),
-      stateQForm S.psiHat ((∑ fs ∈ s, M fs) * N) =
-        ∑ fs ∈ s, stateQForm S.psiHat (M fs * N) := by
-    intro s M N
-    simp [stateQForm, applyOperatorToState, Finset.sum_mul]
-  calc
-    (∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          stateQForm S.psiHat
-            (((S.placedMeasurement .AA'
-              (lines.T .alice lineX lineZ)).postprocess (fun fs =>
-                (evalOpt lineX x fs.1, evalOpt lineZ z fs.2))).effect o *
-              S.place .BA'' (G o.1 o.2))) =
-        ∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          ∑ fs ∈ Finset.univ.filter (fun fs =>
-              (evalOpt lineX x fs.1, evalOpt lineZ z fs.2) = o),
-            stateQForm S.psiHat
-              (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-                S.place .BA'' (G o.1 o.2)) := by
-      refine Finset.sum_congr rfl fun o _ => ?_
-      rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      refine (hsum _ _ _).trans ?_
-      exact Finset.sum_congr rfl fun fs _ => by
-        rw [ProjectiveSetting.placedMeasurement_effect]
-    _ = ∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          ∑ fs ∈ Finset.univ.filter (fun fs =>
-              (evalOpt lineX x fs.1, evalOpt lineZ z fs.2) = o),
-            stateQForm S.psiHat
-              (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-                S.place .BA''
-                  (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))) := by
-      refine Finset.sum_congr rfl fun o _ =>
-        Finset.sum_congr rfl fun fs hfs => ?_
-      rw [← (Finset.mem_filter.mp hfs).2]
-    _ = ∑ fs : DegPoly P.toLdParams (P.m * P.d) ×
-          DegPoly P.toLdParams (P.m * P.d),
-          stateQForm S.psiHat
-            (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-              S.place .BA''
-                (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))) :=
-      Finset.sum_fiberwise_of_maps_to (fun fs _ => Finset.mem_univ _) _
-    _ = ∑ fX, ∑ fZ, stateQForm S.psiHat
-          (S.place .AA' ((lines.T .alice lineX lineZ).effect (fX, fZ)) *
-            S.place .BA'' (G (evalOpt lineX x fX) (evalOpt lineZ z fZ))) :=
-      Fintype.sum_prod_type (f := fun fs => stateQForm S.psiHat
-        (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-          S.place .BA'' (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))))
+  refine Eq.trans ?_ (regroup_line_answer_sum lines lineX lineZ x z G)
+  refine Finset.sum_congr rfl fun o _ => ?_
+  apply congrArg (fun M => stateQForm S.psiHat (M * S.place .BA'' (G o.1 o.2)))
+  rw [ProjectiveSetting.placedMeasurement_effect,
+    MIPStarRE.Quantum.Measurement.postprocess_effect,
+    MIPStarRE.Quantum.Measurement.postprocess_effect]
+  refine Eq.trans (Finset.sum_congr rfl fun fs _ =>
+    S.placedMeasurement_effect .AA' _ fs) ?_
+  exact (S.place_finsetSum .AA' _ _).symm
 
 set_option maxHeartbeats 400000 in
 -- The nested polynomial and completed-outcome sums require extra elaboration steps.
