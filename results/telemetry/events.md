@@ -6222,3 +6222,18 @@ not actual commit/publication hooks. No productive session was killed.
   These are minimal source-preserving repairs, not new hypotheses or proof attempts.
 - Other mathematical work continues while the scoped owner question waits. Main made no
   manual telemetry commit/publication, one-off merge or daemon change this cycle.
+## 2026-09-09 - PR487 guarded publication recovery
+- Autofix commit `e07a9437568a6f322e5101f45317b098cb16cd92` passed its Lean and
+  statement-integrity checks, but checked publication stopped before transport. The reverse
+  blueprint-coverage warning invoked `git diff --merge-base origin/main HEAD`; the branch
+  history had best merge bases `ae49c6bb3309` and `d9be57dedd4e`, so Git exited 128 with
+  `fatal: multiple merge bases found`. Refreshing the `origin/main` alias did not remove the
+  ambiguity.
+- Recovery preserved the autofix commit and merged exact remote main
+  `de4a87cbb440c1a6be8c3db512ac8c61a9be8ae5`. A detached preflight merged cleanly, and the
+  canonical pending and committed merge-loss guards passed against both best bases. The
+  autofix target file remained unchanged by the integration; no theorem hypothesis,
+  conclusion, or proof hole changed. No hook or publication guard was bypassed.
+- Lesson: when criss-cross history makes the guard's single merge-base diff undefined,
+  integrate the exact current main through the normal guarded merge path rather than moving
+  a base alias to an inaccurate commit or skipping validation.
