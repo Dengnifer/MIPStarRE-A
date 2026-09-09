@@ -38,10 +38,10 @@
 \end{itemize}
 
 This proves the combined-point conclusion on the original expanded local
-spaces; it does not discharge the separate common-extension problem for
-quantum linearity.\footnote{The construction is in
+spaces without using the common-ancilla form of quantum linearity.\footnote{The construction is in
 \path{MIPStarRE/QPBT/Combining/Points.lean} and its supporting modules, reviewed
-in \ghpr{424}.  The distinct common-extension problem is documented in
+in \ghpr{424}.  The independently proved common-ancilla theorem and the
+distinct padding limitation are documented in
 \path{docs/paper-gaps/qpbt_linearity-theorem-quotation.tex}.}
 
 \section{Key theorem forms}
@@ -91,12 +91,15 @@ at lines~711--790 of the same source, including \path{eq:qld-r-2} and
 \path{eq:qld-rw-self-cons-1} through \path{eq:qld-rw-self-cons-4}.
 Lines~825--832 apply \path{thm:linearity} and invoke zero-state ancillas.}
 
-The linearity theorem returns an auxiliary space for each point pair.  To
-follow this argument literally, one must realize all those spaces inside
-one common ancillary extension and account for the zero-state padding.
-That construction is not supplied by the fixed expanded-state setting.
-The direct proof below avoids this requirement; it makes no assertion that
-the common-extension reduction has been proved.
+The linearity theorem returns an auxiliary space for each point pair.  Its
+common-ancilla form chooses one finite ancillary space and vector before
+quantifying over the finite-dimensional observable families.  Thus one space
+serves every point pair.\footnote{See
+\leanid{MIPStarRE.QPBT.exists\_exactly\_linear\_observables\_commonAncilla}
+in \path{MIPStarRE/QPBT/Combining/Linearity.lean}.}
+The fixed expanded-state setting still does not supply the zero-state padding
+assumed in the source.  The direct proof below constructs the measurements
+on the original spaces without requiring that padding.
 
 \section{Parseval and the sandwich defect}
 
@@ -222,9 +225,9 @@ entry is \path{lem:qld-4-10} in
 is \leanid{MIPStarRE.QPBT.exists\_combinedPointsWitness}.}
 There is no discrepancy in the combined-point conclusion under the existing
 parameter and polynomial-error conventions, and no additional construction
-is assumed.  The finite common-extension problem for the quoted quantum
-linearity theorem remains a separate open formalization task; this proof
-neither uses nor resolves it.
+is assumed.  The finite common-ancilla theorem is proved independently;
+this direct construction does not use it or assume zero-state padding of
+the fixed strategy.
 
 \bibliographystyle{alpha}
 \bibliography{references}
