@@ -241,6 +241,8 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
                 except LayerError as exc:
                     errors.append(str(exc))
             git(repo, "worktree", "remove", "--force", str(worktree))
+            if os.environ.get("MIPSTARRE_LAKE_ROOT"):
+                command(repo, str(repo / "local/bin/lake-root.sh"), "cleanup", str(repo), branch)
             git(repo, "branch", "-d", branch)
             if errors:
                 raise LayerError("train published; comment publication incomplete: " + "; ".join(errors))

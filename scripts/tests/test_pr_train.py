@@ -275,6 +275,25 @@ class TrainTests(unittest.TestCase):
         self.assertEqual(checked.returncode, 0, checked.stderr)
         self.assertTrue((self.tmp / "build.log").exists(), result.stdout + result.stderr)
 
+    def test_successful_train_cleans_only_its_external_lake_target(self) -> None:
+        lake_root = self.tmp / "external-lake"
+        self.env["MIPSTARRE_LAKE_ROOT"] = str(lake_root)
+        developer = self.tmp / "developer"
+        _git(self.repo, "worktree", "add", str(developer), "issue-2")
+        prepared = subprocess.run([str(self.repo / "local/bin/lake-root.sh"), "prepare",
+                                   str(developer)], env=self.env, text=True, capture_output=True)
+        self.assertEqual(prepared.returncode, 0, prepared.stderr)
+        developer_target = lake_root / "issue-2"
+        (developer_target / "artifact").write_text("preserve\n")
+
+        result = self.train(1, 3)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("removed external Lake directory", result.stderr)
+        self.assertEqual((developer / ".lake").resolve(), developer_target)
+        self.assertEqual((developer_target / "artifact").read_text(), "preserve\n")
+        self.assertEqual(sorted(path.name for path in lake_root.iterdir()), ["issue-2"])
+
     def real_project(self, broken: str = "") -> None:
         lake = shutil.which("lake")
         if not lake:
