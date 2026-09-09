@@ -404,8 +404,10 @@ observation does not prove the child stopped: inspect its live handle before reu
 or restart. Review transport deployment itself still needs independent review.
 
 A terminated publisher may be continued with
-`review.sh PR --resume-native-request REQUEST_JSON`, but only for the single
-native code lane of a diff that does not touch `blueprint/`. The command creates
+`review.sh PR --resume-native-request CODE_REQUEST_JSON`. A diff touching
+`blueprint/` also requires `--resume-native-prose-request PROSE_REQUEST_JSON`;
+the two requests must be distinct and both completed lanes must validate.
+A prose request is rejected when the diff does not touch `blueprint/`. The command creates
 no nonce and invokes no model. It takes the ordinary per-PR review lock without
 waiting; a live publisher is a conflict, while a dead holder is reclaimed by the
 existing stale-lock rule. Under that lock it rechecks green exact-head CI, the
@@ -414,13 +416,20 @@ current clean worktree, and the final head before publication.
 
 `native_review.py accept` requires the canonical request and response files under
 the configured cache mailbox. It matches the request's PR, head, repository,
-worktree, rebuilt standalone prompt and digest, live root, complete author
+worktree, canonical standalone prompt and digest, independently rebuilt prompt,
+live root, complete author
 exclusion set, activation boundary, requested/effective model and literal Ultra
 policy against the current invocation, then reuses the ordinary rollout
 validation and telemetry record. The unchanged parser, lane writer, combiner and
-idempotent `gh_common.py` publisher consume the resulting final message. Queued,
-dry-run, blueprint/prose, stale, mismatched, already-published, or concurrently
-published continuations fail closed; broader multi-lane recovery is unsupported.
+idempotent `gh_common.py` publisher consume the resulting final messages. A resume
+uses a fresh scratch directory and retains the original prompt paths inside the
+rebuilt task text, leaving canonical prompts and old outputs unchanged. It does
+not change the reviewed worktree's sparse-checkout state. A failed acceptance in
+either lane, or an unparseable completed verdict in a combined resume, publishes no review or
+summary. Queued, dry-run, stale, mismatched, already-published, or concurrently
+published continuations fail closed. Reviewer reuse and source mutation remain
+held until the canonical publisher consumes the responses; local acceptance of
+one lane alone does not release either hold.
 
 Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
 For a genuinely hard/semantic/control-policy review main sets `hard_review` and
