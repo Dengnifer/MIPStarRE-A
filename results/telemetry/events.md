@@ -6227,3 +6227,39 @@ not actual commit/publication hooks. No productive session was killed.
   accumulated telemetry through a separate bounded operation using github-sync.sh, with
   staged owner records preserved. Lesson: correct a narrowing assignment promptly and
   restore existing functionality before extending diagnostics or adding infrastructure.
+
+## 2026-09-09 - Give the approved queue priority and publish collision repair (04:12Z)
+
+- Owner-session03:58Z directs that no new lane tails start before the first daemon
+  merges; the running lanes may finish, and other slots remain in light-CPU repairs,
+  reviews and provers. Main adopted that constraint. The plain04:01Z snapshot and the
+  closing process check both observed18 detached workers; no new proof lane was started.
+- Recovery telemetry publication succeeded at03:59:48Z through github-sync.sh, including
+  the final snapshot commit674900861040573abcfb554686fafbf902320414. Its first commit
+  attempt had failed the normal whitespace hook on three archived-handoff lines; only
+  their trailing whitespace was removed. The original /tmp handoff and its wording were
+  preserved, and the retry passed the guarded push. Main has not been pushed by hand.
+- The restored daemon logged14 candidates at04:03:15Z. Its PR312 refresh conflicted at
+  04:03:22Z, then PR343 reached CI. Inspection showed that even with PAR=1 the old outer
+  loop refreshed the entire stale batch before attempting any merge. Main created a new
+  version that stops the refresh phase at the first fresh candidate or after one refresh;
+  all exact-head gates and the canonical build lock remain unchanged. Verified parent
+  PID2741530 was stopped without stopping its live refresh child. New singleton daemon
+  PID3107859 runs /tmp/merge-daemon-v8-one-refresh-20260909.sh and logs to daemon9.log.
+- The queued daemon correction PID2683284 still had only account_router beneath it and
+  had not admitted a model. Main cancelled that pending process group after restoring
+  the functionality directly; there is no new model usage or reset continuation budget.
+  The old interrupted session's capture and1430-second charge remain recorded. The
+  existing serial100-PR census remains a limitation; no completed merge is claimed.
+- PR312's new conflict has bounded detached orc assignment PID3107860. PR363 recovery
+  completed at published c287175740ff8dd68bc757823367e74d0776ddb0 with no additional
+  code edits and all nine CI statuses green. Its author released the model slot rather
+  than waiting indefinitely for review admission; main started review.sh363 (PID2970051),
+  which admitted the independent code reviewer. B8 remains13 attempts/26509 working seconds.
+- PR492's autofix committed and checked-pushed7145f3697587f9663cecbfab321f865ed00c40f8:
+  four duplicate lemmas were replaced by shared placement API, and the prefix-truncation
+  description was corrected. The two edited files and full build passed in the worker;
+  the new head is now undergoing canonical CI. PR470 has newly published review5149623510,
+  CHANGES_REQUESTED with two findings on ab9e275b605b99316d0a2525f7d219a6d794f0e5.
+  Main enabled its auto-fix label through gh_common and started serialized repair PID3161793.
+  A completed single prose lane for PR400 is not treated as a combined published verdict.
