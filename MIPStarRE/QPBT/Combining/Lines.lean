@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Lines.PointSelfConsistency
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions
