@@ -6825,3 +6825,23 @@ not actual commit/publication hooks. No productive session was killed.
   nine-worker census. No native/Fable worker, manual merge, main commit/push,
   new proof attempt on B8, or duplicate CI was introduced. New telemetry is
   left for daemon publication.
+
+### 2026-09-09 - Required CI command failures masked by the step subshell (#504)
+
+- Session `orc-504-20260909-01` reproduced the PR487 incident recorded in
+  `~/.cache/mipstarre-dev/recoveries/pr487-b1ae4d2f-handoff.md`: both retained
+  full-run manifests report success despite failing regression-suite logs.
+  The parent disables errexit to collect each step's status, and the step
+  subshell inherited that setting, allowing later commands to mask failures.
+- Restored errexit inside the shared step subshell in `local/bin/ci.sh`.
+  The parent still records results, releases locks and runs independent steps;
+  explicit advisory handling and missing-tool classification remain intact.
+- New offline fixtures execute the actual driver and fake GitHub publication.
+  All eight required-command failure scenarios incorrectly passed before the
+  fix. After it, all five new tests and four existing PDF-render tests passed,
+  covering step/summary statuses, successful runs, advisory results, missing
+  tools, later independent steps, and build/PR lock cleanup.
+- No protocol, mathematics, model policy or daemon changes. Publication and
+  canonical CI followed by independent review remain operator work: this
+  session was instructed not to push or launch other sessions. Offline fixture
+  results are not canonical CI evidence for a live PR.
