@@ -930,6 +930,23 @@ its recorded 15:40Z boundary and extension request5572932276, not a fresh two-ho
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
 
+## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
+
+**Trigger:** `events.md`, "PR #350 blueprint PDF false success", records a
+fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
+and later successful renderer commands.
+
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
+
+**Expected effect:** fatal TeX errors remain blocking exact-head evidence even
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.
+
 ## 2026-09-08 - Resume completed native code-review publication (#366)
 
 **Trigger:** `results/telemetry/events.md` entries "Native review publisher
@@ -985,6 +1002,31 @@ control-policy review, and normal merge remain required. Runtime acceptance then
 requires a natural post-merge completion transition in the coordinator-owned
 batch with the prescribed ordering; sustained coverage remains a separate
 interval observation.
+
+## 2026-09-08 - Preseal ordinary successor activation messages (#471)
+
+**Trigger:** the owner decision recorded in issue #471 and the read-only proposal
+`/tmp/qpbt-ordinary-successor-prevalidation-20260909.json` with SHA-256
+`c93a44f1d711444d0428e391c2abd40ca2a8f3617c4a6126f521afa32ead727e`.
+Two selected handoffs took 63.076 and 73.171 seconds, including 27.727 and
+29.391 seconds between notification and the native call while long ordinary
+arguments were partly regenerated. Coverage remains 66.95% of 119.63 valid
+minutes; earlier 116.521- and 134.213-second misses remain failures.
+
+**Change:** `sessions.md`, `useful-queue.md`, and the #471 brief permit only
+ordinary proof and CI-handoff records to bind an immutable full-contract path
+and SHA-256 plus an exact short activation message sealed before predecessor
+completion. Activator and actor both verify the hash and current prerequisites;
+the actor reads the full contract before mutation. The budget remains anchored
+to actual native `task_started`, bounded by the presealed absolute and inherited
+deadlines. Existing full messages remain valid. Canonical review assignments
+retain literal nonce/head/prompt-digest/root bindings and consumer holds.
+
+**Expected effect:** ordinary activation can avoid regenerating long arguments
+after completion without weakening scope, ownership, model, capacity, budget,
+review, CI, merge, or telemetry guards. **Outcome:** pending exact-head CI,
+independent hard control-policy review, normal merge, and a later runtime
+observation; documentation alone does not establish improved pool coverage.
 
 ## 2026-09-09 - Resume completed combined native reviews
 
