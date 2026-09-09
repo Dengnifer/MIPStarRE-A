@@ -13,13 +13,11 @@ state-dependent distance between the two bipartition schemes of
 
 ## References
 
-The placements are those of `def:symmetric-equivalents`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1003-1030`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.  The
-EPR-exchange invariance is the element `U_σ U_θ` of
-`lem:symmetric-equivalents-transfer`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`, which needs no
-symmetry of the strategy; its use for `lem:qld-4-10` is analyzed in
+The placements are those of blueprint `def:symmetric-equivalents`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.
+The crosswise EPR exchange is proved independently in blueprint
+`lem:qld-placement-transfer` using only the symmetry of the EPR vectors;
+its use for `lem:qld-4-10` is analyzed in
 `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
 -/
 
@@ -285,11 +283,10 @@ theorem placedMeasurement_isProjective (S : ProjectiveSetting P ε)
 
 /-! ## The crosswise exchange of the two EPR pairs -/
 
-/-- The permutation of the six registers exchanging `A'` with `B''` and `A''`
-with `B'`.  It is the element `U_σ U_θ` of
-`lem:symmetric-equivalents-transfer`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`; unlike the
-generators there it does not touch the strategy registers. -/
+/-- The involution of the six registers exchanging `A'` with `B''` and `A''`
+with `B'`, while fixing the strategy registers `A` and `B`. This
+formalization-only auxiliary is the crosswise exchange of blueprint
+`lem:qld-placement-transfer`. -/
 def eprCrossSwap (P : AdmissibleParams) (ιA ιB : Type*) :
     SixReg P ιA ιB ≃ SixReg P ιA ιB where
   toFun := fun ⟨⟨a, a', a''⟩, b, b', b''⟩ => ((a, (b'', b')), (b, (a'', a')))
@@ -307,10 +304,9 @@ theorem eprState_ofLp_swap {V : Type*} [Fintype V] [DecidableEq V]
   · simp [h]
   · simp [h, Ne.symm h]
 
-/-- The crosswise EPR exchange fixes the expanded state.  This is item 1 of
-`lem:symmetric-equivalents-transfer` for the element `U_σ U_θ`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`; only the symmetry
-of the EPR vector is used. -/
+/-- The crosswise EPR exchange fixes the expanded state. This independently
+proved invariance uses only the symmetry of the EPR vectors, as in blueprint
+`lem:qld-placement-transfer`. -/
 theorem reindexState_eprCrossSwap_psiHat (S : ProjectiveSetting P ε) :
     reindexState (eprCrossSwap P S.toStrategy.ιA S.toStrategy.ιB) S.psiHat =
       S.psiHat := by
@@ -350,9 +346,8 @@ theorem reindexOp_eprCrossSwap_place_BB' (S : ProjectiveSetting P ε)
   ring!
 
 /-- An operator placed on `AB''` has, on the expanded state, the same norm as
-the same operator placed on `AA'`.  This is item 2 of
-`lem:symmetric-equivalents-transfer` for `U_σ U_θ`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`. -/
+the same operator placed on `AA'`. This follows from the crosswise EPR
+exchange of blueprint `lem:qld-placement-transfer`. -/
 theorem norm_place_AB''_eq_norm_place_AA' (S : ProjectiveSetting P ε)
     (O : Op (S.ExpandedLocalSpace .alice)) :
     ‖applyOperatorToState (S.place .AB'' O) S.psiHat‖ =
@@ -362,9 +357,8 @@ theorem norm_place_AB''_eq_norm_place_AA' (S : ProjectiveSetting P ε)
     reindexOp_eprCrossSwap_place_AB'']
 
 /-- An operator placed on `BB'` has, on the expanded state, the same norm as
-the same operator placed on `BA''`.  This is item 2 of
-`lem:symmetric-equivalents-transfer` for `U_σ U_θ`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`. -/
+the same operator placed on `BA''`. This follows from the crosswise EPR
+exchange of blueprint `lem:qld-placement-transfer`. -/
 theorem norm_place_BB'_eq_norm_place_BA'' (S : ProjectiveSetting P ε)
     (O : Op (S.ExpandedLocalSpace .bob)) :
     ‖applyOperatorToState (S.place .BB' O) S.psiHat‖ =

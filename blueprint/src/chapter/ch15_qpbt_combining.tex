@@ -862,8 +862,8 @@ and makes the sandwich projective by the orthonormalization lemma.
 	\leanok
 	\uses{def:expanded-state, def:symmetric-equivalents, def:EPR}
 	This formalization-only auxiliary is not a named statement of the paper;
-	it is the part of Lemma~\ref{lem:symmetric-equivalents-transfer} that
-	needs no symmetry of the strategy. The permutation of the six registers
+	it proves the crosswise EPR exchange independently, without assuming
+	symmetry of the strategy. The permutation of the six registers
 	exchanging $\mathsf{A}' \leftrightarrow \mathsf{B}''$ and
 	$\mathsf{A}'' \leftrightarrow \mathsf{B}'$ fixes $\ket{\hat\psi}$, since
 	each EPR vector is symmetric, and carries the placement
@@ -954,7 +954,8 @@ and makes the sandwich projective by the orthonormalization lemma.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-point-commutation-field, lem:qld-comm-cons, fact:add-a-proj}
+	\uses{lem:qld-point-commutation-field, lem:qld-comm-cons, fact:add-a-proj,
+		fact:triangle}
 	$R^{x,z}_{a,b} = (\hat{M}^X_a \hat{M}^Z_b)^\dagger (\hat{M}^X_a \hat{M}^Z_b)$
 	is positive and $\sum_{a,b} R^{x,z}_{a,b} = \sum_b \hat{M}^Z_b = \Id$.
 	Since $R^{x,z}_{a,b} - \hat{M}^Z_b \hat{M}^X_a
@@ -1328,6 +1329,57 @@ analyzed, together with candidate repairs, in
 	multiplied by an affine factor of degree at most one.
 \end{definition}
 
+\begin{theorem}[Formalization support for Lemma~\ref{lem:qld-4-12}: averaged affine coarse-graining]
+	\label{thm:qld-affine-coarse-graining}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_uniform_affine_postprocess_le}
+	\leanok
+	\uses{def:povm-distance}
+	This formalization-only auxiliary is not a named statement of the paper;
+	it supplies the squared-distance estimate used in the coarse-graining
+	step of Lemma~4.12 of \cite{Ji2020MIPStar}.
+	Let $\F_q$ be a finite field, let $T$ be a finite nonempty set, and let
+	$\ket\psi$ be a vector in a finite-dimensional complex Hilbert space
+	$\hilb$. For each $t \in T$,
+	let $\{A^t_{a,b}\}_{a,b \in \F_q}$ and $\{B^t_{a,b}\}_{a,b \in \F_q}$
+	be operator families on $\hilb$ with equal total operators:
+	$\sum_{a,b} A^t_{a,b} = \sum_{a,b} B^t_{a,b}$.
+	For $\alpha,\beta,c \in \F_q$, set
+	\[
+		A^{t,\alpha,\beta}_c =
+		\sum_{a,b\,:\,\alpha a+\beta b=c} A^t_{a,b},
+		\qquad
+		B^{t,\alpha,\beta}_c =
+		\sum_{a,b\,:\,\alpha a+\beta b=c} B^t_{a,b}.
+	\]
+	Then, with all averages uniform and independent,
+	\[
+		\E_{t,\alpha,\beta} \sum_c
+		\big\lVert (A^{t,\alpha,\beta}_c-B^{t,\alpha,\beta}_c)
+		\ket\psi \big\rVert^2
+		\le \E_t \sum_{a,b}
+		\big\lVert (A^t_{a,b}-B^t_{a,b})\ket\psi \big\rVert^2.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance}
+	Fix $t$ and write $v_{a,b}=(A^t_{a,b}-B^t_{a,b})\ket\psi$.
+	The equality of total operators gives $\sum_{a,b} v_{a,b}=0$.
+	Two distinct pairs $(a,b)$ and $(a',b')$ satisfy
+	$\alpha a+\beta b=\alpha a'+\beta b'$ with probability $1/q$ over
+	uniform independent $\alpha,\beta$: the corresponding nonzero linear
+	equation in two variables has $q$ solutions. Expanding squared norms
+	in inner products therefore gives
+	\[
+		\E_{\alpha,\beta} \sum_c
+		\Big\lVert \sum_{a,b\,:\,\alpha a+\beta b=c} v_{a,b} \Big\rVert^2
+		= (1-q^{-1})\sum_{a,b}\lVert v_{a,b}\rVert^2
+		+ q^{-1}\Big\lVert\sum_{a,b}v_{a,b}\Big\rVert^2
+		\le \sum_{a,b}\lVert v_{a,b}\rVert^2.
+	\]
+	Averaging over $t$ proves the claim.
+\end{proof}
+
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
 	\lean{MIPStarRE.QPBT.exists_extendedQ}
@@ -1374,17 +1426,27 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
 	\lean{MIPStarRE.QPBT.extendedQ_spec}
 	\leanok
-	\uses{lem:qld-4-10, fact:data-processing}
+	\uses{lem:qld-4-10, thm:qld-affine-coarse-graining}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
 	= \sum_{a,b \,:\, \alpha a + \beta b = c} \hat{Q}^{x,z}_{a,b}$,
 	a coarse-graining of the projective measurement of
-	Lemma~\ref{lem:qld-4-10}, hence itself projective. A uniformly random
-	point of $\F_q^{2m+2}$ has uniformly random coordinates $(x,z)$, so the
-	self-consistency and consistency properties follow from those of
-	$\{\hat{Q}^{x,z}_{a,b}\}$ established in Lemma~\ref{lem:qld-4-10}
-	together with Lemma~\ref{fact:data-processing}, which shows that
-	coarse-graining the outcomes preserves the $\delta_Q$ bounds.
+	Lemma~\ref{lem:qld-4-10}, hence itself projective. Completeness gives
+	$\sum_{a,b}\hat{Q}^{x,z}_{a,b}=\Id$ and
+	\[
+		\sum_{a,b}\hat{M}^{(\mathrm{Point},X),x}_a
+		\hat{M}^{(\mathrm{Point},Z),z}_b
+		= \sum_{a,b}\hat{M}^{(\mathrm{Point},Z),z}_b
+		\hat{M}^{(\mathrm{Point},X),x}_a = \Id.
+	\]
+	Register placement preserves these sums and the identity. Thus each
+	pair of operator families compared in Lemma~\ref{lem:qld-4-10} has
+	equal total operators, including both ordered products. Apply
+	Theorem~\ref{thm:qld-affine-coarse-graining} to each pair, averaging
+	uniformly and independently over $(x,z)$ and both coefficients
+	$\alpha,\beta$. This is the uniform distribution on $\F_q^{2m+2}$,
+	and the three squared-distance bounds retain the error $\delta_Q$.
+	The same argument applies to every opposite pair of register placements.
 \end{proof}
 
 \begin{lemma}[Combined line measurement on the extended coordinates]
@@ -1459,10 +1521,10 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$1, \dots, i-1$ of $v$ are $0$. (The function $\chi$ is the one used in
 	the question distribution of the low individual degree game,
 	Definition~\ref{def:ld-question-distribution}.)
-	Here the paper's one-based indexing is retained: the index $i$ corresponds
-	to the Lean index $i_0:\mathrm{Fin}\,m$ with $i_0.\mathrm{val}=i-1$.
-	Thus $\chi(s)=i$ means \texttt{chiIndex}$(s)=i_0$, and the vanishing
-	coordinates correspond to Lean indices $j$ with $j.\mathrm{val}<i_0.\mathrm{val}$.
+	Here the paper's one-based indexing is retained. Under zero-based
+	indexing, write $i_0=i-1$ and $\chi_0(s)=\chi(s)-1$. Then
+	$\chi(s)=i$ means $\chi_0(s)=i_0$, and the vanishing coordinates
+	are those indexed by $0\le j<i_0$.
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]
