@@ -7583,3 +7583,16 @@ not actual commit/publication hooks. No productive session was killed.
   review. Other results and counts will be refreshed before identical168/27
   closing reports. Draft resumption handoff is
   /tmp/qpbt-main-handoff-20260909-pause.md; budgets and saved work are preserved.
+
+### 2026-09-09T15:31:00Z - Preserve completed review and CI handoffs
+
+- Required wind-down snapshot ran; no new dispatch.508 atcf541b58 received
+  current approval5156373606, including53 focused regression tests.478 at
+  b1ec661b received code/prose approval5156344406. Both are daemon candidates;
+  no manual merge or runtime deployment was performed.
+-503's immutable blocker-marker fix publishedc4de7948 and passed canonical
+  CI. The three-stream helper verified actual CI then stopped with the15:15Z
+  cutoff message instead of launching review. Independent review remains the
+  next gate when the owner resumes.
+-507 artifact publication and443 review were confirmed live. Main continues
+  only evidence collection and checkpoint preservation until the closing reports.
