@@ -6411,3 +6411,55 @@ not actual commit/publication hooks. No productive session was killed.
 - B9/B10 still have no owner disposition. Main made no manual telemetry commit or push,
   daemon change, one-off merge/refresh command or proof-budget reset. The verified merge
   is reported on #27.
+
+## 2026-09-09 - Preserve non-closing intent and bound existing repairs (07:42Z)
+
+- PR404's normal unreviewed tail stopped at its diff-based pre-push audit. Bounded Sol
+  recovery1075066 owns the exact graph/publication blocker, preserves all saved work,
+  and may not weaken the audit or alter mathematical statements. Its worker admitted.
+- PR359 refresh publication regenerated Closes348. Under the standing explicit owner
+  authorization, main restored Part of348 and verified it on GitHub at head
+  a93fae30d759e71701404ff0afcf3d6a7ba23ff6. No failed marker existed to remove, and no
+  source commit or issue closure was changed.
+- PR386 now has three full review rounds. Bounded simplifier1119944 owns the current API
+  findings: reuse the existing seed-marginal theorem and assess only a proof-preserving
+  distribution-API relocation. It must report material scope growth rather than expand
+  the PR, and must not launch the fourth full review without main scheduling it.
+- The closing count was12 live workers. No new merge was observed, and no manual
+  telemetry commit/publication, daemon change, or one-off merge/refresh command occurred.
+
+## 2026-09-09 - Recovered heads enter review; telemetry-only staleness confirmed (07:55Z)
+
+- Completed preservation recoveries363/443/448/487 reported published exact heads, clean
+  worktrees and green canonical CI, with no live reviewer. Main queued independent forced
+  reviews1225384/1225398/1225459/1225527, preserving the exact-head and independence gates.
+- Current findings on existing PR469 received serialized autofix1240227. The closing
+  count at07:54:40Z was15 workers. No new packet or approved-PR tail was launched.
+- PR359's latest refusal is gate2b, not the earlier closure/dependency condition: main
+  advanced to a4525824 after its reviewed head a93fae30. Git's diff from their merge base
+  to that main tip, excluding results/telemetry, is empty. Main added this concrete impact
+  to B9 without weakening the gate or silently changing issue498's requested scope.
+- B9/B10 have no owner response in the checked issue/PR locations. Main made no manual
+  telemetry commit/publication, daemon change, one-off merge or proof-budget reset.
+
+## 2026-09-09 - Refill and source-alignment obligations (08:18Z)
+
+- Existing unreviewed PRs401/409 had clean registered worktrees and no CI/review summaries.
+  Main started their normal tails1323482/1323483, delayed0/120 seconds, within the limit
+  of three unreviewed pipelines. Current findings357/478 received autofix launchers1323492/1323493.
+- PR398's third completed review has a real certified error-bound mismatch plus narrow
+  support/prose findings. Source-alignment worker1367648 must preserve the paper statement,
+  reuse valid existing support or remove unsupported certification, and return before a
+  fourth full review is scheduled. It may not silently replace linear error by sqrt error.
+- PR478's autofix stopped without edits because real-part claims were incorrectly linked
+  to complex-modulus source claims. Main explicitly assigned narrow paper-realignment
+  worker1425007 under AGENTS policy, preserving useful auxiliary estimates and documenting
+  missing source obligations. No new exhausted-B8 proof attempt or budget reset is allowed.
+- Worker count fell to5 at08:08:20Z. Inspection distinguished already-live/incomplete
+  handoffs from genuinely ready work; refilling was not immediate. Review404 admitted,
+  then review481 and residual fix479 were launched as1425005/1425006 alongside the
+  realignment worker. The count returned to8 at08:15:25Z and9 at08:17:07Z. The observed
+  shortfall is recorded rather than counted as sustained floor coverage.
+- PR449's remaining blocker is only dirty telemetry. Bounded preservation handoff1458392
+  owns safe parking and independent review without changing the source head. No main
+  telemetry commit/publication, one-off merge/refresh, daemon edit or manual merge occurred.
