@@ -907,7 +907,8 @@ assembled by Fourier averaging.
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents}
+		def:symmetric-equivalents, def:concrete-paired-line-measurement,
+		lem:concrete-paired-line-degree-support}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
 	operator
@@ -965,11 +966,50 @@ assembled by Fourier averaging.
 	the registers modified gives all symmetric equivalents.
 \end{proof}
 
+\begin{definition}[The concrete paired-line POVM]
+	\label{def:concrete-paired-line-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_effect}
+	\leanok
+	\uses{def:expanded-line-measurement, def:povm-conventions,
+		def:ideg-deg-polynomials}
+	For any projective setting, either player, and any two source lines,
+	define the POVM on the expanded local space by
+	\[
+		T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+		 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+		 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X},
+		\qquad (f_X,f_Z)\in\deg_{md}(\ell_X)\times\deg_{md}(\ell_Z).
+	\]
+	Each effect is positive. Summing first over $f_Z$ and then over $f_X$
+	gives the identity by completeness and projectivity of the line
+	measurements. This is the construction in the proof of
+	Lemma~\ref{lem:qld-xz-lines} in \cite{Ji2020MIPStar}.
+\end{definition}
+
+\begin{lemma}[Axis-degree support of the concrete paired-line POVM]
+	\label{lem:concrete-paired-line-degree-support}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_X}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_Z}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	For either player and $W\in\{X,Z\}$, if $\ell_W$ is axis-parallel
+	and $f_W$ does not have degree at most $d$, then
+	$T^{\ell_X,\ell_Z}_{f_X,f_Z}=0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	The corresponding expanded line effect vanishes outside degree $d$.
+	It is a factor of the defining sandwich, so the sandwich vanishes.
+\end{proof}
+
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
-		def:expanded-line-measurement, def:consistency}
+		def:concrete-paired-line-measurement, def:consistency}
 	This is a Lean-only construction obligation. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
@@ -1164,7 +1204,11 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
 	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
-	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
+	Use coordinate indices $i\in\{0,\dots,m-1\}$ throughout this definition
+	and the following mixture estimates. Index $i$ here denotes coordinate
+	$i+1$ in the one-based notation of \cite{Ji2020MIPStar}; likewise
+	$\chi(s)$ here is one less than the paper's index function.
+	For any such $i$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
 	restriction of $D_{\mathrm{ALine}}$ to pairs $(\ell, u)$ where the line
 	$\ell$ is along the direction $e_i$, i.e.\ is of the form
@@ -1172,7 +1216,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	distribution} $D_{\mathrm{DLine},i}$ is the restriction of
 	$D_{\mathrm{DLine}}$ to pairs $(\ell, u)$ where the line
 	$\ell = (u_0, s, v)$ satisfies $\chi(s) = i$ and coordinates
-	$1, \dots, i-1$ of $v$ are $0$. (The function $\chi$ is the one used in
+	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
+	(The function $\chi$ is the one used in
 	the question distribution of the low individual degree game,
 	Definition~\ref{def:ld-question-distribution}.)
 \end{definition}
@@ -1189,7 +1234,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\uses{def:ith-restricted-line, def:line-point-dist, lem:qld-xz-lines,
 		lem:qld-4-10, def:expanded-state}
 	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
-	distributions $D_{\mathrm{ALine},i}$ for $i \in \{1, \dots, m\}$, and
+	distributions $D_{\mathrm{ALine},i}$ for $i \in \{0, \dots, m-1\}$, and
 	likewise $D_{\mathrm{DLine}}$ is a uniform mixture of the
 	$D_{\mathrm{DLine},i}$. As a consequence:
 	\begin{enumerate}
@@ -1202,7 +1247,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 		of restricted distributions with error $4m^2\delta$;
 		\item in particular, by Lemma~\ref{lem:qld-xz-lines}, for any types
 		$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine},
-		\mathrm{DLine}\}$ and any $i, j \in \{1, \dots, m\}$,
+		\mathrm{DLine}\}$ and any $i, j \in \{0, \dots, m-1\}$,
 		\begin{equation}
 			\label{eq:qld-xz-lines-restricted}
 			\E_{(\ell_X,x) \sim D_{\mathrm{v}_1,i}}\
@@ -1461,6 +1506,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:qld-4-10, fact:triangle, def:symmetric-equivalents}
 	Insert the joint measurement on the opposite placement and apply the
 	squared-distance triangle inequality to the two $\delta_Q$ bounds.
 \end{proof}
@@ -1475,9 +1521,53 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{def:povm-distance, def:expanded-state, def:povm-conventions}
 	Apply Cauchy--Schwarz to the outcome sum and then to the question average;
 	completeness bounds the squared norm of the left factor by one.
 \end{proof}
+
+\begin{definition}[Directly indexed sub-line laws]
+	\label{def:direct-subline-law}
+	\lean{MIPStarRE.QPBT.SubLineWitness}
+	\leanok
+	\uses{def:ith-restricted-line, def:line-representative, def:combine-map}
+	Put $n=2m+2$. The directly indexed extended line-point law samples
+	$i\in\{0,\dots,n-1\}$ and $u,v\in\F_q^n$ independently and uniformly,
+	and chooses the axis or diagonal kind with equal probabilities.
+	For the axis kind set $w=e_i$; for the diagonal kind set $w_j=0$ for
+	$j<i$ and $w_j=v_j$ for $j\ge i$. The line has base $L_w^{\mathrm{lnf}}(u)$
+	and direction $w$, retaining its kind and coordinate index; the sampled
+	point is $u$. Zero diagonal directions are included.
+
+	A directly indexed sub-line law $D_{\mathrm{dir}}$ is a probability law
+	on triples $(\ell,\ell_X,\ell_Z)$ with the following properties.
+	Its extended-line marginal is the line marginal just defined.
+	Every supported triple admits affine maps $t\mapsto a_W+b_Wt$ such that
+	\[
+		\pi_W(\ell(t))=\ell_W(a_W+b_Wt),\qquad W\in\{X,Z\},
+	\]
+	where $\ell(t)$ denotes base plus parameter times direction and the
+	field identifications are understood. Thus each extended point projects
+	onto its two source lines, with affine scalar coordinates $\alpha(t)$
+	and $\beta(t)$ as in Definition~\ref{def:combine-map}. An axis-parallel
+	extended line has axis-parallel source lines.
+
+	Finally there is one probability law on
+	$(\mathrm v,i,j)\in\{\mathrm{ALine},\mathrm{DLine}\}
+	\times\{0,\dots,m-1\}^2$ with the following two mixture properties.
+	Sample a triple from $D_{\mathrm{dir}}$ and an independent uniform
+	parameter $t$ on $\ell$. The law of $(\ell_X,\ell_Z,\pi_X(\ell(t)))$
+	is the mixture obtained by sampling $(\ell_X,x)$ from
+	$D_{\mathrm v,i}$ and independently $\ell_Z$ from the line marginal of
+	$D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,x)$.
+	The law of $(\ell_X,\ell_Z,\pi_Z(\ell(t)))$ is the mixture obtained
+	by retaining $(\ell_X,\ell_Z,z)$ from the corresponding independent
+	samples of $\ell_X$ and $(\ell_Z,z)$. These are separate one-point
+	marginal identities, with the same mixture weights; they impose no
+	joint conditional independence of the two projected points.
+	Identification with the source law $D$ is a separate obligation;
+	see \cite{gap:qpbt_ld-dimension-divisibility}.
+\end{definition}
 
 \begin{lemma}[Formalization support: a uniform point under the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
@@ -1487,16 +1577,17 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
 	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_projX_projZ}
 	\leanok
-	\uses{lem:qld-sublines, def:line-point-dist, def:line-representative,
+	\uses{def:direct-subline-law, def:line-representative,
 		def:combine-map}
-	For the directly indexed subline law represented by
-	\texttt{SubLineWitness}, a uniform affine parameter on the sampled extended line gives a uniform
+	For any $D_{\mathrm{dir}}$ as in Definition~\ref{def:direct-subline-law},
+	a uniform affine parameter on the sampled extended line gives a uniform
 	point of $\F_q^{2m+2}$, whose $x$ and $z$ blocks are independent uniform
 	points of $\F_q^m$. This statement does not transport that law to the
 	source distribution $D$; see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{def:direct-subline-law, def:line-representative, def:combine-map}
 	The representative--parameter map has constant fibers of size $q$; the
 	coordinate split and scalar identification are bijections.
 \end{proof}
@@ -1506,35 +1597,40 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
 	\leanok
 	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
-		lem:qld-sublines-uniform-point}
-	Let $D_{\mathrm{dir}}$ be any directly indexed subline law represented by
-	\texttt{SubLineWitness}, and let $Q,T$ satisfy the joint point and line
-	witness properties with errors $\delta_Q,\delta_P$. Write
+		lem:qld-sublines-uniform-point, lem:qld-xz-lines}
+	There is a universal $C>0$ such that the following holds.
+	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law},
+	and let $Q,T$ satisfy the joint point and line measurement properties of
+	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
+	$\delta_Q,\delta_P$. Write
 	$A_{\mathrm{dir}},B_{\mathrm{dir}}$ for the two expectations displayed in
 	Lemma~\ref{lem:claim-17-1}, using $D_{\mathrm{dir}}$ and zero-completed
 	optional evaluations. Then
-	$|\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le 2\sqrt{\delta_Q}$.
+	$|\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le C\sqrt{\delta_Q}$.
 	This formalization-only estimate asserts neither a complex-modulus bound
 	nor transport to the source distribution.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
+		lem:qld-sublines-uniform-point}
 	The real overlap estimate and the same-placement squared-distance bound
 	$4\delta_Q$ give $2\sqrt{\delta_Q}$. Use the uniform-point identity to
-	rewrite the point average.
+	rewrite the point average, and take $C=2$.
 \end{proof}
 
 \begin{lemma}[Formalization support: the concrete X marginal]
 	\label{lem:concrete-line-X-marginal}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
 	\leanok
-	\uses{def:expanded-line-measurement}
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
 	For the concrete X-Z-X measurement,
 	$\sum_{f_Z}T^{\ell_X,\ell_Z}_{f_X,f_Z}
 	=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
 	Sum the middle factor to the identity and use projectivity of the X factor.
 \end{proof}
 
@@ -1544,9 +1640,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
 	\leanok
 	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
-		lem:qld-comm-line-cons}
-	Let $D_{\mathrm{dir}}$ be a directly indexed subline law represented by
-	\texttt{SubLineWitness}. For the concrete X-Z-X measurement, let
+		lem:qld-comm-line-cons, def:direct-subline-law}
+	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law}.
+	For the concrete X-Z-X measurement, let
 	$A_X(\ell_X,\ell_Z,x)$ be the real overlap obtained by summing
 	$T_{f_X,f_Z}^{\ell_X,\ell_Z}\ot
 	\hat M^{(\mathrm{Point},X),x}_{f_X(x)}$ over both outcomes, with
@@ -1556,6 +1652,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
+		lem:qld-comm-line-cons, def:direct-subline-law}
 	The concrete marginal identity reduces the overlap to X-line/point
 	consistency. The separate X marginal of the directly indexed subline law
 	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
@@ -1578,19 +1676,26 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:claim-17-3-re-direct}
 	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
 	\leanok
-	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement}
-	Let $Q,T$ satisfy the joint point and line witness properties with errors
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement,
+		lem:overlap-gap-distance, def:direct-subline-law}
+	There is a universal $C>0$ such that the following holds.
+	Let $Q,T$ satisfy the joint point and line measurement properties of
+	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
 	$\delta_Q,\delta_P$, and let $D_{\mathrm{dir}}$ be a directly indexed
-	subline law represented by \texttt{SubLineWitness}. If $B_Z$ is the
+	subline law as in Definition~\ref{def:direct-subline-law}. If $B_Z$ is the
 	expectation in Lemma~\ref{lem:claim-17-3} under that law with
 	zero-completed optional evaluations, then
 	$|\Re B_Z-1|\le
-	2\sqrt m(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})$.
+	C\sqrt m(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10,
+		lem:overlap-gap-distance, def:direct-subline-law,
+		def:expanded-point-measurement}
 	The separate Z marginal and restricted consistency estimates bound the
-	nonnegative overlap deficit; taking a square root gives the displayed bound.
+	nonnegative overlap deficit; taking a square root gives the displayed
+	bound with $C=2$.
 \end{proof}
 
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
@@ -1623,7 +1728,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 		lem:qld-xz-lines, lem:overlap-gap-distance,
 		lem:qld-sublines-uniform-point, def:line-point-dist}
 	The scalar approximation here is a complex-modulus bound. Its formal
-	proof over the source law remains open; the real-part auxiliary below
+	proof over the source law remains open; the real-part auxiliary above
 	does not establish it. See \cite{gap:qpbt_subline-claims-line-marginal}.
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}

@@ -134,14 +134,13 @@ theorem place_one (S : ProjectiveSetting P ε) (p : Placement) :
     · simp only [ProjectiveSetting.place, Matrix.one_apply, Prod.ext_iff]
       split_ifs <;> simp_all
 
-/-- A placement is additive over finite sums of local operators. -/
+/-- A placement is additive over finite sums of local operators.
+Compatibility name for `place_finset_sum`, retained for the combining-point
+proofs that use this spelling. -/
 theorem place_finsetSum (S : ProjectiveSetting P ε) (p : Placement) {γ : Type*}
     (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ x ∈ s, O x) = ∑ x ∈ s, S.place p (O x) := by
-  ext i j
-  cases p <;>
-    simp only [ProjectiveSetting.place, Matrix.sum_apply, Finset.sum_mul,
-      Finset.mul_sum]
+    S.place p (∑ x ∈ s, O x) = ∑ x ∈ s, S.place p (O x) :=
+  S.place_finset_sum p s O
 
 /-- A placement commutes with the conjugate transpose. -/
 theorem place_conjTranspose (S : ProjectiveSetting P ε) :
