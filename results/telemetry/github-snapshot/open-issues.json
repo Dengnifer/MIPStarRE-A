@@ -1524,7 +1524,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 1,
    "total_blocking": 1
@@ -3381,100 +3381,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/425/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/422",
-  "id": 5389575904,
-  "node_id": "I_kwDOUJyJf88AAAABQT5m4A",
-  "number": 422,
-  "title": "feat(QPBT/Combining): bound pointwise consistency defect",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement"
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result"
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T16:54:39Z",
-  "updated_at": "2026-09-08T16:54:39Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-pointwise-consistency-unit-bound -->\n### Target\n- Restore `consistencyDefect_integrand_le_one` as a standalone proof-only helper.\n\n### Source and scope\n- Base: published PR #392 head `2cc44385ac07b34bd0e3b023c35afd6c95ba4a87`.\n- Source context: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.\n- Use the complete-measurement defect identity and positivity of diagonal overlap on opposite placements.\n\n### Acceptance\n- Preserve the exact old public signature from commit `0f4ef05370350f4017439ebd839ef0561f13130f`.\n- Do not add a defect hypothesis, conditioning law, restoration theorem, sampler change, or pasting theorem.\n- Focused Lean, standard-axiom, hooks, and checked publication evidence.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/422/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -9844,8 +9750,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 7,
-   "percent_completed": 19
+   "completed": 8,
+   "percent_completed": 22
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -10984,9 +10890,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 250,
+  "comments": 252,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-09T12:37:44Z",
+  "updated_at": "2026-09-09T13:08:15Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",

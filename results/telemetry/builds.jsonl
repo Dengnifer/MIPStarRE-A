@@ -1082,3 +1082,4 @@
 {"ts": "2026-09-09T21:05:05+0800", "kind": "ci-build", "trigger": "ci.sh pr=458", "seconds": 167, "outcome": "success", "sha": "8fc1b718af2ef18640e9d78db9530caf1c008de5", "note": "branch issue-422-pointwise-consistency-unit-bound"}
 {"ts": "2026-09-09T21:12:08+0800", "kind": "ci-build", "trigger": "ci.sh pr=456", "seconds": 20, "outcome": "success", "sha": "2d5ae7f16ef461ad78b0737373d0fe816403d5d2", "note": "branch issue-452-mixed-line-resampling"}
 {"ts": "2026-09-09T21:14:34+0800", "kind": "ci-build", "trigger": "ci.sh pr=506", "seconds": 21, "outcome": "success", "sha": "b9ab67c3a5289a33cb0b84f02c8cc62a59480d25", "note": "branch issue-504-ci-step-failure-propagation"}
+{"ts": "2026-09-09T21:16:14+0800", "kind": "ci-build", "trigger": "ci.sh pr=507", "seconds": 19, "outcome": "success", "sha": "29fa79d5822ff4fc07a7bae1150d85d97fb60d88", "note": "branch issue-502-reviewed-merge-train"}
