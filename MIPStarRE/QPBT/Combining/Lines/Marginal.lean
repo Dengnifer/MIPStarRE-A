@@ -17,10 +17,11 @@ open MIPStarRE.LDT MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Formalization-only constructor identity: summing out the Z outcome from
+/-- Formalization-only identity for the X marginal: summing out the Z outcome from
 the X-outer sandwich recovers the X line effect exactly. This uses completeness
 of the Z measurement and projectivity of the outer X effect, as in the POVM
-construction at paper `14_analysis_of_the_pauli_basis_test.tex:942-963`. -/
+construction at paper `14_analysis_of_the_pauli_basis_test.tex:942-963`;
+blueprint `lem:combined-line-x-marginal`. -/
 theorem ProjectiveSetting.combinedLineMeasurement_sum_Z
     {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (side : PlayerSide)
     (lineX lineZ : LineDesc P.toLdParams)

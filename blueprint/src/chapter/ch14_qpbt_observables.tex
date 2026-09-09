@@ -1398,6 +1398,51 @@ every tuple $\omega$.
 	$\mathsf{B}\mathsf{B}'$ and $\mathsf{A}\mathsf{B}''$.
 \end{definition}
 
+\begin{definition}[Crosswise exchange of the EPR registers]
+	\label{def:epr-cross-swap}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.eprCrossSwap}
+	\leanok
+	\uses{def:expanded-state}
+	Define the register involution $\kappa$ by
+	$\mathsf A'\leftrightarrow\mathsf B''$ and
+	$\mathsf A''\leftrightarrow\mathsf B'$, fixing $\mathsf A$ and $\mathsf B$.
+	Write $U_\kappa$ for its permutation unitary. This is a
+	formalization-only auxiliary for the combining argument.
+\end{definition}
+
+\begin{lemma}[Invariance under the crosswise EPR exchange]
+	\label{lem:epr-cross-swap-invariance}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.reindexState_eprCrossSwap_psiHat}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.reindexOp_eprCrossSwap_place_AB''}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.reindexOp_eprCrossSwap_place_BB'}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.norm_place_AB''_eq_norm_place_AA'}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.norm_place_BB'_eq_norm_place_BA''}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.opFamilyDistSq_place_AB''_eq_AA'}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.opFamilyDistSq_place_BB'_eq_BA''}
+	\leanok
+	\uses{def:epr-cross-swap, def:symmetric-equivalents, def:povm-distance}
+	For any projective setting, $U_\kappa\ket{\hat\psi}=\ket{\hat\psi}$.
+	Conjugation by $U_\kappa$ carries an Alice operator on
+	$\mathsf A\mathsf B''$ to the same operator on $\mathsf A\mathsf A'$,
+	and a Bob operator on $\mathsf B\mathsf B'$ to the same operator on
+	$\mathsf B\mathsf A''$. Thus these paired placements have equal
+	state-dependent operator norms and equal same-side family distances.
+	No symmetry of the strategy is assumed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:EPR}
+	The involution exchanges the two identical EPR factors and reverses
+	the registers in each factor, preserving both EPR vectors. It fixes the
+	strategy registers. Conjugation permutes operator placements as stated;
+	unitary invariance of the norm then gives the norm and distance identities.
+\end{proof}
+
+This auxiliary does not establish the full transfer assertion below.
+In particular, $\kappa\ne\sigma\theta$ for the permutations defined there:
+$\kappa(\mathsf B')=\mathsf A''$, whereas
+$\sigma\theta(\mathsf B')=\mathsf A'$.
+
 \begin{lemma}[Transfer to symmetric equivalents]
 	\label{lem:symmetric-equivalents-transfer}
 	\notready

@@ -23,7 +23,8 @@ noncomputable section
 
 /-- The paired-line POVM in the proof of `lem:qld-xz-lines`, paper
 `14_analysis_of_the_pauli_basis_test.tex:942-949`. The X effect is the outer
-projector. This construction does not assert consistency with a point witness. -/
+projector; see blueprint `def:combined-line-sandwich`.
+This construction does not assert consistency with a point witness. -/
 def ProjectiveSetting.combinedLineMeasurement {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (side : PlayerSide)
     (lineX lineZ : LineDesc P.toLdParams) :
@@ -68,7 +69,8 @@ theorem ProjectiveSetting.combinedLineMeasurement_effect_eq_pastedMeasurement
         (S.lineMeasExp side .X lineX).effect fZ fX := rfl
 
 /-- The X-axis degree bound for the constructed POVM, from the support
-argument at paper `14_analysis_of_the_pauli_basis_test.tex:949`. -/
+argument at paper `14_analysis_of_the_pauli_basis_test.tex:949`, blueprint
+`lem:combined-line-axis-support`. -/
 theorem ProjectiveSetting.combinedLineMeasurement_axis_degree_X
     {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (side : PlayerSide)
     (lineX lineZ : LineDesc P.toLdParams)
@@ -79,7 +81,8 @@ theorem ProjectiveSetting.combinedLineMeasurement_axis_degree_X
     S.expLineOp_zero_of_not_deg_d side .X lineX haxis fX hf, zero_mul]
 
 /-- The Z-axis degree bound for the constructed POVM, from the support
-argument at paper `14_analysis_of_the_pauli_basis_test.tex:949`. -/
+argument at paper `14_analysis_of_the_pauli_basis_test.tex:949`, blueprint
+`lem:combined-line-axis-support`. -/
 theorem ProjectiveSetting.combinedLineMeasurement_axis_degree_Z
     {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (side : PlayerSide)
     (lineX lineZ : LineDesc P.toLdParams)

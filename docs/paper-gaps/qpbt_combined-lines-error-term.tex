@@ -113,11 +113,34 @@ $\delta_{\mathrm{combine}}(\eps,m,d,q)$.
   shrinking $b$, so forms~2 and~3 both suffice downstream.
 \end{enumerate}
 
-\section{The domain of the conditional Lean helper}
+\section{The domain of the paired-line helper}
 
-The source statement does not take an arbitrary joint point measurement as an
-input.  It uses the family $\{\hat Q^{x,z}_{a,b}\}$ constructed by the preceding
-point lemma, whose error has the form $\delta_Q(\eps)=\poly(\eps)$.  Consequently,
+The prerequisite paired-line lemma, \path{lem:qld-xz-lines}, concerns two
+lines $\ell_X,\ell_Z$ in $\F_q^m$.  It constructs the POVM
+$\{T^{\ell_X,\ell_Z}_{f_X,f_Z}\}$ with degree-$md$ polynomial outcomes,
+of degree at most $d$ on an axis-parallel component, and asserts
+\[
+  \big(T^{\ell_X,\ell_Z}_{[f_X(x)=a,\,f_Z(z)=b]}\big)_{\mathsf A\mathsf A'}
+  \simeq_{\delta_P}
+  \big(\hat Q^{x,z}_{a,b}\big)_{\mathsf B\mathsf A''},
+  \qquad \delta_P=\poly(\eps,md/q),
+\]
+on the expanded state, averaged over two independently sampled line-point
+pairs, together with all symmetric equivalents.  The point measurements here
+are those of \path{lem:qld-4-10}, with error
+$\delta_Q(\eps)=\poly(\eps)$.%
+\footnote{Both statements occur in
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}:
+\path{lem:qld-xz-lines} at lines~882--894 and \path{lem:qld-4-10} at
+lines~689--709.  Their blueprint nodes have the same labels in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}.}
+This prerequisite is distinct from the extended-line lemma
+\path{lem:qld-4-13}, which constructs $\hat Q^\ell$ for a single line in
+$\F_q^{2m+2}$.  The domain repair below concerns the paired-line helper;
+it neither changes nor resolves the extended-line error discrepancy.
+
+The paired-line source statement does not take an arbitrary joint point
+measurement as an input.  Consequently,
 an internal theorem which accepts an already constructed point witness must retain
 the same quantitative dependency: it should first fix a function
 $\delta_Q:\mathbb R\to\mathbb R$ satisfying the one-variable polynomial-error
@@ -168,6 +191,9 @@ This is not a new hypothesis on the paper theorem.  The source-facing Lean
 declaration \path{exists_combinedLinesWitness} preserves its original statement:
 it existentially obtains $\delta_Q$ and its point witnesses from the preceding
 point construction, then applies the conditional helper.
+The verdict for this prerequisite is therefore a correction of the conditional
+helper's domain, with no change to the paired-line source assertion or its
+error form $\poly(\eps,md/q)$.
 
 The preserved proof route isolates four named obligations.  First,
 \path{exists_combinedLine_restored_defect_le} constructs the conditioned XZX

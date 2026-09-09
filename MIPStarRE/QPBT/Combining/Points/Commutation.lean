@@ -364,7 +364,7 @@ of the four register placements, with the error of item 2 of
 `lem:qld-comm-cons`.  The estimate is transferred from the binary refinements
 of the source by the Parseval identity, without loss in the field size.  Paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`,
-blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1210`; the
+blueprint auxiliary `lem:field-point-commutation`; the
 role of this form in the proof of `lem:qld-4-10` is explained in
 `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`. -/
 theorem expPoint_comm :

@@ -82,21 +82,6 @@ theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableE
           _ ≤ 4 := by linarith
     _ = 4 := avgOver_uniform_const _
 
-/-- The effects of a projective measurement, placed on a register pair, are
-square-summable to the identity. -/
-theorem ProjectiveSetting.sum_place_effect_conjTranspose_mul_self_le_one
-    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (p : Placement)
-    {α : Type*} [Fintype α] (M : Measurement α (S.ExpandedLocalSpace p.side))
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (S.place p (M.effect a))ᴴ * S.place p (M.effect a) ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (S.place p (M.effect a))ᴴ * S.place p (M.effect a)
-      = ∑ a, S.place p (M.effect a) := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [← S.place_conjTranspose, ← S.place_mul,
-          (hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := by rw [← S.place_finsetSum, M.sum_eq_one, S.place_one]
-
 /-- The products `A_a B_b` of the effects of two projective measurements on a
 common space are square-summable to the identity. -/
 theorem sum_mul_conjTranspose_mul_self_eq_one {α β ι : Type*} [Fintype α]

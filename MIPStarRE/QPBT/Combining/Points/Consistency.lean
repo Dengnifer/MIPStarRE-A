@@ -93,18 +93,6 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
 
-/-- The effects of a projective measurement are square-summable to the
-identity. -/
-theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (M.effect a)ᴴ * M.effect a = ∑ a, M.effect a := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := M.sum_eq_one
-
 /-! ## The overlap of two placed sandwiches -/
 
 section Abstract
@@ -154,7 +142,8 @@ theorem sub_mul_mul_eq_add_commutators (X₁ X₂ Z₁ Z₂ : Op ι)
   - (1/2) ∑_{a,b} ‖(X_1(a) - X_2(a)) W_b ψ‖^2`.
 This replaces the Cauchy--Schwarz chain of displays
 `eq:qld-rw-self-cons-1` to `eq:qld-rw-self-cons-4`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`;
+blueprint auxiliary `lem:point-sandwich-overlap`. -/
 theorem sandwich_overlap_identity (ψ : EuclideanSpace ℂ ι)
     (X₁ X₂ : Measurement α ι) (Z₁ Z₂ : Measurement β ι)
     (hX₁ : MIPStarRE.QPBT.Measurement.IsProjective X₁)
@@ -297,7 +286,7 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
     simp only [Fintype.sum_prod_type]
     refine Finset.sum_le_sum fun a _ => ?_
     exact sum_norm_mul_apply_le Z₂.effect (X₁.effect a - X₂.effect a) ψ
-      (sum_effect_conjTranspose_mul_self_le_one_of_projective Z₂ hZ₂)
+      (measurement_sum_adjoint_mul_le_one Z₂)
   have hsum := Finset.sum_le_sum fun ab (_ : ab ∈ Finset.univ) => hpt ab
   rw [← Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_add_distrib] at hsum
   linarith
