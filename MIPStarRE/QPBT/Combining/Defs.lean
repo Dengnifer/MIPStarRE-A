@@ -346,6 +346,36 @@ instance restrictedLineSeedEvent_decidablePred (L : LdParams) (i : Fin L.m) :
   unfold restrictedLineSeedEvent
   infer_instance
 
+/-- Formalization-only auxiliary for `def:ith-restricted-line`: whenever a line
+CL map keeps the shared scalar coordinate, the pre-decoding law it generates
+against the point map gives positive mass to every coordinate-index event.  The
+witness is the constant seed reconstructed from the index by
+`seedOfIndexResidue`. -/
+private theorem clDistribution_seedEvent_positive (L : LdParams) (i : Fin L.m)
+    (CL : LdSpace L → LdSpace L)
+    (hseed : ∀ z : LdSpace L, (CL z).seed = z.seed) :
+    0 < ∑ sample ∈
+        (clDistribution CL (ldPointCL L)).support.filter
+          (restrictedLineSeedEvent L i),
+      (clDistribution CL (ldPointCL L)).weight sample := by
+  set s0 : ScalarQ L := seedOfIndexResidue L i ⟨0, L.seedFiberCard_pos⟩ with hs0
+  set z0 : LdSpace L := fun _ => s0 with hz0
+  refine Finset.sum_pos'
+    (fun a _ => (clDistribution CL (ldPointCL L)).nonnegative a)
+    ⟨(CL z0, ldPointCL L z0), Finset.mem_filter.mpr ⟨?_, ?_⟩, ?_⟩
+  · refine Finset.mem_image.mpr ⟨z0, ?_, rfl⟩
+    simp
+  · change chiIndex L (CL z0).seed = i
+    rw [hseed]
+    exact chiIndex_seedOfIndexResidue L i _
+  · refine Finset.sum_pos'
+      (fun a _ => (uniformDistribution (LdSpace L)).nonnegative a)
+      ⟨z0, Finset.mem_filter.mpr ⟨?_, rfl⟩, ?_⟩
+    · simp
+    · simp only [uniformDistribution, Distribution.uniformOnFinset_weight,
+        Finset.mem_univ, if_true]
+      positivity
+
 /-- The axis-line seed event has positive mass.  This named obligation makes
 normalization in `restrictedALinePreDist` explicit.  It belongs to
 blueprint
@@ -355,8 +385,8 @@ theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldALineCL L) (ldPointCL L)).support.filter
           (restrictedLineSeedEvent L i),
-      (clDistribution (ldALineCL L) (ldPointCL L)).weight sample := by
-  sorry
+      (clDistribution (ldALineCL L) (ldPointCL L)).weight sample :=
+  clDistribution_seedEvent_positive L i (ldALineCL L) fun _ => rfl
 
 /-- The diagonal-line seed event has positive mass.  This is the corresponding
 normalization obligation from blueprint `def:ith-restricted-line`; paper lines
@@ -365,8 +395,8 @@ theorem restrictedDLineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldDLineCL L) (ldPointCL L)).support.filter
           (restrictedLineSeedEvent L i),
-      (clDistribution (ldDLineCL L) (ldPointCL L)).weight sample := by
-  sorry
+      (clDistribution (ldDLineCL L) (ldPointCL L)).weight sample :=
+  clDistribution_seedEvent_positive L i (ldDLineCL L) fun _ => rfl
 
 /-- The normalized pre-decoding axis law conditioned on coordinate `i`. -/
 noncomputable def restrictedALinePreDist (L : LdParams) (i : Fin L.m) :
