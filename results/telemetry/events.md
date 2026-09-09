@@ -7120,3 +7120,101 @@ not actual commit/publication hooks. No productive session was killed.
   MIPSTARRE_JOB_CLASS, MIPSTARRE_HARDNESS_REASON and MIPSTARRE_CODEX_MODEL as
   required by the 11:05Z fixture incident. Shell syntax, git whitespace and
   installed-hook checks pass. No Lean or blueprint files changed.
+
+### 2026-09-09T11:40:10Z - Apply owner four-orc limit and reserve daemon review capacity
+
+- Owner-session10:45Z supersedes the earlier unqualified worker-floor rule:
+  at most four active orc workers, two of the nine worker slots reserved for
+  daemon refresh reviews, and refresh/merge completion before more repairs.
+  Ordinary work therefore has a ceiling of seven while the reserved slots are
+  idle; a count below the former eight-worker floor is intentional here.
+  B11 second-only routing and the physical account allocation are unchanged.
+- Under the existing router lock, main paused five pending non-daemon admissions
+  and recorded their PID/start identities in
+  watchdog/main-allocation-parking-20260909.json. Later inspection found those
+  original router processes terminal, so that file is historical evidence,
+  not proof of a current hold. Actual process counts remain authoritative.
+- Main saved HEAD, branch, index/worktree status and capture references before
+  interrupting387/414/406 CLI workers. Checkpoints are in
+  watchdog/main-orc-checkpoints-20260909.json. The387 worktree retains its
+  staged PlacementSupport consolidation at8c4b320e; no source change was undone.
+  Two previously queued workers338/395 subsequently started; they were also
+  checkpointed and interrupted, with records in
+  watchdog/main-orc-checkpoints-second-20260909.json. Dispatcher captures and
+  histories remain; these interruptions implement allocation, not proof failure.
+- Final census: four orc workers (502,498,388,466), prover474 and reviewer492.
+  PR492 is a code-only review, admitted only after verifying its green CI,
+  matching local/published head and616-test success; this leaves daemon capacity.
+  No more orc repairs are admitted until the cap permits them. Parked work,
+  including479's unexplained pre-output exit, is preserved for later recovery.
+- GitHub verifies PR357 merged11:15:24Z as86c7ed1f9566ef70670d5a2abb6f91ab506495e6
+  from107446202910ddaa14c7c8242addbced7c921721. PR404's refresh completed but
+  became stale after that merge; the daemon owns further refreshes. No main
+  commit/push or manual PR merge was performed.
+- PR499 review5153274840 identified a genuine inherited-submodule-ignore bug.
+  Bounded repair4020023 is active; exactly one further independent verification
+  is authorized after its fix, retaining both earlier rounds. This exception
+  is recorded on the PR and in the decision register; no merge gate is waived.
+- PR443's fourth review has one baseline-duplication finding. Both cited file
+  blobs match current main exactly (e2c99917 and9c2050b7). Main published an
+  exact-head out-of-scope adjudication and prepared the conditional refresh
+  template, then added443 to the daemon's adjudication list. No unrelated
+  placement refactor was introduced and no reviewer approval was fabricated.
+- Worker504 completed bba2d4d4 with625 tests and eight failure-regression cases.
+  Its publication lane stopped on one append-only events.md conflict. Main
+  removed only the four conflict markers in under two minutes and verified
+  both complete parent event sequences remain ordered subsequences. Detached
+  script345207 owns immutable-parent guards, merge commit, checked publication
+  and isolated full CI. It starts no model or review; CI code remains the
+  worker's implementation and only the daemon may merge its eventual PR.
+- Issue502 is now an actual model session and retains its11:38:45Z deadline.
+  Source work and budget histories are preserved. One27 comment reports the
+  next verified merge and owner-directed allocation. Telemetry is left for
+  daemon publication; no native/Fable worker or primary-key request occurred.
+
+### 2026-09-09T11:48:41Z - Short-cycle refill under the latest owner instructions
+
+- Owner11:25/11:41 restores the floor, keeps at most4 orcs, and prohibits
+  qpbt-switch and HOLD/STOP creation. Owner reports the stale hold was removed;
+  earlier operator-signaled pauses remain separately recorded. No new pause,
+  hold file or account change was made. Owner11:45 requires short turns.
+- Snapshot started with3 workers. Reviews478/483/491/488/458 and the505 Astra
+  lane were detached; census now shows9 workers,3 orcs. New review candidates'
+  relevant regression logs were clean. PR503 has an explicit Sol autofix
+  assignment and auto-fix label, preserving its scoped F1/F2 instructions.
+- #502 implementation stopped at its original deadline with677 staged lines,
+  10 new and36 targeted tests passing. Its hook failed from model metadata.
+  Detached non-model tail476906 commits/publishes that preserved implementation
+  with isolated metadata, then runs CI; it never deploys or merges a train.
+  #505 starts after this implementation handoff and targets retired router code.
+- #504 is published as PR506; its existing CI tail remains live. New worker
+  launches use process sessions, retain telemetry and never call native tools.
+  One short27 update records counts and502/503 state. No main commit/push.
+
+### 2026-09-09T11:54:09Z - Advance published repairs and keep the short cycle
+
+- Previous turn progressed. Required snapshot completed; census9 live,2 orcs.
+- Published499 fix7e4b2775 and392 recovery49a8ac5f are CI-green; independent
+  review launchers533003/533004 are assigned. The499 extra verification is the
+  previously authorized single round. No earlier review history was reset.
+- Failed212/443 refreshes have no competing writers; recoveries533007/533013
+  are assigned, keeping active-plus-queued orc work within four.
+- #502 is committed/published as PR507 at e1dd7bb0; its isolated CI tail runs.
+  #504 is PR506 at c672c4f2, with successful canonical CI; its regression log
+  is checked before the independent review handoff. #505 and503 autofix remain
+  live. No qpbt-switch, HOLD/STOP, primary account, native agent or manual merge.
+- One short27 update records the actual counts and handoffs. Telemetry remains
+  for daemon publication; main did not commit or push its own branch.
+
+### 2026-09-09T11:59:15Z - Verify active handoffs and remove stale attention markers
+
+- Previous cycle progressed. Required snapshot is being consumed; latest
+  census9 workers,3 orcs. Existing conflict owners533007/533013 and505,
+  503 autofix,506 review and507 CI handles were verified live.
+- GitHub and clean worktrees agree on507=e1dd7bb0 and506=c672c4f2. Removed
+  only502's obsolete uncommitted-work marker and504's resolved merge-conflict
+  marker. Their publication/CI/review stages remain explicit; no success was
+  inferred from those marker removals.
+- Daemon refreshes431/458. No duplicate writer or extra full-build lane was
+  started while capacity is occupied. One short27 update records current
+  counts. No primary key, native worker, qpbt-switch or HOLD/STOP use.
