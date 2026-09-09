@@ -4,8 +4,8 @@ import MIPStarRE.QPBT.Combining.PointsDataProcessing
 /-!
 # Combining the point measurements
 
-This module states the construction obligation for the joint X/Z point
-measurements and defines their scalar linear coarse-graining.  The latter is
+This module constructs the projective joint X/Z point measurements and defines
+their scalar linear coarse-graining. The latter is
 the genuine postprocessing of a complete measurement on each heterogeneous
 player space.
 

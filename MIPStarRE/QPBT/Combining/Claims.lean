@@ -10,15 +10,20 @@ import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 /-!
 # Scalar claims for combining the Pauli bases
 
-This module states the three scalar estimates used to compare the paired line
-measurement with the joint and ordered point measurements.  The expectations
-retain the subline law and the uniform affine parameter on each extended line
-explicitly.  Line-polynomial evaluation uses the existing `Option` completion,
-so no field value is substituted when an evaluation is undefined.
+This module proves three real-part estimates on the directly indexed subline
+law. The middle estimate uses the concrete X-Z-X line measurement; the first
+and third retain the combined point and line witnesses. The expectations
+include a uniform affine parameter on each extended line. Evaluation uses
+`Option` completion, with zero point effect at an undefined evaluation.
+
+These are auxiliary statements. Transport to the source's seed-indexed law and
+the complex overlap estimates remain open, as recorded in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. The source-labelled
+blueprint claims remain visible without completed Lean links.
 
 ## References
 
-The claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
+The nearby source claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
 `lem:claim-17-3`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
 -/
@@ -336,9 +341,15 @@ private theorem completed_pair_norm_sq_sum {P : AdmissibleParams} {ε δQ : ℝ}
     rw [hQsome ab, hZsome ab.2, hXsome ab.1]
 
 set_option maxHeartbeats 400000 in
-/-- Replacing the combined point measurement by the ordered `Z`-then-`X`
-point product costs a square-root joint-point error.  This is
-`lem:claim-17-1`, paper lines 1140--1145. -/
+/-- On the directly indexed subline law, the real parts of the joint-point
+and ordered `Z`-then-`X` overlaps differ by at most a square-root point error.
+This is auxiliary blueprint `lem:claim-17-1-direct-real`, supporting paper
+`claim:17-1`, lines 1140--1145 of the cited mirror.
+
+**Scope restriction:** The statement uses `SubLineWitness` and real parts.
+It does not establish source-distribution transport or a complex modulus
+estimate. The obligations and discharge plan are recorded in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
 theorem subline_replace_by_ordered_product :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
@@ -546,7 +557,8 @@ theorem subline_replace_by_ordered_product :
 
 /-- Removing the trailing `X`-point factor from the constructed X-Z-X line
 measurement costs the square root of the line-consistency error, with the
-source factor `m`. This is blueprint `lem:claim-17-2`, paper
+source factor `m`. This is auxiliary blueprint `lem:claim-17-2-direct-real`,
+supporting paper `claim:17-2`,
 `14_analysis_of_the_pauli_basis_test.tex:1168-1201`; the measurement is defined
 at paper lines 942--949.
 
@@ -559,7 +571,12 @@ The proof uses the concrete X-marginal identity, expanded line-point
 consistency, and the restricted X-point marginal of `SubLineWitness` to bound
 the X-overlap deficit, then applies Cauchy--Schwarz. No marginal identity is
 assumed in this theorem. The right-hand point is the corrected lowercase `z`
-recorded in the blueprint. -/
+recorded in the blueprint.
+
+**Scope restriction:** This proved estimate compares real parts on the
+directly indexed `SubLineWitness` law. The source complex estimate and
+seed-indexed distribution transport remain open, as recorded in the same
+paper-gap note; the scalar proof is no longer a retained obligation. -/
 theorem subline_remove_X_factor :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ)
@@ -764,9 +781,15 @@ theorem subline_remove_X_factor :
         Real.sqrt_eq_rpow (deltaLine ε)
       rw [hsqrt]
 
-/-- The remaining `Z`-point correlation is close to one with the fourth-root
-error from the point and line constructions.  This is `lem:claim-17-3`, paper
-lines 1204--1209. -/
+/-- On the directly indexed subline law, the real part of the `Z`-point
+correlation is close to one with the fourth-root point and line error.
+This is auxiliary blueprint `lem:claim-17-3-direct-real`, supporting paper
+`claim:17-3`, lines 1204--1209 of the cited mirror.
+
+**Scope restriction:** The statement retains the `SubLineWitness` carrier and
+real-part conclusion. Transport and the source scalar correspondence remain
+open, as recorded in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+The auxiliary result does not certify the source-labelled claim. -/
 theorem subline_Z_term_near_one :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)

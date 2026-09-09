@@ -4,30 +4,31 @@ import MIPStarRE.QPBT.Combining.OverlapGap
 import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
-# One-point deficits of the evaluated pair-line measurement
+# Z-point deficits of the evaluated pair-line measurement
 
-The proofs of `lem:claim-17-2` and `lem:claim-17-3` bound, after their
-Cauchy--Schwarz step, the deficit of the overlap between the evaluated
-pair-line measurement and one of the two expanded point measurements: the
-`X`-point measurement at the `X`-point of the sample, or the `Z`-point
-measurement at its `Z`-point.  This module derives those two deficits from the
+The proof of `lem:claim-17-3` bounds, after its Cauchy--Schwarz step, the
+deficit of the overlap between the evaluated pair-line measurement and the
+expanded `Z`-point measurement at the `Z`-point of the sample.
+This module derives that deficit from the
 consistency of the evaluated pair-line measurement with the completed joint
 point measurement and from the closeness of the joint point measurement to the
-two ordered point products.  The derivation inserts the joint point measurement
+ordered point products. The derivation inserts the joint point measurement
 on the point side, replaces it by the ordered product whose trailing factor is
 the retained point effect, and sums the other factor, at the cost of three
-square roots.  The deficits are first bounded over an arbitrary probability
+square roots. The deficit is first bounded over an arbitrary probability
 law on pairs of line-point pairs and then over a product of two restricted
 line-point laws, whose point marginal is the uniform pair.
 The `_at` variants retain arbitrary opposite placements, including Bob at
 `BBprime` and Alice at `ABdoubleprime`. The original statements are unchanged
 specializations; register commutation does not assume symmetry of the state.
+The separate concrete X-marginal argument used for Claim 17-2 is in
+`MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit`.
 
 ## References
 
-The two deficits are the quantities bounded in the proofs of `lem:claim-17-2`
-and `lem:claim-17-3` in `blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1239`; the
+The Z deficit is the quantity bounded in the proof of `lem:claim-17-3`
+in `blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`; the
 consistency input is `lem:qld-xz-lines` and the ordered products are those of
 `lem:qld-4-10`.
 -/

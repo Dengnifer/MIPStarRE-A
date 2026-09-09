@@ -7,9 +7,12 @@ import MIPStarRE.LDT.Basic.DistributionAvg
 # A uniform point of the extended space from the sub-line law
 
 The first scalar estimate in the combining argument samples an extended line
-from the sub-line witness and then a uniform affine parameter on that line.
+from the directly indexed sub-line witness and then a uniform affine parameter.
 This module records that the resulting extended point is uniform and hence
 that its two source coordinate blocks are independent uniform points.
+This is an auxiliary law. Transport to the source's seed-indexed extended
+distribution remains open, as recorded in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 
 ## References
 
@@ -75,8 +78,9 @@ private theorem lineRepMap_zero_apply_current {K : Type*} [Field K] {m : ℕ}
   rw [hspan, Submodule.mem_bot, sub_eq_zero] at h
   exact h.symm
 
-/-- A uniform canonical representative together with a uniform affine
-parameter gives a uniform point of the ambient coordinate space. -/
+/-- The canonical representative of a uniform ambient point, translated by an
+independent uniform affine parameter, gives a uniform ambient point. The input
+point, rather than its canonical representative, varies in the fibers. -/
 theorem uniformDistribution_map_lineRepMap_add_smul_current
     {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
     (v : Fin m → K) :

@@ -18,16 +18,19 @@
 
 \section{At a glance}
 
-\textbf{Difficulty.} The domain correction is elementary; the remaining
-formal estimate requires the project's state-dependent Cauchy--Schwarz and
-restricted-distribution arguments. \textbf{Estimated weight.} The correction
-affects two Lean modules and their blueprint correspondence. It retains the
-unfinished scalar estimate and isolates the existing pasting consistency
-obligation. \textbf{Mathlib/project split.} Finite sums, positivity, and real
+\textbf{Difficulty.} The constructed-measurement domain correction and its
+real-part estimate on the directly indexed subline law are formalized.
+The source complex estimate and distribution correspondence remain open,
+as does the separate concrete paired-line consistency obligation.
+\textbf{Estimated weight.} The completed scalar proof combines the concrete
+X marginal, expanded line-point consistency, restricted-distribution
+averaging, and projective Cauchy--Schwarz. Remaining transport work concerns
+the extended-line carrier and its evaluations, not this scalar calculation.
+\textbf{Mathlib/project split.} Finite sums, positivity, and real
 square roots use Mathlib; the measurement construction and subline law use
 the local quantum API. \textbf{Key mathematical inputs.} Completeness of a
 POVM, projectivity, and Cauchy--Schwarz suffice for the counterexample and
-the proposed source proof. The counterexample below is a mathematical
+the scalar proof. The counterexample below is a mathematical
 calculation, not a kernel-certified Lean instance.
 
 \section{Key theorem forms}
@@ -53,6 +56,16 @@ The paper's Claim 17-2 states
  T^{\ell_X,\ell_Z}_{f_X,f_Z}
  =L^X_{f_X}(\ell_X)L^Z_{f_Z}(\ell_Z)L^X_{f_X}(\ell_X).
 \]
+Let $A_{\rm dir}$ and $B_{\rm dir}$ denote the same expressions for the
+auxiliary subline law whose coordinate indices are sampled uniformly and
+directly, with completed evaluations. The established Lean result is
+\[
+ |\operatorname{Re}A_{\rm dir}(T)-\operatorname{Re}B_{\rm dir}(T)|
+ \le C m\sqrt{\delta_{\mathrm{Line}}(\eps)},
+\]
+for a universal $C>0$, the concrete sandwich above, and every directly
+indexed subline witness. It assumes no joint-point or paired-line
+consistency witness. This is not yet the complex estimate on the source law.
 The former Lean declaration quantified instead over every paired-line POVM
 with the degree support and evaluated consistency conclusions of the
 combined-lines lemma. Its scalar errors $\delta_P,\delta_Q$ were arbitrary,
@@ -141,11 +154,13 @@ The repaired declaration evaluates the concrete sandwich directly and
 retains the original universal constant, factor $m$, square-root error,
 placements, and subline averages. Its scalar convention remains the
 absolute difference of real parts; the counterexample above is real and
-already refutes that weaker scalar assertion. The blueprint now specifies
-the sandwich in the statement of its Claim 17-2 node. It remains marked as
-unfinished.\footnote{The declaration is
+already refutes that weaker scalar assertion on the former enlarged domain.
+The blueprint keeps the source Claim 17-2 pending and separately certifies
+the proved directly indexed real-part estimate, with its concrete sandwich
+displayed.\footnote{The declaration is
 \leanid{MIPStarRE.QPBT.subline\_remove\_X\_factor} in
-\path{MIPStarRE/QPBT/Combining/Claims.lean}; the blueprint node is
+\path{MIPStarRE/QPBT/Combining/Claims.lean}; the auxiliary blueprint node is
+\path{lem:claim-17-2-direct-real}. Its source counterpart is
 \path{lem:claim-17-2}.}
 
 The abstract combined-line witness record remains unchanged. Its fields
@@ -163,19 +178,59 @@ unfinished consistency proof, to be discharged by the source's point-to-line
 comparisons and pasting argument. The source-facing
 \leanid{exists\_combinedLinesWitness} has an unchanged statement.}
 
-The retained Claim 17-2 proof obligation is to combine the concrete
-X-marginal identity, expanded line-point consistency, and the restricted
-X-point marginal of the subline law. No marginal identity, equality, or
-producer is added to the public hypotheses. The separate concrete marginal
-lemma is not duplicated in this correction.
+The concrete scalar calculation is now proved: the exact X marginal,
+expanded line-point consistency, and the separate restricted X-point mixture
+give the deficit bound, and Cauchy--Schwarz closes the real-part estimate.
+No marginal identity, equality, or producer was added to the public
+hypotheses. In particular, this proof does not use the still-open
+paired-line consistency obligation.\footnote{The deficit theorem is
+\leanid{exists\_concreteXPointOverlap\_deficit\_le} in
+\path{MIPStarRE/QPBT/Combining/Lines/ConcreteXDeficit.lean}; the scalar
+closure is tracked by \ghissue{480}.}
+
+\section{Source correspondence of the three scalar claims}
+
+All three current scalar theorems use the directly indexed auxiliary
+subline law, not the seed-indexed law $D$ of the source. The latter requires
+an extended-dimension index function not defined for every admissible
+parameter tuple, as detailed in the dimension-divisibility note.\footnote{See
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.}
+The proposed construction target
+\leanid{subline\_source\_distribution\_transport} must establish the
+carrier, evaluation, and separate point-marginal identities wherever the
+source law is defined. Its unrestricted use still requires resolution of
+that definition-level obstruction; no divisibility assumption is added to
+the paper theorem.
+
+The first and second scalar statements compare real parts, whereas the
+source bounds a complex modulus. The ordered product $M_ZM_X$ need not be
+Hermitian. With $W=Q-M_ZM_X$, the squared norm in the first claim therefore
+uses $W^\dagger W$, not $W^2$. The available same-placement squared distance
+is $4\delta_Q$, yielding $2\sqrt{\delta_Q}$ with the source's asymptotic
+order. The proposed target \leanid{subline\_complex\_overlap\_bound} must
+formalize the complex Cauchy--Schwarz estimate from positivity, completeness,
+and the stated distance or deficit bounds, without a reality hypothesis.
+For the third claim, the two opposite-placement positive factors commute,
+so a reality lemma must connect the existing real-part estimate to the
+complex source notation. These are future proof targets, not axioms or
+additional public inputs.
+
+The blueprint records the three proved auxiliary estimates separately and
+leaves all three source claims pending these comparisons. The first and
+third retain the existing point and line witness hypotheses; the second
+uses only the projective setting, auxiliary subline law, and defined X-Z-X
+measurement. This distinction preserves the completed concrete proof without
+claiming that the source carrier or the raw line consistency has been proved.
 
 \section{Conclusion}
 
 The discrepancy lies in the formal quantification over arbitrary witnesses,
 not in the paper's constructed-measurement assertion. The counterexample
 forces a domain correction. Using the defined sandwich restores the source
-domain and its original error bound, while retaining the scalar and
-consistency proof obligations explicitly.
+measurement domain and its original error bound. The real-part scalar
+estimate on the auxiliary law is proved. The source distribution and
+complex-scalar comparisons and the separate paired-line consistency proof
+remain open.
 
 \bibliographystyle{alpha}
 \bibliography{references}
