@@ -137,16 +137,38 @@ vanishing error depending on $\eps$ alone absorbs this difference.
 
 \section{Blueprint and formal comparison}
 
-The repaired declaration evaluates the concrete sandwich directly and
-retains the original universal constant, factor $m$, square-root error,
-placements, and subline averages. Its scalar convention remains the
-absolute difference of real parts; the counterexample above is real and
-already refutes that weaker scalar assertion. The blueprint now specifies
-the sandwich in the statement of its Claim 17-2 node. It remains marked as
-unfinished.\footnote{The declaration is
-\leanid{MIPStarRE.QPBT.subline\_remove\_X\_factor} in
-\path{MIPStarRE/QPBT/Combining/Claims.lean}; the blueprint node is
-\path{lem:claim-17-2}.}
+The concrete measurement domain is retained. The scalar obligation now
+compares complex expectations with the complex modulus, preserving the
+universal constant, factor $m$, and square-root error. It is named
+\leanid{subline\_remove\_X\_factor\_direct}. Its distribution is still the
+directly indexed law represented by \leanid{SubLineWitness}, not the
+source law $D$. Thus it is a formalization-only obligation, linked from
+\path{lem:claim-17-2-direct}, and is not a formalization of the source
+claim. The source statement remains at \path{lem:claim-17-2}, with neither
+a Lean link nor a completion mark.
+
+The same scalar distinction affects Claim 17-1: an ordered product
+$M^Z_bM^X_a$ need not be Hermitian, so a bound on the real part of its
+correlation does not bound its complex modulus. The proved real-part
+estimate is retained as
+\leanid{subline\_replace\_by\_ordered\_product\_re\_direct}.
+Its constant is $2\sqrt{\delta_Q}$: the squared-distance comparison on
+one placement is $4\delta_Q$ and uses $W^\dagger W$, not $W^2$.
+The source Claim 17-1 remains a separate uncertified blueprint statement.
+Likewise \leanid{subline\_Z\_term\_near\_one\_re\_direct} retains the
+proved real Z-overlap estimate with its directly indexed domain explicit.
+No reality or distribution-transport theorem is asserted by these renamings.
+The three existing source blueprint statements are reused; no duplicate
+source theorem with a new proof hole is introduced.
+
+The distribution discrepancy is documented in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}. Admissibility
+does not supply the divisibility needed to instantiate the source line law
+at dimension $2m+2$. The current correction neither adds that divisibility
+as a hypothesis nor identifies the directly indexed law with the source law.
+Scalar realignment is tracked in \ghissue{474} and review of PR~478.
+The distribution and complex-overlap work under \ghissue{118} remains open;
+its historical budget is unchanged.
 
 The abstract combined-line witness record remains unchanged. Its fields
 faithfully express the existential conclusion of the combined-lines lemma,
@@ -163,19 +185,35 @@ unfinished consistency proof, to be discharged by the source's point-to-line
 comparisons and pasting argument. The source-facing
 \leanid{exists\_combinedLinesWitness} has an unchanged statement.}
 
-The retained Claim 17-2 proof obligation is to combine the concrete
-X-marginal identity, expanded line-point consistency, and the restricted
-X-point marginal of the subline law. No marginal identity, equality, or
-producer is added to the public hypotheses. The separate concrete marginal
-lemma is not duplicated in this correction.
+There are two retained direct proof holes in the affected modules.
+The first is \leanid{subline\_remove\_X\_factor\_direct}: apply complex
+weighted Cauchy--Schwarz to bound $|A(T)-B(T)|$ by the square root of the
+X-overlap deficit, then use the already proved
+\leanid{exists\_concreteXPointOverlap\_deficit\_le}. That estimate already
+uses \leanid{combinedLineMeasurement\_sum\_Z}, expanded line-point
+consistency, and the separate X marginal of the directly indexed law.
+Transport of this argument and of the real-part estimates to the source
+law, including the complex estimate of Claim 17-1, is a separate remaining
+obligation. No additional hole is introduced for that transport.
+
+The second is \leanid{combined\_line\_measurement\_consistency}.
+It must prove consistency of the same unconditioned X-Z-X measurement
+with the supplied polynomially controlled joint point family on the
+original product of line-point distributions, in every opposite placement.
+The target and its discharge by the source point-to-line comparison and
+pasting argument are described in
+\path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}.
+No marginal identity, deficit bound, or producer is added to a paper theorem.
 
 \section{Conclusion}
 
 The discrepancy lies in the formal quantification over arbitrary witnesses,
 not in the paper's constructed-measurement assertion. The counterexample
-forces a domain correction. Using the defined sandwich restores the source
-domain and its original error bound, while retaining the scalar and
-consistency proof obligations explicitly.
+forces a domain correction. Using the defined sandwich restores the measurement domain. The complex
+scalar conclusion is restored for the directly indexed auxiliary obligation;
+transport to the source distribution and the consistency construction remain
+open. The source claims themselves retain their complex-modulus statements
+without unsupported formalization marks.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -169,27 +169,29 @@ declaration \path{exists_combinedLinesWitness} preserves its original statement:
 it existentially obtains $\delta_Q$ and its point witnesses from the preceding
 point construction, then applies the conditional helper.
 
-The preserved proof route isolates four named obligations.  First,
-\path{exists_combinedLine_restored_defect_le} constructs the conditioned XZX
-line measurement and retains the numerical point error in its raw defect bound.
-Second, \path{exists_conditioned_polynomial_bound} uses the hypothesis
-$\delta_Q=\poly(\eps)$ to choose the two-variable line-error function.  Third,
-\path{nondegenerateLinePastingMass_bounds} controls the conditioning mass between
-$1/2$ and $1$.  Fourth, \path{consistencyDefect_opposite_symm} restores every
-directed opposite placement.  After these are available in the current modular
-tree, the conditional theorem can reuse their proof from protected commit
-\path{0f4ef05370350f4017439ebd839ef0561f13130f}; the source-facing theorem then
-combines it with \path{exists_combinedPointsWitness}.  Until those construction
-obligations are recovered and checked, both theorem proofs remain explicit proof
-obligations rather than bridge assumptions.
+The remaining construction target is
+\path{combined_line_measurement_consistency}. For a joint point family
+with error $\delta_Q(\eps)=\poly(\eps)$, it asks for evaluated consistency
+of the explicit unconditioned measurement
+\[
+ T^{\ell_X,\ell_Z}_{f_X,f_Z}
+ =L^X_{f_X}(\ell_X)L^Z_{f_Z}(\ell_Z)L^X_{f_X}(\ell_X)
+\]
+under the original product of line-point distributions, with error
+$\delta_P(\eps,md/q)=\poly(\eps,md/q)$ and every directed opposite
+placement. The point-to-line comparisons at source lines 900--941 and the
+pasting argument at lines 942--961 are the intended discharge. The POVM,
+axis-degree properties, and X marginal of this same measurement are proved.
 
-At the time of this repair, \path{exists_conditioned_polynomial_bound} is already
-available in \path{MIPStarRE/QPBT/Combining/ErrorBounds.lean}.  The remaining
-proof extension is a focused modular recovery of the XZX measurement definition,
-its two axis-degree lemmas, \path{exists_combinedLine_restored_defect_le},
-\path{nondegenerateLinePastingMass_bounds}, and
-\path{consistencyDefect_opposite_symm}.  It must reuse the current pasting and
-line-measurement APIs rather than importing the protected monolithic file.
+A bound for a measurement conditioned on nondegenerate lines would not by
+itself discharge this target. It would also require a defined conditioning
+event, its probability, an estimate for the discarded contribution, and a
+transfer of the defect back to the unconditioned measurement above under the
+original product law. No such transfer is asserted here. In particular,
+the preserved conditioned construction is not identified with
+\path{combinedLineMeasurement}; its saved proof remains historical work.
+The current target retains its explicit unfinished proof, without assuming
+any conditioning or transfer result in a source theorem.
 
 \section{The source assertion and the two routes}
 
