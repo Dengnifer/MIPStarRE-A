@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Combined lines and restricted line distributions

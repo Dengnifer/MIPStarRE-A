@@ -6221,3 +6221,178 @@ not actual commit/publication hooks. No productive session was killed.
   These are minimal source-preserving repairs, not new hypotheses or proof attempts.
 - Other mathematical work continues while the scoped owner question waits. Main made no
   manual telemetry commit/publication, one-off merge or daemon change this cycle.
+## 2026-09-09 - Review-cap conflict and saved-repair recovery (06:20Z)
+- PR355's minimal bibliography fix is published at c8ad5efbb37a901710f39ae7dd07670b15044100
+  with all nine CI contexts green. Main inspected the two-file patch and its regression
+  evidence. The existing check_review gate requires a current-head canonical review even
+  for adjudication, but the changed patch cannot use honest carry-forward and two full
+  workflow rounds are already complete. Owner question B10 requests one final-review
+  exception; no fabricated review, third unauthorized round, or gate change was used.
+- PR359's merge failure is a real dependency hold: open child353, implemented by unreviewed
+  PR357. Main started its normal unreviewed tail PID379035 in the verified clean worktree;
+  no approved-PR refresh or one-off merge was run. B9 remains pending independently.
+- At06:17:34Z actual worker count dropped to7. Finished/skipped publication pipelines did
+  not provide ready reviewer successors: saved fixes363/448/487 failed guarded pushes,
+  while424/443 failed commit guards. Main launched bounded Sol preservation/publication
+  recoveries PIDs419411-419415 at06:19:26Z, without redoing their mathematical proofs.
+  The shortfall is recorded rather than calling queued launchers live workers.
+- By the closing check, all five recovery dispatches had admitted their Sol workers and
+  the actual count returned to12. B9 and B10 remain scoped owner questions, not a reason
+  to stop independent mathematics. The deficiency and refill are reported on #27.
+## 2026-09-09 - Restrict work to existing backlog; PR375 merged (06:28Z)
+- Owner06:15Z directs no new packet lanes until the open-PR count is below50. A fresh
+  paginated GitHub read found95 open PRs. Main applied the restriction immediately:
+  only existing-PR reviews, fixes and recoveries, plus the already-authorized498 lane.
+- PR359's current merge log shows all proof/review gates passed; its sole blocker is
+  open child issue353. The API confirms the child set is [353]. Existing PR357's tail
+  stopped on an import-only conflict, so bounded Sol recovery PID447992 now owns that
+  exact conflict. Main did not close or re-parent the child to evade the dependency gate.
+- Current findings on existing PRs410/417 received serialized autofix PIDs469821/469822.
+  No duplicate fix loop or new packet was started. The cycle's initial worker count was11.
+- GitHub confirms PR375 merged at06:11:53Z asb2a2747cb5a4bc773931531b041a4b9234c930a8
+  from exact head046c3abdcf2d624de49399c4131d316275fd648e; all ten CI/review statuses are
+  success. The daemon performed the merge. Main reports it and the backlog restriction
+  on #27 and makes no manual telemetry commit or publication this cycle.
+## 2026-09-09 - Owner removes backlog cutoff and adopts v9d telemetry handling (06:39Z)
+- Owner06:20Z supersedes the below50 restriction: ready-packet provers are permitted
+  again after existing reviews and repairs. The earlier60 count was truncated. Main
+  retains the latest policy rather than the superseded cutoff; no new packet was needed
+  this cycle because actionable existing-PR work remained.
+- The registered service is /tmp/merge-daemon-v9d.sh, logging to daemon10.log. The owner
+  assigns dirty-telemetry handling immediately before merges to that service. Main does
+  not push telemetry between merges or alter the service.
+- Re-reading pr359.merge.log confirms two distinct facts: its explicit gate refusal is
+  open child353, and the wrapper subsequently recovered a stash-pop conflict. The new
+  telemetry handling does not remove the dependency. PR357's worker continues preserving
+  the additive import merge needed to finish that actual child, without re-parenting it.
+- Earlier autofix launches213/342 were terminal without admitted fix workers. After
+  checking no live loop owned them, main retried them as PIDs570153/570154; both admitted
+  their provers. The closing count was14. B9 and B10 were re-read and still have no owner
+  disposition; only their dependent actions remain held. No manual telemetry commit.
+## 2026-09-09 - PR 481 bounded repair recovery
+- At head `12ac3b9c9d0d7b3ef1c5894a231fc952749a87dd`, the prior repair
+  worktrees were clean and their changes already adopted. Focused Lean and
+  axiom checks passed. The first CI attempt lost the build-lock race; the
+  locked retry passed all gates in 333 seconds. Independent Astra
+  `source_semantic` prose review requested four documentation/status repairs.
+  Code-review admission was delayed, and that lane was stopped after the
+  60-minute worker limit without a final verdict; the runner exited 4 and
+  published review failure. No source edits or budget resets were made.
+  Evidence, historical budget, pending findings and exact head are recorded
+  in `results/telemetry/pr481-recovery-20260909.md`. The report and this entry
+  remain uncommitted to preserve the tested head. Lesson: account for reviewer
+  admission time within a bounded recovery; green CI is not completed review.
+- PR213 history reconciliation: the incoming #210 episode opus-prover-210-s10-20260905T1157Z records completion with estimated times 2026-09-05T11:57Z to13:20Z. The current registry already contains the same completed episode, proof note,2551working seconds and239016tokens, with 2026-09-05T12:21Z to13:03Z from the documented14:37Z clock re-anchoring. These are one corrected episode, not two sessions or additional charges. Retained all247current raw owner rows byte-for-byte; the existing three-line #210 completion event is already present and is not duplicated. The incoming raw variant and all210incoming rows remain recoverable from f1dc470395734138ab5e8c4ff1fc485d1edce79a:results/telemetry/owner-sessions.jsonl (blobd82226d2f30f73cf7bba7ab60a6803e41500cb30), with current blob 9385f61fb09857053fc626482ebcc92b28ce909e and base blob ddf367a0d9107fac4875f882db885252afd8419d preserved. Exact stage1/2/3 copies and index receipt are retained in pr213-telemetry-stages-y6o3lle_. This specific supersession preserves the86-row clock correction and all budgets; no generic deduplication or other conflict resolution was performed.
+## 2026-09-09 - Completed repair handoffs continue (06:47Z)
+- PR424's saved seven-file repair is published at11ae9bed29a3beb3725d6ce54677ff3046ea45df
+  with green canonical CI and a clean worktree. Main queued independent forced review
+  PID654985 after confirming there was no live reviewer or fixer; this reviews the bot-fix
+  head without weakening any other gate.
+- PR481's completed prose repair is blocked only at guarded publication by multiple merge
+  bases. Bounded preservation recovery PID654986 owns the graph/publication issue, not a
+  repeat of its mathematical or documentation work. All prior source edits and budgets
+  remain intact.
+- B9 and B10 were re-read without an owner response. The current #357 worker remains the
+  owned action for child353 blocking #359; no duplicate implementation was launched.
+  The closing observed count was12, above floor8. No manual telemetry commit, publication,
+  daemon edit or one-off merge/refresh command was made this cycle.
+- The final whitespace check found one unpaired diff3 ancestor delimiter in the primary
+  telemetry log, with no unresolved Git index entry. Main removed only that delimiter,
+  preserving all event text and history on both sides; no generic deduplication was used.
+- 2026-09-09, prover-490-20260909-01, PR #491 repair recovery: current local and
+  published head is `4c836c5441b584883707b3991bc31c6655d52b67`, with open stack
+  parent PR #467 (`issue-464-consistency-discarded-mass`) preserved. The sole
+  published review, #5148639494 on `c605ac8670a149d1fddb0f01f7cbdd4b5ad84801`,
+  raised placement-calculus duplication (F1) and product-average duplication
+  (F2). Both are already resolved by the preserved repair chain `d3af665f`,
+  `3003511b`, `4c836c54`. The registered prior repair worktree
+  `/tmp/qpbt-pr491-average-reuse-repair-20260909` is clean at the same head;
+  no `issue-490-pr491-*` worktrees or additional matching branches were found.
+  Prior `/tmp/qpbt-pr491-*.json` receipts were inspected and retained. No Lean
+  or blueprint edits, new source commits, pushes, merges, or manual main edits
+  were made. The existing checked-push publication is preserved.
+  Direct Lean checks passed for PastingRestoration, ConsistencyPositivity, and
+  RestrictedAverage. The eight repair-related files scanned contain no
+  `sorry`, `axiom`, `admit`, or forbidden kernel bypasses. Six principal
+  declarations have only `propext`, `Classical.choice`, and `Quot.sound` in
+  their axiom closures. Hooks are installed and checked. Primary `ci.sh 491`
+  completed successfully, including its locked full build (9169 jobs), with
+  all nine CI statuses green. The additional blueprint axiom audit passed:
+  1346 declarations passed, zero failed, and 21 inherited statement-only
+  warnings; no proof-level completion claim depends on `sorryAx`.
+  Primary `review.sh 491` was requested with Astra, `source_semantic`, and the
+  explicit reason to verify finite-conditioning restoration and opposite-register
+  positivity against the QPBT paper. The first attempt rejected the inherited
+  effort setting before dispatch; the corrected attempt explicitly set `ultra`.
+  Independent session `reviewer-pr491-20260909-01` waited for account capacity,
+  then encountered a provider reconnect. It had no verdict when the 60-minute
+  limit elapsed; its timeout process was terminated and drained. The publisher
+  reported no usable verdict and `local-review/summary=failure`. This is an
+  incomplete review, not an adverse mathematical finding or approval.
+  No mathematical obligation was introduced; the numerical discarded-mass bound
+  remains outside issue #490. Existing assumptions and conclusions are unchanged.
+  Historical budgets remain cumulative: prior B8 ledger 13/26509, the recorded
+  134.916-second publication overrun, and later 222/401.776-second publication
+  and receipt overruns are retained without reset. This recovery also exceeded
+  its deadline during final process shutdown and reporting; no extension is
+  claimed. This worktree-local telemetry note is deliberately uncommitted so
+  the validated source head remains unchanged. Handoff: obtain an independent
+  review on the same head; do not reapply the stale F1/F2 repairs.
+## 2026-09-09 - PR384 merged; preserve parent348 and refill reviewers (07:14Z)
+- GitHub confirms PR384 merged at06:52:27Z as5e23592c9df643757c7896f643b3bef42f08cc49
+  from exact head481d74e7779a8f80989f2e79a92bbe08e7b7ca65, with all ten CI/review statuses
+  success. Its post-merge bookkeeping hit another unpaired diff3 ancestor delimiter.
+  Main verified no unresolved index entry, removed only the delimiter, and updated the
+  already-staged log without making a commit.
+- Inspection found that inactive /tmp/merge-v2.sh stripped the three ordinary conflict
+  marker forms but not the diff3 ancestor form. Main added only that fourth prefix.
+  Bash syntax, the embedded Python AST and all four marker cases were checked; normal
+  record text remains unchanged. No running script was edited, daemon restarted, or
+  one-off merge/refresh command invoked. Staged and unstaged whitespace checks passed.
+- Owner06:52Z authorized keeping parent348 open. Main changed PR359's GitHub closure
+  reference to Part of348, re-read it, verified348 and353 remain open, then removed only
+  pr359.failed. Its source head was unchanged. The publication helper may regenerate a
+  closing footer on a later refresh, so main must recheck the non-closing intent after
+  publication. PR357's actual dependency repair continues; no child was discarded.
+- Worker count dipped to6 after completions, recovered to9, then reached7 again. Existing
+  residual repairs400/457/470/398 were dispatched as797615-797618; missing review recoveries
+  for442/469/478/479 were dispatched as893616/893695/893753/893864 after old processes ended.
+  Three reviewers admitted and the count returned to12. PR479 correctly refused without
+  a current-head CI summary; canonical CI followed by guarded review is now queued.
+- No manual telemetry commit or publication was made. The merge and the verified PR359
+  metadata action are reported on #27; B9 and B10 remain pending owner decisions.
+## 2026-09-09 - Keep saved fixes moving without duplicate proof work (07:22Z)
+- The07:16:29Z snapshot observed12 workers. GitHub re-read confirmed PR359 still says
+  Part of348 at head2c363ea7da78fc143f8a6d8f7b96d0fc2e0480ec; no further body edit was made.
+- Residual autofixes400/398/470 are terminal with saved commits but guarded publication
+  failures or local/remote head mismatches. Main verified no live fix loop owned them
+  and assigned bounded Sol publication recoveries967540/967541/967543, preserving all
+  mathematical edits, histories and budgets rather than repeating the proof repairs.
+- Existing unreviewed PR404 had a clean unowned worktree and an available build-lane
+  position. Its normal tail967544 was launched; approved refreshes remain daemon-only.
+  PR479's canonical CI had passed its build step and was completing remaining gates;
+  no absent review was treated as approval.
+- The07:20:20Z count was13. No manual telemetry commit/publication, one-off merge,
+  daemon change or new owner escalation was made. The telemetry whitespace check passed.
+## 2026-09-09 - PR 481 documentation repair publication blocked
+- Session `prover-480-20260909-02` committed documentation-only repairs as
+  `56a7364330e795c33ab3b7c057b4e43bf375becd`. Focused Lean elaboration,
+  blueprint rendering, synchronization, 1433 declaration links, and targeted
+  axiom checks passed. Non-comment Lean tokens are unchanged. The existing
+  paired-line consistency obligation still depends on `sorryAx`.
+- Primary `checked-push.sh` passed its changed-file Lean and integrity checks,
+  then failed in the reverse blueprint coverage check: `git diff --merge-base
+  origin/main HEAD` reports multiple merge bases, namely
+  `86d03481953adcd8c9ea97599e942b6af4dc4360` and
+  `d9be57dedd4ea3a3321943539f0785fde00f172d`. No hook bypass, workflow edit,
+  ref adjustment, or merge was attempted. GitHub remains at `12ac3b9c`.
+- The pre-existing recovery telemetry was temporarily stashed for the clean
+  publication gate and restored; backup stash
+  `855f98137be0fb34de48b2efed86e0891280795d` is retained. This incident entry
+  is uncommitted. Exact-head canonical CI and independent review remain for
+  the owner workflow after the publication blocker is repaired.
+- The session exceeded its 30-minute wall-clock limit (started 13:04:36
+  +08:00; publication failure was collected at 13:54). This overrun is not
+  a budget reset or an additional mathematical attempt; B8 remains exhausted
+  at the previously recorded 13 attempts and 26509 working seconds. No
+  mathematical proof attempt, additional model session, or full build ran.
