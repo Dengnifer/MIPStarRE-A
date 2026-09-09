@@ -16,8 +16,8 @@ corresponding block of the direction of the sampled extended line.
 The block decomposition supports `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The coordinate-index event is that of `def:ith-restricted-line`, blueprint
-lines 1209--1228, paper lines 1038--1048.
+The coordinate-index event is that of the auxiliary blueprint
+`def:ith-restricted-line-refined`, supporting paper lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -126,8 +126,8 @@ theorem restrict_uniform_prod_fst {α β : Type*} [Fintype α] [DecidableEq α]
 
 /-! ## The coordinate-index event on a scalar seed -/
 
-/-- The coordinate-index event of `def:ith-restricted-line` read on a scalar
-seed alone.  Blueprint `def:ith-restricted-line`, paper
+/-- The coordinate-index event of `def:ith-restricted-line-refined` read on a scalar
+seed alone. Blueprint `def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 def ldSeedIndexEvent (L : LdParams) (i : Fin L.m) (s : ScalarQ L) : Prop :=
   chiIndex L s = i
@@ -140,7 +140,7 @@ instance ldSeedIndexEvent_decidablePred (L : LdParams) (i : Fin L.m) :
   infer_instance
 
 /-- Every coordinate-index event of a scalar seed has positive mass under the
-uniform law.  Blueprint `def:ith-restricted-line`, paper
+uniform law. Blueprint `def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem ldSeedIndexEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ s ∈ (uniformDistribution (ScalarQ L)).support.filter

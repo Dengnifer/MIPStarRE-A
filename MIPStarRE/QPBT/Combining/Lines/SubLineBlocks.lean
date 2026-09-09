@@ -18,8 +18,8 @@ coordinate index is the unconditioned law.
 The generating descriptions support `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The restricted laws themselves are `def:ith-restricted-line`, blueprint lines
-1209--1228, paper lines 1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -186,9 +186,9 @@ def ldSpaceBlockEquiv (L : LdParams) :
     rcases i with (j | u) | j <;> rfl
   right_inv w := rfl
 
-/-- The coordinate-index event of `def:ith-restricted-line` read on the
+/-- The coordinate-index event of `def:ith-restricted-line-refined` read on the
 seed-direction block of an ambient low-degree vector.  Blueprint
-`def:ith-restricted-line`, paper
+`def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 def ldSeedDirEvent (L : LdParams) (i : Fin L.m)
     (sw : ScalarQ L × (Fin L.m → ScalarQ L)) : Prop :=
@@ -204,7 +204,7 @@ instance ldSeedDirEvent_decidablePred (L : LdParams) (i : Fin L.m) :
 /-- Each coordinate-index event of the seed-direction block carries mass
 `1 / m` under the uniform law, because the retained seed is uniform and its
 `m` coordinate-index fibers are equal.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+`lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem ldSeedDirEvent_mass (L : LdParams) (i : Fin L.m) :
     ∑ sw ∈ (uniformDistribution
@@ -232,7 +232,7 @@ theorem ldSeedDirEvent_mass (L : LdParams) (i : Fin L.m) :
   simp [uniformDistribution_weight_apply, mul_ite]
 
 /-- Every coordinate-index event of the seed-direction block has positive
-mass.  Blueprint `def:ith-restricted-line`, paper
+mass. Blueprint `def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem ldSeedDirEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sw ∈ (uniformDistribution

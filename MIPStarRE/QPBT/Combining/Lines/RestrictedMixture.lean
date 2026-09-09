@@ -3,7 +3,7 @@ import MIPStarRE.QPBT.Combining.Defs
 /-!
 # Uniform coordinate-index mixtures of the line-point laws
 
-This module proves that the axis-parallel and diagonal line-point laws are the
+This module proves that the seed-bearing axis-parallel and diagonal line-point laws are the
 uniform mixtures of their coordinate-index restrictions.  The identity rests on
 the exact seed decomposition of `chiIndex`: the retained scalar seed is uniform,
 so each of its `m` coordinate-index fibers carries mass `1 / m`, and every
@@ -11,11 +11,12 @@ line conditioning map keeps that seed.
 
 ## References
 
-The mixture assertion is the opening sentence of blueprint
-`lem:restricted-line-mixture-bounds`, formalizing the unlabelled observation at
+The mixture assertion is the auxiliary blueprint
+`lem:restricted-line-refined-mixture-bounds`, supporting the source observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
-The restricted laws are blueprint `def:ith-restricted-line`, paper lines
-1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`.
+Their source push-forwards remain open; see
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and paper lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -29,7 +30,7 @@ noncomputable section
 /-! ## Elementary rewriting of finite distributions -/
 
 /-- Formalization-only auxiliary: the mass of a decidable event is the average
-of its indicator.  Blueprint `lem:restricted-line-mixture-bounds`, paper
+of its indicator. Blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem Distribution.sum_filter_weight_eq_avgOver {α : Type*}
     (μ : Distribution α) (p : α → Prop) [DecidablePred p] :
@@ -41,7 +42,7 @@ theorem Distribution.sum_filter_weight_eq_avgOver {α : Type*}
   by_cases h : p a <;> simp [h]
 
 /-- Formalization-only auxiliary: a push-forward commutes with a dependent
-bind.  Blueprint `lem:restricted-line-mixture-bounds`, paper
+bind. Blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem Distribution.bind_map {α β γ : Type*} [DecidableEq β] [DecidableEq γ]
     (μ : Distribution α) (ν : α → Distribution β) (f : β → γ) :
@@ -84,7 +85,7 @@ theorem Distribution.bind_map {α β γ : Type*} [DecidableEq β] [DecidableEq �
 /-- Formalization-only auxiliary: a family of normalized restrictions along the
 fibers of a classifying map recovers the original law when every fiber carries
 the uniform mass `1 / |ι|`.  This is the mixture step of
-blueprint `lem:restricted-line-mixture-bounds`, paper
+blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem Distribution.bind_uniform_restrict_eq {α ι : Type*} [DecidableEq α]
     [Fintype ι] [DecidableEq ι] [Nonempty ι]
@@ -139,11 +140,7 @@ theorem Distribution.bind_uniform_restrict_eq {α ι : Type*} [DecidableEq α]
 /-! ## The uniform coordinate-index law of the retained seed -/
 
 /-- The retained scalar seed of a uniformly sampled low-degree vector is
-uniform.  This is a public copy of the private
-`MIPStarRE.QPBT.map_uniformDistribution_seed` in
-`MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`, which belongs to another
-packet; the duplication is tracked by issue #204.  Formalization-only
-auxiliary for blueprint `def:ith-restricted-line`, paper
+uniform. Formalization-only auxiliary for blueprint `def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem uniformDistribution_map_ldSeed (L : LdParams) :
     (uniformDistribution (LdSpace L)).map (fun z : LdSpace L => z.seed) =
@@ -161,7 +158,7 @@ theorem uniformDistribution_map_ldSeed (L : LdParams) :
 
 /-- The coordinate index of the retained seed of a uniformly sampled low-degree
 vector is uniform.  Formalization-only auxiliary for blueprint
-`def:ith-restricted-line`, paper
+`def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem uniformDistribution_map_chiIndex_ldSeed (L : LdParams) :
     (uniformDistribution (LdSpace L)).map
@@ -179,7 +176,7 @@ theorem uniformDistribution_map_chiIndex_ldSeed (L : LdParams) :
 
 /-- Every coordinate-index event of a line conditioning map that keeps the
 shared scalar coordinate carries mass `1 / m`.  This is the equal-weight
-statement behind blueprint `lem:restricted-line-mixture-bounds`, paper
+statement behind blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem clDistribution_seedEvent_mass (L : LdParams) (i : Fin L.m)
     (CL : LdSpace L → LdSpace L)
@@ -218,11 +215,11 @@ theorem clDistribution_seedEvent_mass (L : LdParams) (i : Fin L.m)
   unfold avgOver
   simp [uniformDistribution_weight_apply, mul_ite]
 
-/-! ## The two source mixture identities -/
+/-! ## The two seed-bearing mixture identities -/
 
 /-- The axis-parallel line-point law is the uniform mixture of its
 coordinate-index restrictions.  This is the axis half of
-blueprint `lem:restricted-line-mixture-bounds`, paper
+blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem aLinePointDist_eq_bind_restricted (L : LdParams) :
     aLinePointDist L =
@@ -243,7 +240,7 @@ theorem aLinePointDist_eq_bind_restricted (L : LdParams) :
 
 /-- The diagonal line-point law is the uniform mixture of its coordinate-index
 restrictions.  This is the diagonal half of
-blueprint `lem:restricted-line-mixture-bounds`, paper
+blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
 theorem dLinePointDist_eq_bind_restricted (L : LdParams) :
     dLinePointDist L =

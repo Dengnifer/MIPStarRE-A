@@ -72,17 +72,6 @@ theorem uniformDistribution_map_uncurry {α β γ : Type*}
       fun _ => ν from funext hg]
   exact Distribution.bind_const_current _ (uniformDistribution_isProbability α) ν
 
-/-- Apply the shared uniform-point identity to an ambient point and an
-independent affine parameter. This preserves the existing public name for the
-identity supplied by `uniformDistribution_map_lineRepMap_add_smul`. -/
-theorem uniformDistribution_map_lineRepMap_add_smul_current
-    {K : Type*} [Field K] [Fintype K] [DecidableEq K] {m : ℕ}
-    (v : Fin m → K) :
-    (uniformDistribution ((Fin m → K) × K)).map
-        (fun w => lineRepMap v w.1 + w.2 • v) =
-      uniformDistribution (Fin m → K) := by
-  exact uniformDistribution_map_lineRepMap_add_smul v
-
 /-- Reading a point at a uniform affine parameter on the canonical line of a
 uniform direct sample gives a uniform point of the direct coordinate space. -/
 theorem uniformDistribution_map_directLine_add_smul (D : DirectLdParams)
@@ -114,7 +103,7 @@ theorem uniformDistribution_map_directLine_add_smul (D : DirectLdParams)
     rfl
   rw [hmap, hequiv]
   refine uniformDistribution_map_uncurry _ _ fun a => ?_
-  exact uniformDistribution_map_lineRepMap_add_smul_current (V a)
+  exact uniformDistribution_map_lineRepMap_add_smul (V a)
 
 /-- Averaging a function at a uniform affine parameter on the canonical line
 of a uniform direct sample is averaging it at a uniform point. -/

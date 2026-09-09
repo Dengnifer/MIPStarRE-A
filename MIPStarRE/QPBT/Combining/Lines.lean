@@ -15,11 +15,13 @@ divisibility hypothesis at dimension `2 * m + 2`.
 
 ## References
 
-The declarations formalize `lem:qld-xz-lines` and
-`lem:restricted-line-mixture-bounds` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex`; `exists_subLineWitness`
-instead supports `lem:qld-sublines` through the directly indexed extended-line
-carrier and probability law.  Their paper sources
+The joint-line construction is stated at blueprint `lem:qld-xz-lines`.
+The proved restriction estimates are the seed-bearing auxiliaries
+`lem:restricted-line-refined-mixture-bounds` and
+`lem:restricted-lines-completed-consistency`, not the source observation
+`lem:restricted-line-mixture-bounds`. The theorem `exists_subLineWitness`
+supports `lem:qld-sublines` through the directly indexed extended-line
+carrier and probability law. Their paper sources
 are `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`
 and `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1069`.
 -/
@@ -34,7 +36,7 @@ noncomputable section
 
 /-- Conditional joint X/Z line measurements for `lem:qld-xz-lines`.
 
-**Source statement:** blueprint
+**Formalization-only auxiliary:** conditional construction supporting blueprint
 `lem:qld-xz-lines`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
@@ -94,13 +96,13 @@ theorem exists_combinedLinesWitness :
 /-- The axis and diagonal line-point laws are uniform mixtures of their
 coordinate-index restrictions.
 
-**Source statement:** blueprint
-`lem:restricted-line-mixture-bounds`, formalizing the
-unlabelled observation at
+**Formalization-only auxiliary:** blueprint
+`lem:restricted-line-refined-mixture-bounds`, supporting the source observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
 `Distribution.bind` is the finite uniform-mixture operation.  The two halves
 are proved from the equal-fiber decomposition of `chiIndex` and the fact that
-every line conditioning map retains the shared scalar seed. -/
+every line conditioning map retains the shared scalar seed. The source-law
+push-forwards remain open; see `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 theorem linePointDist_eq_mixture_restricted (L : LdParams) :
     aLinePointDist L =
         Distribution.bind (uniformDistribution (Fin L.m))
@@ -113,9 +115,8 @@ theorem linePointDist_eq_mixture_restricted (L : LdParams) :
 /-- Restricting a nonnegative average from the line-point distribution to one
 fixed line kind and coordinate inflates its bound by at most `2m`.
 
-**Source statement:** item 1 of blueprint
-`lem:restricted-line-mixture-bounds`, from the unlabelled
-estimate at
+**Formalization-only auxiliary:** the seed-bearing bound of blueprint
+`lem:restricted-line-refined-mixture-bounds`, supporting the source estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`.
 The restricted component carries mixture weight `1 / (2m)`, so a nonnegative
 average bounded by `δ` bounds it by `2mδ`. -/
@@ -132,9 +133,8 @@ theorem avg_restricted_le {P : AdmissibleParams}
 /-- Restricting both variables of a nonnegative average over two independent
 line-point samples inflates its bound by at most `4m^2`.
 
-**Source statement:** item 2 of blueprint
-`lem:restricted-line-mixture-bounds`, from the unlabelled
-estimate at
+**Formalization-only auxiliary:** the seed-bearing product bound of blueprint
+`lem:restricted-line-refined-mixture-bounds`, supporting the source estimate at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`.
 The one-variable estimate is applied successively to the two product
 coordinates. -/
@@ -153,11 +153,11 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
   refine (avgOver_prod_restrictedLinePointDist_le f hf kindX kindZ i j).trans ?_
   exact mul_le_mul_of_nonneg_left havg (by positivity)
 
-/-- Formalization-only auxiliary for item 3 of
-`lem:restricted-line-mixture-bounds`: a consistency defect of two complete
+/-- Formalization-only auxiliary for
+`lem:restricted-lines-completed-consistency`: a consistency defect of two complete
 measurements placed on opposite registers inflates by at most `4m^2` when
 both line-point coordinates are restricted.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+`lem:restricted-line-refined-mixture-bounds`, supporting the source observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`. -/
 private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
     {ε δ : ℝ} {α : Type*} [Fintype α] [DecidableEq α]
@@ -192,12 +192,13 @@ private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
 /-- The evaluated joint line measurement remains consistent with the joint
 point measurement on every product of restricted line distributions.
 
-**Source statement:** item 3 and Equation `eq:qld-xz-lines-restricted` of
-blueprint
-`lem:restricted-line-mixture-bounds`, from
+**Formalization-only auxiliary:** blueprint `lem:restricted-lines-completed-consistency`,
+supporting item 3 and Equation `eq:qld-xz-lines-restricted` of the source observation at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
-Here `consistencyDefect` is the finite POVM form of the displayed expectation
-against `Id - Q` after both measurements are postprocessed by evaluation.
+Here the laws retain their seeds and evaluations use `Option` completion.
+The defect is the expectation against `Id - Q` on that completed alphabet,
+not the source's function-valued line answers. The missing source identifications
+are recorded in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 The universal constant is outside all strategy and parameter quantifiers, and
 is the exact inflation factor `4` of `avg_restricted_prod_le`. -/
 theorem restricted_lines_consistency_bound :

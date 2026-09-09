@@ -5,8 +5,8 @@ import MIPStarRE.QPBT.Combining.Lines.SubLineSeed
 /-!
 # The sampling procedure of the sub-line lemma
 
-This module carries out the sampling procedure of `lem:qld-sublines`.  A line
-kind is drawn from the two kinds, an extended coordinate and an extended point
+This module carries out the directly indexed auxiliary construction for `lem:qld-sublines`.
+A line kind is drawn from the two kinds, an extended coordinate and an extended point
 and direction are drawn uniformly, and two scalar seeds are drawn
 independently in the coordinate-index fibers of the two coordinates that the
 two source lines must carry.  The sampled triple consists of the axis or
@@ -22,11 +22,11 @@ extended-line marginal.
 
 ## References
 
-The construction is the proof of `lem:qld-sublines` in
-blueprint `lem:qld-sublines`, whose source is
+The construction supports blueprint `lem:qld-sublines` on the directly indexed
+extended carrier; its source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The restricted laws are `def:ith-restricted-line`, blueprint lines
-1209--1228, paper lines 1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -55,7 +55,7 @@ abbrev SubLineRaw (P : AdmissibleParams) :=
 
 /-- The law of the scalar seed carried by a source line at a given coordinate
 index: uniform on the coordinate-index fiber of that index.  Blueprint
-`def:ith-restricted-line`, paper
+`def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def subLineSeedDist (P : AdmissibleParams) (i : Fin P.m) :
     Distribution (ScalarQ P.toLdParams) :=

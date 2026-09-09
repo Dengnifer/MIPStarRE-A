@@ -437,8 +437,13 @@ of the source subline lemma. Their formal counterparts currently use a
 different distribution $D_{\rm dir}$, represented by
 \leanid{SubLineWitness}: the extended line is directly indexed, its marginal
 is that of \leanid{directLinePointDist}, and its separate X and Z point
-marginals are mixtures of restricted source line-point laws. Existence of
-this auxiliary distribution does not identify it with $D$. In particular,
+marginals are mixtures of refined seed-bearing restricted line-point laws,
+represented by \leanid{restrictedALineDist} and \leanid{restrictedDLineDist}.
+These are the laws of blueprint \path{def:ith-restricted-line-refined}, not
+the source restrictions of \path{def:ith-restricted-line}. Identifying their
+source push-forwards, including forgetting the residual seed on axis lines,
+remains open. Existence of this auxiliary distribution does not identify it
+with $D$. In particular,
 sampling a coordinate index directly does not construct the seed-indexed
 extended-line questions where the divisibility condition above fails.%
 \footnote{The claims are at lines 1140--1166 and 1204--1239 of
@@ -457,7 +462,8 @@ and Z-point overlaps in these claims. The source assertions are
  |A_Z(D)-1|=O\bigl(\sqrt m\,
    (\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})\bigr).
 \]
-For the projective joint point and paired-line measurement witnesses, and
+For projective joint point measurements and complete paired-line
+measurements satisfying the witness hypotheses, and
 any auxiliary subline witness, the established statements instead bound
 \[
  |\operatorname{Re}A_Q(D_{\rm dir})-

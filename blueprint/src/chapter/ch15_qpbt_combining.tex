@@ -1242,23 +1242,23 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\uses{def:line-point-dist, def:ith-restricted-line}
 	Write $\widetilde D_{\mathrm v}$ for the seed-bearing refinement of
 	$D_{\mathrm v}$ in Definition~\ref{def:line-point-dist}, where
-	$\mathrm v\in\{\mathrm{ALine},\mathrm{DLine}\}$, and let
+	$\mathrm v\in\{\mathrm{ALine},\mathrm{DLine}\}$. For these auxiliary
+	laws, number coordinates from $0$ to $m-1$ and put
+	$\chi_0(s)=\chi(s)-1$. For $i\in\{0,\ldots,m-1\}$, let
 	$\widetilde D_{\mathrm v,i}$ be its normalized restriction to
-	$\chi(s)=i$. Equivalently, condition the corresponding CL distribution
-	on this seed event before decoding the line description. The event has
-	probability $1/m$, so each restricted law has total mass one. An axis
-	description still records $(u_0,s)$; distinct seeds in $\chi^{-1}(i)$
+	$\chi_0(s)=i$. Equivalently, condition the corresponding CL distribution
+	on this seed event before decoding the line description. Each restricted
+	law has total mass one. An axis description still records $(u_0,s)$;
+	distinct seeds in $\chi_0^{-1}(i)$
 	remain distinct outcomes. A diagonal description records $(u_0,s,v)$,
-	with $v_j=0$ for $j<i$. The maps
-	\[
-		((u_0,s),u)\longmapsto ((u_0,e_{\chi(s)}),u),\qquad
-		((u_0,s,v),u)\longmapsto ((u_0,s,v),u)
-	\]
-	push these refined restrictions forward to the source restrictions
-	$D_{\mathrm{ALine},i}$ and $D_{\mathrm{DLine},i}$, respectively.
-	Only the axis map forgets the residual seed. The formalized definitions
-	here are the refined restrictions, not their source push-forwards.
+	with $v_j=0$ for $j<i$.
 \end{definition}
+
+Thus $\widetilde D_{\mathrm v,i}$ denotes the seed-bearing restriction,
+not the source law $D_{\mathrm v,i+1}$. Identifying its push-forward with
+the source restriction requires the corresponding carrier maps; in the axis
+case the map must forget the residual seed. These source-law identities
+remain open, as recorded in \cite{gap:qpbt_ld-dimension-divisibility}.
 
 \begin{lemma}[Mixtures and nonnegative averages on seed-bearing lines]
 	\label{lem:restricted-line-refined-mixture-bounds}
@@ -1269,7 +1269,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	Each refined law is a uniform mixture of its restrictions:
 	\[
 		\widetilde D_{\mathrm v}
-		=\frac1m\sum_{i=1}^m\widetilde D_{\mathrm v,i}.
+		=\frac1m\sum_{i=0}^{m-1}\widetilde D_{\mathrm v,i}.
 	\]
 	For admissible $(q,m,d)$, put
 	$\widetilde D_{\mathrm{Line}}
@@ -1285,17 +1285,17 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	Every fiber of $\chi$ has size $q/m$. Partitioning the uniform seed by
+	Every fiber of $\chi_0$ has size $q/m$. Partitioning the uniform seed by
 	these fibers proves the mixture identities, retaining the seed when
 	decoding. Each restriction has weight $1/(2m)$ in the full mixture;
 	nonnegativity bounds its average by $2m$ times the full average. Apply
 	this argument successively to the two coordinates for the product bound.
 \end{proof}
 
-Pushing the mixture identities forward, and composing nonnegative functions
-with the seed-forgetting maps, gives the same identities and bounds for the
-source laws. This accounts for the first two items of the following source
-observation; it does not identify coefficient answers with functions on lines.
+Once the source-law push-forward identities are established, pushing the
+mixtures forward and composing nonnegative functions with the carrier maps
+will give the first two items of the following source observation. This
+argument does not identify coefficient answers with functions on lines.
 
 \begin{lemma}[Restricted line distributions and error inflation]
 	\label{lem:restricted-line-mixture-bounds}
@@ -1370,7 +1370,8 @@ observation; it does not identify coefficient answers with functions on lines.
 	let $\widehat{\mathrm{ev}}_{\lambda,u}(f)\in\F_q\sqcup\{\perp\}$ be
 	$a$ if at least one parameter $t$ satisfies $u=u_0+tv$ and every such
 	parameter satisfies $f(t)=a$; otherwise let it be $\perp$.
-	For axis descriptions use $v=e_{\chi(s)}$. Postprocess $T$ by the pair
+	For axis descriptions use $v=e_{\chi_0(s)}$, with coordinates numbered
+	from $0$ to $m-1$. Postprocess $T$ by the pair
 	of these evaluations to obtain $T^{\mathrm{ev}}$, with outcomes in
 	$(\F_q\sqcup\{\perp\})^2$. Extend $Q$ to $Q^+$ on this alphabet by
 	setting its effect to zero whenever either component is $\perp$.
@@ -1379,7 +1380,7 @@ observation; it does not identify coefficient answers with functions on lines.
 	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$
 	for every directed pair of opposite placements. Then, for every such
 	pair $p_1,p_2$, every pair of line types $\mathrm v_1,\mathrm v_2$,
-	and every $i,j\in\{1,\ldots,m\}$,
+	and every $i,j\in\{0,\ldots,m-1\}$,
 	\[
 		\E_{(\lambda_X,x)\sim\widetilde D_{\mathrm v_1,i}}
 		\E_{(\lambda_Z,z)\sim\widetilde D_{\mathrm v_2,j}}
@@ -1628,7 +1629,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Formalization support: the ordered product on one placement]
 	\label{lem:qld-4-10-same-placement}
-	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedZX_dist_le}
 	\leanok
 	\uses{lem:qld-4-10, fact:triangle, def:povm-distance}
@@ -1659,7 +1659,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Formalization support: a uniform point from the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
-	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_uniform_directLdSpace_line_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
@@ -1890,8 +1889,6 @@ $\mathsf{B}\mathsf{A}''$.
 	\label{lem:claim-17-1-direct-real}
 	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
 	\leanok
-	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
-		lem:qld-sublines-uniform-point}
 	There is a universal constant $C>0$ such that, for every choice of the
 	auxiliary data just stated,
 	\[
@@ -1901,6 +1898,8 @@ $\mathsf{B}\mathsf{A}''$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:qld-sublines-uniform-point}
 	Take $C=2$. Apply the real-part overlap estimate with squared distance
 	$4\delta_Q$ and use the uniform point marginal of $D_{\rm dir}$.
 \end{proof}
@@ -1909,8 +1908,6 @@ $\mathsf{B}\mathsf{A}''$.
 	\label{lem:claim-17-3-direct-real}
 	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
 	\leanok
-	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
-		lem:restricted-line-mixture-bounds}
 	There is a universal constant $C>0$ such that, for every choice of the
 	same auxiliary data,
 	\[
@@ -1920,6 +1917,8 @@ $\mathsf{B}\mathsf{A}''$.
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:restricted-line-refined-mixture-bounds}
 	Take $C=2$. The separate Z marginal mixture bounds the deficit by
 	$2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}$. Since the real overlap lies
 	in $[0,1]$, its squared deficit is no larger than its deficit. Taking

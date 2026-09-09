@@ -18,8 +18,8 @@ evaluation uses `Option` completion, with zero effect at undefined evaluations.
 These are auxiliary statements. Transport to the seed-indexed distribution of
 the paper and the complex overlap estimate in Claim 17-1 remain open, as recorded
 in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
-"Scalar estimates on the auxiliary subline law". The source-labelled blueprint
-claims remain visible without completed Lean links.
+"Scalar estimates on the auxiliary subline law". The corresponding source
+claims remain open.
 
 ## References
 
@@ -39,8 +39,8 @@ noncomputable section
 
 set_option synthInstance.maxSize 400
 
-/-- Place an Alice-side measurement on `AA'` by the current tensor
-bipartition API. -/
+/-- Place an Alice-side measurement on `AA'` by the corresponding tensor
+bipartition. -/
 private noncomputable def placedAAMeasurement {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) {α : Type*} [Fintype α]
     (M : Measurement α (S.ExpandedLocalSpace .alice)) :
@@ -265,7 +265,6 @@ private theorem completed_pair_norm_sq_sum {P : AdmissibleParams} {ε δQ : ℝ}
   exact S.completedPair_norm_sq_sum_ZX points .BA'' x z
 
 set_option maxHeartbeats 400000 in
--- The expanded six-register overlap expressions require additional elaboration steps.
 /-- On the directly indexed subline law, the real parts of the joint-point
 and ordered `Z`-then-`X` overlaps differ by at most a square-root point error.
 This is the auxiliary blueprint `lem:claim-17-1-direct-real`, supporting paper

@@ -20,8 +20,7 @@ the same three coordinate ranges.
 The decompositions support `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The coordinate blocks are those of `def:combine-map`, blueprint lines
-445--480, paper lines 970--989.
+The coordinate blocks are those of blueprint `def:combine-map`, paper lines 970--989.
 -/
 
 open scoped BigOperators

@@ -13,12 +13,10 @@ state-dependent distance between the two bipartition schemes of
 
 ## References
 
-The placements are those of `def:symmetric-equivalents`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1003-1030`, paper
+The placements are those of blueprint `def:symmetric-equivalents`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.  The
 EPR-exchange invariance is the element `U_σ U_θ` of
-`lem:symmetric-equivalents-transfer`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1032-1130`, which needs no
+blueprint `lem:symmetric-equivalents-transfer`, which needs no
 symmetry of the strategy; its use for `lem:qld-4-10` is analyzed in
 `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
 -/

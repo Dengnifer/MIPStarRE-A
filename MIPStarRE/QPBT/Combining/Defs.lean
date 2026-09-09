@@ -16,8 +16,9 @@ are formed before decoding, while their field seed is still present.
 The combining map is blueprint
 `def:combine-map`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`.
-The restricted laws are blueprint `def:ith-restricted-line`,
-with paper origin in the same source at lines 1038--1048.
+The seed-bearing restricted laws are the auxiliary blueprint
+`def:ith-restricted-line-refined`, supporting the source definition
+`def:ith-restricted-line` in the same paper at lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -338,7 +339,7 @@ instance restrictedLineSeedEvent_decidablePred (L : LdParams) (i : Fin L.m) :
   unfold restrictedLineSeedEvent
   infer_instance
 
-/-- Formalization-only auxiliary for `def:ith-restricted-line`: whenever a line
+/-- Formalization-only auxiliary for `def:ith-restricted-line-refined`: whenever a line
 CL map keeps the shared scalar coordinate, the pre-decoding law it generates
 against the point map gives positive mass to every coordinate-index event.  The
 witness is the constant seed reconstructed from the index by
@@ -371,7 +372,7 @@ private theorem clDistribution_seedEvent_positive (L : LdParams) (i : Fin L.m)
 /-- The axis-line seed event has positive mass.  This named obligation makes
 normalization in `restrictedALinePreDist` explicit.  It belongs to
 blueprint
-`def:ith-restricted-line`, paper
+`def:ith-restricted-line-refined`, supporting paper `def:ith-restricted-line` at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
@@ -381,8 +382,8 @@ theorem restrictedALineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
   clDistribution_seedEvent_positive L i (ldALineCL L) fun _ => rfl
 
 /-- The diagonal-line seed event has positive mass.  This is the corresponding
-normalization obligation from blueprint `def:ith-restricted-line`; paper lines
-1038--1048. -/
+normalization obligation for blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048. -/
 theorem restrictedDLineSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ sample ∈
         (clDistribution (ldDLineCL L) (ldPointCL L)).support.filter
@@ -406,19 +407,24 @@ noncomputable def restrictedDLinePreDist (L : LdParams) (i : Fin L.m) :
     (restrictedLineSeedEvent L i)
     (restrictedDLineSeedEvent_positive L i)
 
-/-- The `i`-th restricted axis-line distribution from
-`def:ith-restricted-line`.  Restriction precedes decoding so the seed fiber is
-represented faithfully.  Blueprint
-`def:ith-restricted-line`; paper
+/-- The seed-bearing axis-line law restricted to the zero-based coordinate `i`.
+
+**Formalization-only auxiliary:** blueprint `def:ith-restricted-line-refined`.
+Restriction precedes decoding, and the decoded description retains the seed.
+The source push-forward to `def:ith-restricted-line` remains open, as recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. Paper source:
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 noncomputable def restrictedALineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedALinePreDist L i).map fun sample =>
     (aLineDescOf L sample.1, sample.2.point)
 
-/-- The `i`-th restricted diagonal-line distribution from blueprint
-`def:ith-restricted-line`.  The decoded direction already has all coordinates
-preceding `i` set to zero.  Paper lines 1038--1048. -/
+/-- The seed-bearing diagonal-line law restricted to the zero-based coordinate `i`.
+
+**Formalization-only auxiliary:** blueprint `def:ith-restricted-line-refined`.
+The decoded direction has all coordinates preceding `i` set to zero. Its
+identification with the source law of `def:ith-restricted-line` remains open;
+see `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and paper lines 1038--1048. -/
 noncomputable def restrictedDLineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedDLinePreDist L i).map fun sample =>

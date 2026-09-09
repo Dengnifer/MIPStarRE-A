@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Combining.Witnesses
 /-!
 # Error inflation of restricted line-point averages
 
-This module records how a nonnegative average over the line-point distribution
+This module records how a nonnegative average over the seed-bearing line-point distribution
 transfers to one restricted component.  The line-point law places weight
 `1 / 2` on each of its two kinds and, inside each kind, weight `1 / m` on each
 coordinate index, so every restricted component carries mixture weight
@@ -12,8 +12,8 @@ coordinate index, so every restricted component carries mixture weight
 
 ## References
 
-The estimates are items 1 and 2 of blueprint
-`lem:restricted-line-mixture-bounds`, formalizing the unlabelled estimates at
+The estimates are the auxiliary blueprint
+`lem:restricted-line-refined-mixture-bounds`, supporting the source estimates at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1058`.
 -/
 
@@ -28,7 +28,7 @@ noncomputable section
 /-! ## Averages of the distribution operations -/
 
 /-- Formalization-only auxiliary: an average against a dependent bind is the
-iterated average.  Blueprint `lem:restricted-line-mixture-bounds`, paper
+iterated average. Blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1058`. -/
 theorem avgOver_bind {α β : Type*} [DecidableEq β]
     (μ : Distribution α) (ν : α → Distribution β) (f : β → ℝ) :
@@ -55,7 +55,7 @@ theorem avgOver_bind {α β : Type*} [DecidableEq β]
 
 /-- Formalization-only auxiliary: an average against a convex mixture is the
 convex combination of the two averages.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+`lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1058`. -/
 theorem avgOver_mix {α : Type*} [DecidableEq α] (t : ℝ) (ht0 : 0 ≤ t)
     (ht1 : t ≤ 1) (μ ν : Distribution α) (f : α → ℝ) :
@@ -84,7 +84,7 @@ theorem avgOver_mix {α : Type*} [DecidableEq α] (t : ℝ) (ht0 : 0 ≤ t)
   rw [hsplit, hμ, hν]
 
 /-- Formalization-only auxiliary: an average against a product law is the
-iterated average.  Blueprint `lem:restricted-line-mixture-bounds`, paper
+iterated average. Blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`. -/
 theorem avgOver_prod {α β : Type*} [DecidableEq α] [DecidableEq β]
     (μ : Distribution α) (ν : Distribution β) (f : α × β → ℝ) :
@@ -100,7 +100,7 @@ theorem avgOver_prod {α β : Type*} [DecidableEq α] [DecidableEq β]
 
 /-- Formalization-only auxiliary: one component of a uniform mixture carries at
 most the whole nonnegative average, scaled by its mixture weight.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+`lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`. -/
 theorem avgOver_bind_uniform_component_le {ι β : Type*}
     [Fintype ι] [DecidableEq ι] [Nonempty ι] [DecidableEq β]
@@ -121,8 +121,8 @@ theorem avgOver_bind_uniform_component_le {ι β : Type*}
 /-! ## Inflation of a restricted line-point average -/
 
 /-- Restricting a nonnegative line-point average to one kind and one coordinate
-index inflates it by at most `2 m`.  This is the pointwise form of item 1 of
-blueprint `lem:restricted-line-mixture-bounds`, paper
+index inflates it by at most `2 m`. This is a formalization-only auxiliary
+on seed-bearing laws for blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`. -/
 theorem avgOver_restrictedLinePointDist_le {P : AdmissibleParams}
     (f : (LineDesc P.toLdParams × (Fin P.m → PauliScalar P)) → ℝ)
@@ -184,8 +184,8 @@ theorem avgOver_restrictedLinePointDist_le {P : AdmissibleParams}
 
 /-- Restricting a nonnegative average over two independent line-point samples
 to one kind and coordinate index in each factor inflates it by at most
-`4 m ^ 2`.  This is the pointwise form of item 2 of
-blueprint `lem:restricted-line-mixture-bounds`, paper
+`4 m ^ 2`. This is a formalization-only auxiliary on seed-bearing laws for
+blueprint `lem:restricted-line-refined-mixture-bounds`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`. -/
 theorem avgOver_prod_restrictedLinePointDist_le {P : AdmissibleParams}
     (f : ((LineDesc P.toLdParams × (Fin P.m → PauliScalar P)) ×

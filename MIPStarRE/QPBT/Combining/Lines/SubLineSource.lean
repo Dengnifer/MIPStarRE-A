@@ -21,8 +21,8 @@ carried by the two indices of the branch.
 The identification is the last step of the proof of `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The restricted laws are `def:ith-restricted-line`, blueprint lines
-1209--1228, paper lines 1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048.
 -/
 
 open scoped BigOperators
