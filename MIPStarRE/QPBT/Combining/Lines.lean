@@ -7,6 +7,7 @@ import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
 import MIPStarRE.QPBT.Combining.Lines.ProductWeightedCollision
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
+import MIPStarRE.QPBT.Combining.Lines.PairStateConsistencyTransport
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
