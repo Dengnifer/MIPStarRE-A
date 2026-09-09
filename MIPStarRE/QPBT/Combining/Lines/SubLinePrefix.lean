@@ -8,7 +8,7 @@ diagonal line.  That direction is obtained from an unrestricted extended
 vector by zeroing the coordinates that precede the stored coordinate index,
 so each source block is again a prefix truncation: when the stored index is
 the `i`-th coordinate of a block, that block inherits the truncation at `i`,
-the preceding block is retained untruncated, and every later block vanishes.
+every preceding block vanishes, and every later block is retained untruncated.
 The computation is recorded after transport to the source scalar field, since
 the extended direction and the source line directions are presented over the
 two identified scalar fields.
@@ -19,7 +19,9 @@ The block computations support `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
 The truncation is the prefix restriction of blueprint
-`def:ld-question-distribution`; the coordinate blocks are those of
+`def:ld-question-distribution`, paper `eq:cl-dlnf` and its explanation in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:230-237`;
+the coordinate blocks are those of
 blueprint `def:combine-map`.
 -/
 
