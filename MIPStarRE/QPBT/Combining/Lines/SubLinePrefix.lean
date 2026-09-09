@@ -8,7 +8,7 @@ diagonal line.  That direction is obtained from an unrestricted extended
 vector by zeroing the coordinates that precede the stored coordinate index,
 so each source block is again a prefix truncation: when the stored index is
 the `i`-th coordinate of a block, that block inherits the truncation at `i`,
-the preceding block is retained untruncated, and every later block vanishes.
+every preceding block vanishes, and later blocks are retained untruncated.
 The computation is recorded after transport to the source scalar field, since
 the extended direction and the source line directions are presented over the
 two identified scalar fields.
