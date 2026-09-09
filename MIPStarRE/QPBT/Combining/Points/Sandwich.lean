@@ -39,16 +39,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Formalization-only auxiliary: applying a product of operators to a state
-applies the factors in sequence. -/
-theorem applyOperatorToState_mul' {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (A B : Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (A * B) ψ =
-      applyOperatorToState A (applyOperatorToState B ψ) := by
-  ext k
-  change ((A * B) *ᵥ ψ.ofLp) k = (A *ᵥ (B *ᵥ ψ.ofLp)) k
-  rw [Matrix.mulVec_mulVec]
-
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
@@ -171,7 +161,7 @@ theorem sandwichPoint_ordered_dist_le :
   unfold opFamilyDistSq
   refine avgOver_mono _ _ _ fun xz => Finset.sum_le_sum fun ab _ => ?_
   rw [← place_sub, sandwichPoint_effect_sub_ordered, place_mul,
-    applyOperatorToState_mul', ← place_sub]
+    DistanceCalculus.applyOperatorToState_mul, ← place_sub]
   exact pow_le_pow_left₀ (norm_nonneg _)
     (MagicSquareRigidity.norm_applyOperatorToState_le
       (S.place_conjTranspose_mul_self_le_one p
