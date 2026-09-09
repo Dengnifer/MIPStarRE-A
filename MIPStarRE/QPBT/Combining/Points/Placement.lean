@@ -19,7 +19,7 @@ The ancillary permutation exchanging the two EPR pairs crosswise gives the
 same-side distance transfers needed here without symmetry of the strategy.
 It is not `U_σ U_θ` and does not formalize the full blueprint lemma
 `lem:symmetric-equivalents-transfer`. Its use for `lem:qld-4-10` is analyzed in
-`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
