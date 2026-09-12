@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Games.ErrorFunctions
-import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
+import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.SoundnessDefs
 import Mathlib.Analysis.MeanInequalitiesPow
 

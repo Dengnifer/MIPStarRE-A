@@ -1,25 +1,21 @@
-import MIPStarRE.QPBT.Games.Consistency
-import MIPStarRE.QPBT.Games.DistributionMarginals
-import MIPStarRE.QPBT.Games.StrategyClasses
-import MIPStarRE.QPBT.Games.TypedCondLinear
-import MIPStarRE.QPBT.Observables.LineDefs
-import MIPStarRE.QPBT.Test.LowDegreeGame
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Soundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
+import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedError
+import MIPStarRE.QPBT.Games.Sandwich.Support
 
 /-!
-# Low-degree polynomial measurements and soundness
+# Quantum soundness of the seed-indexed low-degree game
 
-The low-degree question laws have uniform point and coordinate-index marginals,
-and every sampled line is incident to its paired point.  Polynomial outcomes
-are bounded multivariate polynomials, and the corresponding projective
-strategies satisfy the low-degree soundness theorem used in the QPBT argument.
+The general simultaneity reduction for the directly indexed game is transported
+through the correlated seed dilation. Point consistency survives compression
+exactly; global polynomial consistency is recovered by point agreement and
+Schwartz--Zippel, with the square-root loss absorbed into `deltaLd`.
 
 ## References
 
-The principal definition and theorem are blueprint `def:ld-meas` and
-`lem:ld-soundness`. Their paper origin is
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-287,392-480`.
-The dimension-divisibility hypothesis is documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+* `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`
+* `references/neexp-paper/05_quantum_preliminaries.tex:1409-1503`
+* Blueprint `lem:ld-soundness`
 -/
 
 open scoped BigOperators
@@ -32,350 +28,25 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-!
-### Formalization-only auxiliary facts about the ambient low-degree space
--/
+/-- Distinct polynomial tuples collide only where one of their distinct
+coordinates collides. This formalization auxiliary for `lem:ld-soundness`
+therefore has the same Schwartz--Zippel bound for every simultaneity parameter. -/
+theorem polyTupleAgreement_avg_le_mdq (L : LdParams)
+    (g g' : PolyTuple L) (hne : g ≠ g') :
+    avgOver (uniformDistribution (Fin L.m → ScalarQ L))
+        (fun u => if evalPolyTupleAt u g = evalPolyTupleAt u g' then
+          (1 : ℝ) else 0) ≤
+      ((L.m : ℝ) * (L.d : ℝ)) / (L.q : ℝ) := by
+  obtain ⟨i, hi⟩ := Function.ne_iff.mp hne
+  refine le_trans (avgOver_mono _ _ _ fun u => ?_)
+    (directPolynomialAgreement_avg_le_mdq L.toDirectLdParams (g i) (g' i) hi)
+  split_ifs with h h'
+  · exact le_rfl
+  · exact False.elim (h' (congrFun h i))
+  · norm_num
+  · exact le_rfl
 
-/-- Formalization-only auxiliary equivalence splitting an ambient low-degree
-vector into its point, seed, and direction blocks. -/
-private def ldSpaceSplit (L : LdParams) :
-    LdSpace L ≃ ((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L) where
-  toFun z := ((LdSpace.point z, LdSpace.seed z), LdSpace.direction z)
-  invFun p := fun i =>
-    match i with
-    | .inl (.inl j) => p.1.1 j
-    | .inl (.inr _) => p.1.2
-    | .inr j => p.2 j
-  left_inv z := by
-    funext i
-    rcases i with (j | u) | j
-    · rfl
-    · cases u
-      rfl
-    · rfl
-  right_inv p := by
-    obtain ⟨⟨a, b⟩, c⟩ := p
-    rfl
-
-/-- Formalization-only auxiliary lemma: the point block of a uniformly random
-ambient vector is uniform. -/
-private theorem map_uniformDistribution_point (L : LdParams) :
-    (uniformDistribution (LdSpace L)).map LdSpace.point =
-      uniformDistribution (Fin L.m → ScalarQ L) := by
-  have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
-      uniformDistribution (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L)) :=
-    uniformDistribution_map_equiv (ldSpaceSplit L)
-  calc
-    (uniformDistribution (LdSpace L)).map LdSpace.point
-        = (((uniformDistribution (LdSpace L)).map (ldSpaceSplit L)).map
-            Prod.fst).map Prod.fst := by
-          rw [Distribution.map_map, Distribution.map_map]
-          rfl
-    _ = ((uniformDistribution
-          (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L))).map
-            Prod.fst).map Prod.fst := by rw [hsplit]
-    _ = (uniformDistribution ((Fin L.m → ScalarQ L) × ScalarQ L)).map Prod.fst := by
-          rw [uniformDistribution_map_fst]
-    _ = uniformDistribution (Fin L.m → ScalarQ L) := uniformDistribution_map_fst
-
-/-- Formalization-only auxiliary lemma: the shared scalar coordinate of a
-uniformly random ambient vector is uniform. -/
-private theorem map_uniformDistribution_seed (L : LdParams) :
-    (uniformDistribution (LdSpace L)).map LdSpace.seed =
-      uniformDistribution (ScalarQ L) := by
-  have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
-      uniformDistribution (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L)) :=
-    uniformDistribution_map_equiv (ldSpaceSplit L)
-  calc
-    (uniformDistribution (LdSpace L)).map LdSpace.seed
-        = (((uniformDistribution (LdSpace L)).map (ldSpaceSplit L)).map
-            Prod.fst).map Prod.snd := by
-          rw [Distribution.map_map, Distribution.map_map]
-          rfl
-    _ = ((uniformDistribution
-          (((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L))).map
-            Prod.fst).map Prod.snd := by rw [hsplit]
-    _ = (uniformDistribution ((Fin L.m → ScalarQ L) × ScalarQ L)).map Prod.snd := by
-          rw [uniformDistribution_map_fst]
-    _ = uniformDistribution (ScalarQ L) := uniformDistribution_map_snd
-
-/-- The coordinate index of a uniformly random scalar is uniform.  This is the
-balance assertion in `def:ld-question-distribution`, blueprint
-`lem:chi-index-uniform`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:215-221`.
--/
-theorem uniformDistribution_map_chiIndex (L : LdParams) :
-    (uniformDistribution (ScalarQ L)).map (chiIndex L) =
-      uniformDistribution (Fin L.m) := by
-  letI : Nonempty (Fin (L.q / L.m)) :=
-    Fin.pos_iff_nonempty.mp L.seedFiberCard_pos
-  exact uniformDistribution_map_fst_of_equiv
-    (seedFiberEquiv L) (chiIndex L) fun s => (seedFiberEquiv_fst L s).symm
-
-/-- `lem:alnf`: the point and axis-index marginals of the axis line-point
-distribution are uniform. Blueprint `lem:alnf`, paper
-`08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
-theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
-    (aLinePointDist L).map Prod.snd =
-        uniformDistribution (Fin L.m → ScalarQ L) ∧
-      (aLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
-        uniformDistribution (Fin L.m) := by
-  constructor
-  · have hmap : (aLinePointDist L).map Prod.snd
-        = (uniformDistribution (LdSpace L)).map LdSpace.point := by
-      change ((((uniformDistribution (LdSpace L)).map
-          fun z => (ldALineCL L z, ldPointCL L z)).map
-          fun s => (aLineDescOf L s.1, LdSpace.point s.2)).map Prod.snd) = _
-      rw [Distribution.map_map, Distribution.map_map]
-      rfl
-    rw [hmap, map_uniformDistribution_point]
-  · have hmap : (aLinePointDist L).map (fun sample => chiIndex L sample.1.seed)
-        = ((uniformDistribution (LdSpace L)).map LdSpace.seed).map (chiIndex L) := by
-      change ((((uniformDistribution (LdSpace L)).map
-          fun z => (ldALineCL L z, ldPointCL L z)).map
-          fun s => (aLineDescOf L s.1, LdSpace.point s.2)).map
-          fun sample => chiIndex L sample.1.seed) = _
-      rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
-      rfl
-    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
-
-/-- The incidence conclusion of blueprint
-`lem:alnf`, paper
-`08_classical_and_quantum_low_degree_tests.tex:243-257`. -/
-theorem aLinePointDist_mem_line (L : LdParams) :
-    ∀ sample ∈ (aLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
-  intro sample hsample
-  have hsupport : (aLinePointDist L).support =
-      ((Finset.univ : Finset (LdSpace L)).image
-        fun z => (ldALineCL L z, ldPointCL L z)).image
-        fun s => (aLineDescOf L s.1, LdSpace.point s.2) := rfl
-  rw [hsupport] at hsample
-  obtain ⟨s, hs, rfl⟩ := Finset.mem_image.mp hsample
-  obtain ⟨z, -, rfl⟩ := Finset.mem_image.mp hs
-  change LdSpace.point z ∈
-    linePoints
-      (lineRepMap (coordinateDirection (chiIndex L (LdSpace.seed z)))
-        (lineRepMap (coordinateDirection (chiIndex L (LdSpace.seed z)))
-          (LdSpace.point z)))
-      (coordinateDirection (chiIndex L (LdSpace.seed z)))
-  rw [lineRepMap_apply_self]
-  exact mem_linePoints_lineRepMap _ _
-
-/-- `lem:dlnf`: the point and prefix-index marginals of the diagonal
-line-point distribution are uniform. Blueprint `lem:dlnf`,
-paper `08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
-theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
-    (dLinePointDist L).map Prod.snd =
-        uniformDistribution (Fin L.m → ScalarQ L) ∧
-      (dLinePointDist L).map (fun sample => chiIndex L sample.1.seed) =
-        uniformDistribution (Fin L.m) := by
-  constructor
-  · have hmap : (dLinePointDist L).map Prod.snd
-        = (uniformDistribution (LdSpace L)).map LdSpace.point := by
-      change ((((uniformDistribution (LdSpace L)).map
-          fun z => (ldDLineCL L z, ldPointCL L z)).map
-          fun s => (dLineDescOf L s.1, LdSpace.point s.2)).map Prod.snd) = _
-      rw [Distribution.map_map, Distribution.map_map]
-      rfl
-    rw [hmap, map_uniformDistribution_point]
-  · have hmap : (dLinePointDist L).map (fun sample => chiIndex L sample.1.seed)
-        = ((uniformDistribution (LdSpace L)).map LdSpace.seed).map (chiIndex L) := by
-      change ((((uniformDistribution (LdSpace L)).map
-          fun z => (ldDLineCL L z, ldPointCL L z)).map
-          fun s => (dLineDescOf L s.1, LdSpace.point s.2)).map
-          fun sample => chiIndex L sample.1.seed) = _
-      rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
-      rfl
-    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
-
-/-- The incidence conclusion of blueprint
-`lem:dlnf`, paper
-`08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
-theorem dLinePointDist_mem_line (L : LdParams) :
-    ∀ sample ∈ (dLinePointDist L).support, sample.2 ∈ sample.1.pointSet := by
-  intro sample hsample
-  have hsupport : (dLinePointDist L).support =
-      ((Finset.univ : Finset (LdSpace L)).image
-        fun z => (ldDLineCL L z, ldPointCL L z)).image
-        fun s => (dLineDescOf L s.1, LdSpace.point s.2) := rfl
-  rw [hsupport] at hsample
-  obtain ⟨s, hs, rfl⟩ := Finset.mem_image.mp hsample
-  obtain ⟨z, -, rfl⟩ := Finset.mem_image.mp hs
-  change LdSpace.point z ∈
-    linePoints
-      (lineRepMap
-        (prefixProjection (chiIndex L (LdSpace.seed z))
-          (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z)))
-        (lineRepMap
-          (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z))
-          (LdSpace.point z)))
-      (prefixProjection (chiIndex L (LdSpace.seed z))
-        (prefixProjection (chiIndex L (LdSpace.seed z)) (LdSpace.direction z)))
-  rw [prefixProjection_idempotent, lineRepMap_apply_self]
-  exact mem_linePoints_lineRepMap _ _
-
-/-- The diagonal direction in every sampled description has the prefix-zero
-property of blueprint `lem:dlnf`, paper
-`08_classical_and_quantum_low_degree_tests.tex:261-272`. -/
-theorem dLinePointDist_prefix_zero (L : LdParams) :
-    ∀ sample ∈ (dLinePointDist L).support,
-      ∀ j : Fin L.m, j.val < (chiIndex L sample.1.seed).val →
-        sample.1.direction j = 0 := by
-  intro sample hsample
-  have hsupport : (dLinePointDist L).support =
-      ((Finset.univ : Finset (LdSpace L)).image
-        fun z => (ldDLineCL L z, ldPointCL L z)).image
-        fun s => (dLineDescOf L s.1, LdSpace.point s.2) := rfl
-  rw [hsupport] at hsample
-  obtain ⟨s, -, rfl⟩ := Finset.mem_image.mp hsample
-  exact LineDesc.diagonal_prefix_zero (dLineDescOf L s.1) rfl
-
-/-- The three low-degree question maps form a typed family of three-level
-conditionally linear functions. The point and axis-line representations are
-raised from levels one and two using monotonicity. This is the family condition
-in `lem:ld-question-typed-cl`, blueprint `lem:ld-question-cl-family`, paper
-`references/qpbt-paper/07_types.tex:57-63` and
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-237`. -/
-theorem isTypedCondLinearFamily_ldCL (L : LdParams) :
-    IsTypedCondLinearFamily (ScalarQ L) LdType 3 (ldCL L) := by
-  intro t
-  cases t with
-  | point =>
-      exact IsCondLinearOn.mono_level (isCondLinear_ldPointCL L) (by omega)
-  | aline =>
-      exact IsCondLinearOn.mono_level (isCondLinear_ldALineCL L) (by omega)
-  | dline =>
-      exact isCondLinear_ldDLineCL L
-
-/-- The low-degree question sampler equals the distribution that the
-construction of blueprint `def:typed-cl-distributions`
-produces from the family `ldCL` on the complete type graph. This equality is the
-distribution identity in `lem:ld-question-typed-cl`, blueprint
-`lem:ld-question-typed-equality`; the separate theorem
-`isTypedCondLinearFamily_ldCL` states that the family has a common level. Paper
-`references/qpbt-paper/07_types.tex:84-94`. -/
-theorem ldQuestionDistribution_eq_typedCL (L : LdParams) :
-    ldQuestionDistribution L =
-      typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) (by simp)
-        (ldCL L) (ldCL L) := by
-  have hgraph : ∀ hE : (Finset.univ : Finset (Sym2 LdType)).Nonempty,
-      graphDistribution (Finset.univ : Finset (Sym2 LdType)) hE =
-        uniformDistribution (LdType × LdType) := by
-    intro hE
-    have hfilter : ((Finset.univ : Finset (LdType × LdType)).filter
-        fun ab => Sym2.mk ab.1 ab.2 ∈ (Finset.univ : Finset (Sym2 LdType)))
-        = (Finset.univ : Finset (LdType × LdType)) := by
-      simp
-    change Distribution.uniformOnFinset _ = _
-    rw [hfilter]
-    rfl
-  have hleft : ldQuestionDistribution L =
-      Distribution.bind (uniformDistribution (LdType × LdType))
-        (fun uv => (uniformDistribution (LdSpace L)).map
-          fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z))) := by
-    rw [bind_uniformDistribution_map]
-    rfl
-  have hright : ∀ hE : (Finset.univ : Finset (Sym2 LdType)).Nonempty,
-      typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) hE (ldCL L) (ldCL L) =
-        Distribution.bind (uniformDistribution (LdType × LdType))
-          (fun uv => (uniformDistribution (LdSpace L)).map
-            fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z))) := by
-    intro hE
-    have hfamily : (fun uv : LdType × LdType =>
-        (clDistribution (ldCL L uv.1) (ldCL L uv.2)).map
-          fun xy => ((uv.1, xy.1), (uv.2, xy.2))) =
-      fun uv : LdType × LdType => (uniformDistribution (LdSpace L)).map
-        fun z => ((uv.1, ldCL L uv.1 z), (uv.2, ldCL L uv.2 z)) := by
-      funext uv
-      exact Distribution.map_map _ _ _
-    change Distribution.bind (graphDistribution _ hE) _ = _
-    rw [hgraph hE, hfamily]
-  rw [hleft, hright]
-
-/-- `lem:ld-question-typed-cl`: the low-degree maps form a common-level typed
-conditionally linear family, and their typed distribution is exactly the
-question distribution of the low-degree game. Blueprint
-`lem:ld-question-typed-cl`, paper
-`references/qpbt-paper/07_types.tex:84-93` and
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:203-243`. -/
-theorem ldQuestionDistribution_isTypedCL (L : LdParams) :
-    IsTypedCondLinearFamily (ScalarQ L) LdType 3 (ldCL L) ∧
-      ldQuestionDistribution L =
-        typedCLDistribution (Finset.univ : Finset (Sym2 LdType)) (by simp)
-          (ldCL L) (ldCL L) := by
-  exact ⟨isTypedCondLinearFamily_ldCL L, ldQuestionDistribution_eq_typedCL L⟩
-
-/-- Bounded multivariate polynomials form a finite set over a finite coefficient
-semiring. This is the finite outcome set required by blueprint
-`def:ld-meas`, paper
-`08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
-noncomputable instance polyFuncFintype (m : ℕ) (K : Type*)
-    [CommSemiring K] [Fintype K] (d : ℕ) : Fintype ↥(polyFunc m K d) := by
-  letI : Finite ↥(polyFunc m K d) := Module.finite_of_finite K
-  exact Fintype.ofFinite _
-
-/-- A bounded multivariate polynomial outcome over an arbitrary finite
-coefficient semiring. -/
-noncomputable abbrev PolyIndex (m : ℕ) (K : Type*) [CommSemiring K]
-    [Fintype K] (d : ℕ) := ↥(polyFunc m K d)
-
-/-- A POVM indexed by one bounded multivariate polynomial. -/
-noncomputable abbrev PolyMeas (m : ℕ) (K : Type*) [CommSemiring K]
-    [Fintype K] [DecidableEq K] (d : ℕ) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] :=
-  MIPStarRE.Quantum.Measurement (PolyIndex m K d) ι
-
-/-- The dependent family in `def:ld-meas`: component `i` may
-have its own coefficient field, number of variables, and degree bound.
-Blueprint `def:ld-meas`, paper
-`08_classical_and_quantum_low_degree_tests.tex:394-408`. -/
-noncomputable abbrev PolyMeasFamily (k : ℕ) (K : Fin k → Type*)
-    [∀ i, CommSemiring (K i)] [∀ i, Fintype (K i)]
-    [∀ i, DecidableEq (K i)] (m d : Fin k → ℕ) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] :=
-  MIPStarRE.Quantum.Measurement ((i : Fin k) → PolyIndex (m i) (K i) (d i)) ι
-
-/-- A simultaneous tuple of `L.k` bounded polynomial representatives. -/
-noncomputable abbrev PolyTuple (L : LdParams) :=
-  Fin L.k → PolyIndex L.m (ScalarQ L) L.d
-
-/-- The constant-family specialization used by `lem:ld-soundness`. -/
-noncomputable abbrev PolyMeasTuple (L : LdParams) (ι : Type*)
-    [Fintype ι] [DecidableEq ι] :=
-  PolyMeasFamily L.k (fun _ => ScalarQ L) (fun _ => L.m) (fun _ => L.d) ι
-
-/-- Evaluate every component of a polynomial tuple at a point. -/
-def evalPolyTupleAt {L : LdParams} (u : Fin L.m → ScalarQ L)
-    (g : PolyTuple L) : Fin L.k → ScalarQ L :=
-  fun j => MvPolynomial.eval u (g j).1
-
-/-- Embed a geometric point into the ambient coefficient space used by a
-point question. -/
-def pointSpaceOf (L : LdParams) (u : Fin L.m → ScalarQ L) : LdSpace L :=
-  fun i => match i with
-  | .inl (.inl j) => u j
-  | .inl (.inr _) => 0
-  | .inr _ => 0
-
-/-- The typed low-degree point question associated with `u`. -/
-def ldPointQuestionOf (L : LdParams) (u : Fin L.m → ScalarQ L) : LdQuestion L :=
-  (.point, pointSpaceOf L u)
-
-/-- Read the point component of a low-degree answer, sending answers of the
-wrong form to the fixed zero tuple. This total relabeling turns the strategy's
-answer measurement into the point POVM used by `lem:ld-soundness`. -/
-def ldPointValuesOrZero (L : LdParams) : LdAnswer L → Fin L.k → ScalarQ L
-  | .pointVals values => values
-  | .alinePolys _ => 0
-  | .dlinePolys _ => 0
-
-/-- The quantitative error function in `lem:ld-soundness`.  Its argument order
-is `(a, b, ε, q, m, d, k)`. -/
-noncomputable def deltaLd (a b ε : ℝ) (q m d k : ℕ) : ℝ :=
-  a * Real.rpow (((d * m * k : ℕ) : ℝ)) a *
-    (Real.rpow ε b + Real.rpow (q : ℝ) (-b) +
-      Real.rpow 2 (-(b * ((m * d : ℕ) : ℝ))))
-
+set_option maxHeartbeats 1000000 in
 /-- Quantum soundness of the simultaneous classical low individual degree
 test (blueprint `lem:ld-soundness`; paper theorem and proof
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`).
@@ -384,23 +55,25 @@ The first two consistency bounds compare the point-answer postprocessing of the
 strategy with evaluations of the polynomial measurements. Answers of the wrong
 form are folded into the zero tuple so that the point family remains a POVM.
 
-The source reduction still requires proofs of the claimed game correspondence
-and of the auxiliary parameter bound. These two open facts are detailed in
+The printed tensor-code reduction still requires proofs of its claimed game
+correspondence and auxiliary parameter bound. These two facts are detailed in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and
 `rem:ld-soundness-provider`, and are tracked by issue #16.
 
-A third obligation is the simultaneity of the polynomial measurements for
-`L.k ≥ 2`. The source obtains it from the case `L.k = 1` by the combining
+The proof here instead uses the established direct low individual degree
+reduction and transports it through the correlated seed dilation. It works for
+every `L.k`: simultaneity comes from the single-polynomial case by the combining
 reduction of Theorem 4.43 in the NEEXP paper, not coordinatewise; the
 coordinatewise route planned for the formalization is refuted in
 `docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex`. The combining reduction
 is proved for the directly indexed game in
 `MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Combining/SimultaneousGeneral.lean`;
-the general-`k` seed-indexed theorem remains open. See issue #210.
-The case `L.k = 1`, which is the only
-one instantiated by the Chapter 15 combining argument, is proved with the
-present conclusions as `exists_ld_soundness_of_k_eq_one` in
-`MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean`. -/
+the two mixed relations survive seed compression exactly. Global consistency
+is recovered from point agreement and the tuple Schwartz--Zippel bound, rather
+than double compression. The resulting square-root loss is absorbed by replacing
+the direct constants `(a, b)` with `(10 * a, b / 2)`. This discharges the
+seed-indexed extension tracked by issues #210 and #527, without using either
+open assertion of the printed tensor-code proof. -/
 theorem exists_ld_soundness :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
       ∀ (L : LdParams) (ε : ℝ), 0 < ε →
@@ -428,7 +101,118 @@ theorem exists_ld_soundness :
                 (fun _ g => heteroKron (GA.effect g) 1)
                 (fun _ g => heteroKron 1 (GB.effect g))
                 S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k := by
-  sorry
+  classical
+  obtain ⟨a, b, ha, hb, hb1, hs⟩ := exists_direct_ld_soundness
+  refine ⟨10 * a, b / 2, by linarith, by positivity, by linarith, ?_⟩
+  intro L ε hε S hS hwin
+  let D := L.toDirectLdParams
+  let E := deltaLd a b ε L.q L.m L.d L.k
+  let F := deltaLd (10 * a) (b / 2) ε L.q L.m L.d L.k
+  obtain ⟨GA₀, GB₀, h1, h2, _⟩ := hs D ε hε (ldStrategyToDirect L S)
+    (ldStrategyToDirect_isProjective L S hS)
+    (by simpa only [ldStrategyToDirect_value_eq] using hwin)
+  let GA : PolyMeasTuple L S.ιA := seedFiberCompressPolyMeasTuple L GA₀
+  let GB : PolyMeasTuple L S.ιB := seedFiberCompressPolyMeasTuple L GB₀
+  have c1 : consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+      (fun u outcome => heteroKron
+        (((S.A (ldPointQuestionOf L u)).postprocess
+          (ldPointValuesOrZero L)).effect outcome) 1)
+      (fun u outcome => heteroKron 1
+        ((GB.postprocess (evalPolyTupleAt u)).effect outcome)) S.ψ ≤ E := by
+    rw [show GB = seedFiberCompressPolyMeasTuple L GB₀ from rfl,
+      ← ldStrategyToDirect_pointPolynomial_compression L S GB₀]
+    exact h1
+  have c2 : consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+      (fun u outcome => heteroKron
+        ((GA.postprocess (evalPolyTupleAt u)).effect outcome) 1)
+      (fun u outcome => heteroKron 1
+        (((S.B (ldPointQuestionOf L u)).postprocess
+          (ldPointValuesOrZero L)).effect outcome)) S.ψ ≤ E := by
+    rw [show GA = seedFiberCompressPolyMeasTuple L GA₀ from rfl,
+      ← ldStrategyToDirect_polynomialPoint_compression L S GA₀]
+    exact h2
+  have c3 := ldPointPair_consistencyDefect_le L S hS ε hwin
+  have ctrans : consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+      (fun u outcome => heteroKron
+        ((GA.postprocess (evalPolyTupleAt u)).effect outcome) 1)
+      (fun u outcome => heteroKron 1
+        ((GB.postprocess (evalPolyTupleAt u)).effect outcome)) S.ψ ≤
+      E + 2 * Real.sqrt (9 * ε + E) :=
+    consistencyDefect_trans_le (uniformDistribution (Fin L.m → ScalarQ L))
+      (fun u => DistanceCalculus.leftPlacedMeasurement
+        (GA.postprocess (evalPolyTupleAt u)))
+      (fun u => DistanceCalculus.rightPlacedMeasurement
+        ((S.B (ldPointQuestionOf L u)).postprocess (ldPointValuesOrZero L)))
+      (fun u => DistanceCalculus.leftPlacedMeasurement
+        ((S.A (ldPointQuestionOf L u)).postprocess (ldPointValuesOrZero L)))
+      (fun u => DistanceCalculus.rightPlacedMeasurement
+        (GB.postprocess (evalPolyTupleAt u)))
+      S.ψ E (9 * ε) E (uniformDistribution_isProbability _) S.ψ_norm c2 c3 c1
+  have ccode : consistencyDefect (uniformDistribution Unit)
+      (fun _ g => heteroKron (GA.effect g) 1)
+      (fun _ g => heteroKron 1 (GB.effect g)) S.ψ ≤
+      E + 2 * Real.sqrt (9 * ε + E) + (L.m : ℝ) * L.d / L.q := by
+    have hstep := SandwichProduct.consistencyDefect_codewords_le_evaluated_add
+      (uniformDistribution Unit) (fun _ : Unit => GA) (fun _ : Unit => GB) S.ψ
+      (fun g u => evalPolyTupleAt u g) ((L.m : ℝ) * L.d / L.q)
+      (uniformDistribution_isProbability _) S.ψ_norm (by positivity)
+      (fun g g' hne => polyTupleAgreement_avg_le_mdq L g g' hne)
+    have hprod : ∀ (A B : Unit × (Fin L.m → ScalarQ L) →
+        (Fin L.k → ScalarQ L) → Op (S.ιA × S.ιB)),
+        consistencyDefect
+          (Distribution.prod (uniformDistribution Unit)
+            (uniformDistribution (Fin L.m → ScalarQ L))) A B S.ψ =
+        consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+          (fun u => A ((), u)) (fun u => B ((), u)) S.ψ := by
+      intro A B
+      unfold consistencyDefect
+      rw [SandwichProduct.avgOver_distribution_prod,
+        avgOver_uniform_eq_inv_card_mul_sum]
+      simp
+    rw [hprod] at hstep
+    exact hstep.trans (by linarith)
+  have hsqrt : 10 * Real.sqrt E ≤ F := ten_sqrt_deltaLd_le D ha hε.le
+  have hEnn : 0 ≤ E := by dsimp [E, deltaLd]; positivity
+  have hbound {X α : Type} [Fintype X] [DecidableEq X] [Nonempty X]
+      [Fintype α] [DecidableEq α]
+      (A : X → MIPStarRE.Quantum.Measurement α S.ιA)
+      (B : X → MIPStarRE.Quantum.Measurement α S.ιB)
+      (hc : consistencyDefect (uniformDistribution X)
+        (fun x o => heteroKron ((A x).effect o) 1)
+        (fun x o => heteroKron 1 ((B x).effect o)) S.ψ ≤
+        E + 2 * Real.sqrt (9 * ε + E) + (L.m : ℝ) * L.d / L.q) :
+      consistencyDefect (uniformDistribution X)
+        (fun x o => heteroKron ((A x).effect o) 1)
+        (fun x o => heteroKron 1 ((B x).effect o)) S.ψ ≤ F := by
+    have hone := consistencyDefect_heteroKron_le_one
+      (uniformDistribution X) (uniformDistribution_isProbability _) A B S.ψ S.ψ_norm
+    by_cases hε1 : ε ≤ 1
+    · by_cases hE1 : E ≤ 1
+      · obtain ⟨he, hm⟩ := error_and_collision_le_deltaLd D ha hb1 hε hε1
+        change ε ≤ E at he
+        change (L.m : ℝ) * L.d / L.q ≤ E at hm
+        have hEs : E ≤ Real.sqrt E := le_sqrt_of_le_of_le_one le_rfl hE1
+        have hroot : Real.sqrt (9 * ε + E) ≤ 4 * Real.sqrt E := by
+          apply (Real.sqrt_le_iff).mpr
+          refine ⟨by positivity, ?_⟩
+          nlinarith [Real.sq_sqrt hEnn]
+        exact hc.trans (by linarith)
+      · have hEs : 1 ≤ Real.sqrt E := by
+          simpa using Real.sqrt_le_sqrt (not_le.mp hE1).le
+        exact hone.trans (by linarith)
+    · exact hone.trans (one_le_deltaLd_of_one_le_error (by linarith) (by positivity)
+        (not_le.mp hε1).le L.hm L.hd L.hk)
+  have hrem : 0 ≤ 2 * Real.sqrt (9 * ε + E) + (L.m : ℝ) * L.d / L.q := by
+    positivity
+  refine ⟨GA, GB, ?_, ?_, ?_⟩
+  · apply hbound
+      (fun u => (S.A (ldPointQuestionOf L u)).postprocess (ldPointValuesOrZero L))
+      (fun u => GB.postprocess (evalPolyTupleAt u))
+    exact c1.trans (by linarith)
+  · apply hbound (fun u => GA.postprocess (evalPolyTupleAt u))
+      (fun u => (S.B (ldPointQuestionOf L u)).postprocess (ldPointValuesOrZero L))
+    exact c2.trans (by linarith)
+  · exact hbound (fun _ : Unit => GA) (fun _ : Unit => GB) ccode
 
 end
 
