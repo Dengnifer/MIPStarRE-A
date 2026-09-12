@@ -1,12 +1,51 @@
 #!/usr/bin/env bash
-# merge-v2.sh <pr> [--adjudicated] — merge.sh plus: automatic resolution of telemetry stash
-# conflicts (append-only .jsonl/.md are unioned, other files take the stash version, untracked
-# files are restored from the stash's third parent) and a retry when CI dirties the primary
-# between the stash and the gate ("local changes would be overwritten by merge", 2026-09-04).
+# merge.sh <pr> [--adjudicated] — merge one pull request through the gates.
+#
+# This is the file the merge daemon calls.  Until 2026-09-12 it was
+# /tmp/merge-v2.sh, a path that did not exist in any snapshot while the daemon
+# header still named merge.sh; the two names now describe one tracked file
+# (full-speed-mode v2 design §7, work item W5, finding MT7).
+#
+# What it does, and nothing else:
+#   1. rebases the local `main` onto github/main when it has drifted ahead,
+#      stashing and restoring the working tree around it;
+#   2. runs `python3 local/bin/pr_merge.py <pr> [--adjudicated]` — the ONLY
+#      merge path, with its seven gates untouched.  This script has no flag
+#      that can skip, weaken or fake a gate;
+#   3. retries once when CI dirties the primary checkout between the stash and
+#      the gate ("local changes would be overwritten by merge", 2026-09-04);
+#   4. commits the telemetry the merge produced and syncs the mirror.
+#
+# Stash conflicts on the append-only telemetry records are resolved by union
+# (the same rule W7 installs as a merge driver in .gitattributes): every line
+# of HEAD, the working tree and the stash, in that order, de-duplicated.  A
+# non-append-only file takes the stash version; untracked files come back from
+# the stash's third parent.
+#
+# Exit status: 0 merged; pr_merge.py's own status otherwise (1 on a failed
+# rebase).  Output of the gate run is kept at $CACHE_ROOT/daemon/merge-<pr>.out.
 set -u
 export PATH="$HOME/.local/bin:$HOME/.elan/bin:$PATH"
-cd "$HOME/MIPStarRE-qpbt" || exit 1
+
+CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+CHECKOUT="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
+RUN_DIR="$CACHE_ROOT/daemon"
+mkdir -p "$RUN_DIR"
+cd "$CHECKOUT" || exit 1
+
+version() {
+  local v
+  v="$(cat "$CACHE_ROOT/owner-bin/tools-version" 2>/dev/null | head -n 1)"
+  [ -n "$v" ] || v="$(git rev-parse --short HEAD 2>/dev/null || true)"
+  printf '%s\n' "${v:-unversioned}"
+}
+echo "tool=merge.sh version=$(version)"
+
+[ "$#" -ge 1 ] || { echo "usage: merge.sh <pr> [--adjudicated]" >&2; exit 2; }
 PR="$1"; shift
+case "$PR" in ''|*[!0-9]*) echo "merge.sh: pr must be a number, got '$PR'" >&2; exit 2;; esac
+OUT="$RUN_DIR/merge-$PR.out"
+
 union() { python3 - "$1" "$2" <<'PY'
 import sys, os, subprocess
 f, ref = sys.argv[1], sys.argv[2]
@@ -35,6 +74,7 @@ resolve_pop() {
   git reset -q; git stash drop -q; echo "stash resolved (union)"
 }
 pop() { git stash pop -q 2>/dev/null || { echo "stash pop conflict: auto-resolving"; resolve_pop; }; }
+
 git fetch -q github
 if [ -n "$(git log --oneline github/main..main)" ]; then
   echo "local main is ahead of github/main; rebasing first"
@@ -45,9 +85,9 @@ RC=1
 for attempt in 1 2 3; do
   STASHED=0
   if [ -n "$(git status --porcelain)" ]; then git stash push -q -u -m "merge.sh $PR telemetry" && STASHED=1; fi
-  python3 local/bin/pr_merge.py "$PR" "$@" > "/tmp/merge-$PR.out" 2>&1; RC=$?; cat "/tmp/merge-$PR.out"
+  python3 local/bin/pr_merge.py "$PR" "$@" > "$OUT" 2>&1; RC=$?; cat "$OUT"
   [ "$STASHED" -eq 1 ] && pop
-  if [ "$RC" -ne 0 ] && grep -q "would be overwritten by merge" "/tmp/merge-$PR.out"; then echo "primary dirtied during the gate; retry $attempt"; git merge --abort 2>/dev/null; sleep 5; continue; fi
+  if [ "$RC" -ne 0 ] && grep -q "would be overwritten by merge" "$OUT"; then echo "primary dirtied during the gate; retry $attempt"; git merge --abort 2>/dev/null; sleep 5; continue; fi
   break
 done
 [ "$RC" -eq 0 ] || { echo "MERGE_FAILED rc=$RC"; exit "$RC"; }
