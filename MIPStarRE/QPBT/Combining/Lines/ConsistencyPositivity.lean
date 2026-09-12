@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # Positivity of the consistency defect on opposite placements
@@ -167,13 +168,8 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
     {Y : Op (S.ExpandedLocalSpace p₂.side)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     0 ≤ S.place p₁ X * S.place p₂ Y := by
-  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
-  · exact place_AA'_mul_place_BA''_nonneg S hX hY
-  · rw [← place_AA'_mul_place_BA''_comm_local S Y X]
-    exact place_AA'_mul_place_BA''_nonneg S hY hX
-  · rw [← place_AB''_mul_place_BB'_comm_local S Y X]
-    exact place_AB''_mul_place_BB'_nonneg S hY hX
-  · exact place_AB''_mul_place_BB'_nonneg S hX hY
+  exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
+    (S.place_comm p₁ p₂ hopp X Y)
 
 end ProjectiveSetting
 
@@ -208,7 +204,7 @@ theorem offDiagonalPlacedProduct_nonneg {P : AdmissibleParams} {ε : ℝ}
       S.place p₁ (M₁.effect a) *
         S.place p₂ (∑ b : α, if a = b then 0 else M₂.effect b) := by
     intro a
-    rw [ProjectiveSetting.place_finset_sum_local, Finset.mul_sum]
+    rw [ProjectiveSetting.place_finsetSum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
     · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero_local, mul_zero]
