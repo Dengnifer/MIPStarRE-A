@@ -193,6 +193,84 @@ the preserved conditioned construction is not identified with
 The current target retains its explicit unfinished proof, without assuming
 any conditioning or transfer result in a source theorem.
 
+\subsection{Unrestricted point witnesses in the extended-line assertion}
+
+The same obstruction applies to the auxiliary extended-line assertion when
+its input point error is an arbitrary scalar.  The first-route estimate
+$C m g(\eps,md/q)$ does not remove this obstruction: it still tends to zero
+at $\eps=0$ with fixed $m,d$ and increasing $q$.
+The source instead uses the points constructed in its preceding lemmas,
+with $\delta_Q=\poly(\eps)$; Claim~17-1 explicitly retains this error.
+\footnote{The unrestricted auxiliary is
+\path{exists_extendedLinesWitness_established_ofPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean}, tracked by \ghissue{511}.
+The source passages are \path{lem:qld-4-10}, \path{lem:qld-4-12}, and
+\path{claim:17-1} in
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~689--709, 993--1018, and 1140--1173.}
+
+For an explicit example, set $m=d=1$ and let $q=2^{2k+1}>2$ increase.
+These parameters are admissible.  Use the perfect projective strategy from
+the completeness lemma for the Pauli basis test in \cite{Ji2020MIPStar}, and
+let $\hat\psi$ be its normalized expanded state.
+\footnote{The source is \path{lem:pauli-completeness} in
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~1229--1421.}
+On each player's expanded
+local space, define the supplied joint point measurement by
+\[
+ Q^{x,z}_{a,b}=
+ \begin{cases}
+   \Id,&(a,b)=(x^2,0),\\
+   0,&\text{otherwise}.
+ \end{cases}
+\]
+This is a projective measurement and is exactly self-consistent in every
+opposite placement.  The finitely many averaged squared distances from the
+two ordered expanded point products are finite real numbers.  Taking their
+maximum and zero gives a scalar $\delta_Q$ satisfying all the fields of the
+point witness.  No smallness of this scalar is required by the unrestricted
+assertion.  The combined point answer at $(x,z,\alpha,\beta)$ is
+deterministically $\alpha x^2$.
+
+The directly indexed law in dimension four chooses the axis component with
+probability $1/2$, and then chooses each coordinate with probability $1/4$.
+Restrict to its X-axis lines, of total mass $1/8$.  Such a line has fixed
+$(z,\alpha,\beta)$ and uniform coordinate $x$.  When $\alpha\ne0$, every
+line outcome with nonzero effect has degree at most one by the axis-degree
+requirement.  Consequently the polynomial $f(X)-\alpha X^2$ is nonzero of
+degree two, so it vanishes at at most two field elements.  Averaging over a
+POVM does not increase the agreement bound $2/q$: for a fixed line its
+outcome weights are the nonnegative expectations of the placed effects in
+$\hat\psi$, sum to one, and do not depend on the subsequently sampled $x$.
+Since the opposite point effect is either the identity or zero, these
+weights give exactly the evaluated agreement probabilities.  On these
+nondegenerate axis lines every evaluation is determined, so the completed
+answer symbol causes no additional case.
+
+The coefficient $\alpha$ is uniform and independent of $x$ on this part of
+the law.  All remaining consistency contributions are nonnegative.  Thus
+either orientation of an extended-line witness must have error at least
+\[
+ \frac18\left(1-\frac1q\right)\left(1-\frac2q\right)
+ \longrightarrow \frac18.
+\]
+On the other hand, the polynomial-error bound on $g$ supplies fixed constants
+$K\ge1$ and $r,s>0$ with
+$C g(0,1/q)\le CKq^{-s}\longrightarrow0$.  This contradicts the
+unrestricted auxiliary assertion, independently of the printed-error
+discrepancy and the diagonal-line degeneracy.
+
+This is a mathematical counterexample to the auxiliary quantifiers, not to
+the source theorem with its constructed points.  It is not claimed as a
+kernel-checked refutation: the formal perfect-strategy construction and
+the formal integration of this lower bound remain to be supplied.
+The existing auxiliary statement is preserved pending a separately scoped
+repair.  A source-faithful existence proof must construct polynomially
+controlled points internally and retain their error through the line
+estimates; it cannot cover arbitrary supplied point measurements by
+discarding their error parameter.
+
 \section{The source assertion and the two routes}
 
 The source proof in \cite{Ji2020MIPStar} constructs $\hat Q^{\ell}_f$ by
@@ -284,6 +362,20 @@ first-route bound is not dominated by any such function: along the
 scaling $\eps = m^{-4}$ with $q/(md) \to \infty$, both $m^2\eps = m^{-2}$
 and $md/q$ tend to $0$, while the term $m\,\eps^{1/4} = 1$ does not.
 Hence the established derivation supports no bound of the claimed form.
+This obstruction persists on the admissible numerical domain, even if the
+first-route term is capped by the independent unit bound on consistency.
+Indeed, set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and
+$\eps_n=m_n^{-4}$. The field-size exponent $6n+3$ is odd and
+$m_n\mid q_n$, so these parameters are admissible. Both $m_n^2\eps_n$
+and $m_nd_n/q_n$ equal $m_n^{-2}$ and tend to zero, whereas
+$\min\{1,m_n\eps_n^{1/4}\}=1$. Thus no bound of the corrected sum form
+$C((m^2\eps)^r+(md/q)^s)$ with positive exponents can dominate this
+capped term uniformly.%
+\footnote{This numerical obstruction is proved by
+\leanid{MIPStarRE.QPBT.not\_exists\_combining\_quarter\_power\_bound} in
+\path{MIPStarRE/QPBT/Combining/ErrorObstruction.lean}, tracked by
+\ghissue{510}. It does not construct a strategy attaining the first-route
+upper bound and does not refute the extended-line existence statement.}
 The second-route bound, even granting the missing decomposition, carries
 the separate prefactor $m^2$: writing $\delta_P = \poly(\eps, md/q)$
 with some fixed positive exponents, the contribution
