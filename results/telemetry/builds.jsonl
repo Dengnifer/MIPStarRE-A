@@ -1188,3 +1188,5 @@
 {"ts": "2026-09-12T14:55:29+0900", "kind": "ci-build", "trigger": "ci.sh pr=447", "seconds": 162, "outcome": "success", "sha": "aab4de9b29dc64e0114a40263f4193bfa07219b0", "note": "branch issue-440-axis-linepoint-resampling"}
 {"ts": "2026-09-12T14:55:40+0900", "kind": "ci-build", "trigger": "ci.sh pr=434", "seconds": 55, "outcome": "success", "sha": "653fe24c8e9f843acffa0dacc4e2293563d47db0", "note": "branch issue-413-zero-direction-line-mass"}
 {"ts": "2026-09-12T14:56:03+0900", "kind": "ci-build", "trigger": "ci.sh pr=532", "seconds": 33, "outcome": "success", "sha": "a59322a7a7e0963ebc254f97051bb28775000e96", "note": "branch issue-528-proof-pauli-soundness-qubit"}
+{"ts": "2026-09-12T14:57:07+0900", "kind": "ci-build", "trigger": "ci.sh pr=543", "seconds": 30, "outcome": "error", "sha": "e36fd1aa056782007917b0d6c5e19b85ea28179b", "note": "branch issue-517-proof-nonencodingmarginalmass-le"}
+{"ts": "2026-09-12T14:58:15+0900", "kind": "ci-build", "trigger": "ci.sh pr=349", "seconds": 926, "outcome": "success", "sha": "97f71282e61cd89b2ffff48e5eea9c35dec67a63", "note": "branch issue-346-direct-k-one-soundness-any-strategy"}
