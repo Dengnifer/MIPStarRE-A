@@ -92,10 +92,6 @@ REVIEW_HARDNESS_REASON="${MIPSTARRE_REVIEW_HARDNESS_REASON:-}"
 REVIEW_POLICY_ARGS=(--role reviewer --job-class "$REVIEW_JOB_CLASS")
 [ -z "$REVIEW_HARDNESS_REASON" ] ||
   REVIEW_POLICY_ARGS+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
-REVIEW_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
-  --model "$REVIEW_MODEL" --field model)" || exit 2
-PROSE_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
-  --model "$PROSE_MODEL" --field model)" || exit 2
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
@@ -113,6 +109,33 @@ LOCK_HELD=""
 log()  { printf '%s: %s\n' "$PROG" "$*" >&2; }
 warn() { printf '%s: warning: %s\n' "$PROG" "$*" >&2; }
 die()  { printf '%s: error: %s\n' "$PROG" "$*" >&2; exit 1; }
+
+# ------------------------------------------------------ model policy self-check
+# Resolve the reviewer models ONCE, before any worktree, diff or GitHub work,
+# and die with the policy's own message when it refuses.  The 2026-09-12 run
+# lost every fix session to a rejected model that was only discovered at the
+# dispatcher's preflight, one silent death per session; one loud line here is
+# the whole difference.
+POLICY_MODEL_OUT=""
+policy_model() {
+  # policy_model <requested> <label> — sets POLICY_MODEL_OUT, or dies loudly.
+  # Not a command substitution: `die` inside one would only kill the subshell.
+  local requested="$1" label="$2" rc=0
+  POLICY_MODEL_OUT="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+    --model "$requested" --effort "$REVIEW_EFFORT" --field model 2>&1)" || rc=$?
+  if [ "$rc" -ne 0 ] || [ -z "$POLICY_MODEL_OUT" ]; then
+    die "the model policy refuses the $label model '$requested':
+  ${POLICY_MODEL_OUT}
+  Leave MIPSTARRE_REVIEW_MODEL / MIPSTARRE_PROSE_MODEL unset for the published
+  default. A hard control-policy review is '--job-class hard_review' with
+  MIPSTARRE_REVIEW_HARDNESS_REASON, never a bare model
+  (local/protocols/review.md, local/protocols/sessions.md §2)."
+  fi
+}
+policy_model "$REVIEW_MODEL" code
+REVIEW_MODEL="$POLICY_MODEL_OUT"
+policy_model "$PROSE_MODEL" prose
+PROSE_MODEL="$POLICY_MODEL_OUT"
 
 case "$CITATION_MAX_BYTES" in
   ''|*[!0-9]*) die "MIPSTARRE_CITATION_MAX_BYTES must be an integer of at least 128" ;;
