@@ -108,7 +108,8 @@ private theorem postprocess_effect_of_injective
     have hfb : f b ≠ f a := fun h => hba (hf h)
     simp [hfb]
 
-private theorem postprocess_effect_eq_zero_of_notMem
+/-- Relabeling a measurement gives zero effect to outcomes outside the image. -/
+theorem postprocess_effect_eq_zero_of_notMem
     {α β V : Type*} [Fintype α] [Fintype β]
     [DecidableEq α] [DecidableEq β] [Fintype V] [DecidableEq V]
     (M : Measurement α V) (f : α → β) {b : β}
