@@ -32,7 +32,7 @@
 #   0  the session ran (its own exit status is reported in the summary)
 #   1  usage or environment error
 #   3  refused: invoked from automation, or the branch is being auto-fixed
-#   other: propagated from dispatch.sh / codex
+#   other: propagated from dispatch.sh
 #
 # Environment:
 #   MIPSTARRE_TRUSTED_REF   git ref the persona is read from (default: main)
@@ -322,7 +322,6 @@ STAMP="$(date -u +%Y%m%d-%H%M%S)"
 TASK="$RUN_DIR/$STAMP-task.md"
 CTX="$RUN_DIR/$STAMP-record.txt"
 STANDALONE="$RUN_DIR/$STAMP-standalone.md"
-OUT="$RUN_DIR/$STAMP-last-message.md"
 
 sanitize_to "$CONTEXT_SRC" "$CTX" 600
 
@@ -391,7 +390,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
   log "  role/sandbox: $ROLE / $SANDBOX"
   log "  worktree:     $WORKTREE"
   log "  task:         $TASK"
-  log "  fallback:     $STANDALONE"
+  log "  prompt:       $STANDALONE"
   exit 0
 fi
 
@@ -418,20 +417,7 @@ if [ -x "$DISPATCH" ]; then
   RC=$?
   set -e
 else
-  warn "local/bin/dispatch.sh not found; falling back to a direct 'codex exec'. This session will NOT appear in results/telemetry/sessions.jsonl, so the study loses it."
-  command -v codex >/dev/null 2>&1 ||
-    die "codex CLI not found on PATH and no local/bin/dispatch.sh to delegate to"
-  set +e
-  if [ -n "$AGENT_MODEL" ]; then
-    codex exec --sandbox "$SANDBOX" -C "$WORKTREE" -m "$AGENT_MODEL" \
-      -o "$OUT" -- "$(cat "$STANDALONE")"
-  else
-    codex exec --sandbox "$SANDBOX" -C "$WORKTREE" \
-      -o "$OUT" -- "$(cat "$STANDALONE")"
-  fi
-  RC=$?
-  set -e
-  log "final message: $OUT"
+  die "$DISPATCH is missing or not executable; session admission and telemetry require dispatch.sh"
 fi
 
 POST_HEAD="$(git -C "$WORKTREE" rev-parse HEAD)"

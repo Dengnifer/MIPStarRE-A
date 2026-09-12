@@ -1,0 +1,85 @@
+{
+  "schema": "qpbt-refill-capable-owner-v1",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "control_owner": "/root/astra_refill_coordinator",
+  "control_thread_id": "01a08017-2dc3-7bc3-904c-b390030026c6",
+  "control_model": "gpt-6-astra",
+  "control_effort": "ultra",
+  "control_capability": "Actual native list_agents and followup_task calls followed by useful successor activity",
+  "expiry": null,
+  "release_condition": "A successor demonstrates actual native list_agents and followup_task on useful approved work, followed by verified activity and explicit ownership transfer",
+  "routing_reason": "Current Sol coordinator contexts lack native collaboration tools; their observations and acknowledgments cannot replenish workers",
+  "scope": "Main-approved QPBT supplied-witness/direct-soundness frontier and existing PR integration queue; delegate may plan routine successors within this scope and existing budgets",
+  "review_constraint": "Independent canonical reviews still require the trusted request and fresh direct-root assignment; authors never review their own changes",
+  "allocation": {
+    "key_label": "space",
+    "total": 10,
+    "main": 1,
+    "native_slots": 9,
+    "extra_reservation": 0,
+    "external_admission": 0,
+    "useful_native_floor": 8,
+    "useful_native_aim": 9
+  },
+  "verified_activity": {
+    "observed_at": "2026-09-08T09:07:55.709Z",
+    "useful_native": 9,
+    "read_errors": 0,
+    "models": {"gpt-5.6-sol/ultra": 8, "gpt-6-astra/ultra": 1},
+    "evidence": "Independent lifecycle sampler plus current-turn model contexts and actual model/tool output; qpbt-switch activity recorded 9",
+    "workers": [
+      "/root/astra_refill_coordinator",
+      "/root/space_sol_publication_finish",
+      "/root/sol_ci320",
+      "/root/sol_direct_soundness_compression",
+      "/root/sol_refresh319_dependency",
+      "/root/sol_refresh343_parent",
+      "/root/sol_router_unrelated_appserver",
+      "/root/space_sol_pr249",
+      "/root/sol_review310_b37"
+    ]
+  },
+  "verified_sub60_cycle": {
+    "worker": "/root/space_sol_pr249",
+    "completed_task": "PR320 checked preservation publication",
+    "approved_successor": "Unique canonical exact-head CI320",
+    "completed_at": "2026-09-08T08:49:19.659Z",
+    "successor_started_at": "2026-09-08T08:49:59.049Z",
+    "first_actual_model_output_at": "2026-09-08T08:50:12.870Z",
+    "first_tool_output_at": "2026-09-08T08:50:43.804Z",
+    "dispatch_latency_s": 39.390,
+    "actual_model_recovery_latency_s": 53.211,
+    "tool_recovery_latency_s": 84.145,
+    "forced_or_probe_completion": false
+  },
+  "limitations": [
+    "Other measured dispatch/recovery cycles exceeded 60 seconds; no sustained long-run occupancy percentage is claimed",
+    "Brief seven-worker intervals and the later failed-handoff four/five-worker observations remain in the raw journals",
+    "The original root queue accepted an alert long before root consumption; queue acceptance alone is not enforcement",
+    "The older primary acknowledgment was observation-only and did not establish executable refill ownership"
+  ],
+  "rejected_handoffs": {
+    "primary": "/tmp/qpbt-primary-refill-handoff-ack-20260908.json",
+    "owner_evidence": "/tmp/qpbt-meta-handoff-capability-followup-20260908.json",
+    "reason": "Native collaboration tools absent; spawned-child queue fallback rejected",
+    "backdated_transfer_claim_accepted": false
+  },
+  "budgets": {
+    "same_goal_and_cumulative_counters": true,
+    "original_coordinator_window_minutes": 30,
+    "explicit_extension_minutes": 15,
+    "subsequent_control": "Owner-authorized continuation without expiry; cumulative elapsed and costs retained",
+    "reset": false,
+    "b8_attempts": 13,
+    "b8_working_seconds": 26509
+  },
+  "telemetry": {
+    "sole_primary_writer": "/root/space_sol_publication_finish",
+    "archive": "results/telemetry/owner-audits/occupancy-enforcement-20260908/",
+    "preserve_stash": "69b0ebad",
+    "preserve_post_stash_owner_rows_at": "2026-09-08T09:02:13Z",
+    "preserve_earlier_owner_support_rows_at": "2026-09-08T08:37:56Z",
+    "publication": "Next normal reconciliation/publication after the gated merge; preserve all concurrent rows, verify losses and clean local/live equality",
+    "no_checkpoint_only_commit": true
+  }
+}
