@@ -31,6 +31,9 @@
 #     superseded-PR, stale-lane and spool passes of design §4 have no other
 #     runner, and without them a provider outage's dead workers are
 #     re-dispatched by hand as they were on 2026-09-12;
+#   * after a merge the chsh build seed is refreshed, detached and at most
+#     hourly, and only while the run mode enables the offload — main has moved,
+#     so every offloaded lane would otherwise rebuild the difference;
 #   * pending telemetry is committed from an EXPLICIT path list
 #     (daemon.conf telemetry_paths) and published through
 #     local/bin/checked-push.sh — never `git add results/telemetry` and never
@@ -68,7 +71,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --once) ONCE=1 ;;
     --dry-run) DRY=1; ONCE=1 ;;
-    -h|--help) sed -n '2,58p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,62p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) printf '%s: unknown argument %s\n' "$PROG" "$1" >&2; exit 2 ;;
   esac
   shift
@@ -102,6 +105,7 @@ dep_path() {
        else printf '%s\n' "$SELF_DIR/$1"; fi ;;
   esac
 }
+CHSH_SH="$(dep_path build-on-chsh.sh)"
 SCAN_PY="$(dep_path daemon-scan.py)"
 MERGE_SH="$(dep_path merge.sh)"
 FIX_LANE="$(dep_path fix-lane.sh)"
@@ -449,6 +453,26 @@ launch_repair() { # PR N BR HEAD CLASS
   log "repairing PR $PR ($BR) mode=$mode, pid $(cat "$D/pr$PR.repairing")"
 }
 
+# ------------------------------------------------- chsh build farm (full speed)
+# A merge moves main, which leaves chsh's checkout and its hardlink build seed
+# behind: an offloaded lane then rebuilds the difference — slow, never wrong.
+# build-on-chsh.sh --seed-refresh takes its own lock, returns immediately when it
+# ran within the hour, and does nothing at all when the run mode does not enable
+# the offload, so firing this on every merge is safe and needs no state here.
+# It is slow (a full rebuild on chsh), hence detached; its log is
+# $CACHE_ROOT/watchdog/chsh/seed-refresh.log.
+chsh_seed_refresh() {
+  [ -r "$CHSH_SH" ] || return 0
+  if [ "$DRY" = 1 ]; then
+    log "would refresh the chsh seed (the run mode decides whether it runs)"; return 0
+  fi
+  bash "$CHSH_SH" --check > /dev/null 2>&1 || return 0
+  mkdir -p "$CACHE_ROOT/watchdog/chsh" 2>/dev/null || true
+  setsid nohup bash "$CHSH_SH" --seed-refresh \
+    >> "$CACHE_ROOT/watchdog/chsh/seed-refresh.log" 2>&1 < /dev/null &
+  log "chsh seed refresh started detached (at most hourly, skipped if one is running)"
+}
+
 try_merge() { # PR N MODE HEAD
   local PR="$1" N="$2" MODE="$3" H="$4" T cr cls reason
   local ARGS=()
@@ -467,6 +491,7 @@ try_merge() { # PR N MODE HEAD
     grep -v "^MIPStarRE pre-\|^hint\|^Blueprint" "$L/pr$PR.merge.log" | tail -2
     rm -f "$D/pr$PR.failed" "$D/pr$PR.repair-done"; printf '%s\n' "$PR" >> "$D/merged"
     mark_event "$PR" "$H" merged
+    chsh_seed_refresh
     # v9e: pending telemetry is committed AFTER a merge (main moved anyway); a
     # commit before the merge tripped gate 2b for PR 359.
     if telemetry_pending; then

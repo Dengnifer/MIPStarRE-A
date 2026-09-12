@@ -28,6 +28,7 @@
 #                  a historical /tmp path runs versioned code.  Nothing is ever written or
 #                  edited in /tmp; an existing regular file there is refused, not clobbered.
 #   --crons        run install-crons.sh afterwards (crontab regenerated from run-mode).
+#                  Also installs the chsh build farm's known-hosts file (below).
 #   --dry-run      print the plan and touch nothing (implies --dry-run for --crons too).
 #   --dest DIR     install into DIR instead of $MIPSTARRE_CACHE_ROOT/owner-bin (tests).
 #   --compat-dir D create the compat symlinks in D instead of /tmp (tests).
@@ -41,6 +42,13 @@
 #                       (the fast and the default rendering), because run_mode.py set speed
 #                       regenerates it in place
 #   repo-root           the checkout this release was installed from
+#
+# Outside owner-bin/ this installer also places the chsh build farm's host keys at
+# $MIPSTARRE_CACHE_ROOT/watchdog/chsh/known_hosts, copied from
+# $MIPSTARRE_CHSH_KNOWN_HOSTS (default /tmp/chsh-setup/known_hosts).  They are runtime
+# state, not a committed file, and build-on-chsh.sh uses them with
+# StrictHostKeyChecking=yes.  Without them the offload exits 64 and every lane simply
+# builds on ghz — a missing file is a warning here, never a failed install.
 #   attic/<ts>/         the previous copy of every file this run replaced, plus its manifest
 #
 # Refusal rule (the point of the installer): a deployed file whose hash is neither the
@@ -54,7 +62,7 @@ set -euo pipefail
 
 PROG="install.sh"
 
-usage() { sed -n '2,52p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,60p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 FORCE=0; COMPAT=0; CRONS=0; DRY=0; VERIFY=0; RECORD=""; START_LOOPS=0
 DEST=""; SPEED=""; COMPAT_DIR="${MIPSTARRE_COMPAT_DIR:-/tmp}"
@@ -79,6 +87,26 @@ done
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 DEST="${DEST:-$CACHE_ROOT/owner-bin}"
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
+
+CHSH_STATE="$CACHE_ROOT/watchdog/chsh"
+CHSH_KNOWN_HOSTS_SRC="${MIPSTARRE_CHSH_KNOWN_HOSTS:-/tmp/chsh-setup/known_hosts}"
+
+install_chsh_known_hosts() {
+  if [ ! -r "$CHSH_KNOWN_HOSTS_SRC" ]; then
+    echo "$PROG: no chsh known-hosts at $CHSH_KNOWN_HOSTS_SRC;" \
+         "the build farm stays unusable and lanes build on this host"
+    return 0
+  fi
+  if [ -r "$CHSH_STATE/known_hosts" ] && cmp -s "$CHSH_KNOWN_HOSTS_SRC" "$CHSH_STATE/known_hosts"; then
+    echo "$PROG: chsh known_hosts unchanged ($CHSH_STATE/known_hosts)"
+    return 0
+  fi
+  mkdir -p "$CHSH_STATE"
+  cp "$CHSH_KNOWN_HOSTS_SRC" "$CHSH_STATE/.known_hosts.new"
+  chmod 644 "$CHSH_STATE/.known_hosts.new"
+  mv "$CHSH_STATE/.known_hosts.new" "$CHSH_STATE/known_hosts"
+  echo "$PROG: chsh known_hosts installed at $CHSH_STATE/known_hosts (from $CHSH_KNOWN_HOSTS_SRC)"
+}
 
 # --- the checkout this installer belongs to --------------------------------------------
 # When install.sh is run from owner-bin (--verify / --record on the host) it cannot derive
@@ -122,6 +150,7 @@ codex|owner-bin-codex|755|required
 stack-watch.sh|stack-watch.sh|755|optional
 capacityd.sh|capacityd.sh|755|optional
 merge-daemon.sh|merge-daemon.sh|755|optional
+build-on-chsh.sh|build-on-chsh.sh|755|optional
 merge.sh|merge.sh|755|optional
 daemon-scan.py|daemon-scan.py|755|optional
 daemon.conf|daemon.conf|644|optional
@@ -310,6 +339,11 @@ done
 
 if [ "$DRY" -eq 1 ]; then
   echo "$PROG: [dry-run] no file written, no symlink created, no crontab touched"
+  if [ -r "$CHSH_KNOWN_HOSTS_SRC" ]; then
+    echo "$PROG: [dry-run] would install $CHSH_KNOWN_HOSTS_SRC as $CHSH_STATE/known_hosts"
+  else
+    echo "$PROG: [dry-run] no chsh known-hosts at $CHSH_KNOWN_HOSTS_SRC; the build farm stays unusable"
+  fi
   if [ "$CRONS" -eq 1 ]; then
     "$SRC/install-crons.sh" --dry-run || exit $?
   fi
@@ -379,6 +413,9 @@ SHORT="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 printf '%s\n' "$ROOT" > "$DEST/repo-root"
 echo "$PROG: installed $(wc -l < "$DEST/manifest.sha256" | tr -d ' ') files, release $SHORT ($DESCRIBE)"
 if [ -d "$ATTIC" ]; then echo "$PROG: previous copies kept in $ATTIC"; fi
+
+# --- the chsh build farm's host keys -------------------------------------------------------
+install_chsh_known_hosts
 
 # --- compat symlinks ----------------------------------------------------------------------
 if [ "$COMPAT" -eq 1 ]; then

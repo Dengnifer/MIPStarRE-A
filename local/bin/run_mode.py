@@ -19,6 +19,11 @@ Subcommands::
     run_mode.py pause [--reason TEXT]
     run_mode.py resume
 
+``run.compute.offload_hosts`` names the extra build hosts a run may use.
+``get offload`` answers ``yes`` only when the run is ``fast``, lists ``chsh``
+and is not paused — the owner's rule that the second host belongs to full speed
+mode and to nothing else (``local/protocols/full-speed-mode.md``).
+
 ``models.override`` is resolved against the speed tier rather than read
 literally: ``null`` means ``astra-all`` whenever ``run.speed`` is ``fast`` — in
 full speed mode every role, reviewers included, runs the hard model — and the
@@ -87,6 +92,20 @@ OVERRIDES = (None, "astra-all", "policy")
 #: field runs its reviewers on the cheap model and nothing says so.
 SPEED_DEFAULT_OVERRIDE = {"fast": "astra-all", "default": None}
 
+#: Build hosts a brief may list under ``run.compute.offload_hosts``.  An
+#: unknown name is an exit-2 validation error rather than a host nobody has
+#: keys for: the offload is a mode of the run, not a free-text field.
+OFFLOAD_HOSTS = ("chsh",)
+
+#: The offload host the build farm of 2026-09-12 prepared.  Listed once here so
+#: no script has to spell it.
+OFFLOAD_DEFAULT_HOST = "chsh"
+
+#: The speed tier that may use the extra hosts at all.  The owner's rule: in
+#: full speed mode the compute and the storage of chsh are used alongside ghz,
+#: and outside full speed mode chsh is never used.
+OFFLOAD_SPEED = "fast"
+
 #: The literal `run.dispatch_cutoff` that means "no cutoff".
 CUTOFF_OPEN = "until my word"
 
@@ -101,7 +120,9 @@ RUN_KEYS_REQUIRED = (
     "label", "start", "dispatch_cutoff", "pause_deadline_min", "speed",
     "occupancy_target", "progress_issue", "estimate_issue", "owner_inbox_issue",
 )
-RUN_KEYS_OPTIONAL = ("turn_max_min", "main")
+RUN_KEYS_OPTIONAL = ("turn_max_min", "main", "compute")
+
+COMPUTE_KEYS = ("offload_hosts",)
 
 #: The main session's own launch values, read by ``local/bin/main-session.sh``
 #: through ``run_mode.py get main.<field>``.  Optional in the brief and defaulted
@@ -306,7 +327,42 @@ def _validate_run(run: dict) -> dict:
         out["turn_max_min"] = TURN_MAX_MIN[speed]
     out["estimate_cadence_min"] = ESTIMATE_CADENCE_MIN[speed]
     out["main"] = _validate_main(run.get("main"))
+    out["compute"] = _validate_compute(run.get("compute"))
     return out
+
+
+def _validate_compute(compute) -> dict:
+    """``run.compute``: the extra build hosts this run may use.
+
+    Optional, and its default is the empty list — a run that says nothing about
+    the second host does not use it.  Validated at briefing time so a typo is an
+    exit 2 at ``apply`` rather than a lane quietly building on this host all
+    night while the owner believes the farm is in use.
+    """
+    if compute is None:
+        return {"offload_hosts": []}
+    _require_mapping(compute, "run.compute")
+    unknown = sorted(set(compute) - set(COMPUTE_KEYS))
+    if unknown:
+        raise BriefError(f"run.compute.{unknown[0]}",
+                         f"unknown key(s) under 'run.compute': {', '.join(unknown)}")
+    hosts = compute.get("offload_hosts")
+    if hosts is None:
+        return {"offload_hosts": []}
+    if not isinstance(hosts, list):
+        raise BriefError("run.compute.offload_hosts",
+                         "run.compute.offload_hosts must be a list of host names "
+                         f"from {OFFLOAD_HOSTS}, got {hosts!r}")
+    out: list[str] = []
+    for index, raw in enumerate(hosts):
+        host = _require_text(raw, f"run.compute.offload_hosts[{index}]")
+        if host not in OFFLOAD_HOSTS:
+            raise BriefError(f"run.compute.offload_hosts[{index}]",
+                             f"unknown build host {host!r}; known hosts: "
+                             f"{', '.join(OFFLOAD_HOSTS)}")
+        if host not in out:
+            out.append(host)
+    return {"offload_hosts": out}
 
 
 def _validate_main(main) -> dict:
@@ -433,6 +489,41 @@ def resolved_models(briefed: str | None, speed: str) -> dict:
     """The mode file's ``models`` block: what was briefed, what is in force, why."""
     effective, source = resolve_override(speed, briefed)
     return {"override": briefed, "effective": effective, "source": source}
+
+
+def offload_hosts(mode: dict) -> list[str]:
+    """The build hosts the brief listed; an older mode document has none."""
+    run = mode.get("run") if isinstance(mode.get("run"), dict) else {}
+    compute = run.get("compute") if isinstance(run.get("compute"), dict) else {}
+    hosts = compute.get("offload_hosts")
+    return [h for h in hosts if isinstance(h, str)] if isinstance(hosts, list) else []
+
+
+def offload_state(mode: dict, host: str = OFFLOAD_DEFAULT_HOST) -> tuple[bool, str]:
+    """Is *host* usable by this run, and why — the ONE answer to that question.
+
+    True only when the brief lists the host AND the speed tier is ``fast`` AND
+    the run is not paused.  Everything else is False, including a mode document
+    that predates the field: the owner's rule is that the second host belongs to
+    full speed mode, so "not stated" and "paused" both mean this host is not
+    touched at all.
+    """
+    hosts = offload_hosts(mode)
+    if host not in hosts:
+        listed = ", ".join(hosts) if hosts else "nothing"
+        return (False, f"run.compute.offload_hosts lists {listed}, not {host}")
+    speed = mode.get("run", {}).get("speed", "default")
+    if speed != OFFLOAD_SPEED:
+        return (False, f"run.speed is {speed!r}, and {host} is used only at "
+                       f"{OFFLOAD_SPEED!r} speed")
+    if mode.get("paused"):
+        return (False, f"the run is paused (since {mode.get('paused_at')}); "
+                       f"{host} is not used while admission is stopped")
+    return (True, f"run.speed {OFFLOAD_SPEED} and run.compute.offload_hosts lists {host}")
+
+
+def offload_enabled(mode: dict, host: str = OFFLOAD_DEFAULT_HOST) -> bool:
+    return offload_state(mode, host)[0]
 
 
 def mode_override(mode: dict) -> tuple[str | None, str]:
@@ -731,6 +822,12 @@ SCALAR_KEYS = {
     "model_override": lambda m: mode_override(m)[0] or "none",
     "model_override_briefed": lambda m: m["models"].get("override") or "null",
     "model_override_source": lambda m: mode_override(m)[1],
+    # The build farm.  `offload` is what lane.sh, ci.sh and build-on-chsh.sh
+    # ask; it is `no` for a default-speed run, for a run that does not list the
+    # host, for a paused run and for a mode document that predates the field.
+    "offload": lambda m: "yes" if offload_enabled(m) else "no",
+    "offload_hosts": lambda m: " ".join(offload_hosts(m)) or "none",
+    "offload_reason": lambda m: offload_state(m)[1],
     "brief_sha256": lambda m: m["brief_sha256"],
     "paused": lambda m: "yes" if m.get("paused") else "no",
     # The MAIN session's launch values.  main-session.sh reads exactly these
@@ -803,6 +900,8 @@ def render_show(mode: dict, root: Path | None = None) -> str:
         f"#{run['estimate_issue']}, owner inbox #{run['owner_inbox_issue']}",
         f"models           override {mode_override(mode)[0] or 'none'}  "
         f"({mode_override(mode)[1]})",
+        f"offload          {'yes' if offload_enabled(mode) else 'no'}  "
+        f"({offload_state(mode)[1]})",
         f"main session     {run.get('main', MAIN_DEFAULTS)['model']} effort "
         f"{run.get('main', MAIN_DEFAULTS)['effort']}, CODEX_HOME "
         f"{run.get('main', MAIN_DEFAULTS)['codex_home'] or '(ambient)'}",
@@ -1069,7 +1168,9 @@ def cmd_apply(args: argparse.Namespace) -> int:
                f"cutoff {run['dispatch_cutoff']}, issues "
                f"progress #{run['progress_issue']} estimate #{run['estimate_issue']} "
                f"inbox #{run['owner_inbox_issue']}, override "
-               f"{mode_override(mode)[0] or 'none'}")
+               f"{mode_override(mode)[0] or 'none'}, offload "
+               f"{'yes' if offload_enabled(mode) else 'no'} "
+               f"({' '.join(offload_hosts(mode)) or 'no extra host'})")
 
     if args.dry_run:
         sys.stdout.write(render_show(mode))
