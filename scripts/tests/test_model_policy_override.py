@@ -10,12 +10,14 @@ violations.
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -245,6 +247,70 @@ class CallerSelfCheckTests(unittest.TestCase):
                 result = subprocess.run(["bash", "-n", str(BIN_DIR / name)],
                                         capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+
+# ── the session row ─────────────────────────────────────────────────────────
+
+
+class SessionRowTests(_Base):
+    """W9(2): `sessions.jsonl` names the model that ran and why it was chosen.
+
+    On 2026-09-12 the `sol -> astra` rewrite lived in the PATH shim, so the row
+    recorded the policy's model while the session ran the other one and no audit
+    could see the override at all.  The row must now carry the resolved model,
+    the override mode and the override's source.
+    """
+
+    def summarize(self, selection: dict, observed: str) -> dict:
+        sys.path.insert(0, str(BIN_DIR))
+        import telemetry  # noqa: PLC0415 - the cache root must be set first
+
+        root = self.cache / "repo"
+        (root / "results/telemetry").mkdir(parents=True, exist_ok=True)
+        capture = root / "capture.jsonl"
+        capture.write_text(
+            json.dumps(dict(type="thread.started", thread_id="fixture")) + "\n" +
+            json.dumps(dict(type="turn_context", payload=dict(model=observed))) + "\n",
+            encoding="utf-8")
+        snapshot = root / "policy.json"
+        snapshot.write_text(json.dumps(selection), encoding="utf-8")
+        args = telemetry._build_parser().parse_args([
+            "--repo-root", str(root), "session-summarize", str(capture),
+            "--role", selection["role"], "--model", selection["model"],
+            "--requested-effort", "ultra", "--model-policy-file", str(snapshot),
+            "--no-rollout-scan", "--dispatch-kind", "new",
+            "--activation-at", "2026-09-06T00:00:00Z"])
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(telemetry.cmd_session_summarize(args), 0)
+        return json.loads(out.getvalue())
+
+    def test_an_override_puts_the_resolved_model_and_its_source_on_the_row(self) -> None:
+        self.set_knob("astra-all")
+        selection = model_policy.select_model("reviewer", "independent_review")
+        self.assertEqual(selection["model"], "gpt-6-astra")
+        record = self.summarize(selection, "gpt-6-astra")
+        self.assertEqual(record["selected_model"], "gpt-6-astra")
+        self.assertEqual(record["effective_model"], "gpt-6-astra")
+        self.assertEqual(record["override_mode"], "astra-all")
+        self.assertIn("model-override", record["override_source"])
+        self.assertEqual(record["model_policy"]["override_source"],
+                         record["override_source"])
+        self.assertNotEqual(record.get("status"), "failed")
+
+    def test_without_an_override_the_row_carries_no_override_fields(self) -> None:
+        selection = model_policy.select_model("reviewer", "independent_review")
+        self.assertEqual(selection["model"], "gpt-5.6-sol")
+        record = self.summarize(selection, "gpt-5.6-sol")
+        self.assertEqual(record["selected_model"], "gpt-5.6-sol")
+        self.assertNotIn("override_mode", record)
+        self.assertNotIn("override_source", record)
+
+    def test_dispatch_hands_telemetry_the_policy_snapshot_it_used(self) -> None:
+        body = (REPO_ROOT / "local/bin/dispatch.sh").read_text(encoding="utf-8")
+        self.assertIn("--model-policy-file", body,
+                      "the row's override fields come from this snapshot")
+        self.assertIn('"$MODEL_POLICY_JSON" > "$MODEL_POLICY_FILE"', body)
 
 
 if __name__ == "__main__":

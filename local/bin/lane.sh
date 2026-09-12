@@ -55,7 +55,14 @@ P="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 OWNER_BIN="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}"
 export PATH="$OWNER_BIN:$HOME/.local/bin:$HOME/.elan/bin:$PATH"
-export MIPSTARRE_CODEX_MODEL="${MIPSTARRE_CODEX_MODEL:-$(cat "$CACHE_ROOT/watchdog/model.txt" 2>/dev/null || echo gpt-5.6-sol)}"
+# The model is the policy's decision, never a lane default: dispatch.sh asks
+# model_policy.py, and the run-wide switch is `models.override` in the run
+# brief (watchdog/model-override), which telemetry records on the session row.
+# `auto` is the only value that lets both work. The literal `gpt-5.6-sol`
+# default and the `watchdog/model.txt` side channel each pinned a model behind
+# the policy's back, so a full speed run could not move its lanes to the hard
+# model without editing a file nothing else reads.
+export MIPSTARRE_CODEX_MODEL="${MIPSTARRE_CODEX_MODEL:-auto}"
 export MIPSTARRE_SESSION="owner-operator"
 
 STATE="$CACHE_ROOT/watchdog/lanes"; mkdir -p "$STATE"
@@ -246,7 +253,7 @@ if [ "$SKIP_DISPATCH" != 1 ]; then
   RESUME=(); [ -s "$STATE/$N.thread" ] && RESUME=(--resume "$(cat "$STATE/$N.thread")")
   DRC=0
   for attempt in 1 2 3; do
-    log "dispatch $ROLE for #$N (model $MIPSTARRE_CODEX_MODEL, attempt $attempt)"
+    log "dispatch $ROLE for #$N (requested model $MIPSTARRE_CODEX_MODEL; model_policy.py resolves it, attempt $attempt)"
     # The global launch lock serializes the DISPATCH CALL only: waiting for a
     # slot inside it capped the whole pipeline at ~2.4 launches/minute and let
     # one starved lane block every other for up to six hours.
