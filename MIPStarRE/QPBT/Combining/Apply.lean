@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.PairCompletion
 import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
@@ -176,6 +177,13 @@ remain open and are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
 combined-lines prefactor into the final universal constants is to use
 `deltaQld_mono` on its stated source parameter domain.
+
+The algebraic restriction and projective completion are proved in
+`PairCompletion.lean`. Its `completedPairMeasurement_consistencyDefect_le`
+bounds the completed defect by one minus the retained overlap on a unit state.
+The concentration estimate `eq:qld-g-non-separable` and the retained point
+overlap estimates preceding the completion remain to be derived from the
+strategy, as tracked by issue #513. No quantitative witness is assumed here.
 -/
 theorem exists_globalPairWitness :
     ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧

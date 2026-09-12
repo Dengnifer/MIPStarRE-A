@@ -7643,6 +7643,20 @@ not actual commit/publication hooks. No productive session was killed.
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
 
+## 2026-09-12 - Proof-packet CI inherits an escalation reason
+
+- Session `prover-513-20260912-01`, PR #535, head `fccdd5a12ce1f460dd3155f2e69296b11a0a7240`:
+  the build and Lean audits passed, but `blueprint-sync` failed in
+  `test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra` (629 tests,
+  one error, nine skips). Invoking-model and review-model settings had been
+  scrubbed. The isolated dry-run reproduction reported `an escalation reason
+  requires a hard job classification`: the fixture's bounded job inherited
+  `MIPSTARRE_HARDNESS_REASON` from the source-semantic prover dispatch.
+  Unsetting that variable and `MIPSTARRE_JOB_CLASS` as well makes the isolated
+  test pass. Rerun exact-head CI with both unset; no routing policy or workflow
+  implementation was changed. Future dispatched-session CI invocations should
+  scrub classification and escalation context alongside model/effort settings.
+
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 
 - Session `prover-528-20260912-01`, issue #528: the first exact-head CI run for
