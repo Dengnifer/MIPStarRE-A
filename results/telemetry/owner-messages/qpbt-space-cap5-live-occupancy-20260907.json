@@ -1,0 +1,81 @@
+{
+  "schema": "qpbt-native-occupancy-v1",
+  "timestamp": "2026-09-07T18:02:43.929691+00:00",
+  "observation_source": "Fresh collaboration.list_agents and current canonical rollout tool events",
+  "root_pid": 2085772,
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "key_label": "space",
+  "total_allocation": 5,
+  "native_descendant_cap": 3,
+  "external_admission": 0,
+  "observed_running_native_workers": 2,
+  "observed_useful_native_workers": 2,
+  "tasks": [
+    {
+      "thread_id": "01a07aef-32df-75b2-a189-9b66fe88bac7",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_integration",
+      "start": "2026-09-07T08:14:51.780Z",
+      "end": null,
+      "assigned": "2026-09-07T17:59:23.812Z",
+      "turn_start": "2026-09-07T16:17:08.324Z",
+      "observed_usage": {
+        "input_tokens": 195332776,
+        "cached_input_tokens": 194430976,
+        "output_tokens": 241305,
+        "reasoning_output_tokens": 134893,
+        "total_tokens": 195574081
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "task": "/root/relay3_integration",
+      "role": "Required control-policy CI/review integration",
+      "first_actual_tool": "2026-09-07T16:17:37.887Z",
+      "last_actual_tool": "2026-09-07T18:02:43.363Z",
+      "key_label": "space",
+      "usage": null,
+      "usage_scope": "unknown; cumulative observations are not additive",
+      "model_reason": "Hard control-policy role, grandfathered Astra Ultra identity",
+      "counted_in_future_new_dispatch_ratio": false
+    },
+    {
+      "thread_id": "01a07bd2-61a1-7d23-abbb-d21570091c34",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/cap11_pr253",
+      "start": "2026-09-07T12:23:00.521Z",
+      "end": null,
+      "assigned": "2026-09-07T17:59:05.632Z",
+      "turn_start": "2026-09-07T17:59:05.553Z",
+      "observed_usage": {
+        "input_tokens": 96472283,
+        "cached_input_tokens": 95501184,
+        "output_tokens": 156880,
+        "reasoning_output_tokens": 103912,
+        "total_tokens": 96629163
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "task": "/root/cap11_pr253",
+      "role": "Independent hard control-policy CODE review",
+      "first_actual_tool": "2026-09-07T17:59:21.989Z",
+      "last_actual_tool": "2026-09-07T18:02:28.004Z",
+      "key_label": "space",
+      "usage": null,
+      "usage_scope": "unknown; cumulative observations are not additive",
+      "model_reason": "Hard control-policy role, grandfathered Astra Ultra identity",
+      "counted_in_future_new_dispatch_ratio": false
+    }
+  ],
+  "completed": [
+    "/root/cap11_pr281"
+  ],
+  "pending_init": [],
+  "previous_observation": "/tmp/qpbt-space-cap5-live-occupancy-20260907-prior-04e62e252a2c.json",
+  "allocation_reason": "Author complete; independent review follows green exact-head CI. The bounded priority301 resume does not authorize refilling old mathematics.",
+  "sol_first_live_activation": false,
+  "observed_new_sol_dispatches": 0,
+  "routine_sol_config_is_not_runtime_observation": true,
+  "occupancy_percent": null,
+  "previous_cap11_floor_superseded": true,
+  "budgets_reset": false
+}
