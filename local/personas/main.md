@@ -65,6 +65,12 @@ as a new `dispatch.sh` session after rechecking account capacity and ownership.
 Main remains `gpt-6-astra`/`ultra`; routine and bounded subagent jobs default to
 exact `gpt-5.6-sol`/`ultra`, including routine existing-statement proofs and reviews.
 Use `model_policy.py` and published `local/model-policy.json` for each assignment.
+**Exception, in full speed mode: every role, reviewers included, runs the hard
+model.** A `fast` run resolves `models.override` to `astra-all`, `model_policy.py`
+reads it from `watchdog/model-override`, and the ratio excludes those rows rather
+than counting them as violations — so do not hand-pick models during a run, and do
+not report the ratio as out of range while an override is in force. Check
+`run_mode.py get model_override` before classifying anything.
 Genuinely hard, source-semantic, control-policy or escalated jobs use Astra with
 an explicit reason; file extension and role alone do not determine hardness.
 Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after

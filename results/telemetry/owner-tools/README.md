@@ -200,6 +200,15 @@ The shim does **not** rewrite the model. The `gpt-5.6-sol → gpt-6-astra` rewri
 carry made `sessions.jsonl` record a model that never ran; a run-wide override belongs in
 `models.override` in the run brief, where telemetry can see it.
 
+`models.override` resolves from the speed tier: **in full speed mode every role, reviewers
+included, runs the hard model**, so `null` means `astra-all` whenever `run.speed` is `fast`
+and the published `local/model-policy.json` otherwise. Write `"policy"` to keep the
+published policy during a fast run, `"astra-all"` to force the hard model at default speed.
+`run_mode.py set speed` re-resolves the field and rewrites `watchdog/model-override` with
+it, and then regenerates the crontab through `install-crons.sh` — the estimate cadence
+lives there, and a tier switch that leaves it alone is half a switch. `run_mode.py get
+model_override` answers with what is in force; `model_override_source` says why.
+
 ## Launching the main session
 
 `local/bin/main-session.sh` is the only launcher. It reads the model, the effort and the

@@ -37,7 +37,7 @@ the **only** artifact the owner authors for a run.
 | `accounts[].nominal_limit` | **a ceiling, never a target** (see below) |
 | `accounts[].external_reserved` | slots on that key the pipeline must not use (a forked session sharing the key), subtracted from the ceiling |
 | `accounts[].enabled` | `false` means the pipeline never dispatches there at all |
-| `models.override` | `null` = the published `local/model-policy.json`; `"astra-all"` = every role runs the hard model, recorded in telemetry |
+| `models.override` | `null` = **resolve from `run.speed`** (section 5): `fast` means `astra-all`, `default` means the published `local/model-policy.json`. `"astra-all"` forces the hard model at any speed; `"policy"` keeps the published policy at any speed. Whatever is in force is recorded in telemetry |
 
 **`nominal_limit` is a ceiling and never a target.** It is the highest
 concurrency the key may ever reach. The controller may sit below it for the
@@ -99,11 +99,12 @@ On success `apply`
 1. writes `watchdog/run-mode.json` atomically (temp file + `os.replace`);
 2. derives `watchdog/max-codex-primary`, `max-codex-second` and `max-codex`;
 3. regenerates the deployed PATH shim for the briefed speed (section 5);
-4. writes or removes `watchdog/model-override` from `models.override`, which is
-   what makes that field *do* something: `astra-all` writes the runtime knob
-   `model_policy.py` reads, `null` removes it. Validating the field is not
-   applying it, and until this step existed "every worker on the hard model"
-   still needed a hand-edited knob file or a reviewed PR mid-run;
+4. writes or removes `watchdog/model-override` from the **resolved**
+   `models.override` (section 5), which is what makes that field *do*
+   something: an override in force writes the runtime knob `model_policy.py`
+   reads, no override removes it. Validating the field is not applying it, and
+   until this step existed "every worker on the hard model" still needed a
+   hand-edited knob file or a reviewed PR mid-run;
 5. appends a `stages.jsonl` row carrying the brief's `sha256`;
 6. appends one row to `results/telemetry/design-decisions.md`.
 
@@ -196,6 +197,18 @@ The split between the two issues is normative in
 | shim | `service_tier="priority"` | no tier argument |
 | estimate cadence | every 30 min | every 6 h |
 | main-session turn cap | 8 min | 20 min |
+| models (`models.override: null`) | `astra-all` | the published `local/model-policy.json` |
+
+**In full speed mode every role, reviewers included, runs the hard model.**
+Review is a semantic-alignment phase and needs the strong model as much as
+proving does, so this is the *default* of a `fast` run rather than a field the
+brief has to remember: `models.override: null` resolves to `astra-all` at
+`fast` speed and to the published policy at `default` speed. A fast run that
+wants the published policy writes the explicit word `"policy"`, so declining
+the override is a recorded decision and not an omission; `"astra-all"` forces
+the hard model at `default` speed. `run_mode.py get model_override` answers with
+what is actually in force, `model_override_briefed` with what the owner wrote
+and `model_override_source` with which of the two decided it.
 
 Mid-run:
 
@@ -211,12 +224,27 @@ template, the command **refuses and prints the diff**, so an emergency
 hand-edit is never silently discarded; fold the edit into the committed
 template, redeploy, and retry.
 
+`set speed` also **re-resolves `models.override` for the new tier** and
+rewrites the runtime knob, so the mode file and `watchdog/model-override` can
+never disagree about which model is in force: switching to `fast` puts every
+role on the hard model, switching back to `default` returns the routine roles
+to the published policy, and an explicit `"astra-all"` or `"policy"` in the
+brief survives both. It then **regenerates the crontab** through
+`results/telemetry/owner-tools/install-crons.sh`, because the estimate cadence
+lives there and a switch to `fast` that leaves the cadence at six hours is not a
+switch. A missing or failing installer is reported on stdout and never fails the
+speed change — fix it and run `install-crons.sh` by hand.
+
 The command prints who picks the change up: worker sessions dispatched from now
 on **yes**; lane and daemon children started from now on **yes**; sessions
 already running **no**; **the running main TUI no** — it must be relaunched
-through `local/bin/main-session.sh`, which reads the run mode. The estimate
-cadence changes only when the crontab is regenerated
-(`results/telemetry/owner-tools/install-crons.sh`).
+through `local/bin/main-session.sh`, which reads the run mode.
+
+Nothing in the layer carries a model of its own: `lane.sh` requests `auto`,
+`autofix.sh` leaves `MIPSTARRE_FIX_MODEL` empty, and `dispatch.sh` asks
+`model_policy.py`, which reads the knob. A hard-coded model anywhere else is a
+defect — the 2026-09-12 `gpt-5.6-sol` lane default and the `watchdog/model.txt`
+side channel each pinned a model behind the policy's back.
 
 ## 6. Pause and resume
 
@@ -253,6 +281,7 @@ Resume is run only on the owner's explicit word
 | unreadable `run-mode.json` | `show`/`get` exit 2; the caller treats the mode as unknown, never as zero |
 | unreadable cap file | reported as unknown with a warning; the record's value is used; the file is never left empty |
 | deployed shim hand-edited | `set speed` refuses and prints the diff; `apply` warns loudly and applies the caps anyway |
+| `install-crons.sh` missing or failing during `set speed` | reported on stdout naming the command to run; the speed, the shim and the override are still changed |
 | `capacity_controller.py` fails during pause | the caps are zeroed directly and the failure is reported (stopping admission is the safe direction) |
 | `capacity_controller.py` fails during resume | the command refuses; the caps stay where they are (paused is the safe direction) |
 | GitHub failure in `ready_report.py` / `estimate_post.py` | nonzero exit and **no partial comment**; at most one mutation per publishing step, adopting the stable marker comment when it already exists |

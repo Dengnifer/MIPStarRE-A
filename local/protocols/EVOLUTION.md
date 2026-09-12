@@ -1437,3 +1437,53 @@ evidence for the scope rule, not against it.
 
 **Expected effect:** the rule keeps its force; the next workflow change of this
 size is split, or is authorised as one episode before it is written, not after.
+
+## 2026-09-12 - Full speed mode means every role on the hard model (W9, PR 552)
+
+**Trigger:** the owner's rule after the 2026-09-12 run — "in full speed mode all
+subagents are astra, reviewers included; review is a semantic-alignment phase and
+needs the strong model as much as proving" — and three leftovers the PR 552 review
+left open.
+
+**Change, in four parts.**
+
+*The override resolves from the speed tier.* `models.override: null` was read
+literally as "no override", so a fast run that did not repeat the field ran its
+reviewers on the cheap model and nothing said so. `run_mode.py` now resolves the
+field: `run.speed fast` means `astra-all`, `default` means the published
+`local/model-policy.json`, the explicit `"policy"` keeps the published policy at
+any speed and `"astra-all"` forces the hard model at any speed. `set speed`
+re-resolves it and rewrites `watchdog/model-override`, so the mode file and the
+runtime knob cannot disagree about which model is in force. `get model_override`
+answers with the effective value; `model_override_briefed` and
+`model_override_source` say what was written and why. The brief template carries
+a `_comment` key (accepted and ignored) explaining the resolution.
+
+*No script carries a model.* `lane.sh` defaulted `MIPSTARRE_CODEX_MODEL` to a
+literal `gpt-5.6-sol`, falling back to `watchdog/model.txt` — a second side
+channel that pinned a model behind the policy's back and that no override could
+move. It requests `auto` now and lets `dispatch.sh` ask `model_policy.py`.
+`autofix.sh`'s `MIPSTARRE_FIX_MODEL` already defaulted to empty (the dispatcher's
+default) and is unchanged; the two were verified together.
+
+*`set speed` regenerates the crontab.* The estimate cadence lives in the crontab,
+and the command used to print a line asking the reader to regenerate it, so a run
+switched to `fast` kept posting its estimate every six hours. It now calls the
+tracked `results/telemetry/owner-tools/install-crons.sh`; a missing or failing
+installer is reported and never fails the speed change.
+
+*The leftover lane runner is deleted.* `results/telemetry/owner-tools/lane.sh`
+was superseded by `local/bin/lane.sh` and still carried
+`MIPSTARRE_SKIP_HOOKS=1 git push` as its push path — the blanket hook bypass that
+`local/protocols/issues-prs.md` restricts to a hand-run emergency, sitting in a
+file an operator could copy. Nothing in the layer referenced it (`git grep`
+finds only the historical `owner-log.md` line and session transcripts, both
+records of the past rather than call sites), and `lane-v2.sh`, which is
+referenced by those records too, has no such push. It is removed rather than
+repaired: two lane runners with different push rules is the defect.
+
+**Expected effect:** a full speed run's reviewers run the hard model without the
+owner naming it, the model that ran is the model the session row records, one
+tier switch moves the shim, the models and the cadence together, and the only
+`MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
+`checked-push.sh`.
