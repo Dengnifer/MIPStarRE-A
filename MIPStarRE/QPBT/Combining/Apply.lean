@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
+import MIPStarRE.QPBT.Combining.DirectPassingErrorBounds
 
 /-!
 # Applying the classical low-degree test
@@ -173,9 +174,12 @@ instead chooses `K = M^3 d` for a tensor-code theorem requiring
 `K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
 claimed tensor-code game correspondence.  Both source-import obligations
 remain open and are documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
-combined-lines prefactor into the final universal constants is to use
-`deltaQld_mono` on its stated source parameter domain.
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+`exists_direct_global_pair_error_bound` absorbs the actual direct-game passing
+error, including both point and line errors and the established line prefactor,
+into the final universal constants. This numerical result does not construct
+the line witness, the ordered polynomial correlations, or the projective pair
+measurement required here.
 -/
 theorem exists_globalPairWitness :
     ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧
