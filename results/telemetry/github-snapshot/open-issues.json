@@ -9116,81 +9116,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/258",
-  "id": 5362969638,
-  "node_id": "I_kwDOUJyJf88AAAABP6hsJg",
-  "number": 258,
-  "title": "feat(QPBT/Extraction): construct encoding-supported Pauli measurements",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T04:57:02Z",
-  "updated_at": "2026-09-06T04:57:02Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/123",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-encoded-reference-20260906 -->\n# Main-selected independent proof packet: encoding-supported Pauli measurement\n\nSource/decomposition evidence: the completed scout report\n~/.cache/mipstarre-dev/sessions/scout-123-nonencoding-mass-20260906-02.last.md.\nRead that report, the actual paper, blueprint eq:qld-nonencoding-mass and\nlem:qld-nonencoding-mass-bound, then current Lean/Mathlib. Base only on actually\nmerged source32a32edee16d3932525e4b1da9f84009e1fbb13b. No anticipated-parent API.\n\nConstruct the concrete complete Pauli reference POVM which measures the original\nstrategy Pauli answer h and ideal ancillary Pauli answer hprime, and returns the\nbounded encoding polynomial g_(h+hprime). Prove positivity/completeness, zero\neffect on nonencoding outcomes, and the exact evaluation-postprocessing formula\nas the convolution used by the blueprint. Reuse current tensor POVM, Pauli\ncompleteness and postprocess APIs; do not duplicate standard Mathlib results.\nA natural dedicated file is QPBT/Extraction/EncodingSupport.lean; keep it on the\npublic import graph and document the internal auxiliary status honestly.\n\nThis is INDEPENDENT algebra/construction from existing measurement definitions,\nnot activation of the nonencoding quantitative/source-existence tail. Do not\nprove nonencodingMarginalMass_le yet, or duplicate the scalar collision packet,\nissue243 placement identities,113/115 winning proofs,118 restricted-law work,\n241/242/245/246 results. No new bridge inputs or global-witness existence claims.\nPreserve all public source statements, no new holes or extra axioms. Read paper\nbefore proofs, use targeted Lean/axiom scans then normal build/publication gates.\nCommit and open a scoped PR if complete, with a faithful scope audit and no\nunjustified source-labelled leanok. No self-review, merges/pr_merge.py or\nsubagents. Primary/Astra/max, fan-out off, hard2400seconds. max is selected for\nfinite-matrix measurement/postprocessing construction and source-faithful typing.\nRecord time/available tokens, effort configuration caveat, validation and outcome.\nB7/B8 and the exhausted118 budget remain unchanged.14400 build-lock wait.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/258/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/257",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/257/labels{/name}",
@@ -10722,8 +10647,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 6,
-   "completed": 0,
-   "percent_completed": 0
+   "completed": 1,
+   "percent_completed": 16
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
