@@ -174,7 +174,7 @@ def disabled_accounts(root: Path) -> set[str]:
 
 
 def effective_caps(root: Path, names: tuple[str, ...] | None = None) -> list[int]:
-    """Per-account caps, with a dead or disabled endpoint forced to zero.
+    """Per-account caps, with a dead, disabled or homeless account forced to zero.
 
     Without the health part the router *prefers* the dead account:
     `choose_account` picks the lower live/cap ratio, and an endpoint answering
@@ -182,16 +182,29 @@ def effective_caps(root: Path, names: tuple[str, ...] | None = None) -> list[int
     into the outage.  That is how one hour of relay-us7 503s cost 69 sessions on
     2026-09-12.  Forcing the cap to zero only ever narrows admission; it can
     never widen it.
+
+    **A name with no CODEX_HOME is cap 0.**  `account_names` deliberately falls
+    open to the ``max-codex-*`` glob when accounts.json is unreadable, so that a
+    mistyped ceiling cannot stop admission — but `account_homes` reads the same
+    file and has no such glob, so in exactly that window a third key was
+    admitted here while `dispatch.sh` could not resolve its home and ran the
+    worker on the ambient ``~/.codex``.  The owner's ceiling of 5 on the primary
+    key then carried cap(second) + cap(third) sessions, with the pipeline's own
+    accounting attributing them elsewhere.  Admitting only to a key whose home is
+    known closes that: the fail-open name list survives, and it can no longer
+    point at a key the dispatcher cannot actually reach.
     """
     accounts = names if names is not None else account_names(root)
     disabled = disabled_accounts(root)
+    homes = account_homes(root)
     caps = []
     for account in accounts:
         path = root / 'watchdog' / f'max-codex-{account}'
         cap = int(path.read_text().strip()) if path.exists() else 0
         if cap < 0:
             raise ValueError(f'{path}: cap must be nonnegative')
-        if account in disabled or health_state(root, account) == "down":
+        if (account in disabled or account not in homes
+                or health_state(root, account) == "down"):
             cap = 0
         caps.append(cap)
     return caps

@@ -270,5 +270,47 @@ class EventShardTests(unittest.TestCase):
             "results/telemetry/events.d/2026-09-13-orc-1.md"))
 
 
+class TestKeyInvalidatingClasses(unittest.TestCase):
+    """`local/capacity-policy.json` marks `auth` and `insufficient_balance`
+    ``"disables": true`` and the capacity controller builds its disable rule on
+    them — but `load_failure_patterns` read only the object form of the table
+    while the policy ships the list form, and neither name was in the built-in
+    table, so a real quota capture classified `unknown`.  `unknown` is neutral,
+    so nothing ever disabled the key and the owner still had to notice by hand.
+    These cases go through the shipped policy on purpose: the file and the
+    classifier must not be able to drift apart again."""
+
+    def setUp(self) -> None:
+        self.patterns = telemetry.load_failure_patterns(REPO_ROOT)
+
+    def test_the_policy_reaches_the_classifier(self) -> None:
+        for name in ("auth", "insufficient_balance"):
+            self.assertIn(name, self.patterns, name)
+            self.assertTrue(self.patterns[name], name)
+
+    def test_an_exhausted_quota_classifies_as_insufficient_balance(self) -> None:
+        events = _stream("stream error: INSUFFICIENT_BALANCE; retrying",
+                         "Reconnecting... 5/5")
+        result = telemetry.classify_failure(events, 1, self.patterns)
+        self.assertEqual(result["failure_class"], "insufficient_balance")
+
+    def test_an_invalid_key_classifies_as_auth(self) -> None:
+        events = _stream("stream error: 401 Unauthorized from the endpoint",
+                         "Reconnecting... 5/5")
+        result = telemetry.classify_failure(events, 1, self.patterns)
+        self.assertEqual(result["failure_class"], "auth")
+
+    def test_neither_is_retried_by_the_dispatcher(self) -> None:
+        # Five retries with backoff against an invalid or exhausted key spend
+        # the run's wall clock and nothing else.
+        for name in ("auth", "insufficient_balance"):
+            self.assertIn(name, telemetry.KNOWN_FAILURE_CLASSES)
+            self.assertNotIn(name, telemetry.TRANSIENT_FAILURE_CLASSES)
+
+    def test_a_concurrency_refusal_is_still_a_concurrency_refusal(self) -> None:
+        result = telemetry.classify_failure(CONCURRENCY, 1, self.patterns)
+        self.assertEqual(result["failure_class"], "concurrency_limit")
+
+
 if __name__ == "__main__":
     unittest.main()

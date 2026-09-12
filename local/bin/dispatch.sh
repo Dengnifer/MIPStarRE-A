@@ -863,22 +863,36 @@ PY
 }
 
 account_home() {
-  # account_home <account> — that key's CODEX_HOME, expanded, or empty.  The
-  # live accounts file is the source (run_mode.py exposes the same value as
-  # `get codex_home.<account>`); MIPSTARRE_CODEX_HOME_SECOND still overrides the
-  # historical `second` entry, and an unknown account yields nothing, which
-  # means "the ambient home", not "the wrong one".
+  # account_home <account> — that key's CODEX_HOME, expanded, or empty.
+  #
+  # The source is `account_router.account_homes()`, which reads
+  # watchdog/accounts.json DIRECTLY — the same file `account_names()` admits
+  # against.  Asking `run_mode.py get codex_home.<account>` instead was the
+  # fail-open hole: that accessor goes through load_mode() -> with_live_accounts()
+  # and exits 2 on an invalid accounts file, so it resolved nothing for a third
+  # key while the router happily admitted to it from the max-codex-* glob, and
+  # the worker then ran on the ambient ~/.codex against the owner's ceiling of 5.
+  # account_homes() supplies ~/.codex for `primary` and honours
+  # MIPSTARRE_CODEX_HOME_SECOND, so the historical pair still resolves with no
+  # run mode at all; `run_mode.py get` stays as the second source for a host
+  # whose accounts file is absent but whose brief names a home.
   local account="$1" home=""
-  if [ "$account" = second ] && [ -n "${MIPSTARRE_CODEX_HOME_SECOND:-}" ]; then
-    home="$MIPSTARRE_CODEX_HOME_SECOND"
-  else
+  home="$(python3 - "$SCRIPT_DIR" "$CACHE_ROOT" "$account" <<'PY' 2>/dev/null || true
+import sys
+from pathlib import Path
+
+sys.path.insert(0, sys.argv[1])
+try:
+    import account_router
+    resolved = account_router.account_homes(Path(sys.argv[2])).get(sys.argv[3])
+except Exception:
+    resolved = None
+if resolved:
+    print(resolved)
+PY
+)"
+  if [ -z "$home" ]; then
     home="$(run_mode_field "codex_home.$account")"
-  fi
-  # The 2026-09-12 path, kept as the last fallback for the historical `second`
-  # entry only: a host with no run mode yet must still reach the right home for
-  # the one account whose home was never the default.
-  if [ -z "$home" ] && [ "$account" = second ]; then
-    home="$HOME/.cache/mipstarre-dev/codex-home-yxy"
   fi
   [ -n "$home" ] || return 0
   case "$home" in "~/"*) home="$HOME/${home#\~/}" ;; esac
@@ -968,7 +982,7 @@ endpoint_available() {
   # never reserved on: five client-side retries against a dead endpoint are how
   # 69 refusals became 69 deaths (events.md 2026-09-12, 05:30Z-05:58Z).
   local account state
-  for account in $(account_list); do
+  for account in ${ACCOUNT_LIST:-$(account_list)}; do
     case "$ACCOUNT_REQUESTED" in
       auto) ;;
       "$account") ;;
@@ -1274,7 +1288,16 @@ while :; do
   # the deployed PATH shim treats "any non-default CODEX_HOME" as the thing it
   # gates on, and setting it redundantly would arm that gate for no reason.
   ACCOUNT_HOME="$(account_home "$ACCOUNT")"
-  if [ -n "$ACCOUNT_HOME" ] && [ "$ACCOUNT_HOME" != "$HOME/.codex" ]; then
+  # FAIL CLOSED.  An unresolvable home used to mean "omit CODEX_HOME", which is
+  # "run on ~/.codex" — the primary key — while the router had already counted
+  # the session against a different one.  Two keys' caps then landed on one key
+  # and no report said so.  A key the dispatcher cannot place is a refusal.
+  [ -n "$ACCOUNT_HOME" ] || die 4 "account '$ACCOUNT' has no codex_home the dispatcher
+  can resolve. It is admitted by watchdog/max-codex-$ACCOUNT but absent from
+  $CACHE_ROOT/watchdog/accounts.json (or that file does not parse). Running it
+  would spend the DEFAULT ~/.codex key under another key's name: refusing instead.
+  Fix the entry with results/telemetry/owner-tools/accounts.sh list / add."
+  if [ "$ACCOUNT_HOME" != "$HOME/.codex" ]; then
     ACCOUNT_ENV+=("CODEX_HOME=$ACCOUNT_HOME")
   fi
 

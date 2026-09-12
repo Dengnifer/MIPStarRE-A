@@ -121,6 +121,26 @@ class TestEffectiveCaps(RouterHarness):
         self.caps(primary=5)
         self.assertEqual(ar.effective_caps(self.root), [5, 0])
 
+    def test_a_name_with_no_resolvable_home_is_zero(self) -> None:
+        # The fail-open hole.  `account_names` falls back to the max-codex-*
+        # glob when the file does not parse, but `account_homes` has no such
+        # glob — so `third` was admitted while dispatch.sh could not place it
+        # and ran the worker on the ambient ~/.codex, putting cap(second) +
+        # cap(third) sessions on the owner's 5-slot primary key.
+        (self.watchdog / "accounts.json").write_text('{"cieling": 5}', encoding="utf-8")
+        self.caps(primary=5, second=30, third=8)
+        names = ar.account_names(self.root)
+        self.assertEqual(names, ("primary", "second", "third"))
+        self.assertEqual(ar.effective_caps(self.root, names), [5, 30, 0])
+
+    def test_a_homeless_name_is_never_reserved_on(self) -> None:
+        (self.watchdog / "accounts.json").write_text("{oops", encoding="utf-8")
+        self.caps(primary=0, second=0, third=8)
+        with self.assertRaises(ValueError):
+            ar.reserve(self.root, "third", 4321, 0, dry_run=True)
+        with self.assertRaises(ValueError):
+            ar.reserve(self.root, "auto", 4321, 0, dry_run=True)
+
     def test_a_negative_cap_is_refused(self) -> None:
         self.caps(primary=-1, second=1)
         with self.assertRaises(ValueError):
