@@ -344,17 +344,30 @@ class FailureBehaviourTests(CapacityHarness):
 
 
 class RecordTests(CapacityHarness):
-    def test_one_capacity_row_per_tick(self) -> None:
+    def test_one_runtime_row_per_tick_and_none_in_the_committed_log(self) -> None:
+        # The per-tick record is RUNTIME state.  A row per 60-second tick is
+        # ~1440 committed lines a day in a file that holds a hundred for the
+        # whole project and that the merge daemon publishes to main; only the
+        # transitions a human cares about reach stages.jsonl (meta.md,
+        # Telemetry duties).
         self.invoke("--now", at(0), "init")
         self.tick(60)
         self.tick(120)
-        rows = [json.loads(line) for line in
-                (self.telemetry / "stages.jsonl").read_text(encoding="utf-8").splitlines() if line]
-        ticks = [row for row in rows if row.get("stage") == "capacity"
-                 and row.get("event") == "tick"]
+        ticks = [json.loads(line) for line in
+                 (self.watchdog / "capacity" / "ticks.jsonl")
+                 .read_text(encoding="utf-8").splitlines() if line]
         self.assertEqual(len(ticks), 2)
+        self.assertEqual({row["event"] for row in ticks}, {"tick"})
         self.assertIn("accounts", ticks[0]["capacity"])
         self.assertEqual(ticks[0]["capacity"]["accounts"]["primary"]["cap"], 5)
+
+        rows = [json.loads(line) for line in
+                (self.telemetry / "stages.jsonl").read_text(encoding="utf-8").splitlines() if line]
+        self.assertEqual(
+            [row for row in rows if row.get("event") == "tick"], [],
+            "a 60-second tick must not append to the committed stages.jsonl")
+        self.assertEqual([row["event"] for row in rows if row.get("stage") == "capacity"],
+                         ["init"], "init is a transition and does belong there")
 
     def test_estimate_carries_the_measurement_fields(self) -> None:
         self.invoke("--now", at(0), "init")

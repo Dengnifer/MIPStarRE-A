@@ -7,15 +7,28 @@
 # this project 17 hours on 2026-09-01 (design full-speed-v2 §9 item 7).
 # A failing tick is logged and retried on the next tick; the controller leaves the cap files
 # untouched when its inputs are malformed, so a bad run-mode.json never zeroes capacity.
+# Started by results/telemetry/owner-tools/install.sh --start-loops, by
+# owner-resume.sh phase 3, and re-started by the supervising crontab row
+# install-crons.sh writes; the run-start runbook in local/protocols/full-speed-mode.md
+# §2 names it.  Safe to invoke repeatedly: a second instance exits at the lock.
 set -u
 export PATH="$HOME/.cache/mipstarre-dev/owner-bin:$HOME/.local/bin:$PATH"
 ROOT="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
 W="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/watchdog"
 C="$W/capacity"; STOP="$C/capacityd.stop"; LOG="$C/capacityd.log"; INTERVAL="${CAPACITY_TICK_S:-60}"
 mkdir -p "$C" || exit 1
-echo "tool=capacityd.sh version=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown) started $(date -u +%FT%TZ)" >>"$LOG"
 # The stop file is kept across restarts, as the merge daemon's is: the resume path removes it.
 [ -e "$STOP" ] && { echo "$(date -u +%FT%TZ) stop file present; remove $STOP to start" >>"$LOG"; exit 0; }
+# Single instance.  The cron row below re-execs this script every few minutes and
+# the resume path starts it too; without the lock a run would accumulate one
+# controller per start, and two controllers writing the cap files is the one thing
+# local/protocols/capacity.md forbids.
+exec 9>>"$C/capacityd.lock" || exit 1
+if command -v flock >/dev/null 2>&1 && ! flock -n 9; then
+  echo "$(date -u +%FT%TZ) another capacityd holds $C/capacityd.lock; exiting" >>"$LOG"
+  exit 0
+fi
+echo "tool=capacityd.sh version=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown) started $(date -u +%FT%TZ)" >>"$LOG"
 echo $$ >"$C/capacityd.pid"
 while true; do
   [ -e "$STOP" ] && { echo "$(date -u +%FT%TZ) stop file present; exiting" >>"$LOG"; break; }

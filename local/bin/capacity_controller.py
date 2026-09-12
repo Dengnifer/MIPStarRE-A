@@ -537,16 +537,30 @@ def apply_aimd(account_state: dict, counters: dict, knobs: dict, live: int, now:
         if until is None or now > until:
             # The FIRST refusal of a window: step just under the concurrency that
             # was refused.  ``live`` is sampled at the tick that observes it,
-            # which is the closest the controller gets to the moment of refusal.
-            cap = max(floor, min(cap, live - 1))
+            # which is the closest the controller gets to the moment of refusal —
+            # but when the refused sessions have already died it is 0 or 1, and a
+            # raw ``live - 1`` would collapse the cap to the floor and then climb
+            # back one slot per quiet window (an hour from 1 to 30 with the
+            # shipped defaults).  Fall back to what the account is KNOWN to have
+            # sustained before believing an instantaneous zero.
+            evidence = [value for value in
+                        (account_state.get("observed_refusal_floor"),
+                         account_state.get("measured_limit"))
+                        if isinstance(value, int) and not isinstance(value, bool)]
+            basis = live if live > 1 else max([live] + evidence)
+            cap = max(floor, min(cap, basis - 1))
             account_state["decrease_window_until"] = ts(now + window)
-            notes.append(f"decrease(first) live={live} -> {cap}")
+            notes.append(f"decrease(first) live={live} basis={basis} -> {cap}")
+            observed = basis
         else:
             cap = max(floor, math.ceil(cap * float(aimd["decrease"])))
             notes.append(f"decrease(x{aimd['decrease']}) -> {cap}")
-        seen = account_state.get("observed_refusal_floor")
-        account_state.update(refusal_cursor=ts(max(fresh)), quiet_since=None,
-                             observed_refusal_floor=live if seen is None else min(int(seen), live))
+            observed = live
+        account_state.update(refusal_cursor=ts(max(fresh)), quiet_since=None)
+        if observed >= 1:  # a zero census is not evidence that one slot refused
+            seen = account_state.get("observed_refusal_floor")
+            account_state["observed_refusal_floor"] = (
+                observed if seen is None else min(int(seen), observed))
     # ``live >= cap - 1`` keeps the cap honest: a cap nobody uses is not evidence
     # of headroom.
     if (not counters["refusals"] and not counters["deaths"]
@@ -635,14 +649,24 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
         floor, ceiling = refresh(account_state, entry, knobs)
         health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
         was = health["state"]
+        # A paused run has no daemons and spends no key: `paused` joins the hold
+        # and the disabled account in suppressing the probe, so a pause can never
+        # fire `codex exec` on the owner's keys after the deadline.
         action = update_health(name, health, counters, knobs["health"], now,
-                               no_probe=hold or not entry["enabled"],
+                               no_probe=hold or paused or not entry["enabled"],
                                codex_home=entry["codex_home"],
                                probe_timeout_s=windows["probe_timeout_s"])
         account_state["health"] = health["state"]
         notes: list[str] = []
         if hold:
             notes.append("hold: cap frozen")
+        elif paused or not entry["enabled"]:
+            # BEFORE the recovery branch: a recovering endpoint must not raise
+            # the cap to 1 while state.json says paused (or while the brief says
+            # this key is off).  Pause outranks health in both directions.
+            if int(account_state["cap"]) != 0:  # a note per tick would be noise
+                notes.append("paused: cap 0" if paused else "disabled in the brief: cap 0")
+            account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
         elif action == "trip":
             account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
             notes.append("endpoint down: cap 0")
@@ -652,7 +676,7 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
             account_state.update(cap=clamp(1, floor, ceiling), quiet_since=None,
                                  decrease_window_until=None, refusal_cursor=None)
             notes.append(f"endpoint recovered: cap {account_state['cap']}, AIMD climbs")
-        elif health["state"] == "down" or not entry["enabled"] or paused:
+        elif health["state"] == "down":
             account_state["cap"] = 0
         else:
             notes.extend(apply_aimd(account_state, counters, knobs, live[name], now,
@@ -694,11 +718,16 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
     return summary
 
 
-def append_stage(event: str, summary: dict, note: str) -> None:
-    """One ``capacity`` row per tick in ``results/telemetry/stages.jsonl``."""
-    record = {"ts": summary.get("ts") or ts(utcnow()), "stage": "capacity", "event": event,
-              "note": note, "capacity": summary}
-    path = telemetry_dir() / "stages.jsonl"
+#: Transitions a human reads in the committed log.  Everything else — the
+#: 60-second tick, about 1440 rows a day — goes to runtime state.
+STAGE_EVENTS = ("init", "set", "pause", "resume", "endpoint-trip", "endpoint-recovered")
+
+#: Per-tick rows kept in ``watchdog/capacity/ticks.jsonl`` (two days at 60 s).
+TICKS_KEEP = 2880
+
+
+def _append_jsonl(path: Path, record: dict) -> None:
+    """One locked, newline-safe append."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o644)
     with os.fdopen(fd, "r+", encoding="utf-8") as handle:
@@ -714,6 +743,46 @@ def append_stage(event: str, summary: dict, note: str) -> None:
             os.fsync(handle.fileno())
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def append_stage(event: str, summary: dict, note: str) -> None:
+    """One ``capacity`` TRANSITION row in ``results/telemetry/stages.jsonl``.
+
+    Transitions only — ``init``, ``set``, ``pause``, ``resume``, and an endpoint
+    tripping or recovering.  The 60-second tick writes ``append_tick`` instead:
+    a row per tick would be ~1440 committed lines a day in a file that holds a
+    hundred for the whole project, and every one of them would ride into ``main``
+    on the merge daemon's telemetry batch.  The event names and the ``capacity``
+    stage are declared in ``local/protocols/meta.md`` (Telemetry duties).
+    """
+    if event not in STAGE_EVENTS:
+        raise ControllerError(
+            f"{event!r} is not a stages.jsonl transition for the capacity stage "
+            f"({', '.join(STAGE_EVENTS)}); per-tick records go to "
+            f"{capacity_dir() / 'ticks.jsonl'}")
+    record = {"ts": summary.get("ts") or ts(utcnow()), "stage": "capacity", "event": event,
+              "note": note, "capacity": summary}
+    _append_jsonl(telemetry_dir() / "stages.jsonl", record)
+
+
+def append_tick(summary: dict, note: str) -> Path:
+    """The per-tick record: runtime state under the cache root, never committed.
+
+    Trimmed to the last ``TICKS_KEEP`` rows by this writer, so nobody has to
+    prune it by hand and it cannot grow without bound on a long run.
+    """
+    path = capacity_dir() / "ticks.jsonl"
+    _append_jsonl(path, {"ts": summary.get("ts") or ts(utcnow()), "event": "tick",
+                         "note": note, "capacity": summary})
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if len(lines) > TICKS_KEEP:
+            tmp = path.with_suffix(".jsonl.tmp")
+            tmp.write_text("\n".join(lines[-TICKS_KEEP:]) + "\n", encoding="utf-8")
+            os.replace(tmp, path)
+    except OSError:
+        pass  # a trim failure must never fail a control step
+    return path
 
 
 def render_note(summary: dict) -> str:
@@ -736,6 +805,22 @@ def _lock(blocking: bool):
     except OSError:
         handle.close()
         return None
+    return handle
+
+
+def _require_lock(blocking: bool):
+    """``_lock`` or a named failure — never ``None`` reaching a ``.close()``.
+
+    ``flock`` can fail on a blocking wait too (EINTR is reachable), and an
+    unguarded ``lock.close()`` in a ``finally`` turns that into an
+    ``AttributeError`` traceback that ``main``'s handler does not catch.
+    """
+    handle = _lock(blocking)
+    if handle is None:
+        raise ControllerError(
+            f"cannot take {capacity_dir() / 'controller.lock'}; another capacity "
+            "controller holds it or the lock could not be acquired. Nothing was "
+            "written: the cap files are exactly as they were.")
     return handle
 
 
@@ -812,7 +897,17 @@ def cmd_tick(args: argparse.Namespace) -> int:
         summary = tick(now, policy=policy, run_mode=run_mode, state=state, dry_run=args.dry_run)
         note = ("seeded from the brief; " if seeded else "") + render_note(summary)
         if not args.dry_run:
-            append_stage("tick", summary, note)
+            append_tick(summary, note)
+            # The committed log carries the transitions a human cares about, not
+            # the tick: an endpoint going down or coming back is the thing that
+            # was answered by hand on 2026-09-12.
+            for name, row in summary["accounts"].items():
+                if row["health_action"] == "trip":
+                    append_stage("endpoint-trip", summary,
+                                 f"{name} ({row['health_was']} -> down): cap 0; {note}")
+                elif row["health_action"] == "recovered":
+                    append_stage("endpoint-recovered", summary,
+                                 f"{name} (down -> up): cap {row['cap']}, AIMD climbs; {note}")
     finally:
         lock.close()
     print(f"{summary['ts']} {note} | max-codex {summary['max_codex']}")
@@ -826,7 +921,7 @@ def cmd_set(args: argparse.Namespace) -> int:
     _require(args.account in run_mode["accounts"], f"{args.account}: not an account in the "
              f"current brief ({', '.join(run_mode['accounts']) or 'none'})")
     _require(args.cap >= 0, "cap must be a nonnegative integer")
-    lock = _lock(blocking=True)
+    lock = _require_lock(blocking=True)
     try:
         state = load_state() or new_state(run_mode["brief_ref"])
         caps = {}
@@ -858,7 +953,7 @@ def cmd_pause(args: argparse.Namespace) -> int:
     """
     policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
     now = args.now or utcnow()
-    lock = _lock(blocking=True)
+    lock = _require_lock(blocking=True)
     try:
         state = load_state() or new_state(run_mode["brief_ref"])
         already = state.get("paused_at")
@@ -887,7 +982,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
     """Restore the saved caps and re-enter AIMD at the saved value."""
     policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
     now = args.now or utcnow()
-    lock = _lock(blocking=True)
+    lock = _require_lock(blocking=True)
     try:
         state = load_state()
         _require(state is not None, f"{state_path()}: no capacity state to resume; run init")

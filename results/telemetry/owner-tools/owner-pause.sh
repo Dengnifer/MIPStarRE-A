@@ -19,7 +19,8 @@
 #   T+0:30  release waiters  account_router.reserve sees watchdog/drain and exits cleanly,
 #                            so queued dispatches release THEMSELVES (49 waiters at 06:38Z
 #                            on 2026-09-12 were killed instead).  Stop the keeper, the merge
-#                            daemon (stop file kept) and stack-watch by stop file and pid.
+#                            daemon, stack-watch and capacityd (stop files kept) by stop
+#                            file and by a VERIFIED pid — a paused pipeline has no daemons.
 #   T+1:00  one message      exactly one owner-say.sh --mode terminal: closing progress
 #                            comment + handoff, no prose on the estimate issue, no
 #                            auto-resume (watchdog/goal-hold is written by owner-say.sh).
@@ -27,8 +28,10 @@
 #                            nothing, then install the paused crontab from a file under $W.
 #   D-2:00  kill leftovers   anchored patterns only, SIGTERM then SIGKILL after 20 s.
 #                            Partial work stays in the worker's worktree; never `git clean`.
-#   D       confirm/record   confirm "Goal paused" in the pane, write pause-state.json,
-#                            append stages.jsonl and an events.d/ entry, commit and push.
+#   D-0:01  confirm/record   confirm "Goal paused" in the pane, write pause-state.json,
+#                            append stages.jsonl and an events.d/ entry, commit and publish
+#                            through checked-push.sh.  One minute BEFORE the deadline, so a
+#                            publish that takes a few seconds still finishes inside it.
 #
 # watchdog/pause-state.json is the single record owner-resume.sh reads.  No literal
 # timestamp, cap, issue number or deadline appears anywhere in this file.
@@ -53,7 +56,7 @@ while [ "$#" -gt 0 ]; do
     --reason) REASON="${2:-}"; shift ;;
     --reason=*) REASON="${1#--reason=}" ;;
     --dry-run) DRY=1 ;;
-    -h|--help) sed -n '2,36p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "$PROG: unknown argument '$1'" >&2; exit 2 ;;
   esac
   shift
@@ -107,6 +110,12 @@ P_KILL=$((DEADLINE_S - 120))
 [ "$P_KILL" -lt $((P_CRONTAB + 30)) ] && P_KILL=$((P_CRONTAB + 30))
 P_KILL="$(clamp "$P_KILL")"
 P_RECORD="$DEADLINE_S"
+# The confirm/record phase runs a minute BEFORE the deadline, not on it: it ends with a
+# checked-push.sh publish, and a publish started at T+deadline returns after it.  "Paused
+# within 15 minutes" is the owner's whole instruction, so the last phase finishes inside it.
+P_PUBLISH=$((P_RECORD - 60))
+[ "$P_PUBLISH" -lt $((P_KILL + 25)) ] && P_PUBLISH=$((P_KILL + 25))
+P_PUBLISH="$(clamp "$P_PUBLISH")"
 COLLAPSED=0
 [ "$P_CRONTAB" -lt 120 ] && COLLAPSED=1
 
@@ -177,12 +186,13 @@ plan() {
   printf 'phase plan (deadline %s min = T+%s from the owner word):\n' \
     "$DEADLINE_MIN" "$(hhmm "$DEADLINE_S")"
   printf '  T+%-6s stop admission   run_mode.py pause; touch watchdog/drain\n' "$(hhmm $P_ADMISSION)"
-  printf '  T+%-6s release waiters  drain check releases queued dispatches; stop keeper, merge daemon (stop file kept), stack-watch\n' "$(hhmm $P_RELEASE)"
+  printf '  T+%-6s release waiters  drain check releases queued dispatches; stop keeper, merge daemon, stack-watch and capacityd (stop files kept)\n' "$(hhmm $P_RELEASE)"
   printf '  T+%-6s one message      owner-say.sh --mode terminal (no auto-resume, goal-hold written)\n' "$(hhmm $P_MESSAGE)"
   printf '  T+%-6s crontab          backup crontab -l verbatim, install the paused crontab from a file under $W\n' "$(hhmm $P_CRONTAB)"
   printf '  T+%-6s kill leftovers   anchored patterns, SIGTERM then SIGKILL after 20 s; partial work stays in the worktrees\n' "$(hhmm $P_KILL)"
-  printf '  T+%-6s confirm/record   confirm the paused goal, write pause-state.json, append telemetry, commit and push\n' "$(hhmm $P_RECORD)"
-  printf 'last phase T+%s <= deadline T+%s\n' "$(hhmm "$P_RECORD")" "$(hhmm "$DEADLINE_S")"
+  printf '  T+%-6s confirm/record   confirm the paused goal, write pause-state.json, append telemetry, commit and push\n' "$(hhmm $P_PUBLISH)"
+  printf 'last phase T+%s <= deadline T+%s (the publish is started before the deadline, not on it)\n' \
+    "$(hhmm "$P_PUBLISH")" "$(hhmm "$DEADLINE_S")"
   if [ "$COLLAPSED" -eq 1 ]; then
     printf 'NOTE: the deadline is shorter than the nominal plan, so the later phases are\n'
     printf '      clamped onto it; the main session gets almost no time for its closing report.\n'
@@ -210,6 +220,21 @@ wait_until() { # wait_until <offset seconds from T0>
     [ "$now" -ge "$target" ] && return 0
     sleep 5
   done
+}
+
+# Signal a pid ONLY when it is still the process the file names.  ghz is a
+# 128-core host shared with other users' jobs, so a recycled pid is a real
+# possibility and an unverified `kill "$(cat …)"` can stop someone else's work.
+kill_recorded() { # kill_recorded <pid file> <substring the cmdline must contain> <label>
+  local file="$1" want="$2" label="$3" pid cmd
+  pid="$(cat "$file" 2>/dev/null || true)"
+  case "${pid:-}" in ''|*[!0-9]*) return 1 ;; esac
+  kill -0 "$pid" 2>/dev/null || { log "$label: pid $pid is already gone"; return 1; }
+  cmd="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || ps -o args= -p "$pid" 2>/dev/null || true)"
+  case "$cmd" in
+    *"$want"*) kill "$pid" 2>/dev/null && log "$label: SIGTERM to pid $pid"; return 0 ;;
+    *) log "$label: pid $pid is NOT $want (it runs '${cmd:0:60}'); not signalled"; return 1 ;;
+  esac
 }
 
 plan
@@ -279,12 +304,19 @@ wait_until "$P_RELEASE"
 WAITERS="$(pgrep -fc 'python3 [^ ]*account_router\.py' 2>/dev/null || true)"; WAITERS="${WAITERS:-0}"
 log "waiting dispatches at the drain: $WAITERS (they exit themselves; none is killed here)"
 touch "$W/goal-keeper.stop"
-p="$(cat "$W/goal-keeper.pid" 2>/dev/null || true)"; [ -n "$p" ] && kill "$p" 2>/dev/null
+kill_recorded "$W/goal-keeper.pid" goal-keeper "goal keeper" || true
 touch "$D/stop"
-p="$(cat "$D/daemon.pid" 2>/dev/null || true)"; [ -n "$p" ] && kill "$p" 2>/dev/null
+kill_recorded "$D/daemon.pid" merge-daemon "merge daemon" || true
 touch "$W/stack-watch.stop"
 for p in $(pgrep -f '^bash [^ ]*stack-watch(-v[0-9]+)?\.sh' 2>/dev/null || true); do kill "$p" 2>/dev/null; done
-log "keeper stopped, merge daemon stopped (stop file KEPT), stack-watch stopped"
+# capacityd too: a paused pipeline has NO daemons running.  Without this the
+# controller keeps ticking every 60 s through the pause, and because a recovering
+# endpoint is handled before the paused test it could raise a cap while
+# state.json says paused.  The stop file is kept; owner-resume.sh removes it.
+mkdir -p "$W/capacity"
+touch "$W/capacity/capacityd.stop"
+kill_recorded "$W/capacity/capacityd.pid" capacityd "capacity controller" || true
+log "keeper stopped, merge daemon stopped (stop file KEPT), stack-watch stopped, capacityd stopped (stop file KEPT)"
 
 # --- T+1:00 the one terminal message ------------------------------------------------------------
 wait_until "$P_MESSAGE"
@@ -331,7 +363,8 @@ PATTERNS='^bash [^ ]*lane\.sh( |$)
 ^bash [^ ]*fix-lane\.sh( |$)
 ^bash [^ ]*conflict-resolve\.sh( |$)
 ^bash [^ ]*dispatch\.sh( |$)
-python3 [^ ]*account_router\.py
+^python3 [^ ]*account_router\.py
+^bash [^ ]*capacityd\.sh( |$)
 ^node [^ ]*codex(\.js)?( |$).* exec( |$)'
 n=0
 while IFS= read -r pat; do
@@ -355,8 +388,8 @@ $PATTERNS
 EOF
 log "SIGKILL sent to $m survivors; partial work stays in the workers' worktrees (never git clean)"
 
-# --- D confirm and record --------------------------------------------------------------------------
-wait_until "$P_RECORD"
+# --- D-0:01 confirm and record ------------------------------------------------------------------
+wait_until "$P_PUBLISH"
 MAIN_GOAL="unknown"
 if tmux has-session -t "$S" 2>/dev/null; then
   PANE="$(tmux capture-pane -p -t "$S" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n 4)"

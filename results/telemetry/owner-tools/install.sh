@@ -9,13 +9,21 @@
 # `assert old in s` here-doc against a 90-character substring.
 #
 # Usage:
-#   install.sh [--force] [--compat-tmp] [--crons] [--dry-run]
+#   install.sh [--force] [--compat-tmp] [--crons] [--start-loops] [--dry-run]
 #   install.sh --verify                 # dependency/hash check (the merge daemon's gate)
 #   install.sh --record <name>          # re-record a regenerated file (run_mode.py set speed)
 #
 # Options:
 #   --force        overwrite a deployed copy whose hash matches no released version.
 #                  The previous copy is MOVED to owner-bin/attic/<ts>/, never deleted.
+#   --start-loops  start capacityd.sh (the 60 s capacity controller loop) if it is not
+#                  already running and no stop file holds it.  Without a running
+#                  controller nothing writes watchdog/max-codex-*, the caps stay frozen
+#                  at whatever seeded them, there is no AIMD, no 5xx trip and no
+#                  half-open probe — the 2026-09-12 situation, recovered by hand — and on
+#                  a fresh host lane.sh:wait_for_slot fails closed with
+#                  `no-capacity-record`.  The merge daemon and the goal keeper are NOT
+#                  started here: owner-resume.sh owns those (design §5).
 #   --compat-tmp   create /tmp/<name> SYMLINKS into owner-bin/ so anything still invoking
 #                  a historical /tmp path runs versioned code.  Nothing is ever written or
 #                  edited in /tmp; an existing regular file there is refused, not clobbered.
@@ -46,15 +54,16 @@ set -euo pipefail
 
 PROG="install.sh"
 
-usage() { sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,52p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
-FORCE=0; COMPAT=0; CRONS=0; DRY=0; VERIFY=0; RECORD=""
+FORCE=0; COMPAT=0; CRONS=0; DRY=0; VERIFY=0; RECORD=""; START_LOOPS=0
 DEST=""; SPEED=""; COMPAT_DIR="${MIPSTARRE_COMPAT_DIR:-/tmp}"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --force) FORCE=1 ;;
     --compat-tmp) COMPAT=1 ;;
     --crons) CRONS=1 ;;
+    --start-loops) START_LOOPS=1 ;;
     --dry-run) DRY=1 ;;
     --verify) VERIFY=1 ;;
     --record) RECORD="${2:-}"; [ -n "$RECORD" ] || { echo "$PROG: --record needs a tool name" >&2; exit 2; }; shift ;;
@@ -304,6 +313,9 @@ if [ "$DRY" -eq 1 ]; then
   if [ "$CRONS" -eq 1 ]; then
     "$SRC/install-crons.sh" --dry-run || exit $?
   fi
+  if [ "$START_LOOPS" -eq 1 ]; then
+    echo "$PROG: [dry-run] would start capacityd.sh (the 60 s capacity controller loop)"
+  fi
   exit 0
 fi
 
@@ -392,5 +404,28 @@ fi
 # --- crontab -------------------------------------------------------------------------------
 if [ "$CRONS" -eq 1 ]; then
   "$DEST/install-crons.sh" || exit $?
+fi
+
+# --- the capacity controller loop -----------------------------------------------------------
+# The AIMD controller and the endpoint health machine are the whole answer to the ten hand
+# cap edits and the 69 deaths into a 503 endpoint.  Copying capacityd.sh is not running it.
+if [ "$START_LOOPS" -eq 1 ]; then
+  CAPD="$DEST/capacityd.sh"
+  CAP_STATE="$CACHE_ROOT/watchdog/capacity"
+  if [ ! -x "$CAPD" ]; then
+    echo "$PROG: no capacityd.sh at $CAPD; the capacity controller is NOT running" >&2
+  elif [ -e "$CAP_STATE/capacityd.stop" ]; then
+    echo "$PROG: $CAP_STATE/capacityd.stop holds capacityd; remove it (owner-resume.sh does)" >&2
+  else
+    mkdir -p "$CAP_STATE"
+    setsid nohup bash "$CAPD" >> "$CAP_STATE/capacityd.out" 2>&1 < /dev/null &
+    sleep 1
+    CAPPID="$(cat "$CAP_STATE/capacityd.pid" 2>/dev/null || true)"
+    if [ -n "$CAPPID" ] && kill -0 "$CAPPID" 2>/dev/null; then
+      echo "$PROG: capacityd.sh running (pid $CAPPID, tick ${CAPACITY_TICK_S:-60}s)"
+    else
+      echo "$PROG: capacityd.sh did not come up; see $CAP_STATE/capacityd.log" >&2
+    fi
+  fi
 fi
 exit 0

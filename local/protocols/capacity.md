@@ -31,11 +31,15 @@ as `external_inferred = nominal - external_reserved - measured_limit`.
 ## 2. The control loop
 
 `results/telemetry/owner-tools/capacityd.sh` runs `capacity_controller.py tick` every 60 s —
-a `while`/`sleep` loop with a stop file, and nothing more.  Each tick, per account:
+a `while`/`sleep` loop with a stop file and a single-instance lock, and nothing more.  It is
+**started** by `install.sh --start-loops`, restarted by `owner-resume.sh` phase 3 and brought
+back by the five-minute row `install-crons.sh` writes; copying the script is not running it,
+and with no controller the caps never move again.  Each tick, per account:
 
 1. **Counters** over the last `counter_window_s` (300 s), derived from the `failure_class`
    and `endpoint` fields of `results/telemetry/sessions.jsonl`.  Never a grep of a capture:
-   the classification happens once, in `telemetry.py`, and everything downstream reads it.
+   the classification happens once, in `telemetry.py` (`classify_failure`, exposed to the
+   shell tools as `telemetry.py classify-failure`), and everything downstream reads it.
 2. **Additive increase.** `refusals_5m == 0` and `deaths_5m == 0` and `live >= cap - 1`,
    held continuously for a full `quiet_window_s` → `cap += 1`.  One slot per window, never
    more.  The `live >= cap - 1` term keeps the cap honest: a cap nobody uses is not evidence
@@ -73,10 +77,15 @@ the AIMD arithmetic.  `watchdog/capacity/health-<account>.json` holds
   jumps back to its pre-outage value** — an endpoint that just came back is the last thing
   to hand twenty sessions.
 
-The probe is a health check, not a work session: read-only, no persona, no task, no worktree
-write, nothing appended to `sessions.jsonl`; its record is the health file and the `capacity`
-row in `stages.jsonl`.  It is the one `codex` invocation in the layer outside `dispatch.sh`,
-and it is confined to this paragraph.
+The health probe is a health check, not a work session: read-only, no persona, no task, no
+worktree write, nothing appended to `sessions.jsonl`; its record is the health file and the
+`capacity` / `endpoint-recovered` row in `stages.jsonl`.  It is the one `codex` invocation in
+the layer outside `dispatch.sh`, and it is confined to this paragraph.  That exception is
+also written into `local/protocols/meta.md` (Telemetry duties) and the AGENTS.md Sessions
+bullet, because a rule stated in one document and contradicted in another is not a rule;
+a second exception means amending all three in one commit.  The probe never fires while the
+run is paused, while `watchdog/capacity/hold` exists, or against a disabled account — a
+paused pipeline spends nothing on the owner's keys.
 
 `account_router.effective_caps` reads the health file and treats a `down` account as cap 0.
 Without that, `choose_account` *prefers* the dead account — it picks the lower live/cap
@@ -91,6 +100,9 @@ how one hour of 503s cost 69 sessions.
 | `watchdog/capacity/health-<account>.json` | the controller | §3 |
 | `watchdog/capacity/limit-estimate.json` | the controller | §5 |
 | `watchdog/capacity/hold` | the operator | §6 |
+| `watchdog/capacity/ticks.jsonl` | the controller | the per-tick record (one row per 60 s, trimmed to the last 2880 by its writer). It lives here and **not** in `results/telemetry/stages.jsonl`: 1440 rows a day do not belong in a committed file that the merge daemon publishes to `main`. Only transitions — `init`, `set`, `pause`, `resume`, `endpoint-trip`, `endpoint-recovered` — reach `stages.jsonl` (`local/protocols/meta.md`, Telemetry duties). |
+| `watchdog/capacity/capacityd.stop` | the pause, removed by the resume | while it exists no controller starts; a paused pipeline has no daemons running |
+| `watchdog/capacity/capacityd.pid` / `.lock` | `capacityd.sh` | the running loop; the lock makes a second start a no-op, so a restart row cannot create a second writer |
 | `watchdog/max-codex-{primary,second}` | the controller | **derived**; these are what admission reads |
 | `watchdog/max-codex` | the controller | **derived: the sum of the effective per-account caps.  It is a display and lane-parallelism value with no admission meaning.** |
 | `watchdog/drain` | the pause path | §6 |

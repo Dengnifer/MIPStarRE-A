@@ -16,7 +16,9 @@
 #   --state FILE     use FILE instead of watchdog/pause-state.json
 #
 # Post-condition check, loud on failure: every cap file exists, is numeric and nonzero for
-# an enabled account, no account is "down", and watchdog/drain is gone.
+# an enabled account, no account is "down", the capacity controller and the merge daemon are
+# running, and watchdog/drain is gone.  A resume that leaves no controller running is a run
+# whose caps can never move again, so it is an exit-5 failure, not a silent success.
 #
 # Exit codes: 0 resumed · 2 usage · 3 no usable pause record · 4 the crontab was edited
 #             during the pause and --force-crontab was not given · 5 the post-condition
@@ -38,7 +40,7 @@ while [ "$#" -gt 0 ]; do
     --force-crontab) FORCE_CRON=1 ;;
     --state) STATE="${2:-}"; shift ;;
     --state=*) STATE="${1#--state=}" ;;
-    -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "$PROG: unknown argument '$1'" >&2; exit 2 ;;
   esac
   shift
@@ -102,7 +104,7 @@ echo "$PROG: caps to restore:"; printf '%s\n' "$CAPS_LINES" | sed 's/^/  /'
 
 if [ "$DRY" -eq 1 ]; then
   echo "$PROG: [dry-run] would: run_mode.py resume; install $CRON_BAK verbatim;"
-  echo "$PROG: [dry-run]        restart merge daemon (PAR=${PAR:-daemon default}), stack-watch, keeper;"
+  echo "$PROG: [dry-run]        restart capacityd, merge daemon (PAR=${PAR:-daemon default}), stack-watch, keeper;"
   echo "$PROG: [dry-run]        remove watchdog/{drain,goal-hold,paused} and the stop files;"
   echo "$PROG: [dry-run]        send one resume message rendered from run_mode.py show."
   [ -n "$CRON_BAK" ] && [ ! -r "$CRON_BAK" ] && echo "$PROG: [dry-run] WARNING: $CRON_BAK is missing" >&2
@@ -171,10 +173,23 @@ if [ "$CRON_OK" -eq 1 ]; then
 fi
 
 # --- 3. clear the pause markers and restart the loops ---------------------------------------
-rm -f "$D/stop" "$W/goal-keeper.stop" "$W/stack-watch.stop" "$W/paused" "$W/drain" "$W/goal-hold"
-log "drain, goal-hold and the stop files cleared"
+rm -f "$D/stop" "$W/goal-keeper.stop" "$W/stack-watch.stop" "$W/capacity/capacityd.stop" \
+      "$W/paused" "$W/drain" "$W/goal-hold"
+log "drain, goal-hold and the stop files cleared (capacityd.stop included)"
 
-mkdir -p "$L"
+mkdir -p "$L" "$W/capacity"
+# capacityd FIRST: without a running controller nothing writes the cap files again, there
+# is no AIMD, no 5xx trip and no half-open probe, and the caps stay frozen at whatever the
+# resume restored — the 2026-09-12 situation that was recovered by hand.  capacityd.sh
+# takes a lock, so starting one that is already running is a no-op.
+if [ -x "$OWNER_BIN/capacityd.sh" ]; then
+  setsid nohup bash "$OWNER_BIN/capacityd.sh" >> "$W/capacity/capacityd.out" 2>&1 < /dev/null &
+  sleep 1
+  log "capacity controller restarted (pid $(cat "$W/capacity/capacityd.pid" 2>/dev/null || echo '?'))"
+else
+  echo "$PROG: no capacityd.sh in $OWNER_BIN; the capacity controller is NOT running." >&2
+  echo "$PROG: run results/telemetry/owner-tools/install.sh --start-loops." >&2
+fi
 if [ -x "$OWNER_BIN/merge-daemon.sh" ]; then
   if [ -n "$PAR" ]; then export PAR; fi
   setsid nohup bash "$OWNER_BIN/merge-daemon.sh" >> "$L/daemon.log" 2>&1 < /dev/null &
@@ -213,9 +228,15 @@ for f in "$W"/max-codex-*; do
   v="$(cat "$f" 2>/dev/null || true)"
   name="$(basename "$f")"; name="${name#max-codex-}"
   case "$v" in ''|*[!0-9]*) echo "$PROG: POST-CONDITION: $f is not numeric ('$v')" >&2; RC=5; continue ;; esac
-  enabled="$(python3 "$RUN_MODE" get "account.$name.enabled" 2>/dev/null || echo true)"
-  if [ "$enabled" != false ] && [ "$v" = 0 ]; then
-    echo "$PROG: POST-CONDITION: $name is enabled but its cap is 0" >&2; RC=5
+  # `enabled.<account>` is run_mode's spelling (PER_ACCOUNT_KEYS), and it answers
+  # yes/no, never true/false.  `account.<name>.enabled` raises and exits 2, so the
+  # old `|| echo true` fallback fired on every account and the comparison against
+  # `false` could never be true: a briefed `enabled: false` account (the supported
+  # replacement for `echo 0 > max-codex-primary`) tripped this check on a healthy
+  # resume and the script exited 5 RESUME INCOMPLETE.
+  enabled="$(python3 "$RUN_MODE" get "enabled.$name" 2>/dev/null || echo unknown)"
+  if [ "$enabled" != no ] && [ "$v" = 0 ]; then
+    echo "$PROG: POST-CONDITION: $name is enabled ($enabled) but its cap is 0" >&2; RC=5
   fi
   health="$(python3 -c '
 import json,sys
@@ -224,6 +245,21 @@ except Exception: print("unknown")' "$W/capacity/health-$name.json" 2>/dev/null 
   if [ "$health" = down ]; then echo "$PROG: POST-CONDITION: account $name is down" >&2; RC=5; fi
   printf '  %-10s cap %s health %s enabled %s\n' "$name" "$v" "$health" "$enabled"
 done
+CAPD_PID="$(cat "$W/capacity/capacityd.pid" 2>/dev/null || true)"
+if [ -e "$W/capacity/capacityd.stop" ]; then
+  echo "$PROG: POST-CONDITION: watchdog/capacity/capacityd.stop still exists" >&2; RC=5
+elif [ -z "$CAPD_PID" ] || ! kill -0 "$CAPD_PID" 2>/dev/null; then
+  echo "$PROG: POST-CONDITION: no capacity controller is running (capacityd.pid '${CAPD_PID:-none}')" >&2
+  echo "$PROG: without it the caps never move again: no AIMD, no 5xx trip, no probe." >&2
+  RC=5
+else
+  printf '  %-10s pid %s (60 s tick)\n' capacityd "$CAPD_PID"
+fi
+DAEMON_PID="$(cat "$D/daemon.pid" 2>/dev/null || true)"
+if [ -z "$DAEMON_PID" ] || ! kill -0 "$DAEMON_PID" 2>/dev/null; then
+  echo "$PROG: POST-CONDITION: no merge daemon is running (daemon.pid '${DAEMON_PID:-none}')" >&2
+  RC=5
+fi
 if [ -e "$W/drain" ]; then echo "$PROG: POST-CONDITION: watchdog/drain still exists" >&2; RC=5; fi
 if [ -e "$W/goal-hold" ]; then echo "$PROG: POST-CONDITION: watchdog/goal-hold still exists" >&2; RC=5; fi
 if [ ! -s "$W/max-codex" ]; then echo "$PROG: POST-CONDITION: $W/max-codex is missing or empty" >&2; RC=5; fi

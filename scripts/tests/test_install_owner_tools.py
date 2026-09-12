@@ -285,9 +285,14 @@ class CrontabGenerationTests(OwnerToolsFixture):
         self.assertIn(f"{self.dest}/estimate.sh", body)
         self.assertIn("17 * * * *", body)
         self.assertIn("ready_report.py", body)
-        # the nudging crons are off in the mode file, so they appear as comments only
+        # the nudging crons have been deliberately off since 2026-09-09, so they
+        # appear as comments only (there is no `cron.<name>` brief field: the
+        # block said it read one and nothing ever wrote one)
         self.assertNotIn("qpbt-watchdog.sh >>", body)
-        self.assertIn("watchdog: off (run-mode)", body)
+        self.assertIn("qpbt-watchdog.sh: off since 2026-09-09", body)
+        # the capacity controller's restart row, guarded by the pause's stop file
+        self.assertIn("capacityd.sh", body)
+        self.assertIn("capacityd.stop", body)
         # a foreign row survives; the historical 6-hourly estimate row does not
         self.assertIn("unrelated-backup.sh", body)
         self.assertNotIn("0 */6 * * *", body)
@@ -366,7 +371,10 @@ class OwnerPausePlanTests(OwnerToolsFixture):
         for phase in ("stop admission", "release waiters", "one message", "crontab",
                       "kill leftovers", "confirm/record"):
             self.assertIn(phase, body)
-        self.assertIn("last phase T+15:00 <= deadline T+15:00", body)
+        # The last phase ends with a checked-push.sh publish, so it is scheduled
+        # BEFORE the deadline rather than on it: a publish started at T+deadline
+        # returns after it, and "pause within 15 minutes" is the whole instruction.
+        self.assertIn("last phase T+14:00 <= deadline T+15:00", body)
         self.assertIn("nothing was stopped, written or sent", body)
         self.assertFalse((self.cache / "watchdog" / "drain").exists())
         self.assertFalse((self.cache / "watchdog" / "pause-state.json").exists())
