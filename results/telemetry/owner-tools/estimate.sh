@@ -74,7 +74,13 @@ if [ -z "$ISSUE" ]; then
   exit 3
 fi
 
-git fetch -q github || echo "$PROG: git fetch failed; using the refs on disk" >&2
+# --no-write-fetch-head, because this runs in the PRIMARY checkout: a plain
+# fetch rewrites $ROOT/FETCH_HEAD under whatever else is working there, which is
+# the clobber the per-branch fetches were moved into a throwaway worktree to
+# avoid.  The remote-tracking refs this needs are updated either way.
+git fetch -q --no-write-fetch-head github \
+  || git fetch -q github \
+  || echo "$PROG: git fetch failed; using the refs on disk" >&2
 MAIN="$(git rev-parse --short github/main)"
 
 count_at() { # open `sorry` sites in the QPBT tree at a ref
