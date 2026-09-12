@@ -45,7 +45,7 @@ Formalization-only auxiliary for the placement bipartitions of blueprint
 theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
     (e : ι ≃ κ) {M : Op κ} (hM : 0 ≤ M) :
     0 ≤ reindexOp e M := by
-  exact reindex_nonneg e.symm hM
+  exact MIPStarRE.Quantum.reindex_nonneg e.symm hM
 
 namespace ProjectiveSetting
 
