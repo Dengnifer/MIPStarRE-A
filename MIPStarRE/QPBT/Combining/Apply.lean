@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.PointErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -42,6 +43,15 @@ alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Their conversion to the source's verifier game remains open. This declaration takes
 an already constructed point witness; the companion obligation below supplies that
 witness existentially.
+
+**Unfaithful:** This auxiliary quantifies over an unrestricted scalar `δQ` but
+omits it from the line error. That domain is not supplied by `lem:qld-4-10` and
+admits deterministic quadratic point answers even at zero strategy error; their
+axis-line defect stays positive as `q` grows. See issue #509 and the extended-line
+supplied-point obstruction in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Elimination requires a separately authorized realignment to the polynomial point
+error supplied by `exists_combinedPointsWitness`, followed by a proof of the
+printed error bound. The present signature and open proof are retained.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form

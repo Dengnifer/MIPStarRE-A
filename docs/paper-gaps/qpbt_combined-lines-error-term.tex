@@ -33,6 +33,10 @@
   decomposition that the stated sub-line lemma does not supply.  The
   correction is to state the first route's established error form and confirm
   that the sole consumer tolerates it.
+  The unrestricted supplied-point domain of the current extended-line helper
+  has a separate obstruction: deterministic quadratic point answers force a
+  positive axis-line error even on a perfect strategy. This does not refute
+  the paper statement, which uses its previously constructed point family.
   \item \textbf{Key Mathlib inputs:} the
   Cauchy--Schwarz inequality for state-dependent operator distances
   (project-local, blueprint Chapter 12), mixture decompositions of
@@ -192,6 +196,81 @@ the preserved conditioned construction is not identified with
 \path{combinedLineMeasurement}; its saved proof remains historical work.
 The current target retains its explicit unfinished proof, without assuming
 any conditioning or transfer result in a source theorem.
+
+\subsection{The extended-line supplied-point obstruction}
+
+The same quantitative omission remains in the auxiliary
+\path{exists_extendedLinesWitness_ofPointsWitness}: a single polynomial error
+function is chosen before an arbitrary scalar $\delta_Q$ and every point witness
+at that error. Passing from paired points to the extended scalar answer does
+not remove this obstruction. The source instead uses the family constructed
+by its point lemma, and defines the scalar answer by
+$c=\alpha a+\beta b$ at lines~993--1018 of the Pauli basis analysis.
+
+Take $m=d=1$, $\eps=0$, and let $q$ tend to infinity through admissible field
+sizes. The Pauli basis test has a perfect projective strategy by
+\path{lem:pauli-completeness}.\footnote{See
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~1232--1255, for the statement and its projective Pauli measurements.}
+On its expanded local spaces, choose the supplied joint point measurement on
+both sides to have the deterministic answer $(x^2,0)$: the effect for this
+answer is the identity, and every other effect is zero. This is a complete
+projective measurement. Its self-consistency defect is zero. The ordered-product
+distances are finite real numbers on the finitely many placements, so a common
+scalar $\delta_Q$ bounds all of them. Thus this family satisfies the supplied
+witness hypotheses. No estimate of this scalar in terms of $\eps$ is required.
+
+The extended point answer is $\alpha x^2$. In dimension $2m+2=4$, the directly
+indexed line-point law assigns weight $1/2$ to axis lines and then chooses one
+of the four coordinates uniformly. Its X-axis branch therefore has mass $1/8$.
+On that branch, $z,\alpha,\beta$ are fixed along the line, while $x$ is uniform
+in the field. The canonical base has X coordinate zero, so the affine line
+parameter is exactly $x$. For $\alpha\ne0$, every permitted line answer $p$
+has degree at most one, and $p(X)-\alpha X^2$ is a nonzero polynomial of degree
+two. It has at most two roots, hence its agreement with the point answer is at
+most $2/q$.
+
+This bound also holds for any line POVM. Indeed, for a fixed line let $w_p$
+be the expectation of its effect for $p$ in the expanded state, at the line
+player's placement. Positivity and completeness give $w_p\ge0$ and
+$\sum_p w_p=1$; the axis-degree field makes $w_p=0$ for higher-degree answers.
+The opposite point effect is deterministically the identity at $\alpha x^2$,
+so the agreement is precisely the $w_p$-weighted average of those root-count
+fractions. These weights depend on the line but not on $x$ along it. Averaging
+over the fixed coordinates, and using nonnegativity of the defect on the
+remaining question branches, gives for either player orientation
+\[
+ \operatorname{defect}\ \ge\
+ \frac18\left(1-\frac1q\right)\left(1-\frac2q\right).
+\]
+There is no undefined evaluation on these nonzero axis directions, so the
+completed answer alphabet does not change this calculation. The scalar field
+identification preserves the polynomial evaluations and their root counts.
+
+The lower bound tends to $1/8$. In contrast, the predicate
+\path{IsPolyErr}\textsubscript{2} bounds the proposed error at these parameters by
+$\delta_{\mathrm{combine}}(0,1/q)\le Cq^{-s}$ with $s>0$, which tends to zero.
+Consequently the unrestricted supplied-point auxiliary is false. This argument
+does not refute the existential point-witness declaration or the source
+\path{lem:qld-4-13}; neither requires a line approximation to every arbitrarily
+chosen point family.
+
+Two parts of the obstruction are independently verified in Lean: every
+projective joint family admits some finite witness error, and a coefficient
+answer with zero quadratic coefficient agrees with a nonzero multiple of the
+square function with probability at most $2/q$.\footnote{The declarations are
+\path{CombinedPointsWitness.exists_error_of_projective} and
+\path{linear_quadratic_agreement_le} in
+\path{MIPStarRE/QPBT/Combining/PointErrorObstruction.lean}. The first uses the
+existence of an upper bound for a finite set of real numbers; the second reuses
+\path{directCoefficientCollision_avg_le}, which reduces to Mathlib's
+univariate root count. The complete strategy-level contradiction is the
+mathematical argument above, not a Lean counterexample theorem.}
+The assigned signature and its unfinished proof are preserved, with this
+obstruction tracked by \ghissue{509}. A future realignment must retain the
+polynomial point-error dependency or use the existentially constructed points.
+Even after that domain repair, the separate printed-error estimate discussed
+below remains open.
 
 \section{The source assertion and the two routes}
 
@@ -415,6 +494,9 @@ the corrected first-route form in the proof and in the sequel, and cites this
 note; strengthening the sub-line lemma to license the second route is
 optional, and no route to the printed form is currently known.  We do not
 assert that the printed form is false.
+The unrestricted supplied-point auxiliary is false for the independent
+quadratic-answer reason above; its quantifiers must not be substituted for
+those of the source statement.
 
 \bibliographystyle{alpha}
 \bibliography{references}
