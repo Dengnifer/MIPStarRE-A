@@ -124,7 +124,6 @@ def main() -> None:
     parser.add_argument('--model', default='auto')
     parser.add_argument('--effort', default='ultra')
     parser.add_argument('--hardness-reason')
-    parser.add_argument('--external', action='store_true')
     parser.add_argument('--field', choices=('model',))
     parser.add_argument('--ratio-registry', type=Path)
     parser.add_argument('--activation-at')
@@ -136,11 +135,6 @@ def main() -> None:
             print(json.dumps(dispatch_ratio(session_rows(args.ratio_registry), args.activation_at,
                                             args.window)))
             return
-        if args.external:
-            from account_router import external_admission_enabled
-            if not external_admission_enabled(Path(os.environ.get('MIPSTARRE_CACHE_ROOT',
-                                                    Path.home() / '.cache/mipstarre-dev'))):
-                raise ValueError('external admission disabled by owner gate')
         selection = select_model(args.role, args.job_class, args.model, args.effort,
                                  args.hardness_reason)
     except (OSError, ValueError, TypeError, KeyError, AttributeError, subprocess.CalledProcessError) as error:
