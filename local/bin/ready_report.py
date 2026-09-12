@@ -25,7 +25,11 @@ Output: one comment per hour on the run's progress issue in the compact form
 against the briefed floor — the number the owner asked for three times on
 2026-09-12 and which nothing measured, because the half-hourly live-vs-floor
 line is a main-session duty and a stalled main session reports nothing), one
-line per ready-but-open PR with its reason, one **models** line (sessions
+line per ready-but-open PR with its reason, one **per-key** line (ceiling,
+effective cap, live, refusals in the last ten minutes, health with the reason it
+was disabled, and the owner's own note — so the state of every key reaches the
+owner's channel instead of living in ``capacity_controller.py status`` on the
+host), one **models** line (sessions
 started in the window grouped by the model that actually ran, against the
 override the run mode has in force — follow-up item W9(5), so a run whose
 reviewers slipped onto the cheap model shows up within the hour instead of in a
@@ -255,7 +259,7 @@ def occupancy(cache: Path) -> dict | None:
     try:
         import account_router  # noqa: PLC0415 - same directory, optional
         live = {name: len(account_router.live_pids(cache / "accounts" / name))
-                for name in account_router.ACCOUNTS}
+                for name in account_router.account_names(cache)}
     except Exception:  # pragma: no cover - a census failure must not lose the report
         return None
     total = sum(live.values())
@@ -263,8 +267,131 @@ def occupancy(cache: Path) -> dict | None:
             "by_account": live, "below": total < int(floor)}
 
 
-def _rows_in_window(path: Path, since: datetime, field: str) -> list[dict]:
-    """JSONL rows whose *field* parses as a timestamp at or after *since*."""
+#: The per-key line looks back this far for refusals, independently of the
+#: report's own window: the owner asked for "refusals in the last ten minutes",
+#: which is a question about right now, not about the hour.
+KEY_REFUSAL_WINDOW_MIN = 10
+
+
+def key_census(repo_root: Path, cache: Path, now: datetime,
+               window_min: int = KEY_REFUSAL_WINDOW_MIN) -> list[dict] | None:
+    """One row per KEY: ceiling, effective cap, live, refusals, health, note.
+
+    The owner's per-key picture, in the owner's own channel.  Until this existed
+    the only place a key's state was visible was ``capacity_controller.py
+    status`` on the host — so "the yxy key is disabled and here is why" reached
+    the owner as a message from a session, which is exactly the prompt the live
+    accounts file exists to remove.  Every field comes from the component that
+    owns it: the ceiling and the note from ``watchdog/accounts.json`` (the
+    owner's own file, so the line echoes back what they last wrote), the cap
+    from the cap files admission actually reads, the health and its reason from
+    ``watchdog/capacity/health.json``, the live count from the router's census,
+    and the refusals from ``sessions.jsonl`` classified by the capacity policy.
+
+    ``None`` when there is no accounts file and no run mode — never a partial
+    row, and never a guess.
+    """
+    try:
+        import accounts_file  # noqa: PLC0415 - same directory
+        entries = accounts_file.load(cache)
+    except Exception:  # noqa: BLE001 - a bad accounts file must not lose the report
+        entries = None
+    if entries is None:
+        try:
+            mode = run_mode.load_mode()
+            entries = [{"name": row["name"], "label": row.get("label") or row["name"],
+                        "endpoint": row.get("endpoint") or row["name"],
+                        "ceiling": row.get("nominal_limit", 0),
+                        "external_reserved": row.get("external_reserved", 0),
+                        "enabled": bool(row.get("enabled", True)),
+                        "note": row.get("note") or ""}
+                       for row in mode.get("accounts", [])]
+        except (LayerError, KeyError, TypeError, ValueError):
+            return None
+    if not entries:
+        return None
+
+    names = [entry["name"] for entry in entries]
+    caps = run_mode.read_live_caps(cache, names)
+    health = _read_json(cache / "watchdog" / "capacity" / "health.json").get("accounts", {})
+    try:
+        import account_router  # noqa: PLC0415 - same directory
+        live = {name: len(account_router.live_pids(cache / "accounts" / name))
+                for name in names}
+    except Exception:  # noqa: BLE001
+        live = {name: 0 for name in names}
+    refusals = refusals_by_account(repo_root, entries, now - timedelta(minutes=window_min))
+
+    rows = []
+    for entry in entries:
+        name = entry["name"]
+        state = health.get(name) if isinstance(health.get(name), dict) else {}
+        rows.append({
+            "name": name, "label": entry.get("label") or name,
+            "endpoint": entry.get("endpoint") or name,
+            "ceiling": entry.get("ceiling", 0),
+            "reserved": entry.get("external_reserved", 0),
+            "cap": caps.get(name), "live": live.get(name, 0),
+            "refusals": refusals.get(name, 0),
+            "enabled": bool(entry.get("enabled", True)),
+            "health": (state.get("state") or "unknown") if state else "unknown",
+            "reason": state.get("reason") or "",
+            "note": entry.get("note") or "",
+        })
+    return rows
+
+
+def _read_json(path: Path) -> dict:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return document if isinstance(document, dict) else {}
+
+
+def refusals_by_account(repo_root: Path, entries: list[dict],
+                        since: datetime) -> dict[str, int]:
+    """Refusals per account since *since*, classified by the capacity policy.
+
+    The policy is the single place that says which ``failure_class`` counts as a
+    refusal, so this cannot drift from what the controller's AIMD reacted to.
+    An unreadable policy degrades to the two classes every generation of the
+    pipeline has used, never to "no refusals" — a silent zero here would read as
+    a healthy key.
+    """
+    try:
+        import capacity_controller  # noqa: PLC0415 - same directory
+        roles = capacity_controller.class_roles(capacity_controller.load_policy())
+        refusal_classes = {name for name, role in roles.items() if role == "refusal"}
+    except Exception:  # noqa: BLE001
+        refusal_classes = {"concurrency_limit", "refused"}
+    owner: dict[str, str] = {}
+    for entry in entries:
+        for key in (entry["name"], entry.get("endpoint"), entry.get("label")):
+            if isinstance(key, str) and key:
+                owner.setdefault(key, entry["name"])
+    counts: dict[str, int] = {entry["name"]: 0 for entry in entries}
+    path = repo_root / "results" / "telemetry" / "sessions.jsonl"
+    for row in _rows_in_window(path, since, ("end", "start", "ts")):
+        if row.get("failure_class") not in refusal_classes:
+            continue
+        name = next((owner[row[field]] for field in
+                     ("endpoint", "failure_endpoint", "account", "key_label")
+                     if isinstance(row.get(field), str) and row[field] in owner), None)
+        if name is not None:
+            counts[name] = counts.get(name, 0) + 1
+    return counts
+
+
+def _rows_in_window(path: Path, since: datetime,
+                    field: str | tuple[str, ...]) -> list[dict]:
+    """JSONL rows whose *field* parses as a timestamp at or after *since*.
+
+    A tuple takes the FIRST field that parses, so one pass over a registry whose
+    rows carry ``end`` or only ``start`` yields each row exactly once; reading
+    the file twice and concatenating would count a completed row twice.
+    """
+    fields = (field,) if isinstance(field, str) else field
     out: list[dict] = []
     try:
         handle = path.open(encoding="utf-8", errors="replace")
@@ -281,11 +408,14 @@ def _rows_in_window(path: Path, since: datetime, field: str) -> list[dict]:
                 continue
             if not isinstance(row, dict):
                 continue
-            try:
-                moment = run_mode.parse_timestamp(row.get(field), field)
-            except LayerError:
-                continue
-            if moment >= since:
+            moment = None
+            for candidate in fields:
+                try:
+                    moment = run_mode.parse_timestamp(row.get(candidate), candidate)
+                    break
+                except LayerError:
+                    continue
+            if moment is not None and moment >= since:
                 out.append(row)
     return out
 
@@ -361,9 +491,30 @@ def dead_session_residue(cache: Path, since: datetime) -> dict | None:
             "redispatched_roles": list(JANITOR_REDISPATCHED_ROLES)}
 
 
+def render_key_line(row: dict) -> str:
+    """One key's line: what it may use, what it is using, and whether it works."""
+    cap = "unknown" if row["cap"] is None else row["cap"]
+    state = row["health"] if row["enabled"] else f"{row['health']}/off"
+    line = (f"- key {row['name']} ({row['label']}, {row['endpoint']}): ceiling "
+            f"{row['ceiling']}" +
+            (f" less {row['reserved']} reserved" if row["reserved"] else "") +
+            f", cap {cap}, live {row['live']}, refusals/{KEY_REFUSAL_WINDOW_MIN}m "
+            f"{row['refusals']}, health {state}")
+    if row["reason"]:
+        line += f" ({row['reason']})"
+    if not row["enabled"]:
+        line += "  <- disabled in accounts.json"
+    elif row["health"] == "down":
+        line += "  <- alarm: cap 0 until a probe succeeds"
+    if row["note"]:
+        line += f"; note: {row['note']}"
+    return line
+
+
 def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
            unexplained: int, occ: dict | None = None,
-           models: dict | None = None, dead: dict | None = None) -> str:
+           models: dict | None = None, dead: dict | None = None,
+           keys: list[dict] | None = None) -> str:
     """The compact hourly comment."""
     ready = [row for row in rows if row["ready"]]
     lines = [f"ready {len(ready)}, merged-this-hour {merged}"]
@@ -372,6 +523,8 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
         lines.append(f"occupancy {occ['live']} live of cap {occ['cap']} ({detail}), "
                      f"floor {occ['floor']}" +
                      ("  <- alarm: below the occupancy floor" if occ["below"] else ""))
+    for key in keys or []:
+        lines.append(render_key_line(key))
     for row in sorted(ready, key=lambda item: item["pr"]):
         issue = f"issue {row['issue']}" if row.get("issue") else "no issue in the branch"
         lines.append(f"- PR {row['pr']} ({issue}, head {row['head'][:8]}) "
@@ -407,18 +560,25 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
     return "\n".join(lines) + "\n"
 
 
-def signature(rows: list[dict], occ: dict | None = None) -> str:
+def signature(rows: list[dict], occ: dict | None = None,
+              keys: list[dict] | None = None) -> str:
     """Stable digest of the ready set and its reasons (no elapsed timers).
 
     The occupancy ALARM state joins it — not the live count, which changes every
     minute and would defeat the suppression — so that crossing the floor in
     either direction posts instead of being suppressed as "unchanged".
     """
-    keys = sorted(f"{row['pr']}:{row['head']}:{row['reason']['key']}"
-                  for row in rows if row["ready"])
-    payload = f"ready={len(keys)}\n" + "\n".join(keys)
+    ready_keys = sorted(f"{row['pr']}:{row['head']}:{row['reason']['key']}"
+                        for row in rows if row["ready"])
+    payload = f"ready={len(ready_keys)}\n" + "\n".join(ready_keys)
     if occ is not None:
         payload += f"\noccupancy_below={int(bool(occ['below']))}"
+    # A key's ceiling, cap, health or enabled flag changing is exactly the event
+    # the owner wants the next hourly comment to carry, so it joins the
+    # signature; `live` and `refusals` do not, or nothing would ever suppress.
+    for key in keys or []:
+        payload += (f"\nkey={key['name']}:{key['ceiling']}:{key['reserved']}:"
+                    f"{key['cap']}:{key['health']}:{int(bool(key['enabled']))}")
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -525,7 +685,8 @@ def latency_path(repo_root: Path, now: datetime) -> Path:
 
 
 def latency_rows(rows: list[dict], merged: int, unexplained: int, ts: str,
-                 models: dict | None = None, dead: dict | None = None) -> list[dict]:
+                 models: dict | None = None, dead: dict | None = None,
+                 keys: list[dict] | None = None) -> list[dict]:
     out = [{"ts": ts, "pr": row["pr"], "head": row["head"], "event": "ready",
             "class": row["reason"]["class"], "reason": row["reason"]["detail"],
             "seconds": None, "par": None}
@@ -549,6 +710,15 @@ def latency_rows(rows: list[dict], merged: int, unexplained: int, ts: str,
         out.append({"ts": ts, "pr": None, "head": None, "event": "dead-sessions",
                     "class": "summary",
                     "reason": f"not-re-dispatched total={dead['total']} {split}",
+                    "seconds": None, "par": None})
+    for key in keys or []:
+        out.append({"ts": ts, "pr": None, "head": None, "event": "key",
+                    "class": key["health"],
+                    "reason": (f"{key['name']} ceiling={key['ceiling']} "
+                               f"reserved={key['reserved']} cap={key['cap']} "
+                               f"live={key['live']} refusals={key['refusals']} "
+                               f"enabled={int(bool(key['enabled']))} "
+                               f"{key['reason'] or ''}").strip(),
                     "seconds": None, "par": None})
     return out
 
@@ -619,9 +789,11 @@ def main(argv: list[str] | None = None) -> int:
     since = now - timedelta(minutes=args.window_min)
     models = model_census(repo_root, since)
     dead = dead_session_residue(cache, since)
+    keys = key_census(repo_root, cache, now)
     body = render(rows, merged, window_min=args.window_min, ts=ts,
-                  unexplained=unexplained, occ=occ, models=models, dead=dead)
-    digest = signature(rows, occ)
+                  unexplained=unexplained, occ=occ, models=models, dead=dead,
+                  keys=keys)
+    digest = signature(rows, occ, keys)
     state_file = state_path(cache)
     state = read_state(state_file)
     post, why = should_post(state, digest, merged, now, force=args.force)
@@ -642,7 +814,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     path = latency_path(repo_root, now)
-    for record in latency_rows(rows, merged, unexplained, ts, models, dead):
+    for record in latency_rows(rows, merged, unexplained, ts, models, dead, keys):
         run_mode.locked_append(path, json.dumps(record, ensure_ascii=False))
     atomic_write(state_file, json.dumps(
         {"signature": digest, "posted_at": ts, "issue": issue,
