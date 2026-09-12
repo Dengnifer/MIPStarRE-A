@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Algebra.PauliTheorems
-import MIPStarRE.QPBT.Test.SoundnessDefs
+import MIPStarRE.QPBT.Test.Soundness
 
 /-!
 # Qubit form of Pauli basis test soundness
@@ -11,7 +11,8 @@ stored in the canonical `FixedFieldModel`.
 `PauliSoundnessWitness.toQubit` transports supplied existential data, and the
 three `qubit_*_to_qubit` identities preserve its comparison quantities exactly.
 These are Lean-only transport results, not soundness existence theorems. This
-module does not import or use `pauli_soundness`; the source corollary remains open.
+module derives `pauli_soundness_qubit` from `pauli_soundness` using those identities.
+The corollary still depends on the unfinished proof of `pauli_soundness` (issue #529).
 
 ## References
 
@@ -409,7 +410,12 @@ coordinates. Blueprint `cor:pauli-binary`, paper
 `08_classical_and_quantum_low_degree_tests.tex:1450-1491`.
 
 The theorem assumes a nonnegative error parameter, as in the source, and uses
-only `P.model` and its stored basis dimension. -/
+only `P.model` and its stored basis dimension.
+
+**Proof dependency:** The coordinate change and all three error identities are
+proved, but the source theorem `pauli_soundness` remains an open proof obligation
+(issue #529). Completing that theorem from `thm:pauli`'s hypotheses is required
+to certify this corollary; no proof-completeness claim is made here. -/
 theorem pauli_soundness_qubit :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧
       ∀ (P : AdmissibleParams) (ε : ℝ), 0 ≤ ε →
@@ -423,7 +429,16 @@ theorem pauli_soundness_qubit :
             ∀ W : PauliKind,
               qubitOperatorDistanceB P S w W ≤
                 deltaQld a b ε P.m P.d P.q := by
-  sorry
+  obtain ⟨a, b, ha, hb, hb_one, hsound⟩ := pauli_soundness
+  refine ⟨a, b, ha, hb, hb_one, ?_⟩
+  intro P ε hε S hS
+  obtain ⟨w, hstate, hA, hB⟩ := hsound P ε hε S hS
+  refine ⟨w.toQubit, ?_, ?_, ?_⟩
+  · exact (qubit_state_error_to_qubit P S w).trans_le hstate
+  · intro W
+    exact (qubit_operator_distance_a_to_qubit P S w W).trans_le (hA W)
+  · intro W
+    exact (qubit_operator_distance_b_to_qubit P S w W).trans_le (hB W)
 
 end
 
