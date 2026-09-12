@@ -7657,3 +7657,25 @@ not actual commit/publication hooks. No productive session was killed.
   The failed run remains in the SHA-keyed manifest and logs for PR532 under
   `~/.cache/mipstarre-dev/`. Clear selectors and their reasons together before
   workflow fixtures, and retain this failed attempt in the episode cost.
+
+## 2026-09-12 - PR264 merge task reached a preserved recovery branch
+
+- Session `orc-pr264-20260912-02` was dispatched to the named issue-261
+  worktree, but its checked-out branch was `issue-261-preserved-merge-20260907`
+  at `06d6a7dc`, with an already-resolved merge of `d13df575` staged. GitHub
+  confirmed that PR #264 instead used `issue-261-supported-mass-comparison`
+  at `193723b4`, checked out in the clean `pr264-recovery-20260907` worktree.
+  After type-checking the staged Lean files and passing the merge-loss guard
+  and commit hooks, the pending result was preserved as `d9e82115` on its
+  existing branch. The other checkout was detached at its unchanged commit,
+  and the requested branch was checked out in the dispatched worktree.
+  Merging `github/main` at `b65adc13` then succeeded without textual conflicts,
+  retaining the supported-mass theorems and all incoming main content.
+  The first aggregate type-check lacked `MeasurementCompression.olean` because
+  this worktree still used the September 6 snapshot. The canonical cache
+  consumer refreshed only its private build artifacts from the complete
+  September 12 snapshot; shared packages and the published cache were unchanged.
+  That snapshot also preceded `EncodingSupport.olean`; the subsequent locked
+  full build compiled the remaining main changes and passed all 9220 jobs.
+  Check the actual branch and pending merge parents when resuming a recovered
+  worktree; its directory name alone does not identify the PR branch.

@@ -24,6 +24,7 @@ import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.MeasurementCompression
 import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.Sandwich
+import MIPStarRE.QPBT.Games.SupportMass
 import MIPStarRE.QPBT.Games.CondLinearTheorems
 import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Observables.LineDefs
