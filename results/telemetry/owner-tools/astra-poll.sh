@@ -24,7 +24,7 @@ case "$answer" in
   ASTRA=none|ASTRA=unknown) exit 0 ;;
 esac
 if [ ! -f "$STATE/astra-announced" ]; then
-  gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments \
+  gh api repos/Dengnifer/MIPStarRE-A/issues/27/comments \
     -f body="### NOTE — astra model detected ($(date -u +%Y-%m-%d\ %H:%MZ))
 <!-- astra-poll -->
 **What happened:** the hourly poller reached \`${answer#ASTRA=}\` through the codex relay on ghz. The owner session will switch subagent dispatches to it at the next dispatch (no action needed from the owner unless the id is wrong)." >/dev/null 2>&1 \
