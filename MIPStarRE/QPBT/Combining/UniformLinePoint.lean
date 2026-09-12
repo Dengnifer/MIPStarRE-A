@@ -201,4 +201,11 @@ theorem SubLineWitness.avgOver_projX_projZ (P : AdmissibleParams)
 
 end
 
+/-- Compatibility name for the uniform representative--parameter theorem.
+Its proof is now shared with the subline construction in
+`uniformDistribution_map_lineRepMap_add_smul`. -/
+@[deprecated (since := "2026-09-12")]
+alias uniformDistribution_map_lineRepMap_add_smul_current :=
+  uniformDistribution_map_lineRepMap_add_smul
+
 end MIPStarRE.QPBT
