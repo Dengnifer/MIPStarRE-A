@@ -47,3 +47,13 @@ After the checkpoint switch, a second read-only check verified root
 PID 3846730/start187183661 with a nine-descendant lease, census `[9, 0]` workers and
 `[1, 0]` interactives within capacity ten, external reservation zero, no live
 `app-server`, and an unchanged lease-file timestamp and SHA-256.
+
+## Merge reconciliation (September 12, 2026)
+
+PR #508, implementing issue #505, superseded this change contract before PR #350
+merged. Incoming main at `ae124f8f09ee002444ac5b9711822c0f1daae142` uses only worker
+reservation markers and the two configured account caps. Unmarked application-server
+processes no longer consume worker slots; host scanning, CWD exclusions and native
+leases are retired. The merge retains that implementation and its tests, including
+coverage that legacy CWD-exclusion settings cannot affect admission. The observations
+above remain historical evidence, not instructions to restore the retired router.
