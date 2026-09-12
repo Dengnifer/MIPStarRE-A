@@ -1,0 +1,37 @@
+{
+  "schema": "mipstarre-run-brief/1",
+  "run": {
+    "label": "full speed 2026-09-13",
+    "start": "2026-09-13T04:00:00Z",
+    "dispatch_cutoff": "2026-09-13T08:00:00Z",
+    "pause_deadline_min": 15,
+    "speed": "fast",
+    "occupancy_target": 0.8,
+    "progress_issue": 27,
+    "estimate_issue": 168,
+    "owner_inbox_issue": 500
+  },
+  "accounts": [
+    {
+      "name": "primary",
+      "label": "relay-us7",
+      "endpoint": "relay-us7",
+      "codex_home": "~/.codex",
+      "nominal_limit": 5,
+      "external_reserved": 0,
+      "enabled": true
+    },
+    {
+      "name": "second",
+      "label": "space",
+      "endpoint": "api.finite-dimensional.space",
+      "codex_home": "~/.cache/mipstarre-dev/codex-home-yxy",
+      "nominal_limit": 30,
+      "external_reserved": 2,
+      "enabled": true
+    }
+  ],
+  "models": {
+    "override": null
+  }
+}
