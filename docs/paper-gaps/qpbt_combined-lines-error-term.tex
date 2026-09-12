@@ -113,6 +113,164 @@ $\delta_{\mathrm{combine}}(\eps,m,d,q)$.
   shrinking $b$, so forms~2 and~3 both suffice downstream.
 \end{enumerate}
 
+\section{The domain of the conditional Lean helper}
+
+The source statement does not take an arbitrary joint point measurement as an
+input.  It uses the family $\{\hat Q^{x,z}_{a,b}\}$ constructed by the preceding
+point lemma, whose error has the form $\delta_Q(\eps)=\poly(\eps)$.  Consequently,
+an internal theorem which accepts an already constructed point witness must retain
+the same quantitative dependency: it should first fix a function
+$\delta_Q:\mathbb R\to\mathbb R$ satisfying the one-variable polynomial-error
+predicate, then choose $\delta_P$, and at strategy error $\eps$ accept only a
+point witness with bound $\delta_Q(\eps)$.
+
+Before the repair tracked by \ghissue{389}, the Lean helper
+\path{exists_combinedLinesWitness_ofPointsWitness} instead had the quantifier
+order
+\[
+  \exists\delta_P=\poly(\eps,md/q)\quad
+  \forall\eps\ \forall\delta_Q\ \forall Q,
+  \qquad Q\text{ has point error at most }\delta_Q
+  \Longrightarrow T\text{ has line error at most }\delta_P(\eps,md/q).
+\]
+Thus the line-error function was chosen before an unrestricted scalar
+$\delta_Q$, and did not depend on it.  The fields of
+\path{CombinedPointsWitness} bound self-consistency and the two ordered-product
+comparisons by precisely this scalar; they impose no relation between an
+arbitrary $\delta_Q$ and $\eps$.  The conditioned-pasting estimate therefore
+cannot eliminate $\delta_Q$ from its conclusion.
+
+There is a concrete mathematical obstruction to the old domain.  Set
+$\eps=0$, take $m=1$ and fixed $d$, and let $q$ grow through admissible field
+sizes with $q>d+1$.  On any perfect strategy, define the supplied projective
+joint point measurement deterministically, with X answer $x^{d+1}$ and a fixed
+Z answer, identically on the two player sides.  Its self-consistency defect is
+zero, while the two ordered-product defects are finite and hence can be covered
+by a sufficiently large scalar $\delta_Q$, which the old helper quantified
+arbitrarily.  On an axis X line, however, every outcome allowed by
+\path{CombinedLinesWitness.axis_degree_X} evaluates as a polynomial of degree at
+most $d$.  Its difference from $x^{d+1}$ has at most $d+1$ roots, so even after
+mixing line outcomes the disagreement probability on that line is at least
+$1-(d+1)/q$.  Since axis lines have fixed positive weight in the line-point
+law, the resulting line consistency defect stays bounded away from zero as
+$q\to\infty$.  In contrast, the two-variable polynomial-error predicate forces
+$\delta_P(0,d/q)\to0$.  This argument diagnoses the theorem interface; no Lean
+counterexample theorem is asserted here.
+
+The repaired conditional helper has the form
+\[
+  \forall\delta_Q,\quad \delta_Q=\poly(\eps)\Longrightarrow
+  \exists\delta_P=\poly(\eps,md/q)\quad
+  \forall\eps\ \forall Q\text{ with error }\delta_Q(\eps),\quad
+  \exists T\text{ with error }\delta_P(\eps,md/q).
+\]
+This is not a new hypothesis on the paper theorem.  The source-facing Lean
+declaration \path{exists_combinedLinesWitness} preserves its original statement:
+it existentially obtains $\delta_Q$ and its point witnesses from the preceding
+point construction, then applies the conditional helper.
+
+The remaining construction target is
+\path{combined_line_measurement_consistency}. For a joint point family
+with error $\delta_Q(\eps)=\poly(\eps)$, it asks for evaluated consistency
+of the explicit unconditioned measurement
+\[
+ T^{\ell_X,\ell_Z}_{f_X,f_Z}
+ =L^X_{f_X}(\ell_X)L^Z_{f_Z}(\ell_Z)L^X_{f_X}(\ell_X)
+\]
+under the original product of line-point distributions, with error
+$\delta_P(\eps,md/q)=\poly(\eps,md/q)$ and every directed opposite
+placement. The point-to-line comparisons at source lines 900--941 and the
+pasting argument at lines 942--961 are the intended discharge. The POVM,
+axis-degree properties, and X marginal of this same measurement are proved.
+
+A bound for a measurement conditioned on nondegenerate lines would not by
+itself discharge this target. It would also require a defined conditioning
+event, its probability, an estimate for the discarded contribution, and a
+transfer of the defect back to the unconditioned measurement above under the
+original product law. No such transfer is asserted here. In particular,
+the preserved conditioned construction is not identified with
+\path{combinedLineMeasurement}; its saved proof remains historical work.
+The current target retains its explicit unfinished proof, without assuming
+any conditioning or transfer result in a source theorem.
+
+\subsection{Unrestricted point witnesses in the extended-line assertion}
+
+The same obstruction applies to the auxiliary extended-line assertion when
+its input point error is an arbitrary scalar.  The first-route estimate
+$C m g(\eps,md/q)$ does not remove this obstruction: it still tends to zero
+at $\eps=0$ with fixed $m,d$ and increasing $q$.
+The source instead uses the points constructed in its preceding lemmas,
+with $\delta_Q=\poly(\eps)$; Claim~17-1 explicitly retains this error.
+\footnote{The unrestricted auxiliary is
+\path{exists_extendedLinesWitness_established_ofPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean}, tracked by \ghissue{511}.
+The source passages are \path{lem:qld-4-10}, \path{lem:qld-4-12}, and
+\path{claim:17-1} in
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~689--709, 993--1018, and 1140--1173.}
+
+For an explicit example, set $m=d=1$ and let $q=2^{2k+1}>2$ increase.
+These parameters are admissible.  Use the perfect projective strategy from
+the completeness lemma for the Pauli basis test in \cite{Ji2020MIPStar}, and
+let $\hat\psi$ be its normalized expanded state.
+\footnote{The source is \path{lem:pauli-completeness} in
+\path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+lines~1229--1421.}
+On each player's expanded
+local space, define the supplied joint point measurement by
+\[
+ Q^{x,z}_{a,b}=
+ \begin{cases}
+   \Id,&(a,b)=(x^2,0),\\
+   0,&\text{otherwise}.
+ \end{cases}
+\]
+This is a projective measurement and is exactly self-consistent in every
+opposite placement.  The finitely many averaged squared distances from the
+two ordered expanded point products are finite real numbers.  Taking their
+maximum and zero gives a scalar $\delta_Q$ satisfying all the fields of the
+point witness.  No smallness of this scalar is required by the unrestricted
+assertion.  The combined point answer at $(x,z,\alpha,\beta)$ is
+deterministically $\alpha x^2$.
+
+The directly indexed law in dimension four chooses the axis component with
+probability $1/2$, and then chooses each coordinate with probability $1/4$.
+Restrict to its X-axis lines, of total mass $1/8$.  Such a line has fixed
+$(z,\alpha,\beta)$ and uniform coordinate $x$.  When $\alpha\ne0$, every
+line outcome with nonzero effect has degree at most one by the axis-degree
+requirement.  Consequently the polynomial $f(X)-\alpha X^2$ is nonzero of
+degree two, so it vanishes at at most two field elements.  Averaging over a
+POVM does not increase the agreement bound $2/q$: for a fixed line its
+outcome weights are the nonnegative expectations of the placed effects in
+$\hat\psi$, sum to one, and do not depend on the subsequently sampled $x$.
+Since the opposite point effect is either the identity or zero, these
+weights give exactly the evaluated agreement probabilities.  On these
+nondegenerate axis lines every evaluation is determined, so the completed
+answer symbol causes no additional case.
+
+The coefficient $\alpha$ is uniform and independent of $x$ on this part of
+the law.  All remaining consistency contributions are nonnegative.  Thus
+either orientation of an extended-line witness must have error at least
+\[
+ \frac18\left(1-\frac1q\right)\left(1-\frac2q\right)
+ \longrightarrow \frac18.
+\]
+On the other hand, the polynomial-error bound on $g$ supplies fixed constants
+$K\ge1$ and $r,s>0$ with
+$C g(0,1/q)\le CKq^{-s}\longrightarrow0$.  This contradicts the
+unrestricted auxiliary assertion, independently of the printed-error
+discrepancy and the diagonal-line degeneracy.
+
+This is a mathematical counterexample to the auxiliary quantifiers, not to
+the source theorem with its constructed points.  It is not claimed as a
+kernel-checked refutation: the formal perfect-strategy construction and
+the formal integration of this lower bound remain to be supplied.
+The existing auxiliary statement is preserved pending a separately scoped
+repair.  A source-faithful existence proof must construct polynomially
+controlled points internally and retain their error through the line
+estimates; it cannot cover arbitrary supplied point measurements by
+discarding their error parameter.
+
 \section{The source assertion and the two routes}
 
 The source proof in \cite{Ji2020MIPStar} constructs $\hat Q^{\ell}_f$ by
