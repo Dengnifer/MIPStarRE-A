@@ -9133,81 +9133,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/243",
-  "id": 5362369967,
-  "node_id": "I_kwDOUJyJf88AAAABP59Frw",
-  "number": 243,
-  "title": "feat(QPBT/Extraction): derive independent marginal agreement estimates",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:34:07Z",
-  "updated_at": "2026-09-06T02:34:07Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-extraction-marginal-agreement -->\n### Independent mathematical task\n\nExclusive write scope MIPStarRE/QPBT/Extraction/Consistency.lean and a packet-specific audit. Begin the direct Alice AA-prime versus Bob BA-double-prime and reverse-player marginal agreement estimates from the EXISTING GlobalPairWitness.point_consistent_alice/bob fields. Prove source-faithful named direct-placement lemmas supporting sum_marginalPoly_pointMeas_approx_id, via finite postprocessing and projective agreement identities. These do not require existence of the witness or missing issue115 placement-transfer theorems. Preserve the full existing source theorem; do not call unproved issue115 or issue240 helpers, add bridge assumptions, or claim all four placements if only two are proved. Source references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1617-1662, eq:qld-sg-cons1 and eq:qld-sg-cons2; blueprint lem:qld-constructing-the-paulis-helper. Existing measurement APIs are reusable; first verify exact inputs. Do not duplicate issue240 marginal projectivity implementation. No shared blueprint edits; record links in the audit.\n\n### Integrity and lifecycle\n\nMain-selected disjoint prerequisite work under the owner concurrency deadline. Base is published main a61ee55. The original extraction packets keep their parent merge gates. No new sorry, axiom, native bypass, statement weakening or implicit proof-budget reset. Source first; targeted Lean and declaration axiom checks; normal hooks, CI, independent review and daemon-only merge. Do not mark an unfinished source theorem complete. Other active writers retain their exclusive files. Addresses #123 without closing it.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/243/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/labels{/name}",
@@ -9755,8 +9680,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 26,
-   "completed": 12,
-   "percent_completed": 46
+   "completed": 13,
+   "percent_completed": 50
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
