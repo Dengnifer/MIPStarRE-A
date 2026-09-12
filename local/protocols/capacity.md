@@ -15,14 +15,20 @@ limit and nothing noticed the dead endpoint.
 
 | Number | Owner | Where it lives |
 |---|---|---|
-| **Ceiling** — the most the pipeline may ever run on a key | the owner's run brief | `run-mode.json`, as `nominal_limit - external_reserved` |
+| **Ceiling** — the most the pipeline may ever run on a key | the owner, live | `watchdog/accounts.json`, as `ceiling - external_reserved`; the run brief seeds that file once (`full-speed-mode.md` §1.1) |
 | **Cap** — how many it runs right now | the controller | `watchdog/capacity/state.json`, mirrored to the derived cap files |
 | **Floor**, AIMD constants, health thresholds | the reviewed policy | `local/capacity-policy.json` |
 | **Freeze** | the operator | `watchdog/capacity/hold` (touch file) |
 | **Zero** | the pause path | `capacity_controller.py pause` (never `echo 0 >`) |
 
-`ceiling_source` is validated to be the literal `"brief"`, so a knob file can never raise
-the owner's limit.  The cap may sit below the ceiling forever and must never go above it.
+`ceiling_source` is validated to be `"accounts"` (or the historical `"brief"`), so a knob
+file can never raise the owner's limit.  The cap may sit below the ceiling forever and must
+never go above it.  **The accounts file is re-read on every tick and every reservation**, so
+a ceiling the owner lowers at 05:12Z is in force by 05:13Z with nothing restarted, and an
+entry they disable or remove is cap 0 with no probe.  An invalid accounts file is a hard,
+named failure with the cap files untouched — never a silent fall back to the brief, which
+would restore the ceiling the owner has just lowered.  Any number of named accounts:
+`primary` and `second` are ordinary entries, and nothing in the layer enumerates them.
 `external_reserved` is the owner's statement that something outside the pipeline shares the
 key (on 2026-09-12 a forked session, limited to two slots).  An **undeclared** sharer needs
 no identification: it appears as refusals, AIMD walks the cap down, and the gap is recorded
@@ -68,6 +74,17 @@ the AIMD arithmetic.  `watchdog/capacity/health-<account>.json` holds
 - `fivexx_threshold` (3) `endpoint_5xx` deaths inside `fivexx_window_s` (120 s) → **down**,
   and cap 0 at once.  This is the 05:30Z–05:58Z relay-us7 outage, answered on the day by a
   human typing `echo 0`.
+- A **key-invalidating** class — any `failure_patterns` entry marked `"disables": true` other
+  than `endpoint_5xx`, today `auth` (401/403/invalid key) and `insufficient_balance`
+  (`INSUFFICIENT_BALANCE`, quota) — → **down** at `disable_threshold` (1) occurrences.  One
+  `401` is the whole answer: no amount of AIMD makes an invalid key valid, and retrying it at
+  any concurrency produces nothing but dead sessions.  The backoff for this class starts at
+  `disable_backoff_s` (300 s) rather than 30 s, because a key does not become valid again in
+  thirty seconds.
+- Every trip records a **reason** (`reason`, `disabled_by`) in the health files.  "Cap 0"
+  with no reason is the state a person had to diagnose by reading captures on 2026-09-12;
+  the reason travels to `watchdog/capacity/health.json`, to `capacity_controller.py status`
+  and to the hourly per-key line on the progress issue.
 - Below the threshold but above zero → **degraded**: the cap is not cut, but the climb stops.
 - Recovery is half-open.  After `probe_backoff_s` (30 s, doubling to `probe_backoff_max_s`)
   the controller runs **one** probe — `codex exec --sandbox read-only`, a trivial prompt,
@@ -97,13 +114,16 @@ how one hour of 503s cost 69 sessions.
 | Path (under `~/.cache/mipstarre-dev/`) | Written by | Meaning |
 |---|---|---|
 | `watchdog/capacity/state.json` | the controller, **solely** | the record: per account `cap`, `floor`, `ceiling`, `health`, `saved_cap`, `external_reserved`; plus `paused_at`, `brief_ref` |
-| `watchdog/capacity/health-<account>.json` | the controller | §3 |
+| `watchdog/capacity/health-<account>.json` | the controller | §3; the per-account file admission reads |
+| `watchdog/capacity/health.json` | the controller | §3; ONE document for every key — state, reason, `disabled_by`, next probe — quoted by the hourly per-key line and by `accounts.sh list`. A view, never an admission input |
+| `watchdog/accounts.json` | **the owner** (`owner-tools/accounts.sh`, the `ACCOUNTS:` inbox channel, `run_mode.py apply` when absent) | the live keys and their ceilings; `full-speed-mode.md` §1.1. The controller never writes it |
+| `watchdog/capacity/accounts.log` | `accounts_file.py` | one line per edit: timestamp, actor, action, field, old → new |
 | `watchdog/capacity/limit-estimate.json` | the controller | §5 |
 | `watchdog/capacity/hold` | the operator | §6 |
 | `watchdog/capacity/ticks.jsonl` | the controller | the per-tick record (one row per 60 s, trimmed to the last 2880 by its writer). It lives here and **not** in `results/telemetry/stages.jsonl`: 1440 rows a day do not belong in a committed file that the merge daemon publishes to `main`. Only transitions — `init`, `set`, `pause`, `resume`, `endpoint-trip`, `endpoint-recovered` — reach `stages.jsonl` (`local/protocols/meta.md`, Telemetry duties). |
 | `watchdog/capacity/capacityd.stop` | the pause, removed by the resume | while it exists no controller starts; a paused pipeline has no daemons running |
 | `watchdog/capacity/capacityd.pid` / `.lock` | `capacityd.sh` | the running loop; the lock makes a second start a no-op, so a restart row cannot create a second writer |
-| `watchdog/max-codex-{primary,second}` | the controller | **derived**; these are what admission reads |
+| `watchdog/max-codex-<account>` | the controller | **derived**; these are what admission reads. One per configured account, plus `primary` and `second` always, so a reader that predates the live accounts file finds a number rather than an empty read |
 | `watchdog/max-codex` | the controller | **derived: the sum of the effective per-account caps.  It is a display and lane-parallelism value with no admission meaning.** |
 | `watchdog/drain` | the pause path | §6 |
 
@@ -115,8 +135,9 @@ A hand edit of a cap file is overwritten on the next tick (a hold file freezes t
 `capacity_controller.py set ACCOUNT N`, which clamps to the ceiling, may go to 0 (the
 replacement for `echo 0 > max-codex-primary`), records the change, and gives the operator's
 number a full quiet window before AIMD moves again — AIMD will then climb back out of it, so
-an account that is off for the whole run belongs in the brief as `enabled: false`, and an
-account frozen at a number needs the `hold` file.  `run_mode.py apply` seeds a run by
+an account that is off for the whole run belongs in the accounts file as
+`enabled: false` (`accounts.sh disable <name>`), and an account frozen at a number needs the
+`hold` file.  `run_mode.py apply` seeds a run by
 calling `capacity_controller.py init` rather than writing the cap files itself, for the same
 one-writer reason.  A cap file is never written empty or non-numeric: that failure is silent
 and total, since every dispatch then exits 4 on `invalid literal for int()`.
