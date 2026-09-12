@@ -112,6 +112,14 @@ blueprint declaration synchronization passed. The web render retains existing
 bibliography warnings. Publication checks are recorded separately in the
 session handoff; no independent review is claimed by this author session.
 
+The first published-head CI passed the mathematical and rendering checks,
+but one model-policy fixture failed because it inherited the prover's
+hardness reason while selecting a bounded job. The exact test passes with
+`MIPSTARRE_JOB_CLASS` and `MIPSTARRE_HARDNESS_REASON` unset in addition to
+the invoking, review, and prose model settings. The incident is recorded in
+`results/telemetry/events.md` at 2026-09-12T05:37Z. No workflow or fixture
+code is changed to obtain that result.
+
 ## Prior Work and Accounting
 
 This packet continues the existing #118 episode. The preserved historical
