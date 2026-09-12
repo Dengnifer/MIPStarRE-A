@@ -184,7 +184,10 @@ sys.path.insert(0, str(checkout / "local" / "bin"))
 router = None
 try:
     import account_router as router
-    accounts = list(router.ACCOUNTS)
+    # The owner's live accounts file, then the cap files on disk, then the two
+    # historical names: a key added mid-run with owner-tools/accounts.sh counts
+    # toward this lane's slots at the next poll, with nothing restarted.
+    accounts = list(router.account_names(cache))
 except Exception:
     accounts = ["primary", "second"]
 def alive(pid):
@@ -200,7 +203,7 @@ def alive(pid):
 if router is not None and any((cache / "watchdog" / f"max-codex-{a}").exists()
                               for a in accounts):
     try:
-        caps = router.effective_caps(cache)          # a `down` endpoint counts as 0
+        caps = router.effective_caps(cache, tuple(accounts))  # `down` counts as 0
         live = sum(len(router.live_pids(cache / "accounts" / a)) for a in accounts)
         cap = sum(max(0, value) for value in caps)
         print(f"{max(0, cap - live)} {live} {cap}")

@@ -1,30 +1,33 @@
 {
   "schema_version": 1,
   "owner_scope": "design full-speed-v2 §2 item 1; protocol local/protocols/capacity.md",
-  "ceiling_source": "brief",
+  "ceiling_source": "accounts",
   "windows": {"counter_window_s": 300, "measured_hold_s": 600, "probe_timeout_s": 60},
   "defaults": {
     "floor": 1,
     "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
     "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
-               "probe_backoff_max_s": 600, "probes_to_recover": 2}
+               "probe_backoff_max_s": 600, "probes_to_recover": 2,
+               "disable_threshold": 1, "disable_backoff_s": 300}
   },
   "accounts": {
     "primary": {
       "floor": 1,
       "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
       "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
-                 "probe_backoff_max_s": 600, "probes_to_recover": 2}
+                 "probe_backoff_max_s": 600, "probes_to_recover": 2,
+                 "disable_threshold": 1, "disable_backoff_s": 300}
     },
     "second": {
       "floor": 1,
       "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
       "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
-                 "probe_backoff_max_s": 600, "probes_to_recover": 2}
+                 "probe_backoff_max_s": 600, "probes_to_recover": 2,
+                 "disable_threshold": 1, "disable_backoff_s": 300}
     }
   },
   "failure_patterns": [
-    {"failure_class": "endpoint_5xx", "counts_as": "death",
+    {"failure_class": "endpoint_5xx", "counts_as": "death", "disables": true,
      "patterns": ["503 Service Unavailable", "502 Bad Gateway", "504 Gateway Timeout",
                   "500 Internal Server Error", "Service Unavailable"]},
     {"failure_class": "concurrency_limit", "counts_as": "refusal",
@@ -35,8 +38,12 @@
     {"failure_class": "retries_exhausted", "counts_as": "death",
      "patterns": ["Reconnecting... 5/5", "stream disconnected before completion",
                   "exceeded retry limit"]},
-    {"failure_class": "auth", "counts_as": "death",
-     "patterns": ["401 Unauthorized", "403 Forbidden", "invalid_api_key"]},
+    {"failure_class": "auth", "counts_as": "death", "disables": true,
+     "patterns": ["401 Unauthorized", "403 Forbidden", "invalid_api_key",
+                  "Invalid API key", "invalid_request_error: api key"]},
+    {"failure_class": "insufficient_balance", "counts_as": "death", "disables": true,
+     "patterns": ["INSUFFICIENT_BALANCE", "insufficient balance", "insufficient_quota",
+                  "You exceeded your current quota", "billing_hard_limit_reached"]},
     {"failure_class": "unknown", "counts_as": "neutral", "patterns": []}
   ],
   "priority_classes": {

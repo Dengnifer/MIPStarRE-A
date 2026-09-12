@@ -1,10 +1,17 @@
 """Atomic dispatcher account reservations and resume affinity.
 
-Two admission inputs are additive and fail open to the historical behaviour:
+Three admission inputs are additive and fail open to the historical behaviour:
+``watchdog/accounts.json`` (the owner's live list of keys and their ceilings),
 ``watchdog/capacity/health-<account>.json`` (a ``down`` endpoint is cap 0) and
 ``watchdog/drain`` (a pause releases queued dispatches with `DRAIN_EXIT`).
-Absent files reproduce the previous behaviour exactly, and neither input can
-widen capacity — both only turn a waiting reservation into a clean refusal.
+Absent files reproduce the previous behaviour exactly, and none of them can
+widen capacity — they only turn a waiting reservation into a clean refusal.
+
+**Any number of named accounts.**  The account set is read per call from the
+live accounts file, and otherwise from the two historical names plus whatever
+extra name has a cap file, so a third key added with ``accounts.sh add`` is
+routable at the next reservation with nothing restarted and no code change.
+``primary`` and ``second`` are ordinary entries of that list, not special cases.
 """
 
 import argparse
@@ -12,17 +19,91 @@ import fcntl
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-ACCOUNTS = ("primary", "second")
+#: The same class `accounts_file.NAME_RE` enforces when the owner adds a key.
+_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,31}$")
+
+#: The two names every historical brief, cap file and session row uses.  They are
+#: the fallback when nothing on disk says otherwise — never a restriction.
+DEFAULT_ACCOUNTS = ("primary", "second")
+
+#: Kept as the module constant older callers import, and deliberately NOT
+#: computed from disk: a constant whose value depends on a file read at import
+#: time is unpredictable in a test and stale in a long-lived process.  Every
+#: admission decision below calls `account_names(root)` per call instead, so a
+#: file the owner edits mid-run is honoured with nothing reimported, and the
+#: in-tree callers (`lane.sh`, `daemon-scan.py`, `ready_report.py`) do the same.
+ACCOUNTS = DEFAULT_ACCOUNTS
 
 #: Exit status of a reservation released by an operator drain.  Distinct from
 #: the exit 4 every other routing failure uses, so a caller can tell "the run is
 #: pausing, come back later" from "this request is wrong".
 DRAIN_EXIT = 6
+
+
+def _cache_root() -> Path:
+    return Path(os.environ.get("MIPSTARRE_CACHE_ROOT",
+                               "~/.cache/mipstarre-dev")).expanduser()
+
+
+def account_names(root: Path | None = None) -> tuple[str, ...]:
+    """Every routable account name, newest source first.
+
+    1. ``watchdog/accounts.json`` — the owner's live file, which is the only
+       place a key may be added or retired during a run.  It is authoritative in
+       full: an account it does not list is not routable.
+    2. ``DEFAULT_ACCOUNTS`` plus any extra name that has a
+       ``watchdog/max-codex-<name>`` file — so a host with no accounts file yet
+       routes exactly as it did before, including the invariant that a
+       historical name with no cap file is cap 0 rather than absent.
+
+    An unreadable or invalid accounts file falls through to (2): admission must
+    never stop because the owner mistyped a field, and the capacity controller
+    is the component that reports that error loudly.
+    """
+    base = root or _cache_root()
+    try:
+        import accounts_file  # noqa: PLC0415 - same directory, optional
+        names = tuple(entry["name"] for entry in accounts_file.load(base) or ())
+        if names:
+            return names
+    except Exception:  # noqa: BLE001 - a bad file must not stop every dispatch
+        pass
+    watchdog = base / "watchdog"
+    found = sorted(
+        path.name[len("max-codex-"):] for path in watchdog.glob("max-codex-*")
+        if path.is_file() and path.name != "max-codex")
+    return DEFAULT_ACCOUNTS + tuple(name for name in found
+                                    if name not in DEFAULT_ACCOUNTS)
+
+
+def account_homes(root: Path | None = None) -> dict[str, Path]:
+    """``name -> CODEX_HOME`` from the live file, with the historical defaults.
+
+    The homes are resume affinity's evidence (a rollout file lives under the home
+    that produced it), so an account the file names must contribute its home even
+    when the two historical entries are also present.
+    """
+    base = root or _cache_root()
+    homes: dict[str, Path] = {}
+    try:
+        import accounts_file  # noqa: PLC0415 - same directory, optional
+        for entry in accounts_file.load(base) or ():
+            homes[entry["name"]] = Path(entry["codex_home"]).expanduser()
+    except Exception:  # noqa: BLE001 - fall back to the historical pair
+        homes = {}
+    homes.setdefault("primary", Path.home() / ".codex")
+    homes.setdefault("second", Path(os.environ.get("MIPSTARRE_CODEX_HOME_SECOND")
+                                    or Path.home() / ".cache/mipstarre-dev/codex-home-yxy"))
+    if os.environ.get("MIPSTARRE_CODEX_HOME_SECOND"):
+        homes["second"] = Path(os.environ["MIPSTARRE_CODEX_HOME_SECOND"]).expanduser()
+    return homes
 
 
 class DrainRequested(Exception):
@@ -35,8 +116,26 @@ class DrainRequested(Exception):
     """
 
 
-def choose_account(live: list[int], caps: list[int]) -> str:
-    return "primary" if live[0] * caps[1] <= live[1] * caps[0] else "second"
+def choose_account(live: list[int], caps: list[int],
+                   names: tuple[str, ...] = DEFAULT_ACCOUNTS) -> str:
+    """The account with the most headroom, as a fraction of its own cap.
+
+    The rule is unchanged for two accounts — ``live[0]*caps[1] <= live[1]*caps[0]``
+    is exactly "the first account's occupancy is no higher" — and generalizes to
+    N by comparing ``live/cap`` as a fraction, with ties going to the earlier
+    entry so a two-account file keeps preferring ``primary``.  A zero cap is
+    never chosen: `reserve` has already filtered it out, and treating it as
+    infinitely free is how a dead endpoint attracted every dispatch.
+    """
+    best, best_key = names[0], None
+    for index, name in enumerate(names):
+        cap = caps[index]
+        if cap <= 0:
+            continue
+        key = (live[index] * 1.0 / cap, index)
+        if best_key is None or key < best_key:
+            best, best_key = name, key
+    return best
 
 
 def health_state(root: Path, account: str) -> str:
@@ -55,22 +154,46 @@ def health_state(root: Path, account: str) -> str:
     return state if state in ("up", "degraded", "down") else "up"
 
 
-def effective_caps(root: Path) -> list[int]:
-    """Per-account caps with a dead endpoint forced to zero.
+def disabled_accounts(root: Path) -> set[str]:
+    """Names the owner's live file marks ``enabled: false``, or has dropped.
 
-    Without this the router *prefers* the dead account: `choose_account` picks
-    the lower live/cap ratio, and an endpoint answering 503 keeps freeing slots
-    as its sessions die, so every new dispatch is routed into the outage.  That
-    is how one hour of relay-us7 503s cost 69 sessions on 2026-09-12.  Forcing
-    the cap to zero only ever narrows admission; it can never widen it.
+    Belt and braces with the capacity controller, which writes cap 0 for such an
+    account at its next tick: between the owner's edit and that tick — up to 60
+    seconds — the cap file still holds the old number, and a dispatch admitted in
+    that window runs on a key the owner has just taken away.  Reading the file
+    here closes the window.  It can only ever narrow admission.
     """
+    try:
+        import accounts_file  # noqa: PLC0415 - same directory, optional
+        entries = accounts_file.load(root)
+    except Exception:  # noqa: BLE001 - an unreadable file changes nothing
+        return set()
+    if entries is None:
+        return set()
+    return {entry["name"] for entry in entries if not entry["enabled"]}
+
+
+def effective_caps(root: Path, names: tuple[str, ...] | None = None) -> list[int]:
+    """Per-account caps, with a dead or disabled endpoint forced to zero.
+
+    Without the health part the router *prefers* the dead account:
+    `choose_account` picks the lower live/cap ratio, and an endpoint answering
+    503 keeps freeing slots as its sessions die, so every new dispatch is routed
+    into the outage.  That is how one hour of relay-us7 503s cost 69 sessions on
+    2026-09-12.  Forcing the cap to zero only ever narrows admission; it can
+    never widen it.
+    """
+    accounts = names if names is not None else account_names(root)
+    disabled = disabled_accounts(root)
     caps = []
-    for account in ACCOUNTS:
+    for account in accounts:
         path = root / 'watchdog' / f'max-codex-{account}'
         cap = int(path.read_text().strip()) if path.exists() else 0
         if cap < 0:
             raise ValueError(f'{path}: cap must be nonnegative')
-        caps.append(0 if health_state(root, account) == "down" else cap)
+        if account in disabled or health_state(root, account) == "down":
+            cap = 0
+        caps.append(cap)
     return caps
 
 
@@ -112,9 +235,21 @@ def session_rows(registry: Path) -> list[dict]:
     return rows
 
 
+def is_account_name(value) -> bool:
+    """A syntactically valid account name.
+
+    Affinity and continuation are judged on the *recorded* name, not on today's
+    account list: a thread started on a key the owner has since retired still
+    belongs to that key, and the reservation for it will simply find no capacity.
+    Reading the historical row as "not an account" instead would silently turn a
+    resume into a fresh thread.
+    """
+    return isinstance(value, str) and bool(_NAME_RE.match(value))
+
+
 def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     matches = {row['account'] for row in session_rows(registry)
-               if row.get('thread_id') == thread and row.get('account') in ACCOUNTS}
+               if row.get('thread_id') == thread and is_account_name(row.get('account'))}
     for account, home in homes.items():
         for area in ("sessions", "archived_sessions"):
             if any((home / area).rglob(f"rollout-*{thread}.jsonl")):
@@ -172,7 +307,7 @@ def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict
     rows = session_rows(registry)
     previous = next(row for row in reversed(rows) if row.get('name') == request['previous_session'])
     if (previous.get('status') not in ('done', 'failed', 'archived') or
-            previous.get('account') not in ACCOUNTS or not previous.get('thread_id') or
+            not is_account_name(previous.get('account')) or not previous.get('thread_id') or
             str(previous.get('issue')) != issue):
         raise ValueError('continuation requires a terminal, same-issue predecessor with affinity')
     checkpoint = subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', '--verify',
@@ -206,7 +341,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool = Fal
     instead of being killed.  Absent file, absent health file: unchanged
     behaviour in every respect.
     """
-    if requested not in ('auto', *ACCOUNTS) or pid <= 0 or wait < 0:
+    if (requested != 'auto' and not is_account_name(requested)) or pid <= 0 or wait < 0:
         raise ValueError('expected a valid account, positive pid and nonnegative wait')
     accounts = root / "accounts"
     accounts.mkdir(parents=True, exist_ok=True)
@@ -216,12 +351,24 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool = Fal
             raise DrainRequested('drain in progress; no reservation made')
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            caps = effective_caps(root)
-            live = [len(live_pids(accounts / account)) for account in ACCOUNTS]
-            available = [account for index, account in enumerate(ACCOUNTS)
-                         if live[index] < caps[index] and requested in ('auto', account)]
-            if available:
-                selected = choose_account(live, caps) if len(available) == 2 else available[0]
+            # Re-read per iteration, inside the lock: a waiter queued for half an
+            # hour must see the key the owner added, the ceiling they raised and
+            # the account they disabled, without being restarted.
+            names = account_names(root)
+            if requested != 'auto' and requested not in names:
+                raise ValueError(
+                    f'{requested!r} is not one of the configured accounts '
+                    f'({", ".join(names)}); add it with owner-tools/accounts.sh add')
+            caps = effective_caps(root, names)
+            live = [len(live_pids(accounts / account)) for account in names]
+            free = [index for index, account in enumerate(names)
+                    if live[index] < caps[index] and requested in ('auto', account)]
+            if free:
+                # Only the accounts with a free slot compete, exactly as the
+                # two-account form did: a full account is not a candidate.
+                selected = (names[free[0]] if len(free) == 1 else choose_account(
+                    [live[index] for index in free], [caps[index] for index in free],
+                    tuple(names[index] for index in free)))
                 if not dry_run:
                     (accounts / selected / str(pid)).touch()
                 return selected
@@ -235,7 +382,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("reserve",))
     parser.add_argument("root", type=Path)
-    parser.add_argument("account", choices=("auto", *ACCOUNTS))
+    # Not `choices=`: the account set is on disk, not in this file, and a name
+    # the owner added minutes ago must be accepted.  `reserve` validates it
+    # against the live list and names the alternatives when it does not match.
+    parser.add_argument("account")
     parser.add_argument("pid", type=int)
     parser.add_argument("wait", type=int)
     parser.add_argument("registry", type=Path, nargs="?",
@@ -243,8 +393,7 @@ def main() -> None:
     parser.add_argument("--resume")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    homes = {"primary": Path.home() / ".codex", "second": Path(os.environ.get(
-        "MIPSTARRE_CODEX_HOME_SECOND") or Path.home() / ".cache/mipstarre-dev/codex-home-yxy")}
+    homes = account_homes(args.root)
     try:
         if args.resume and args.registry is None:
             raise ValueError("resume requires a session registry")

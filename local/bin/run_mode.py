@@ -38,18 +38,28 @@ speed.  ``set speed`` re-resolves it, so the tier and the models never disagree.
 Validation fails loudly at briefing time rather than at 05:00Z: an unknown
 key, a missing endpoint, a non-integer limit, ``external_reserved >=
 nominal_limit``, an occupancy target above 1, an unknown speed or model
-override, a non-positive issue number, or an account named outside
-``{primary, second}`` all exit 2 naming the offending key and the template
-path.  A missing brief is a hard error naming both paths — never silently zero
-and never silently unlimited capacity.
+override, a non-positive issue number, or an account name outside
+``[a-z0-9][a-z0-9_-]{0,31}`` all exit 2 naming the offending key and the
+template path.  A missing brief is a hard error naming both paths — never
+silently zero and never silently unlimited capacity.
 
-The derived cap files ``watchdog/max-codex-primary``, ``max-codex-second`` and
-``max-codex`` stay where ``account_router.py``, the lane runner and
-``status-snapshot.sh`` already read them.  This script refuses to write an
-empty or non-numeric cap file under any circumstance: the 2026-09-12 resume
-script wrote empty caps and every dispatch then exited 4 with
-``invalid literal for int()``.  ``max-codex`` is mechanically the sum of the
-effective per-account caps and has no admission meaning.
+**The brief seeds; the accounts file lives.**  ``apply`` writes
+``watchdog/accounts.json`` (``local/bin/accounts_file.py``) from the brief's
+``accounts`` block when that file does not exist, and **never overwrites an
+existing one**; where it exists it is what ``apply`` reads, so re-applying a
+brief to change the speed tier cannot undo the ceilings the owner has been
+editing all morning.  Any number of named accounts: ``primary`` and ``second``
+are ordinary entries, and a third key added with ``owner-tools/accounts.sh add``
+gets its own cap file, its own health and its own line in every report.
+
+The derived cap files ``watchdog/max-codex-<account>`` and ``max-codex`` stay
+where ``account_router.py``, the lane runner and ``status-snapshot.sh`` already
+read them, and the two historical names always get a file even when the run no
+longer configures them.  This script refuses to write an empty or non-numeric
+cap file under any circumstance: the 2026-09-12 resume script wrote empty caps
+and every dispatch then exited 4 with ``invalid literal for int()``.
+``max-codex`` is mechanically the sum of the effective per-account caps and has
+no admission meaning.
 
 Environment: ``MIPSTARRE_CACHE_ROOT`` (runtime root, default
 ``~/.cache/mipstarre-dev``), ``MIPSTARRE_REPO_ROOT`` (checkout holding
@@ -72,14 +82,33 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import accounts_file  # noqa: E402
 from wf_util import LayerError, atomic_write, sanitize  # noqa: E402
 
 #: The brief schema this tool accepts, and the mode document it writes.
 BRIEF_SCHEMA = "mipstarre-run-brief/1"
 MODE_SCHEMA = "mipstarre-run-mode/1"
 
-#: `account_router.py` knows exactly these two accounts.
+#: The two names every historical brief, cap file and session row uses.  They
+#: are ordinary entries, not a closed set: a brief may name any number of
+#: accounts (``accounts_file.NAME_RE``), and the owner may add more mid-run with
+#: ``owner-tools/accounts.sh add``.  These are only the fallback for a caller
+#: that has no mode document to read the names from.
 ACCOUNT_NAMES = ("primary", "second")
+
+
+def names_of(source) -> list[str]:
+    """Account names of a mode document, a brief, or a list of account rows."""
+    rows = source
+    if isinstance(source, dict):
+        rows = source.get("accounts")
+    if isinstance(rows, dict):
+        rows = list(rows.values())
+    if not isinstance(rows, list):
+        return list(ACCOUNT_NAMES)
+    names = [row.get("name") for row in rows
+             if isinstance(row, dict) and isinstance(row.get("name"), str)]
+    return names or list(ACCOUNT_NAMES)
 
 SPEEDS = ("fast", "default")
 
@@ -367,11 +396,8 @@ def _validate_accounts(accounts) -> list[dict]:
         if missing:
             raise BriefError(f"{where}.{missing[0]}",
                              f"{where} is missing: {', '.join(missing)}")
-        name = _require_text(raw["name"], f"{where}.name")
-        if name not in ACCOUNT_NAMES:
-            raise BriefError(f"{where}.name",
-                             f"account name {name!r} is outside {ACCOUNT_NAMES}; "
-                             "account_router.py knows exactly these two")
+        name = _require_text(raw["name"], f"{where}.name",
+                             pattern=accounts_file.NAME_RE)
         if name in seen:
             raise BriefError(f"{where}.name", f"account {name!r} is listed twice")
         seen.add(name)
@@ -493,7 +519,7 @@ def read_brief(path: Path) -> tuple[dict, str]:
 # Derived capacity
 # ---------------------------------------------------------------------------
 
-def measured_limits(root: Path | None = None) -> dict[str, int]:
+def measured_limits(root: Path | None = None, names: list[str] | None = None) -> dict[str, int]:
     """Per-account `measured_limit` from the capacity controller, if any.
 
     An unreadable or malformed estimate degrades to "no measurement" with a
@@ -511,7 +537,7 @@ def measured_limits(root: Path | None = None) -> dict[str, int]:
     accounts = doc.get("accounts") if isinstance(doc, dict) else None
     source = accounts if isinstance(accounts, dict) else doc if isinstance(doc, dict) else {}
     out: dict[str, int] = {}
-    for name in ACCOUNT_NAMES:
+    for name in (names if names is not None else list(source)):
         row = source.get(name)
         if not isinstance(row, dict):
             continue
@@ -531,7 +557,7 @@ def effective_caps(brief: dict, measured: dict[str, int] | None = None) -> dict[
     account is 0: the pipeline never dispatches there at all.
     """
     seen = measured or {}
-    caps = {name: 0 for name in ACCOUNT_NAMES}
+    caps = {account["name"]: 0 for account in brief["accounts"]}
     for account in brief["accounts"]:
         if not account["enabled"]:
             continue
@@ -540,7 +566,11 @@ def effective_caps(brief: dict, measured: dict[str, int] | None = None) -> dict[
         limit = seen.get(account["name"])
         if isinstance(limit, int) and limit >= 0:
             target = min(base, limit)
-        caps[account["name"]] = max(1, min(base, target))
+        # A live entry may reach ``ceiling == external_reserved``: the admin has
+        # taken every slot of that key for now.  That is 0, not the floor of 1 —
+        # the clamp exists so a measured limit never seeds a disabled-looking
+        # cap, not to invent a slot the owner says is not theirs.
+        caps[account["name"]] = max(1, min(base, target)) if base > 0 else 0
     return caps
 
 
@@ -555,7 +585,10 @@ def cap_values(caps: dict[str, int]) -> dict[str, int]:
     file is the failure this refuses, so it must not be silently repaired.
     """
     values: dict[str, int] = {}
-    for name in ACCOUNT_NAMES:
+    # The two historical names always get a file, even when the run no longer
+    # configures them: a reader that predates the live accounts file must find a
+    # number rather than an empty read, and 0 is the honest one.
+    for name in (*ACCOUNT_NAMES, *(name for name in caps if name not in ACCOUNT_NAMES)):
         value = caps.get(name, 0)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise LayerError(f"refusing max-codex-{name}: {value!r} is not a "
@@ -661,11 +694,12 @@ def write_account_mode(mode: dict, *, root: Path | None = None,
     return note
 
 
-def read_live_caps(root: Path | None = None) -> dict[str, int | None]:
+def read_live_caps(root: Path | None = None,
+                   names: list[str] | None = None) -> dict[str, int | None]:
     """Cap files as the router sees them; unreadable is None, never zero."""
     base = (root or cache_root()) / "watchdog"
     out: dict[str, int | None] = {}
-    for name in ACCOUNT_NAMES:
+    for name in (names if names is not None else list(ACCOUNT_NAMES)):
         path = base / f"max-codex-{name}"
         try:
             text = path.read_text(encoding="utf-8").strip()
@@ -738,7 +772,30 @@ def load_mode(root: Path | None = None) -> dict:
     if not isinstance(doc, dict) or doc.get("schema") != MODE_SCHEMA:
         raise LayerError(f"{path} is not a {MODE_SCHEMA} document; re-run "
                          "'run_mode.py apply'")
-    return doc
+    return with_live_accounts(doc)
+
+
+def with_live_accounts(mode: dict) -> dict:
+    """The mode document with its account list replaced by the live file.
+
+    ``run-mode.json`` is a SNAPSHOT taken at ``apply``; ``accounts.json`` is
+    live.  Without this, ``show``, ``get cap.<account>``, ``floor``, ``pause``
+    and ``resume`` would all quote the ceilings of the briefing while the
+    controller admitted against the ones the owner edited an hour ago — the
+    exact class of defect this whole layer exists to remove (the 2026-09-12
+    resume message announced "primary 5 / second 39 / total 44" forty minutes
+    after those numbers were wrong).  A key added mid-run appears here too, so
+    it gets a cap file, a `cap.<name>` accessor and a line in every report.
+
+    An invalid accounts file raises, and every caller treats that as unknown
+    rather than as zero capacity: silently falling back to the snapshot would
+    restore a ceiling the owner has just lowered.
+    """
+    entries = accounts_file.load()
+    if entries is None:
+        return mode
+    return dict(mode, accounts=accounts_file.as_mode_rows(entries),
+                accounts_source=str(accounts_file.accounts_path()))
 
 
 def account_row(mode: dict, name: str) -> dict:
@@ -751,11 +808,12 @@ def account_row(mode: dict, name: str) -> dict:
 
 def current_caps(mode: dict, root: Path | None = None) -> dict[str, int]:
     """Live cap files where readable, the record where not."""
-    live = read_live_caps(root)
+    names = names_of(mode)
+    live = read_live_caps(root, names)
     recorded = mode.get("derived", {}).get("caps", {})
     return {name: (live[name] if live.get(name) is not None
                    else int(recorded.get(name, 0)))
-            for name in ACCOUNT_NAMES}
+            for name in names}
 
 
 # ---------------------------------------------------------------------------
@@ -812,7 +870,7 @@ def value_for(mode: dict, key: str, root: Path | None = None):
         return " ".join(a["name"] for a in mode["accounts"] if a.get("enabled"))
     if "." in key:
         field, _, name = key.partition(".")
-        if field in PER_ACCOUNT_KEYS and name in ACCOUNT_NAMES:
+        if field in PER_ACCOUNT_KEYS and name in names_of(mode):
             row = account_row(mode, name)
             if field == "cap":
                 return caps.get(name, 0)
@@ -885,7 +943,7 @@ def render_oneline(mode: dict, root: Path | None = None) -> str:
     caps = current_caps(mode, root)
     parts = [
         f"speed={run['speed']}" + ("(PAUSED)" if mode.get("paused") else ""),
-        " ".join(f"{name}={caps.get(name, 0)}" for name in ACCOUNT_NAMES),
+        " ".join(f"{name}={caps.get(name, 0)}" for name in names_of(mode)),
         f"total={sum(caps.values())}",
         f"floor={floor_for(caps, run['occupancy_target'])}",
         f"progress=#{run['progress_issue']}",
@@ -1087,12 +1145,14 @@ def controller_state(root: Path | None = None) -> dict | None:
     return doc if isinstance(doc, dict) else None
 
 
-def controller_caps(root: Path | None = None) -> dict[str, int]:
+def controller_caps(root: Path | None = None,
+                    names: list[str] | None = None) -> dict[str, int]:
     doc = controller_state(root) or {}
     caps = doc.get("caps") if isinstance(doc.get("caps"), dict) else {}
     accounts = doc.get("accounts") if isinstance(doc.get("accounts"), dict) else {}
     out: dict[str, int] = {}
-    for name in ACCOUNT_NAMES:
+    for name in (names if names is not None
+                 else sorted(set(caps) | set(accounts)) or list(ACCOUNT_NAMES)):
         value = caps.get(name)
         if not isinstance(value, int) or isinstance(value, bool):
             row = accounts.get(name)
@@ -1148,19 +1208,65 @@ def call_controller(command: str) -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# The live accounts file (W10)
+# ---------------------------------------------------------------------------
+
+def seed_accounts(brief: dict, digest: str, source: Path, *,
+                  dry_run: bool = False) -> str:
+    """Write ``watchdog/accounts.json`` from the brief, only when it is absent.
+
+    The brief is ONE-SHOT and the accounts file is LIVE.  A brief re-applied
+    mid-run — to change the speed tier, the cutoff or an issue number — must not
+    undo an hour of the owner's ceiling edits, so an existing file is left
+    exactly as it is and this says so.  The owner's own tools
+    (``owner-tools/accounts.sh``, the ``ACCOUNTS:`` inbox comment) are the way
+    it changes afterwards; ``rm`` it and re-apply to go back to the brief.
+    """
+    path = accounts_file.accounts_path()
+    if path.exists():
+        return f"{path} kept (the live accounts file is the owner's; the brief seeds it once)"
+    if dry_run:
+        return (f"{path} would be seeded from {source} with " +
+                ", ".join(f"{a['name']}={a['nominal_limit']}" for a in brief["accounts"]))
+    try:
+        written, path = accounts_file.seed(
+            brief["accounts"], source=f"seeded from {source} sha256 {digest[:12]}")
+    except accounts_file.AccountsError as exc:
+        raise BriefError("accounts", f"cannot seed {path}: {exc}") from exc
+    return f"{path} {'seeded from the brief' if written else 'kept'}"
+
+
+def live_accounts(brief: dict) -> list[dict]:
+    """The brief's accounts, superseded by the live file whenever it exists.
+
+    ``apply`` therefore records what admission will ACTUALLY use.  Reading the
+    brief here instead would make the mode document, the reports rendered from
+    it and the caps it derives disagree with the controller within one tick, and
+    the disagreement would look like a capacity bug rather than a stale read.
+    """
+    entries = accounts_file.load()
+    if entries is None:
+        return brief["accounts"]
+    return accounts_file.as_mode_rows(entries)
+
+
+# ---------------------------------------------------------------------------
 # Subcommands
 # ---------------------------------------------------------------------------
 
 def cmd_apply(args: argparse.Namespace) -> int:
     source = Path(args.brief).expanduser() if args.brief else brief_path()
     brief, digest = read_brief(source)
-    measured = measured_limits()
+    accounts_note = seed_accounts(brief, digest, source, dry_run=args.dry_run)
+    brief = dict(brief, accounts=live_accounts(brief))
+    names = names_of(brief)
+    measured = measured_limits(names=names)
     caps = effective_caps(brief, measured)
     mode = build_mode(brief, digest, source, caps, measured)
     values = cap_values(caps)
     run = mode["run"]
     summary = (f"speed {run['speed']}, caps " +
-               ", ".join(f"{name} {caps[name]}" for name in ACCOUNT_NAMES) +
+               ", ".join(f"{name} {caps[name]}" for name in names) +
                f", max-codex {values['max-codex']}, occupancy floor "
                f"{mode['derived']['floor']} (target {run['occupancy_target']:.2f}), "
                f"cutoff {run['dispatch_cutoff']}, issues "
@@ -1178,6 +1284,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         sys.stdout.write(f"  {shim_path()} rendered at {run['speed']} speed\n")
         sys.stdout.write(f"  {write_model_override(mode, dry_run=True)}\n")
         sys.stdout.write(f"  {write_account_mode(mode, dry_run=True)}\n")
+        sys.stdout.write(f"  {accounts_note}\n")
         sys.stdout.write(f"  brief sha256 {digest}\n")
         return 0
 
@@ -1204,7 +1311,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
             "not round-trip until the controller has state. Fix it, then run "
             "'python3 local/bin/capacity_controller.py init'.\n")
     append_stage(f"run-mode apply: {summary}; {override_note}; {account_mode_note}; "
-                 f"brief {source} sha256 {digest}", "run-mode-apply")
+                 f"{accounts_note}; brief {source} sha256 {digest}", "run-mode-apply")
     append_decision(
         f"Run mode applied: {summary}",
         "owner brief via run_mode.py apply",
@@ -1214,6 +1321,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
     sys.stdout.write(render_show(mode))
     sys.stdout.write(override_note + "\n")
     sys.stdout.write(account_mode_note + "\n")
+    sys.stdout.write(accounts_note + "\n")
     if previous_paused:
         sys.stdout.write("note: the previous run mode was paused; this brief restores "
                          "capacity now.\n")
@@ -1301,11 +1409,12 @@ def cmd_set(args: argparse.Namespace) -> int:
 
 def cmd_pause(args: argparse.Namespace) -> int:
     mode = load_mode()
+    names = names_of(mode)
     saved = mode.get("saved_caps")
     if not (mode.get("paused") and isinstance(saved, dict) and saved):
-        saved = controller_caps() or current_caps(mode)
-    saved = {name: int(saved.get(name, 0)) for name in ACCOUNT_NAMES}
-    zero = {name: 0 for name in ACCOUNT_NAMES}
+        saved = controller_caps(names=names) or current_caps(mode)
+    saved = {name: int(saved.get(name, 0)) for name in names}
+    zero = {name: 0 for name in names}
     mode["paused"] = True
     mode["paused_at"] = utcnow()
     mode["saved_caps"] = saved
@@ -1316,7 +1425,7 @@ def cmd_pause(args: argparse.Namespace) -> int:
     problem = ""
     if ok:
         source = "capacity_controller.py pause"
-        live = read_live_caps()
+        live = read_live_caps(names=names)
         if any(value is None or value != 0 for value in live.values()):
             write_caps(zero)
             source += " (cap files corrected by run_mode.py)"
@@ -1330,7 +1439,7 @@ def cmd_pause(args: argparse.Namespace) -> int:
 
     account_mode_note = write_account_mode(mode)
     note = (f"run-mode pause: caps zeroed via {source}; saved caps " +
-            ", ".join(f"{name} {saved[name]}" for name in ACCOUNT_NAMES) +
+            ", ".join(f"{name} {saved[name]}" for name in names) +
             (f"; reason {args.reason}" if args.reason else "") +
             f"; {account_mode_note}")
     append_stage(note, "run-mode-pause")
@@ -1351,10 +1460,16 @@ def cmd_resume(args: argparse.Namespace) -> int:
     if not mode.get("paused"):
         sys.stderr.write("run_mode.py: warning: the run mode is not paused; "
                          "restoring the briefed caps anyway\n")
+    names = names_of(mode)
     saved = mode.get("saved_caps") if isinstance(mode.get("saved_caps"), dict) else {}
-    briefed = effective_caps({"accounts": mode["accounts"]}, measured_limits())
+    briefed = effective_caps({"accounts": mode["accounts"]}, measured_limits(names=names))
     caps: dict[str, int] = {}
-    for name in ACCOUNT_NAMES:
+    # Names whose saved cap this command replaced with the briefed one.  Only
+    # for these may the controller legitimately restore a different number: it
+    # clamps its OWN saved value to its floor, and this command never told it
+    # about the substitution.  Every other difference stays a hard refusal.
+    substituted: set[str] = set()
+    for name in names:
         row = next((a for a in mode["accounts"] if a["name"] == name), None)
         enabled = bool(row and row.get("enabled"))
         value = saved.get(name)
@@ -1365,6 +1480,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
                              f"resuming at the briefed {briefed[name]} instead of zero "
                              "capacity\n")
             value = briefed[name]
+            substituted.add(name)
         if not enabled:
             value = 0
         caps[name] = value
@@ -1392,8 +1508,8 @@ def cmd_resume(args: argparse.Namespace) -> int:
                       "The cap files were left where they are (paused is the safe "
                       "direction). Fix the controller and re-run 'run_mode.py resume'.")
 
-    live = read_live_caps()
-    for name in ACCOUNT_NAMES:
+    live = read_live_caps(names=names)
+    for name in names:
         row = next((a for a in mode["accounts"] if a["name"] == name), None)
         enabled = bool(row and row.get("enabled"))
         value = live.get(name)
@@ -1403,17 +1519,34 @@ def cmd_resume(args: argparse.Namespace) -> int:
         if enabled and value < 1:
             raise Refused(f"post-condition: {name} is enabled but resumed at cap {value}")
         if value != caps[name]:
-            raise Refused(
-                f"post-condition: {name} was resumed at cap {value}, not the "
-                f"restored {caps[name]}. Something else wrote the cap file, or "
-                "the capacity controller has no state for this run (seed it with "
-                "'python3 local/bin/capacity_controller.py init'). Refusing to "
-                "report a number the files do not carry.")
+            if name in substituted and 1 <= value <= max(1, briefed[name]):
+                # The one legitimate difference: this command replaced a saved
+                # cap below 1 (an account that was disabled or `down` when the
+                # pause ran and is enabled now) with the briefed one, and the
+                # controller restored its own clamp of the saved value instead.
+                # Both are safe and neither widens capacity.  Adopt the number
+                # the FILES carry and say so, rather than announcing one they do
+                # not — that is the 2026-09-12 failure this guard exists for.
+                sys.stderr.write(
+                    f"run_mode.py: warning: {name} was resumed at cap {value}; this "
+                    f"command had substituted the briefed {caps[name]} for a saved "
+                    "cap below 1. Reporting the value the cap file carries.\n")
+                caps[name] = value
+            else:
+                raise Refused(
+                    f"post-condition: {name} was resumed at cap {value}, not the "
+                    f"restored {caps[name]}. Something else wrote the cap file, or "
+                    "the capacity controller has no state for this run (seed it with "
+                    "'python3 local/bin/capacity_controller.py init'). Refusing to "
+                    "report a number the files do not carry.")
     # Reported from the files, not from the intent: a resume that announces caps
     # it did not actually write is how the 2026-09-12 run lost an hour.
-    live_total = sum(live[name] or 0 for name in ACCOUNT_NAMES)
+    mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
+                       "floor": floor_for(caps, mode["run"]["occupancy_target"])}
+    write_mode(mode)
+    live_total = sum(live[name] or 0 for name in names)
     note = ("run-mode resume: caps " +
-            ", ".join(f"{name} {live[name]}" for name in ACCOUNT_NAMES) +
+            ", ".join(f"{name} {live[name]}" for name in names) +
             f", max-codex {live_total}, floor {mode['derived']['floor']} "
             f"via {source}; {resume_override}; {resume_account_mode}")
     append_stage(note, "run-mode-resume")

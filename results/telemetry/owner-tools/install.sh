@@ -118,6 +118,7 @@ owner-say.sh|owner-say.sh|755|required
 goal-keeper.sh|goal-keeper.sh|755|required
 estimate.sh|estimate.sh|755|required
 status-snapshot.sh|status-snapshot.sh|755|required
+accounts.sh|accounts.sh|755|required
 codex|owner-bin-codex|755|required
 stack-watch.sh|stack-watch.sh|755|optional
 capacityd.sh|capacityd.sh|755|optional

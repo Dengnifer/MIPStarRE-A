@@ -30,7 +30,7 @@ the **only** artifact the owner authors for a run.
 | `run.progress_issue` | prose progress and the hourly readiness report |
 | `run.estimate_issue` | the two-line estimate, and nothing else, ever |
 | `run.owner_inbox_issue` | permission, credential, access and scope grants only |
-| `accounts[].name` | `primary` or `second` — `account_router.py` knows exactly these two |
+| `accounts[].name` | any name matching `[a-z0-9][a-z0-9_-]{0,31}`; `primary` and `second` are ordinary entries, not a closed set |
 | `accounts[].label` | the human name of the key ("space", "relay-us7") |
 | `accounts[].endpoint` | the label failures and health are attributed to, so a key moved between homes keeps its identity |
 | `accounts[].codex_home` | that account's `CODEX_HOME` |
@@ -51,6 +51,107 @@ and dispatch nowhere on that key, with the AIMD seeing only deaths — the
 idle-slot failure of 2026-09-12 intervention 2. Read it with `run_mode.py get
 account_mode`; `owner-resume.sh` exits 5 when the file and the brief disagree.
 Never edit it.
+
+## 1.1 The live accounts file
+
+The brief is **one-shot**; the set of usable keys is **live**. The owner's real situation is
+one to three endpoints, each with one or two keys, and each key's concurrency limit moving
+during the run: the endpoint's admin reassigns slots, the owner wins them back, a key
+becomes invalid, a key runs out of quota. On 2026-09-12 every one of those events reached
+the pipeline as a message to a session that had to be idle to receive it.
+
+`~/.cache/mipstarre-dev/watchdog/accounts.json` is therefore the source of truth for
+admission. One entry per key:
+
+```json
+{"schema": "mipstarre-accounts/1",
+ "accounts": [
+   {"name": "second", "label": "space", "endpoint": "api.finite-dimensional.space",
+    "codex_home": "~/.cache/mipstarre-dev/codex-home-yxy",
+    "ceiling": 30, "external_reserved": 2, "enabled": true, "note": ""}]}
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | `[a-z0-9][a-z0-9_-]{0,31}`; any number of entries |
+| `label` / `endpoint` | the human name, and the label failures and health are attributed to |
+| `codex_home` | that key's `CODEX_HOME`. **The key value itself is never in this file** — it lives in that directory, which only the owner touches |
+| `ceiling` | **a ceiling, never a target** (below) |
+| `external_reserved` | slots on the key the pipeline must not use. `external_reserved == ceiling` is legal and means the key has no slot for the pipeline right now — different from `enabled: false`, which is a decision |
+| `enabled` | `false` is cap 0 immediately and no health probe; removing the entry is the same |
+| `note` | the owner's own free text, echoed in the hourly per-key line and changing nothing |
+
+**`run_mode.py apply` seeds this file from the brief when it is absent and NEVER overwrites
+an existing one**, and where the file exists it is what `apply` reads. So re-applying a
+brief to change the speed tier, the cutoff or an issue number cannot undo an hour of ceiling
+edits; `rm` the file and re-apply to go back to the brief.
+
+**The controller and the router re-read it on every tick and every reservation** (at most
+60 s stale). Lowering a ceiling takes effect at the next tick; raising it lets the AIMD
+creep continue rather than jumping the cap; `enabled: false` and a removed entry are cap 0
+at once. An entry the owner adds gets its own cap file, its own health, its own
+`cap.<name>` accessor and its own line in every report, with nothing restarted.
+
+An **invalid** accounts file is a hard, named failure of the controller with the cap files
+left exactly as they are — never a silent fall back to the brief, which would restore a
+ceiling the owner has just lowered.
+
+### Editing it
+
+```bash
+results/telemetry/owner-tools/accounts.sh list
+results/telemetry/owner-tools/accounts.sh set second ceiling 20
+results/telemetry/owner-tools/accounts.sh set second reserved 4
+results/telemetry/owner-tools/accounts.sh disable second --note "quota gone"
+results/telemetry/owner-tools/accounts.sh add third --endpoint api.third.example \
+    --codex-home ~/.codex-third --ceiling 8
+results/telemetry/owner-tools/accounts.sh probe second
+results/telemetry/owner-tools/accounts.sh log -n 20
+```
+
+Every write is atomic (temp file + rename) and appends one line to
+`watchdog/capacity/accounts.log`. A bad field is refused with the field named and the file
+is left byte-identical.
+
+### The GitHub channel
+
+When the owner is away from a shell, a comment on the owner inbox issue
+(`run.owner_inbox_issue`) in the fixed form
+
+```
+ACCOUNTS: <name> ceiling=<n> [reserved=<n>] [enabled=true|false] [note=<word>]
+```
+
+— one or more lines per comment — is applied by `local/bin/janitor.sh`'s `owner-accounts`
+pass at its next sweep and answered with one reply per comment saying exactly what took
+effect: `applied: second ceiling 30 -> 20`, or `rejected: … — <reason>`. Three rules make
+it a control channel rather than a conversation:
+
+* only comments written by the **repository owner login** recorded in `local/README.md` are
+  applied (overridable with `MIPSTARRE_OWNER_LOGIN`); anyone else's are answered with a
+  `rejected:` line naming them, so an attempt is visible rather than silent;
+* a comment is applied **exactly once** — the reply carries
+  `<!-- mipstarre-accounts comment=<id> -->` and an answered comment is skipped — so a sweep
+  every minute cannot re-apply a ceiling the owner has since changed at the shell;
+* the channel carries `ceiling`, `reserved`, `enabled` and `note` **only**. An endpoint or a
+  codex home is a path on the owner's host and is set with `accounts.sh`, where a typo
+  cannot travel through a public comment.
+
+Comment bodies are untrusted text (`issues-prs.md` §4): only `ACCOUNTS:` lines are read at
+all, every value is validated before anything is written, and nothing is interpolated into a
+shell.
+
+### Measured health
+
+A key is disabled by measurement, not by opinion. `401`/`403`/invalid-key and
+`INSUFFICIENT_BALANCE` disable it at the **first** occurrence — a `401` is not a statistic,
+and retrying an invalid key at any concurrency produces nothing but dead sessions — and
+`endpoint_5xx` disables it at three deaths inside two minutes, the 2026-09-12 outage. Both
+write the reason into `watchdog/capacity/health.json`, one document for every key, and cap
+it at 0. The way back is the same half-open, single-flight, read-only probe in both cases,
+restoring cap **1** and letting AIMD climb; the key-invalid backoff starts at five minutes
+rather than thirty seconds, because a key does not become valid again in thirty seconds.
+`accounts.sh probe [name]` runs that probe now instead of waiting for the backoff.
 
 **`nominal_limit` is a ceiling and never a target.** It is the highest
 concurrency the key may ever reach. The controller may sit below it for the
@@ -156,6 +257,7 @@ run_mode.py show --oneline       # the whole mode on ONE line (goal text, resume
 run_mode.py get account_mode     # derived from accounts[].enabled; the PATH shim reads it
 run_mode.py get speed
 run_mode.py get floor            # int(occupancy_target * sum of effective caps)
+run_mode.py get accounts          # the enabled account names
 run_mode.py get cap.second
 run_mode.py get endpoint.second
 run_mode.py get codex_home.second
@@ -205,8 +307,14 @@ the alarm case and should always be zero.** A post is suppressed when the ready
 set and the reasons are unchanged and nothing merged, and forced at least every
 six hours. The same rows go to `results/telemetry/merge-latency-<date>.jsonl`.
 
-The hourly comment also carries two counts the owner would otherwise have to
-audit by hand:
+The hourly comment also carries **one line per key** — ceiling, effective cap,
+live workers, refusals in the last ten minutes, health with the reason it was
+disabled, and the owner's own `note` — so the state of every key reaches the
+owner's own channel. Before it existed, "the yxy key is disabled and here is
+why" was a message from a session, which is the prompt the live accounts file
+exists to remove.
+
+It also carries two counts the owner would otherwise have to audit by hand:
 
 * **models** — sessions started in the window grouped by the model that actually
   ran, next to the override in force and, when the override names one model, the

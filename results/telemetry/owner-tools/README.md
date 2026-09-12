@@ -59,6 +59,7 @@ stream, so it prints nothing.
 | `goal-keeper.sh` | idem | long-running host loop |
 | `estimate.sh` | idem | cron job |
 | `status-snapshot.sh` | idem | host census |
+| `accounts.sh` | idem (work item W10) | the owner's command for the live accounts file; usable while the checkout is mid-merge, which is exactly when a key goes bad |
 | `stack-watch.sh` | idem | long-running host loop |
 | `capacityd.sh` | idem (work item W3) | 60 s controller loop; started by `install.sh --start-loops`, by `owner-resume.sh` and by a five-minute crontab row; single-instance under a lock |
 | `merge-daemon.sh`, `merge.sh`, `daemon-scan.py`, `daemon.conf` | idem (work item W5) | long-running host loop; must survive a mid-merge checkout. It is also the **runner of `local/bin/janitor.sh`** (every `janitor_interval_s`, detached and self-locking): the dead-session, parked-lane, stale-lane and spool passes have no other caller |
@@ -83,14 +84,71 @@ These stay in `~/bin` on the host — they are the owner's, not the pipeline's �
 | `~/bin/astra-poll.sh` | `results/telemetry/owner-tools/astra-poll.sh` | cron row off since 2026-09-09 |
 | `~/bin/estimate.sh` | **retired** — superseded by `owner-bin/estimate.sh` | the crontab row now points at `owner-bin/` |
 
-## The owner's four commands
+## The owner's five commands
 
 ```sh
 owner-bin/owner-pause.sh  [--deadline 15m] [--reason "..."] [--dry-run]
 owner-bin/owner-resume.sh [--dry-run] [--force-crontab]
 owner-bin/owner-say.sh --mode idle|interrupt|terminal [--timeout N] "TEXT"
 owner-bin/install-crons.sh [--paused] [--dry-run] [--restore FILE]
+owner-bin/accounts.sh     list | get | set | enable | disable | add | remove | probe | log
 ```
+
+### `accounts.sh` — the keys, their ceilings and their health
+
+`~/.cache/mipstarre-dev/watchdog/accounts.json` is the **live** source of truth for
+admission: one entry per key, `{name, label, endpoint, codex_home, ceiling,
+external_reserved, enabled, note}`, any number of endpoints and keys. The capacity
+controller and `account_router.py` re-read it every tick and every reservation, so an edit
+reaches admission within 60 seconds with **no session prompted, no brief re-applied and
+nothing restarted**. `run_mode.py apply` seeds the file from the brief when it is absent and
+never overwrites an existing one.
+
+```sh
+accounts.sh list                                  # every key, its ceiling and its state
+accounts.sh set second ceiling 20                 # the admin took slots back
+accounts.sh set second reserved 4                 # a forked session shares this key
+accounts.sh disable second --note "quota gone"    # cap 0 immediately, no probes
+accounts.sh enable second
+accounts.sh add third --endpoint api.third.example \
+    --codex-home ~/.codex-third --ceiling 8       # routable at the next reservation
+accounts.sh remove third
+accounts.sh probe second                          # one read-only health probe, now
+accounts.sh log -n 20                             # who changed what, and when
+```
+
+* **`ceiling` is a ceiling, never a target.** The controller's AIMD discovery runs below it
+  and may never exceed `ceiling - external_reserved`. Lowering it takes effect at the next
+  tick; raising it lets the additive creep continue — the cap does not leap to the new
+  number. A run sitting at 60 % of the ceiling with no refusals is behaving correctly.
+* **`external_reserved == ceiling` is legal** and means the key has no slot for the pipeline
+  right now — an honest state during a run, and different from `enabled: false`, which is a
+  decision.
+* **No key value is ever stored.** An entry names the codex home the key lives in; the
+  secret stays in that directory, which only the owner touches.
+* Every write is atomic (temp file + rename) and appends one line to
+  `watchdog/capacity/accounts.log`. A bad field is refused with the field named and the file
+  is left byte-identical, so the controller reading it a millisecond later never sees a
+  half-file.
+
+**From GitHub, when there is no shell.** A comment on the owner inbox issue in the fixed
+form `ACCOUNTS: <name> ceiling=<n> [reserved=<n>] [enabled=true|false]` (one or more lines
+per comment) is applied by `local/bin/janitor.sh` at its next sweep and answered with one
+reply saying exactly what took effect (`applied: second ceiling 30 -> 20`, or `rejected: …`
+with the reason). Only comments written by the repository owner login recorded in
+`local/README.md` are applied; anyone else's are answered with a `rejected:` line naming
+them. The channel carries `ceiling`, `reserved`, `enabled` and `note` only — an endpoint or
+a codex home is a path on the host and is set here, where a typo cannot travel through a
+public comment.
+
+**Measured health.** A key that answers `401`/`403`/invalid-key or `INSUFFICIENT_BALANCE`
+disables itself at the first occurrence, and an endpoint answering 5xx three times in two
+minutes does the same; both record the REASON in `watchdog/capacity/health.json` and cap the
+key at 0. A disabled key probes its own way back (read-only, bounded, single-flight) and
+returns at cap 1, never at its pre-outage cap. The hourly readiness report on the progress
+issue carries one line per key — ceiling, effective cap, live, refusals in the last ten
+minutes, health with its reason, and the owner's own note — so none of this needs a question
+to a session.
 
 ### `owner-pause.sh` — pause within the deadline
 

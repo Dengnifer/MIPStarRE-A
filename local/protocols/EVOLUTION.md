@@ -1538,3 +1538,91 @@ that is not the briefed one shows up on the progress issue within the hour, one
 tier switch moves the shim, the models and the cadence together, and the only
 `MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
 `checked-push.sh`.
+
+## 2026-09-13 - The keys are a live file, not a message (W10, issue 555)
+
+**Trigger:** the owner's account of their real situation, 2026-09-12 — one to
+three endpoints, each with one or two API keys, each key's concurrency limit
+between 5 and 40 and *changing during the run*: the endpoint's admin reassigns
+slots, the owner wins them back, a key becomes invalid, a key runs out of quota.
+W1 gave the start of a run one briefing; the middle of it still ran on messages.
+Changing a ceiling meant re-applying a one-shot brief, adding or retiring a key
+was impossible, and every such change had to be typed to a session that had to be
+idle to receive it.
+
+**Change, in six parts.**
+
+*One live file, owned by the owner.*
+`~/.cache/mipstarre-dev/watchdog/accounts.json` is the source of truth for
+admission: one entry per key, `{name, label, endpoint, codex_home, ceiling,
+external_reserved, enabled, note}`, any number of endpoints and keys, and **no key
+value in it** — the secret lives in the codex home the entry names, which only the
+owner touches. `run_mode.py apply` seeds the file from the brief's `accounts`
+block when it is absent and **never overwrites an existing one**, and where it
+exists it is what `apply` reads; so the brief stays one-shot while the accounts
+stay live, and re-applying a brief to change the speed tier cannot undo an hour of
+ceiling edits. `local/bin/accounts_file.py` is the only writer: validation before
+any write, `os.replace` after it, and one line per edit in
+`watchdog/capacity/accounts.log`.
+
+*Re-read every tick, with ceiling semantics.* The capacity controller loads the
+file on every tick and `account_router.py` on every reservation, so a ceiling
+lowered at 05:12Z is in force by 05:13Z with nothing restarted. `ceiling` is a
+ceiling and never a target: the AIMD discovery is unchanged below it and may never
+exceed `ceiling - external_reserved`; lowering it takes effect at the next tick,
+raising it lets the additive creep continue rather than jumping the cap.
+`enabled: false` and a removed entry are cap 0 with no probe — the router also
+reads the flag directly, which closes the up-to-60-second window between the
+owner's edit and the controller's tick. An invalid file is a hard, named failure
+with the cap files untouched: falling back to the brief would restore the ceiling
+the owner has just lowered.
+
+*Health that knows the difference between busy and broken.* `auth` (401/403,
+invalid key) and `insufficient_balance` (`INSUFFICIENT_BALANCE`, quota) are marked
+`"disables": true` in `local/capacity-policy.json` and take the key to cap 0 at the
+**first** occurrence, with the reason recorded — a `401` is not a statistic, and
+no amount of AIMD makes an invalid key valid. `endpoint_5xx` keeps its 3-in-120 s
+threshold. Both write `reason` and `disabled_by` into the per-account health files
+and into the new `watchdog/capacity/health.json`, one document for every key; the
+way back is the same half-open, single-flight, read-only probe restoring cap 1,
+with the key-invalid backoff starting at five minutes rather than thirty seconds.
+`capacity_controller.py probe [ACCOUNT]` runs it now.
+
+*Two owner touchpoints, neither of them a prompt.*
+`results/telemetry/owner-tools/accounts.sh list|get|set|enable|disable|add|remove|probe|log`
+is the shell one. For when there is no shell, a comment on the owner inbox issue
+in the form `ACCOUNTS: <name> ceiling=<n> [reserved=<n>] [enabled=true|false]` is
+applied by a sixth janitor pass (`local/bin/accounts_inbox.py`) and answered with
+one reply per comment saying exactly what took effect. Only the repository owner
+login recorded in `local/README.md` is applied; anyone else's comment is answered
+with a `rejected:` line naming them, so an attempt is visible rather than silent.
+A comment is applied exactly once — the reply carries its comment id — so a sweep
+every minute cannot re-apply a ceiling the owner has since changed at the shell.
+The channel carries `ceiling`, `reserved`, `enabled` and `note` only: an endpoint
+or a codex home is a path on the host and is set at the shell, where a typo cannot
+travel through a public comment.
+
+*N named accounts.* `account_router.ACCOUNTS = ("primary", "second")` was a
+two-element tuple that had become a schema — the router, `run_mode.py`,
+`dispatch.sh --account`, `lane.sh`'s slot count, `daemon-scan.py` and the
+pause/resume snapshot all enumerated it, and the second key's `CODEX_HOME` was an
+`if` rather than a field. The account set is now read per call from the live file,
+then from the cap files, then from those two names as the last fallback;
+`choose_account` generalizes to the emptiest key by occupancy with ties going to
+the earlier entry, which is byte-identical to the old rule for two accounts; every
+account's `CODEX_HOME` comes from its own entry. `primary` and `second` keep
+working as ordinary entries, and both always get a cap file so a reader that
+predates this layer finds a number rather than an empty read.
+
+*The owner's per-key line.* `ready_report.py`'s hourly comment gains one line per
+key — ceiling, effective cap, live, refusals in the last ten minutes, health with
+its reason, and the owner's own note — and a key's ceiling, cap, health or enabled
+flag changing joins the suppression signature, so the hour it changes is posted
+rather than suppressed as unchanged.
+
+**Expected effect:** the owner changes a ceiling, disables a dead key, or adds a
+third one from a shell or from a phone, and the running pipeline follows within a
+minute with no session told anything; an invalid or exhausted key takes itself out
+of service with a reason the owner reads on the progress issue and probes its own
+way back; and the number of keys is a fact about a file rather than about the
+source.

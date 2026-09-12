@@ -6,21 +6,31 @@
 into a primary endpoint that answered 503 for half an hour, the rest above the
 second account's real provider limit.  Two independent paths replace both
 interventions.  **AIMD** over refusals: one slot up per quiet window, and on a
-refusal down to just under the concurrency that was refused, inside the brief's
-``nominal_limit - external_reserved`` ceiling.  **Endpoint health**: three
-``endpoint_5xx`` deaths in two minutes write cap 0 at once, and the way back is
-a half-open, single-flight, read-only probe that restores cap 1 — never the
-pre-outage cap.  Counters come from the ``failure_class`` and ``endpoint``
-fields of ``sessions.jsonl``, never from a fresh grep; a class the policy does
-not name is neutral in both directions.
+refusal down to just under the concurrency that was refused, inside the owner's
+``ceiling - external_reserved``.  **Measured health**: three ``endpoint_5xx``
+deaths in two minutes write cap 0 at once, and so does a single ``auth`` or
+``insufficient_balance`` failure — a `401` is not a statistic — each with the
+REASON recorded; the way back is a half-open, single-flight, read-only probe
+that restores cap 1, never the pre-outage cap.  Counters come from the
+``failure_class`` and ``endpoint`` fields of ``sessions.jsonl``, never from a
+fresh grep; a class the policy does not name is neutral in both directions.
 
-This tool is the sole writer of ``watchdog/capacity/state.json`` and of the
-derived ``watchdog/max-codex{,-primary,-second}`` files.
+**The ceilings are re-read every tick** from ``watchdog/accounts.json``, the
+owner's live file (``local/bin/accounts_file.py``), which supersedes the run
+mode's account list entirely when it exists: a ceiling lowered at 05:12Z is in
+force by 05:13Z, an account disabled there is cap 0 with no probe, and an entry
+removed is the same — with no session prompted and no brief re-applied.  Any
+number of named accounts; ``primary`` and ``second`` are ordinary entries.
+
+This tool is the sole writer of ``watchdog/capacity/state.json``, of
+``watchdog/capacity/health{,-<account>}.json`` and of the derived
+``watchdog/max-codex{,-<account>}`` files.  It never writes ``accounts.json``:
+that one is the owner's.
 
 Usage:
     capacity_controller.py init [--force] [--dry-run] | tick [--dry-run]
     capacity_controller.py set ACCOUNT CAP | pause [--reason T] | resume
-    capacity_controller.py status [--json | --brief]
+    capacity_controller.py probe [ACCOUNT] | status [--json | --brief]
 """
 
 from __future__ import annotations
@@ -39,10 +49,12 @@ from typing import Any, Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from account_router import ACCOUNTS, live_pids  # noqa: E402
+import accounts_file  # noqa: E402
+from account_router import DEFAULT_ACCOUNTS, live_pids  # noqa: E402
 from wf_util import atomic_write  # noqa: E402
 
 STATE_SCHEMA = "mipstarre-capacity-state/1"
+HEALTH_SCHEMA = "mipstarre-capacity-health/1"
 POLICY_SCHEMA_VERSION = 1
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 #: Tail of ``sessions.jsonl`` parsed per tick; the counters look back 5 minutes.
@@ -52,6 +64,11 @@ EXIT_FAIL = 2
 _COUNTS_AS = ("refusal", "death", "neutral")
 _HEALTH_KEYS = ("fivexx_threshold", "fivexx_window_s", "probe_backoff_s",
                 "probe_backoff_max_s", "probes_to_recover")
+#: Knobs for the non-5xx disabling classes (an invalid key, an exhausted
+#: balance).  Optional so a policy file written before this layer still
+#: validates; `_health_knobs` supplies these defaults.
+_DISABLE_KEYS = ("disable_threshold", "disable_backoff_s")
+_DISABLE_DEFAULTS = {"disable_threshold": 1, "disable_backoff_s": 300}
 _STATES = ("up", "degraded", "down")
 
 
@@ -152,8 +169,12 @@ def load_policy(path: Path | None = None) -> dict:
         raise ControllerError(f"{path}: capacity policy is missing or unreadable ({exc})") from exc
     _require(isinstance(policy, dict) and policy.get("schema_version") == POLICY_SCHEMA_VERSION,
              f"{path}: an object with schema_version {POLICY_SCHEMA_VERSION} is required")
-    # The ceiling is the owner's, and a knob file may never raise it.
-    _require(policy.get("ceiling_source") == "brief", f"{path}: ceiling_source must be 'brief'")
+    # The ceiling is the owner's, and a knob file may never raise it.  It is
+    # stated in the brief and then lives in watchdog/accounts.json, which the
+    # owner edits directly; both spellings assert the same thing — not here.
+    _require(policy.get("ceiling_source") in ("brief", "accounts"),
+             f"{path}: ceiling_source must be 'accounts' (the owner's live file) "
+             "or the historical 'brief'")
     _require(isinstance(policy.get("windows"), dict) and isinstance(policy.get("defaults"), dict)
              and isinstance(policy.get("accounts"), dict),
              f"{path}: windows, defaults and accounts must be objects")
@@ -179,6 +200,9 @@ def _check_knobs(entry: dict, what: str) -> None:
              f"{what}.aimd.decrease must lie in (0, 1)")
     for key in _HEALTH_KEYS:
         _int(health.get(key), f"{what}.health.{key}", minimum=1)
+    for key in _DISABLE_KEYS:
+        if key in health:
+            _int(health[key], f"{what}.health.{key}", minimum=1)
     _require(health["probe_backoff_max_s"] >= health["probe_backoff_s"],
              f"{what}.health.probe_backoff_max_s must be at least probe_backoff_s")
 
@@ -216,6 +240,27 @@ def knobs_for(policy: dict, account: str) -> dict:
 def class_roles(policy: dict) -> dict[str, str]:
     """``failure_class`` → ``refusal`` | ``death`` | ``neutral``."""
     return {entry["failure_class"]: entry["counts_as"] for entry in policy["failure_patterns"]}
+
+
+def health_knobs(policy: dict, account: str) -> dict:
+    """The health block with the optional disable defaults filled in."""
+    health = dict(_DISABLE_DEFAULTS)
+    health.update(knobs_for(policy, account)["health"])
+    return health
+
+
+def disabling_classes(policy: dict) -> tuple[str, ...]:
+    """Failure classes that disable the key outright, not just count against it.
+
+    A concurrency refusal says "too many at once"; ``auth`` and
+    ``insufficient_balance`` say "this key does not work at all", and no amount
+    of AIMD makes an invalid key valid.  ``endpoint_5xx`` is a third kind —
+    the endpoint is down, the key is fine — and keeps its own 3-in-120 s
+    threshold; the others trip at ``disable_threshold`` (1 by default), because
+    one ``401`` is already the whole answer.
+    """
+    return tuple(entry["failure_class"] for entry in policy["failure_patterns"]
+                 if entry.get("disables") and entry["failure_class"] != "endpoint_5xx")
 
 
 def load_run_mode(path: Path | None = None) -> dict:
@@ -261,9 +306,47 @@ def load_run_mode(path: Path | None = None) -> dict:
                           "external_reserved": reserved, "enabled": entry.get("enabled", True)}
     _require(bool(accounts), f"{path}: the brief must name at least one account")
     run = mode.get("run") if isinstance(mode.get("run"), dict) else {}
-    return {"accounts": accounts, "run": run,
+    accounts, source = overlay_live_accounts(accounts)
+    return {"accounts": accounts, "run": run, "accounts_source": source,
             "brief_ref": (mode.get("brief_sha256") or mode.get("brief_ref")
                           or run.get("label") or str(path))}
+
+
+def overlay_live_accounts(from_mode: dict[str, dict]) -> tuple[dict[str, dict], str]:
+    """Replace the mode's account list with the owner's live file when it exists.
+
+    THE HOT RELOAD.  ``load_run_mode`` runs once per tick, so the ceilings, the
+    reserved slots and the enabled flags the controller uses are at most one tick
+    (60 s) old.  The live file is authoritative in full: an entry the owner
+    removed is gone from the tick that follows, which is cap 0 and no probe —
+    the same as ``enabled: false``, and deliberately so.
+
+    An unreadable or invalid file is a HARD failure, like a malformed run mode:
+    the caller exits nonzero and leaves the cap files exactly as they are.
+    Falling back to the brief would silently restore a ceiling the owner has just
+    lowered, which is the one behaviour this file exists to remove.
+    """
+    try:
+        entries = accounts_file.load()
+    except accounts_file.AccountsError as exc:
+        raise ControllerError(
+            f"{exc}\nThe cap files are untouched. Fix the field this message names "
+            f"(results/telemetry/owner-tools/accounts.sh list), or delete "
+            f"{accounts_file.accounts_path()} to fall back to the brief.") from exc
+    if entries is None:
+        return from_mode, "run-mode.json (no accounts.json yet)"
+    live: dict[str, dict] = {}
+    for entry in entries:
+        name = entry["name"]
+        ceiling = entry["ceiling"]
+        reserved = min(entry["external_reserved"], ceiling)
+        live[name] = {"name": name, "endpoint": entry["endpoint"],
+                      "label": entry["label"], "nominal_limit": ceiling,
+                      "codex_home": entry["codex_home"],
+                      "external_reserved": reserved, "enabled": entry["enabled"],
+                      "note": entry["note"]}
+    _require(bool(live), f"{accounts_file.accounts_path()}: no account entries")
+    return live, str(accounts_file.accounts_path())
 
 
 # --- observations ----------------------------------------------------------
@@ -318,15 +401,22 @@ def read_session_rows(path: Path, since: datetime, *, tail_bytes: int = TAIL_BYT
 
 
 def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[str, str],
-            now: datetime, *, counter_window_s: int, fivexx_window_s: int) -> dict:
-    """Refusal and death counters for one account.
+            now: datetime, *, counter_window_s: int, fivexx_window_s: int,
+            disabling: tuple[str, ...] = ()) -> dict:
+    """Refusal, death and key-invalidating counters for one account.
 
     A ``failure_class`` the policy does not name — including the literal
     ``unknown`` — is counted in neither direction, so a reworded provider message
     leaves the cap where a hand-set cap would have been instead of collapsing it.
+
+    ``disabling`` names the classes that say the KEY is unusable rather than busy
+    (``auth``, ``insufficient_balance``).  They are collected separately, with
+    their detail, because the answer to them is "disable this key and say why",
+    not "lower the cap by a quarter".
     """
     bucket: dict[str, Any] = {"refusals": 0, "deaths": 0, "neutral": 0,
-                              "deaths_by_class": {}, "refusal_times": [], "fivexx_times": []}
+                              "deaths_by_class": {}, "refusal_times": [], "fivexx_times": [],
+                              "disable_times": [], "disable_class": "", "disable_detail": ""}
     counter_since = now - timedelta(seconds=counter_window_s)
     fivexx_since = now - timedelta(seconds=fivexx_window_s)
     for row in rows:
@@ -340,6 +430,10 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
             bucket["fivexx_times"].append(row["_ts"])
         if row["_ts"] < counter_since:
             continue
+        if failure_class in disabling:
+            bucket["disable_times"].append(row["_ts"])
+            bucket["disable_class"] = failure_class
+            bucket["disable_detail"] = str(row.get("failure_detail") or "")[:120]
         role = roles.get(failure_class, "neutral")
         if role == "refusal":
             bucket["refusals"] += 1
@@ -352,6 +446,7 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
             bucket["neutral"] += 1
     bucket["refusal_times"].sort()
     bucket["fivexx_times"].sort()
+    bucket["disable_times"].sort()
     return bucket
 
 
@@ -397,8 +492,11 @@ def load_health(account: str, endpoint: str, now: datetime, backoff_s: int) -> d
     if not isinstance(document.get("backoff_s"), int) or document["backoff_s"] <= 0:
         document["backoff_s"] = backoff_s
     document.setdefault("consecutive_5xx", 0)
+    document.setdefault("key_failures", 0)
     document.setdefault("probes_ok", 0)
     document.setdefault("next_probe_at", None)
+    document.setdefault("reason", "")
+    document.setdefault("disabled_by", "")
     return dict(document, account=account, endpoint=endpoint)
 
 
@@ -424,7 +522,11 @@ def write_cap_files(caps: dict[str, int]) -> int:
     effective = {name: int(value) for name, value in caps.items()}
     directory = watchdog_dir()
     directory.mkdir(parents=True, exist_ok=True)
-    for name in (*ACCOUNTS, *(name for name in effective if name not in ACCOUNTS)):
+    # The two historical names keep a file even when no longer configured, so a
+    # reader that predates this layer still finds a number rather than an empty
+    # read; every configured account gets one whatever it is called.
+    for name in (*DEFAULT_ACCOUNTS,
+                 *(name for name in effective if name not in DEFAULT_ACCOUNTS)):
         _write_cap_file(directory / f"max-codex-{name}", effective.get(name, 0))
     _write_cap_file(directory / "max-codex", sum(effective.values()))
     return sum(effective.values())
@@ -476,21 +578,52 @@ def update_health(account: str, health: dict, counters: dict, knobs: dict, now: 
 
     Independent of AIMD in both directions: a refusal never changes health and a
     5xx never runs the AIMD arithmetic.
+
+    Two kinds of trip, one machine.  ``endpoint_5xx`` says the ENDPOINT is down
+    and needs ``fivexx_threshold`` deaths inside ``fivexx_window_s`` — a single
+    502 is noise.  ``auth`` and ``insufficient_balance`` say the KEY is unusable
+    and trip at ``disable_threshold`` (1): a `401` is not a statistic, and
+    retrying an invalid key at any concurrency produces nothing but dead
+    sessions.  Both write the REASON into the health file, because "cap 0" with
+    no reason is the state the owner had to diagnose by reading captures on
+    2026-09-12; the way back is the same half-open probe, with the key-invalid
+    backoff starting longer (``disable_backoff_s``) since a key does not become
+    valid again in thirty seconds.
     """
     fivexx = len(counters["fivexx_times"])
+    disabling = len(counters.get("disable_times") or ())
     base = knobs["probe_backoff_s"]
-    health.update(consecutive_5xx=fivexx, updated=ts(now))
+    disable_base = max(base, int(knobs.get("disable_backoff_s",
+                                           _DISABLE_DEFAULTS["disable_backoff_s"])))
+    health.update(consecutive_5xx=fivexx, key_failures=disabling, updated=ts(now))
     if health["state"] != "down":
+        if disabling >= int(knobs.get("disable_threshold",
+                                      _DISABLE_DEFAULTS["disable_threshold"])):
+            detail = counters.get("disable_detail") or ""
+            health.update(state="down", since=ts(now), probes_ok=0,
+                          backoff_s=min(disable_base, knobs["probe_backoff_max_s"]),
+                          reason=f"{counters.get('disable_class') or 'key'}: "
+                                 f"{detail or 'the key was refused'}",
+                          disabled_by=counters.get("disable_class") or "key",
+                          next_probe_at=ts(now + timedelta(
+                              seconds=min(disable_base, knobs["probe_backoff_max_s"]))))
+            return "trip"
         if fivexx >= knobs["fivexx_threshold"]:
             health.update(state="down", since=ts(now), probes_ok=0, backoff_s=base,
+                          reason=f"endpoint_5xx: {fivexx} deaths in "
+                                 f"{knobs['fivexx_window_s']}s",
+                          disabled_by="endpoint_5xx",
                           next_probe_at=ts(now + timedelta(seconds=base)))
             return "trip"
         if fivexx:
             if health["state"] != "degraded":
-                health.update(state="degraded", since=ts(now))
+                health.update(state="degraded", since=ts(now),
+                              reason=f"endpoint_5xx: {fivexx} death(s) in "
+                                     f"{knobs['fivexx_window_s']}s, below the "
+                                     f"threshold of {knobs['fivexx_threshold']}")
             return "degraded"
         if health["state"] != "up":
-            health.update(state="up", since=ts(now))
+            health.update(state="up", since=ts(now), reason="")
             return "clear"
         return "none"
     if no_probe:  # an operator hold, or a key the brief disabled
@@ -511,6 +644,7 @@ def update_health(account: str, health: dict, counters: dict, knobs: dict, now: 
         health["next_probe_at"] = ts(now + timedelta(seconds=base))
         return "probe-ok"
     health.update(state="up", since=ts(now), probes_ok=0, consecutive_5xx=0,
+                  key_failures=0, reason="", disabled_by="",
                   backoff_s=base, next_probe_at=None)
     return "recovered"
 
@@ -621,6 +755,7 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
          dry_run: bool = False) -> dict:
     """One control step: health, then decrease, then increase, then the clamp."""
     windows, roles = policy["windows"], class_roles(policy)
+    disabling = disabling_classes(policy)
     hold = (capacity_dir() / "hold").exists()
     paused = state.get("paused_at") is not None
     accounts = run_mode["accounts"]
@@ -631,28 +766,31 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
         if entry["label"]:
             endpoints.setdefault(entry["label"], name)
     lookback = max([windows["counter_window_s"]]
-                   + [knobs_for(policy, name)["health"]["fivexx_window_s"] for name in accounts])
+                   + [health_knobs(policy, name)["fivexx_window_s"] for name in accounts])
     rows = read_session_rows(telemetry_dir() / "sessions.jsonl",
                              now - timedelta(seconds=lookback))
     live, waiters = count_live(accounts), count_waiters()
     summary: dict[str, Any] = {"ts": ts(now), "hold": hold, "paused": paused,
                                "waiters": waiters, "accounts": {}}
     caps: dict[str, int] = {}
+    health_rows: dict[str, dict] = {}
     estimate = {"schema": "mipstarre-capacity-estimate/1", "updated": ts(now), "accounts": {}}
 
     for name, entry in accounts.items():
         knobs = knobs_for(policy, name)
+        hknobs = health_knobs(policy, name)
         counters = observe(rows, name, endpoints, roles, now,
                            counter_window_s=windows["counter_window_s"],
-                           fivexx_window_s=knobs["health"]["fivexx_window_s"])
+                           fivexx_window_s=hknobs["fivexx_window_s"],
+                           disabling=disabling)
         account_state = state["accounts"].setdefault(name, new_account_state(name))
         floor, ceiling = refresh(account_state, entry, knobs)
-        health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+        health = load_health(name, entry["endpoint"], now, hknobs["probe_backoff_s"])
         was = health["state"]
         # A paused run has no daemons and spends no key: `paused` joins the hold
         # and the disabled account in suppressing the probe, so a pause can never
         # fire `codex exec` on the owner's keys after the deadline.
-        action = update_health(name, health, counters, knobs["health"], now,
+        action = update_health(name, health, counters, hknobs, now,
                                no_probe=hold or paused or not entry["enabled"],
                                codex_home=entry["codex_home"],
                                probe_timeout_s=windows["probe_timeout_s"])
@@ -665,7 +803,8 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
             # the cap to 1 while state.json says paused (or while the brief says
             # this key is off).  Pause outranks health in both directions.
             if int(account_state["cap"]) != 0:  # a note per tick would be noise
-                notes.append("paused: cap 0" if paused else "disabled in the brief: cap 0")
+                notes.append("paused: cap 0" if paused
+                             else "disabled in the accounts file: cap 0, no probe")
             account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
         elif action == "trip":
             account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
@@ -700,21 +839,46 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
         summary["accounts"][name] = {
             "cap": caps[name], "live": live[name], "floor": floor, "ceiling": ceiling,
             "health": health["state"], "health_was": was, "health_action": action,
+            "health_reason": health.get("reason") or "",
             "refusals_5m": counters["refusals"], "deaths_5m": counters["deaths"],
-            "neutral_5m": counters["neutral"], "measured_limit": measured, "notes": notes}
+            "neutral_5m": counters["neutral"], "measured_limit": measured,
+            "enabled": bool(entry["enabled"]), "endpoint": entry["endpoint"],
+            "label": entry.get("label") or name, "note": entry.get("note") or "",
+            "external_reserved": entry["external_reserved"], "notes": notes}
+        health_rows[name] = {
+            "state": health["state"], "reason": health.get("reason") or "",
+            "disabled_by": health.get("disabled_by") or "", "since": health.get("since"),
+            "endpoint": entry["endpoint"], "enabled": bool(entry["enabled"]),
+            "cap": caps[name], "ceiling": ceiling,
+            "consecutive_5xx": health.get("consecutive_5xx", 0),
+            "key_failures": health.get("key_failures", 0),
+            "probes_ok": health.get("probes_ok", 0),
+            "next_probe_at": health.get("next_probe_at"),
+            "backoff_s": health.get("backoff_s")}
         if not dry_run:
             _write_json(health_path(name), health)
 
     for stale in [name for name in state["accounts"] if name not in accounts]:
         state["accounts"].pop(stale)
         summary.setdefault("dropped", []).append(stale)
-    state.update(updated=ts(now), brief_ref=run_mode["brief_ref"])
+    state.update(updated=ts(now), brief_ref=run_mode["brief_ref"],
+                 accounts_source=run_mode.get("accounts_source", ""))
     summary["max_codex"] = sum(caps.values())
+    summary["accounts_source"] = run_mode.get("accounts_source", "")
     if not dry_run:
         if not hold:
             summary["max_codex"] = write_cap_files(caps)
         _write_json(state_path(), state)
         _write_json(capacity_dir() / "limit-estimate.json", estimate)
+        # ONE document for every key, next to the per-account files the router
+        # and dispatch.sh already read.  The per-account files stay exactly as
+        # they are (they are the admission input); this is the owner's picture —
+        # which key is disabled, and the REASON, which is what the hourly per-key
+        # line and `accounts.sh list` quote instead of "cap 0, nobody knows why".
+        _write_json(capacity_dir() / "health.json",
+                    {"schema": HEALTH_SCHEMA, "updated": ts(now),
+                     "source": run_mode.get("accounts_source", ""),
+                     "accounts": health_rows})
     return summary
 
 
@@ -858,7 +1022,8 @@ def cmd_init(args: argparse.Namespace) -> int:
         knobs = knobs_for(policy, name)
         account_state = state["accounts"].setdefault(name, new_account_state(name))
         floor, ceiling = refresh(account_state, entry, knobs)
-        health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+        health = load_health(name, entry["endpoint"], now,
+                             health_knobs(policy, name)["probe_backoff_s"])
         # A fresh brief is not evidence that a dead endpoint came back.
         account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
                              decrease_window_until=None, refusal_cursor=None,
@@ -991,7 +1156,8 @@ def cmd_resume(args: argparse.Namespace) -> int:
             knobs = knobs_for(policy, name)
             account_state = state["accounts"].setdefault(name, new_account_state(name))
             floor, ceiling = refresh(account_state, entry, knobs)
-            health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+            health = load_health(name, entry["endpoint"], now,
+                             health_knobs(policy, name)["probe_backoff_s"])
             saved = account_state["saved_cap"]
             restored = (seed_cap(account_state, floor, ceiling, entry) if saved is None
                         else clamp(int(saved), floor, ceiling))
@@ -1012,6 +1178,60 @@ def cmd_resume(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_probe(args: argparse.Namespace) -> int:
+    """Run the health probe now, for one account or for every one.
+
+    The owner's "is that key working yet?", answered in a bounded read-only
+    session instead of a wait for the next backoff.  It is the same probe the
+    tick runs — same single-flight lock, same command, same recovery counting —
+    so a success here counts toward `probes_to_recover` rather than being a
+    separate opinion, and a failure doubles the backoff exactly as it would have.
+    """
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    names = list(run_mode["accounts"]) if not args.account else [args.account]
+    _require(all(name in run_mode["accounts"] for name in names),
+             f"{args.account}: not a configured account "
+             f"({', '.join(run_mode['accounts']) or 'none'})")
+    failures = 0
+    for name in names:
+        entry = run_mode["accounts"][name]
+        hknobs = health_knobs(policy, name)
+        health = load_health(name, entry["endpoint"], now, hknobs["probe_backoff_s"])
+        if not entry["enabled"]:
+            print(f"{name}: disabled in {run_mode.get('accounts_source') or 'the brief'}; "
+                  "not probed (enable it first)")
+            continue
+        ran, ok = _try_probe(name, entry["codex_home"], policy["windows"]["probe_timeout_s"])
+        if not ran:
+            print(f"{name}: another probe holds the lock; nothing run")
+            continue
+        if ok:
+            health.update(probes_ok=int(health.get("probes_ok") or 0) + 1, updated=ts(now))
+            if health["state"] == "down" and health["probes_ok"] >= hknobs["probes_to_recover"]:
+                health.update(state="up", since=ts(now), probes_ok=0, consecutive_5xx=0,
+                              key_failures=0, reason="", disabled_by="",
+                              backoff_s=hknobs["probe_backoff_s"], next_probe_at=None)
+                print(f"{name}: probe ok; health up (the next tick restores cap 1 and "
+                      "AIMD climbs)")
+            else:
+                print(f"{name}: probe ok (state {health['state']}, "
+                      f"{health['probes_ok']}/{hknobs['probes_to_recover']} toward recovery)")
+        else:
+            failures += 1
+            health.update(probes_ok=0, updated=ts(now),
+                          backoff_s=min(int(health.get("backoff_s") or
+                                            hknobs["probe_backoff_s"]) * 2,
+                                        hknobs["probe_backoff_max_s"]))
+            health["next_probe_at"] = ts(now + timedelta(seconds=health["backoff_s"]))
+            print(f"{name}: probe FAILED (state {health['state']}, reason "
+                  f"{health.get('reason') or 'none recorded'}; next probe in "
+                  f"{health['backoff_s']}s)")
+        if not args.dry_run:
+            _write_json(health_path(name), health)
+    return 0 if not failures else EXIT_FAIL
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     """Read-only: the state, the health files and the live census."""
     state = load_state()
@@ -1029,6 +1249,7 @@ def cmd_status(args: argparse.Namespace) -> int:
                           ("cap", "floor", "ceiling", "measured_limit", "observed_refusal_floor")},
                          account=name, live=live[name], waiters=waiters,
                          health=health.get("state", account_state.get("health", "up")),
+                         health_reason=health.get("reason") or "",
                          probe=health.get("next_probe_at"),
                          external_inferred=estimate.get(name, {}).get("external_inferred")))
     if args.json:
@@ -1048,7 +1269,8 @@ def cmd_status(args: argparse.Namespace) -> int:
               f"waiters {row['waiters']:<4} floor {row['floor']} ceiling {row['ceiling']} "
               f"health {row['health']:<8} measured {row['measured_limit']} refusal_floor "
               f"{row['observed_refusal_floor']} external_inferred {row['external_inferred']}"
-              + (f" next probe {row['probe']}" if row["health"] == "down" else ""))
+              + (f" next probe {row['probe']}" if row["health"] == "down" else "")
+              + (f"\n{'':<11}reason {row['health_reason']}" if row["health_reason"] else ""))
     return 0
 
 
@@ -1074,9 +1296,13 @@ def build_parser() -> argparse.ArgumentParser:
             ("tick", cmd_tick, "one control step (the 60 s loop)"),
             ("set", cmd_set, "operator override of one account's cap"),
             ("pause", cmd_pause, "caps to 0, saving them inside state.json"),
-            ("resume", cmd_resume, "restore the saved caps and re-enter AIMD")):
+            ("resume", cmd_resume, "restore the saved caps and re-enter AIMD"),
+            ("probe", cmd_probe, "run the health probe now (owner-tools/accounts.sh probe)")):
         sub = subparsers.add_parser(name, help=help_text)
         sub.add_argument("--dry-run", action="store_true")
+        if name == "probe":
+            sub.add_argument("account", nargs="?", default="",
+                             help="default: every configured account")
         if name == "init":
             sub.add_argument("--force", action="store_true",
                              help="discard the carried measurement as well as the run state")

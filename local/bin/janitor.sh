@@ -52,6 +52,17 @@
 #   spool-expiry    $CACHE_ROOT/watchdog/capacity/spool/*.json entries past the
 #                   run's dispatch_cutoff are dropped, so a spool that outlives a
 #                   run cannot re-launch stale work.
+#   owner-accounts  `ACCOUNTS: <name> ceiling=<n> [reserved=<n>]
+#                   [enabled=true|false]` comments on the owner inbox issue are
+#                   applied to the live accounts file and answered with one
+#                   `applied:` / `rejected:` reply per comment
+#                   (local/bin/accounts_inbox.py).  ONLY comments written by the
+#                   repository owner login are applied; the author check, the
+#                   parsing and the validation live in that tool and in
+#                   local/bin/accounts_file.py, never here.  It is the owner's
+#                   channel for a ceiling change when they are away from a
+#                   shell: on 2026-09-12 every such change was a message to a
+#                   session that had to be idle to receive it.
 #
 # The janitor repairs; it never merges, never pushes, never closes an issue and
 # never touches a gate.  Repairs are dispatched through fix-lane.sh ->
@@ -116,7 +127,7 @@ USE_LOCK=1
 REPORT_FILE=""
 PASS_FAILURES=0
 
-ALL_PASSES="dead-sessions parked-lanes superseded-prs stale-lanes spool-expiry"
+ALL_PASSES="dead-sessions parked-lanes superseded-prs stale-lanes spool-expiry owner-accounts"
 SELECTED="$ALL_PASSES"
 
 # Report lines are collected in a file, not a variable: each pass runs in its own
@@ -935,6 +946,25 @@ pass_spool_expiry() {
   return 0
 }
 
+# =================================================== pass 6: owner accounts
+
+pass_owner_accounts() {
+  local args=() out rc
+  [ -f "$SCRIPT_DIR/accounts_inbox.py" ] || {
+    report "janitor: owner-accounts: accounts_inbox.py missing"; return 1; }
+  [ "$DRY_RUN" -eq 1 ] && args+=(--dry-run)
+  # Bounded like every other GitHub read here: a slow API delays one pass and
+  # never holds the janitor's lock while the daemon waits to call it again.
+  out="$(timeout 300 python3 "$SCRIPT_DIR/accounts_inbox.py" "${args[@]}" 2>&1)"
+  rc=$?
+  while IFS= read -r line; do
+    [ -n "$line" ] && report "$line"
+  done <<EOF
+$out
+EOF
+  return "$rc"
+}
+
 # =========================================================== driver
 
 run_pass() {
@@ -1004,6 +1034,7 @@ main() {
   run_pass superseded-prs pass_superseded_prs
   run_pass stale-lanes    pass_stale_lanes
   run_pass spool-expiry   pass_spool_expiry
+  run_pass owner-accounts pass_owner_accounts
 
   {
     printf '# janitor report %s\n\n' "$(now)"
