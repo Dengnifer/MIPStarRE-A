@@ -178,24 +178,6 @@ def evalAt {P : AdmissibleParams} (W : PauliKind)
   | .X => MvPolynomial.eval u pair.1.1
   | .Z => MvPolynomial.eval u pair.2.1
 
-/-- Interpret a bounded coefficient list as an ordinary univariate
-polynomial.  This helper makes the line-combination definition use Mathlib's
-actual polynomial composition operation. -/
-noncomputable def linePolynomialOfCoefficients {K : Type*} [Semiring K]
-    {c : ℕ} (f : Fin (c + 1) → K) : Polynomial K :=
-  ∑ i : Fin (c + 1), Polynomial.C (f i) * Polynomial.X ^ i.val
-
-/-- Evaluating the polynomial represented by a coefficient list agrees with
-`evalCoefficient`. -/
-theorem linePolynomialOfCoefficients_eval {K : Type*} [Semiring K]
-    {c : ℕ} (f : Fin (c + 1) → K) (t : K) :
-    (linePolynomialOfCoefficients f).eval t = evalCoefficient f t := by
-  change Polynomial.eval t
-      (∑ i ∈ Finset.univ, Polynomial.C (f i) * Polynomial.X ^ i.val) =
-    ∑ i ∈ Finset.univ, f i * t ^ i.val
-  rw [Polynomial.eval_finsetSum]
-  simp
-
 /-- The bounded coefficient vector of a univariate polynomial.  For polynomials
 of degree at most `n`, it preserves evaluation by
 `evalCoefficient_coefficientsOfPolynomial`. -/
@@ -211,19 +193,6 @@ theorem evalCoefficient_coefficientsOfPolynomial {K : Type*} [Semiring K] {n : �
   rw [Polynomial.eval_eq_sum_range' (Nat.lt_succ_of_le hp) t,
     ← Fin.sum_univ_eq_sum_range (fun i => p.coeff i * t ^ i) (n + 1)]
   rfl
-
-/-- The polynomial of a bounded coefficient vector has degree at most `n`. -/
-theorem linePolynomialOfCoefficients_natDegree_le {K : Type*} [Semiring K] {n : ℕ}
-    (f : Fin (n + 1) → K) :
-    (linePolynomialOfCoefficients f).natDegree ≤ n := by
-  refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun i _ => ?_
-  refine le_trans (Polynomial.natDegree_C_mul_le _ _) ?_
-  calc (Polynomial.X ^ i.val : Polynomial K).natDegree
-      ≤ i.val * (Polynomial.X : Polynomial K).natDegree :=
-        Polynomial.natDegree_pow_le
-    _ ≤ i.val * 1 := Nat.mul_le_mul_left _ Polynomial.natDegree_X_le
-    _ = i.val := mul_one _
-    _ ≤ n := Nat.lt_succ_iff.mp i.isLt
 
 /-- The univariate polynomial before coefficient extraction in
 `combineLinePoly`.  The four first scalars describe the affine parameters on
