@@ -1,0 +1,223 @@
+# Protocol: full speed mode — the briefing, the mode file, the standing reports
+
+Normative for a *run*: a bounded period in which the fleet works at the owner's
+stated capacity and speed. Read `local/protocols/meta.md` first, then this file
+before starting or pausing a run.
+
+The rule this protocol exists to enforce: **the owner gives one briefing and
+afterwards receives only the estimate one-liner and the progress log.** Every
+number the owner states lives in exactly one file, and every component reads it
+through one tool. Nothing is transcribed by hand into a second place — on
+2026-09-12 the caps were restated five times, edited by hand ten times, and a
+resume script still announced "primary 5 / second 39 / total 44" forty minutes
+after those numbers were wrong.
+
+## 1. The briefing
+
+The owner copies the committed template
+`results/telemetry/owner-tools/run-brief.template.json` to
+`~/.cache/mipstarre-dev/watchdog/run-brief.json` and edits the values. That is
+the **only** artifact the owner authors for a run.
+
+| Field | Meaning |
+|---|---|
+| `run.label` | free text, used in reports and telemetry |
+| `run.start` | ISO-8601 instant the run begins |
+| `run.dispatch_cutoff` | ISO-8601 instant after which no new dispatch starts (running work finishes), or the literal `until my word` for an open-ended run |
+| `run.pause_deadline_min` | the deadline budget for the pause procedure (section 6) |
+| `run.speed` | `fast` or `default` (section 5) |
+| `run.occupancy_target` | a fraction in `(0, 1]` of the effective cap; the integer floor everything quotes is `run_mode.py get floor` |
+| `run.progress_issue` | prose progress and the hourly readiness report |
+| `run.estimate_issue` | the two-line estimate, and nothing else, ever |
+| `run.owner_inbox_issue` | permission, credential, access and scope grants only |
+| `accounts[].name` | `primary` or `second` — `account_router.py` knows exactly these two |
+| `accounts[].label` | the human name of the key ("space", "relay-us7") |
+| `accounts[].endpoint` | the label failures and health are attributed to, so a key moved between homes keeps its identity |
+| `accounts[].codex_home` | that account's `CODEX_HOME` |
+| `accounts[].nominal_limit` | **a ceiling, never a target** (see below) |
+| `accounts[].external_reserved` | slots on that key the pipeline must not use (a forked session sharing the key), subtracted from the ceiling |
+| `accounts[].enabled` | `false` means the pipeline never dispatches there at all |
+| `models.override` | `null` = the published `local/model-policy.json`; `"astra-all"` = every role runs the hard model, recorded in telemetry |
+
+**`nominal_limit` is a ceiling and never a target.** It is the highest
+concurrency the key may ever reach. The controller may sit below it for the
+whole run and must never go above it; a run that sits at 60 % of the ceiling
+with zero refusals is behaving correctly, and "we are below the limit" is not a
+defect to report. The number to compare live workers against is the occupancy
+floor `run_mode.py get floor`, not the ceiling.
+
+## 2. Applying it
+
+```bash
+local/bin/run_mode.py apply            # reads watchdog/run-brief.json
+local/bin/run_mode.py apply --brief PATH --dry-run
+```
+
+`apply` validates strictly and **fails loudly at briefing time rather than at
+05:00Z**. Each of these exits 2 naming the offending key, the template path and
+the destination path: an unknown key anywhere in the document, a missing or
+malformed `endpoint`, a non-integer limit, `external_reserved >=
+nominal_limit`, `occupancy_target` outside `(0, 1]`, an unknown `speed` or
+`models.override`, an issue number that is not a positive integer, the three
+issue numbers not being distinct, and an account named outside
+`{primary, second}`. A **missing brief is a hard error** naming the template and
+the exact destination — never "zero capacity" and never "unlimited".
+
+On success `apply`
+
+1. writes `watchdog/run-mode.json` atomically (temp file + `os.replace`);
+2. derives `watchdog/max-codex-primary`, `max-codex-second` and `max-codex`;
+3. regenerates the deployed PATH shim for the briefed speed (section 5);
+4. appends a `stages.jsonl` row carrying the brief's `sha256`;
+5. appends one row to `results/telemetry/design-decisions.md`.
+
+**The starting cap per account** is
+
+```
+cap0 = clamp(1, nominal_limit - external_reserved,
+             last_measured_limit or nominal_limit - external_reserved)
+```
+
+reading `watchdog/capacity/limit-estimate.json` when it exists, so a run starts
+*below* the measured cliff instead of above it. A disabled or unlisted account
+is 0. `max-codex` is mechanically the sum of the effective per-account caps; it
+has **no admission meaning** (the router reads only the per-account files) and
+exists because `status-snapshot.sh` and the lane runner read it.
+
+**The cap files are never empty and never non-numeric.** `run_mode.py` refuses
+to write one under any circumstance and reads each back after writing. The
+2026-09-12 resume script wrote empty cap files from a `grep` that matched
+nothing, after which every dispatch exited 4 with `invalid literal for int()`.
+
+## 3. Reading it
+
+`watchdog/run-mode.json` is the record; `run_mode.py` is the only writer of it
+and the only accessor anything else uses.
+
+```bash
+run_mode.py show                 # human-readable dump (goal text, cycle text)
+run_mode.py get speed
+run_mode.py get floor            # int(occupancy_target * sum of effective caps)
+run_mode.py get cap.second
+run_mode.py get endpoint.second
+run_mode.py get codex_home.second
+run_mode.py get progress_issue | estimate_issue | owner_inbox_issue
+run_mode.py get dispatch_cutoff | pause_deadline_min | turn_max
+```
+
+An unknown key exits 2 and lists the known ones. `cap.<account>` and `floor`
+prefer the live cap files, falling back to the record; an unreadable cap file
+is reported as **unknown**, never as zero.
+
+**Protocols, personas and scripts cite this file, never a literal number.** A
+cap, a floor, a cadence, a turn limit or an issue number written into a script,
+a goal text or a persona is a defect: it was wrong within the hour every time it
+was done on 2026-09-12. If a document needs the number in prose, it names the
+key (`run_mode.py get floor`), not the value.
+
+An unreadable `run-mode.json` makes `show` and `get` exit 2. The caller treats
+that as *unknown* — it stops and says so — and never as zero capacity.
+
+## 4. The standing reports
+
+| Channel | Content | Writer |
+|---|---|---|
+| Estimate issue (`run.estimate_issue`) | **exactly two lines**: the bold headline and one `<sub>` provenance line; never anything else | `local/bin/estimate_post.py`, called by `owner-tools/estimate.sh` from cron |
+| Progress log (`run.progress_issue`) | (a) one five-line progress comment every 30 min in `fast` mode; (b) one hourly readiness report; (c) one line per stage boundary, merge, adopted mathematical correction, automatic PR retirement and repair | (a) and (c) the main session (`local/personas/main.md`, "Standing reports"); (b) `local/bin/ready_report.py` from cron |
+| Owner inbox (`run.owner_inbox_issue`) | permission, credential, access or scope grants only; ten plain lines; one id | the main session |
+
+`estimate_post.py` renders the body from values on the command line and refuses
+any other body; there is no way to pass it prose. The issue number comes from
+the run mode and was validated at briefing time, so a missing
+`watchdog/estimate-issue` can no longer silently no-op the owner's only
+progress channel.
+
+`ready_report.py` implements the owner's rule *"a ready-to-merge PR left open
+needs a good reason"*. It computes readiness on the exact head and, for each
+ready-but-open PR, reads the reason from daemon state rather than guessing:
+`refreshing` (pid, lane, elapsed), a `failed` marker (class and reason string),
+`parked` (the lane's `needs-attention` reason), `awaiting-adjudication`,
+`stale` (the base moved, minutes since), or `unexplained`. **`unexplained` is
+the alarm case and should always be zero.** A post is suppressed when the ready
+set and the reasons are unchanged and nothing merged, and forced at least every
+six hours. The same rows go to `results/telemetry/merge-latency-<date>.jsonl`.
+
+The split between the two issues is normative in
+`local/protocols/issues-prs.md` section 6.
+
+## 5. Speed
+
+`run.speed` selects the provider tier and the reporting cadence:
+
+| | `fast` | `default` |
+|---|---|---|
+| shim | `service_tier="priority"` | no tier argument |
+| estimate cadence | every 30 min | every 6 h |
+| main-session turn cap | 8 min | 20 min |
+
+Mid-run:
+
+```bash
+local/bin/run_mode.py set speed fast     # or: default
+```
+
+This **regenerates the deployed shim from the committed template**
+`results/telemetry/owner-tools/owner-bin-codex` — it never patches the live file
+by string surgery, which is how a 90-character `assert old in s` anchor became
+load-bearing on 2026-09-12. When the deployed shim matches no rendering of the
+template, the command **refuses and prints the diff**, so an emergency
+hand-edit is never silently discarded; fold the edit into the committed
+template, redeploy, and retry.
+
+The command prints who picks the change up: worker sessions dispatched from now
+on **yes**; lane and daemon children started from now on **yes**; sessions
+already running **no**; **the running main TUI no** — it must be relaunched
+through `local/bin/main-session.sh`, which reads the run mode. The estimate
+cadence changes only when the crontab is regenerated
+(`results/telemetry/owner-tools/install-crons.sh`).
+
+## 6. Pause and resume
+
+The owner's word starts the deadline in `run.pause_deadline_min`. The procedure
+is one tracked script, `results/telemetry/owner-tools/owner-pause.sh`, which
+ends admission and hands the rest to the standing duties:
+
+| T | Phase |
+|---|---|
+| +0:00 | `run_mode.py pause` — caps to 0, the pre-pause caps saved **inside the run mode**, `watchdog/drain` touched |
+| +0:30 | queued dispatches release themselves on `watchdog/drain`; keeper, merge daemon and stack-watch stopped by their stop files |
+| +1:00 | one terminal message to the main session (`owner-say.sh --mode terminal`); the *content* of the closing report is a standing duty, not a dictation |
+| +2:00 | crontab backed up verbatim, then installed from a file; never an in-place `sed` |
+| deadline −2:00 | leftover workers killed by anchored patterns; partial work stays in the worktree |
+| deadline | confirm, write `watchdog/pause-state.json`, append telemetry, publish |
+
+`run_mode.py pause` is idempotent: a second pause does not overwrite the saved
+caps with the zeros the first one wrote. `run_mode.py resume` restores **from
+the saved caps only** — never from a message, never from a second file that a
+later phase can clobber — refuses to resume an enabled account into zero
+capacity, and checks afterwards that every cap file exists, is numeric, and is
+at least 1 for an enabled account. When `capacity_controller.py` is installed,
+both commands go through its state document so the cap files keep exactly one
+writer; without it they write the cap files directly.
+
+Resume is run only on the owner's explicit word
+(`results/telemetry/owner-tools/owner-resume.sh`).
+
+## 7. Failure modes, by design
+
+| Situation | Behaviour |
+|---|---|
+| missing or invalid brief | exit 2, naming the key, the template path and the destination path; nothing is written |
+| unreadable `run-mode.json` | `show`/`get` exit 2; the caller treats the mode as unknown, never as zero |
+| unreadable cap file | reported as unknown with a warning; the record's value is used; the file is never left empty |
+| deployed shim hand-edited | `set speed` refuses and prints the diff; `apply` warns loudly and applies the caps anyway |
+| `capacity_controller.py` fails during pause | the caps are zeroed directly and the failure is reported (stopping admission is the safe direction) |
+| `capacity_controller.py` fails during resume | the command refuses; the caps stay where they are (paused is the safe direction) |
+| GitHub failure in `ready_report.py` / `estimate_post.py` | nonzero exit and **no partial comment**; at most one mutation per publishing step, adopting the stable marker comment when it already exists |
+
+## 8. Records
+
+Every `apply`, `set speed`, `pause` and `resume` appends one `stages.jsonl` row
+(stage `operator`) and one row to `results/telemetry/design-decisions.md`. The
+brief's `sha256` travels in the apply row, so a report can be tied to the exact
+briefing that produced it.

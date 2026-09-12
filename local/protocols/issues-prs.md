@@ -234,9 +234,14 @@ c8f1999): read-only research data, never edited or read as active input.
 
 ## 6. Owner inbox and mathematical-gap escalation
 
-Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. Following the availability report on #26 and the September 6
+Pinned issue #500 is the owner inbox — during a run it is
+`run.owner_inbox_issue` in the briefing, read with
+`local/bin/run_mode.py get owner_inbox_issue`; the retired #26 is archived and
+no longer read. It receives only decisions that require
+the human owner: a permission, credential, access or scope grant, in ten plain
+lines carrying one id. A source statement found to be mathematically false does
+not go there first. Following the availability report on the owner inbox and
+the September 6
 owner decision, main selects Astra Ultra for the mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
@@ -270,9 +275,9 @@ definition/game corrections that preserve the intended source semantics;
 changing the project goal is outside that authority. If the current authorized
 budget expires, stop that lane and record the attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Use #26 only for an owner-only
+note. Do not reset attempts or working time. Use #500 only for an owner-only
 permission, credential, access or scope/resource grant; mathematical difficulty
-alone is not an owner decision. An already-posted #26 item waits for the owner
+alone is not an owner decision. An already-posted #500 item waits for the owner
 unless the owner explicitly returns it to main.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
@@ -280,3 +285,28 @@ operator announces it in one line on progress log #27 and records it in the
 paper-gap note, `results/telemetry/events.md`, and
 `results/telemetry/design-decisions.md`. That announcement informs the owner; it
 is not a request for a decision.
+
+### 6.1 The estimate issue and the progress log are different channels
+
+Three owner-facing issues, three contents, and no overlap. A run states their
+numbers once in the briefing (`local/protocols/full-speed-mode.md`); every tool
+reads them with `local/bin/run_mode.py get`, and no script, persona or protocol
+carries the literal number anywhere else.
+
+| Channel | Carries | Written by |
+|---|---|---|
+| `run.estimate_issue` (#168) | **exactly two lines**: the bold `**<ts> — implemented ≈ N% · days to go ≈ D**` headline and one `<sub>` provenance line | `local/bin/estimate_post.py` alone |
+| `run.progress_issue` (#27) | prose progress, the hourly readiness report, and one line per stage boundary, merge, adopted mathematical correction, automatic PR retirement and repair | the main session and `local/bin/ready_report.py` |
+| `run.owner_inbox_issue` (#500) | owner-only permission, credential, access and scope grants; ten plain lines; one id | the main session |
+
+`estimate_post.py` renders the two lines from values passed on the command line
+and **refuses any other body**; it takes no prose input, so the channel cannot
+drift. Nothing else writes that issue: a multi-line report there is a protocol
+violation that costs the owner the one number they asked for (2026-09-12, where
+the operator had to reformat a comment by hand). Conversely the estimate issue
+is never used to explain a delay — that is a progress-log line or, if it needs
+a decision, an owner-inbox item.
+
+A missing issue number is a hard failure, not a silent no-op: the number is
+validated at briefing time, and a tool that cannot read the run mode exits
+nonzero and says so rather than publishing nothing quietly.
