@@ -45,11 +45,7 @@ Formalization-only auxiliary for the placement bipartitions of blueprint
 theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
     (e : ι ≃ κ) {M : Op κ} (hM : 0 ≤ M) :
     0 ≤ reindexOp e M := by
-  letI := Fintype.ofFinite ι
-  letI := Fintype.ofFinite κ
-  rw [Matrix.nonneg_iff_posSemidef] at hM ⊢
-  have hsub := hM.submatrix (e : ι → κ)
-  simpa [reindexOp, Matrix.reindex_apply] using hsub
+  exact MIPStarRE.Quantum.reindex_nonneg e.symm hM
 
 namespace ProjectiveSetting
 
