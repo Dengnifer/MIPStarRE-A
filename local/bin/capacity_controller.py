@@ -516,3 +516,497 @@ def update_health(account: str, health: dict, counters: dict, knobs: dict, now: 
 
 
 # --- AIMD, measurement, and the control step -------------------------------
+
+
+def clamp(value: int, floor: int, ceiling: int) -> int:
+    """Into ``[floor, ceiling]``; the ceiling wins when the two cross."""
+    return max(min(floor, ceiling), min(ceiling, int(value)))
+
+
+def apply_aimd(account_state: dict, counters: dict, knobs: dict, live: int, now: datetime,
+               *, floor: int, ceiling: int) -> list[str]:
+    """Decrease first, so a refusal cannot be overtaken by an increase."""
+    notes: list[str] = []
+    aimd = knobs["aimd"]
+    window = timedelta(seconds=aimd["quiet_window_s"])
+    cap = int(account_state["cap"])
+    cursor = parse_ts(account_state.get("refusal_cursor"))
+    fresh = [moment for moment in counters["refusal_times"] if cursor is None or moment > cursor]
+    if fresh:
+        until = parse_ts(account_state.get("decrease_window_until"))
+        if until is None or now > until:
+            # The FIRST refusal of a window: step just under the concurrency that
+            # was refused.  ``live`` is sampled at the tick that observes it,
+            # which is the closest the controller gets to the moment of refusal.
+            cap = max(floor, min(cap, live - 1))
+            account_state["decrease_window_until"] = ts(now + window)
+            notes.append(f"decrease(first) live={live} -> {cap}")
+        else:
+            cap = max(floor, math.ceil(cap * float(aimd["decrease"])))
+            notes.append(f"decrease(x{aimd['decrease']}) -> {cap}")
+        seen = account_state.get("observed_refusal_floor")
+        account_state.update(refusal_cursor=ts(max(fresh)), quiet_since=None,
+                             observed_refusal_floor=live if seen is None else min(int(seen), live))
+    # ``live >= cap - 1`` keeps the cap honest: a cap nobody uses is not evidence
+    # of headroom.
+    if (not counters["refusals"] and not counters["deaths"]
+            and account_state["health"] == "up" and live >= cap - 1):
+        started = parse_ts(account_state.get("quiet_since"))
+        if started is None:
+            account_state["quiet_since"] = ts(now)
+        elif now - started >= window:
+            if cap < ceiling:
+                cap = min(ceiling, cap + int(aimd["increase"]))
+                notes.append(f"increase -> {cap}")
+            account_state["quiet_since"] = ts(now)
+    else:
+        account_state["quiet_since"] = None
+    account_state["cap"] = clamp(cap, floor, ceiling)
+    return notes
+
+
+def update_measurement(account_state: dict, counters: dict, live: int, now: datetime,
+                       *, measured_hold_s: int) -> None:
+    """The highest concurrency sustained *measured_hold_s* with no refusal or death."""
+    if counters["refusals"] or counters["deaths"]:
+        account_state.update(measured_since=None, measured_level=None)
+        return
+    started = parse_ts(account_state.get("measured_since"))
+    level = account_state.get("measured_level")
+    if started is None or not isinstance(level, int):
+        account_state.update(measured_since=ts(now), measured_level=live)
+        return
+    account_state["measured_level"] = min(int(level), live)
+    if now - started >= timedelta(seconds=measured_hold_s):
+        sustained, current = int(account_state["measured_level"]), account_state["measured_limit"]
+        if current is None or sustained > int(current):
+            account_state["measured_limit"] = sustained
+        account_state.update(measured_since=ts(now), measured_level=live)
+
+
+def refresh(account_state: dict, entry: dict, knobs: dict) -> tuple[int, int]:
+    """Ceiling and floor from the brief and the policy; returns ``(floor, ceiling)``."""
+    ceiling = max(0, entry["nominal_limit"] - entry["external_reserved"])
+    floor = min(int(knobs["floor"]), ceiling)
+    account_state.update(nominal_limit=entry["nominal_limit"], floor=floor, ceiling=ceiling,
+                         external_reserved=entry["external_reserved"],
+                         enabled=entry["enabled"], endpoint=entry["endpoint"])
+    return floor, ceiling
+
+
+def seed_cap(account_state: dict, floor: int, ceiling: int, entry: dict) -> int:
+    """Starting cap for a run: ``min(brief ceiling, last measured limit)``."""
+    if not entry["enabled"]:
+        return 0
+    measured = account_state.get("measured_limit")
+    return clamp(max(ceiling if measured is None else min(ceiling, int(measured)), 1),
+                 floor, ceiling)
+
+
+def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
+         dry_run: bool = False) -> dict:
+    """One control step: health, then decrease, then increase, then the clamp."""
+    windows, roles = policy["windows"], class_roles(policy)
+    hold = (capacity_dir() / "hold").exists()
+    paused = state.get("paused_at") is not None
+    accounts = run_mode["accounts"]
+    endpoints: dict[str, str] = {}
+    for name, entry in accounts.items():
+        endpoints[entry["endpoint"]] = name
+        endpoints[name] = name
+        if entry["label"]:
+            endpoints.setdefault(entry["label"], name)
+    lookback = max([windows["counter_window_s"]]
+                   + [knobs_for(policy, name)["health"]["fivexx_window_s"] for name in accounts])
+    rows = read_session_rows(telemetry_dir() / "sessions.jsonl",
+                             now - timedelta(seconds=lookback))
+    live, waiters = count_live(accounts), count_waiters()
+    summary: dict[str, Any] = {"ts": ts(now), "hold": hold, "paused": paused,
+                               "waiters": waiters, "accounts": {}}
+    caps: dict[str, int] = {}
+    estimate = {"schema": "mipstarre-capacity-estimate/1", "updated": ts(now), "accounts": {}}
+
+    for name, entry in accounts.items():
+        knobs = knobs_for(policy, name)
+        counters = observe(rows, name, endpoints, roles, now,
+                           counter_window_s=windows["counter_window_s"],
+                           fivexx_window_s=knobs["health"]["fivexx_window_s"])
+        account_state = state["accounts"].setdefault(name, new_account_state(name))
+        floor, ceiling = refresh(account_state, entry, knobs)
+        health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+        was = health["state"]
+        action = update_health(name, health, counters, knobs["health"], now,
+                               no_probe=hold or not entry["enabled"],
+                               codex_home=entry["codex_home"],
+                               probe_timeout_s=windows["probe_timeout_s"])
+        account_state["health"] = health["state"]
+        notes: list[str] = []
+        if hold:
+            notes.append("hold: cap frozen")
+        elif action == "trip":
+            account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
+            notes.append("endpoint down: cap 0")
+        elif action == "recovered":
+            # Never back to the pre-outage cap: the endpoint that just came back
+            # is the last thing to hand twenty sessions.
+            account_state.update(cap=clamp(1, floor, ceiling), quiet_since=None,
+                                 decrease_window_until=None, refusal_cursor=None)
+            notes.append(f"endpoint recovered: cap {account_state['cap']}, AIMD climbs")
+        elif health["state"] == "down" or not entry["enabled"] or paused:
+            account_state["cap"] = 0
+        else:
+            notes.extend(apply_aimd(account_state, counters, knobs, live[name], now,
+                                    floor=floor, ceiling=ceiling))
+            account_state["cap"] = clamp(account_state["cap"], floor, ceiling)
+        update_measurement(account_state, counters, live[name], now,
+                           measured_hold_s=windows["measured_hold_s"])
+        if notes:
+            account_state["last_change"] = ts(now)
+        caps[name] = int(account_state["cap"])
+        measured = account_state["measured_limit"]
+        estimate["accounts"][name] = {
+            "nominal": entry["nominal_limit"], "external_reserved": entry["external_reserved"],
+            "cap_now": caps[name], "live": live[name], "waiters": waiters,
+            "refusals_5m": counters["refusals"], "deaths_5m_by_class": counters["deaths_by_class"],
+            "measured_limit": measured,
+            "observed_refusal_floor": account_state["observed_refusal_floor"],
+            "external_inferred": (None if measured is None else entry["nominal_limit"]
+                                  - entry["external_reserved"] - int(measured)),
+            "health": health["state"], "updated": ts(now)}
+        summary["accounts"][name] = {
+            "cap": caps[name], "live": live[name], "floor": floor, "ceiling": ceiling,
+            "health": health["state"], "health_was": was, "health_action": action,
+            "refusals_5m": counters["refusals"], "deaths_5m": counters["deaths"],
+            "neutral_5m": counters["neutral"], "measured_limit": measured, "notes": notes}
+        if not dry_run:
+            _write_json(health_path(name), health)
+
+    for stale in [name for name in state["accounts"] if name not in accounts]:
+        state["accounts"].pop(stale)
+        summary.setdefault("dropped", []).append(stale)
+    state.update(updated=ts(now), brief_ref=run_mode["brief_ref"])
+    summary["max_codex"] = sum(caps.values())
+    if not dry_run:
+        if not hold:
+            summary["max_codex"] = write_cap_files(caps)
+        _write_json(state_path(), state)
+        _write_json(capacity_dir() / "limit-estimate.json", estimate)
+    return summary
+
+
+def append_stage(event: str, summary: dict, note: str) -> None:
+    """One ``capacity`` row per tick in ``results/telemetry/stages.jsonl``."""
+    record = {"ts": summary.get("ts") or ts(utcnow()), "stage": "capacity", "event": event,
+              "note": note, "capacity": summary}
+    path = telemetry_dir() / "stages.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o644)
+    with os.fdopen(fd, "r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            handle.seek(0, os.SEEK_END)
+            if handle.tell():
+                handle.seek(handle.tell() - 1)
+                if handle.read(1) != "\n":  # a previous writer died mid-line
+                    handle.write("\n")
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def render_note(summary: dict) -> str:
+    parts = [f"{name} {row['live']}/{row['cap']} {row['health']}"
+             + (" (" + "; ".join(row["notes"]) + ")" if row["notes"] else "")
+             for name, row in summary["accounts"].items()]
+    parts += ["hold"] if summary.get("hold") else []
+    parts += ["paused"] if summary.get("paused") else []
+    return "; ".join(parts) or "no accounts"
+
+
+# --- subcommands -----------------------------------------------------------
+
+
+def _lock(blocking: bool):
+    capacity_dir().mkdir(parents=True, exist_ok=True)
+    handle = (capacity_dir() / "controller.lock").open("a")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX if blocking else fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        handle.close()
+        return None
+    return handle
+
+
+def _commit(state: dict, caps: dict[str, int], now: datetime, event: str, note: str,
+            dry_run: bool) -> int:
+    state["updated"] = ts(now)
+    if dry_run:
+        return sum(caps.values())
+    total = write_cap_files(caps)
+    _write_json(state_path(), state)
+    append_stage(event, {"ts": ts(now), "max_codex": total,
+                         "accounts": {name: {"cap": caps[name]} for name in caps}}, note)
+    return total
+
+
+def cmd_init(args: argparse.Namespace) -> int:
+    """Validate the policy and the brief, then seed the run's starting caps.
+
+    ``run_mode.py apply`` calls this instead of writing the cap files itself:
+    this tool is the sole writer of ``state.json`` and of the derived files.
+    """
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    previous = load_state()
+    state = new_state(run_mode["brief_ref"])
+    if previous and not args.force:
+        # A new brief is a new run: only the measurement is carried, because it
+        # is what starts the next run below the cliff instead of above it.
+        for name, old in previous["accounts"].items():
+            state["accounts"][name] = dict(
+                new_account_state(name), measured_limit=old.get("measured_limit"),
+                observed_refusal_floor=old.get("observed_refusal_floor"))
+    caps, lines = {}, []
+    for name, entry in run_mode["accounts"].items():
+        knobs = knobs_for(policy, name)
+        account_state = state["accounts"].setdefault(name, new_account_state(name))
+        floor, ceiling = refresh(account_state, entry, knobs)
+        health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+        # A fresh brief is not evidence that a dead endpoint came back.
+        account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
+                             decrease_window_until=None, refusal_cursor=None,
+                             cap=0 if health["state"] == "down"
+                             else seed_cap(account_state, floor, ceiling, entry))
+        caps[name] = int(account_state["cap"])
+        lines.append(f"{name} cap {caps[name]} (floor {floor}, ceiling {ceiling}, health "
+                     f"{health['state']}, measured {account_state['measured_limit']})")
+        if not args.dry_run:
+            _write_json(health_path(name), health)
+    for stale in [name for name in state["accounts"] if name not in run_mode["accounts"]]:
+        state["accounts"].pop(stale)
+    total = _commit(state, caps, now, "init", "seeded from the brief: " + "; ".join(lines),
+                    args.dry_run)
+    print("\n".join(lines))
+    print(f"max-codex {total}" + (" (dry run; nothing written)" if args.dry_run else ""))
+    return 0
+
+
+def cmd_tick(args: argparse.Namespace) -> int:
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    lock = _lock(blocking=False)
+    if lock is None:
+        print("skipped: another capacity controller holds the lock", file=sys.stderr)
+        return 0
+    try:
+        state, seeded = load_state(), False
+        if state is None:
+            seeded, state = True, new_state(run_mode["brief_ref"])
+            for name, entry in run_mode["accounts"].items():
+                account_state = new_account_state(name)
+                floor, ceiling = refresh(account_state, entry, knobs_for(policy, name))
+                account_state["cap"] = seed_cap(account_state, floor, ceiling, entry)
+                state["accounts"][name] = account_state
+        summary = tick(now, policy=policy, run_mode=run_mode, state=state, dry_run=args.dry_run)
+        note = ("seeded from the brief; " if seeded else "") + render_note(summary)
+        if not args.dry_run:
+            append_stage("tick", summary, note)
+    finally:
+        lock.close()
+    print(f"{summary['ts']} {note} | max-codex {summary['max_codex']}")
+    return 0
+
+
+def cmd_set(args: argparse.Namespace) -> int:
+    """Operator override of one cap, clamped to the brief's ceiling."""
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    _require(args.account in run_mode["accounts"], f"{args.account}: not an account in the "
+             f"current brief ({', '.join(run_mode['accounts']) or 'none'})")
+    _require(args.cap >= 0, "cap must be a nonnegative integer")
+    lock = _lock(blocking=True)
+    try:
+        state = load_state() or new_state(run_mode["brief_ref"])
+        caps = {}
+        for name, entry in run_mode["accounts"].items():
+            account_state = state["accounts"].setdefault(name, new_account_state(name))
+            floor, ceiling = refresh(account_state, entry, knobs_for(policy, name))
+            if name == args.account:
+                # Clamped to the ceiling but not up to the floor: this is the
+                # supported replacement for ``echo 0 > max-codex-primary``.  The
+                # operator's number owns a full quiet window before AIMD moves
+                # again, and a stale decrease window must not shrink it.
+                account_state.update(cap=clamp(args.cap, 0, ceiling), quiet_since=None,
+                                     decrease_window_until=None, last_change=ts(now))
+            caps[name] = int(account_state["cap"])
+        total = _commit(state, caps, now, "set",
+                        f"operator set {args.account} cap {caps[args.account]}", args.dry_run)
+    finally:
+        lock.close()
+    print(f"{args.account} cap {caps[args.account]} | max-codex {total}")
+    return 0
+
+
+def cmd_pause(args: argparse.Namespace) -> int:
+    """Caps to 0, the pre-pause caps saved **inside** ``state.json``.
+
+    Never to a second file: on 2026-09-12 the pause chain wrote
+    ``watchdog/caps-before-pause`` in one format, a later phase overwrote it with
+    another, and the resume script restored nothing.
+    """
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    lock = _lock(blocking=True)
+    try:
+        state = load_state() or new_state(run_mode["brief_ref"])
+        already = state.get("paused_at")
+        caps = {}
+        for name, entry in run_mode["accounts"].items():
+            account_state = state["accounts"].setdefault(name, new_account_state(name))
+            refresh(account_state, entry, knobs_for(policy, name))
+            if account_state["saved_cap"] is None:  # a second pause saves nothing
+                account_state["saved_cap"] = int(account_state["cap"])
+            account_state.update(cap=0, quiet_since=None)
+            caps[name] = 0
+        state["paused_at"] = already or ts(now)
+        if args.reason:
+            state["pause_reason"] = args.reason
+        saved = ", ".join(f"{name} {state['accounts'][name]['saved_cap']}" for name in caps)
+        _commit(state, caps, now, "pause", f"capacity paused; saved caps {saved}", args.dry_run)
+    finally:
+        lock.close()
+    if already:
+        print(f"already paused at {already}; saved caps left untouched")
+    print(f"saved {saved}; caps 0")
+    return 0
+
+
+def cmd_resume(args: argparse.Namespace) -> int:
+    """Restore the saved caps and re-enter AIMD at the saved value."""
+    policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
+    now = args.now or utcnow()
+    lock = _lock(blocking=True)
+    try:
+        state = load_state()
+        _require(state is not None, f"{state_path()}: no capacity state to resume; run init")
+        caps, lines = {}, []
+        for name, entry in run_mode["accounts"].items():
+            knobs = knobs_for(policy, name)
+            account_state = state["accounts"].setdefault(name, new_account_state(name))
+            floor, ceiling = refresh(account_state, entry, knobs)
+            health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
+            saved = account_state["saved_cap"]
+            restored = (seed_cap(account_state, floor, ceiling, entry) if saved is None
+                        else clamp(int(saved), floor, ceiling))
+            if not entry["enabled"] or health["state"] == "down":
+                restored = 0  # health outranks a saved number
+            account_state.update(cap=restored, saved_cap=None, quiet_since=None,
+                                 decrease_window_until=None, health=health["state"])
+            caps[name] = restored
+            lines.append(f"{name} cap {restored} (health {health['state']})")
+        state["paused_at"] = None
+        state.pop("pause_reason", None)
+        total = _commit(state, caps, now, "resume", "capacity resumed: " + "; ".join(lines),
+                        args.dry_run)
+    finally:
+        lock.close()
+    print("\n".join(lines))
+    print(f"max-codex {total}")
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    """Read-only: the state, the health files and the live census."""
+    state = load_state()
+    if state is None:
+        print(f"{state_path()}: no capacity state (run capacity_controller.py init)",
+              file=sys.stderr)
+        return EXIT_FAIL
+    live, waiters = count_live(list(state["accounts"])), count_waiters()
+    hold = (capacity_dir() / "hold").exists()
+    estimate = (_read_json(capacity_dir() / "limit-estimate.json") or {}).get("accounts", {})
+    rows = []
+    for name, account_state in state["accounts"].items():
+        health = _read_json(health_path(name)) or {}
+        rows.append(dict({key: account_state.get(key) for key in
+                          ("cap", "floor", "ceiling", "measured_limit", "observed_refusal_floor")},
+                         account=name, live=live[name], waiters=waiters,
+                         health=health.get("state", account_state.get("health", "up")),
+                         probe=health.get("next_probe_at"),
+                         external_inferred=estimate.get(name, {}).get("external_inferred")))
+    if args.json:
+        print(json.dumps({"ts": ts(utcnow()), "paused_at": state.get("paused_at"), "hold": hold,
+                          "brief_ref": state.get("brief_ref"), "updated": state.get("updated"),
+                          "accounts": rows}, ensure_ascii=False, indent=2))
+        return 0
+    brief = " | ".join(f"{row['account']} {row['live']}/{row['cap']} ({row['health']}) "
+                       f"{row['waiters']}w" for row in rows) or "no accounts"
+    suffix = (" [hold]" if hold else "") + (" [paused]" if state.get("paused_at") else "")
+    if args.brief:
+        print(brief + suffix)
+        return 0
+    print(f"capacity {state.get('updated')} brief={state.get('brief_ref')}{suffix}")
+    for row in rows:
+        print(f"  {row['account']:<8} cap {row['cap']:<4} live {row['live']:<4} "
+              f"waiters {row['waiters']:<4} floor {row['floor']} ceiling {row['ceiling']} "
+              f"health {row['health']:<8} measured {row['measured_limit']} refusal_floor "
+              f"{row['observed_refusal_floor']} external_inferred {row['external_inferred']}"
+              + (f" next probe {row['probe']}" if row["health"] == "down" else ""))
+    return 0
+
+
+# --- entry point -----------------------------------------------------------
+
+
+def _moment(text: str) -> datetime:
+    parsed = parse_ts(text)
+    if parsed is None:
+        raise argparse.ArgumentTypeError(f"{text!r} is not an ISO-8601 timestamp")
+    return parsed
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--policy", type=Path, help="capacity policy (default: the checkout's)")
+    parser.add_argument("--run-mode", type=Path, help="default: watchdog/run-mode.json")
+    parser.add_argument("--now", type=_moment, help=argparse.SUPPRESS)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for name, handler, help_text in (
+            ("init", cmd_init, "validate the brief and seed the starting caps"),
+            ("tick", cmd_tick, "one control step (the 60 s loop)"),
+            ("set", cmd_set, "operator override of one account's cap"),
+            ("pause", cmd_pause, "caps to 0, saving them inside state.json"),
+            ("resume", cmd_resume, "restore the saved caps and re-enter AIMD")):
+        sub = subparsers.add_parser(name, help=help_text)
+        sub.add_argument("--dry-run", action="store_true")
+        if name == "init":
+            sub.add_argument("--force", action="store_true",
+                             help="discard the carried measurement as well as the run state")
+        if name == "set":
+            sub.add_argument("account")
+            sub.add_argument("cap", type=int)
+        if name == "pause":
+            sub.add_argument("--reason")
+        sub.set_defaults(handler=handler)
+    status = subparsers.add_parser("status", help="read-only picture of the caps and health")
+    group = status.add_mutually_exclusive_group()
+    group.add_argument("--json", action="store_true")
+    group.add_argument("--brief", action="store_true", help="one line for status-snapshot.sh")
+    status.set_defaults(handler=cmd_status)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    try:
+        return args.handler(args)
+    except (ControllerError, OSError) as error:
+        print(f"capacity controller: {error}", file=sys.stderr)
+        return EXIT_FAIL
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
