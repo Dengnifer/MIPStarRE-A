@@ -8545,104 +8545,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/278",
-  "id": 5364279503,
-  "node_id": "I_kwDOUJyJf88AAAABP7xozw",
-  "number": 278,
-  "title": "feat(QPBT/Games): Transport projective rounding through postprocessing",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T09:59:30Z",
-  "updated_at": "2026-09-06T09:59:30Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: recovery-20260906-rounding-transport -->\n# Projective rounding through arbitrary postprocessing\n\nProve the dimension-independent quantitative adapter needed after compression\nin the proof of `lem:qld-4-7`, references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1278-1288.\nThe source input is `lem:ortho` in the same file at 135. This is an auxiliary\nderived from existing proved rounding and consistency calculus, not a new premise\nof the paper theorem and not a claim to have constructed the global witness.\n\nGiven two complete POVMs C_A,C_B with defect at most delta, obtain projective\nroundings on their original heterogeneous spaces using\nprojective_rounding_with_explicit_constant. Prove a quantitative cross-player\nconsistency bound after every question-dependent outcome map f_x, against any\nopposite-player measurement already eta-consistent with C_A after that map.\nThe scout proposes delta + sqrt(220*delta^(1/4)) + 2*sqrt(delta+eta);\nderive the actual constants from the existing exact APIs and display all genuine\nnormalization/range hypotheses. Do not assume the proposed estimate or add it as\na bridge. Prove both orientations by explicit factor exchange, not symmetry.\n\nRead the paper and Games/DistanceTheorems/{ProjectiveRounding,Support,Calculus}.lean.\nReuse overlap_gap_le_of_opFamilyDistSq, consistencyDefect_postprocess_le and\nconsistencyDefect_trans_le. No polynomial-outcome cardinality factor is acceptable.\nPrior derivation: primary results/telemetry/sessions/scout-118-dilation-20260906-01.last.md.\n\nOwn a new Games/DistanceTheorems/RoundingTransport.lean under MIPStarRE/QPBT and\na narrowly named audit. Do not edit shared re-exports or the compression packet.\nPreserve all existing public signatures. Type-check the module, check axiom closure\nand document the auxiliary's statement-integrity verdict and future consumer.\n\nUse normal hooks, checked publication and exact-head CI; main arranges independent\nreview and merging. Stay workspace-write and use supported approval requests.\nOn refusal retain a handoff; do not change permissions, account, or execution route.\nNo subagents, service probes, bypasses, or unlocked full builds.\n\nPrimary Astra max: quantitative cross-player transport with universal maps and\nfractional powers. Bound 2400 seconds with a validated checkpoint before expiry.\nReport actual time/available tokens. No extension or reset of B8 is authorized:\ntwelve mathfix attempts, 24242 seconds, original anchor 2026-09-05T19:24:00Z.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/278/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/273",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/273/labels{/name}",
@@ -10048,8 +9950,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 30,
-   "completed": 17,
-   "percent_completed": 56
+   "completed": 18,
+   "percent_completed": 60
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
