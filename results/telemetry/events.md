@@ -7960,3 +7960,18 @@ current dispatch and authority rules remain in the protocols.
 - **Hand-back:** to be recorded here and in `stages.jsonl` when the owner
   says so; the codex main session then resumes from `~/.codex/prompts/goal.md`
   plus the #27 log.
+
+## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
+
+- Session `prover-528-20260912-01`, issue #528: the first exact-head CI run for
+  `f5dd9de98cdad7a87643798e8e9a1555cd723380` took 260 seconds and failed the
+  workflow fixture suite (four failures and one error among 629 tests). The
+  author cleared `MIPSTARRE_JOB_CLASS` and model selectors but left
+  `MIPSTARRE_HARDNESS_REASON`. Ordinary fixture dispatches then failed with
+  `an escalation reason requires a hard job classification`. Both Lean builds
+  and all other applicable integrity checks passed. Clearing the inherited
+  reason, model, classification, and effort settings made all five affected
+  tests pass in 2.467 seconds; no workflow or mathematical code was changed.
+  The failed run remains in the SHA-keyed manifest and logs for PR532 under
+  `~/.cache/mipstarre-dev/`. Clear selectors and their reasons together before
+  workflow fixtures, and retain this failed attempt in the episode cost.
