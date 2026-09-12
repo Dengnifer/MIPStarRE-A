@@ -15,9 +15,10 @@ state-dependent distance between the two bipartition schemes of
 
 The placements are those of blueprint `def:symmetric-equivalents`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.  The
-EPR-exchange invariance is the element `U_σ U_θ` of
-blueprint `lem:symmetric-equivalents-transfer`, which needs no
-symmetry of the strategy; its use for `lem:qld-4-10` is analyzed in
+placement module proves EPR-exchange invariance for the involution
+`(A' B'')(A'' B')`, which fixes `A` and `B`, in
+`ProjectiveSetting.reindexState_eprCrossSwap_psiHat`; its use for
+`lem:qld-4-10` is analyzed in
 `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
 -/
 
@@ -132,14 +133,13 @@ theorem place_one (S : ProjectiveSetting P ε) (p : Placement) :
     · simp only [ProjectiveSetting.place, Matrix.one_apply, Prod.ext_iff]
       split_ifs <;> simp_all
 
-/-- A placement is additive over finite sums of local operators. -/
+/-- A placement is additive over finite sums of local operators.
+Compatibility name for `place_finset_sum`, retained for the combining-point
+proofs that use this spelling. -/
 theorem place_finsetSum (S : ProjectiveSetting P ε) (p : Placement) {γ : Type*}
     (s : Finset γ) (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ x ∈ s, O x) = ∑ x ∈ s, S.place p (O x) := by
-  ext i j
-  cases p <;>
-    simp only [ProjectiveSetting.place, Matrix.sum_apply, Finset.sum_mul,
-      Finset.mul_sum]
+    S.place p (∑ x ∈ s, O x) = ∑ x ∈ s, S.place p (O x) :=
+  S.place_finset_sum p s O
 
 /-- A placement commutes with the conjugate transpose. -/
 theorem place_conjTranspose (S : ProjectiveSetting P ε) :
@@ -280,36 +280,6 @@ theorem placedMeasurement_isProjective (S : ProjectiveSetting P ε)
   · change star (S.place p (M.effect a)) = S.place p (M.effect a)
     rw [Matrix.star_eq_conjTranspose, ← place_conjTranspose,
       (hM a).isSelfAdjoint.isHermitian.eq]
-
-/-- A placement maps the zero operator to zero. -/
-theorem place_zero (S : ProjectiveSetting P ε) (p : Placement) :
-    S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-  ext i j
-  cases p <;> simp [ProjectiveSetting.place]
-
-/-- The completed expanded point measurement agrees with the original effect
-at a defined outcome. -/
-theorem pointMeasExpOption_effect_some (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
-    (a : PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect (some a) =
-      (S.pointMeasExp side W u).effect a := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  simp [Finset.filter_eq']
-
-/-- The completed expanded point measurement has zero effect at `none`. -/
-theorem pointMeasExpOption_effect_none (S : ProjectiveSetting P ε)
-    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    (S.pointMeasExpOption side W u).effect none = 0 := by
-  classical
-  unfold ProjectiveSetting.pointMeasExpOption
-  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-  apply Finset.sum_eq_zero
-  intro a ha
-  exact absurd (Finset.mem_filter.mp ha).2 (by simp)
-
 
 end ProjectiveSetting
 

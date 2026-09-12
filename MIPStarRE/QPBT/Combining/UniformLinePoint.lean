@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
-import MIPStarRE.QPBT.Combining.Lines.SubLineUniform
+import MIPStarRE.QPBT.Combining.Lines.SubLineBind
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.LDT.Basic.DistributionAvg
@@ -32,33 +32,6 @@ open MIPStarRE.LDT
 
 noncomputable section
 
-/-- A dependent mixture of a constant family is the constant law. -/
-private theorem Distribution.bind_const_current {α β : Type*} [DecidableEq β]
-    (μ : Distribution α) (hμ : μ.IsProbability) (ν : Distribution β) :
-    Distribution.bind μ (fun _ => ν) = ν := by
-  have hne : μ.support.Nonempty := by
-    rw [← Finset.card_pos]
-    by_contra hcard
-    have hempty : μ.support = ∅ := by
-      rw [← Finset.card_eq_zero]
-      omega
-    have htotal := hμ.weight_sum_eq_one
-    rw [hempty] at htotal
-    simp at htotal
-  refine Distribution.ext_of_support_of_weight ?_ ?_
-  · change μ.support.biUnion (fun _ => ν.support) = ν.support
-    ext b
-    simp only [Finset.mem_biUnion]
-    constructor
-    · rintro ⟨a, -, hb⟩
-      exact hb
-    · intro hb
-      obtain ⟨a, ha⟩ := hne
-      exact ⟨a, ha, hb⟩
-  · funext b
-    change (∑ a ∈ μ.support, μ.weight a * ν.weight b) = ν.weight b
-    rw [← Finset.sum_mul, hμ.weight_sum_eq_one, one_mul]
-
 /-- If every slice of a map of a pair carries the second uniform law to one
 fixed law, then the map carries the uniform law of the pair to that law. -/
 theorem uniformDistribution_map_uncurry {α β γ : Type*}
@@ -70,7 +43,7 @@ theorem uniformDistribution_map_uncurry {α β γ : Type*}
   rw [← bind_uniformDistribution_map (fun a b => g (a, b)),
     show (fun a => (uniformDistribution β).map (fun b => g (a, b))) =
       fun _ => ν from funext hg]
-  exact Distribution.bind_const_current _ (uniformDistribution_isProbability α) ν
+  exact Distribution.bind_const _ (uniformDistribution_isProbability α) ν
 
 /-- Reading a point at a uniform affine parameter on the canonical line of a
 uniform direct sample gives a uniform point of the direct coordinate space. -/
