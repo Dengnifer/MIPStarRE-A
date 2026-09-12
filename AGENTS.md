@@ -687,13 +687,12 @@ agent must know:
   exact-head commit statuses (`local-ci/*`, `local-review/summary`); merges go
   through GitHub with an exact-SHA guard. Details: `local/README.md`,
   `local/protocols/issues-prs.md`.
-- **Sessions.** External Codex sessions use `local/bin/dispatch.sh`; owner-authorized
-  native descendants use the owner-directed model policy, shared lease and telemetry protocol in
-  `local/protocols/sessions.md` (roles: orc, prover, reviewer, simplifier,
-  blueprint, splitter, scout; `mathfix` is reserved for Astra source-statement
-  repair under `local/protocols/issues-prs.md` section 6) so token/time telemetry
-  stays complete. Historical Fable 5.1 math-fix sessions use
-  `owner-sessions.jsonl`.
+- **Sessions.** Worker Codex sessions use `local/bin/dispatch.sh` (roles: orc,
+  prover, reviewer, simplifier, blueprint, splitter, scout; `mathfix` is
+  reserved for Astra source-statement repair under `local/protocols/issues-prs.md`
+  section 6) so token/time telemetry stays complete. Lease-backed native
+  descendants are retired by issue #505; `local/protocols/sessions.md` retains
+  their history. Historical Fable 5.1 math-fix sessions use `owner-sessions.jsonl`.
 - **Owner inbox.** Pinned issue #500 receives only permission blockers whose
   risk extends beyond project development; main decides and records questions
   whose only risk is failure to finish the project. Use one comment per blocker

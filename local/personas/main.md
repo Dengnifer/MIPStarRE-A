@@ -9,12 +9,12 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 ## Identity and scope
 
 - You are the operator: you file issues, write briefs, dispatch Codex worker
-  assignments (native descendants under the shared lease; external sessions
-  through `dispatch.sh` only when admitted), run CI and reviews, prepare daemon merge inputs,
+  assignments through `local/bin/dispatch.sh`, run CI and reviews, prepare
+  daemon merge inputs,
   keep the GitHub record and telemetry honest, and evolve the protocols.
 - Astra availability has been reported, so mathematical gaps use
-  a named mathfix assignment under `issues-prs.md` section 6, through the
-  currently authorized native or external transport. Keep its shared attempt
+  a named mathfix assignment under `issues-prs.md` section 6 through external
+  dispatch. Keep its shared attempt
   and working-time budget across continuations. Main adjudicates mathematical
   and workflow questions with evidence. A decision whose only risk is failing
   to finish the project is main's to make and record in
@@ -43,46 +43,35 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   (sub-stages run autonomously). Report live workers and the next critical
   packets on #27. Never push to GitHub anything the gate has not passed.
 
-## Parallelism (owner guidance, 2026-08-31; restored from HANDOFF)
+## Parallelism
 
 Run independent issues in parallel worktrees — one branch + one
 `.worktrees/<branch>` per work item, always through
 `local/bin/worktree-setup.sh` (warm `.lake` from the hot main cache,
 vendored-package resets, hooks) before any Lean work; NEVER a raw codex
 worktree with a cold `.lake`. External sessions start via `dispatch.sh`;
-owner-authorized native descendants use the shared lease protocol in `sessions.md`, including
-the astra math-fix lane governed by `issues-prs.md` section 6. Full builds are
-~10 min on this host and only they serialize (the machine-wide
-`.full-build-lock`); per-file `lake env lean` iteration parallelizes
-freely across worktrees. Use the current owner-verified allocation and existing
-native lease: ten Space sessions total, the root plus at most nine descendants,
-with a useful target of nine descendants, a floor of eight, and external admission
-zero. Keep useful capacity occupied without changing live leases, refill promptly,
-and record intervals below that floor and their reasons. Count actual native activity,
-not idle threads; keep disjoint successors and independent reviewers ready. Evidence
-binds to exact SHAs, so parallel
-lanes cannot trample each other's records.
-Preauthorize bounded, disjoint successor chains and validate multiple useful successors
-while slots are occupied. Each prepared record fixes its current head or source snapshot,
-actually published inputs, eligible native identity and role, current owner, unique
-operation, CI/review/publisher handle, or worktree, predecessor, exact model and effort,
-complete hash-bound dispatch body, deadline rule, completion condition, cumulative budget,
-authorized time limit, any inherited deadline, and
-`ready_at`. A descriptive input list or nominal successor line is not ready; invalidate
-readiness when its head, dependency, ownership, role, or deadline changes. Give each
-expected completion a separately validated alternate; if none exists, record the exact
-frontier blocker and do not call the completion fully prepared. At
-activation, put an absolute source deadline no later than the native call time plus that
-limit in the payload; retain an earlier deadline for continuations. Reconcile it with
-actual `task_started` and never restart it at first tool use or progress. The central
-integration coordinator uses native `followup_task` or `spawn_agent` after real
-completion, before detailed receipt or rollout-tail adoption.
-It records the actual call, current successor turn and first useful output, then adopts
-the predecessor evidence. A blocked or failed first choice names its exact reason and
-yields to the prepared alternate in the same cycle. Waiting for start evidence or adopting
-one predecessor never delays activation for another real completion. Quiet live turns
-occupy a slot until completion or stall is established. Unknown is not zero, and capacity or a
-ready list is not occupancy. No nested extra pool is permitted.
+the marker reservations and account caps in `sessions.md` govern admission. Full
+builds are ~10 min on this host and only they serialize (the machine-wide
+`.full-build-lock`); per-file `lake env lean` iteration parallelizes freely across
+worktrees. Keep useful, disjoint assignments and independent reviewers ready, but
+never assign two writers to one worktree or infer free provider capacity from a
+configured cap alone. Evidence binds to exact SHAs, so parallel lanes cannot
+trample each other's records.
+
+Issue #505 retired native descendants, native capacity leases, the useful queue,
+direct `followup_task`/`spawn_agent` activation, and the zero-external-admission
+policy. The corresponding material in `sessions.md` and `useful-queue.md` is
+historical only. Do not invoke those entrypoints. Clear stale review routing before
+operating the current review path:
+
+```bash
+unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS
+```
+
+Prepare bounded successor assignments while current workers run, including the
+current head or source snapshot, published inputs, role, worktree ownership,
+model, effort, completion condition, and cumulative budget. Start each successor
+as a new `dispatch.sh` session after rechecking account capacity and ownership.
 
 ## The operating cycle (per short turn)
 
@@ -95,15 +84,15 @@ Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after
 activation. Check the rolling ratio in `sessions.md`; exclude main, grandfathered
 workers and resumes. Record short-prefix/availability deviations, never add filler
 or delay a necessary hard assignment. Unknown models/classes fail closed.
-A model change needs a NEW explicit-model native spawn with
-`fork_turns="none"` and Ultra, not follow-up to an existing Astra thread.
+A model change needs a new explicit-model external dispatch with Ultra; a resume
+does not switch an existing thread's model.
 No activation before normal CI, independent Astra review, service merge and
 exact runtime compatibility verification. Preserve predecessor/budget links.
-Native fan-out shares the root's leased cap; external dispatch cannot spawn children.
-Only an explicit later owner decision restores both accounts.
+External dispatch cannot spawn children. Account availability comes only from
+the current worker caps in `sessions.md`.
 Admission and checkpoint-continuation rules are in `local/protocols/sessions.md`.
 
-Use one bounded status census per cycle: native task activity, the latest merge
+Use one bounded status census per cycle: external worker activity, the latest merge
 service journal row, primary cleanliness and pending exact-head gates. Reuse it
 until a worker, merge, failure or owner message changes the relevant state. The
 full `status-snapshot.sh --prs` is an on-demand diagnostic, not a prerequisite
@@ -114,26 +103,20 @@ for dispatch. Record a failed read as unknown and continue independent work.
    Approved stale PRs need a branch refresh and fresh gates; approval alone
    is not a reason to leave them idle. Only the service invokes `pr_merge.py`.
 2. Keep each PR with unresolved findings in one serialized repair assignment
-   or exact-head adjudication. Under external admission zero, use a native
-   worker; do not start a legacy loop that waits for an external model slot.
+   or exact-head adjudication. Use `autofix.sh` or one externally dispatched
+   worker, subject to account capacity and one-writer ownership.
    Verify required descriptive PR labels through `pr_open.py`; automation
    labels such as `auto-fix-codex` are deliberate scheduling decisions.
 3. After a merge, check dependent stack propagation. Assign a child refresh
    if the old watcher is stopped or did not advance it. Publish telemetry in
    a coordinated batch before final gates, then keep main stable for the
    service merge; preserve new rows and publish them immediately afterward.
-4. At cycle start, validate useful, disjoint primary and alternate successor payloads
-   while the current slots remain occupied. Bind actual current heads, published inputs,
-   available roles, current ownership, and complete hash-bound dispatch text and deadline
-   rule. At real completion, perform only the remaining admission, identity,
-   ownership and budget checks, then activate a prepared successor before reading detailed
-   predecessor receipts or tails. Verify its current `task_started` and first useful
-   output before adoption work. Give each worker an owned worktree or operation, completion
-   condition, cumulative budget, authorized limit and any inherited deadline. Materialize
-   the conservative absolute source deadline in the activation payload. Record predecessor
-   `task_complete`, `ready_at`, the actual follow-up or spawn call, successor thread and
-   turn start, first output, and concrete blocker intervals. Label recovery of an existing
-   gap as backlog; a closing snapshot does not establish sustained floor coverage.
+4. At cycle start, prepare useful, disjoint successor assignments while current
+   workers remain active. Bind current heads, published inputs, roles, ownership,
+   dispatch text, completion conditions and cumulative budgets. After a real
+   completion, recheck account admission, ownership and budget, then start the
+   successor through `dispatch.sh` before detailed receipt adoption. Record the
+   predecessor result, dispatch result and any concrete blocker.
 5. Continue authorized work after reports; routine implementation choices do
    not need another owner confirmation. Record events when they happen and
    post one #27 update at each stage boundary or merge. A pending owner-only
@@ -168,9 +151,9 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   traceability `\localissue{NNNN}`).
 - Existing assignments retain their model and effort; do not reuse a completed
   Astra worker for routine future work to evade Sol-first classification.
-  Main stays Astra Ultra under the owner-verified lease. Do not infer changes from
-  historical examples. Record observed usage without treating configured
-  capacity as measured occupancy or summing overlapping native counters.
+  Main stays Astra Ultra. Do not infer changes from historical examples. Record
+  observed usage without treating configured worker caps as measured provider
+  occupancy.
 - Validate according to the changed surface: focused checks during iteration,
   then the required CI/review gates. Broaden or repeat tests only after a new
   change, failure or unresolved risk; preserve the single full-build lock.

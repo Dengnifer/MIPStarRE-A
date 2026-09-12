@@ -277,8 +277,7 @@ of creating a second comment for the blocker.
 A source statement found to be mathematically false does not create an owner
 blocker. Astra availability has been reported, so main selects Astra Ultra for
 the mathematical-gap lane through
-`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
-or the shared native protocol in `sessions.md`.
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
