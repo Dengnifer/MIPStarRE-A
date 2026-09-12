@@ -156,7 +156,7 @@ theorem SubLineWitness.exists_avgOver_X_eq_mixture (P : AdmissibleParams)
           (sample.1.base + t • sample.1.direction))))) =
       avgOver ((subLinePointDist P sublines.D).map subLineXProjection) F := by
     rw [Distribution.avgOver_map, subLinePointDist, Distribution.avgOver_map,
-      avgOver_prod]
+      SandwichProduct.avgOver_distribution_prod]
     rfl
   rw [h1, hX, avgOver_bind]
   refine avgOver_congr _ _ _ fun c => ?_
@@ -190,7 +190,7 @@ theorem SubLineWitness.exists_avgOver_Z_eq_mixture (P : AdmissibleParams)
           (sample.1.base + t • sample.1.direction))))) =
       avgOver ((subLinePointDist P sublines.D).map subLineZProjection) F := by
     rw [Distribution.avgOver_map, subLinePointDist, Distribution.avgOver_map,
-      avgOver_prod]
+      SandwichProduct.avgOver_distribution_prod]
     rfl
   rw [h1, hZ, avgOver_bind]
   refine avgOver_congr _ _ _ fun c => ?_

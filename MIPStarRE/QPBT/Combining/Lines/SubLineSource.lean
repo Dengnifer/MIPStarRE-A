@@ -1,5 +1,4 @@
 import MIPStarRE.QPBT.Combining.Lines.SubLineConstruct
-import MIPStarRE.QPBT.Combining.Lines.SubLineShuffle
 
 /-!
 # The projected marginals of the sub-line law

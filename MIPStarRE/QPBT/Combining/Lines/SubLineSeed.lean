@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Lines.SubLineBind
+import MIPStarRE.QPBT.Combining.Lines.SubLinePrefix
 
 /-!
 # The two independent blocks of a fresh diagonal direction pair
@@ -27,102 +27,6 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 noncomputable section
-
-/-! ## Conditioning the first factor of a product -/
-
-/-- Restricting a product law to an event depending on the first factor alone
-leaves the second factor unchanged and independent of the conditioned first
-factor.  Blueprint `lem:qld-sublines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem Distribution.restrict_prod_fst {α β : Type*} [DecidableEq α]
-    [DecidableEq β] (μ : Distribution α) (ν : Distribution β)
-    (hν : ν.IsProbability) (p : α → Prop) [DecidablePred p]
-    (hpos : 0 < ∑ a ∈ μ.support.filter p, μ.weight a)
-    (hpos' : 0 < ∑ w ∈ (Distribution.prod μ ν).support.filter
-        (fun w => p w.1), (Distribution.prod μ ν).weight w) :
-    Distribution.restrict (Distribution.prod μ ν) (fun w => p w.1) hpos' =
-      Distribution.prod (Distribution.restrict μ p hpos) ν := by
-  classical
-  have hsupp : (Distribution.prod μ ν).support.filter (fun w => p w.1) =
-      (μ.support.filter p) ×ˢ ν.support := by
-    change (μ.support ×ˢ ν.support).filter (fun w => p w.1) =
-      (μ.support.filter p) ×ˢ ν.support
-    ext w
-    simp only [Finset.mem_filter, Finset.mem_product]
-    tauto
-  have hmass : (∑ w ∈ (Distribution.prod μ ν).support.filter
-        (fun w => p w.1), (Distribution.prod μ ν).weight w) =
-      ∑ a ∈ μ.support.filter p, μ.weight a := by
-    rw [hsupp]
-    have h1 : (∑ w ∈ (μ.support.filter p) ×ˢ ν.support,
-        (Distribution.prod μ ν).weight w) =
-        ∑ a ∈ μ.support.filter p, ∑ b ∈ ν.support,
-          μ.weight a * ν.weight b := by
-      rw [Finset.sum_product]
-      rfl
-    rw [h1, Finset.sum_congr rfl fun a _ =>
-        (Finset.mul_sum ν.support (fun b => ν.weight b) (μ.weight a)).symm,
-      hν.weight_sum_eq_one]
-    simp
-  refine Distribution.ext_of_support_of_weight ?_ ?_
-  · change (Distribution.prod μ ν).support.filter (fun w => p w.1) =
-      (μ.support.filter p) ×ˢ ν.support
-    exact hsupp
-  · funext w
-    change (if p w.1 then (Distribution.prod μ ν).weight w /
-        ∑ c ∈ (Distribution.prod μ ν).support.filter (fun w => p w.1),
-          (Distribution.prod μ ν).weight c else 0) =
-      (if p w.1 then μ.weight w.1 /
-        ∑ c ∈ μ.support.filter p, μ.weight c else 0) * ν.weight w.2
-    rw [hmass]
-    by_cases h : p w.1
-    · rw [if_pos h, if_pos h, div_mul_eq_mul_div]
-      rfl
-    · rw [if_neg h, if_neg h, zero_mul]
-
-/-- Formalization-only auxiliary: the mass of an event depending only on the
-first factor is the same under a uniform product law and under the uniform
-law of that factor.  Blueprint `lem:qld-sublines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem uniformDistribution_fst_event_mass {α β : Type*} [Fintype α]
-    [DecidableEq α] [Nonempty α] [Fintype β] [DecidableEq β] [Nonempty β]
-    (p : α → Prop) [DecidablePred p] :
-    ∑ w ∈ (uniformDistribution (α × β)).support.filter (fun w => p w.1),
-        (uniformDistribution (α × β)).weight w =
-      ∑ a ∈ (uniformDistribution α).support.filter p,
-        (uniformDistribution α).weight a := by
-  classical
-  rw [Distribution.sum_filter_weight_eq_avgOver,
-    Distribution.sum_filter_weight_eq_avgOver,
-    ← uniformDistribution_map_fst (α := α) (β := β), Distribution.avgOver_map]
-
-/-- Conditioning a uniform product law on an event of its first factor leaves
-the second factor uniform and independent.  Blueprint
-`lem:qld-sublines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem restrict_uniform_prod_fst {α β : Type*} [Fintype α] [DecidableEq α]
-    [Nonempty α] [Fintype β] [DecidableEq β] [Nonempty β] (p : α → Prop)
-    [DecidablePred p]
-    (hpos : 0 < ∑ a ∈ (uniformDistribution α).support.filter p,
-      (uniformDistribution α).weight a)
-    (hpos' : 0 < ∑ w ∈ (uniformDistribution (α × β)).support.filter
-        (fun w => p w.1), (uniformDistribution (α × β)).weight w) :
-    Distribution.restrict (uniformDistribution (α × β)) (fun w => p w.1)
-        hpos' =
-      Distribution.prod
-        (Distribution.restrict (uniformDistribution α) p hpos)
-        (uniformDistribution β) := by
-  classical
-  have hpos'' : 0 < ∑ w ∈ (Distribution.prod (uniformDistribution α)
-        (uniformDistribution β)).support.filter (fun w => p w.1),
-      (Distribution.prod (uniformDistribution α)
-        (uniformDistribution β)).weight w := by
-    rw [← uniformDistribution_prod]
-    exact hpos'
-  rw [Distribution.restrict_congr (uniformDistribution_prod α β)
-    (fun w => p w.1) hpos' hpos'']
-  exact Distribution.restrict_prod_fst _ _
-    (uniformDistribution_isProbability β) p hpos hpos''
 
 /-! ## The coordinate-index event on a scalar seed -/
 

@@ -1,5 +1,4 @@
 import MIPStarRE.QPBT.Combining.Lines.SubLineBranch
-import MIPStarRE.QPBT.Combining.Lines.SubLineProduct
 import MIPStarRE.QPBT.Combining.Lines.SubLineSeed
 
 /-!
