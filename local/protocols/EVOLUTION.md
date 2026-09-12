@@ -1306,9 +1306,19 @@ state on a different day.
 **Change:** `local/bin/janitor.sh` is one idempotent sweep of five passes —
 dead sessions, parked lanes, superseded PRs, stale lane state, expired dispatch
 spool — each selecting by record field, with no date glob and no digit filter
-anywhere. A session that ended in a transient class is re-dispatched under a
-per-(PR, role, head) budget, a clean ending never is, and every abandoned row is
-marked `failed` so telemetry stops showing it live. Parked lanes classed `merge`
+anywhere. A **reviewer** session that ended in a transient class is re-dispatched
+under a per-(PR, role, head) budget, a clean ending never is, and every abandoned
+row is marked `failed` so telemetry stops showing it live. The re-dispatch is
+deliberately reviewer-only, and the entry point is the one that exists:
+`review.sh` re-reviews the PR's exact head and its verdict supersedes, so the
+re-run cannot duplicate work. **A dead prover, orc or fixer is NOT re-dispatched**
+— its unfinished packet is the owning session's to re-plan — so it is marked
+`failed` with a `residue` field in `watchdog/janitor/actions.jsonl`, and
+`local/bin/ready_report.py` counts those rows per role into the hourly comment on
+the progress issue. Widening the scope means writing a re-dispatch entry point
+for those roles first and then listing them in
+`MIPSTARRE_JANITOR_REDISPATCH_ROLES`; until then the residue is reported rather
+than silently repaired. Parked lanes classed `merge`
 or `build` go to `fix-lane.sh`, which renders a committed brief
 (`local/briefs/lane-repair-{merge,build}.md`), dispatches one repair through
 `dispatch.sh` and relaunches the lane tail. `local/bin/pr_janitor.py` closes a
@@ -1316,8 +1326,11 @@ pull request only when its three-dot diff against `main` is empty **and** its
 head is an ancestor of `main`, posting one comment naming both checks; it never
 touches an issue and never guesses.
 
-**Expected effect:** the work the provider interrupted resumes without an
-operator, and the run's own debris is cleared by record rather than by pattern.
+**Expected effect:** the reviews the provider interrupted resume without an
+operator, the run's own debris is cleared by record rather than by pattern, and
+the part that is not repaired — every dead non-reviewer session — is counted per
+role on the progress issue instead of sitting in a local report file nothing
+reads.
 
 ## 2026-09-12 - Union merge for the append-only logs and a reachability guard (W7)
 
@@ -1353,7 +1366,7 @@ branch). Four of its findings are protocol questions rather than code defects,
 and meta.md amendment procedure step 5 requires the enforcement points to move in
 the same commit as the behaviour.
 
-**Change, in four parts.**
+**Change, in seven parts.**
 
 *The telemetry schema.* `local/protocols/meta.md` declared
 `stages.jsonl` as `event: start|end|milestone` over the six project stages, while
@@ -1466,6 +1479,32 @@ move. It requests `auto` now and lets `dispatch.sh` ask `model_policy.py`.
 `autofix.sh`'s `MIPSTARRE_FIX_MODEL` already defaulted to empty (the dispatcher's
 default) and is unchanged; the two were verified together.
 
+*The one-line run mode exists.* `run_mode.py show` defined only `--json`, yet
+two shipped callers render owner-visible text from `show --oneline` —
+`owner-tools/goal-keeper.sh` (the `/goal` body) and `owner-tools/owner-resume.sh`
+(the single resume message) — and both file headers say so. The subcommand
+exited 2 with `unrecognized arguments`, both callers swallowed it and took their
+degraded fallback, and the pause/resume `stages.jsonl` note recorded the fallback
+string as if it were the mode. `show --oneline` now renders speed, the
+per-account caps, the total, the occupancy floor, the three issue numbers, the
+effective override, the account mode and the dispatch cutoff from the same
+accessors `show` uses, so the line cannot drift from the dump. The fallbacks stay
+where they are.
+
+*The account mode is derived, not a second file.* The deployed PATH shim gates
+the second key on `watchdog/account-mode`, which nothing in the brief path wrote
+or checked: absent, it reads `primary` and every dispatch whose `CODEX_HOME` is
+not `~/.codex` exits 4. A brief enabling `second` with a `nominal_limit` of 30
+could therefore hold a cap of 28 and dispatch nowhere, with the capacity
+controller seeing only deaths — intervention 2's idle slots, with nothing saying
+why, and a second file holding a capacity decision against full-speed-mode.md
+section 1. `run_mode.py apply`, `pause` and `resume` now derive the file from
+`accounts[].enabled` (`both` when more than one account is enabled, `primary`
+otherwise), print it, expose it as `get account_mode`, and `owner-resume.sh`
+exits 5 when the file and the brief disagree. The shim's own hard-coded
+`model=gpt-6-astra` default is removed with it: a caller that names no model now
+gets codex's default rather than this file's opinion.
+
 *`set speed` regenerates the crontab.* The estimate cadence lives in the crontab,
 and the command used to print a line asking the reader to regenerate it, so a run
 switched to `fast` kept posting its estimate every six hours. It now calls the
@@ -1482,8 +1521,20 @@ records of the past rather than call sites), and `lane-v2.sh`, which is
 referenced by those records too, has no such push. It is removed rather than
 repaired: two lane runners with different push rules is the defect.
 
+*The resolved model is counted every hour.* Recording the model on the session
+row is not the same as noticing that it is the wrong one: confirming that a fast
+run really put every role, reviewers included, on the hard model still meant
+reading `results/telemetry/sessions.jsonl` by hand — the audit the override
+exists to remove. The hourly comment of `local/bin/ready_report.py` now carries
+one `models` line: sessions started in the window grouped by the model that
+actually ran, the override in force, and, when the override names one model, the
+count of rows that disagree with it, flagged the way `unexplained` is. The same
+row goes to `merge-latency-<date>.jsonl`. That comment also carries the janitor's
+residue — dead sessions marked `failed` and not re-dispatched, per role (W6).
+
 **Expected effect:** a full speed run's reviewers run the hard model without the
-owner naming it, the model that ran is the model the session row records, one
+owner naming it, the model that ran is the model the session row records, a model
+that is not the briefed one shows up on the progress issue within the hour, one
 tier switch moves the shim, the models and the cadence together, and the only
 `MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
 `checked-push.sh`.

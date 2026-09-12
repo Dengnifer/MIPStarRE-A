@@ -39,6 +39,19 @@ the **only** artifact the owner authors for a run.
 | `accounts[].enabled` | `false` means the pipeline never dispatches there at all |
 | `models.override` | `null` = **resolve from `run.speed`** (section 5): `fast` means `astra-all`, `default` means the published `local/model-policy.json`. `"astra-all"` forces the hard model at any speed; `"policy"` keeps the published policy at any speed. Whatever is in force is recorded in telemetry |
 
+**Nothing else holds a capacity decision.** `accounts[].enabled` is the only
+statement of which keys a run may use, and `run_mode.py apply`, `pause` and
+`resume` DERIVE `watchdog/account-mode` from it (`both` when more than one
+account is enabled, `primary` otherwise). That file is what the deployed PATH
+shim reads before it lets a dispatch use a `CODEX_HOME` other than `~/.codex`;
+while it says `primary` every such dispatch exits 4 with `primary-only policy`.
+It was previously written by hand and nothing in the brief path touched it, so a
+brief that enabled `second` with a `nominal_limit` of 30 could hold a cap of 28
+and dispatch nowhere on that key, with the AIMD seeing only deaths — the
+idle-slot failure of 2026-09-12 intervention 2. Read it with `run_mode.py get
+account_mode`; `owner-resume.sh` exits 5 when the file and the brief disagree.
+Never edit it.
+
 **`nominal_limit` is a ceiling and never a target.** It is the highest
 concurrency the key may ever reach. The controller may sit below it for the
 whole run and must never go above it; a run that sits at 60 % of the ceiling
@@ -139,6 +152,8 @@ and the only accessor anything else uses.
 
 ```bash
 run_mode.py show                 # human-readable dump (goal text, cycle text)
+run_mode.py show --oneline       # the whole mode on ONE line (goal text, resume message)
+run_mode.py get account_mode     # derived from accounts[].enabled; the PATH shim reads it
 run_mode.py get speed
 run_mode.py get floor            # int(occupancy_target * sum of effective caps)
 run_mode.py get cap.second
@@ -147,6 +162,11 @@ run_mode.py get codex_home.second
 run_mode.py get progress_issue | estimate_issue | owner_inbox_issue
 run_mode.py get dispatch_cutoff | pause_deadline_min | turn_max
 ```
+
+`show --oneline` is what `owner-tools/goal-keeper.sh` puts in the `/goal` text
+and what `owner-tools/owner-resume.sh` puts in the single resume message, so
+neither names a cap, a floor or an issue number of its own. Both keep a
+degraded fallback for the case where the run mode cannot be read at all.
 
 An unknown key exits 2 and lists the known ones. `cap.<account>` and `floor`
 prefer the live cap files, falling back to the record; an unreadable cap file
@@ -184,6 +204,24 @@ ready-but-open PR, reads the reason from daemon state rather than guessing:
 the alarm case and should always be zero.** A post is suppressed when the ready
 set and the reasons are unchanged and nothing merged, and forced at least every
 six hours. The same rows go to `results/telemetry/merge-latency-<date>.jsonl`.
+
+The hourly comment also carries two counts the owner would otherwise have to
+audit by hand:
+
+* **models** — sessions started in the window grouped by the model that actually
+  ran, next to the override in force and, when the override names one model, the
+  number of rows that disagree with it. A full speed run whose reviewers slipped
+  onto the cheap model shows up here within the hour; before it existed the only
+  check was reading `results/telemetry/sessions.jsonl` by hand.
+* **dead sessions marked failed and NOT re-dispatched, per role** — the janitor's
+  residue. `local/bin/janitor.sh` re-dispatches **`reviewer` only**: that is the
+  one role whose re-run is a pure re-run of the same work (`review.sh`, the exact
+  head, and the new verdict supersedes). A dead prover, orc or fixer is marked
+  `failed` with a `residue` field in `watchdog/janitor/actions.jsonl` and is the
+  OWNING SESSION'S to re-plan — the janitor does not invent a packet. Widening
+  it means giving those roles a re-dispatch entry point first and then listing
+  them in `MIPSTARRE_JANITOR_REDISPATCH_ROLES`; until then the count is on the
+  progress issue so the remainder is visible without opening a file on the host.
 
 The split between the two issues is normative in
 `local/protocols/issues-prs.md` section 6.
