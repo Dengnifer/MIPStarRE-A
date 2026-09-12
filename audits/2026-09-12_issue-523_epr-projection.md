@@ -129,3 +129,17 @@ message and GitHub evidence rather than predicted here.
    projection transfer is a separate downstream obligation.
 
 No counterexample or new mathematical non-derivability claim is asserted.
+
+## Publication checkpoint
+
+PR #544 publishes this partial result. At `4109e55a`, pre-push dependency
+builds and the full locked CI Lean build passed. CI caught an undefined
+`ketbra` macro in the new blueprint text; replacing it by the existing
+`ket`/`bra` notation makes `leanblueprint pdf` pass. The CI workflow-fixture
+suite independently failed `test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra`
+because its temporary dry-run dispatcher returned exit 4. The six invoking
+model/effort variables were unset before CI. This packet does not change that
+fixture or the workflow machinery. The remaining CI proof-debt, proof-evasion,
+file-length, and paper-gap checks passed. Final-head CI must be rerun after
+publishing the PDF correction; the session's 60-minute limit precludes another
+complete CI cycle. No reviewer was launched and no merge was attempted.

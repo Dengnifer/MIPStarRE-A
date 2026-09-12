@@ -441,13 +441,13 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\[
 		H_W=\frac{1}{q^M}\sum_{u\in\F_q^M}\tau^W(u)\ot\tau^W(u).
 	\]
-	Then $H_XH_Z=\ketbra{E}{E}$. Let $R$ be an auxiliary register and
+	Then $H_XH_Z=\ket{E}\bra{E}$. Let $R$ be an auxiliary register and
 	$\vartheta$ a unit vector on $R\ot A''\ot B''$. If $\delta\geq0$ and
 	\[
 		\Re\langle\vartheta,(\Id_R\ot H_W)\vartheta\rangle
 		\geq1-\delta/2\qquad(W\in\{X,Z\}),
 	\]
-	then, writing $\Pi=\Id_R\ot\ketbra{E}{E}$, one has
+	then, writing $\Pi=\Id_R\ot\ket{E}\bra{E}$, one has
 	\[
 		\|\vartheta-\Pi\vartheta\|\leq2\sqrt\delta.
 	\]
@@ -465,7 +465,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\leanok
 	\uses{lem:pauli-observable-expansion, def:generalized-pauli, def:EPR}
 	Fourier inversion shows that $H_Z$ keeps precisely the equal computational
-	labels. Averaging the simultaneous shifts gives $H_XH_Z=\ketbra{E}{E}$.
+	labels. Averaging the simultaneous shifts gives $H_XH_Z=\ket{E}\bra{E}$.
 	Each $\Id_R\ot H_W$ is an average of unitaries, hence is a contraction.
 	Expanding the squared distance gives
 	$\|\vartheta-(\Id_R\ot H_W)\vartheta\|^2\leq\delta$.
