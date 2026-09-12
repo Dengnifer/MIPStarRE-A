@@ -49,20 +49,6 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
       direction index = 0 := by
     intro index hindex
     simp [direction, prefixProjection, hindex]
-  have hresample (direction : Fin L.m -> ScalarQ L)
-      (quantity : (Fin L.m -> ScalarQ L) ->
-        (Fin L.m -> ScalarQ L) -> ℝ) :
-      avgOver (uniformDistribution (Fin L.m -> ScalarQ L))
-          (fun point => quantity (lineRepMap direction point) point) =
-        avgOver (uniformDistribution (Fin L.m -> ScalarQ L)) (fun point =>
-          avgOver (uniformDistribution (ScalarQ L)) (fun param =>
-            quantity (lineRepMap direction point)
-              (lineRepMap direction point + param • direction))) := by
-    have hmap := uniformDistribution_map_lineRepMap_add_smul direction
-    have havg := congrArg (fun dist => avgOver dist
-      (fun point => quantity (lineRepMap direction point) point)) hmap
-    rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
-    simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
   change avgOver (uniformDistribution (Fin L.m -> ScalarQ L)) (fun point =>
       value (LineDesc.diagonal (lineRepMap direction point) block.1 direction
         (lineRepMap_apply_self direction point) hprefix, point)) =
@@ -71,7 +57,7 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
         value (LineDesc.diagonal (lineRepMap direction point) block.1 direction
           (lineRepMap_apply_self direction point) hprefix,
           lineRepMap direction point + param • direction)))
-  have h := hresample direction
+  have h := avgOver_lineRepMap_resample_parameter direction
     (fun base point => value (LineDesc.diagonal
       (lineRepMap direction base) block.1 direction
       (lineRepMap_apply_self direction base) hprefix, point))
