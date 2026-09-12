@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.PairCompletion
+import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -71,6 +72,13 @@ printed in `lem:qld-4-13`, paper lines 1020--1034.
 The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
 law, and completed answer alphabet, so neither is the source-facing paper statement.
+
+The first proof route's term `m * epsilon ^ (1 / 4)` cannot be absorbed into
+the printed error arguments, even after capping it by one and restricting to
+admissible parameters; `not_exists_combining_quarter_power_bound` proves this
+scalar obstruction. It does not refute this existence assertion, which requires
+a different estimate. See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`
+and issue #510.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
