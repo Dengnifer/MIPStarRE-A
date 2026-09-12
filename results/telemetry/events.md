@@ -1,6 +1,18 @@
 # Incident and observation log
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
+## 2026-09-12: issue #523 extraction checkpoint
+- PR #544 at `4109e55a` passed the full locked Lean build, but PDF rendering
+  rejected a newly used undefined `ketbra` macro. Commit `c86af17c` uses the
+  existing `ket`/`bra` macros; `leanblueprint pdf` then passed. Web rendering
+  alone had not caught this error. The same CI run failed the unchanged
+  `test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra` fixture
+  when its temporary dry-run dispatcher exited 4, despite scrubbing invoking
+  and review model/effort variables. The bounded prover session preserves the
+  correction and leaves final-head CI and fixture diagnosis to the next gate;
+  no workflow rule or fixture is changed. See
+  `audits/2026-09-12_issue-523_epr-projection.md` for proof and cost provenance.
+
 ## 2026-09-05
 - **Owner-side `.lake` relocation shim.** Worktree build directories consumed the
   87%-full root volume, whose fsync writes measured nine times slower than the

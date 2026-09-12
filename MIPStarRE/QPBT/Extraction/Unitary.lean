@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Extraction.Consistency
+import MIPStarRE.QPBT.Extraction.EPRState
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -90,7 +91,11 @@ conclusion; see `docs/paper-gaps/qpbt_extraction-transfer.tex`.
 Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
 `aux` from the EPR projection of the swapped state, use the corrected
 small-error case split, and combine the point-measurement consistency with the
-exact swap conjugation identities. -/
+exact swap conjugation identities. The algebraic projection identity and
+corrected projection estimate are proved in `Extraction.EPRProjection`;
+`ProjectiveSetting.exists_unit_aux_near_eprProjection` supplies normalization.
+Issue #523 still requires deriving the correlation bounds for the swapped
+state and proving the total-Pauli measurement comparison. -/
 theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
