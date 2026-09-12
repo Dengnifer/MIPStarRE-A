@@ -1,0 +1,10 @@
+{
+  "event": "handoff_correction_consumed_by_main",
+  "guidance": null,
+  "progress": {
+    "handoff_correction_delivery": "TUI16:28:47 shows the full META CORRECTION as current input, no longer pending after next tool call. Actual durable repair or acknowledgment not yet verified; do not resend while main processes it.",
+    "occupancy_latest": "Last16:27:22 snapshot seven running andtwo completed. Prior16:25:58 eight running was followedby PR299 fixercompletion. Eightornine closing snapshots do not establish sustainedoccupancy.",
+    "retirement": "Stillnotverified. Maincontinuesproof/reviewpublication; systematiccompletionhandoff correction nowreceived but execution remainsnextverificationtarget.",
+    "queue_cleanup_permission": "Historicalmonitorqueue untouched. Noowneranswer; no deletionorindirectclearing. Newnotices remain disabled."
+  }
+}
