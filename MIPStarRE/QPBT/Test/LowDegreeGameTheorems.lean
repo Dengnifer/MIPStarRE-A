@@ -80,7 +80,7 @@ private theorem map_uniformDistribution_point (L : LdParams) :
 
 /-- Formalization-only auxiliary lemma: the shared scalar coordinate of a
 uniformly random ambient vector is uniform. -/
-private theorem map_uniformDistribution_seed (L : LdParams) :
+theorem map_uniformDistribution_seed (L : LdParams) :
     (uniformDistribution (LdSpace L)).map LdSpace.seed =
       uniformDistribution (ScalarQ L) := by
   have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
