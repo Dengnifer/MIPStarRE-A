@@ -418,6 +418,36 @@ the unsupported step of the printed proof but still requires the
 error-form decision of the previous direction, with $m^2$ in place of
 $m$.
 
+\paragraph{The concrete directly indexed joint comparison.}
+For the concrete directly indexed sampler, the joint decomposition in
+items (i)--(ii) above is now proved. At a fixed kind and extended coordinate,
+replacement of the original uniform point by a uniform point on its line
+preserves both source-line representatives. The two retained point blocks,
+direction blocks, and seed choices can then be grouped into independent
+restricted line-point samples. Averaging over the kind and coordinate gives
+the joint mixture. This includes zero directions: a uniform affine parameter
+then samples the singleton with probability one. The implementation reuses
+the existing fixed-coordinate identity
+\path{subLineBranchRaw_map_joint} and assembles it in
+\path{MIPStarRE/QPBT/Combining/Lines/SubLineJoint.lean}.
+
+The resulting theorem \path{subLineDist_map_joint} concerns the concrete
+law \path{subLineDist}, with first-coordinate choices for blocks not
+containing the stored extended coordinate. It is not an assertion about
+every witness satisfying the separate marginal conditions, nor a transport
+to the seed-indexed extended game. Applying the nonnegative
+restricted-product bound to the completed consistency integrand gives
+\path{subLineDist_consistencyDefect_le_ofLinesWitness}: for a supplied
+joint line witness of error $\delta_P$, the direct sub-line defect is at
+most $4m^2\delta_P$. This discharges the distribution comparison for the
+concrete sampler only. The line witness must still be constructed, for
+example by \path{combined_line_measurement_consistency}, and the separate
+factor $m^2$ still prevents this estimate alone from establishing the printed
+polynomial error form. Blueprint entries
+\path{lem:qld-subline-joint-mixture} and
+\path{rem:qld-subline-joint-consistency} record precisely this auxiliary
+scope; issue \#510 remains open.
+
 \paragraph{Establishing the claimed form.}
 Re-derive the chain so that every factor of $m$ enters jointly with
 $\eps$ as $m^2\eps$, in the sense of the orientation identity above.

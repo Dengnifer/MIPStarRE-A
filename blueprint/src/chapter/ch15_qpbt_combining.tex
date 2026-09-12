@@ -2010,6 +2010,64 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{lemma}[Joint projected law of the concrete direct sub-line sampler]
+\label{lem:qld-subline-joint-mixture}
+\lean{MIPStarRE.QPBT.subLineJointProjection, MIPStarRE.QPBT.subLineDist_map_joint}
+\lean{MIPStarRE.QPBT.avgOver_subLineJointProjection_le}
+\leanok
+\uses{def:ith-restricted-line, lem:restricted-line-mixture-bounds}
+This is a formalization-only assertion for the directly indexed law
+$D_{\mathrm{dir}}$ defined by \texttt{subLineDist}, with its concrete choices
+of source indices. Choose a line kind $v$ uniformly from the two kinds and
+$k$ uniformly from $\{0,\ldots,2m+1\}$. Put $i_X(k)=k$ for $k<m$ and
+$i_X(k)=0$ otherwise; put $i_Z(k)=k-m$ for $m\leq k<2m$ and $i_Z(k)=0$
+otherwise. Let $\mu$ be the law of $(v,i_X(k),i_Z(k))$.
+Sample $(\ell,\ell_X,\ell_Z)$ from $D_{\mathrm{dir}}$ and a uniform affine
+parameter $t$, and set $u=\ell(t)$. Then
+\[
+ \operatorname{Law}((\ell_X,u_X),(\ell_Z,u_Z))
+ =\sum_{v,i,j}\mu(v,i,j)\bigl(D_{v,i}\times D_{v,j}\bigr).
+\]
+In particular, for every nonnegative function $F$ of two source line-point
+pairs,
+\[
+ \mathbb{E}_{D_{\mathrm{dir}},t}F((\ell_X,u_X),(\ell_Z,u_Z))
+ \leq 4m^2\mathbb{E}_{D_{\mathrm{Line}}\times D_{\mathrm{Line}}}F.
+\]
+Zero directions and singleton lines are included. The assertion concerns
+this concrete direct law, not every distribution with the separate marginal
+properties of Lemma~\ref{lem:qld-sublines}.
+\end{lemma}
+\begin{proof}
+\leanok
+For fixed $v,k$, replacing the original uniform extended point by a uniform
+point of its line preserves its uniform law and both source-line
+representatives. Its two coordinate blocks, the two direction blocks, and
+the two source seeds then form independent restricted samples. Averaging
+this joint identity over $v,k$ gives the displayed law. Apply the
+nonnegative restricted-product estimate of
+Lemma~\ref{lem:restricted-line-mixture-bounds} in each component.
+\end{proof}
+
+\begin{remark}[Conditional direct sub-line consistency]
+\label{rem:qld-subline-joint-consistency}
+In a projective setting, suppose a point witness $Q$ and a joint line
+witness $T$ are supplied, with completed-answer consistency defect at most
+$\delta_P$ over two independent source line-point samples. For any directed
+pair of opposite expanded placements, their completed evaluations at
+$(u_X,u_Z)$, sampled from the concrete law $D_{\mathrm{dir}}$ above, have
+consistency defect at most $4m^2\delta_P$.
+This conditional auxiliary proves the distribution comparison used in the
+second route at source lines 1241--1245. Construction of $T$ with a suitable
+error, and the error form of Lemma~\ref{lem:qld-4-13}, remain separate
+obligations.
+
+The integrand defining the completed consistency defect is nonnegative
+because the two measurements act on opposite registers. Apply
+Lemma~\ref{lem:qld-subline-joint-mixture} to that integrand and use the
+assumed consistency bound on $T$.
+\end{remark}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}

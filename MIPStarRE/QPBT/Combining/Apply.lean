@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.Lines.SubLineJoint
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -70,6 +71,13 @@ printed in `lem:qld-4-13`, paper lines 1020--1034.
 The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
 law, and completed answer alphabet, so neither is the source-facing paper statement.
+
+The concrete directly indexed sampler now has the joint product decomposition
+`subLineDist_map_joint`. Its second-route consequence
+`subLineDist_consistencyDefect_le_ofLinesWitness` gives `4 * m^2 * δP` for a
+supplied line witness. Neither that premise nor the stronger error estimate needed
+here is discharged by this comparison; see issue #510 and
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form

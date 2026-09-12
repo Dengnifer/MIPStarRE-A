@@ -7642,3 +7642,17 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - Issue 510 independent attempt: validation friction
+
+Session `prover-510-20260912-02` proved the joint projected law for the
+concrete direct sub-line sampler. The initial full-build helper waited 120
+seconds for a live machine-wide lock and exited before compiling; no lock
+was bypassed. Pre-commit then rejected the conditional consistency helper's
+blueprint link in a lemma environment, although the new auxiliary entry
+stated its line-witness premise explicitly. The author retained the
+conditional declaration name and moved that discussion to an unlinked
+remark, preserving proof-complete links only on the unconditional joint-law
+entry. No audit exception or workflow rule was changed. Mathematical scope,
+prior attempt costs, and verification are recorded in
+`audits/2026-09-12_issue510-second-route-joint-law.md`.
