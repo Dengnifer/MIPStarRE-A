@@ -1690,7 +1690,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
 \end{proof}
 
-\begin{lemma}[Formalization obligation: complex X-factor removal under the directly indexed law]
+\begin{lemma}[Formalization support: complex X-factor removal under the directly indexed law]
 	\label{lem:claim-17-2-direct}
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor_direct}
 	\uses{lem:concrete-X-deficit-direct}
@@ -1698,10 +1698,20 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$D_{\mathrm{dir}}$ with zero-completed optional evaluations, the complex
 	modulus of the difference in Lemma~\ref{lem:claim-17-2} is at most
 	$C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$ for a universal $C>0$.
-	The remaining obligation is the complex weighted Cauchy--Schwarz step.
+	This directly indexed estimate is proved in Lean. Completion marks remain
+	withheld while the declaration retains its source-transport marker.
 	Transport to the source law is separate; see
 	\cite{gap:qpbt_subline-claims-line-marginal,gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
+\begin{proof}
+	\uses{lem:concrete-X-deficit-direct}
+	Apply complex Cauchy--Schwarz with the positive line effect as weight,
+	the Z-point projection on the first vector, and the complement of the
+	X-point projection on the second. Completeness bounds the first quadratic
+	sum by one, and projectivity identifies the second with the X deficit.
+	The deficit bound gives $\sqrt{C_0m^2\delta_{\mathrm{Line}}}
+	=\sqrt{C_0}m\sqrt{\delta_{\mathrm{Line}}}$.
+\end{proof}
 
 \begin{lemma}[Formalization support: the real Z overlap under the directly indexed law]
 	\label{lem:claim-17-3-re-direct}

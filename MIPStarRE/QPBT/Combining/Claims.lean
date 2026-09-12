@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
+import MIPStarRE.QPBT.Combining.ComplexOverlapGap
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit
 import MIPStarRE.QPBT.Combining.SubLineZDeficit
@@ -11,9 +12,9 @@ import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 # Scalar claims for combining the Pauli bases
 
 This module records auxiliary scalar estimates for the directly indexed subline
-law. The proved estimates compare real parts; they do not establish the complex
-modulus comparisons over the source distribution in Claims 17-1 and 17-3.
-The pending Claim 17-2 analogue retains the complex modulus. The source claims
+law. The Claim 17-1 and 17-3 estimates compare real parts; they do not establish
+the complex modulus comparisons over the source distribution.
+The Claim 17-2 analogue proves the complex-modulus bound. The source claims
 remain separate, uncertified blueprint statements until the distribution and
 scalar transport obligations are discharged. Line-polynomial evaluation uses the
 existing `Option` completion, so no field value is substituted when an evaluation
@@ -347,13 +348,15 @@ theorem subline_replace_by_ordered_product_re_direct :
 using the concrete X-Z-X measurement defined at paper lines 942--949.
 The source-law statement remains blueprint `lem:claim-17-2`.
 
-**Unfaithful:** The complex Cauchy--Schwarz estimate is still unproved, and
-`SubLineWitness` has not been transported to the source law. Issues #414 and
-#474 and `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` track the scalar
-obligation; `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` tracks transport.
-Discharge this retained hole by the complex weighted Cauchy--Schwarz inequality
-and `exists_concreteXPointOverlap_deficit_le`, which already uses
-`combinedLineMeasurement_sum_Z`. No deficit or transport is assumed.
+**Unfaithful:** `SubLineWitness` has not been transported to the source law;
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` tracks this remaining
+deviation. Discharge it by transporting the directly indexed subline law to the
+paper's distribution. The complex estimate itself is proved using weighted
+Cauchy--Schwarz and `exists_concreteXPointOverlap_deficit_le`, which already uses
+`combinedLineMeasurement_sum_Z`. Issue #514 discharges the scalar obligation
+tracked in issues #414 and #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+No deficit or transport is assumed.
 The finite weighted sums below are complex expectations, without taking real parts. -/
 theorem subline_remove_X_factor_direct :
     ∃ C : ℝ, 0 < C ∧
@@ -394,7 +397,64 @@ theorem subline_remove_X_factor_direct :
                         (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
                           S.psiHat))))‖ ≤
           C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-  sorry
+  obtain ⟨C, hC, hdef⟩ := exists_concreteXPointOverlap_deficit_le
+  refine ⟨Real.sqrt C, Real.sqrt_pos.mpr hC, ?_⟩
+  intro P ε S sublines
+  classical
+  let μ := Distribution.prod sublines.D
+    (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+  let A : SubLineTriple P × DirectScalarQ P.extendedDirectLd →
+      Measurement (DegPoly P.toLdParams (P.m * P.d) ×
+        DegPoly P.toLdParams (P.m * P.d))
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s =>
+    S.placedMeasurement .AA' (S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2)
+  let B : SubLineTriple P × DirectScalarQ P.extendedDirectLd →
+      DegPoly P.toLdParams (P.m * P.d) × DegPoly P.toLdParams (P.m * P.d) →
+      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
+    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .X s.1.2.1
+      (projX (directPointToPauli P (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
+  let Z : SubLineTriple P × DirectScalarQ P.extendedDirectLd →
+      DegPoly P.toLdParams (P.m * P.d) × DegPoly P.toLdParams (P.m * P.d) →
+      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
+    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
+      (projZ (directPointToPauli P (s.1.1.base + s.2 • s.1.1.direction))) fs.2)
+  have hB : ∀ s fs, IsProj (B s fs) := by
+    intro s fs
+    dsimp only [B]
+    rw [← S.pointMeasExpOption_effect_evalOpt]
+    exact S.place_isProj .BA'' (S.pointMeasExpOption_isProj .bob .X _ _)
+  have hZ : ∀ s fs, IsProj (Z s fs) := by
+    intro s fs
+    dsimp only [Z]
+    rw [← S.pointMeasExpOption_effect_evalOpt]
+    exact S.place_isProj .BA'' (S.pointMeasExpOption_isProj .bob .Z _ _)
+  have hgap := norm_overlap_gap_le_sqrt_one_sub_of_isProj μ A B Z S.psiHat
+    (Distribution.prod_isProbability _ _ sublines.isProbability
+      (uniformDistribution_isProbability _)) S.psiHat_norm hB hZ
+    (fun s fs => S.place_comm .AA' .BA'' trivial _ _)
+    (fun s fs => S.place_comm .AA' .BA'' trivial _ _)
+  have hdeficit : 1 - avgOver μ (fun s =>
+      ∑ fs, stateQForm S.psiHat ((A s).effect fs * B s fs)) ≤
+      C * (P.m : ℝ) ^ 2 * deltaLine ε := by
+    simpa only [μ, avgOver_prod, A, B, ProjectiveSetting.placedMeasurement_effect,
+      Fintype.sum_prod_type, concreteXPointOverlap, Placement.side] using hdef P ε S sublines
+  have hbound := hgap.trans (Real.sqrt_le_sqrt hdeficit)
+  have hsqrt : Real.sqrt (C * (P.m : ℝ) ^ 2 * deltaLine ε) =
+      Real.sqrt C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+    rw [Real.sqrt_mul (by positivity), Real.sqrt_mul hC.le,
+      Real.sqrt_sq (by positivity), Real.sqrt_eq_rpow (deltaLine ε)]
+    rfl
+  rw [hsqrt] at hbound
+  dsimp only [μ, Distribution.prod] at hbound
+  simp only [Finset.product_eq_sprod, Finset.sum_product] at hbound
+  simp only [A, B, Z, ProjectiveSetting.placedMeasurement_effect,
+    ← ProjectiveSetting.place_mul, uniformDistribution_support,
+    uniformDistribution_weight_apply, Complex.ofReal_mul, Complex.ofReal_inv,
+    Complex.ofReal_natCast, one_div,
+    ← Finset.mul_sum, Fintype.sum_prod_type, applyOperatorToState,
+    Matrix.toEuclideanLin, Matrix.toLpLin_apply, EuclideanSpace.equiv,
+    PiLp.coe_symm_continuousLinearEquiv] at hbound ⊢
+  exact hbound
 
 /-- Formalization-only real-part Z-correlation bound for the directly indexed law.
 
