@@ -69,14 +69,16 @@ The measurements $\hat{M}^{(\mathrm{Point},X),x}$ and
 $\hat{M}^{(\mathrm{Point},Z),z}$ commute only approximately. The first goal of
 this chapter is to construct a single projective measurement that
 simultaneously measures both, first at points and then along lines. The
-construction of the combined point measurement proceeds in three steps: the
+source construction of the combined point measurement proceeds in three steps: the
 binary refinements $\hat{M}^{(\mathrm{Point},X),x,r}$ and
 $\hat{M}^{(\mathrm{Point},Z),z,s}$ are combined into a sandwich POVM, the
 resulting family is shown to satisfy an approximate linearity in the index
 pair $(r,s)$, and the following result of Natarajan and
 Vidick~\cite{Natarajan2017Linearity} converts approximate linearity into exact
 linearity, from which a projective measurement with outcomes in $\F_q^2$ is
-assembled by Fourier averaging.
+obtained by Fourier averaging. The proof of Lemma~\ref{lem:qld-4-10} below
+instead forms the sandwich with field-valued outcomes and applies
+orthonormalization directly, without extending the local spaces.
 
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
@@ -226,8 +228,8 @@ assembled by Fourier averaging.
 	instantiation of $\rho$ as a reduced state of $\ket{\hat\psi}$, the
 	absorption of the ancilla register into padding of the strategy state,
 	and the identity $\mathcal{L}^0 = \Id$ --- are enumerated in
-	Remark~\ref{rem:linearity-import} and addressed in the proof of
-	Lemma~\ref{lem:qld-4-10}.
+	Remark~\ref{rem:linearity-import}. The proof of
+	Lemma~\ref{lem:qld-4-10} below does not use this theorem.
 \end{proof}
 
 \begin{remark}[Obligations of the linearity-theorem import]
@@ -236,7 +238,8 @@ assembled by Fourier averaging.
 	argument of \cite{Natarajan2017Linearity}, with the normalization of its
 	distance bound corrected as described in
 	Remark~\ref{rem:linearity-distance-normalization}. Three features are
-	load-bearing for the proof of Lemma~\ref{lem:qld-4-10}: the error is
+	load-bearing for the source's linearity-based proof of
+	Lemma~\ref{lem:qld-4-10}: the error is
 	preserved without polynomial loss ($\delta$ in the hypothesis becomes
 	$2\delta$ in the conclusion for the squared operator distance, and
 	$\delta$ for the squared measurement distance, a constant factor absorbed
@@ -248,7 +251,7 @@ assembled by Fourier averaging.
 	which no a priori bound is available. The closeness of $\mathcal{L}^u$ to
 	$\mathcal{O}^u$ is guaranteed on average over a uniformly random $u$
 	only; this averaged form suffices because the $\mathcal{L}^u$ enter
-	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
+	that source argument only through averages over $u$.
 	The quotation of the theorem in \cite{Ji2020MIPStar} differs from the
 	cited statement in three respects: it inserts the restriction
 	$0 \le \delta \le 1$, which would block the fiberwise application
@@ -280,8 +283,7 @@ assembled by Fourier averaging.
 	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
 	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
 	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
-	conversion obligations, discharged in the proof of
-	Lemma~\ref{lem:qld-4-10}: the theorem is
+	conversion obligations in the source argument: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -290,12 +292,14 @@ assembled by Fourier averaging.
 	Definition~\ref{def:povm-distance} by expanding the square, using
 	unitarity of the observables, and relabelling the averaged index
 	pair, at the cost of the constant factors absorbed by that
-	definition. One obligation remains open and is flagged where it
-	arises: the ancilla register $\hilb'$ and its state
+	definition. The common-extension obligation remains open:
+	the ancilla register $\hilb'$ and its state
 	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
 	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
 	zero-state padding of the strategy state, padding that the source
-	assumes present without construction.
+	assumes present without construction. The field-valued sandwich
+	construction in the proof of Lemma~\ref{lem:qld-4-10} does not invoke
+	the linearity theorem and does not discharge this unused obligation.
 \end{remark}
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
@@ -845,31 +849,154 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-comm-cons, lem:ortho, fact:triangle,
-		def:expanded-point-measurement, def:symmetric-equivalents,
-		def:povm-distance}
-	The formal proof works with field-valued outcomes directly. On each
-	expanded local space form the complete sandwich POVM
-	$R^{x,z}_{a,b}=M^{Z,z}_b M^{X,x}_a M^{Z,z}_b$.
-	Field-valued approximate commutation bounds its distance from the ordered
-	point product. Point self-consistency and the same commutation estimate
-	bound its off-diagonal overlap across opposite placements.
-	Apply orthonormalization to obtain a projective measurement for each
-	point pair, on the same expanded local space, close to this POVM.
-	The squared-distance triangle inequality gives self-consistency of the
-	projective families and their distances from both ordered products.
-	The placement comparisons give all symmetric equivalents.
-	The estimates are absorbed into $\delta_Q(\eps)=K\eps^{1/8}$ for one
-	universal constant $K$.
+	\uses{lem:qld-comm-cons, def:expanded-point-measurement,
+		lem:cancellation, fact:add-a-proj, fact:agreement,
+		lem:ortho-explicit-constant, prop:triangle-inequality-for-approx_delta,
+		def:expanded-state, lem:ortho, fact:triangle,
+		def:symmetric-equivalents, def:povm-distance}
+	We give a construction directly with field-valued outcomes, on the
+	original expanded local spaces. Write
+	$X_a=\hat{M}^{(\mathrm{Point},X),x}_a$ and
+	$Z_b=\hat{M}^{(\mathrm{Point},Z),z}_b$.
+	Fourier inversion expresses these effects as averages of the expanded
+	observables against the trace characters. Character orthogonality
+	(Lemma~\ref{lem:cancellation}) and Parseval's identity therefore identify
+	the sum over $(a,b)\in\F_q^2$ of the squared commutator norms with the
+	average over the two scalar character indices of the squared observable
+	commutator norms. Thus Lemma~\ref{lem:qld-comm-cons} gives field-valued
+	commutation error $O(\sqrt{\eps})$, without a factor depending on $q$.
 
-	This proves the stated measurement construction without using the source's
-	intermediate binary refinements and quantum linearity construction.
-	The zero-state padding needed by that source proof remains the separate
-	import issue in Remark~\ref{rem:linearity-import} and
-	\cite{gap:qpbt_linearity-theorem-quotation}.
+	For each $(x,z)$ form the POVM $R_{a,b}=Z_bX_aZ_b$.
+	Projectivity and the contraction estimate of Lemma~\ref{fact:add-a-proj}
+	give $R_{a,b}\approx_{\sqrt{\eps}}Z_bX_a$.
+	To bound its consistency defect across opposite placements, use subscripts
+	$1,2$ for those placements and put
+	$W_b=Z_{1,b}Z_{2,b}$ and $D^X_a=X_{1,a}-X_{2,a}$.
+	Projectivity, completeness, and commutation across the placements give
+	the exact identity
+	\[
+		1-\sum_{a,b}\bra{\hat\psi}R_{1,a,b}R_{2,a,b}\ket{\hat\psi}
+		=\frac12\sum_b\|(Z_{1,b}-Z_{2,b})\ket{\hat\psi}\|^2
+		+\frac12\sum_{a,b}\|D^X_aW_b\ket{\hat\psi}\|^2.
+	\]
+	Writing $K_{i,a,b}=[X_{i,a},Z_{i,b}]$, expand
+	$D^X_aW_b=W_bD^X_a+Z_{2,b}K_{1,a,b}-Z_{1,b}K_{2,a,b}$.
+	The contraction estimate, point self-consistency, and the commutator
+	bound show that the mean of the resulting nonnegative pointwise bound
+	$c_{x,z}$ is at most $C_0(\eps+\sqrt{\eps})$ for a universal $C_0\geq1$.
+
+	Apply Lemma~\ref{lem:ortho-explicit-constant} separately for each
+	$(x,z)$ and each player. It gives projective measurements $Q^{x,z}$
+	on that player's original expanded local space, with squared distance
+	from $R^{x,z}$ at most $220c_{x,z}^{1/4}$. Concavity of the fourth root
+	bounds the averaged distance by
+	$220\bigl(C_0(\eps+\sqrt{\eps})\bigr)^{1/4}$.
+	The ancillary permutation exchanging $\mathsf{A}'$ with $\mathsf{B}''$
+	and $\mathsf{A}''$ with $\mathsf{B}'$ fixes $\ket{\hat\psi}$ and
+	transfers these same-side bounds to the other two placements.
+	It requires no symmetry of the strategy.
+
+	Point self-consistency moves $Z_{1,b}X_{1,a}$ to
+	$X_{2,a}Z_{2,b}$ with error $O(\eps)$. The triangle inequality along
+	$Q_1\approx R_1\approx Z_1X_1\approx X_2Z_2$, followed by commutation
+	on placement $2$, gives both ordered-product comparisons. Continuing
+	to $R_2\approx Q_2$ gives self-consistency. For $0\leq\eps\leq1$ all
+	errors are bounded by $K\eps^{1/8}$ for a universal $K$; for $\eps>1$
+	the squared distance between the square-summable families is at most
+	$4$, which is absorbed by increasing $K$.
+	This proves all four directed opposite-placement comparisons.
+	The binary-linearity construction in the source is not used; its
+	ancillary-space absorption obligation in
+	Remark~\ref{rem:linearity-import} and
+	\cite{gap:qpbt_linearity-theorem-quotation} remains unresolved and is not an
+	assumption of this construction.
 \end{proof}
 
 \section{Combined line measurements}
+
+\begin{theorem}[Formalization support: same-placement line-point distance]
+	\label{thm:line-point-same-placement-distance}
+	\lean{MIPStarRE.QPBT.exists_expLine_point_same_placement_distance_le}
+	\leanok
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement,
+		def:line-point-dist, def:povm-distance, def:symmetric-equivalents,
+		def:ideg-deg-polynomials}
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:936-941,
+	% the same-placement comparison preceding eq:pasting-q1.
+	This formalization-only auxiliary isolates the same-placement comparison
+	used for the first pasting hypothesis in the proof of
+	Lemma~\ref{lem:qld-xz-lines}.
+	There is a universal constant $C\geq1$ such that, for every admissible
+	parameter set, projective strategy of success at least $1-\eps$,
+	directed opposite-placement pair $(p_1,p_2)$, and $W\in\{X,Z\}$,
+	\[
+		\E_{(\ell,u)\sim D_{\mathsf{Line}}}
+		\sum_{a\in\F_q\cup\{\bot\}}
+		\left\|\left(
+		(\hat M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=a]})_{p_2}
+		-(\hat M^{(\mathrm{Point},W),u}_a)_{p_2}
+		\right)\ket{\hat\psi}\right\|^2
+		\leq C\bigl(\eps+\delta_{\mathrm{Line}}(\eps)\bigr),
+		\qquad \delta_{\mathrm{Line}}(\eps)=\sqrt{\eps}.
+	\]
+	Here $D_{\mathsf{Line}}$ is the equal mixture of the seed-bearing axis
+	and diagonal laws of Definition~\ref{def:line-point-dist}, not a uniform
+	law on geometric lines. Evaluation is completed by the residual outcome
+	$\bot$ of Definition~\ref{def:ideg-deg-polynomials}, while
+	$\hat M^{(\mathrm{Point},W),u}_{\bot}=0$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-line-cons, lem:qld-comm-cons, lem:alnf, lem:dlnf,
+		prop:triangle-inequality-for-approx_delta}
+	Item~3 of Lemma~\ref{lem:qld-comm-line-cons} compares the evaluated
+	line measurement on $p_2$ with the completed point measurement on
+	$p_1$, at cost $C_{\mathrm{Line}}\delta_{\mathrm{Line}}(\eps)$.
+	Point self-consistency compares the latter with the point measurement
+	on $p_2$, at cost $C_{\mathrm{Point}}\eps$: the point marginal of
+	$D_{\mathsf{Line}}$ is uniform by Lemmas~\ref{lem:alnf}
+	and~\ref{lem:dlnf}, and adjoining a zero effect does not change the
+	distance. The squared triangle inequality proves the assertion with
+	$C=2(C_{\mathrm{Line}}+C_{\mathrm{Point}})$.
+\end{proof}
+
+\begin{theorem}[Formalization support: joint point consistency on line-point samples]
+	\label{thm:joint-point-line-point-consistency}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
+		def:symmetric-equivalents}
+	% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:955-963.
+	This formalization-only auxiliary transports
+	\eqref{eq:qld-q-self-cons} to the sampling law of the second pasting
+	hypothesis in the proof of Lemma~\ref{lem:qld-xz-lines}.
+	Fix any projective combined point family satisfying the conclusions of
+	Lemma~\ref{lem:qld-4-10} with squared-distance bound $\delta_Q$.
+	For every directed opposite-placement pair $(p_1,p_2)$,
+	\[
+		\E_{\substack{(\ell_X,x)\sim D_{\mathsf{Line}}\\
+			(\ell_Z,z)\sim D_{\mathsf{Line}}}}
+		\sum_{\substack{(a,b),(c,d)\in\F_q^2\\(a,b)\ne(c,d)}}
+		\Re\bra{\hat\psi}
+		(\hat Q^{x,z}_{a,b})_{p_1}
+		(\hat Q^{x,z}_{c,d})_{p_2}
+		\ket{\hat\psi}
+		\leq\delta_Q .
+	\]
+	The two line-point samples are independent and use the same seed-bearing
+	mixture as in Theorem~\ref{thm:line-point-same-placement-distance}.
+	The outcome alphabet here is $\F_q^2$; no residual outcome is added
+	to the joint point measurement.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, fact:agreement, lem:alnf, lem:dlnf}
+	Projectivity bounds the consistency defect by the squared-distance
+	bound $\delta_Q$. Each line-point law has uniform point marginal by
+	Lemmas~\ref{lem:alnf} and~\ref{lem:dlnf}; independence therefore
+	identifies the displayed average with the uniform average over
+	$(x,z)\in\F_q^m\times\F_q^m$.
+\end{proof}
 
 \begin{lemma}[Formalization support for coefficient polynomial agreement]
 	\label{lem:coefficient-polynomial-agreement}
@@ -934,7 +1061,9 @@ assembled by Fourier averaging.
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents, def:concrete-paired-line-measurement,
+		def:symmetric-equivalents, thm:line-point-same-placement-distance,
+		thm:joint-point-line-point-consistency,
+		def:concrete-paired-line-measurement,
 		lem:concrete-paired-line-degree-support}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
@@ -964,7 +1093,8 @@ assembled by Fourier averaging.
 	(\hat{M}^{(\mathrm{Point},X),x}_{a})_{\mathsf{B}\mathsf{A}''}$ and
 	$(\hat{Q}^{x,z}_{\bullet,b})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
 	(\hat{M}^{(\mathrm{Point},Z),z}_{b})_{\mathsf{B}\mathsf{A}''}$.
-	From items 1 and 3 of Lemma~\ref{lem:qld-comm-line-cons}, converting
+	Theorem~\ref{thm:line-point-same-placement-distance} supplies the
+	same-placement comparison between evaluated lines and points. Converting
 	between $\approx$ and $\simeq$ with Lemma~\ref{fact:agreement} and
 	summing outcomes with Lemma~\ref{fact:data-processing}, the lines
 	measurements are consistent with the points measurements, and combining
@@ -983,8 +1113,8 @@ assembled by Fourier averaging.
 	Schwartz--Zippel bound (Lemma~\ref{lem:schwartz-zippel-total-degree})
 	applied to the polynomials $f_X, f_Z$ of total degree at most $md$; the
 	two hypotheses of the pasting lemma are supplied by the preceding display
-	and by \eqref{eq:qld-q-self-cons}, and the distribution over
-	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines. The
+	and by Theorem~\ref{thm:joint-point-line-point-consistency}, with two
+	independent samples from the line-point distribution. The
 	register-exchanged comparison \eqref{eq:pasting-1-sym} is supplied by the
 	symmetric equivalents of that preceding display, which
 	Lemma~\ref{lem:qld-4-10} establishes for all of its approximations.

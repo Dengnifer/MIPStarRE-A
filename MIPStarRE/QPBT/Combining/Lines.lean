@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.Lines.SamePlacementDistance
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
