@@ -11,7 +11,10 @@
 #   accounts.sh add <name> --endpoint E --codex-home D --ceiling N
 #                          [--label L] [--reserved N] [--note TEXT] [--disabled]
 #   accounts.sh remove <name>
-#   accounts.sh probe [name]
+#   accounts.sh cap <name> <n>                 set the EFFECTIVE cap now
+#   accounts.sh probe [name] [--force] [--dry-run]
+#   accounts.sh seed                           write the file from the brief (once)
+#   accounts.sh apply-directives --text-file F apply ACCOUNTS: lines from a file
 #   accounts.sh log [-n N]
 #
 # What it edits: ~/.cache/mipstarre-dev/watchdog/accounts.json, the live source of
@@ -25,13 +28,21 @@
 # effect at the next tick; raising it lets the additive creep continue.
 # `enabled false` is cap 0 immediately and no probes, and so is `remove`.
 #
+# Raising a ceiling is a PERMISSION, not a jump: AIMD then creeps +1 per quiet
+# window (120 s by default) and only while the key is saturated, so ten recovered
+# slots take twenty minutes of real demand.  `accounts.sh cap <name> <n>` is the
+# one immediate lever — it sets the effective cap now, clamped to the ceiling and
+# recorded by the controller.  Set the ceiling first; the cap cannot exceed it.
+#
 # Every write is atomic (temp file + rename) and appends one line to
 # ~/.cache/mipstarre-dev/watchdog/capacity/accounts.log.  No key value is ever
 # stored in the file: an entry names the codex home the key lives in, nothing more.
 #
 # `probe` runs one bounded read-only health probe per account through the capacity
 # controller (the owner of endpoint health) and prints what it found; it is how a
-# key disabled by measured health is checked by hand instead of waited on.
+# key disabled by measured health is checked by hand instead of waited on.  It
+# spends one real session per key, so it REFUSES while the run is paused or the
+# caps are held; `--force` says it anyway and `--dry-run` runs nothing at all.
 #
 # This is a thin, versioned wrapper: every rule above is enforced by
 # local/bin/accounts_file.py, so the CLI and the janitor's GitHub channel cannot
@@ -48,7 +59,7 @@ PROG="accounts.sh"
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 OWNER_BIN="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}"
 
-usage() { sed -n '2,44p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,55p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 resolve_root() {
   local candidate
@@ -91,7 +102,21 @@ ACTOR="${MIPSTARRE_ACCOUNTS_ACTOR:-${USER:-owner}}"
 command="$1"; shift
 case "$command" in
   probe)
+    # "$@" carries the optional account plus --force/--dry-run; a name is
+    # [a-z0-9][a-z0-9_-]{0,31} (accounts_file.NAME_RE), so it never begins with
+    # '-' and anything that does is reported by the controller's own parser.
     exec python3 "$ROOT/local/bin/capacity_controller.py" probe "$@"
+    ;;
+  cap)
+    [ "$#" -eq 2 ] || {
+      printf '%s: usage: accounts.sh cap <name> <n>  (the ceiling is set with "set")\n' \
+        "$PROG" >&2; exit 2; }
+    case "$1" in
+      ''|[!a-z0-9]*|*[!a-z0-9_-]*)
+        printf '%s: %s is not an account name ([a-z0-9][a-z0-9_-]{0,31})\n' "$PROG" "$1" >&2
+        exit 2 ;;
+    esac
+    exec python3 "$ROOT/local/bin/capacity_controller.py" set "$1" "$2"
     ;;
   log)
     LINES=50

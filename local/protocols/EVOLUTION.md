@@ -1574,8 +1574,14 @@ raising it lets the additive creep continue rather than jumping the cap.
 `enabled: false` and a removed entry are cap 0 with no probe — the router also
 reads the flag directly, which closes the up-to-60-second window between the
 owner's edit and the controller's tick. An invalid file is a hard, named failure
-with the cap files untouched: falling back to the brief would restore the ceiling
-the owner has just lowered.
+**of the controller** with the cap files untouched: falling back to the brief would
+restore the ceiling the owner has just lowered. Admission is deliberately
+asymmetric — the router keeps running against the last good cap files, and narrows
+them further by refusing any name whose `codex_home` it cannot resolve, so a
+mistyped field stops no dispatch and can never put a second key's sessions on the
+default `~/.codex`. `run_mode.py pause` and `resume` warn and carry on for the same
+reason: a pause only ever zeroes caps, and the `ACCOUNTS:` channel is the remote
+path for repairing the file.
 
 *Health that knows the difference between busy and broken.* `auth` (401/403,
 invalid key) and `insufficient_balance` (`INSUFFICIENT_BALANCE`, quota) are marked
@@ -1593,11 +1599,20 @@ with the key-invalid backoff starting at five minutes rather than thirty seconds
 is the shell one. For when there is no shell, a comment on the owner inbox issue
 in the form `ACCOUNTS: <name> ceiling=<n> [reserved=<n>] [enabled=true|false]` is
 applied by a sixth janitor pass (`local/bin/accounts_inbox.py`) and answered with
-one reply per comment saying exactly what took effect. Only the repository owner
-login recorded in `local/README.md` is applied; anyone else's comment is answered
-with a `rejected:` line naming them, so an attempt is visible rather than silent.
-A comment is applied exactly once — the reply carries its comment id — so a sweep
-every minute cannot re-apply a ceiling the owner has since changed at the shell.
+one reply per comment saying exactly what took effect. That pass runs at the merge
+daemon's `janitor_interval_s` (900 s by default) and only while that daemon is up,
+so the phone path is "at the next sweep" — up to fifteen minutes — not "within a
+minute"; the shell path is the one that is in force at the next tick. Only the
+repository owner login recorded in `local/README.md` is applied; anyone else's
+comment is ignored and reported in the janitor's line rather than answered in
+public, so an attempt is visible to the owner without letting a stranger make the
+bot comment. A comment is applied exactly once — the id is recorded locally before
+the file is written and the reply carries it — so neither a repeated sweep nor a
+reply that failed to post can re-apply a ceiling the owner has since changed at the
+shell. A directive older than the staleness window (default 120 minutes) is neither
+applied nor answered: a backlog that accumulated while the daemon was down is stale
+capacity advice, and applying it after a resume would silently override the brief
+that had just been applied.
 The channel carries `ceiling`, `reserved`, `enabled` and `note` only: an endpoint
 or a codex home is a path on the host and is set at the shell, where a typo cannot
 travel through a public comment.

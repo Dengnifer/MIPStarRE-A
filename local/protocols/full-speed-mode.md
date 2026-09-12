@@ -92,9 +92,21 @@ creep continue rather than jumping the cap; `enabled: false` and a removed entry
 at once. An entry the owner adds gets its own cap file, its own health, its own
 `cap.<name>` accessor and its own line in every report, with nothing restarted.
 
-An **invalid** accounts file is a hard, named failure of the controller with the cap files
-left exactly as they are — never a silent fall back to the brief, which would restore a
-ceiling the owner has just lowered.
+An **invalid** accounts file is a hard, named failure **of the controller**, with the cap
+files left exactly as they are — never a silent fall back to the brief, which would restore
+a ceiling the owner has just lowered. **Admission is deliberately asymmetric**: the
+controller freezes and reports, while `account_router.py` and `ready_report.py` keep
+running against the last good derived files (the `max-codex-<name>` caps the controller
+wrote before the typo), because a mistyped field must not stop every dispatch. The router
+can only ever narrow what those files allow — a name with no readable entry has no
+resolvable `codex_home`, and a key the dispatcher cannot place is cap 0, never a dispatch
+onto the default `~/.codex`. For the same reason `run_mode.py pause` and `resume`, and any
+`get` of a run scalar, warn loudly and carry on: pausing only zeroes caps, and the
+`ACCOUNTS:` channel is the owner's remote path for repairing the file itself.
+
+A directive comment the janitor does not sweep within `accounts_inbox.py`'s staleness
+window (default 120 minutes, several sweeps wide) is **not** applied and **not** answered.
+No reply within a sweep means it did not take effect — repeat it.
 
 ### Editing it
 

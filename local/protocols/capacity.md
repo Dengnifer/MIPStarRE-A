@@ -109,13 +109,22 @@ Without that, `choose_account` *prefers* the dead account — it picks the lower
 ratio, and a dying endpoint keeps freeing slots — so an outage accelerates itself.  That is
 how one hour of 503s cost 69 sessions.
 
+**An invalid accounts file stops the CONTROLLER, not admission.** The controller
+raises with the offending field named and leaves every cap file untouched; the
+router, `ready_report.py` and `run_mode.py pause|resume` keep working from the
+last good derived files, because a mistyped ceiling must never stop every
+dispatch. That fail-open can only narrow: an account the file no longer
+describes has no resolvable `codex_home`, and a key the dispatcher cannot place
+is cap 0 rather than a session on the default `~/.codex`.
+
 ## 4. The files, and which of them means anything
 
 | Path (under `~/.cache/mipstarre-dev/`) | Written by | Meaning |
 |---|---|---|
 | `watchdog/capacity/state.json` | the controller, **solely** | the record: per account `cap`, `floor`, `ceiling`, `health`, `saved_cap`, `external_reserved`; plus `paused_at`, `brief_ref` |
 | `watchdog/capacity/health-<account>.json` | the controller | §3; the per-account file admission reads |
-| `watchdog/capacity/health.json` | the controller | §3; ONE document for every key — state, reason, `disabled_by`, next probe — quoted by the hourly per-key line and by `accounts.sh list`. A view, never an admission input |
+| `watchdog/capacity/health.json` | the controller | §3; ONE document for every key — state, reason, `disabled_by`, next probe — quoted by the hourly per-key line and by `accounts.sh list` (which renders the effective cap, the state and the reason beside the owner's own ceiling). A view, never an admission input |
+| `watchdog/account-mode` | the controller (every tick) and `accounts_file.py` (every write), to the rule `run_mode.account_mode` states | `both` when more than one entry is enabled, else `primary`; the deployed PATH shim refuses a non-default `CODEX_HOME` while it says `primary`. Derived, never briefed — a key enabled with `accounts.sh` or from a phone must not need a re-brief to be dispatchable |
 | `watchdog/accounts.json` | **the owner** (`owner-tools/accounts.sh`, the `ACCOUNTS:` inbox channel, `run_mode.py apply` when absent) | the live keys and their ceilings; `full-speed-mode.md` §1.1. The controller never writes it |
 | `watchdog/capacity/accounts.log` | `accounts_file.py` | one line per edit: timestamp, actor, action, field, old → new |
 | `watchdog/capacity/limit-estimate.json` | the controller | §5 |
