@@ -573,3 +573,604 @@ def current_caps(mode: dict, root: Path | None = None) -> dict[str, int]:
 # ---------------------------------------------------------------------------
 # Accessors
 # ---------------------------------------------------------------------------
+
+SCALAR_KEYS = {
+    "label": lambda m: m["run"]["label"],
+    "start": lambda m: m["run"]["start"],
+    "dispatch_cutoff": lambda m: m["run"]["dispatch_cutoff"],
+    "pause_deadline_min": lambda m: m["run"]["pause_deadline_min"],
+    "speed": lambda m: m["run"]["speed"],
+    "turn_max": lambda m: m["run"]["turn_max_min"],
+    "turn_max_min": lambda m: m["run"]["turn_max_min"],
+    "estimate_cadence_min": lambda m: m["run"]["estimate_cadence_min"],
+    "occupancy_target": lambda m: m["run"]["occupancy_target"],
+    "progress_issue": lambda m: m["run"]["progress_issue"],
+    "estimate_issue": lambda m: m["run"]["estimate_issue"],
+    "owner_inbox_issue": lambda m: m["run"]["owner_inbox_issue"],
+    "model_override": lambda m: m["models"]["override"] or "none",
+    "brief_sha256": lambda m: m["brief_sha256"],
+    "paused": lambda m: "yes" if m.get("paused") else "no",
+}
+
+PER_ACCOUNT_KEYS = ("cap", "endpoint", "codex_home", "label", "enabled",
+                    "nominal_limit", "external_reserved")
+
+
+def value_for(mode: dict, key: str, root: Path | None = None):
+    """One value for ``get KEY``; unknown keys raise ``LayerError``."""
+    if key in SCALAR_KEYS:
+        return SCALAR_KEYS[key](mode)
+    caps = current_caps(mode, root)
+    if key == "floor":
+        return floor_for(caps, mode["run"]["occupancy_target"])
+    if key == "max_codex":
+        return sum(caps.values())
+    if key == "accounts":
+        return " ".join(a["name"] for a in mode["accounts"] if a.get("enabled"))
+    if "." in key:
+        field, _, name = key.partition(".")
+        if field in PER_ACCOUNT_KEYS and name in ACCOUNT_NAMES:
+            row = account_row(mode, name)
+            if field == "cap":
+                return caps.get(name, 0)
+            if field == "codex_home":
+                return row.get("codex_home_path") or row["codex_home"]
+            if field == "enabled":
+                return "yes" if row["enabled"] else "no"
+            return row[field]
+    known = sorted(list(SCALAR_KEYS) + ["floor", "max_codex", "accounts"] +
+                   [f"{field}.<account>" for field in PER_ACCOUNT_KEYS])
+    raise LayerError(f"unknown key {key!r}; known keys: {', '.join(known)}")
+
+
+def render_show(mode: dict, root: Path | None = None) -> str:
+    run = mode["run"]
+    caps = current_caps(mode, root)
+    total = sum(caps.values())
+    paused = " (PAUSED)" if mode.get("paused") else ""
+    lines = [
+        f"run              {run['label']}{paused}",
+        f"brief            {mode['brief_path']}  sha256 {mode['brief_sha256'][:12]}",
+        f"start            {run['start']}",
+        f"dispatch cutoff  {run['dispatch_cutoff']}",
+        f"speed            {run['speed']}  (turn max {run['turn_max_min']} min, "
+        f"estimate every {run['estimate_cadence_min']} min)",
+        f"occupancy        target {run['occupancy_target']:.2f}, floor "
+        f"{floor_for(caps, run['occupancy_target'])} of {total}",
+    ]
+    for account in mode["accounts"]:
+        name = account["name"]
+        state = "enabled" if account["enabled"] else "DISABLED"
+        measured = account.get("measured_limit")
+        seen = f", measured {measured}" if isinstance(measured, int) else ""
+        lines.append(
+            f"cap {name:<12} {caps.get(name, 0)} of ceiling {account['nominal_limit']} "
+            f"minus reserved {account['external_reserved']} "
+            f"({account['label']}, {account['endpoint']}, {state}{seen})")
+    lines += [
+        f"max-codex        {total}  (sum of the per-account caps; no admission meaning)",
+        f"issues           progress #{run['progress_issue']}, estimate "
+        f"#{run['estimate_issue']}, owner inbox #{run['owner_inbox_issue']}",
+        f"models           override {mode['models']['override'] or 'none (local/model-policy.json)'}",
+        f"pause deadline   {run['pause_deadline_min']} min",
+    ]
+    if mode.get("paused"):
+        lines.append(f"paused at        {mode.get('paused_at')} "
+                     f"(saved caps {mode.get('saved_caps')})")
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# The PATH shim (the speed tier)
+# ---------------------------------------------------------------------------
+
+def shim_template_path() -> Path:
+    return repo_root() / SHIM_TEMPLATE_REL
+
+
+def shim_path() -> Path:
+    return owner_bin() / "codex"
+
+
+def render_shim(template: str, speed: str) -> str:
+    """The deployed shim for *speed*, rendered from the committed template."""
+    if speed not in SPEEDS:
+        raise LayerError(f"speed must be one of {SPEEDS}, got {speed!r}")
+    # Position 1, the one the committed template actually uses: a single
+    # anchored SPEED_ARGS= line.  Anchored at the start of the line on purpose -
+    # the template's header documents both renderings, and a comment that merely
+    # shows the line must never be rewritten with it.
+    speed_lines = _SPEED_ARGS_RE.findall(template)
+    if speed_lines:
+        if len(speed_lines) != 1:
+            raise LayerError(
+                f"{shim_template_path()} has {len(speed_lines)} lines starting "
+                "with SPEED_ARGS=; exactly one is required (install.sh renders "
+                "the same line and exits 5 on the same condition).")
+        return _SPEED_ARGS_RE.sub(
+            lambda _match: SPEED_ARGS_LINE[speed], template, count=1)
+    stripped = _SERVICE_TIER_RE.sub("", template)
+    if SPEED_PLACEHOLDER in stripped:
+        return _PLACEHOLDER_RE.sub(PRIORITY_ARG + " " if speed == "fast" else "", stripped)
+    if SHIM_ANCHOR not in stripped:
+        raise LayerError(
+            f"{shim_template_path()} carries neither {SPEED_PLACEHOLDER} nor the "
+            f"anchor {SHIM_ANCHOR}; the speed tier has no rendering position. Fix the "
+            "committed template (results/telemetry/owner-tools/owner-bin-codex) rather "
+            "than hand-patching the deployed shim.")
+    if speed == "default":
+        return stripped
+    return stripped.replace(SHIM_ANCHOR, f"{PRIORITY_ARG} {SHIM_ANCHOR}", 1)
+
+
+def record_shim() -> str:
+    """Re-record the regenerated shim in ``owner-bin/manifest.sha256``.
+
+    ``install.sh`` releases both renderings into ``manifest.accepted`` but keeps
+    ``manifest.sha256`` at the deployed one, and the merge daemon's start gate is
+    ``install.sh --verify``.  Without this step the first ``set speed`` of a run
+    makes the daemon refuse to start.  Best effort: a missing or failing
+    installer is a warning, never a reason to leave the speed change unmade.
+    """
+    installer = repo_root() / "results" / "telemetry" / "owner-tools" / "install.sh"
+    if not installer.is_file():
+        return f"manifest not re-recorded: no {installer}"
+    try:
+        done = subprocess.run(["bash", str(installer), "--record", "codex"],
+                              capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"warning: install.sh --record codex did not run: {exc}"
+    if done.returncode != 0:
+        detail = (done.stderr or done.stdout).strip().splitlines()
+        return ("warning: install.sh --record codex failed: "
+                + (detail[-1] if detail else f"exit {done.returncode}"))
+    return "manifest re-recorded (install.sh --record codex)"
+
+
+def _shim_diff(live: str, wanted: str) -> str:
+    return "".join(difflib.unified_diff(
+        live.splitlines(keepends=True), wanted.splitlines(keepends=True),
+        fromfile="deployed shim", tofile="rendered from the committed template"))
+
+
+def apply_speed(mode: dict, speed: str, *, dry_run: bool = False) -> str:
+    """Regenerate the deployed shim; refuse when it was hand-edited."""
+    template_file = shim_template_path()
+    try:
+        template = template_file.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise LayerError(f"cannot read the shim template {template_file}: {exc}") from exc
+    wanted = render_shim(template, speed)
+    renderings = {render_shim(template, tier) for tier in SPEEDS}
+    live_file = shim_path()
+    try:
+        live = live_file.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise Refused(
+            f"no deployed shim at {live_file}; install the operator tools first "
+            "(results/telemetry/owner-tools/install.sh)") from exc
+    if live not in renderings:
+        raise Refused(
+            f"the deployed shim {live_file} differs from every rendering of "
+            f"{template_file}; refusing to discard an emergency hand-edit.\n"
+            "Fold the edit into the committed template, redeploy, then retry.\n"
+            + _shim_diff(live, wanted))
+    if dry_run:
+        return "dry-run: shim unchanged"
+    if live == wanted:
+        return f"shim already at {speed} speed"
+    mode_bits = os.stat(live_file).st_mode & 0o777
+    atomic_write(live_file, wanted)
+    os.chmod(live_file, mode_bits or 0o755)
+    return f"shim regenerated at {speed} speed; {record_shim()}"
+
+
+# ---------------------------------------------------------------------------
+# Records
+# ---------------------------------------------------------------------------
+
+def locked_append(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_APPEND, 0o644)
+    with os.fdopen(fd, "r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            handle.seek(0, os.SEEK_END)
+            if handle.tell():
+                handle.seek(handle.tell() - 1)
+                if handle.read(1) != "\n":
+                    handle.write("\n")
+                handle.seek(0, os.SEEK_END)
+            handle.write(text if text.endswith("\n") else text + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def append_stage(note: str, event: str, *, root: Path | None = None) -> None:
+    """One `stages.jsonl` row through telemetry.py's locked appender."""
+    path = (root or repo_root()) / "results" / "telemetry" / "stages.jsonl"
+    record = {"ts": stamp(), "stage": "operator", "event": event,
+              "note": sanitize(note, 2000)}
+    try:
+        import telemetry  # noqa: PLC0415 - optional, same directory
+    except ImportError:
+        locked_append(path, json.dumps(record, ensure_ascii=False))
+        return
+    telemetry.append_jsonl(path, record)
+
+
+def _cell(text: str) -> str:
+    return sanitize(str(text), 400).replace("|", "/").replace("\n", " ").strip()
+
+
+def append_decision(decision: str, who: str, rationale: str, record: str,
+                    *, root: Path | None = None) -> None:
+    """One row in the design-decisions register (newest last)."""
+    path = (root or repo_root()) / "results" / "telemetry" / "design-decisions.md"
+    date = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    row = (f"| {date} | {_cell(decision)} | {_cell(who)} | {_cell(rationale)} "
+           f"| {_cell(record)} |")
+    locked_append(path, row)
+
+
+# ---------------------------------------------------------------------------
+# The capacity controller round trip (W3), when it is installed
+# ---------------------------------------------------------------------------
+
+def controller_path() -> Path:
+    # repo_root(), not this file's directory: capacity_controller.py resolves its
+    # policy (local/capacity-policy.json) and its state under repo_root(), so a
+    # controller taken from another tree would be run against a different root's
+    # data.  In the checkout the two paths are the same file.
+    return repo_root() / "local" / "bin" / "capacity_controller.py"
+
+
+def controller_state(root: Path | None = None) -> dict | None:
+    path = (root or cache_root()) / "watchdog" / "capacity" / "state.json"
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return doc if isinstance(doc, dict) else None
+
+
+def controller_caps(root: Path | None = None) -> dict[str, int]:
+    doc = controller_state(root) or {}
+    caps = doc.get("caps") if isinstance(doc.get("caps"), dict) else {}
+    accounts = doc.get("accounts") if isinstance(doc.get("accounts"), dict) else {}
+    out: dict[str, int] = {}
+    for name in ACCOUNT_NAMES:
+        value = caps.get(name)
+        if not isinstance(value, int) or isinstance(value, bool):
+            row = accounts.get(name)
+            value = row.get("cap") if isinstance(row, dict) else None
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            out[name] = value
+    return out
+
+
+def call_controller(command: str) -> tuple[bool, str]:
+    path = controller_path()
+    if not path.exists():
+        return (False, "not installed")
+    proc = subprocess.run([sys.executable, str(path), command],
+                          capture_output=True, text=True)
+    detail = (proc.stdout + proc.stderr).strip()[:800]
+    return (proc.returncode == 0, detail or f"exit {proc.returncode}")
+
+
+# ---------------------------------------------------------------------------
+# Subcommands
+# ---------------------------------------------------------------------------
+
+def cmd_apply(args: argparse.Namespace) -> int:
+    source = Path(args.brief).expanduser() if args.brief else brief_path()
+    brief, digest = read_brief(source)
+    measured = measured_limits()
+    caps = effective_caps(brief, measured)
+    mode = build_mode(brief, digest, source, caps, measured)
+    values = cap_values(caps)
+    run = mode["run"]
+    summary = (f"speed {run['speed']}, caps " +
+               ", ".join(f"{name} {caps[name]}" for name in ACCOUNT_NAMES) +
+               f", max-codex {values['max-codex']}, occupancy floor "
+               f"{mode['derived']['floor']} (target {run['occupancy_target']:.2f}), "
+               f"cutoff {run['dispatch_cutoff']}, issues "
+               f"progress #{run['progress_issue']} estimate #{run['estimate_issue']} "
+               f"inbox #{run['owner_inbox_issue']}, override "
+               f"{mode['models']['override'] or 'none'}")
+
+    if args.dry_run:
+        sys.stdout.write(render_show(mode))
+        sys.stdout.write("\nwould write:\n")
+        sys.stdout.write(f"  {mode_path()}\n")
+        for name, value in values.items():
+            sys.stdout.write(f"  {watchdog_dir() / name} = {value}\n")
+        sys.stdout.write(f"  {shim_path()} rendered at {run['speed']} speed\n")
+        sys.stdout.write(f"  brief sha256 {digest}\n")
+        return 0
+
+    previous_paused = False
+    try:
+        previous_paused = bool(load_mode().get("paused"))
+    except LayerError:
+        pass
+    path = write_mode(mode)
+    write_caps(caps)
+    # Hand the briefed caps to the capacity controller, which is the sole writer
+    # of watchdog/capacity/state.json and therefore the thing `pause` asks to
+    # save them and `resume` asks to restore them.  Without this seed the
+    # controller has no state, `pause` saves zeros, and `resume` restores the
+    # floor: a briefed 5/28/33 came back as 1/1/2 while the resume message
+    # announced 5/28/33 - the exact defect of the 2026-09-12 resume script.
+    ok, detail = call_controller("init")
+    if not ok and detail != "not installed":
+        sys.stderr.write(
+            "run_mode.py: warning: capacity_controller.py init failed: "
+            f"{detail}\nThe cap files above are correct, but pause/resume will "
+            "not round-trip until the controller has state. Fix it, then run "
+            "'python3 local/bin/capacity_controller.py init'.\n")
+    append_stage(f"run-mode apply: {summary}; brief {source} sha256 {digest}",
+                 "run-mode-apply")
+    append_decision(
+        f"Run mode applied: {summary}",
+        "owner brief via run_mode.py apply",
+        "one briefing per run; capacity, schedule, speed and issue numbers live only in "
+        "watchdog/run-brief.json and are read through run_mode.py get",
+        f"brief sha256 {digest[:12]}; {path}; stages.jsonl event=run-mode-apply")
+    sys.stdout.write(render_show(mode))
+    if previous_paused:
+        sys.stdout.write("note: the previous run mode was paused; this brief restores "
+                         "capacity now.\n")
+    # The briefed speed must reach the deployed shim, or `fast` is a word in a
+    # file and every worker runs at default speed (2026-09-12, three hand
+    # patches).  A missing or hand-edited shim is reported loudly and never
+    # silently overwritten; the caps above are applied either way.
+    try:
+        sys.stdout.write(apply_speed(mode, run["speed"]) + "\n")
+    except (Refused, LayerError) as exc:
+        sys.stderr.write(f"run_mode.py: warning: the shim was NOT regenerated: {exc}\n"
+                         f"Fix it, then run 'run_mode.py set speed {run['speed']}'.\n")
+    return 0
+
+
+def cmd_show(args: argparse.Namespace) -> int:
+    mode = load_mode()
+    if args.json:
+        json.dump(mode, sys.stdout, indent=1, ensure_ascii=False)
+        sys.stdout.write("\n")
+    else:
+        sys.stdout.write(render_show(mode))
+    return 0
+
+
+def cmd_get(args: argparse.Namespace) -> int:
+    mode = load_mode()
+    sys.stdout.write(f"{value_for(mode, args.key)}\n")
+    return 0
+
+
+def cmd_set(args: argparse.Namespace) -> int:
+    mode = load_mode()
+    speed = args.value
+    if speed not in SPEEDS:
+        raise LayerError(f"speed must be one of {SPEEDS}, got {speed!r}")
+    note = apply_speed(mode, speed, dry_run=args.dry_run)
+    if args.dry_run:
+        sys.stdout.write(f"{note}; speed would become {speed}\n")
+        return 0
+    previous = mode["run"]["speed"]
+    mode["run"]["speed"] = speed
+    mode["run"]["turn_max_min"] = TURN_MAX_MIN[speed]
+    mode["run"]["estimate_cadence_min"] = ESTIMATE_CADENCE_MIN[speed]
+    mode["generated"] = utcnow()
+    write_mode(mode)
+    append_stage(f"run-mode speed {previous} -> {speed}: {note}; turn max "
+                 f"{mode['run']['turn_max_min']} min, estimate cadence "
+                 f"{mode['run']['estimate_cadence_min']} min", "run-mode-speed")
+    append_decision(
+        f"Run speed {previous} -> {speed}",
+        "operator via run_mode.py set speed",
+        "one switch regenerates the deployed shim from the committed template; "
+        "a hand-edited shim is refused, not clobbered",
+        f"{shim_path()}; {mode_path()}; stages.jsonl event=run-mode-speed")
+    sys.stdout.write(
+        f"{note}\n"
+        f"speed {previous} -> {speed} (turn max {mode['run']['turn_max_min']} min, "
+        f"estimate cadence {mode['run']['estimate_cadence_min']} min)\n"
+        "picked up by: worker sessions dispatched from now on (yes), lane and daemon "
+        "children started from now on (yes), the running main TUI (NO — relaunch it "
+        "through local/bin/main-session.sh), sessions already running (NO)\n"
+        "the estimate cadence changes only when the crontab is regenerated "
+        "(results/telemetry/owner-tools/install-crons.sh)\n")
+    return 0
+
+
+def cmd_pause(args: argparse.Namespace) -> int:
+    mode = load_mode()
+    saved = mode.get("saved_caps")
+    if not (mode.get("paused") and isinstance(saved, dict) and saved):
+        saved = controller_caps() or current_caps(mode)
+    saved = {name: int(saved.get(name, 0)) for name in ACCOUNT_NAMES}
+    zero = {name: 0 for name in ACCOUNT_NAMES}
+    mode["paused"] = True
+    mode["paused_at"] = utcnow()
+    mode["saved_caps"] = saved
+    mode["derived"] = {"caps": zero, "max_codex": 0, "floor": 0}
+    write_mode(mode)
+
+    ok, detail = call_controller("pause")
+    problem = ""
+    if ok:
+        source = "capacity_controller.py pause"
+        live = read_live_caps()
+        if any(value is None or value != 0 for value in live.values()):
+            write_caps(zero)
+            source += " (cap files corrected by run_mode.py)"
+    elif detail == "not installed":
+        write_caps(zero)
+        source = "run_mode.py (no capacity controller installed)"
+    else:
+        write_caps(zero)
+        source = "run_mode.py (controller refused)"
+        problem = f"capacity_controller.py pause failed: {detail}"
+
+    note = (f"run-mode pause: caps zeroed via {source}; saved caps " +
+            ", ".join(f"{name} {saved[name]}" for name in ACCOUNT_NAMES) +
+            (f"; reason {args.reason}" if args.reason else ""))
+    append_stage(note, "run-mode-pause")
+    append_decision(
+        "Admission paused: every account cap set to 0, pre-pause caps saved in the run mode",
+        "operator via run_mode.py pause",
+        args.reason or "owner pause word; running work finishes, no new dispatch starts",
+        f"{mode_path()}; stages.jsonl event=run-mode-pause")
+    sys.stdout.write(f"{note}\n")
+    if problem:
+        sys.stderr.write(f"run_mode.py: {problem}\n")
+        return 3
+    return 0
+
+
+def cmd_resume(args: argparse.Namespace) -> int:
+    mode = load_mode()
+    if not mode.get("paused"):
+        sys.stderr.write("run_mode.py: warning: the run mode is not paused; "
+                         "restoring the briefed caps anyway\n")
+    saved = mode.get("saved_caps") if isinstance(mode.get("saved_caps"), dict) else {}
+    briefed = effective_caps({"accounts": mode["accounts"]}, measured_limits())
+    caps: dict[str, int] = {}
+    for name in ACCOUNT_NAMES:
+        row = next((a for a in mode["accounts"] if a["name"] == name), None)
+        enabled = bool(row and row.get("enabled"))
+        value = saved.get(name)
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            value = briefed[name]
+        if enabled and value < 1:
+            sys.stderr.write(f"run_mode.py: warning: saved cap for {name} was {value}; "
+                             f"resuming at the briefed {briefed[name]} instead of zero "
+                             "capacity\n")
+            value = briefed[name]
+        if not enabled:
+            value = 0
+        caps[name] = value
+
+    mode["paused"] = False
+    mode["paused_at"] = None
+    mode["saved_caps"] = None
+    mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
+                       "floor": floor_for(caps, mode["run"]["occupancy_target"])}
+    mode["generated"] = utcnow()
+    write_mode(mode)
+
+    ok, detail = call_controller("resume")
+    if ok:
+        source = "capacity_controller.py resume"
+    elif detail == "not installed":
+        write_caps(caps)
+        source = "run_mode.py (no capacity controller installed)"
+    else:
+        raise Refused(f"capacity_controller.py resume failed: {detail}\n"
+                      "The cap files were left where they are (paused is the safe "
+                      "direction). Fix the controller and re-run 'run_mode.py resume'.")
+
+    live = read_live_caps()
+    for name in ACCOUNT_NAMES:
+        row = next((a for a in mode["accounts"] if a["name"] == name), None)
+        enabled = bool(row and row.get("enabled"))
+        value = live.get(name)
+        if value is None:
+            raise Refused(f"post-condition: {watchdog_dir()}/max-codex-{name} is missing, "
+                          "empty or non-numeric after resume")
+        if enabled and value < 1:
+            raise Refused(f"post-condition: {name} is enabled but resumed at cap {value}")
+        if value != caps[name]:
+            raise Refused(
+                f"post-condition: {name} was resumed at cap {value}, not the "
+                f"restored {caps[name]}. Something else wrote the cap file, or "
+                "the capacity controller has no state for this run (seed it with "
+                "'python3 local/bin/capacity_controller.py init'). Refusing to "
+                "report a number the files do not carry.")
+    # Reported from the files, not from the intent: a resume that announces caps
+    # it did not actually write is how the 2026-09-12 run lost an hour.
+    live_total = sum(live[name] or 0 for name in ACCOUNT_NAMES)
+    note = ("run-mode resume: caps " +
+            ", ".join(f"{name} {live[name]}" for name in ACCOUNT_NAMES) +
+            f", max-codex {live_total}, floor {mode['derived']['floor']} "
+            f"via {source}")
+    append_stage(note, "run-mode-resume")
+    append_decision(
+        "Admission resumed from the saved caps in the run mode",
+        "operator via run_mode.py resume",
+        "resume restores the recorded pre-pause caps only; it never re-derives capacity "
+        "from a message or a second file",
+        f"{mode_path()}; stages.jsonl event=run-mode-resume")
+    sys.stdout.write(f"{note}\n")
+    sys.stdout.write(render_show(mode))
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="run_mode.py", description=__doc__.splitlines()[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--repo-root", help="checkout holding results/telemetry "
+                                            "(default: this script's checkout)")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("apply", help="validate the brief and write the mode file")
+    p.add_argument("--brief", help=f"default {'<cache>/watchdog/run-brief.json'}")
+    p.add_argument("--dry-run", action="store_true", help="print the plan, write nothing")
+
+    p = sub.add_parser("show", help="human-readable dump of the run mode")
+    p.add_argument("--json", action="store_true")
+
+    p = sub.add_parser("get", help="one value on stdout")
+    p.add_argument("key")
+
+    p = sub.add_parser("set", help="change one mid-run knob")
+    p.add_argument("knob", choices=("speed",))
+    p.add_argument("value")
+    p.add_argument("--dry-run", action="store_true")
+
+    p = sub.add_parser("pause", help="stop admission: caps to 0, pre-pause caps saved")
+    p.add_argument("--reason", default="")
+
+    sub.add_parser("resume", help="restore the saved caps")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(sys.argv[1:] if argv is None else argv)
+    if args.repo_root:
+        os.environ["MIPSTARRE_REPO_ROOT"] = args.repo_root
+    handlers = {"apply": cmd_apply, "show": cmd_show, "get": cmd_get,
+                "set": cmd_set, "pause": cmd_pause, "resume": cmd_resume}
+    try:
+        return handlers[args.cmd](args)
+    except BriefError as exc:
+        sys.stderr.write(f"run_mode.py: invalid brief at {exc.key}: {exc}\n")
+        if _template_hint() not in str(exc):
+            sys.stderr.write(f"{_template_hint()}\n")
+        return 2
+    except Refused as exc:
+        sys.stderr.write(f"run_mode.py: refused: {exc}\n")
+        return 3
+    except LayerError as exc:
+        sys.stderr.write(f"run_mode.py: {exc}\n")
+        return 2
+    except (KeyError, TypeError, ValueError) as exc:
+        # A hand-edited run-mode.json is unknown, not zero: say so and stop.
+        sys.stderr.write(f"run_mode.py: {mode_path()} is incomplete ({exc!r}); "
+                         "re-run 'run_mode.py apply'. Treat the run mode as "
+                         "unknown, never as zero capacity.\n")
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
