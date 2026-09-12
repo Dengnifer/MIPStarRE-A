@@ -1,0 +1,41 @@
+{
+  "schema": "qpbt-finite-telemetry-restore-v2",
+  "recorded_at": "2026-09-08T21:34:13.525Z",
+  "main_head": "81148545f0752ec09b3efe88332b49bb771312be",
+  "candidate_pr": 476,
+  "files": [
+    {
+      "path": "results/telemetry/builds.jsonl",
+      "inode_before": 157961188,
+      "inode_after": 157961188,
+      "inode_preserved": true,
+      "base_rows": 848,
+      "parked_rows": 5,
+      "later_rows": 1,
+      "restored_rows": 854,
+      "base_sha256": "bdd7ef49cf8cc065fceb702d2cf67d1bfa51ea1c95ae0e4860d18f24a6cf5bee",
+      "parked_sha256": "b7ad81dfc7c470363d062ddf6572b7744292b6e7ef529260b591027c484237f1",
+      "later_sha256": "66b491c0635577a376efa8dd590028055d1fb88f97f55791004a3337d874d396",
+      "restored_sha256": "b0615302dfee4ca11cce60fe4b47f50ac26fb0da2f766a39a10fbf5ff96eda19",
+      "ordered_base_parked_later": true
+    },
+    {
+      "path": "results/telemetry/sessions.jsonl",
+      "inode_before": 157961181,
+      "inode_after": 157961181,
+      "inode_preserved": true,
+      "base_rows": 1038,
+      "parked_rows": 4,
+      "later_rows": 0,
+      "restored_rows": 1042,
+      "base_sha256": "37465125f14fd7f355dd8b7404d88e9899bb3a57a76be89e88ba8fe77dfeaa40",
+      "parked_sha256": "f8f31bd3d1d712f8e9b9c67f70e0b7b5c4a3043dffce8cab09bbe41118135be6",
+      "later_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "restored_sha256": "20c29a37f62b31a65c0df2f642a9111a581a3b3c1eb24d3fbb81487d04b9ff30",
+      "ordered_base_parked_later": true
+    }
+  ],
+  "locks": "exclusive flock on both actual JSONL inodes only during ordered restore",
+  "held_through_service": false,
+  "later_appends_after_restore_remain_normal_suffix": true
+}
