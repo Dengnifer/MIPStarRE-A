@@ -6547,7 +6547,9 @@ not actual commit/publication hooks. No productive session was killed.
 - No new DECISION lines were found on26. The PR359 refresh regenerated Closes348;
   main repeats only the owner-authorized non-closing metadata repair. Approved
   refreshes and merges remain daemon-owned; no main telemetry push occurs.
+
 ### 2026-09-09T08:42Z - Daemon exclusively owns main commits and pushes
+
 - Owner08:32Z hard rule: main never commits or pushes main, including telemetry.
   Write the files and leave them uncommitted; the daemon batches after merges or
   hourly without a merge. Issue27 comments are only for merges/stage boundaries.
@@ -6565,7 +6567,9 @@ not actual commit/publication hooks. No productive session was killed.
 - Telemetry append verification raced a concurrent rewrite, then one constructed
   patch was malformed; neither failure changed files. Retried against current
   content. No main commit/push, manual merge or routine27 comment was made.
+
 ### 2026-09-09T08:46Z - PR359 verified merged by the daemon
+
 - GitHub confirms PR359 merged2026-09-09T08:42:16Z as
   e67dda95abf6cb6b02946c2530c1a1fcd464065b from reviewed head
   bf0c33a13d50359824498535b63c85b8257edfd5. All ten CI/review statuses are
@@ -6583,7 +6587,9 @@ not actual commit/publication hooks. No productive session was killed.
 - This cycle is verified progress through the daemon merge and independent
   approval. Main records the required merge report on27 and leaves these new
   telemetry edits uncommitted; no main commit/push or manual merge occurred.
+
 ### 2026-09-09T08:51Z - Main dispositions for B8-B10 under new owner authority
+
 - Owner comment5599043067, posted08:45:54Z, delegates all three decisions to main.
   Only risks beyond project development require the owner inbox; no Fable subagents
   are available or authorized. Main retains proof integrity, budget histories and
@@ -6611,7 +6617,9 @@ not actual commit/publication hooks. No productive session was killed.
   explicit RESOLVED lines on26. Implementation/review work remains unfinished.
   Worker census08:51:14Z is18. No main commit/push, manual merge or native worker.
 - PR478 bounded realignment finished at clean local head d04d00b3f41ec9de10d36ebfce00eec36167fe91, following substantive repair 1e2fddccbdbf8b6b1036c63f2ce1f48d970abcf3. The first canonical partial CI run passed all applicable gates, including the 9195-job full build. The final commit changes comments only and passes focused Lean with just the tracked hole warning; its repeat partial CI passed every applicable non-build gate but returned build=error because the machine-wide lock was held. Both manifests are under ~/.cache/mipstarre-dev/ci-manifests/pr478-<head>.partial.json and publish no statuses. Whole-blueprint axiom audit: 1380 pass, zero fail, 14 existing statement-only warnings; 1433 declaration links resolve. The guarded-publication multiple-merge-base blocker remains unchanged and GitHub head remains 25fa5893. An exact-local-head review handoff was posted on PR478, blocked until authorized publication and green exact-head CI; no reviewer, subagent, merge, refresh, service change, or main commit/push was launched. B8 budgets and all saved work remain unchanged.
+
 ### 2026-09-09T08:59Z - Persona amendment and completed publication handoff
+
 - Owner corrected the earlier PR359 failure attribution: gate7 dependencies, not
   a telemetry push. Main re-read the PR body through gh_common: Part of348 remains,
   merge08:42:16Z is confirmed, and pr359.failed is absent. The daemon-only rule
@@ -6631,6 +6639,42 @@ not actual commit/publication hooks. No productive session was killed.
   successor; partial CI is not claimed as published CI, and B8 remains parked.
 - Snapshot08:54:15Z showed17 live workers and final census18. No main commit/push,
   manual merge or native worker was used; new telemetry stays uncommitted.
+
+- 2026-09-09 - Issue #502 development, session `orc-502-20260909-01`:
+  the 09:05Z D1 decision identified repeated invalidation of ready PRs by
+  single-PR merges. Added a reviewed-member train with combined-commit CI and
+  post-preflight freshness checks. Fixture tests exercise conflict exclusion,
+  failed member gates, build failure, live build lock, dirty primary, and moved
+  main/member refs. Early CI command failure must stop the step; warming inside
+  the CI lock must use `--no-build`. No live train, publication, independent
+  review, or child session was invoked. Development retains the original
+  11:38:45Z deadline; deployment and daemon wiring remain operator-owned.
+  Implementation froze before that deadline. The already-running commit hook
+  finished afterward: 626 Python tests, one error in
+  `ModelPolicyTests.test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra`
+  (`test_dispatch.py:238`, fixture `dispatch.sh --dry-run` exited 4). All ten
+  new train tests and the targeted 36 publication/workflow tests passed.
+  The hook refused the commit; changes are preserved for the operator, with
+  no hook bypass or model-policy repair attempted in this episode.
+
+- 2026-09-09 - Issue #502 review repair, session `orc-502-20260909-02`:
+  main authorized 60 minutes of actual work to repair canonical PR507 review
+  `5154118210` at `e1dd7bb0`. This necessary review repair retains the original
+  episode history, costs, and 1000-line total ceiling; it is not a new
+  implementation episode. F1 now builds the complete library and axiom audit in
+  one locked invocation. F2 records published, refused, and unknown outcomes,
+  including remote descendants and failed reconciliation. F3 uses single-component
+  train branches accepted by the real external Lake-root bootstrap.
+  All endpoints in train tests are isolated fixtures. The installed Lean
+  toolchain and production publication hook passed a cold-project-artifact
+  publication with dynamic `checkdecls`; separate downstream and axiom-audit
+  failures blocked publication. Initial negative tests exceeded their old
+  45-second timeout while waiting for the machine build lock; the fixture now
+  allows the existing lock wait to finish. The external-root fixture needed
+  the production `.lake` ignore convention for symlinks. Corrected targeted
+  reruns passed. No live train, deployment, main publication, child session,
+  or independent review is performed by this author; checked branch publication
+  and canonical CI precede handoff to a different reviewer session.
 ## 2026-09-09 — Primary codex account out of balance; pipeline moved to the second account (2026-09-09T09:22:57Z)
 - relay-us7 (primary key) returned 403 INSUFFICIENT_BALANCE for astra and sol from about 09:15Z; the main session's goal loop stalled
   on it and five lane logs carry the error. The second key (api.finite-dimensional.space) answers. Meta actions: B11 posted on #500
@@ -7381,6 +7425,31 @@ not actual commit/publication hooks. No productive session was killed.
   and fewer than9 workers before starting. No duplicate449 assignment.
 - Existing router-doc fix, train repair and other review/CI owners continue.
 
+- 2026-09-09 - PR507 bounded refresh recovery, session `orc-502-20260909-03`:
+  preserve approved parent `80089187ed563085a5a603ec31bdd98dac579027` and incoming
+  parent `b3b84fbb8eeb0296ca493ad34e945a66a594e2c3`; refresh process3962513 is
+  terminal. Compose step-local errexit with PR506's explanation, retain the
+  unchanged train frozen-base validation, and use the reviewed `head_is_fresh`
+  predicate for ordinary PRs with distinct accurate messages. Both append-only
+  histories retain their original line order and multiplicities, including
+  first-parent blank lines removed by the automatic merge. Existing fixtures
+  verify ordinary telemetry versus source movement, unchanged train bases,
+  rejection of any post-freeze movement, and non-main train rejection.
+  Preserve review rounds5154118210,5155171427,5155750523 and all episode costs
+  and decisions. Test and CI parents omit invoking-model metadata and
+  MIPSTARRE_REVIEW_* / MIPSTARRE_PROSE_MODEL while preserving credentials.
+  Main authorizes one independent verification after genuine green CI; this
+  author neither launches a reviewer nor fabricates carry-forward. No live
+  train, deployment, main publication, PR merge, or descendant is authorized.
+  The exact merge, gates, publication state, elapsed time, and handoff will be
+  checkpointed in the session's final capture by15:05Z.
+  Initial full hook validation ran659 tests and failed9 train cases: the old
+  fixture created neither the new compiler working directory `blueprint/src`
+  nor a PDF from `latexmk`. Updated only the fake renderer and directory to
+  match the incoming reviewed interface, retaining all existing assertions;
+  added a train refusal case for failed compilation with a partial PDF.
+  Production compiler, train publication, and cleanup checks are unchanged.
+
 ### 2026-09-09T14:16:27Z - Merge506 and refill with reviews
 
 - Required snapshot completed. PR506 merged at14:05:33Z as
@@ -7642,6 +7711,25 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+- 2026-09-12 - PR #507 merge-conflict recovery, session `orc-pr507-20260912-02`:
+  resolved the pending merge of `ae124f8f09ee002444ac5b9711822c0f1daae142`
+  into `f427e121` by retaining both sides of the EVOLUTION.md and events.md
+  additions. Verified that every original line of both histories remains in
+  order. Lean, blueprint, and reference sources match the incoming parent;
+  the PR's train implementation and tests match its pre-merge head.
+  The first Lean check failed on a missing OrderedPoints artifact. Automatic
+  approval review rejected an external Lake-directory build because its stream
+  hit an account concurrency limit. Validation instead used a temporary Lake
+  configuration and artifact tree under `/tmp/pr507-merge-validation`, with
+  links to unchanged cached artifacts after the initial temporary import root
+  lacked them. All 22 incoming Lean files and 23 affected dependencies passed
+  `lake env lean` with this configuration. The only warnings in those checks
+  were the unchanged sorry sites in Claims.lean and Lines.lean; no theorem,
+  proof, or source statement was edited. The pending-index merge-loss guard
+  and whitespace check passed. No full build, subagent, review, or push ran.
+  The remote-tracking main has advanced beyond the pinned incoming parent;
+  the lane remains responsible for publication and freshness checks.
 
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 
