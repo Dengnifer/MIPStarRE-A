@@ -301,13 +301,48 @@ def append_log(line: str, root: Path | None = None) -> None:
 
 def save(entries: list[dict], *, root: Path | None = None, actor: str,
          action: str, detail: str, source: str = "") -> Path:
-    """Validate, write atomically, then log.  Nothing is written on a bad entry."""
+    """Validate, write atomically, re-derive the shim's gate, then log.
+
+    Nothing is written on a bad entry.  ``write_account_mode`` runs on every
+    write because the gate is derived from ``enabled`` and must not lag it: the
+    capacity controller re-derives it too, but it only ticks while the pipeline
+    is running, and ``accounts.sh enable`` on a paused run has to work.
+    """
     checked = validate({"schema": SCHEMA, "accounts": entries}, source="the new file")
     path = accounts_path(root)
     atomic_write(path, render(checked, source=source))
+    write_account_mode(checked, root)
     append_log(f"{utcnow()} actor={sanitize(actor, 60) or 'unknown'} "
                f"action={sanitize(action, 40)} {sanitize(detail, 400)}", root)
     return path
+
+
+#: The runtime file the deployed PATH shim reads before it lets a dispatch use a
+#: CODEX_HOME other than ~/.codex (``results/telemetry/owner-tools/owner-bin-codex``).
+ACCOUNT_MODE_REL = Path("watchdog") / "account-mode"
+
+
+def write_account_mode(entries: list[dict], root: Path | None = None) -> str:
+    """Derive ``watchdog/account-mode`` from ``enabled``; never fatal.
+
+    ``both`` when more than one entry is enabled, ``primary`` otherwise — the
+    rule ``run_mode.account_mode`` states, applied to the live file.  It used to
+    be written only by ``run_mode.py apply|pause|resume``, so ``accounts.sh add``
+    or an ``ACCOUNTS: second enabled=true`` comment left it saying ``primary``
+    and the PATH shim refused every dispatch whose CODEX_HOME was not ~/.codex
+    with exit 4 — while the router admitted to the new key and the inbox replied
+    "applied:".  Deriving it here makes that reply true without a re-brief.
+    """
+    wanted = "both" if sum(1 for entry in entries if entry["enabled"]) > 1 else "primary"
+    path = (root or cache_root()) / ACCOUNT_MODE_REL
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write(path, f"{wanted}\n")
+    except OSError as exc:
+        sys.stderr.write(f"accounts_file.py: warning: cannot write {path}: {exc}; "
+                         "the PATH shim may still refuse a non-default CODEX_HOME "
+                         "(run 'local/bin/run_mode.py apply' to rewrite it)\n")
+    return wanted
 
 
 def seed(brief_entries, *, root: Path | None = None, source: str = "",
@@ -541,16 +576,52 @@ def apply_directives(text: str, *, root: Path | None = None, actor: str,
 # Rendering
 # ---------------------------------------------------------------------------
 
-def render_table(entries: list[dict]) -> str:
+def _derived_state(root: Path | None = None) -> tuple[dict[str, int | None], dict[str, dict]]:
+    """The cap files and ``capacity/health.json``, both optional, never fatal.
+
+    They are written by the capacity controller next to the accounts file.  The
+    owner's first-line command has to show them: a key can be ``enabled`` in
+    their own file and still be cap 0 because a probe says the endpoint is down
+    or the key is invalid, and "why is nothing running on this key?" must be
+    answerable from ``accounts.sh list`` rather than from
+    ``capacity_controller.py status`` on the host.
+    """
+    base = (root or cache_root()) / "watchdog"
+    caps: dict[str, int | None] = {}
+    for path in base.glob("max-codex-*"):
+        if not path.is_file() or path.name == "max-codex":
+            continue
+        try:
+            caps[path.name[len("max-codex-"):]] = int(path.read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            caps[path.name[len("max-codex-"):]] = None
+    try:
+        document = json.loads((base / "capacity" / "health.json").read_text(encoding="utf-8"))
+        health = document.get("accounts") if isinstance(document, dict) else None
+    except (OSError, ValueError):
+        health = None
+    return caps, health if isinstance(health, dict) else {}
+
+
+def render_table(entries: list[dict], root: Path | None = None) -> str:
+    caps, health = _derived_state(root)
     width = max((len(entry["name"]) for entry in entries), default=4)
     lines = []
     for entry in entries:
+        name = entry["name"]
         share = entry["ceiling"] - entry["external_reserved"]
+        # An ABSENT cap file is a hard 0 to `account_router.effective_caps`, so
+        # it is rendered as 0 with the reason, never omitted and never "unknown".
+        cap = caps.get(name)
+        shown = "0 (no tick yet)" if cap is None else str(cap)
+        row = health.get(name) if isinstance(health.get(name), dict) else {}
+        state = str(row.get("state") or "") or ("-" if not row else "up")
         lines.append(
-            f"{entry['name']:<{width}}  ceiling {entry['ceiling']:<4} reserved "
-            f"{entry['external_reserved']:<3} share {share:<4} "
-            f"{'enabled ' if entry['enabled'] else 'DISABLED'} "
+            f"{name:<{width}}  ceiling {entry['ceiling']:<4} reserved "
+            f"{entry['external_reserved']:<3} share {share:<4} cap {shown:<16} "
+            f"{'enabled ' if entry['enabled'] else 'DISABLED'} health {state:<9} "
             f"{entry['label']} ({entry['endpoint']}, {entry['codex_home']})"
+            + (f"  reason: {row['reason']}" if row.get("reason") else "")
             + (f"  note: {entry['note']}" if entry["note"] else ""))
     return "\n".join(lines) + "\n"
 
@@ -631,7 +702,7 @@ def main(argv: list[str] | None = None) -> int:
                 json.dump(entries, sys.stdout, indent=1, ensure_ascii=False)
                 sys.stdout.write("\n")
             else:
-                sys.stdout.write(render_table(entries))
+                sys.stdout.write(render_table(entries, root))
             return 0
         if args.cmd == "get":
             entry = find(_require_file(root), args.name)

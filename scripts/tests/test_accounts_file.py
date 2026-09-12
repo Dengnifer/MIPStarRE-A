@@ -212,6 +212,36 @@ class TestCli(AccountsHarness):
         self.cli("enable", "second")
         self.assertTrue(af.load_map()["second"]["enabled"])
 
+    def test_list_shows_the_effective_cap_and_the_health_reason(self) -> None:
+        # The owner's first-line command has to answer "why is nothing running
+        # on this key?".  A key can be `enabled` in their own file and still be
+        # cap 0 because a probe found the key invalid, and that reason lives in
+        # the controller's health.json next to the accounts file.
+        self.seed()
+        (self.cache / "watchdog" / "max-codex-primary").write_text("0\n", encoding="utf-8")
+        capacity = self.cache / "watchdog" / "capacity"
+        capacity.mkdir(parents=True, exist_ok=True)
+        (capacity / "health.json").write_text(json.dumps({
+            "schema": "mipstarre-capacity-health/1",
+            "accounts": {"primary": {"state": "down",
+                                     "reason": "auth: 401 Unauthorized"}}}),
+            encoding="utf-8")
+        listing = self.cli("list")
+        self.assertIn("cap 0", listing)
+        self.assertIn("down", listing)
+        self.assertIn("401 Unauthorized", listing)
+        # `second` has no cap file at all, which admission reads as a hard 0.
+        self.assertIn("no tick yet", listing)
+
+    def test_a_write_re_derives_the_path_shims_gate(self) -> None:
+        self.seed()
+        gate = self.cache / "watchdog" / "account-mode"
+        self.assertEqual(gate.read_text(encoding="utf-8").strip(), "both")
+        self.cli("disable", "second")
+        self.assertEqual(gate.read_text(encoding="utf-8").strip(), "primary")
+        self.cli("enable", "second")
+        self.assertEqual(gate.read_text(encoding="utf-8").strip(), "both")
+
     def test_add_and_remove(self) -> None:
         self.seed()
         self.cli("add", "third", "--endpoint", "api.third.example",

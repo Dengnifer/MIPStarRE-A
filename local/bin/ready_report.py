@@ -365,18 +365,29 @@ def refusals_by_account(repo_root: Path, entries: list[dict],
         refusal_classes = {name for name, role in roles.items() if role == "refusal"}
     except Exception:  # noqa: BLE001
         refusal_classes = {"concurrency_limit", "refused"}
-    owner: dict[str, str] = {}
+    # The same attribution the controller's AIMD used, for the same reason: an
+    # endpoint shared by two keys (the owner's own topology) names neither of
+    # them, so a token more than one entry claims is dropped instead of resolved
+    # to whichever entry wrote it last, and the row's own `account` is read
+    # first.  Reporting the collapse back to the owner as a per-key number was
+    # how the wrong key looked guilty in their hourly line as well.
+    owner: dict[str, str] = {entry["name"]: entry["name"] for entry in entries}
+    claimed: dict[str, str] = {}
+    ambiguous: set[str] = set()
     for entry in entries:
-        for key in (entry["name"], entry.get("endpoint"), entry.get("label")):
-            if isinstance(key, str) and key:
-                owner.setdefault(key, entry["name"])
+        for key in (entry.get("endpoint"), entry.get("label")):
+            if not isinstance(key, str) or not key or key in owner:
+                continue
+            if claimed.setdefault(key, entry["name"]) != entry["name"]:
+                ambiguous.add(key)
+    owner.update({key: name for key, name in claimed.items() if key not in ambiguous})
     counts: dict[str, int] = {entry["name"]: 0 for entry in entries}
     path = repo_root / "results" / "telemetry" / "sessions.jsonl"
     for row in _rows_in_window(path, since, ("end", "start", "ts")):
         if row.get("failure_class") not in refusal_classes:
             continue
         name = next((owner[row[field]] for field in
-                     ("endpoint", "failure_endpoint", "account", "key_label")
+                     ("account", "endpoint", "failure_endpoint", "key_label")
                      if isinstance(row.get(field), str) and row[field] in owner), None)
         if name is not None:
             counts[name] = counts.get(name, 0) + 1
@@ -493,7 +504,10 @@ def dead_session_residue(cache: Path, since: datetime) -> dict | None:
 
 def render_key_line(row: dict) -> str:
     """One key's line: what it may use, what it is using, and whether it works."""
-    cap = "unknown" if row["cap"] is None else row["cap"]
+    # An absent cap file is what `account_router.effective_caps` reads as a hard
+    # 0 — the state of a key added between two ticks.  "unknown" read to the
+    # owner as a reporting glitch rather than as "not admitted yet".
+    cap = "0 (no cap file yet)" if row["cap"] is None else row["cap"]
     state = row["health"] if row["enabled"] else f"{row['health']}/off"
     line = (f"- key {row['name']} ({row['label']}, {row['endpoint']}): ceiling "
             f"{row['ceiling']}" +

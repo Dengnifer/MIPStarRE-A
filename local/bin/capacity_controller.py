@@ -400,6 +400,32 @@ def read_session_rows(path: Path, since: datetime, *, tail_bytes: int = TAIL_BYT
     return rows
 
 
+def attribution_map(accounts: dict[str, dict]) -> tuple[dict[str, str], list[str]]:
+    """``token -> account`` for failure attribution, plus the ambiguous tokens.
+
+    Account NAMES are unique by construction and always map to themselves.  An
+    endpoint or a label may legitimately be shared — the owner's topology is one
+    to three endpoints with one or two keys on each — and a shared token cannot
+    say which key refused, so it is DROPPED rather than resolved to the last
+    entry that claimed it.  Dropping it costs nothing: every row the dispatcher
+    writes carries ``account``, which `observe` now reads first.  Keeping it was
+    an active harm — it moved a refusal, and at ``disable_threshold`` 1 a whole
+    key, onto a key that had done nothing.
+    """
+    endpoints: dict[str, str] = {name: name for name in accounts}
+    claimed: dict[str, str] = {}
+    ambiguous: set[str] = set()
+    for name, entry in accounts.items():
+        for token in (entry.get("endpoint"), entry.get("label")):
+            if not isinstance(token, str) or not token or token in endpoints:
+                continue  # an account name always outranks another key's label
+            if claimed.setdefault(token, name) != name:
+                ambiguous.add(token)
+    endpoints.update({token: owner for token, owner in claimed.items()
+                      if token not in ambiguous})
+    return endpoints, sorted(ambiguous)
+
+
 def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[str, str],
             now: datetime, *, counter_window_s: int, fivexx_window_s: int,
             disabling: tuple[str, ...] = ()) -> dict:
@@ -420,8 +446,14 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
     counter_since = now - timedelta(seconds=counter_window_s)
     fivexx_since = now - timedelta(seconds=fivexx_window_s)
     for row in rows:
+        # ``account`` FIRST.  The dispatcher writes the name it actually routed
+        # to; an endpoint is shared by up to two keys in the owner's own topology
+        # (one to three endpoints, one or two keys each).  Matching the endpoint
+        # first attributed a refusal to whichever key happened to be written into
+        # the endpoint map last, so AIMD cut the innocent key while the refusing
+        # one crept up, and one `auth` row disabled the wrong key at threshold 1.
         owner = next((endpoints[row[field]] for field in
-                      ("endpoint", "failure_endpoint", "account", "key_label")
+                      ("account", "endpoint", "failure_endpoint", "key_label")
                       if isinstance(row.get(field), str) and row[field] in endpoints), None)
         failure_class = row.get("failure_class")
         if owner != name or not isinstance(failure_class, str) or not failure_class:
@@ -522,10 +554,19 @@ def write_cap_files(caps: dict[str, int]) -> int:
     effective = {name: int(value) for name, value in caps.items()}
     directory = watchdog_dir()
     directory.mkdir(parents=True, exist_ok=True)
-    # The two historical names keep a file even when no longer configured, so a
-    # reader that predates this layer still finds a number rather than an empty
-    # read; every configured account gets one whatever it is called.
-    for name in (*DEFAULT_ACCOUNTS,
+    # A cap file for an account that has dropped out of the configured set is
+    # ZEROED, not deleted.  Deleting it would break the "never an empty read"
+    # property; leaving its old number is worse still, because that stale file is
+    # exactly what `account_router.account_names()` picks up from its
+    # ``max-codex-*`` glob when accounts.json is unreadable — a key the owner
+    # removed would go on being admitted at the ceiling it had when they removed
+    # it.  The two historical names keep a file unconditionally, so a reader that
+    # predates this layer still finds a number.
+    stale = sorted(path.name[len("max-codex-"):] for path in
+                   directory.glob("max-codex-*")
+                   if path.is_file() and path.name != "max-codex"
+                   and path.name[len("max-codex-"):] not in effective)
+    for name in (*DEFAULT_ACCOUNTS, *stale,
                  *(name for name in effective if name not in DEFAULT_ACCOUNTS)):
         _write_cap_file(directory / f"max-codex-{name}", effective.get(name, 0))
     _write_cap_file(directory / "max-codex", sum(effective.values()))
@@ -759,12 +800,7 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
     hold = (capacity_dir() / "hold").exists()
     paused = state.get("paused_at") is not None
     accounts = run_mode["accounts"]
-    endpoints: dict[str, str] = {}
-    for name, entry in accounts.items():
-        endpoints[entry["endpoint"]] = name
-        endpoints[name] = name
-        if entry["label"]:
-            endpoints.setdefault(entry["label"], name)
+    endpoints, ambiguous = attribution_map(accounts)
     lookback = max([windows["counter_window_s"]]
                    + [health_knobs(policy, name)["fivexx_window_s"] for name in accounts])
     rows = read_session_rows(telemetry_dir() / "sessions.jsonl",
@@ -772,6 +808,10 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
     live, waiters = count_live(accounts), count_waiters()
     summary: dict[str, Any] = {"ts": ts(now), "hold": hold, "paused": paused,
                                "waiters": waiters, "accounts": {}}
+    if ambiguous:
+        # Legal (two keys on one endpoint) but worth saying once a tick: rows
+        # that carry only that token are attributed to neither key.
+        summary["ambiguous_endpoints"] = ambiguous
     caps: dict[str, int] = {}
     health_rows: dict[str, dict] = {}
     estimate = {"schema": "mipstarre-capacity-estimate/1", "updated": ts(now), "accounts": {}}
@@ -879,7 +919,39 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
                     {"schema": HEALTH_SCHEMA, "updated": ts(now),
                      "source": run_mode.get("accounts_source", ""),
                      "accounts": health_rows})
+        summary["account_mode"] = write_account_mode(accounts)
     return summary
+
+
+#: The runtime file the deployed PATH shim reads before it lets a dispatch use a
+#: CODEX_HOME other than ~/.codex (``results/telemetry/owner-tools/owner-bin-codex``).
+#: ``run_mode.account_mode`` states the rule; this is the same rule applied to the
+#: live entries.
+ACCOUNT_MODE_REL = Path("watchdog") / "account-mode"
+
+
+def write_account_mode(accounts: dict[str, dict]) -> str:
+    """Re-derive the PATH shim's gate from the accounts this tick actually used.
+
+    It was written only by ``run_mode.py apply|pause|resume``, so a key the owner
+    added or enabled with ``accounts.sh`` — or from a phone — left it saying
+    ``primary``, and the shim then refused every dispatch to that key with exit
+    4.  Those refusals classify ``unknown``, which is neutral, so the cap never
+    fell and the new key went on absorbing dispatches that all died at the shim.
+    The controller already reads accounts.json every tick and already owns every
+    other derived file, so the gate is derived here too and the owner's remaining
+    ``run_mode.py apply`` — the very re-brief the live file exists to remove —
+    is gone.  Never fatal: a tick must not fail over a derived file.
+    """
+    wanted = "both" if sum(1 for entry in accounts.values()
+                           if entry.get("enabled")) > 1 else "primary"
+    path = cache_root() / ACCOUNT_MODE_REL
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write(path, f"{wanted}\n")
+    except OSError as exc:  # pragma: no cover - defensive
+        print(f"capacity controller: warning: cannot write {path}: {exc}", file=sys.stderr)
+    return wanted
 
 
 #: Transitions a human reads in the committed log.  Everything else — the
@@ -1193,6 +1265,25 @@ def cmd_probe(args: argparse.Namespace) -> int:
     _require(all(name in run_mode["accounts"] for name in names),
              f"{args.account}: not a configured account "
              f"({', '.join(run_mode['accounts']) or 'none'})")
+    # PAUSED- AND HOLD-AWARE, like the tick.  `tick` suppresses the probe when
+    # the run is paused or the cap is frozen precisely so that a pause can never
+    # fire `codex exec` on the owner's keys; this is the path the owner is told
+    # to use (`owner-tools/accounts.sh probe`), and it used to spend a session on
+    # a key while the run was deliberately stopped.  `--force` is the owner
+    # saying it anyway, in as many words.
+    state = load_state()
+    blocked = []
+    if state is not None and state.get("paused_at") is not None:
+        blocked.append(f"the run is PAUSED (since {state['paused_at']}); "
+                       "lift it with 'local/bin/run_mode.py resume'")
+    if (capacity_dir() / "hold").exists():
+        blocked.append(f"the caps are on HOLD ({capacity_dir() / 'hold'}); "
+                       "remove that file to lift it")
+    if blocked and not args.force:
+        print("capacity controller: not probing — " + "; and ".join(blocked) +
+              ".\nA probe spends one real session on the owner's key. Re-run with "
+              "--force to probe anyway.", file=sys.stderr)
+        return EXIT_FAIL
     failures = 0
     for name in names:
         entry = run_mode["accounts"][name]
@@ -1201,6 +1292,15 @@ def cmd_probe(args: argparse.Namespace) -> int:
         if not entry["enabled"]:
             print(f"{name}: disabled in {run_mode.get('accounts_source') or 'the brief'}; "
                   "not probed (enable it first)")
+            continue
+        if args.dry_run:
+            # A rehearsal that spends a session is not a rehearsal.  The probe
+            # itself was run unconditionally and only the health write was
+            # skipped, so --dry-run burned a real session and moved the recovery
+            # counters in memory while reporting as a dry run.
+            print(f"{name}: would probe {entry['endpoint']} "
+                  f"(CODEX_HOME {entry['codex_home'] or '~/.codex'}, state "
+                  f"{health['state']}); --dry-run, nothing run")
             continue
         ran, ok = _try_probe(name, entry["codex_home"], policy["windows"]["probe_timeout_s"])
         if not ran:
@@ -1303,6 +1403,9 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "probe":
             sub.add_argument("account", nargs="?", default="",
                              help="default: every configured account")
+            sub.add_argument("--force", action="store_true",
+                             help="probe even while the run is paused or the caps "
+                                  "are held (it spends one real session per key)")
         if name == "init":
             sub.add_argument("--force", action="store_true",
                              help="discard the carried measurement as well as the run state")

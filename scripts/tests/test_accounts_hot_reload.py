@@ -282,12 +282,159 @@ class TestMeasuredHealth(HotReloadHarness):
         self.assertIn("disabled", output)
         self.assertEqual(self.probe_calls(), [])
 
+    def test_probe_refuses_while_the_run_is_paused(self) -> None:
+        # The invariant `tick` documents and enforces — "a pause can never fire
+        # `codex exec` on the owner's keys" — has to hold on the path the owner
+        # is actually told to use (owner-tools/accounts.sh probe).
+        self.tick(60)
+        self.invoke("--now", at(120), "pause")
+        output = self.invoke("--now", at(180), "probe", "second", expect=cc.EXIT_FAIL)
+        self.assertIn("PAUSED", output)
+        self.assertEqual(self.probe_calls(), [])
+
+    def test_probe_refuses_while_the_caps_are_held(self) -> None:
+        self.tick(60)
+        (self.watchdog / "capacity").mkdir(parents=True, exist_ok=True)
+        (self.watchdog / "capacity" / "hold").write_text("frozen\n", encoding="utf-8")
+        output = self.invoke("--now", at(180), "probe", "second", expect=cc.EXIT_FAIL)
+        self.assertIn("HOLD", output)
+        self.assertEqual(self.probe_calls(), [])
+
+    def test_probe_force_overrides_the_pause_deliberately(self) -> None:
+        self.tick(60)
+        self.invoke("--now", at(120), "pause")
+        self.invoke("--now", at(180), "probe", "second", "--force")
+        self.assertEqual(self.probe_calls(), ["second"])
+
+    def test_probe_dry_run_spends_no_session(self) -> None:
+        self.tick(60)
+        output = self.invoke("--now", at(120), "probe", "second", "--dry-run")
+        self.assertIn("would probe", output)
+        self.assertEqual(self.probe_calls(), [])
+
     def test_health_json_carries_every_key(self) -> None:
         self.tick(60)
         rows = self.health()
         self.assertEqual(sorted(rows), ["primary", "second"])
         self.assertEqual(rows["second"]["endpoint"], "api.finite-dimensional.space")
         self.assertEqual(rows["second"]["ceiling"], 28)
+
+
+class TestSharedEndpoint(HotReloadHarness):
+    """Two keys on ONE endpoint — the owner's stated topology (accounts-spec.md:
+    one to three endpoints, each with one or two API keys).  Attribution by
+    endpoint alone names neither key, and getting it wrong is not neutral: AIMD
+    multiplicatively decreases the innocent key while the refusing one creeps up,
+    and one `auth` row disables the wrong key at `disable_threshold` 1."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.write_accounts([
+            {"name": "keya", "label": "keya", "endpoint": "api.shared.example",
+             "codex_home": str(self.cache / "codex-a"), "ceiling": 10,
+             "external_reserved": 0, "enabled": True, "note": ""},
+            {"name": "keyb", "label": "keyb", "endpoint": "api.shared.example",
+             "codex_home": str(self.cache / "codex-b"), "ceiling": 10,
+             "external_reserved": 0, "enabled": True, "note": ""},
+        ])
+
+    def row(self, offset: int, account: str, failure_class: str, detail: str) -> None:
+        """One session row naming BOTH the shared endpoint and the key."""
+        with (self.telemetry / "sessions.jsonl").open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps({
+                "name": f"prover-{account}-{offset}", "role": "prover", "issue": "1",
+                "start": at(offset), "end": at(offset), "status": "failed", "exit": 1,
+                "endpoint": "api.shared.example", "account": account,
+                "failure_class": failure_class, "failure_detail": detail}) + "\n")
+
+    def test_each_key_owns_its_own_refusals(self) -> None:
+        rows = [{"account": "keya", "endpoint": "api.shared.example",
+                 "failure_class": "concurrency_limit", "_ts": T0},
+                {"account": "keyb", "endpoint": "api.shared.example",
+                 "failure_class": "concurrency_limit", "_ts": T0}]
+        accounts = cc.load_run_mode()["accounts"]
+        endpoints, ambiguous = cc.attribution_map(accounts)
+        self.assertEqual(ambiguous, ["api.shared.example"])
+        roles = {"concurrency_limit": "refusal"}
+        for name in ("keya", "keyb"):
+            counters = cc.observe(rows, name, endpoints, roles, T0,
+                                  counter_window_s=300, fivexx_window_s=120)
+            self.assertEqual(counters["refusals"], 1, name)
+
+    def test_a_row_naming_only_the_shared_endpoint_charges_neither_key(self) -> None:
+        rows = [{"endpoint": "api.shared.example",
+                 "failure_class": "concurrency_limit", "_ts": T0}]
+        accounts = cc.load_run_mode()["accounts"]
+        endpoints, _ = cc.attribution_map(accounts)
+        roles = {"concurrency_limit": "refusal"}
+        for name in ("keya", "keyb"):
+            counters = cc.observe(rows, name, endpoints, roles, T0,
+                                  counter_window_s=300, fivexx_window_s=120)
+            self.assertEqual(counters["refusals"], 0, name)
+
+    def test_one_auth_failure_disables_the_key_that_produced_it(self) -> None:
+        # `disable_threshold` is 1, so attribution is the whole decision here:
+        # with the endpoint map last-writer-wins, one 401 on keyb took keya out
+        # of service instead — cap 0 with a reason naming the wrong key.
+        self.tick(60)
+        self.row(90, "keyb", "auth", "401 Unauthorized")
+        self.tick(120)
+        rows = self.health()
+        self.assertEqual(rows["keyb"]["state"], "down")
+        self.assertEqual(rows["keya"]["state"], "up")
+        self.assertIn("401", rows["keyb"]["reason"])
+        self.assertEqual(self.cap("keyb"), 0)
+        self.assertGreater(self.cap("keya"), 0)
+
+
+class TestDerivedFiles(HotReloadHarness):
+    def gate(self) -> str:
+        path = self.watchdog / "account-mode"
+        return path.read_text(encoding="utf-8").strip() if path.exists() else ""
+
+    def test_a_second_enabled_key_opens_the_path_shim_gate(self) -> None:
+        # The PATH shim refuses every non-default CODEX_HOME while this file says
+        # `primary`.  It used to be written only by run_mode.py apply|pause|resume,
+        # so `accounts.sh add` produced a key every dispatch to which died at the
+        # shim with exit 4 — and those deaths are neutral, so the cap never fell.
+        self.write_accounts([
+            {"name": "primary", "label": "relay-us7", "endpoint": "relay-us7",
+             "codex_home": str(self.cache / "codex-primary"), "ceiling": 5,
+             "external_reserved": 0, "enabled": True, "note": ""}])
+        self.assertEqual(self.gate(), "primary")
+        self.tick(60)
+        self.assertEqual(self.gate(), "primary")
+        self.write_accounts([
+            {"name": "primary", "label": "relay-us7", "endpoint": "relay-us7",
+             "codex_home": str(self.cache / "codex-primary"), "ceiling": 5,
+             "external_reserved": 0, "enabled": True, "note": ""},
+            {"name": "third", "label": "third", "endpoint": "api.third.example",
+             "codex_home": str(self.cache / "codex-third"), "ceiling": 8,
+             "external_reserved": 0, "enabled": True, "note": ""}])
+        # Already open at the write, with no run_mode.py apply and no tick.
+        self.assertEqual(self.gate(), "both")
+        self.tick(120)
+        self.assertEqual(self.gate(), "both")
+
+    def test_disabling_the_second_key_closes_it_again(self) -> None:
+        self.tick(60)
+        self.assertEqual(self.gate(), "both")
+        self.edit("second", enabled="false")
+        self.assertEqual(self.gate(), "primary")
+
+    def test_a_removed_account_does_not_keep_a_live_cap_file(self) -> None:
+        # That stale file is what account_router's fallback glob picks up when
+        # accounts.json is unreadable, so a removed key would go on being
+        # admitted at the ceiling it had when the owner removed it.
+        self.tick(60)
+        self.assertEqual(self.cap("second"), 28)
+        self.write_accounts([
+            {"name": "primary", "label": "relay-us7", "endpoint": "relay-us7",
+             "codex_home": str(self.cache / "codex-primary"), "ceiling": 5,
+             "external_reserved": 0, "enabled": True, "note": ""}])
+        self.tick(120)
+        self.assertEqual(self.cap("second"), 0)
+        self.assertTrue((self.watchdog / "max-codex-second").exists())
 
 
 if __name__ == "__main__":
