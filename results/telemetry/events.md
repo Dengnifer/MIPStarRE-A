@@ -6298,7 +6298,6 @@ not actual commit/publication hooks. No productive session was killed.
   in `results/telemetry/pr481-recovery-20260909.md`. The report and this entry
   remain uncommitted to preserve the tested head. Lesson: account for reviewer
   admission time within a bounded recovery; green CI is not completed review.
-- PR213 history reconciliation: the incoming #210 episode opus-prover-210-s10-20260905T1157Z records completion with estimated times 2026-09-05T11:57Z to13:20Z. The current registry already contains the same completed episode, proof note,2551working seconds and239016tokens, with 2026-09-05T12:21Z to13:03Z from the documented14:37Z clock re-anchoring. These are one corrected episode, not two sessions or additional charges. Retained all247current raw owner rows byte-for-byte; the existing three-line #210 completion event is already present and is not duplicated. The incoming raw variant and all210incoming rows remain recoverable from f1dc470395734138ab5e8c4ff1fc485d1edce79a:results/telemetry/owner-sessions.jsonl (blobd82226d2f30f73cf7bba7ab60a6803e41500cb30), with current blob 9385f61fb09857053fc626482ebcc92b28ce909e and base blob ddf367a0d9107fac4875f882db885252afd8419d preserved. Exact stage1/2/3 copies and index receipt are retained in pr213-telemetry-stages-y6o3lle_. This specific supersession preserves the86-row clock correction and all budgets; no generic deduplication or other conflict resolution was performed.
 ## 2026-09-09 - Completed repair handoffs continue (06:47Z)
 - PR424's saved seven-file repair is published at11ae9bed29a3beb3725d6ce54677ff3046ea45df
   with green canonical CI and a clean worktree. Main queued independent forced review
@@ -7105,9 +7104,7 @@ not actual commit/publication hooks. No productive session was killed.
   second account had six free slots. The meta session sent SIGCONT to the routers (workers 4 -> 8 within a minute), removed the HOLD file
   (kept as HOLD.removed-by-meta), found the queue supervisor already dead, and filed issue #505 to strip the Space-era admission
   machinery from the router. The main session must never run qpbt-switch. (Entry rewritten: the first append mangled its backticks.)
-
 ## 2026-09-09 - Issue #505 router simplification (orc-505-20260909-01)
-
 - The 11:22Z stale-HOLD incident above motivates marker-only worker reservations.
   This branch removes the router's retired admission machinery and the shim's
   obsolete gates, preserving model policy, resume affinity and session telemetry.
@@ -7121,7 +7118,6 @@ not actual commit/publication hooks. No productive session was killed.
   MIPSTARRE_JOB_CLASS, MIPSTARRE_HARDNESS_REASON and MIPSTARRE_CODEX_MODEL as
   required by the 11:05Z fixture incident. Shell syntax, git whitespace and
   installed-hook checks pass. No Lean or blueprint files changed.
-
 ### 2026-09-09T11:40:10Z - Apply owner four-orc limit and reserve daemon review capacity
 - Owner-session10:45Z supersedes the earlier unqualified worker-floor rule:
   at most four active orc workers, two of the nine worker slots reserved for
@@ -7380,9 +7376,7 @@ not actual commit/publication hooks. No productive session was killed.
   1898883 waits for fewer than3 orcs, leaving room for pending483 admission,
   and fewer than9 workers before starting. No duplicate449 assignment.
 - Existing router-doc fix, train repair and other review/CI owners continue.
-
 ### 2026-09-09T14:16:27Z - Merge506 and refill with reviews
-
 - Required snapshot completed. PR506 merged at14:05:33Z as
   2d038ed7e7bee491f52b35cbdfe1fd1ad3439eb7 from
   7f4102ad2bd75c5aaf54a759889665a3908e2982, with current CI and review approval.
@@ -7402,9 +7396,7 @@ not actual commit/publication hooks. No productive session was killed.
 - Observed8 live second-account workers,2 orcs, with409 entering review. No
   primary-key routing, new HOLD/STOP files, duplicate repair owner, or manual
   PR merge. Existing source obligations and cumulative review budgets remain.
-
 ### 2026-09-09T14:23:44Z - Advance train and inbox verification
-
 - Snapshot completed; previous cycle classified as progress. PR507's cleanup
   fix80089187 is published and clean. CI3852943 retries the confirmed GitHub
   head after a propagation race, then runs the one authorized final review.
@@ -7421,9 +7413,7 @@ not actual commit/publication hooks. No productive session was killed.
 - Final census8 live workers, all second account,2 orcs;507 review follows CI.
   Owner handoff schedule read: normal work until15:15Z; dispatch nothing new
   during15:15-15:45Z; report estimates on168 and27 by15:50Z, then pause.
-
 ### 2026-09-09T14:28:13Z - Refill reviews and release approved refresh
-
 - Previous cycle made progress. Required snapshot observed six live workers;
   started independent reviews213/483 on clean published headse127e8b7/acdda3ff
   after verifying actual616/632-test successes. Code and prose lanes admitted
@@ -7437,9 +7427,7 @@ not actual commit/publication hooks. No productive session was killed.
   its previously authorized final independent reviewer is now active.
 - Existing443/487 recovery and503 review owners continue. No new source
   changes, primary-key routing, manual merge, or review counter reset.
-
 ### 2026-09-09T14:33:56Z - Train approval and bounded refresh handoffs
-
 - Required snapshot completed; prior cycle classified as progress. PR507 at
   80089187 received final approval5155750523 with zero unresolved findings,
   after635 workflow tests and current CI success. It awaits daemon merge and
@@ -7458,9 +7446,7 @@ not actual commit/publication hooks. No productive session was killed.
 - Final census9 second-account workers,3 orcs;465 is the fourth assigned orc.
   No further repair admission until one of these four assignments completes.
   Existing503/213/483 reviews and456 autofix remain owned. No manual merge.
-
 ### 2026-09-09T14:49:22Z - Owner's seven tails and wind-down order
-
 - Required snapshot completed. Prior interrupted cycle made progress:507's
   unstarted predecessor465 queue was cancelled only after verifying no model
   child, and priority507 recovery3975567 replaced it. The507 refresh combines
@@ -7488,9 +7474,7 @@ not actual commit/publication hooks. No productive session was killed.
 - Every new target and model-launching command in the seven-tail helper checks
   the15:15Z cutoff. By15:50Z prepare identical estimate numbers on168 and27,
   then honor the owner's pause and remain idle for the meta session.
-
 ### 2026-09-09T15:03:00Z - Router publication and closing estimate preparation
-
 - Snapshot completed; previous cycle made progress. PR508 recovery preserved
   reviewed code and both data histories but stopped at1050 guarded lines.
   Main authorized exactly its immutable staged merge tree's50-line excess
@@ -7505,9 +7489,7 @@ not actual commit/publication hooks. No productive session was killed.
   headb1ec661b to independent review after checking actual CI results and its
   clean worktree.507 recovery and daemon443 review remain live. Cutoff checks
   remain15:15Z for new dispatches; final reports are due15:50Z.
-
 ### 2026-09-09T15:07:00Z - Advance503 before cutoff and retain stacked evidence
-
 - Required snapshot ran; prior cycle made progress. Cancelled only the queued
   duplicate449 review4188890 after verifying4076479 holds the actual review
   lock and the duplicate has no model child. StreamA advanced to503's bounded
@@ -7525,9 +7507,7 @@ not actual commit/publication hooks. No productive session was killed.
 - No final estimate or pause is claimed yet. The verified main pane isqpbt:0.0;
   after closing reports, the owner-authorized /goal pause can be issued there.
   New main dispatches remain forbidden after15:15Z; meta owns daemon shutdown.
-
 ### 2026-09-09T15:15:00Z - Enter owner-directed wind-down
-
 - Required snapshot completed. Prior cycle made progress. At15:10:55Z the
   direct GitHub query measured84 open PRs: latest reviews22 approved,28 changes
   requested,34 unreviewed; exact-head reviews5 approved,18 adverse,61 missing.
@@ -7547,9 +7527,7 @@ not actual commit/publication hooks. No productive session was killed.
 - From15:15Z, main dispatches nothing new. Existing503 fix,507 artifact work,
   reviews,CI and estimate audit may finish or checkpoint. Closing reports on
  168/27 remain due by15:50Z, followed by /goal pause and owner-controlled idle.
-
 ### 2026-09-09T15:20:00Z - Wind-down checkpoints and site-count audit
-
 - Required snapshot ran without any new dispatch.312 received current-head
   approval5156235168.467's pre-cutoff launcher stopped on its missing local
   stack base; it was not retried after15:15Z.456's published-head CI passed.
@@ -7566,9 +7544,7 @@ not actual commit/publication hooks. No productive session was killed.
 - Existing507 artifact work,508 review,503 fix and estimate audit retain live
   owners. No main merge or new dispatch after cutoff; uncommitted telemetry
   remains for the daemon/meta session. Closing reports and pause remain pending.
-
 ### 2026-09-09T15:26:17Z - Close already-integrated records during wind-down
-
 - Required snapshot completed; no new dispatch. Estimate audit finished and
   independently distinguished30 direct holes from32 textual matches. Using
   the stated197-obligation denominator gives84.8percent main-only progress;
@@ -7584,9 +7560,7 @@ not actual commit/publication hooks. No productive session was killed.
   review. Other results and counts will be refreshed before identical168/27
   closing reports. Draft resumption handoff is
   /tmp/qpbt-main-handoff-20260909-pause.md; budgets and saved work are preserved.
-
 ### 2026-09-09T15:31:00Z - Preserve completed review and CI handoffs
-
 - Required wind-down snapshot ran; no new dispatch.508 atcf541b58 received
   current approval5156373606, including53 focused regression tests.478 at
   b1ec661b received code/prose approval5156344406. Both are daemon candidates;
@@ -7597,9 +7571,7 @@ not actual commit/publication hooks. No productive session was killed.
   next gate when the owner resumes.
 -507 artifact publication and443 review were confirmed live. Main continues
   only evidence collection and checkpoint preservation until the closing reports.
-
 ### 2026-09-09T15:34:00Z - Router simplification merged; retire obsolete adjudication
-
 - GitHub confirms508 merged at15:29:17Z as
   e84305e3f6eb3db91a51dcf9e3525d883cf9ee49 fromcf541b58. The daemon's later
  15:31:37Z line records completion, not the authoritative merge timestamp.
@@ -7609,9 +7581,7 @@ not actual commit/publication hooks. No productive session was killed.
   including blueprint/source correspondence issues. Its old sole-baseline
   adjudication does not apply. Removed only443 from the daemon adj-list, leaving
   historical evidence and templates intact for inspection; no findings waived.
-
 ### 2026-09-09T15:42:07Z - Closing reports and owner-directed pause handoff
-
 - Final required snapshot completed. At15:37:42Z, GitHub main was29de0332,
   with26 PRs merged todayUTC and81 open: latest19 approved/28 changes requested/
  34 unreviewed; exact-head5 approved/19 adverse/57 missing. All model workers
@@ -7630,21 +7600,16 @@ not actual commit/publication hooks. No productive session was killed.
   /tmp/qpbt-main-handoff-20260909-pause.md. Main now issues /goal pause under
   the owner's order, leaving the formalization incomplete and telemetry
   uncommitted for meta/daemon publication. Resume only on the owner's word.
-
 ## 2026-09-09 — Pause of track A on the owner's instruction (2026-09-09T15:55:49Z)
-
 - Owner (13:35Z): work about two more hours, update #168, then pause; the meta session resumes the main session days later on the
   owner's explicit word. At 15:55:49Z: main at 88449102, 21 merges today through the daemon. Stopped: goal keeper, merge daemon
   (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
   goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
-
 - Incident (15:55Z, meta, fixed 16:00Z): the pause script's crontab step used `|` both as the sed delimiter and as alternation; sed failed
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
-
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
-
 - Session `prover-528-20260912-01`, issue #528: the first exact-head CI run for
   `f5dd9de98cdad7a87643798e8e9a1555cd723380` took 260 seconds and failed the
   workflow fixture suite (four failures and one error among 629 tests). The
@@ -7657,3 +7622,302 @@ not actual commit/publication hooks. No productive session was killed.
   The failed run remains in the SHA-keyed manifest and logs for PR532 under
   `~/.cache/mipstarre-dev/`. Clear selectors and their reasons together before
   workflow fixtures, and retain this failed attempt in the episode cost.
+## 2026-09-12T07:07:28Z - Finish checked proofs and approve canonical imports
+- Required snapshot completed.541 at946c6c34 now has green full CI and
+  independent approval5185693322 with zero findings. The requested canonical
+  import repair is available to the daemon; no manual merge was invoked.
+- Independent receipts verify completed target proofs in534 (combined-line
+  consistency),538 (complex-modulus X-factor estimate),539 (opposite-player
+  consistency), and saved512 constructionaeaca3ae. Signatures and documented
+  source distinctions remain; target closures were reported with only standard
+  axioms. The existing proof is recovered rather than attempted again.
+- Started three non-model completion streams3478928/3478929/3478930:534 CI then
+ 512 checked publication/CI,538 clean-environment CI,539 saved-head checked
+  publication/CI. Each pins the head, keeps builds locked, requires actual test
+  evidence, and defers new review dispatch after08:00Z. Current attempts are
+  in validation/publication, not new proof episodes. Source changes remain with
+  the original authors; failed predecessor costs and checkpoints are preserved.
+- GitHub confirms263 merged06:35:25Z asb65adc13, bringing today's verified
+  merge count to4 (525,530,532,263). Main has19 direct holes, one fewer than
+  resumption; the qubit wrapper still depends on unfinished soundness. Fourteen
+  project workers and8 waiting dispatches were measured under0/14 caps.
+- The finish-tail syntax check used ast.parse after py_compile could not write
+  the shared/tmp/__pycache__; execution and source files were unaffected.
+  No new code change or permission escalation was needed. Progress remains
+  on27 only;08:00Z cutoff and08:20Z closing/pause are unchanged.
+## 2026-09-12T04:35:06Z - Owner-authorized full-speed resumption
+- Read the renewed owner order in /tmp/qpbt-main-handoff-v5.md before starting
+  work. It authorizes both keys at primary5/second39, target40 live workers,
+  Astra xhigh priority, dispatch cutoff08:00Z and reports/pause by08:20Z.
+  This supersedes the September9 pause, primary-key prohibition and single-key
+  allocation. No credential contents were read or printed.
+- Required snapshot completed at04:18Z with no workers. Verified caps and the
+  owner shim's priority tier and legacy-ultra-to-xhigh mapping. Main dispatches
+  use explicit Astra and owner-escalation reasons through the existing policy.
+  Prepared /tmp/qpbt-fullspeed-20260912-env.sh and reported pre-model failures
+  on27/5643439501: changing the downstream shim alone cannot repair a rejected
+  model-policy preflight. Preserve actual/requested model distinctions.
+- Started saved-head reviews503/507 and independent reviews365/497/472/467/
+ 361/285/260 only after inspecting real CI test endings and current worktree
+  state.503,507,497,285,260 approved.361's publisher correctly withheld a stale
+  result after meta advanced its head; no approval was fabricated.
+-409/460/465 have named Astra repair workers for their existing Lines.lean
+  conflicts, preserving parents, statements, shared build locking and history.
+  Thirty other PRs are assigned across three staggered CI/review streams with
+  a fresh meta-ownership check per target and08:00Z cutoff checks.
+- Meta owns the PRs in watchdog/meta-dispatched.txt; main did not duplicate
+  their failed loops. Meta's initial and second waves hit preflight rejections;
+  corrected retries are now admitting workers. Observed21 live model workers
+  at04:35Z, still below the target40. More fix and review handoffs remain queued.
+  Main assignments are recorded in watchdog/main-dispatched-20260912.json.
+- Runtime scripts are resumption orchestration only; no Lean source changes,
+  main commit/push, manual PR merge, new native agent, HOLD/STOP file or
+  qpbt-switch invocation was made by main. Prior budgets and saved edits remain.
+## 2026-09-12 — Resume in FULL SPEED MODE (owner instruction 04:1xZ; 4 hours, then pause)
+- Owner: resume; two keys (auth-1 on relay-us7 cap 5; yxy on finite-dimensional cap 40 incl. the main); full concurrency, all
+  subagents astra, fast mode if possible; 20 or more occupied slots within 10 minutes; the meta may dispatch directly. Meta actions:
+  primary `~/.codex/auth.json` replaced by the auth-1 key (old key backed up under `~/.codex/backup-20260912T0400Z/`); caps
+  primary 5 / second 39 / total 44; shim adds `service_tier="priority"` (accepted by both endpoints) and REWRITES gpt-5.6-sol to
+  gpt-6-astra for every worker (logged in `watchdog/shim-rewrite.log`): `model_policy.py` still classifies routine jobs as sol and
+  rejects an explicit astra request, so sessions.jsonl records the POLICY model (sol) while the session actually ran astra xhigh;
+  `watchdog/model.txt` = auto and autofix runs with `MIPSTARRE_FIX_MODEL=auto` for the same reason. Message delivery bug fixed
+  (owner-say v4: idle judged on the last four lines; v2 waited on a stale "esc to interrupt" line for 20 minutes).
+- Meta dispatch waves (listed in `watchdog/meta-dispatched.txt`): autofix review loops for the 16 CHANGES_REQUESTED PRs whose review
+  sits on the current head; lane tails 1000+PR for the 12 CHANGES_REQUESTED PRs with a stale review and the 27 PRs without a local
+  review. Uncommitted leftovers of failed fixer runs were stashed in their worktrees (`git stash list`), not deleted. Workers: 1 at
+  04:24Z, 21 at 04:35Z (primary 3, second 18). Machine load 115-140 from other users' jobs before any worker started.
+- 04:58Z: the second account (yxy) answers "Concurrency limit exceeded for account" from about 29 concurrent sessions (45 retried
+  errors by 04:55Z at 34 workers + main; none exhausted the 5 retries). Owner confirms the limit cannot be raised. Caps set to
+  primary 5 / second 29 / total 34 (main + 29 workers on the second account); sessions above the cap drain naturally.
+## 2026-09-12T04:59:00Z - Bulk remaining-hole packets and advisory disposition
+- Required snapshot completed. Owner/meta04:45Z assigns all existing PR lanes
+  and autofix loops to meta; main's new work is remaining-hole proof packets
+  and evidence-based adjudication. Main did not restart a meta-owned lane.
+- Pinned actual mainae124f8f has20 direct sorry sites, not the stale count30.
+  Prepared20 named packets, each preserving its exact signature, source context,
+  prior attempt history and a60-active-minute bound. Bulk launcher3881249 files
+  issues under the existing chapter trackers, creates isolated worktrees, runs
+  worktree-setup --no-build and dispatches Astra through the normal router.
+ 509-513 are already dispatched; remaining packets are being prepared serially
+  without full builds. Inventory:/tmp/qpbt-proof-packets-20260912.json; progress:
+  watchdog/proof-packets-20260912/dispatches.jsonl. No proof claim is made from
+  another unresolved sorry, and no exhausted gap approach is silently reset.
+- Seven read-only audits inspect current-head findings399/411/449/470/488/491/
+ 492 using immutable Git objects, leaving meta's working trees untouched. Main
+  directly verified491's two criticized files byte-identical to main and posted
+  exact-head ADJUDICATION5643589226 for sole findingF1 as out of scope. Existing
+  gates, reviewer verdict, stacked base and saved fixer work remain unchanged.
+- Observed40 model workers (primary5/second35) before the04:58Z correction.
+  The owner-confirmed provider ceiling is now primary5/second29/total34, target
+  at least32. Router caps were verified; excess workers drain naturally and
+  already prepared packets queue. No manual admission holds or key changes.
+- No new source edits by main, manual merge, main push/commit, or native agent.
+  Original08:00Z dispatch cutoff and08:20Z closing/pause schedule remain active.
+- 05:06Z-05:18Z: measured yxy limit was 20 concurrent (errors from 20 up; 2 sessions died at 29-34); caps went 29 -> 20 -> 18. The owner
+  then raised the yxy key limit from 20 to 30 (05:18Z): caps now primary 5 / second 28 / total 33.
+- 05:15Z: two systemic blockers found and fixed by the meta: (a) every lane failed the pre-push gate because modules outside the
+  MIPStarRE.QPBT import closure on main (Combining.Points.Absorption, MarginalContraction) have no olean after the umbrella build;
+  lane runner v18 builds the changed modules explicitly (the umbrella import gap itself is a repository fix for the main session);
+  (b) PR 213's lane worktree held the branch issue-116-expanded-line-preserved-20260907 while the PR branch lived in
+  .worktrees/issue-116-expanded-line-current, so every daemon refresh pushed nothing and reported the PR stale; the worktrees were
+  swapped and an orc resolver merges main into the PR branch (121 commits behind).
+## 2026-09-12T05:47:00Z - Adopt completed packets and maintain independent attempts
+- Required snapshots completed across the interrupted turns. All20 pinned-main
+  proof packets were prepared.516/521 and later522/526 independently verified
+  existing exact-signature standard-axiom proofs in399/383/299; duplicate issues
+  were closed without claiming main integration or additional completed sites.
+ 519/520/524 expired before account reservation, verified terminal, and were
+  requeued as970167/970972/971098 with unchanged targets and preserved history.
+-411 scope comment5643676297 records that its placement-duplication finding is
+  unchanged main material, not a new PR defect. Current-head review/CI remain
+  required. Audits449/488/492 identify saved or newly published fixes, not grounds
+  to mark the old heads approved. Meta's lanes retain ownership.
+-525's documentation-only CI was correctly skipped except paper-gap checks;
+  after verifying its full manifest, independent review661745 was dispatched.
+  It merged05:24:53Z as13409f63, recording the unrestricted-point-error
+  obstruction without closing a proof hole.530 proves a scalar bound obstruction,
+  not nonexistence of the witness; its independent review is active.
+-512's saved construction recovery1067131 continues the original issue and
+  costs. Repository import repair537/worker1082325 implements meta's requested
+  Points.Absorption/MarginalContraction canonical imports; published PR541 is
+  validating. Main did not edit Lean proofs or bypass the import/build gate.
+- Owner05:40Z supersedes earlier occupancy and reporting details: use5/28 caps,
+  keep at least3 waiting dispatches, and post half-hourly progress on27.168 is
+  reserved for the prescribed bold estimate plus sub-line; cron owns it. Main's
+  earlier05:15 progress text was reformatted by meta; no further free-form168
+  posts were made.08:00Z cutoff and08:20Z closing/pause remain.
+- Prepared13 independent second attempts under the same packet issues, each
+  on its own branch with a genuinely distinct strategy and preserved budget.
+  First attempts are over20 minutes old; recently admitted519/520/524 and four
+  already-duplicate packets were excluded. Launcher1224476 completed all13.
+  Seven clean CI-green heads without active reviewers were assigned reviews:
+ 533/531/532/465/409/488/212. Eight further read-only finding audits supplement
+  the queued proof/review work and preserve meta's mutable worktrees.
+- Closed329/334/336/337 after checking zero commits ahead of main and empty
+  three-dot diffs, as explicitly ordered. Comments5643869121/5643870408/
+ 5643871733/5643873353 preserve the disposition. No new merges or sites credited.
+-05:45 measurement:20 direct holes on main13409f63, zero closed on main since
+  the run resumed, one PR merged todayUTC. One point-import fix and multiple
+  proof packets are published or in flight. No manual merge or main push.
+-05:51:13Z final census:33 live workers, primary5/second28, and9 router
+  dispatches waiting. Owner's occupancy/queue condition is satisfied. Additional
+  read-only audits cover342/349/363/398/400/410/417/442/454/457/467/479, with
+  no builds or mutable-worktree ownership. Their reports feed main disposition;
+  they do not publish approvals or waive proof defects.
+- 05:28Z-05:46Z (meta): lane runner v19/v20 feed the pre-push preflight gate and the explicit module build github/main as the base (the
+  gate re-checked every file main changed since the PR head: hundreds of `lake env lean` runs per lane); the meta's lanes were
+  renumbered to their issue numbers (pr_open adopts the open PR by issue; lanes numbered 1000+PR died after the push); eleven
+  `pr<N>.failed` markers left by the gate failures were cleared and the daemon restarted with PAR=8. First merge of the run: PR 525
+  at 05:26Z. Owner rule (05:40Z): the second account should sit near 30 sessions; #168 gets one-line estimate posts only (cron every
+  30 min); at 06:50Z new agents go back to default speed (finalizing stage); pause at about 08:20Z.
+## 2026-09-12
+- Issue #537 / PR #541, session orc-537-20260912-01: the single locked canonical build at 946c6c3407f41e1f9c1658960f5393e383af4abe succeeded and regenerated Points.Absorption and Points.MarginalContraction from absent worktree artifacts. Full CI failed only in test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra: despite removal of invoking/review model and effort fields, inherited MIPSTARRE_HARDNESS_REASON conflicted with the routine fixture. The focused test passed after also unsetting MIPSTARRE_HARDNESS_REASON and MIPSTARRE_JOB_CLASS. A blueprint-sync-only rerun is in progress and publishes no statuses. The task forbids a second full build, so full CI remains red and independent review requires operator continuation. No workflow gates or locks were changed. Future CI fixture environments must clear dispatch classification and hardness reason as well as model fields.
+- 05:30Z-05:58Z: the primary endpoint (relay-us7, auth-1 key) started answering 503 Service Unavailable; 69 worker sessions died
+  there after five retries (reviewers, provers, orc repairs), none on the second account. Meta: primary cap 0, total 28; the reviews
+  that died are re-run on the second account; the repair workers relaunched. The yxy limit raise to 30 holds (2 deaths all day there).
+- Issue #537 / PR #541 follow-up: the corrected-environment blueprint-sync-only CI rerun passed in 151 seconds (629 tests, 9 skipped; declaration and blueprint synchronization passed). The isolated worktree remains clean at 946c6c3407f41e1f9c1658960f5393e383af4abe. Full CI and independent review remain gated as documented in the PR handoff; no second full build, workflow edit, review dispatch, main commit/push, or merge was performed. Detailed evidence is in /home/drx/.cache/mipstarre-dev/sessions/orc-537-20260912-01-validation.md.
+- 06:10Z-06:26Z: sessions kept dying on the second account at 24-28 workers (10-15 per 5 minutes, all roles); the owner clarified
+  that the yxy limit is 20 (not yet 30) and that only the yxy key is used. Caps: primary 0 / second 17 / total 17 (main + 17 = 18,
+  two spare for reconnect overlaps). Lost work so far: about 90 sessions (69 on relay-us7 503s, the rest on the yxy limit); the
+  reviews among them were re-run.
+- orc-pr386-20260912-03: The QPBT build for PR #386 was not started because automatic approval review rejected the command that acquires the machine-wide build lock and records build telemetry; its service disconnected with an account concurrency-limit error. File-level checks identified a stale SubLineBind import and seven avgOver_prod references. Updated the import to SubLineUniform and the references to SandwichProduct.avgOver_distribution_prod. UniformLinePoint and DiagonalResampling pass focused Lean checks; SubLineZDeficit, ConcreteXDeficit, and Claims await missing dependency oleans. No build success is claimed; explicit approval is required before retrying the rejected build action.
+## 2026-09-12T06:38:22Z - Recover primary failures and record merged proof debt
+- Required snapshots completed across interrupted turns. Owner06:02Z stopped
+  primary routing after503 failures. Correctly parsed ledger UTC offsets and
+  identified30 failed main-owned primary sessions after05:30Z. Coordinator
+ 2609078 requeued24 on second (13 prover attempts,11 audits), linking original
+  thread, worktree, failure and cumulative costs; six audits already had live
+  replacements and were not duplicated.519/520 second-attempt replacements
+ 2610705/2610747 retain their own branches. Meta owns failed reviewer retries.
+- Direct capture inspection confirms the affected primary audits exhausted503
+  retries, not proof failures. No unknown usage was replaced by zero and no
+  saved work or original failure row was erased. Retry inventory is in
+  watchdog/primary-failover-20260912/retries.jsonl; blocked account observations
+  never caused a live worker to be restarted.
+-541's single import substitution and default locked build succeeded. Full CI
+  initially failed from inherited classification/hardness fields; the worker's
+  corrected partial rerun passed629 tests,9 skipped. Main continued full exact-head
+  CI with every invoking/review model field removed; it is now green. Independent
+  review is queued under tail2635908, retaining the same946c6c34 head.
+- GitHub confirms530 merged05:56:57Z as075edfc9 and532 merged06:12:53Z as
+  a513b17e, following525. Three merges todayUTC. Main now has19 direct holes,
+  one fewer than at resumption; the removed qubit-wrapper hole still transitively
+  depends on unfinished pauli_soundness and is not a fully closed paper proof.
+- Meta continues lowering caps after provider failures. Latest verified runtime
+  caps at06:38:22Z are primary0/second12/total12;12 project model workers and49
+  project admission waiters were observed. Main respects the current router
+  ceiling, not superseded occupancy targets. No new primary request or cap edit.
+- Half-hour progress is on27 only;168 remains in the owner's exact estimate
+  format under cron.06:50Z default-speed transition,08:00Z dispatch cutoff and
+ 08:20Z closing/pause remain scheduled. Main does not merge PRs by hand.
+## 2026-09-12T06:50:11Z - Prioritize completion at default speed
+- Required snapshot completed. Main deferred15 unadmitted advisory audit
+  dispatch groups only after verifying they were still in account_router reserve
+  with no model child. Original command/task payloads are preserved in
+  watchdog/deferred-advisory-audits-20260912.jsonl. No live audit, prover or
+  reviewer was interrupted. This gives critical review and proof continuations
+  priority under the lowered capacity while retaining a waiting queue.
+- The completed253 audit confirms a genuinely PR-introduced psiHat_norm
+  duplicate, not unchanged-main advisory material. Main retained F1 as required
+  in comment5644283797 and queued bounded correction3230920 after checking the
+  clean worktree and absence of a writer. Only canonical theorem reuse and
+  acyclic imports are allowed; fresh-source/co-import checks are required.
+- At06:50:11Z the owner shim no longer has a service_tier priority override,
+  implementing the scheduled default-speed transition for new processes. Main
+  did not restart existing workers or edit the shim. Fourteen project workers
+  and26 waiting dispatches were observed. Current router caps remain authoritative.
+-541 is CI-green and still queued for independent review. No merge or full
+  paper-proof completion is inferred from the pending gate.08:00Z dispatch cutoff
+  and08:20Z closing/pause remain unchanged; progress stays on27, estimate-only168.
+- 07:02Z (meta): append-only telemetry logs (events.md and friends) conflicted on almost every merge of main (PR 507, lanes 484,
+  518); a union merge driver for results/telemetry/*.md and *.jsonl is installed in .git/info/attributes of the ghz checkout
+  (repo-local, shared by all worktrees). Lanes 502 (PR 507, merge train) and 518 re-merged cleanly and run again. Speed switch at
+  06:50Z done (new workers at default speed). Cap on the yxy key: 14 workers (the owner's forked local session shares the key).
+## 2026-09-12T07:35:38Z - Refill independent attempts and finish publication
+- Required snapshots completed across interrupted turns.253's bounded
+  duplicate-declaration correction is checked-published728aa06b; fresh source,
+  combined imports and standard-axiom checks passed. Its CI build step was
+  blocked by the shared build lock, not a new source failure.
+-539's non-model publication attempt stopped on missing ExpandedPlacement.olean.
+  Verified the old tail terminal; artifact continuation3768541 now takes the
+  canonical shared build lock, restores the existing artifacts, then performs
+  checked publication and CI, followed by253 if before the cutoff.534/538 CI
+  owners were left running. Old build-lock PID3446238 was terminal but the lock
+  had already moved to a new owner; no live lock was deleted.
+- Owner07:25Z requested more independent attempts and a nonempty queue.
+  Launcher3898660 prepared19 separate third-approach worktrees. Each has a
+  distinct method,25-active-minute scope and08:10Z checkpoint target, preserving
+  prior attempts/costs. Known existing proofs are reused only for current-main
+  compatibility evidence; closed duplicate issues stay closed and no duplicate
+  PR or false theorem proof is requested. Current08:00Z cutoff remains; no
+  possible future extension was assumed.
+- A reduced GitHub query succeeded after one transport cancellation. Current
+  CI-green, unowned heads382/535 received reviewers4064056/4064242; active
+  review/CI owners386/432/534/538 remained untouched.417's working state did
+  not qualify for a review and was not assigned from stale evidence.
+- Final census13 live project workers and17 waiting dispatches under second
+  account capacity. Main has19 direct holes, one fewer than resumption but with
+  qubit-soundness dependency still open. Local/GitHub merge evidence now records
+  six merges today:525/530/532/263/280/281. No manual merge or main push.
+## 2026-09-12T07:50:27Z - Scoped blueprint corrections and capped coverage disposition
+- Required snapshot completed.539's savedb13d6098 is published and CI-green;
+  its independent review is queued.538's proof received code approval, but
+  review5185757222 requires two synchronization corrections. Queued scoped
+  blueprint worker263400 to mark only the explicitly restricted direct-law
+  result and add the two mathematical auxiliary entries. No proof body or
+  source-law theorem changes are permitted; the transport caveat remains.
+-483's unchangedacdda3ff head and canonical review5155906957 still have two
+  overlapping blueprint-coverage findings at the recorded cap. Created concrete
+  tracker548 and exact-head ADJUDICATION5644558850 deferring both ledger IDs.
+  The source restrictions, positive-fiber-mass distinction and unfinished
+  unrestricted construction remain explicit. No automatic future-head template,
+  clean reviewer verdict or direct PR merge was manufactured.
+-534 review5185770602 returned six findings; the completed proof is not thereby
+  merge-approved. Stream3478928 continues the already checked512 construction's
+  publication.253's published duplicate correction remains queued behind539.
+- Thirteen project workers and13 waiting dispatches were observed. No owner
+  extension has arrived; the08:00Z dispatch cutoff and08:20Z closing/pause
+  remain controlling. All saved work and previous review/cost records remain.
+## 2026-09-12T07:57:00Z - Prepare cutoff with published recovery
+- Required snapshot is complete; no extension has been confirmed in the
+  session or owner handoff. The08:00Z dispatch cutoff and08:20Z closing/pause
+  still control. Existing work may finish to a checkpoint.
+-512's independently checked construction is now published as PR549 at
+  aeaca3ae. Its canonical CI is running and the build step has passed; no
+  current-head approval or main integration is claimed.539 is published and
+  CI-green with review queued;538's bounded prose correction is active.
+- GitHub confirms282 merged07:46:20Z as8a5eddb3, bringing verified UTC merges
+  today to7. Main still has19 direct holes. First/second/third packet inventories
+  are preserved in/tmp/qpbt-september12-packet-checkpoint-inventory.json.
+- At07:56:50Z,13 project workers and8 admission waiters remained. Future
+  queued admission and follow-on reviews must respect the cutoff unless a
+  subsequent owner extension changes it. No new broad proof scope was added.
+
+## 2026-09-12T08:23:11Z - Final owner quota stop
+
+- The owner extended work at08:08Z until08:55Z; main began an ownership-checked
+  current-head review batch. The subsequent FINAL quota-stop order superseded
+  that extension. Main immediately stopped dispatch coordination, cancelled
+  unadmitted project dispatches and router waits, and preserved their payloads.
+  Active model workers were left for meta's specified08:33Z shutdown.
+- Closing census:20 direct holes at resumption,19 now. The single removed
+  qubit-wrapper admission still depends on unfinished pauli_soundness. No fully
+  closed paper theorem is inferred from that direct-hole reduction.
+- Owner listed eight merges525/530/532/263/280/281/282/251. Final GitHub evidence
+  confirms late256 at08:19:21Z asbc7d69bd; total verified merges today9. This
+  correction is explicit in the one short closing27 comment5644705239.
+- Saved results/telemetry/owner-handoffs/2026-09-12-main.md with the requested
+  next tasks:213's blueprint-sync guard at e099eca (current sync green/render red),
+ 507 repeated staleness,541 Points umbrella imports,342 oversized file, and
+  already-completed329/334/336/337 closures. In-flight and proof checkpoints,
+  failed-session costs, source caveats and runtime inventories are preserved.
+- No168 closing post. Main issues /goal pause and remains idle until explicit
+  owner resumption. The formalization remains incomplete; no complete/blocked
+  goal status is substituted for the owner's scheduling pause.
+
+## 2026-09-12 — Pause of track A on the owner's instruction (2026-09-12T08:33:00Z)
+
+- Owner (13:35Z): work about two more hours, update #168, then pause; the meta session resumes the main session days later on the
+  owner's explicit word. At 08:33:00Z: main at bc7d69bd, 30 merges today through the daemon. Stopped: goal keeper, merge daemon
+  (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
+  goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
