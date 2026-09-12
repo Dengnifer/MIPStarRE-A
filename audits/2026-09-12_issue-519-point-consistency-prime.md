@@ -148,6 +148,10 @@ provenance retained:
 - `Combining/Lines/PairStateConsistencyTransport.lean`, originally from `7f916eb8`.
 - `Extraction/NonencodingSupport.lean`, proved in `e36fd1aa`.
 
+The full-build linter found a global `open scoped Classical` in the recovered
+`NonencodingSupport.lean`. It is restricted to the two theorem statements
+whose filters need classical decidability, using `open Classical in`.
+
 Only these necessary support files and the tensor API change were recovered.
 The other packet's `Consistency.lean`, blueprint, audit, and gap-note edits
 were not copied. In particular, `nonencodingMarginalMass_le` remains untouched

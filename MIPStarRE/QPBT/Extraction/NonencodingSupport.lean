@@ -23,7 +23,6 @@ mass outside the encoding image by evaluated reference inconsistency.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
-open scoped Classical
 
 namespace MIPStarRE.QPBT
 
@@ -50,6 +49,7 @@ theorem consistencyDefect_comm_of_commute {X A I : Type*}
   intro a _
   simp only [hcomm x a b, eq_comm]
 
+open Classical in
 /-- A polynomial measurement's mass outside the encoding image is at most
 its evaluated inconsistency with an encoding-supported reference, plus `md/q`.
 This is the Schwartz-Zippel step in blueprint `eq:qld-nonencoding-mass`.
@@ -158,6 +158,7 @@ theorem expanded_point_consistency_eq {P : AdmissibleParams} {epsilon : ℝ}
 
 end ProjectiveSetting
 
+open Classical in
 /-- The right-hand marginal version of the support estimate, obtained by
 interchanging the two tensor factors and using the same collision bound. -/
 theorem right_mass_outside_encoding_le_evaluated_defect {P : AdmissibleParams}
