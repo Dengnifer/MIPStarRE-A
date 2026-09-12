@@ -27,7 +27,7 @@ the self-consistency of each factor.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-748`
 (the sandwich and display `eq:qld-r-2`), blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960` (`lem:qld-4-10`); the
-route is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+route is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -98,7 +98,7 @@ point measurements, with outcomes in `F_q × F_q`.  This is the POVM of the
 first step of the proof of `lem:qld-4-10`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-736`,
 formed directly with field-valued outcomes rather than from the binary
-refinements; see `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`. -/
+refinements; see `docs/paper-gaps/qpbt_combined-points-direct.tex`. -/
 def sandwichPoint (S : ProjectiveSetting P ε) (side : PlayerSide)
     (x z : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
@@ -241,7 +241,8 @@ theorem ordered_cross_dist_le :
       (fun b => S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b))
       (S.place p₁ ((S.pointMeasExp p₁.side .X xz.1).effect a) -
         S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₁ .Z xz.2)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₁ (S.pointMeasExp p₁.side .Z xz.2)))
   have h₂ : opFamilyDistSq (uniformDistribution (PointPair P))
       (fun xz (ab : PauliScalar P × PauliScalar P) =>
         S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect ab.2) *
@@ -276,7 +277,8 @@ theorem ordered_cross_dist_le :
       (fun a => S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a))
       (S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b) -
         S.place p₂ ((S.pointMeasExp p₂.side .Z xz.2).effect b)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₂ .X xz.1)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₂ (S.pointMeasExp p₂.side .X xz.1)))
   have htri := opFamilyDistSq_le_of_le_of_le (uniformDistribution (PointPair P))
     _ _ _ S.psiHat (C * ε) (C * ε) h₁ h₂
   linarith

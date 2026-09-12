@@ -11,4 +11,4 @@ if [ "$age" -le 6000 ]; then rm -f "$W/owner-heartbeat.alerted"; exit 0; fi
 [ -e "$W/owner-heartbeat.alerted" ] && exit 0
 export PATH=$HOME/.local/bin:$PATH
 printf "%s\n" "OPERATOR SILENT: the owner session has not woken up for $((age/60)) minutes (its background wake-up dies when the Claude app process restarts). Lanes on ghz keep running; green PRs may be waiting. Send any message to the session to wake it." > /tmp/hb-alert.md
-gh api repos/Dengnifer/MIPStarRE-A/issues/26/comments -F body=@/tmp/hb-alert.md > /dev/null && touch "$W/owner-heartbeat.alerted"
+gh api repos/Dengnifer/MIPStarRE-A/issues/27/comments -F body=@/tmp/hb-alert.md > /dev/null && touch "$W/owner-heartbeat.alerted"
