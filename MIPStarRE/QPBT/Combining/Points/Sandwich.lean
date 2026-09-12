@@ -241,7 +241,8 @@ theorem ordered_cross_dist_le :
       (fun b => S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b))
       (S.place p₁ ((S.pointMeasExp p₁.side .X xz.1).effect a) -
         S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₁ .Z xz.2)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₁ (S.pointMeasExp p₁.side .Z xz.2)))
   have h₂ : opFamilyDistSq (uniformDistribution (PointPair P))
       (fun xz (ab : PauliScalar P × PauliScalar P) =>
         S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect ab.2) *
@@ -276,7 +277,8 @@ theorem ordered_cross_dist_le :
       (fun a => S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a))
       (S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b) -
         S.place p₂ ((S.pointMeasExp p₂.side .Z xz.2).effect b)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₂ .X xz.1)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₂ (S.pointMeasExp p₂.side .X xz.1)))
   have htri := opFamilyDistSq_le_of_le_of_le (uniformDistribution (PointPair P))
     _ _ _ S.psiHat (C * ε) (C * ε) h₁ h₂
   linarith

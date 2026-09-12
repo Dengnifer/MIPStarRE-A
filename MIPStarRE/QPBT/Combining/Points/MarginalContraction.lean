@@ -3,13 +3,13 @@ import MIPStarRE.QPBT.Combining.Points.Absorption
 /-!
 # Marginal contraction for combined point measurements
 
-This module records the generic projector-sum estimate used to recover a
-marginal operator from a projective refinement.  It is the norm calculation
-following the first absorption step in the combined-line argument.
+This module records a formalization-only auxiliary estimate for recovering a
+marginal operator from a projective refinement. It combines the two contraction
+steps in the combined-line argument into a pointwise factor-four bound.
 
 ## References
 
-Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:912-932`.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:902-927`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -21,10 +21,15 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- Summing a projective refinement close to `B_b D` recovers `D` with
-four times the squared-distance error. This is the calculation from
-`eq:qqm` to `eq:qld-qxz-close-to-point`, paper lines 912--932. Completeness
-is required of `B`, not of the fixed marginal fiber `Q`. -/
+/-- A formalization-only auxiliary lemma: summing a projective refinement close to
+`B_b D` recovers `D` with four times the squared-distance error.
+
+It combines the absorption and orthogonal-projector contraction yielding `eq:qqm`
+with the subsequent contraction through the projective measurement `B` used to obtain
+`eq:qld-qxz-close-to-point` (paper lines 902--927). The bound is pointwise for a fixed
+marginal fiber `Q`, with factor four from the squared triangle inequality; the paper
+sums over outcomes and averages over questions. Completeness is required of `B`,
+not of `Q`. -/
 theorem norm_marginal_sub_sq_le {β ι : Type*} [Fintype β]
     [Fintype ι] [DecidableEq ι] (Q : β → Op ι)
     (hQ : ∀ b, IsProj (Q b))
