@@ -13,6 +13,7 @@
 #                         [--continue-from FILE]  fresh primary checkpoint/budget handoff JSON
 #                         [--account ACCOUNT]     auto|primary|second (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
+#                         [--job-class CLASS]     bounded audit-backed job class
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
 #                         [--pr ID]               PR id recorded in the registry line
 #                         [--skip-hook-check]     do not install/verify git hooks
@@ -165,6 +166,8 @@ CONTINUATION_JSON=""
 ACCOUNT="${MIPSTARRE_CODEX_ACCOUNT:-auto}"
 ACCOUNT_WAIT="${MIPSTARRE_ACCOUNT_WAIT:-1800}"
 EFFORT=""
+JOB_CLASS="${MIPSTARRE_JOB_CLASS:-general}"
+HARDNESS_REASON="${MIPSTARRE_HARDNESS_REASON:-}"
 PR_ID=""
 DRY_RUN=0
 SKIP_HOOK_CHECK=0
@@ -191,6 +194,8 @@ while [ "$#" -gt 0 ]; do
     --continue-from) require_value "$1" "$#"; CONTINUATION_FILE="$2"; shift 2 ;;
     --account) require_value "$1" "$#"; ACCOUNT="$2"; shift 2 ;;
     --effort) require_value "$1" "$#"; EFFORT="$2"; shift 2 ;;
+    --job-class) require_value "$1" "$#"; JOB_CLASS="$2"; shift 2 ;;
+    --hardness-reason) require_value "$1" "$#"; HARDNESS_REASON="$2"; shift 2 ;;
     --context-file)
       require_value "$1" "$#"
       CONTEXT_FILES[${#CONTEXT_FILES[@]}]="$2"
@@ -231,9 +236,8 @@ case "$LOCK_WAIT" in
 esac
 
 case "$EFFORT" in
-  ''|ultra) EFFORT=max ;;
-  max|xhigh) ;;
-  *) die 2 "--effort must be max or xhigh (legacy ultra maps to max)" ;;
+  ''|ultra) EFFORT=ultra ;;
+  *) die 2 "--effort must be ultra" ;;
 esac
 
 if [ -n "$RESUME_ID" ]; then
@@ -265,6 +269,16 @@ TELEMETRY_DIR="$REPO_ROOT/results/telemetry"
 REGISTRY="$TELEMETRY_DIR/sessions.jsonl"
 TELEMETRY_PY="$SCRIPT_DIR/telemetry.py"
 HOOK_SCRIPT="$REPO_ROOT/scripts/install_git_hooks.sh"
+POLICY_ARGS=(--role "$ROLE" --job-class "$JOB_CLASS"
+  --model "${MIPSTARRE_CODEX_MODEL:-auto}" --effort "$EFFORT")
+[ -z "$HARDNESS_REASON" ] || POLICY_ARGS+=(--hardness-reason "$HARDNESS_REASON")
+MODEL_POLICY_JSON="$(python3 "$SCRIPT_DIR/model_policy.py" "${POLICY_ARGS[@]}")" ||
+  die 4 "model policy preflight failed"
+MIPSTARRE_CODEX_MODEL="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["model"])' \
+  "$MODEL_POLICY_JSON")"
+export MIPSTARRE_CODEX_MODEL MIPSTARRE_JOB_CLASS="$JOB_CLASS"
+export MIPSTARRE_DISPATCH_ROLE="$ROLE" MIPSTARRE_REQUESTED_EFFORT="$EFFORT"
+export MIPSTARRE_HARDNESS_REASON="$HARDNESS_REASON"
 
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 CAPTURE_DIR="$CACHE_ROOT/sessions"
@@ -636,20 +650,14 @@ if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
   WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
   acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
 fi
-if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
-  [ "$(git -C "$WORKTREE_ABS" rev-parse HEAD)" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] ||
-    die 4 "queued worktree head moved; adoption required"
-  [ -z "$RESUME_ID" ] && [ -z "$CONTINUATION_FILE" ] ||
-    die 4 "queued dispatch must be a fresh one-shot session"
-fi
-export MIPSTARRE_DISPATCH_WORKTREE="$WORKTREE_ABS"
-ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
 if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
 if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
 ACCOUNT_ROUTING=1
 ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
 ACCOUNT="${ROUTING%%$'\n'*}"
 MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
+export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
 ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
 if [ "$ACCOUNT" = second ]; then
   ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
@@ -705,6 +713,8 @@ fi
 if [ -n "$CONTINUATION_JSON" ]; then
   (umask 077; set -C; printf '%s\n' "$CONTINUATION_JSON" > "$CAPTURE_DIR/$NAME.continuation.json")
 fi
+MODEL_POLICY_FILE="$CAPTURE_DIR/$NAME.model-policy.json"
+(umask 077; set -C; printf '%s\n' "$MODEL_POLICY_JSON" > "$MODEL_POLICY_FILE")
 note "dispatching $NAME (role=$ROLE account=$ACCOUNT sandbox=$SANDBOX worktree=$WORKTREE_ABS)"
 
 # stdin is closed: codex exec reads piped stdin as extra prompt input, which
@@ -748,8 +758,27 @@ if [ -n "${MIPSTARRE_CODEX_MODEL:-}" ]; then
   TELEM_ARGS[${#TELEM_ARGS[@]}]="$MIPSTARRE_CODEX_MODEL"
 fi
 TELEM_ARGS+=(--requested-effort "$EFFORT")
+TELEM_ARGS+=(--model-policy-file "$MODEL_POLICY_FILE")
+DISPATCH_KIND=new
+[ -z "$RESUME_ID" ] || DISPATCH_KIND=resume
+TELEM_ARGS+=(--dispatch-kind "$DISPATCH_KIND")
+[ -z "${MIPSTARRE_MODEL_POLICY_ACTIVATION_AT:-}" ] ||
+  TELEM_ARGS+=(--activation-at "$MIPSTARRE_MODEL_POLICY_ACTIVATION_AT")
+TELEM_KEY_LABEL="${MIPSTARRE_KEY_LABEL:-${MIPSTARRE_NATIVE_KEY_LABEL:-unknown}}"
+case "$TELEM_KEY_LABEL" in
+  relay-1|space|unknown) ;;
+  *) TELEM_KEY_LABEL=unknown ;;
+esac
+TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)")
 
 REPLAY_EFFORT_ARG=" --requested-effort $EFFORT"
+printf -v REPLAY_POLICY_ARG ' --model-policy-file %q' "$MODEL_POLICY_FILE"
+REPLAY_POLICY_ARG+=" --dispatch-kind $DISPATCH_KIND"
+if [ -n "${MIPSTARRE_MODEL_POLICY_ACTIVATION_AT:-}" ]; then
+  printf -v REPLAY_ACTIVATION_ARG ' --activation-at %q' "$MIPSTARRE_MODEL_POLICY_ACTIVATION_AT"
+  REPLAY_POLICY_ARG+="$REPLAY_ACTIVATION_ARG"
+fi
+REPLAY_EFFORT_ARG+=" --key-label $([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)"
 REPLAY_CONTINUATION_ARG=""
 if [ -n "$CONTINUATION_JSON" ]; then
   printf -v REPLAY_CONTINUATION_ARG ' --continuation-json "$(cat %q)"' \
@@ -762,7 +791,7 @@ if ! "${ACCOUNT_ENV[@]}" python3 "$TELEMETRY_PY" "${TELEM_ARGS[@]}" >/dev/null; 
   The event stream is intact at $CAPTURE — replay it with:
     ${REPLAY_ACCOUNT_ENV}python3 $TELEMETRY_PY session-summarize $CAPTURE --name $NAME \\
       --role $ROLE --issue $ISSUE --start $START_TS --end $END_TS \\
-      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG$REPLAY_CONTINUATION_ARG \\
+      --exit-code $CODEX_EXIT --account $ACCOUNT --model $MIPSTARRE_CODEX_MODEL$REPLAY_EFFORT_ARG$REPLAY_POLICY_ARG$REPLAY_CONTINUATION_ARG \\
       --append-to $REGISTRY
   Do not leave the session unrecorded (meta.md, telemetry duties)."
 fi

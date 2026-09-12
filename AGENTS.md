@@ -687,11 +687,12 @@ agent must know:
   exact-head commit statuses (`local-ci/*`, `local-review/summary`); merges go
   through GitHub with an exact-SHA guard. Details: `local/README.md`,
   `local/protocols/issues-prs.md`.
-- **Sessions.** Dispatch, resume, and archive Codex sessions only via
-  `local/bin/dispatch.sh` (roles: orc, prover, reviewer, simplifier,
-  blueprint, splitter, scout; `mathfix` is reserved for astra after the #26
-  availability report) so token/time telemetry stays complete. Current Fable
-  5.1 math-fix sessions are owner-launched and use `owner-sessions.jsonl`.
+- **Sessions.** Worker Codex sessions use `local/bin/dispatch.sh` (roles: orc,
+  prover, reviewer, simplifier, blueprint, splitter, scout; `mathfix` is
+  reserved for astra after the #26 availability report) so token/time telemetry
+  stays complete. Lease-backed native descendants are retired by issue #505;
+  `local/protocols/sessions.md` retains their history. Current Fable 5.1
+  math-fix sessions are owner-launched and use `owner-sessions.jsonl`.
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.

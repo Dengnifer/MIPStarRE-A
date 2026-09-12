@@ -15,7 +15,16 @@ no frontmatter. Parent/child structure is the native sub-issue relation
 (`POST …/issues/{parent}/sub_issues`), one parent per issue exactly as the
 retired `parent:` scalar allowed; discussion is comments; labels come from the
 repository (`list-labels`, paginated), so `local/labels.yml` is retired and a
-label absent from GitHub is reported, never invented. Briefs (the design record
+label absent from GitHub is reported, never invented.
+`pr_open.py --issue N` inherits only its explicit descriptive-label allowlist
+from issue N, unions it with explicit `--label` values, and adds those labels
+without removing existing PR labels. Scheduling, approval and owner-state
+labels are never inherited. Before push, creation/adoption requires at least
+one descriptive label, supplied explicitly, inherited, or already on the PR;
+otherwise the command explains how the operator can classify the change.
+GitHub still validates label existence; the allowlist is an inheritance policy,
+not a replacement registry. Backfills use the same additive API and inspect
+the actual change when the source issue itself is unlabeled. Briefs (the design record
 per issue) live in `local/briefs/`: agent input, not lifecycle state.
 
 Prerequisites between issues are **GitHub issue dependencies**
@@ -54,6 +63,14 @@ closed even when that hook is stale or absent.  A caller's explicit
 `MIPSTARRE_SKIP_HOOKS=1` remains the documented emergency bypass.  It skips
 validation only: implicit tag following stays disabled, so publication remains
 limited to the explicit branch mapping.
+
+`github-sync.sh [ref ...]` takes branch names (default `main`), not a `push`
+subcommand. It retains the post-publication record snapshot. When an explicitly
+requested/default main push succeeded and the snapshot created a new telemetry
+commit, it checked-pushes main once more without creating another snapshot.
+Branch-only calls never implicitly publish main. Snapshot reads remain best-effort;
+snapshot commit or final publication failure returns nonzero and leaves the
+preserved local state for the operator to recover.
 
 Every merge of `github/main` or a stack parent into an issue branch runs the
 merge-loss guard before the merge commit is created. The guard compares the
@@ -126,7 +143,17 @@ that refuse by default:
 1. the PR is open, unmerged and not a draft (`draft is False`, not merely
    falsy), and reports a head SHA, a head ref and a base ref;
 2. the primary worktree is clean and on the base, and the local branch tip
-   equals the GitHub head SHA — the merge must be of the bytes built here;
+   equals the GitHub head SHA — the merge must be of the bytes built here. After
+   fetching the current GitHub base, the head is fresh when that base is its
+   ancestor, or when every raw tree change from their merge base to the base is
+   allowlisted passive telemetry: a regular non-executable (`100644`) `.md` or
+   `.jsonl` file below `results/telemetry/`, or a generated regular
+   non-executable `.json` file below the exact
+   `results/telemetry/github-snapshot/` subtree. The check uses
+   `git diff --raw -z --no-renames` so additions, deletions and both sides of a
+   rename retain their paths and modes. Executable files, executable-mode
+   changes, symlinks, code or unknown suffixes, malformed records, paths outside
+   those boundaries, a missing merge base and every failed Git command block;
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
@@ -147,6 +174,25 @@ an exact-head `ADJUDICATION` comment backs it; gate 5 is never adjudicable.
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
+
+### Main-cycle integration checkpoint
+
+The active owner service records, at each bounded tick, the local `main` SHA,
+the readable remote `refs/heads/main` SHA, primary cleanliness, transport
+result, and the age and exact head of the oldest CI-and-review-eligible open
+PR. A dirty primary, remote mismatch, unavailable transport, active fix or
+transaction lock, missing configured Space allocation or external-zero gate, or a stale
+candidate is
+a HOLD reason; it is never silently converted into a merge attempt. After a
+successful daemon-owned merge, the service re-reads remote `main` and records
+the new SHA before the next tick. The service may invoke `pr_merge.py` only as
+its daemon-owned final action after these checks; workers never merge directly.
+Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
+exiting the loop. The cadence is monotonic: work time is subtracted from the
+configured interval (default 300 seconds). Candidate records distinguish stale
+exact-head PRs from fresh actionable PRs using `pr_merge.head_is_fresh`, the
+same conservative predicate as gate 2b; `pr_age_s` is PR creation age, while
+eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text
 
@@ -209,35 +255,29 @@ fifth full review, fabricated carry-forward or CI/proof/merge/access bypass.
 An unresolved evidence requirement stays blocked internally, not automatically
 escalated to the human. No mathematical result is declared solved without proof.
 
-The standing target is eleven useful live workers plus main, with a floor of
-eight and worker cap eleven (`local/personas/main.md`). Under the owner's
-2026-09-06T05:56Z guidance, main autonomously reassesses useful parallelism every
-cycle, after completion/failure, newly unblocked work or compaction, and before
-waiting or ending, without owner/meta prompts. Keep prepared useful assignments
-available to the durable replenisher and recheck current dependencies, ownership
-and service constraints; queue #257's operation requires evidence. Main owns
-selection and replenishment. Below target or floor, report the actual count,
-concrete constraint and next admission condition. Idle reservations, duplicate
-writers and completed sessions do not count. This duty changes no account
-limits, proof budgets, review caps or integrity, validation and exact-head merge
-gates.
-Main may hold replenishment for a reported concrete service constraint while
-preserving the eleven-worker allocation; bounded recovery admissions follow a
-census and useful-work evidence, not an assumed server request count.
+Under the owner's 2026-09-06T05:56Z guidance, main autonomously reassesses
+useful parallelism every cycle, after completion/failure, newly unblocked work
+or compaction, and before waiting or ending, without owner/meta prompts.
+Main selects useful, disjoint successors, rechecks dependencies, ownership,
+account capacity, service evidence and cumulative budgets, and reports concrete
+constraints and the next admission condition. Idle reservations, duplicate
+writers, completed sessions and filler do not qualify. The September 6
+eight-to-eleven allocation is historical; current admission uses the configured
+account caps in `sessions.md` section 4. Issue #505 retired queue #257 and native
+leases; replenishment uses external `dispatch.sh` assignments.
 
-Main stays at `max`; main selects exactly `max` or `xhigh` for each new or
-resumed primary/`gpt-6-astra` worker (the latest owner "high" means `xhigh`).
-Record effort, rationale and outcomes as observations, distinguishing client
-configuration from server verification. Preserve raw provenance, sample counts
-and unknowns in `results/telemetry/model-comparison/astra-effort-20260906.md` and
-its dataset; refine guidance through normal reviewed amendments and EVOLUTION.
-No benchmark, probe, filler session or gate/budget relaxation follows from this.
+Main remains Astra Ultra; routine workers use Sol Ultra and hard assignments use
+Astra Ultra with an explicit reason under `local/model-policy.json`. Record
+selection, rationale and observed outcomes separately from provider-measured
+effort. Preserve the historical max/xhigh observations, raw provenance, sample
+counts and unknowns in `results/telemetry/model-comparison/`; no benchmark,
+probe, filler session or gate/budget relaxation follows from this guidance.
 
 A source statement found to be mathematically false goes to main, not #26,
-unless actual access or permission requires human action. Following the availability
-report on #26 and the September 6 owner decision, the mathematical-gap lane uses
-`local/bin/dispatch.sh --role mathfix` on primary/`gpt-6-astra`, with the exact
-`--effort max` or `--effort xhigh` chosen by main under the policy above.
+unless actual access or permission requires human action. Following the
+availability report on #26 and the September 6 owner decision, main selects
+Astra Ultra for the mathematical-gap lane through
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
@@ -254,10 +294,10 @@ A correction is adopted only when it meets all four conditions below.
    insufficient.
 3. **Minimality:** the correction is the closest sufficient statement to the
    source, with no unnecessary hypothesis or weakened conclusion and no change
-   to a mathematical definition or game under an ordinary repair task. A
-   necessary definition/game change first returns to main for a separately
-   recorded decision and scoped task; it is never silently adopted as the
-   printed theorem or exempted from faithfulness and consumer analysis.
+   to the source semantics. A necessary definition/game correction first
+   returns to main for a separately recorded decision and scoped task, with an
+   explicit faithfulness audit and independent mathematical review. It is never
+   silently adopted as the printed theorem or exempted from consumer analysis.
 4. **Lean convergence:** the corrected statement type-checks and all affected
    downstream consumers compile. Lean success alone does not establish the
    preceding three conditions.
@@ -265,14 +305,19 @@ A correction is adopted only when it meets all four conditions below.
 The ordinary budget is at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
 is shared across the historical owner-launched Fable lane and the Astra lane; a
-model or telemetry change does not reset it. If the correction requires
-changing a mathematical definition or game, the worker stops and returns it to
-main immediately. At budget exhaustion, main receives the attempted statements,
-counterexamples, proof sketches and unresolved consumer failures, and decides
-whether to stop, rescope or record a separately bounded tranche. A worker cannot
-self-extend; a running attempt, new model, thread or route never resets the count.
+model or telemetry change does not reset it. If a correction requires changing
+a mathematical definition or game, the worker stops and returns it to main
+immediately. Main decides source-semantic corrections with the preceding evidence
+and independent review; changing the project goal is outside that authority.
+At budget exhaustion, stop that lane and record attempted statements,
+counterexamples, proof sketches and unresolved consumers on #27 and in the gap
+note. Main decides whether to stop, rescope or record a separately bounded tranche
+within existing authority. Workers never self-extend or reset attempts or time.
+Owner-only permission, credential, access or scope/resource grants go to #26;
+mathematical difficulty alone is not an owner decision. Already-posted items
+await the owner unless explicitly returned to main, as B7/B8 were above.
 
-**Explicit #118/B8 tranche (recorded for this amendment):** main authorizes
+**Recorded #118/B8 tranche (September 6 amendment):** main authorized
 attempts **11 and 12**, each at most **2700 seconds**, on primary Astra **max**.
 The carried baseline is **10 completed attempts / 19931 completed seconds**,
 with original anchor **2026-09-05T19:24:00Z**. Attempt 12 is conditional on

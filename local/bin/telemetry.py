@@ -123,15 +123,21 @@ def now_ts() -> str:
 
 
 def parse_ts(text: str | None) -> datetime | None:
+    """Parse an ISO-8601 timestamp and reject timezone-naive values."""
     if not text:
         return None
+    text = text.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
     for fmt in (TS_FMT, "%Y-%m-%dT%H:%M:%S.%f%z"):
         try:
-            return datetime.strptime(text, fmt)
+            parsed = datetime.strptime(text, fmt)
+            return parsed if parsed.tzinfo is not None else None
         except ValueError:
             pass
     try:
-        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(text)
+        return parsed if parsed.tzinfo is not None else None
     except ValueError:
         return None
 
@@ -424,6 +430,7 @@ def append_session_record(registry: Path, record: dict[str, Any]) -> bool:
                     and existing.get("status") == record.get("status")
                     and existing.get("thread_id") == record.get("thread_id")
                     and existing.get("exit") == record.get("exit")
+                    and (record.get('dispatcher') != 'native' or existing == record)
                 ):
                     return False
             _ensure_trailing_newline(handle)
@@ -452,7 +459,8 @@ def write_shell_out(path: Path, record: dict[str, Any]) -> None:
         "DISPATCH_TURNS": record.get("turns"),
         "DISPATCH_USAGE_INPUT": usage.get("input"),
         "DISPATCH_USAGE_OUTPUT": usage.get("output"),
-        "DISPATCH_USAGE_TOTAL": sum(int(usage.get(k) or 0) for k in USAGE_KEYS),
+        "DISPATCH_USAGE_TOTAL": (sum(int(usage.get(k) or 0) for k in USAGE_KEYS)
+                                 if record.get('usage') is not None else None),
     }
     lines = []
     for key, value in fields.items():
@@ -521,6 +529,120 @@ def _atomic_write(path: Path, content: str) -> None:
 
 def telemetry_dir(args: argparse.Namespace) -> Path:
     return args.repo_root.resolve() / TELEMETRY_SUBDIR
+
+
+def native_rollout(path: Path, thread: str, *, role: str = 'orc', job_class: str = 'general',
+                   requested_model: str | None = None, hardness_reason: str | None = None,
+                   grandfathered: bool = False, activation_at: str | None = None) -> dict:
+    """Read only attributable native metadata; never serialize credential-home paths."""
+    rows, errors = read_jsonl(path)
+    if errors:
+        raise ValueError('malformed native rollout')
+    meta = next((row for row in rows if row.get('type') == 'session_meta' and
+                 row.get('payload', {}).get('id') == thread), None)
+    if not meta:
+        raise ValueError('native thread identity missing')
+    source = meta['payload'].get('source', {})
+    spawn = source.get('subagent', {}).get('thread_spawn', {}) if isinstance(source, dict) else {}
+    result = dict(thread_id=thread, parent_thread_id=spawn.get('parent_thread_id'),
+                  agent_path=spawn.get('agent_path'), start=meta['timestamp'],
+                  end=None, final=None, assigned=None, turn_start=None, observed_usage=None)
+    turn = None
+    contexts, child_turns, first_assignment = {}, set(), None
+    # Forks copy parent events with rewritten timestamps; require a child assignment.
+    for row in rows:
+        payload = row.get('payload', {})
+        if row.get('type') == 'turn_context':
+            context = dict(model=payload.get('model'), effort=payload.get('effort'))
+            if payload.get('turn_id'):
+                contexts.setdefault(payload['turn_id'], []).append(context)
+            elif turn:
+                contexts.setdefault(turn, []).append(context)
+        elif (row.get('type') == 'response_item' and payload.get('type') == 'agent_message' and
+                payload.get('author') == spawn.get('agent_path', '').rsplit('/', 1)[0] and
+                payload.get('recipient') == spawn.get('agent_path')):
+            result.update(assigned=row['timestamp'], end=None, final=None)
+            first_assignment = first_assignment or row['timestamp']
+            child_turns.add(turn)
+        elif row.get('type') == 'event_msg':
+            if payload.get('type') == 'task_started':
+                turn = payload.get('turn_id')
+                result.update(end=None, final=None, turn_start=row['timestamp'])
+                if first_assignment:
+                    child_turns.add(turn)
+            elif (payload.get('type') == 'task_complete' and result['assigned'] and turn and
+                  payload.get('turn_id') == turn):
+                result.update(end=row['timestamp'], final=payload.get('last_agent_message'))
+            elif payload.get('type') == 'token_count' and result['assigned']:
+                usage = (payload.get('info') or {}).get('total_token_usage')
+                if isinstance(usage, dict):
+                    observed = {key: usage[key] for key in ('input_tokens', 'cached_input_tokens',
+                        'output_tokens', 'reasoning_output_tokens', 'total_tokens')
+                        if type(usage.get(key)) is int and usage[key] >= 0}
+                    if observed:
+                        result['observed_usage'] = observed
+    from model_policy import load_policy, observe_model
+    if grandfathered and load_policy()['schema_version'] != 0:
+        activation, started = parse_ts(activation_at), parse_ts(result['turn_start'])
+        if not activation or not started or started >= activation:
+            raise ValueError('grandfathered task requires verified pre-activation turn evidence')
+    active_contexts = contexts.get(turn, [])
+    if not active_contexts:
+        raise ValueError('native effective model requires bound current-turn context')
+    for context in active_contexts:
+        selection = observe_model(role, job_class, context['model'], context['effort'],
+                                  requested_model, hardness_reason, grandfathered)
+    if any(context != active_contexts[0] for context in active_contexts):
+        raise ValueError('mixed current-turn model/effort contexts are not admissible')
+    if not child_turns or any(not contexts.get(child_turn) for child_turn in child_turns):
+        raise ValueError('native affinity requires bound context for every attributable child turn')
+    if any(context != active_contexts[0]
+           for child_turn in child_turns for context in contexts[child_turn]):
+        raise ValueError('resuming an existing native thread cannot switch its model or effort')
+    result.update(model=active_contexts[-1]['model'],
+                  requested_effort=active_contexts[-1]['effort'], model_contexts=active_contexts)
+    result.update(requested_model=requested_model,
+                  selected_model=selection['model'] if requested_model is not None else None,
+                  effective_model=result['model'], first_assignment=first_assignment,
+                  job_class=job_class, model_policy=selection)
+    return result
+
+
+def record_native(args: argparse.Namespace) -> int:
+    activation = getattr(args, 'activation_at', None) or os.environ.get('MIPSTARRE_MODEL_POLICY_ACTIVATION_AT')
+    observation = native_rollout(args.rollout, args.thread_id, role=args.role,
+        job_class=getattr(args, 'job_class', 'general'),
+        requested_model=getattr(args, 'requested_model', None),
+        hardness_reason=getattr(args, 'hardness_reason', None),
+        grandfathered=getattr(args, 'dispatch_kind', 'grandfathered') == 'grandfathered',
+        activation_at=activation)
+    end = observation['end']
+    if args.status == 'done' and not end:
+        raise ValueError('native turn has not completed')
+    kind = getattr(args, 'dispatch_kind', 'grandfathered')
+    if observation['parent_thread_id'] != args.root_thread_id:
+        raise ValueError('native observation root does not match actual parent')
+    first, turn = parse_ts(observation['first_assignment']), parse_ts(observation['turn_start'])
+    activated, started = parse_ts(activation), parse_ts(observation['start'])
+    if activated and started and started >= activated and first and turn and turn <= first:
+        kind = 'new'
+    if kind == 'new':
+        if not first or not turn or turn > first:
+            raise ValueError('a resumed native task is not a new dispatch')
+        if not activated or not started or started < activated:
+            raise ValueError('new dispatch must follow its explicit activation boundary')
+    record = {key: value for key, value in observation.items() if key != 'final'}
+    record.update(name=args.name, role=args.role, issue=args.issue, pr=args.pr,
+                  worktree=str(args.worktree), root_thread_id=args.root_thread_id,
+                  key_label=args.key_label, account=args.key_label, dispatcher='native',
+                  dispatch_kind=kind, activation_at=activation,
+                  status=args.status, usage=None, usage_scope='unknown',
+                  usage_provenance='rollout token_count.total_token_usage; not additive',
+                  wire_effort=None, returned_effort=None,
+                  wall_s=(parse_ts(end) - parse_ts(observation['start'])).total_seconds()
+                  if end else None)
+    append_session_record(telemetry_dir(args) / 'sessions.jsonl', record)
+    return 0
 
 
 def cmd_session_summarize(args: argparse.Namespace) -> int:
@@ -602,6 +724,28 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
     )
     if args.continuation_json:
         record['continuation'] = json.loads(args.continuation_json)
+    if getattr(args, 'model_policy_file', None):
+        selection = json.loads(args.model_policy_file.read_text())
+        if (selection.get('model') != args.model or selection.get('role') != role or
+                selection.get('requested_effort') != args.requested_effort):
+            fail('model policy snapshot differs from the dispatched configuration')
+        observed = [event.get('payload', {}).get('model') for event in events
+                    if event.get('type') == 'turn_context' and event.get('payload', {}).get('model')]
+        mismatch = any(model != args.model for model in observed)
+        record.update(requested_model=selection['requested_model'], selected_model=args.model,
+                      effective_model=observed[-1] if observed and len(set(observed)) == 1 else None,
+                      job_class=selection['job_class'], model_policy=selection,
+                      dispatch_kind=getattr(args, 'dispatch_kind', None),
+                      activation_at=getattr(args, 'activation_at', None))
+        if mismatch:
+            record.update(status='failed', model_policy_mismatch=True)
+    if args.key_label:
+        record.update(key_label=args.key_label, wire_effort=None, returned_effort=None,
+                      usage_provenance='codex exec turn.completed; native delegation disabled')
+        if not turns:
+            record.update(usage=None, usage_scope='unknown')
+        if record.get('rollout'):
+            record['rollout'] = Path(record['rollout']).name
 
     if args.append_to is not None:
         appended = append_session_record(args.append_to, record)
@@ -614,7 +758,7 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         write_shell_out(args.shell_out, record)
 
     sys.stdout.write(json.dumps(record, ensure_ascii=False) + "\n")
-    return 0
+    return 4 if record.get('model_policy_mismatch') else 0
 
 
 def cmd_session_status(args: argparse.Namespace) -> int:
@@ -749,7 +893,12 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument("--name", help="session name (default: capture file stem)")
     summarize.add_argument("--role", choices=ROLES, help="agent role")
     summarize.add_argument("--model", help="explicitly selected Codex model")
+    summarize.add_argument('--model-policy-file', type=Path,
+                           help='immutable dispatch-time model-selection snapshot')
+    summarize.add_argument('--dispatch-kind', choices=('new', 'resume', 'grandfathered'))
+    summarize.add_argument('--activation-at')
     summarize.add_argument("--account", choices=("primary", "second"))
+    summarize.add_argument('--key-label', choices=('relay-1', 'space', 'unknown'))
     summarize.add_argument("--continuation-json", help="validated checkpoint and shared budget link")
     summarize.add_argument(
         "--requested-effort",
@@ -794,6 +943,23 @@ def _build_parser() -> argparse.ArgumentParser:
         help="write shell-quoted DISPATCH_* assignments here for the caller",
     )
     summarize.set_defaults(func=cmd_session_summarize)
+
+    native = subparsers.add_parser('native-record', help='record a native thread observation')
+    native.add_argument('rollout', type=Path)
+    for option in ('name', 'thread-id', 'root-thread-id', 'issue'):
+        native.add_argument('--' + option, required=True)
+    native.add_argument('--role', choices=ROLES, required=True)
+    native.add_argument('--key-label', choices=('relay-1', 'space'), required=True)
+    native.add_argument('--worktree', type=Path, required=True)
+    native.add_argument('--pr')
+    native.add_argument('--job-class', default='general')
+    native.add_argument('--hardness-reason')
+    native.add_argument('--dispatch-kind', choices=('new', 'resume', 'grandfathered'),
+                        default='grandfathered')
+    native.add_argument('--activation-at')
+    native.add_argument('--requested-model', choices=('gpt-6-astra', 'gpt-5.6-sol', 'auto'))
+    native.add_argument('--status', choices=('active', 'done', 'failed'), required=True)
+    native.set_defaults(func=record_native)
 
     status = subparsers.add_parser(
         "session-status",

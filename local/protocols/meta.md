@@ -64,6 +64,9 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
   supply `account` (`primary` or `second`) and the exact resolved `model`
   passed to the CLI (environment override, otherwise selected-account config).
+  External rows use allocator accounts `primary|second`; native rows use the
+  active key label (`space` or historical `relay-1`) in both `account` and
+  `key_label`, with `dispatcher: native`.
   When the dispatcher supplies a reasoning override, `requested_effort` is its
   effective value after model-specific normalization. It records the CLI request,
   not provider-measured effort. All three fields remain optional for historical
@@ -82,9 +85,18 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 
 Duties:
 
-- **Every Codex session goes through `dispatch.sh`** so token usage and wall
+- **Every external Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
+- Historical native descendants were recorded with `telemetry.py native-record`
+  under `sessions.md`:
+  `dispatcher: native`, root/parent IDs, key label, actual model/requested effort,
+  worktree, timestamps and status. `observed_usage` preserves raw cumulative rollout
+  counters, but `usage` remains null with `usage_scope: unknown`; parent inclusion
+  of descendants is unverified. Never convert missing usage to zero or sum these
+  observations. Private homes and credential data are not serialized. Requested
+  CLI Ultra is distinct from wire/returned Max seen in owner migration receipts;
+  absent request-specific wire evidence stays null, not inferred from configuration.
 - **Every full build** (warmer, CI, cold rebuild) lands in `builds.jsonl`.
 - **Stage transitions** are logged by the orchestrator (main session) at the
   moment they happen, not reconstructed later.
@@ -93,6 +105,21 @@ Duties:
   entries with token totals, since they bypass `dispatch.sh`.
 
 ## Research-data invariants
+
+Model-policy records (#301) retain `requested_model`, `selected_model`,
+`effective_model` only when observed, `job_class`, and `model_policy` with
+routine/hard classification and the explicit hardness/escalation rationale.
+External capture without model evidence records effective model as null, not the
+CLI argument. Historical native observations retain all bound current-turn contexts; mixed
+models/efforts and requested/observed mismatches fail closed. Prior/forked contexts
+are not attributed to a new job. Requested effort remains distinct from provider
+effort; missing usage remains unknown and historical records are not rewritten.
+`dispatch_kind` is new/resume/grandfathered; `activation_at` fixes the accounting
+boundary. Ratio reports count actual distinct new threads with matching observed
+and selected models, with a rolling 100-dispatch window and separate cumulative
+counts. Unknowns may resolve from later observations; conflicts remain unknown.
+Main, pre-activation workers and resumes do not count. Preserve predecessor and
+cumulative-budget links recorded when a model change required a fresh native identity.
 
 The project doubles as a study of a self-evolving formalization workflow.
 Three artifacts must therefore stay trustworthy:

@@ -929,3 +929,322 @@ review precede deployment; this amendment does not install or start anything.
 identities, diagnostic-only refusals and preserved Lake-root export; consolidate
 duplicate protocol exposition under `useful-queue.md`. **Expected effect:** correct
 reservations and holds within the original episode cap; deployment remains gated.
+
+## 2026-09-07 — Space-cap5 merge-service checkpoint
+
+**Trigger:** `events.md`, "space-cap5 merge-service checkpoint"; legacy daemon
+v8 remains SIGSTOPped after its recorded SSH reset. **Change:** the bounded
+owner service records local/remote `main` SHAs, primary dirt, transport and
+lock state, the oldest exact-head CI/review-eligible PR age, and the concrete
+HOLD reason before delegating any merge. Space capacity 5 and external gate 0
+are required; successful daemon-owned merges re-read remote `main`. **Expected
+effect:** dirty-primary and stale-head stalls remain visible, and no worker or
+ manual path can merge around the exact-head gate. Git/GitHub reads are bounded,
+ per-tick failures become HOLD records, cadence is monotonic, and stale and
+ fresh candidates are reported separately without claiming an eligibility onset.
+
+## 2026-09-06 — Scoped native QPBT allocation switched to space/cap5
+
+**Trigger:** owner switch receipt `space-cap5-switch-20260906.json` and
+`events.md`, "space five-total native allocation". **Change:** the active QPBT
+queue now counts the main once plus at most four actual native descendants on
+the `space` account; external admission stays zero. Completion/failure/
+unblock/compaction events require prompt disjoint successor reassessment, with
+vacancy duration and concrete reasons recorded. Relay-1/cap8 observations
+remain historical and are not reclassified. **Expected effect:** no stale
+account labels or occupancy claims while preserving all proof, review, CI and
+merge gates.
+
+## 2026-09-06 — Literal Ultra and shared native accounting
+
+**Trigger:** PR287's owner-authorized native workflow repair, following the
+space/cap5 switch recorded above; historical relay-1 and cap8 observations remain
+unchanged. **Change:** external dispatch, review, autofix, shim and useful-queue
+effort checks require literal Ultra. A native root lease charges its verified
+shared descendant cap against the same owner allocation, while native telemetry
+retains unknown usage aggregation and explicit key labels. The nonce-bound native
+review transport re-derives exact-head evidence from the live root, and session
+policy records disjoint successor chains and activity-based vacancy reasons.
+**Expected effect:** native mathematics and independent review can proceed under
+the current space five-total allocation without stale account labels, double
+admission, or manufactured review receipts. CLI Ultra selection is not a claim
+about backend compute equivalence.
+
+
+## 2026-09-06 — Conservative Astra prompting and descriptive PR labels (#291)
+
+**Trigger:** Owner migration/order and missing-label reports; events.md entry
+"Conservative Astra instructions and PR label publication" records the completed
+prior repair, conflicting persona instructions, and 22 unlabeled open PRs.
+
+**Change:** main.md uses bounded event-driven checks, useful shared-capacity
+delegation, autonomous follow-through and calibrated validation. issues-prs.md
+records descriptive-label inheritance and the new pre-publication classification
+requirement, plus the current permission-only owner-inbox boundary. PR290 owns
+the existing native route/lease/review implementation; its mechanics are unchanged.
+
+**Expected effect:** Fewer repeated scans and stale-instruction pauses; new or
+adopted PRs carry descriptive labels without implicitly enabling automation.
+**Outcome:** Pending focused tests, ordinary gates, and post-restart observation.
+
+
+## 2026-09-06 — Publish the final main snapshot in an explicit sync (#291)
+
+**Trigger:** events.md "Snapshot publication regression in migration #291";
+real-Git regressions show the valid main sync returned success with local main
+ahead because it committed the record snapshot after publication.
+**Change:** github-sync.sh retains the snapshot timing and, only after a successful
+requested main push and snapshot commit, checked-pushes main once more. Branch-only
+scope is unchanged; commit/publication failures return nonzero. issues-prs.md
+documents the argument and outcome contracts.
+**Expected effect:** An explicit successful main sync leaves its own snapshot
+published, so the merge service does not stall on that avoidable local-only commit.
+**Outcome:** Nine offline tests pass; three baseline regressions demonstrate the
+old failure. Final CI/review and deployed observation remain pending.
+
+## 2026-09-07 - Audit-qualified bounded model routing (#301)
+
+**Trigger:** Owner instruction and the independent C01/C02 audit/validation,
+recorded in events.md under issue #301; no blanket Sol capability claim.
+**Change:** Published-main model policy permits only root-issued exact nonsemantic
+cleanup recipes, bounded to two existing Lean files/twelve changed lines.
+Shared selectors validate class/model/Ultra, root-issued request and native
+assignment provenance; exact artifact checks retain normal CI/Astra-review/merge
+gates. Requested/selected/observed model fields are distinguished. Root/default
+Astra, allocation, permission, credential and external-zero guards are unchanged.
+**Expected effect:** Use only demonstrated bounded execution without delegating
+mathematical, blueprint-status or runtime authority to the cheaper model.
+**Outcome:** Focused tests pass; canonical CI/review/deployment remain pending.
+The shared owner episode began about 13:40Z, with a 15:40Z/1000-line boundary;
+the author's 14:06:27Z start is a subphase, not a budget reset.
+
+## 2026-09-07 - Owner supersedes cleanup-only routing (#301)
+
+**Trigger:** Owner scope comment5573256033 and renewed completion priority,
+recorded in events.md; preserved f43be38 and audit remain historical evidence.
+**Change:** Sol/Ultra becomes the routine/bounded subagent and routine-review
+default. Hard/escalated Astra requires a reason. Root identity stays Astra and
+validates both the grandfathered Astra child default and the reviewed Sol default.
+The latest Space allocation is five total/three descendants/external0, untouched
+by this implementation. Native model contexts, true new-dispatch identity and
+pre-activation grandfathering evidence remain checked; actual dispatch ratios
+report rolling and cumulative counts without filler or delaying hard jobs.
+**Expected effect:** Broader routine delegation implements owner policy without
+claiming broader capability evidence from the earlier two-case audit.
+**Outcome:** Renewed work continues the same approximately 13:40Z episode beyond
+its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
+allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
+CI/control-policy review/publication gates are recorded separately. No activation yet.
+
+## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
+
+**Trigger:** `events.md`, "PR #350 blueprint PDF false success", records a
+fatal undefined command whose nonzero PDF exit was hidden by a stale artifact
+and later successful renderer commands.
+
+**Change:** `ci.sh` removes the prior `print.pdf` and runs the checked-in
+`latexmk` configuration directly with noninteractive halt-on-error behavior.
+It stops `blueprint-render` on any compiler failure or missing fresh non-empty
+output. This bypasses the observed wrapper-success/inner-exit-12 boundary.
+Isolated fake-tool tests also cover a fresh partial PDF from that boundary.
+
+**Expected effect:** fatal TeX errors remain blocking exact-head evidence even
+when a worktree contains an older PDF or the failed compiler leaves a fresh
+partial one, while a successful fresh render keeps the existing bbl, web,
+manifest, and publication behavior.
+
+## 2026-09-08 - Resume completed native code-review publication (#366)
+
+**Trigger:** `results/telemetry/events.md` entries "Native review publisher
+recovery for PRs #320 and #355" and "PR #358 review-format recovery" record
+valid native responses stranded after their original `review.sh` publishers
+terminated. **Change:** `review.sh --resume-native-request` consumes one existing
+single-code-lane request through a new guarded `native_review.py accept` command,
+then reuses the normal parser, combiner, final-head check and idempotent publisher.
+The continuation rechecks the live root, complete author exclusions, model/Ultra
+policy, prompt digest, CI, clean exact head, lock and prior publication evidence;
+it creates no request or model turn and rejects prose combinations. **Expected
+effect:** a late native response can reach the canonical review record without
+manual body reconstruction or a duplicate reviewer, while every existing review
+and merge gate remains authoritative. **Outcome:** focused offline regression and
+normal CI/independent review are required before deployment.
+
+## 2026-09-08 - Activate prepared successors before receipt adoption (#418)
+
+**Trigger:** `results/telemetry/events.md`, "Completion handoff ordering and
+source-deadline correction"; the owner-directed regular lifecycle audit found
+only 26 of 65 valid sampled minutes at or above eight useful native workers,
+including gaps of approximately 10.5 minutes and more than six minutes.
+
+**Change:** `sessions.md`, `useful-queue.md`, `main.md`, `DESIGN.md`, and the
+integration-checkpoint wording in `issues-prs.md` now record the active Space
+total of ten sessions, native target nine and floor eight, with external admission
+zero. Main and the capable coordinator validate useful, disjoint primary and alternate
+successor records while slots are occupied and record `ready_at`. Operational readiness
+requires current heads or source snapshots, actually published inputs, eligible roles,
+current unique operation ownership, complete hash-bound dispatch bodies and deadline rules,
+and a separately
+validated alternate or an exact no-alternate blocker; descriptive input strings or a
+nominal successor line do not qualify. On real completion they perform
+only the remaining capacity, identity, ownership, intent, and deadline checks before
+the actual native follow-up or spawn call; detailed predecessor receipt and rollout
+adoption follows successor start verification. Each activation payload carries an
+absolute source deadline no later than its native call plus the authorized limit,
+and continuations retain earlier deadlines, so silence before first progress remains
+charged. Coordinator-owned latency evidence records the
+predecessor terminal event, `ready_at`, activation call, current successor turn,
+first useful output, source deadline, and real blockers. The historical one-shot
+executor is explicitly not the native controller and receives no code change.
+
+**Expected effect:** ready work occupies a released native slot before forensic
+adoption consumes the vacancy, without weakening source, budget, ownership,
+review, model, or capacity gates. Backlog recovery and closing snapshots cannot
+be reported as prompt or sustained coverage. **Outcome:** the pre-merge
+coordinator batch records two missed transitions at 294.078 and 354.659 seconds
+from predecessor completion to actual successor start; both have no `ready_at`,
+and the latter was not fully prevalidated before completion. Its later count of
+nine occupied slots is recovery, not acceptance. Canonical CI, independent hard
+control-policy review, and normal merge remain required. Runtime acceptance then
+requires a natural post-merge completion transition in the coordinator-owned
+batch with the prescribed ordering; sustained coverage remains a separate
+interval observation.
+
+## 2026-09-08 - Preseal ordinary successor activation messages (#471)
+
+**Trigger:** the owner decision recorded in issue #471 and the read-only proposal
+`/tmp/qpbt-ordinary-successor-prevalidation-20260909.json` with SHA-256
+`c93a44f1d711444d0428e391c2abd40ca2a8f3617c4a6126f521afa32ead727e`.
+Two selected handoffs took 63.076 and 73.171 seconds, including 27.727 and
+29.391 seconds between notification and the native call while long ordinary
+arguments were partly regenerated. Coverage remains 66.95% of 119.63 valid
+minutes; earlier 116.521- and 134.213-second misses remain failures.
+
+**Change:** `sessions.md`, `useful-queue.md`, and the #471 brief permit only
+ordinary proof and CI-handoff records to bind an immutable full-contract path
+and SHA-256 plus an exact short activation message sealed before predecessor
+completion. Activator and actor both verify the hash and current prerequisites;
+the actor reads the full contract before mutation. The budget remains anchored
+to actual native `task_started`, bounded by the presealed absolute and inherited
+deadlines. Existing full messages remain valid. Canonical review assignments
+retain literal nonce/head/prompt-digest/root bindings and consumer holds.
+
+**Expected effect:** ordinary activation can avoid regenerating long arguments
+after completion without weakening scope, ownership, model, capacity, budget,
+review, CI, merge, or telemetry guards. **Outcome:** pending exact-head CI,
+independent hard control-policy review, normal merge, and a later runtime
+observation; documentation alone does not establish improved pool coverage.
+
+## 2026-09-09 - Resume completed combined native reviews
+
+**Trigger:** owner assignment of the actual PR #400 consumer recovery, tracked
+in issue #475. The publisher terminated with two genuinely completed responses;
+the existing continuation rejected its blueprint diff before consumption.
+The primary coordinator retains the incident and prior costs in telemetry.
+
+**Change:** `review.sh` accepts an explicit completed prose request alongside
+the code request when the diff requires both lanes. Both trust envelopes are
+validated through `native_review.py`; the existing parser, combiner, CI, lock,
+head and publication guards remain authoritative. Resume scratch files are
+separate from canonical prompts and outputs, and independently rebuilt prompts
+must match the exact bound digest. Invalid combined evidence publishes nothing.
+
+**Expected effect:** a dead combined publisher can complete without launching
+another review or weakening the author/reviewer hold. Activation requires normal
+CI, independent hard control-policy review and merge. The PR #400 source repair
+and held reviewers remain frozen until canonical consumption succeeds.
+
+**Outcome:** PR #476 passed one canonical exact-head CI run in 249 seconds with
+all nine contexts green, and independent hard review `5147206622` approved the
+control path with no findings. The service gate merged it as
+`81148545f0752ec09b3efe88332b49bb771312be`. The primary used a finite
+same-inode telemetry boundary rather than waiting for unrelated writers. The
+merged continuation then consumed the preserved PR #400 CODE and PROSE
+responses and published canonical failure review `5147250926` with seven
+unresolved findings. It launched no new model turn, edited no response or
+source, and released the old reviewer and source holds. PR #400 remains
+ineligible to merge until its isolated repair proceeds through normal checked
+publication, CI, and fresh independent review.
+
+## 2026-09-09 - Simplify dispatcher worker reservations (#505)
+
+**Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
+and the issue #505 implementation entry for `orc-505-20260909-01`.
+**Change:** `sessions.md` and `DESIGN.md` define marker-only reservations using
+the two worker caps, missing as zero, ratio selection and 10-second polling.
+The router and shim drop retired gates; native lease and queue entrypoints are
+retired, and `useful-queue.md` becomes historical. Resume/model affinity,
+telemetry, fan-out restrictions and publication/review gates remain enforced.
+**Expected effect:** free configured worker slots are usable without the retired
+Space admission machinery. Installed qpbt-switch retirement belongs to the meta
+session; this branch changes neither that command nor live caps. Runtime effect
+is unverified until checked publication, independent review and deployment.
+
+## 2026-09-09 - Complete native review retirement (#505)
+
+**Trigger:** PR #508 review F1 found that a stale
+`MIPSTARRE_NATIVE_REVIEW_ROOT` export still diverted `review.sh` into the
+disabled lease-backed handler, while active operator prose still required the
+retired native pool. This is the review-facing remainder of the
+`results/telemetry/events.md` 2026-09-09T11:22Z stale-HOLD incident.
+**Change:** `review.sh` sends every new review through external `dispatch.sh`
+and clears inherited native-review variables after warning. `review.md`, the
+main persona, and active workflow summaries now direct new work through marker-
+reserved external dispatch; the former native review procedure remains marked
+as historical. **Expected effect:** stale shell configuration cannot strand a
+review in the retired lease verifier, and operators no longer receive mutually
+exclusive native-lease and external-capacity instructions.
+
+## 2026-09-09 - Tolerate telemetry-only base movement at merge (#498)
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-09 — Meta intervention:
+stalled \"Space\" main session replaced; detached-worker architecture
+reinstated", and the later same-day approved-refresh entries. Telemetry snapshot
+commits moved `main` while exact-head CI and review lanes were completing, so
+otherwise ready pull requests became stale without a source or blueprint change.
+Owner comment `5599043067` at `2026-09-09T08:45:54Z` delegated the B9 decision
+to main; main authorized option B with the conservative data-and-mode scope
+recorded below.
+
+**Change:** `pr_merge.py` gate 2b and its daemon-facing freshness helper retain
+base ancestry as the fast path. When ancestry fails, they parse NUL-delimited
+raw Git changes with rename detection disabled and accept only regular
+non-executable `.md`/`.jsonl` files below `results/telemetry/` and generated
+regular non-executable `.json` files below the exact
+`results/telemetry/github-snapshot/` subtree. Python, shell, JavaScript and other
+code; executable modes and mode changes; symlinks; unknown or boundary paths;
+and all nontelemetry paths remain freshness-relevant. Additions, deletions and
+renames are checked by path and tree mode. Missing merge bases, malformed raw
+records and failed Git commands still refuse. `issues-prs.md` records the rule,
+and `review.md` limits review carry-forward to refreshes still required by it.
+
+**Scope disposition:** PR #499 review F2 names the retired Space merge service.
+Main disposition is out of scope: this repair does not revive, edit or restart
+that service. The active v9f daemon must consume the accepted
+`pr_merge.head_is_fresh` predicate in a separately checked rollout after this
+change merges; no running daemon or rollout script is changed here.
+
+**Expected effect:** telemetry publication no longer serializes all otherwise
+mergeable pull requests behind another refresh lane, while executable telemetry
+tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
+symlink, unknown-path or other non-allowlisted base change still requires
+refresh, exact-head CI and independent review; all other merge gates are
+unchanged.
+
+## 2026-09-12 - Reconcile PR260 standing guidance with current main
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-12 - PR260 standing
+policy merge recovery", and the requested merge of `ae124f8f` into PR #260.
+
+**Change:** reconcile the main persona and issues/PR protocol with main's
+Sol/Astra Ultra selection, configured account caps and retired native queue,
+while retaining autonomous useful-work reassessment, the explicit B7/B8 return
+to main and cumulative budget records. The orchestrator's mathfix instruction
+uses current Ultra effort. Review carry-forward keeps main's narrow passive
+telemetry freshness exception and the PR's existing review-cap restriction.
+The shim uses main's single attached-model parser; the PR's normalization tests
+remain, with current model/effort expectations. Historical event paragraphs
+lost by the automatic merge are appended verbatim.
+
+**Expected effect:** refreshing this older policy branch preserves its useful
+duties and evidence without reinstating superseded runtime admission rules,
+losing model-option coverage, or weakening proof, review or merge gates.

@@ -356,6 +356,14 @@ branch and owns the branch-name lint (`local/protocols/issues-prs.md`).
     local/bin/review.sh 7 --dry-run      # build diff and prompts, dispatch nothing
     LOCAL_REVIEW_ENABLED=false local/bin/review.sh 7    # confirm the kill switch
 
+Issue #505 retired lease-backed native review. Before running a current review,
+remove any legacy shell exports so they cannot be mistaken for active routing:
+
+    unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS
+
+Every new code or prose review runs through `local/bin/dispatch.sh` and the
+worker-cap reservations in `sessions.md`.
+
 Exit codes: `0` reviewed or intentionally skipped · `1` usage/environment ·
 `3` gate blocked (CI not green for this head) · `4` no parseable verdict.
 Code 3 publishes nothing at all — the missing green `local-review/summary` is
@@ -373,15 +381,81 @@ Artefacts:
 | `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.raw.md` | no | complete resolver output retained locally |
 | `~/.cache/mipstarre-dev/locks/review-<pr>.lock` | no | the review lock |
 
-Every codex invocation goes through `local/bin/dispatch.sh` when it exists, so
+Every current codex invocation goes through `local/bin/dispatch.sh`, so
 the session is named, captured to `results/telemetry/sessions/<name>.jsonl` and
 summarised into `results/telemetry/sessions.jsonl`
-(`local/protocols/sessions.md`).  Without the dispatcher, `review.sh` falls
-back to a direct `codex exec` and says loudly that the session will not appear
-in the registry — an untracked session is lost research data, so the fallback
-is a degradation, not an alternative.  `dispatch.sh` enforces
+(`local/protocols/sessions.md`). A missing dispatcher fails closed. `dispatch.sh` enforces
 `LOCAL_REVIEW_ENABLED` for reviewer-role sessions independently; the two checks
 agreeing is intentional redundancy.
+
+### Historical native review transport (retired by #505)
+
+The remainder of this subsection records the former transport for interpreting
+archived requests. It is not an operating procedure: `native_review.py` now
+rejects lease-backed roots, and current reviews use external dispatch as described
+above.
+
+Before retirement, with external admission held at zero, main could set
+`MIPSTARRE_NATIVE_REVIEW_ROOT` and `MIPSTARRE_NATIVE_REVIEW_AUTHORS` (all author
+thread IDs, comma-separated).
+The unchanged trusted `review.sh` prepares separate code/prose prompts only after
+green exact-head CI. `native_review.py request` creates a nonce-bound request under
+`CACHE/native-reviews`; main assigns an independent child a fresh turn to read the
+entire referenced trusted prompt and review the pinned worktree. The child includes
+`Native review binding: NONCE HEAD PROMPT_SHA256` as a separate line before the
+normal final `VERDICT` line. Existing independent reviewers may revalidate on a new
+parent-assigned turn after request creation; an old completion alone is insufficient.
+
+After the child actually completes, the operator calls
+`native_review.py complete REQUEST_JSON CHILD_THREAD`. Both producer and waiting
+consumer re-read the canonical live root's rollout, verify direct parentage,
+independence, fresh assignment/current-turn completion and the request's recorded
+routine/hard model decision with Ultra, including every bound-turn model context
+(a final context cannot conceal an earlier different model),
+prompt digest and exact worktree head. The mailbox supplies only identity; its
+verdict text is never trusted. Fork-inherited parent completions cannot qualify.
+Normal `review.sh` parsing, review ledger, exact-head COMMENT/status publication,
+kill switches, round cap and merge ownership remain unchanged. A timed-out
+observation does not prove the child stopped: inspect its live handle before reuse
+or restart. Review transport deployment itself still needs independent review.
+
+A terminated publisher may be continued with
+`review.sh PR --resume-native-request CODE_REQUEST_JSON`. A diff touching
+`blueprint/` also requires `--resume-native-prose-request PROSE_REQUEST_JSON`;
+the two requests must be distinct and both completed lanes must validate.
+A prose request is rejected when the diff does not touch `blueprint/`. The command creates
+no nonce and invokes no model. It takes the ordinary per-PR review lock without
+waiting; a live publisher is a conflict, while a dead holder is reclaimed by the
+existing stale-lock rule. Under that lock it rechecks green exact-head CI, the
+round cap, the absence of an exact-head review and `local-review/summary`, the
+current clean worktree, and the final head before publication.
+
+`native_review.py accept` requires the canonical request and response files under
+the configured cache mailbox. It matches the request's PR, head, repository,
+worktree, canonical standalone prompt and digest, independently rebuilt prompt,
+live root, complete author
+exclusion set, activation boundary, requested/effective model and literal Ultra
+policy against the current invocation, then reuses the ordinary rollout
+validation and telemetry record. The unchanged parser, lane writer, combiner and
+idempotent `gh_common.py` publisher consume the resulting final messages. A resume
+uses a fresh scratch directory and retains the original prompt paths inside the
+rebuilt task text, leaving canonical prompts and old outputs unchanged. It does
+not change the reviewed worktree's sparse-checkout state. A failed acceptance in
+either lane, or an unparseable completed verdict in a combined resume, publishes no review or
+summary. Queued, dry-run, stale, mismatched, already-published, or concurrently
+published continuations fail closed. Reviewer reuse and source mutation remain
+held until the canonical publisher consumes the responses; local acceptance of
+one lane alone does not release either hold.
+
+Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
+For a genuinely hard/semantic/control-policy review main sets `hard_review` and
+`MIPSTARRE_REVIEW_HARDNESS_REASON`; it selects Astra and records that reason in
+the native request. Explicit conflicting model overrides fail. The model choice
+does not change identity independence, author exclusion, CI or any merge gate.
+Existing Astra reviewers need a fresh explicit Sol spawn for future routine jobs,
+not a follow-up treated as a model switch. This control-policy PR itself requires Astra.
+
+### Current failure semantics
 
 Missing pieces degrade with a message, never silently: missing CI statuses
 block, no `worktree-setup.sh` warns about a cold build cache, no codex CLI is a
@@ -444,19 +518,22 @@ no B7 disposition and claims no review or proof result.
 
 ## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
 
-The merge gate's fresh-base rule (issues-prs.md, gate 2b) moves a PR's head
-every time `main` advances, but a merge of `main` into the branch does not
-change the PR's own patch.  `review.sh` therefore compares a whitespace-
-sensitive hash of the patch (the diff without its `index`/hunk-header lines,
-so hunk positions may move but no byte of content may) with that of every
-earlier reviewed head of the same PR whose review is bound to that head and
-published by the lane's account; on a match it republishes that head's verdict
-and ledger as the exact-head review of the new head, marked "Carried forward
-from <sha>" (marker `<!-- mipstarre-review-carried from=<sha> -->`; a carried
-review is not a review round and is never itself a carry source), and posts the matching
-`local-review/summary` — without dispatching the reviewer.  Adverse verdicts
-are carried too, so an adjudication at the new head remains possible.  Any
-change to the patch (a repair, a conflict resolution) yields a different
-patch-id and requires a real review within §12's cap; at the cap, missing
-exact-head evidence remains blocked. `--force-review` bypasses the fast path,
-not the cap or any evidence requirement.
+When `main` advances through any freshness-relevant path or mode, the merge
+gate's fresh-base rule (issues-prs.md, gate 2b) requires a refreshed PR head,
+but a merge of `main` into the branch does not necessarily change the PR's own
+patch. An advance containing only the narrowly allowlisted passive telemetry
+records does not require a new head. For a required refresh, `review.sh`
+therefore compares a whitespace-sensitive hash of the patch (the diff without its
+`index`/hunk-header lines, so hunk positions may move but no byte of content may)
+with that of every earlier reviewed head of the same PR whose review is bound to
+that head and published by the lane's account; on a match it republishes that
+head's verdict and ledger as the exact-head review of the new head, marked
+"Carried forward from <sha>" (marker
+`<!-- mipstarre-review-carried from=<sha> -->`; a carried review is not a review
+round and is never itself a carry source), and posts the matching
+`local-review/summary` — without dispatching the reviewer. Adverse verdicts are
+carried too, so an adjudication at the new head remains possible. Any change to
+the patch (a repair, a conflict resolution) yields a different patch-id and a
+real review within section 12's cap; at the cap, missing exact-head evidence
+remains blocked. `--force-review` bypasses the fast path, not the cap or any
+evidence requirement.

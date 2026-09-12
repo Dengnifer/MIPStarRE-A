@@ -30,8 +30,8 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    paper label being formalized and never authorizes adding a bridge, residual,
    repair, package, producer, or generic hypotheses bundle to it. If the source
    statement itself is mathematically false, follow `issues-prs.md` section 6.
-   Astra availability has been reported; use primary Astra through
-   `dispatch.sh --role mathfix`, with main-selected max/xhigh and the cumulative
+   Astra availability has been reported; use Astra through
+   `dispatch.sh --role mathfix --effort ultra`, with account admission and the cumulative
    budget required by `issues-prs.md` §6. Do not use an ordinary prover for a
    source defect. Return definition/game proposals or exhausted budgets to main;
    only actual access/permission blockers requiring human action go to #26.

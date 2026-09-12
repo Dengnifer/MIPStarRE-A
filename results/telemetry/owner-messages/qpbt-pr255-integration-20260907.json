@@ -1,0 +1,63 @@
+{
+  "event": "pr255_ci_review_and_service_integration",
+  "pr": 255,
+  "head": "a3dd7fec87abba6151d2ef75b3a63dfae3fd9248",
+  "frozen_main": "9262e56853ad577e5130fd843cde10a7b9ef2618",
+  "ci": {
+    "driver": "local/bin/ci.sh",
+    "conclusion": "success",
+    "partial": false,
+    "seconds": 141,
+    "build_seconds": 31,
+    "all_eight_steps_and_summary_success": true,
+    "manifest": "ci-manifests/pr255-a3dd7fec87abba6151d2ef75b3a63dfae3fd9248.json"
+  },
+  "review": {
+    "driver": "local/bin/review.sh",
+    "id": 5126382101,
+    "verdict": "APPROVED",
+    "unresolved_findings": 0,
+    "carried_from": "815978233b44122e6c67c53e2b2770ecc1be9729",
+    "canonical_complete_patch_equal": true,
+    "new_reviewer_dispatched": false
+  },
+  "merged_at": "2026-09-06T19:38:59Z",
+  "merge_commit": "2c60618b40b4d596d9215376501b4384e64bfa5b",
+  "merge_owner": "periodic canonical space-cap5 service",
+  "service_pid": 1664171,
+  "merge_exit": 0,
+  "post_merge_remote_verified": true,
+  "preservation": {
+    "stash": "4d3a51ebee1318abefbc73570bb71c81cabcbbdf",
+    "backup_directory": "pr255-quiet-U1LBop",
+    "saved_bytes": 197257,
+    "pre_restore_bytes": 197432,
+    "restored_bytes": 223,
+    "restored_rows": 1,
+    "post_restore_bytes": 197655,
+    "all_saved_raw_multiplicities_verified": true,
+    "concurrent_prefix_retained": true,
+    "file_mode_retained": true,
+    "stash_dropped": false,
+    "post_restore_sha256": "5678ba98371a79a66ef9332599a8e5ed15680e77e640e60d11d32b03c24e98da"
+  },
+  "warmer": {
+    "outcome": "success",
+    "seconds": 65,
+    "sha": "2c60618b40b4d596d9215376501b4384e64bfa5b",
+    "concurrent_row_retained": true
+  },
+  "account": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "owner_total_limit": 5,
+  "native_descendant_limit": 4,
+  "external_admission": 0,
+  "usage": null,
+  "usage_scope": "unknown; cumulative native observations are not additive",
+  "next_gate": {
+    "250": "a1b138fac1483d4b6c1cd8acdc740a28bc3d5100 requires refresh after main advanced",
+    "293": "dc0ccdc91adf0b5d2b48308e9a20994677f17102 requires refresh after main advanced"
+  },
+  "next": "Publish restored telemetry with github-sync.sh main, verify live remote equality, and refresh stale heads before next full CI."
+}

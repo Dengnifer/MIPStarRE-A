@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in, main-selected one-shot admissions; never select tasks or repair launches."""
+"""Retired queue implementation, retained for historical evidence (#505)."""
 from __future__ import annotations
 import argparse
 from contextlib import contextmanager
@@ -61,7 +61,7 @@ def configuration(path: Path) -> dict:
             raise ValueError('packet ids must be unique lowercase names')
         identifiers.add(packet['id'])
         if (type(packet['issue']) is not int or packet['issue'] <= 0 or
-                packet['effort'] not in ('max', 'xhigh') or
+                packet['effort'] != 'ultra' or
                 not isinstance(packet['head'], str) or not SHA.fullmatch(packet['head']) or
                 not isinstance(packet['worktree'], str) or
                 not Path(packet['worktree']).is_absolute() or
@@ -194,10 +194,7 @@ def observe(path: Path, cursor: dict) -> dict:
 class Supervisor:
     """A durable single-attempt state machine; failures are holds, not retry invitations."""
     def __init__(self, primary: Path, root: Path):
-        self.primary, self.root = primary, root
-        self.directory = root / 'useful-queue'
-        self.state_path = self.directory / 'state.json'
-        self.children = []
+        raise ValueError('useful queue is retired; use dispatch.sh worker reservations')
     def event(self, kind: str, **data) -> None:
         with (self.directory / 'events.jsonl').open('a') as handle:
             fcntl.flock(handle, fcntl.LOCK_EX)
@@ -310,10 +307,11 @@ class Supervisor:
                             live, interactive = router.occupancy(self.root)
                             caps, total, mode = router.admission_limits(self.root, interactive)
                             slots = 2 if packet['kind'] == 'review' else 1
-                            if (mode != 'primary' or live[0] + slots > min(10, caps[0]) or
-                                    sum(live) + slots > total):
-                                raise ValueError('capacity: primary recovery ceiling 10 '
-                                                 'or owner limit')
+                            recovery_ceiling = min(caps[0], total)
+                            if (mode != 'primary' or live[0] + slots > recovery_ceiling or
+                                    sum(live) + sum(interactive) + slots > total):
+                                raise ValueError('capacity: primary recovery ceiling '
+                                                 f'{recovery_ceiling} or owner limit')
                             if worktree_busy(packet, self.root):
                                 raise ValueError('worktree already occupied or reserved')
                             if any((self.directory / name).exists() for name in ('STOP', 'HOLD')):
@@ -331,7 +329,8 @@ class Supervisor:
                     live, interactive = router.occupancy(self.root)
                     caps, total, mode = router.admission_limits(self.root, interactive)
                     report['census'] = dict(workers_and_reservations=live, interactive=interactive,
-                                            caps=caps, total=total, mode=mode, recovery_ceiling=10,
+                                            caps=caps, total=total, mode=mode,
+                                            recovery_ceiling=min(caps[0], total),
                                             tickets=router.queue_tickets(self.root))
                     _, clients = router.host_processes()
                     report['census']['observed_clients_including_exempt'] = {
@@ -428,33 +427,7 @@ def execute(primary: Path, root: Path, identifier: str) -> int:
     save(launch_dir / 'receipt.json', receipt)
     return 0 if receipt['ok'] else 1
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--run', action='store_true',
-                        help='admit only if queue.json also enables it')
-    parser.add_argument('--watch', type=int, default=0, metavar='SECONDS')
-    parser.add_argument('--execute', help=argparse.SUPPRESS)
-    args = parser.parse_args(argv)
-    os.umask(0o077)
-    source = Path(__file__).resolve().parents[2]
-    primary = Path(git(source, 'rev-parse', '--path-format=absolute', '--git-common-dir')).parent
-    root = Path(os.environ.get('MIPSTARRE_CACHE_ROOT', '~/.cache/mipstarre-dev'))
-    root = root.expanduser().resolve()
-    if root.is_relative_to(primary) or args.watch < 0 or (args.watch and args.watch < 5):
-        parser.error('runtime must be outside the repository; watch interval must be >=5 seconds')
-    if (args.run or args.execute) and (source != primary or
-            git(primary, 'symbolic-ref', '--short', 'HEAD') != 'main' or
-            git(primary, 'status', '--porcelain',
-            '--', 'local/bin/useful_queue.py', 'local/bin/account_router.py',
-            'local/bin/review.sh', 'local/bin/dispatch.sh')):
-        parser.error('run only reviewed, installed primary-checkout source; '
-                     'worktree execution refused')
-    if args.execute:
-        if not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,79}', args.execute):
-            parser.error('invalid packet id')
-        return execute(primary, root, args.execute)
-    supervisor = Supervisor(primary, root)
-    while True:
-        print(json.dumps(supervisor.tick(args.run), sort_keys=True), flush=True)
-        if not args.watch: return 0
-        time.sleep(args.watch)
+    print('useful queue is retired; use dispatch.sh worker reservations', file=sys.stderr)
+    return 4
+
 if __name__ == '__main__': raise SystemExit(main())

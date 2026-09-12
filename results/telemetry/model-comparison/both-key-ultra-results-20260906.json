@@ -1,0 +1,34 @@
+{
+  "source": "/tmp/qpbt-meta-20260905-230133/both-key-ultra-results-20260906.json",
+  "session": "orc-owner-ultra-test-20260906-01",
+  "thread_id": "01a075e7-0d8f-7890-a6d9-5810d9ebd360",
+  "start_utc": "2026-09-06T08:51:51.518619+00:00",
+  "end_utc": "2026-09-06T08:51:54.222975+00:00",
+  "request_count": 2,
+  "automatic_retries": 0,
+  "fan_out": false,
+  "model": "gpt-6-astra",
+  "outgoing_effort": "ultra",
+  "samples": [
+    {
+      "account": "relay",
+      "http_status": 400,
+      "error_code": "invalid_value",
+      "error_parameter": "reasoning.effort",
+      "elapsed_seconds": 0.963,
+      "completion_effort": null
+    },
+    {
+      "account": "space",
+      "http_status": 400,
+      "error_code": "invalid_value",
+      "error_parameter": "reasoning.effort",
+      "elapsed_seconds": 1.737,
+      "completion_effort": null
+    }
+  ],
+  "supported_efforts_reported": ["none", "minimal", "low", "medium", "high", "xhigh", "max"],
+  "interpretation": "Completed literal API tests, not an official UI-mode test or backend-compute measurement. No completion or medium fallback; no production routing change. No further probe requested.",
+  "usage": null,
+  "sanitization": "Credentials, authentication paths, endpoints, raw error messages and completion content omitted. Existing dispatch registry row is retained without duplication."
+}
