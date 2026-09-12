@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Extraction.Defs
+import MIPStarRE.QPBT.Observables.ExpandedPlacement
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
@@ -173,12 +174,6 @@ theorem norm_sub_idealExpState_eq
           (extractionEprFirstEquiv params setting.toStrategy.ιA setting.toStrategy.ιB) state -
         reindexState prodShuffle (vecTensor (eprState (PauliRegister params)) aux)‖ := by
   rw [← setting.reindexState_idealExpState, reindexState_norm_sub]
-
-/-- The initial six-register state is normalized, since both adjoined EPR
-vectors and the original strategy state have norm one. -/
-theorem psiHat_norm : ‖setting.psiHat‖ = 1 := by
-  simp only [psiHat, reindexState_norm_eq, vecTensor_norm_eq, eprState_norm,
-    setting.toStrategy.ψ_norm, one_mul]
 
 /-- Tensoring an auxiliary vector with the extracted EPR state preserves its
 norm, even when the auxiliary vector is not normalized. -/
