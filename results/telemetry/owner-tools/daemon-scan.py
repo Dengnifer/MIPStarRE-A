@@ -562,7 +562,10 @@ def cmd_slots(args: argparse.Namespace) -> int:
     sys.path.insert(0, str(Path(args.checkout) / "local" / "bin"))
     try:
         import account_router  # noqa: E402
-        accounts = list(account_router.ACCOUNTS)
+        # Per call, from the owner's live accounts file and then the cap files:
+        # a key added mid-run must count toward the pool the daemon sizes PAR
+        # against, and a module constant read at import time would not see it.
+        accounts = list(account_router.account_names(cache))
     except Exception:  # pragma: no cover - fallback for a partial checkout
         accounts = ["primary", "second"]
     cap = live = 0
