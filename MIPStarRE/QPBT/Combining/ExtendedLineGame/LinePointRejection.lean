@@ -39,9 +39,10 @@ variable {points : CombinedPointsWitness setting deltaQ}
 private def onlyCoordinate : Fin P.extendedDirectLd.k :=
   ⟨0, by change 0 < 1; decide⟩
 
-/-- Evaluate an axis-line answer at the sampled point, returning `none` for
-invalid answer formats or evaluations. -/
-private def axisGameRead
+/-- Read an axis-line answer by completed evaluation at the sampled point.
+Failed completed evaluation, including a zero-direction ambiguity, remains
+the `none` outcome. -/
+def axisGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
   | .alinePolys coeffs =>
@@ -49,9 +50,9 @@ private def axisGameRead
         (coeffs onlyCoordinate)).map (extendedDirectScalarEquiv P)
   | _ => none
 
-/-- Read the unique coordinate of a point-format answer, returning `none` for
-other answer formats. -/
-private def pointGameRead :
+/-- Read the unique point coordinate as an optional Pauli scalar. Support for
+`lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+def pointGameRead :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
   | .pointVals values => some (extendedDirectScalarEquiv P (values onlyCoordinate))
   | _ => none
@@ -253,7 +254,8 @@ private theorem rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem rejectedMass_eq_read_mismatch
+/-- Fixed-sample axis-line/point rejection equals completed-read mismatch mass. -/
+theorem rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -274,7 +276,9 @@ private theorem rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem completed_defect_eq_read_defect
+/-- The `AA'`--`BA''` completed axis-line/point defect is the consistency
+defect of the corresponding completed direct-game readouts on `pairState`. -/
+theorem completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .AA' .BA''
         (directALinePointDist P.extendedDirectLd) =
@@ -360,9 +364,10 @@ theorem aline_point_rejection_eq_completedLinePointDefect
         (directALinePointDist P.extendedDirectLd) :=
       (completed_defect_eq_read_defect lines).symm
 
-/-- Evaluate a completed diagonal answer at the sampled point, returning `none` for
-other answer formats or when the evaluation is undefined. -/
-private def diagonalGameRead
+/-- Read a diagonal-line answer by completed evaluation at the sampled point.
+Other answer formats and undefined evaluations return `none`.
+Support for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+def diagonalGameRead
     (sample : DirectLdSpace P.extendedDirectLd) :
     DirectLdAnswer P.extendedDirectLd → Option (PauliScalar P)
   | .dlinePolys coeffs =>
@@ -370,7 +375,9 @@ private def diagonalGameRead
         (coeffs onlyCoordinate)).map (extendedDirectScalarEquiv P)
   | _ => none
 
-private theorem diagonal_point_win_iff_read_eq
+/-- The diagonal-line/point verifier is equality of the completed reads.
+Support for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+theorem diagonal_point_win_iff_read_eq
     (sample : DirectLdSpace P.extendedDirectLd)
     (coeffs : Fin P.extendedDirectLd.k →
       Fin (P.extendedDirectLd.m * P.extendedDirectLd.d + 1) →
@@ -432,7 +439,9 @@ private theorem diagonal_point_win_iff_read_eq
       simpa [line, directDLineDescOf, directLdMap, DirectLineDesc.base,
         DirectLineDesc.direction] using hparameter)
 
-private theorem diagonalGameRead_diagonalAnswer_eq
+/-- Reading a diagonal strategy answer agrees with completed polynomial evaluation.
+Support for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+theorem diagonalGameRead_diagonalAnswer_eq
     (sample : DirectLdSpace P.extendedDirectLd)
     (coeffs : DirectDegPoly P.extendedDirectLd (P.m * P.d + 1)) :
     diagonalGameRead sample (diagonalAnswer P coeffs) =
@@ -545,7 +554,8 @@ private theorem diagonal_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inr rfl)]
           simp
 
-private theorem diagonal_rejectedMass_eq_read_mismatch
+/-- Fixed-sample diagonal-line/point rejection equals completed-read mismatch mass. -/
+theorem diagonal_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -566,7 +576,9 @@ private theorem diagonal_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem diagonal_completed_defect_eq_read_defect
+/-- The `AA'`--`BA''` completed diagonal-line/point defect is the consistency
+defect of the corresponding completed direct-game readouts on `pairState`. -/
+theorem diagonal_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .AA' .BA''
         (directDLinePointDist P.extendedDirectLd) =
@@ -737,7 +749,9 @@ private theorem axis_read_effect_bob
   · simp [heffect]
   · rw [axisGameRead_axisAnswer_eq_of_effect_ne_zero_bob lines sample coeffs heffect]
 
-private theorem point_read_effect_alice
+/-- Alice's point readout is the corresponding postprocessed joint point effect.
+Support for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+theorem point_read_effect_alice
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) (answer : Option (PauliScalar P)) :
     ((((answerMeasurement lines .alice
@@ -813,7 +827,8 @@ private theorem point_axis_rejectedTerm_eq_read_mismatch
           rw [outcomeWeight_eq_zero_of_invalid lines _ _ _ _ (Or.inl rfl)]
           simp
 
-private theorem point_axis_rejectedMass_eq_read_mismatch
+/-- Fixed-sample point/axis-line rejection equals completed-read mismatch mass. -/
+theorem point_axis_rejectedMass_eq_read_mismatch
     (lines : ExtendedLinesWitness setting points deltaL)
     (sample : DirectLdSpace P.extendedDirectLd) :
     directRejectedMass P.extendedDirectLd (strategy lines)
@@ -834,7 +849,9 @@ private theorem point_axis_rejectedMass_eq_read_mismatch
   · simpa [hread] using hterm
   · simpa [hread] using hterm
 
-private theorem place_BB'_mul_AB''_comm
+/-- The opposite `BB'` and `AB''` placements commute. Formalization-only support
+for `lem:qld-4-7`, paper `14_analysis_of_the_pauli_basis_test.tex:1279-1288`. -/
+theorem place_BB'_mul_AB''_comm
     (A : Op (setting.ExpandedLocalSpace .alice))
     (B : Op (setting.ExpandedLocalSpace .bob)) :
     setting.place .BB' B * setting.place .AB'' A =
@@ -870,7 +887,9 @@ private theorem place_BB'_mul_AB''_comm
     _ = setting.place .AB'' A * setting.place .BB' B :=
       congrArg₂ (fun X Y => X * Y) hleft hright
 
-private theorem reversed_axis_completed_defect_eq_read_defect
+/-- The `BB'`--`AB''` completed axis-line/point defect is the consistency
+defect of the reversed completed direct-game readouts on `pairState`. -/
+theorem reversed_axis_completed_defect_eq_read_defect
     (lines : ExtendedLinesWitness setting points deltaL) :
     completedLinePointDefect lines .BB' .AB''
         (directALinePointDist P.extendedDirectLd) =
