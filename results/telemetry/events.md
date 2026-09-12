@@ -7643,6 +7643,26 @@ not actual commit/publication hooks. No productive session was killed.
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
 
+## 2026-09-12 - Issue 519 publication attempted before commit completion
+
+- Session `prover-519-20260912-01` invoked `pr_open.py` while its source commit
+  was still running the pre-commit audits. The tool refused with no commits
+  ahead of main; no push or PR creation occurred. The commit subsequently
+  passed its hooks as `ab6a2079`. Publication is retried only after the commit
+  process exits successfully and the branch head is checked. This was a
+  sequencing error by the prover, not a GitHub or proof failure.
+
+## 2026-09-12 - Issue 519 CI inherited a hard-task justification
+
+- PR #539 at `7f01d12cd5be8cd021a2aabed121bff7880c9f5b` passed its full
+  Lean build but failed one of 629 workflow tests. Although invoking and review
+  model settings were cleared, `MIPSTARRE_HARDNESS_REASON` was inherited by
+  `test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra` and
+  caused its routine dispatch to fail policy preflight. The focused fixture
+  passes with the dispatch role, job class, hardness reason, and effort also
+  cleared. The prover reruns exact-head CI with this expanded environment
+  scrub; no workflow source or account policy is modified.
+
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 
 - Session `prover-528-20260912-01`, issue #528: the first exact-head CI run for
