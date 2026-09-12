@@ -115,3 +115,20 @@ must be added to the existing history, without resetting that history.
 - Full-build and exact-head CI evidence must come from the primary checkout's
   `local/bin/ci.sh` after publication. Independent review is a subsequent gate;
   the author session does not launch it or merge the PR.
+
+## First exact-head CI attempt
+
+PR #532 published `f5dd9de98cdad7a87643798e8e9a1555cd723380`, and the remote
+head was verified before CI. That run took 260 seconds. The full project build
+(9217 jobs), the separate axiom-audit build, and all applicable integrity checks
+passed. The workflow fixture suite failed with four failures and one error
+among 629 tests because the author cleared the invoking job class but retained
+`MIPSTARRE_HARDNESS_REASON`. The resulting ordinary fixture jobs were correctly
+rejected by the model policy for carrying an escalation reason.
+
+Clearing the inherited reason together with model, classification, and effort
+settings made all five affected tests pass in 2.467 seconds. No workflow or
+mathematical implementation change was needed. The failed manifest and logs
+remain under `~/.cache/mipstarre-dev/ci-manifests/` and `ci-logs/532/`, keyed by
+that full SHA; this cost is additional to the prior sessions above. A clean
+exact-head CI run is required after publishing this incident record.
