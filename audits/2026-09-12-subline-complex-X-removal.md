@@ -102,3 +102,32 @@ One workflow fixture failed because the author session's inherited
 The isolated test passes when that variable is unset along with the invoking
 and review model settings. A clean-environment CI rerun follows the telemetry
 checkpoint; no workflow or Lean repair is required.
+
+## 2026-09-12: Prose Findings F1 and F2
+
+Review 5185757222 on `4871c76f18f04a516e9e7b5c8ddabea57c89ae8c`
+approves the code and requests synchronization of the restricted statement.
+The direct-law entry now has statement and proof completion marks. The
+docstring records source-law transport under **Scope restriction**: transport
+is not used by the restricted proof, and its dependencies introduce no
+undischarged assumption beyond the displayed domain. The source-law entry
+`lem:claim-17-2` remains unmarked and its transport obligation remains open.
+This classification supersedes the earlier completion-mark decision above;
+the prior review, proof provenance, and recorded costs are preserved.
+
+Two auxiliary entries state positive-operator weighted Cauchy--Schwarz and
+the complex projection-overlap deficit bound, with finite-dimensional domains,
+probability normalization, completeness, projectivity, and the precise
+commutation hypotheses. Their dependency links connect the weighted estimate
+to the overlap bound and the overlap bound to the direct-law proof.
+
+Statement audit: the paper uses the source subline law; Lean retains
+`AdmissibleParams`, `ProjectiveSetting`, and the directly indexed
+`SubLineWitness`. Both conclusions bound the complex X-factor removal error
+by a universal constant times `m * sqrt(deltaLine)`, under their respective
+laws. Verdict: the same explicit scope restriction; all Lean signatures and
+proof bodies are unchanged. Focused typechecking, blueprint synchronization,
+and axiom checks of the two helpers, deficit theorem, and target pass; all
+four closures contain only `propext`, `Classical.choice`, and `Quot.sound`.
+Publication and new-head CI outcomes are recorded in the session result.
+Independent review remains a separate gate and is not launched here.

@@ -1690,25 +1690,88 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
 \end{proof}
 
+The following two auxiliary estimates express the Cauchy--Schwarz argument
+in the proof of Claim~17.2 of \cite{Ji2020MIPStar} for finite families of
+operators and finitely supported probability laws.
+
+\begin{theorem}[Formalization support: positive-operator weighted Cauchy--Schwarz]
+	\label{thm:complex-weighted-cauchy-schwarz}
+	\lean{MIPStarRE.QPBT.norm_sum_inner_le_sqrt_mul_sqrt}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	Let $I$ and $J$ be finite sets, let $A_a$ be positive semidefinite
+	operators on $\mathbb C^J$ for $a\in I$, and let $u_a,v_a\in\mathbb C^J$.
+	Then
+	\[
+		\left|\sum_{a\in I}\langle u_a,A_av_a\rangle\right|
+		\le
+		\sqrt{\sum_{a\in I}\Re\langle u_a,A_au_a\rangle}
+		\sqrt{\sum_{a\in I}\Re\langle v_a,A_av_a\rangle}.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	The triangle inequality bounds the modulus by the sum of the moduli.
+	For each positive operator $A_a$, Cauchy--Schwarz for its positive
+	sesquilinear form bounds the summand by
+	$\sqrt{\Re\langle u_a,A_au_a\rangle}
+	\sqrt{\Re\langle v_a,A_av_a\rangle}$.
+	Apply the scalar Cauchy--Schwarz inequality to this finite sum.
+\end{proof}
+
+\begin{theorem}[Formalization support: complex overlap deficit for projections]
+	\label{thm:complex-projection-overlap-deficit}
+	\lean{MIPStarRE.QPBT.norm_overlap_gap_le_sqrt_one_sub_of_isProj}
+	\leanok
+	\uses{def:povm-conventions, def:distance-state-quadratic-form}
+	Let $\mu$ be a finitely supported probability law on a set $X$, and
+	let $I,J$ be finite sets. For each $x\in X$, let $(A_{x,a})_{a\in I}$
+	be a complete measurement on $\mathbb C^J$. Let $\psi\in\mathbb C^J$
+	have norm one. Suppose $B_{x,a}$ and $C_{x,a}$ are orthogonal
+	projections, each commuting with $A_{x,a}$, for all $x,a$.
+	No commutation between $B_{x,a}$ and $C_{x,a}$ is required. Then
+	\begin{align*}
+		\Big|\E_{x\sim\mu}\sum_a
+		\langle\psi,A_{x,a}C_{x,a}B_{x,a}\psi\rangle
+		&-\E_{x\sim\mu}\sum_a
+		\langle\psi,A_{x,a}C_{x,a}\psi\rangle\Big| \\
+		&\le \sqrt{1-\E_{x\sim\mu}\sum_a
+		\Re\langle\psi,A_{x,a}B_{x,a}\psi\rangle}.
+	\end{align*}
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:complex-weighted-cauchy-schwarz, def:povm-conventions,
+		def:distance-state-quadratic-form}
+	For each $x$, apply Theorem~\ref{thm:complex-weighted-cauchy-schwarz}
+	with weight $A_{x,a}$ and vectors $C_{x,a}\psi$ and
+	$(I-B_{x,a})\psi$. Commutation, projectivity, and completeness bound
+	the first quadratic sum by one and identify the second with
+	$g(x)=1-\sum_a\Re\langle\psi,A_{x,a}B_{x,a}\psi\rangle\ge0$.
+	The triangle inequality for the probability average followed by
+	$\E_\mu\sqrt{g}\le\sqrt{\E_\mu g}$ gives the asserted bound.
+\end{proof}
+
 \begin{lemma}[Formalization support: complex X-factor removal under the directly indexed law]
 	\label{lem:claim-17-2-direct}
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor_direct}
+	\leanok
 	\uses{lem:concrete-X-deficit-direct}
 	For the concrete X-Z-X measurement and the directly indexed law
 	$D_{\mathrm{dir}}$ with zero-completed optional evaluations, the complex
 	modulus of the difference in Lemma~\ref{lem:claim-17-2} is at most
 	$C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$ for a universal $C>0$.
-	This directly indexed estimate is proved in Lean. Completion marks remain
-	withheld while the declaration retains its source-transport marker.
-	Transport to the source law is separate; see
+	Comparison with the source distribution remains open; see
 	\cite{gap:qpbt_subline-claims-line-marginal,gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:concrete-X-deficit-direct}
-	Apply complex Cauchy--Schwarz with the positive line effect as weight,
-	the Z-point projection on the first vector, and the complement of the
-	X-point projection on the second. Completeness bounds the first quadratic
-	sum by one, and projectivity identifies the second with the X deficit.
+	\leanok
+	\uses{lem:concrete-X-deficit-direct, thm:complex-projection-overlap-deficit}
+	Apply Theorem~\ref{thm:complex-projection-overlap-deficit} to the
+	placed line measurement, with $B$ the X-point projection and $C$ the
+	Z-point projection. Opposite tensor placements give the required
+	commutation relations.
 	The deficit bound gives $\sqrt{C_0m^2\delta_{\mathrm{Line}}}
 	=\sqrt{C_0}m\sqrt{\delta_{\mathrm{Line}}}$.
 \end{proof}

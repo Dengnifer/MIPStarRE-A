@@ -346,12 +346,13 @@ theorem subline_replace_by_ordered_product_re_direct :
 **Scope restriction:** This is a formalization-only analogue of paper `claim:17-2`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`,
 using the concrete X-Z-X measurement defined at paper lines 942--949.
-The source-law statement remains blueprint `lem:claim-17-2`.
-
-**Unfaithful:** `SubLineWitness` has not been transported to the source law;
+The proved statement is blueprint `lem:claim-17-2-direct`; the source-law
+statement remains blueprint `lem:claim-17-2`, without completion marks.
+`SubLineWitness` has not been transported to the source law;
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` tracks this remaining
-deviation. Discharge it by transporting the directly indexed subline law to the
-paper's distribution. The complex estimate itself is proved using weighted
+comparison. Transporting the directly indexed subline law to the paper's
+distribution remains a separate obligation, unused by this restricted proof.
+The complex estimate itself is proved using weighted
 Cauchy--Schwarz and `exists_concreteXPointOverlap_deficit_le`, which already uses
 `combinedLineMeasurement_sum_Z`. Issue #514 discharges the scalar obligation
 tracked in issues #414 and #474 and
