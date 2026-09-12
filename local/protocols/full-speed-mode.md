@@ -56,7 +56,7 @@ list — nothing else has to be remembered, and nothing here is optional:
 
 ```bash
 local/bin/run_mode.py apply                                   # 1. the brief
-results/telemetry/owner-tools/install.sh --crons --start-loops # 2. tools, crontab, capacityd
+results/telemetry/owner-tools/install.sh --crons --start-loops # 2. tools, crontab, capacityd, chsh seed
 setsid nohup ~/.cache/mipstarre-dev/owner-bin/merge-daemon.sh \
     >> ~/.cache/mipstarre-dev/watchdog/lanes/daemon.log 2>&1 < /dev/null &   # 3. the merge queue
 setsid nohup ~/.cache/mipstarre-dev/owner-bin/goal-keeper.sh > /dev/null 2>&1 < /dev/null &
@@ -73,6 +73,12 @@ remove — and on a fresh host `lane.sh`'s `wait_for_slot` fails closed with
 `no-capacity-record`. The five-minute crontab row installed in the same step
 brings the loop back if it is killed; `capacityd.sh` takes a lock, so a start
 that is already running is a no-op.
+
+Step 2 also fires one detached `build-on-chsh.sh --seed-refresh`. It returns
+immediately unless the brief put the run in full speed mode and listed `chsh`, so
+it costs a default-speed run nothing; without it the first offloaded lanes of a
+run rebuild on chsh everything `main` moved since the last one, because the merge
+daemon only refreshes the seed *after* a merge (section 5.1).
 
 After a pause, `owner-resume.sh` performs steps 1-3 from the pause record and
 checks afterwards that the controller and the daemon are actually running
@@ -273,7 +279,10 @@ paused run, an unreadable run mode, a run-mode document written before the
 field existed — is `no`. There is no operator switch, no environment variable
 that turns it *on*, and no file an agent can touch to enable it;
 `MIPSTARRE_OFFLOAD=0` can only turn it further off. `run_mode.py get
-offload_reason` prints the sentence that decided it.
+offload_reason` prints the sentence that decided it. `local/bin/offload-build.sh`
+asks the run mode itself **before** it honours `MIPSTARRE_OFFLOAD_SCRIPT`, so
+that variable can only ever point the offload at a different script — a script
+whose `--check` exits 0 still offloads nothing outside full speed mode.
 
 **And no codex on chsh.** chsh's own internet is about 16 KB/s. It is a pure
 build node fed from ghz by rsync: no worker session, no dispatch, no review, no
@@ -318,12 +327,34 @@ and a lane seeded from an old seed rebuilds the difference — slow, never wrong
 The merge daemon fires `build-on-chsh.sh --seed-refresh` after every merge; the
 refresh is detached, takes its own lock, runs at most once an hour and returns
 immediately while the offload is disabled. Its log is
-`watchdog/chsh/seed-refresh.log`.
+`watchdog/chsh/seed-refresh.log`. The rate-limit stamp is written **after** the
+rebuild succeeds, so a refresh that fails does not rate-limit its own retries for
+an hour.
+
+`install.sh --start-loops` (run-start step 2) fires one detached
+`--seed-refresh` of its own, because the merge daemon only refreshes *after* a
+merge: chsh's checkout is at whatever the last run left it. It is a no-op while
+the offload is disabled.
+
+The seed is replaced **in place** (`rsync -a --delete` into the seed directory)
+under `seed-refresh.lock`, while lanes `cp -al` out of that same directory under
+their own per-lane locks. The two locks are disjoint, so a lane can be seeded
+from a half-replaced seed. That is slow, never wrong: rsync unlinks and recreates
+rather than writing in place, so hardlinks a lane has already taken keep their
+old contents, and a lane seeded mid-refresh simply rebuilds more than it needed
+to. It is written down here rather than fixed because the cost is build minutes
+on 192 idle cores; a shared seed lock taken by the lane skeleton step is the fix
+if that ever stops being true.
 
 **Installation.** `results/telemetry/owner-tools/install.sh` deploys
 `build-on-chsh.sh` under the hash manifest like every other operator tool, and
 copies the host keys to `watchdog/chsh/known_hosts` (from
-`$MIPSTARRE_CHSH_KNOWN_HOSTS`, default `/tmp/chsh-setup/known_hosts`). The keys
+`$MIPSTARRE_CHSH_KNOWN_HOSTS`, then its own durable copy at
+`watchdog/chsh/known_hosts.source`, then `/tmp/chsh-setup/known_hosts` — where
+the 2026-09-12 side session left them, and which a reboot or a `/tmp` sweep
+removes). The first install keeps that durable copy so the keys outlive `/tmp`,
+and `install.sh --verify` reports a missing or empty `known_hosts` rather than
+leaving the *absence* of `host=chsh` rows as the only signal. The keys
 are runtime state, never committed, and the connection is
 `StrictHostKeyChecking=yes` against that file: a missing file makes the offload
 unusable — which costs a little build time and nothing else — and is never a

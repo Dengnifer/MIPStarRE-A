@@ -333,8 +333,13 @@ class FallbackTest(ShellTestCase):
                            FAKE_OFFLOAD.format(rc=offload_rc, check_rc=check_rc, ran=ran))
         driver = self.stub("driver.sh", DRIVER.format(
             helper=HELPER_SH, built=built, worktree=self.worktree, local_rc=local_rc))
-        done = subprocess.run(["bash", str(driver)], capture_output=True, text=True,
-                              env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script)))
+        done = subprocess.run(
+            ["bash", str(driver)], capture_output=True, text=True,
+            # The run mode is asked independently of MIPSTARRE_OFFLOAD_SCRIPT, so
+            # these tests state it: without it the helper answers "not a full
+            # speed run" and never reaches the script at all.
+            env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
+                         MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes"))))
         self.ran = ran
         self.built = built
         return done.stdout + done.stderr
@@ -384,9 +389,26 @@ class FallbackTest(ShellTestCase):
             helper=HELPER_SH, built=built, worktree=self.worktree, local_rc=0))
         done = subprocess.run(["bash", str(driver)], capture_output=True, text=True,
                               env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
+                                           MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes")),
                                            MIPSTARRE_OFFLOAD="0"))
         self.assertIn("host=ghz", done.stdout)
         self.assertFalse(ran.exists())
+
+    def test_a_default_speed_run_never_reaches_the_script(self) -> None:
+        """MIPSTARRE_OFFLOAD_SCRIPT can redirect the offload; it cannot enable it."""
+        ran = self.root / "offload-ran.txt"
+        built = self.root / "local-built.txt"
+        script = self.stub("fake-offload.sh", FAKE_OFFLOAD.format(rc=0, check_rc=0, ran=ran))
+        driver = self.stub("driver.sh", DRIVER.format(
+            helper=HELPER_SH, built=built, worktree=self.worktree, local_rc=0))
+        done = subprocess.run(["bash", str(driver)], capture_output=True, text=True,
+                              env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
+                                           MIPSTARRE_RUN_MODE=str(self.run_mode_stub("no"))))
+        self.assertIn("host=ghz", done.stdout)
+        self.assertFalse(ran.exists(),
+                         "a run whose mode says no must not run the offload script, "
+                         "however friendly that script's --check is")
+        self.assertTrue(built.exists())
 
 
 class ShellSyntaxTest(unittest.TestCase):
@@ -410,11 +432,79 @@ class ShellSyntaxTest(unittest.TestCase):
         self.assertIn("--seed-refresh", daemon)
 
     def test_the_pre_push_per_file_gate_stays_on_this_host(self) -> None:
-        """`lake env lean` is never offloaded: the push gate runs where we push."""
-        lane = (BIN_DIR / "lane.sh").read_text("utf-8")
-        self.assertNotIn("build-on-chsh", lane)
+        """`lake env lean` is never offloaded: the push gate runs where we push.
+
+        Asserted on the GATE'S CALL SITES rather than on the absence of the
+        string "build-on-chsh" from lane.sh: lane.sh reaches the farm by sourcing
+        offload-build.sh, so that assertion passed for the wrong reason and would
+        have gone on passing if the `lake env lean` gate itself were offloaded.
+        """
         hook = (REPO_ROOT / ".githooks" / "pre-push").read_text("utf-8")
         self.assertNotIn("chsh", hook)
+        self.assertNotIn("offload", hook)
+        gate_lines = [line for line in hook.splitlines()
+                      if "lake env lean" in line and not line.strip().startswith("#")]
+        self.assertTrue(gate_lines,
+                        "the pre-push hook must still run `lake env lean` per changed file")
+        for body, where in ((hook, ".githooks/pre-push"),
+                            ((BIN_DIR / "lane.sh").read_text("utf-8"), "lane.sh"),
+                            ((BIN_DIR / "ci.sh").read_text("utf-8"), "ci.sh")):
+            for number, line in enumerate(body.splitlines(), 1):
+                if "lake env lean" not in line or line.strip().startswith("#"):
+                    continue
+                with self.subTest(where=f"{where}:{number}"):
+                    self.assertNotIn("offload", line)
+                    self.assertNotIn("chsh", line)
+
+    def test_the_offload_returns_the_whole_closure_not_the_delta(self) -> None:
+        """The post-condition is the local .lake/build, not chsh's own delta.
+
+        `find lib ir -newer .offload-stamp` returns what chsh rebuilt relative to
+        ITS seed, which tracks `main`, while a ghz worktree is warmed from the
+        hot-main snapshot and lags it.  Every module that moved in that gap has
+        an olean on chsh and none here, the offload reports success, nothing
+        falls back, and the lane dies at the per-file push gate.
+        """
+        body = OFFLOAD_SH.read_text("utf-8")
+        self.assertNotIn("--files-from", body,
+                         "the artifact return must not be a file list built from "
+                         "chsh's own stamp")
+        self.assertIn('"$CHSH_HOST:$LANE/.lake/build/" "$SRC/.lake/build/"', body,
+                      "the whole .lake/build tree is what comes back")
+        self.assertIn("--timeout=", body.replace('--timeout="$RSYNC_TIMEOUT_S"',
+                                                 "--timeout=X"),
+                      "every rsync needs an I/O timeout: ssh's ServerAlive only "
+                      "notices a link that is dead, not one that is slow")
+        for line in body.splitlines():
+            if line.strip().startswith("#") or '"$RSYNC_BIN"' not in line:
+                continue
+            with self.subTest(line=line.strip()[:60]):
+                self.assertIn("--timeout=", line)
+
+    def test_the_seed_stamp_is_written_after_the_rebuild(self) -> None:
+        body = OFFLOAD_SH.read_text("utf-8")
+        rebuild = body.index("seed refresh: the rebuild on")
+        stamp = body.index(': > "$stamp"')
+        self.assertGreater(stamp, rebuild,
+                           "a refresh that fails must not rate-limit its own retries "
+                           "for an hour; after a toolchain bump that is an hour of "
+                           "silently unused farm")
+
+    def test_the_offload_has_a_wall_clock(self) -> None:
+        helper = HELPER_SH.read_text("utf-8")
+        self.assertIn("MIPSTARRE_OFFLOAD_TIMEOUT_S", helper)
+        self.assertIn("OFFLOAD_TIMED_OUT=124", helper)
+        self.assertIn('rc="$OFFLOAD_UNUSABLE"', helper,
+                      "a stalled offload is 'chsh is unusable', never a verdict "
+                      "on the proof")
+
+    def test_the_script_variable_cannot_turn_the_farm_on(self) -> None:
+        helper = HELPER_SH.read_text("utf-8")
+        gate = helper.split("offload_enabled_for_run()", 1)[1]
+        self.assertIn("offload_run_mode_says_yes", gate.split("offload_script", 1)[0],
+                      "full-speed-mode.md section 5.1 claims there is no environment "
+                      "variable that turns the offload on; the run mode must be asked "
+                      "before MIPSTARRE_OFFLOAD_SCRIPT is honoured")
 
 
 if __name__ == "__main__":

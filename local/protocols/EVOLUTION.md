@@ -1488,7 +1488,7 @@ tier switch moves the shim, the models and the cadence together, and the only
 `MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
 `checked-push.sh`.
 
-## 2026-09-12 - The chsh build farm is a mode of the run, not an operator action (W8, PR __PR__)
+## 2026-09-12 - The chsh build farm is a mode of the run, not an operator action (W8, PR 554)
 
 **Trigger:** the 2026-09-12 full speed run was CPU-bound on a host shared with other
 users — load 90-150 for four hours, a 61 s median CI build, lanes queueing behind the
@@ -1515,6 +1515,21 @@ code is the build's own verdict and is passed through**. A proof that does not c
 chsh does not compile here either, and a silent local retry would spend the machine's
 single full-build lease twice to learn the same thing. The exit code of the build that
 actually ran is the step's exit code, and the log names the host either way.
+
+**And the offload returns the whole closure, not the delta.** The first draft rsynced
+back only `find lib ir -newer .offload-stamp` — what chsh rebuilt relative to ITS seed.
+The two hosts do not start from the same object: chsh's seed is refreshed after every
+merge and tracks `main`, while a ghz worktree is warmed from the hot-main snapshot, which
+lags it by hours. Every module that moved on `main` inside that gap has an olean in chsh's
+seed — not rebuilt, not newer than the stamp, not returned — and none on ghz, so the
+offload reports `host=chsh` success, nothing falls back, and the lane dies later at the
+pre-push per-file `lake env lean` gate or triggers an unbounded local rebuild outside the
+build lease it has already released. Step 4 rsyncs the whole of `.lake/build`; rsync's own
+size/mtime delta still transfers only what is missing, and the stamp survives as the
+`artifacts=N` field in the log. Both rsyncs carry `--timeout`, and `offload-build.sh`
+bounds the whole offload with a wall clock mapped to exit 64, because ssh's `ServerAlive`
+notices a link that is dead and not one that is merely slow — and a stalled offload holds
+this machine's single full-build lease.
 
 **What did not move.** The pre-push per-file `lake env lean` gate, `checked-push.sh`, the
 hooks, the seven `pr_merge.py` gates and the eight `local-ci/<step>` contexts: only the
