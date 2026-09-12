@@ -69,14 +69,17 @@ The measurements $\hat{M}^{(\mathrm{Point},X),x}$ and
 $\hat{M}^{(\mathrm{Point},Z),z}$ commute only approximately. The first goal of
 this chapter is to construct a single projective measurement that
 simultaneously measures both, first at points and then along lines. The
-construction of the combined point measurement proceeds in three steps: the
+source construction of the combined point measurement proceeds in three steps: the
 binary refinements $\hat{M}^{(\mathrm{Point},X),x,r}$ and
 $\hat{M}^{(\mathrm{Point},Z),z,s}$ are combined into a sandwich POVM, the
 resulting family is shown to satisfy an approximate linearity in the index
 pair $(r,s)$, and the following result of Natarajan and
 Vidick~\cite{Natarajan2017Linearity} converts approximate linearity into exact
 linearity, from which a projective measurement with outcomes in $\F_q^2$ is
-assembled by Fourier averaging.
+assembled by Fourier averaging. The proof of Lemma~\ref{lem:qld-4-10}
+below instead forms the sandwich directly with field-valued outcomes and
+orthonormalizes it on the original expanded local spaces. The source's
+linearity route is retained in Remark~\ref{rem:combined-points-linearity-route}.
 
 % Statement as in Theorem 10 of the cited source \cite{Natarajan2017Linearity}
 % (arXiv:1610.03574): hypothesis as in its display (7), conclusion as in its
@@ -226,8 +229,8 @@ assembled by Fourier averaging.
 	instantiation of $\rho$ as a reduced state of $\ket{\hat\psi}$, the
 	absorption of the ancilla register into padding of the strategy state,
 	and the identity $\mathcal{L}^0 = \Id$ --- are enumerated in
-	Remark~\ref{rem:linearity-import} and addressed in the proof of
-	Lemma~\ref{lem:qld-4-10}.
+	Remark~\ref{rem:linearity-import} and discussed in
+	Remark~\ref{rem:combined-points-linearity-route}.
 \end{proof}
 
 \begin{remark}[Obligations of the linearity-theorem import]
@@ -236,7 +239,8 @@ assembled by Fourier averaging.
 	argument of \cite{Natarajan2017Linearity}, with the normalization of its
 	distance bound corrected as described in
 	Remark~\ref{rem:linearity-distance-normalization}. Three features are
-	load-bearing for the proof of Lemma~\ref{lem:qld-4-10}: the error is
+	load-bearing for the source's linearity proof of Lemma~\ref{lem:qld-4-10}:
+	the error is
 	preserved without polynomial loss ($\delta$ in the hypothesis becomes
 	$2\delta$ in the conclusion for the squared operator distance, and
 	$\delta$ for the squared measurement distance, a constant factor absorbed
@@ -248,7 +252,7 @@ assembled by Fourier averaging.
 	which no a priori bound is available. The closeness of $\mathcal{L}^u$ to
 	$\mathcal{O}^u$ is guaranteed on average over a uniformly random $u$
 	only; this averaged form suffices because the $\mathcal{L}^u$ enter
-	the proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
+	the source's proof of Lemma~\ref{lem:qld-4-10} only through averages over $u$.
 	The quotation of the theorem in \cite{Ji2020MIPStar} differs from the
 	cited statement in three respects: it inserts the restriction
 	$0 \le \delta \le 1$, which would block the fiberwise application
@@ -280,8 +284,8 @@ assembled by Fourier averaging.
 	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
 	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
 	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
-	conversion obligations, discharged in the proof of
-	Lemma~\ref{lem:qld-4-10}: the theorem is
+	conversion obligations, explained in
+	Remark~\ref{rem:combined-points-linearity-route}: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -295,7 +299,9 @@ assembled by Fourier averaging.
 	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
 	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
 	zero-state padding of the strategy state, padding that the source
-	assumes present without construction.
+	assumes present without construction. This is an obligation of the source's
+	linearity route, not of the completed field-valued sandwich proof of
+	Lemma~\ref{lem:qld-4-10}, which introduces no additional ancillary space.
 \end{remark}
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
@@ -845,31 +851,305 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-comm-cons, lem:ortho, fact:triangle,
-		def:expanded-point-measurement, def:symmetric-equivalents,
-		def:povm-distance}
-	The formal proof works with field-valued outcomes directly. On each
-	expanded local space form the complete sandwich POVM
-	$R^{x,z}_{a,b}=M^{Z,z}_b M^{X,x}_a M^{Z,z}_b$.
-	Field-valued approximate commutation bounds its distance from the ordered
-	point product. Point self-consistency and the same commutation estimate
-	bound its off-diagonal overlap across opposite placements.
-	Apply orthonormalization to obtain a projective measurement for each
-	point pair, on the same expanded local space, close to this POVM.
-	The squared-distance triangle inequality gives self-consistency of the
-	projective families and their distances from both ordered products.
-	The placement comparisons give all symmetric equivalents.
-	The estimates are absorbed into $\delta_Q(\eps)=K\eps^{1/8}$ for one
-	universal constant $K$.
+	\uses{lem:qld-comm-cons, lem:expanded-point-measurement-properties,
+		prop:fourier-fact-scalar, lem:ortho-explicit-constant, fact:triangle,
+		def:expanded-state, def:EPR}
+	We give a field-valued variant of the sandwich construction in
+	\cite{Ji2020MIPStar} (source label \texttt{lem:qld-4-10}); see
+	\path{docs/paper-gaps/qpbt_combined-points-direct.tex} for details.
+	Write $X_a=\hat{M}^{(\mathrm{Point},X),x}_a$ and
+	$Z_b=\hat{M}^{(\mathrm{Point},Z),z}_b$. Fourier inversion expresses
+	$[X_a,Z_b]$ as the Fourier transform of the commutators of the expanded
+	observables. Orthogonality of the additive characters and Parseval's
+	identity transfer Lemma~\ref{lem:qld-comm-cons} to the field-valued
+	effects without a factor depending on $q$:
+	\[
+		\E_{x,z}\sum_{a,b}\|[X_a,Z_b]\ket{\hat\psi}\|^2
+		\leq C_1\sqrt{\eps}
+	\]
+	on every placement, for a universal $C_1$. Form the POVM
+	$R^{x,z}_{a,b}=Z_bX_aZ_b$ with $a,b\in\F_q$. The identity
+	$R_{a,b}-Z_bX_a=Z_b[X_a,Z_b]$ and contraction by $Z_b$ give the
+	same bound on its squared distance from the ordered product.
 
-	This proves the stated measurement construction without using the source's
-	intermediate binary refinements and quantum linearity construction.
-	The zero-state padding needed by that source proof remains the separate
-	import issue in Remark~\ref{rem:linearity-import} and
-	\cite{gap:qpbt_linearity-theorem-quotation}.
+	For opposite placements, denoted by subscripts $1,2$, put
+	$D^X_a=(X_a)_1-(X_a)_2$, $D^Z_b=(Z_b)_1-(Z_b)_2$, and
+	$W_b=(Z_b)_1(Z_b)_2$. Projectivity and completeness give the exact
+	consistency-defect identity
+	\[
+		1-\sum_{a,b}\bra{\hat\psi}(R_{a,b})_1(R_{a,b})_2\ket{\hat\psi}
+		=\frac12\sum_b\|D^Z_b\ket{\hat\psi}\|^2
+		+\frac12\sum_{a,b}\|D^X_aW_b\ket{\hat\psi}\|^2.
+	\]
+	Commuting $D^X_a$ past $W_b$ leaves the two placed commutators.
+	Their bounds and point self-consistency bound the average defect by
+	$C_0(\eps+\sqrt{\eps})$. Apply
+	Lemma~\ref{lem:ortho-explicit-constant} for each $(x,z)$ on each player
+	space. Averaging its fourth-root error by concavity produces projective
+	$Q^{x,z}$ on the original expanded local spaces, with squared distance
+	$O((\eps+\sqrt{\eps})^{1/4})$ from $R^{x,z}$.
+
+	The ancillary involution exchanging $\mathsf{A}'$ with $\mathsf{B}''$
+	and $\mathsf{A}''$ with $\mathsf{B}'$ fixes $\ket{\hat\psi}$: it
+	exchanges the identical EPR factors and reverses each pair. Thus it
+	transfers these same-side distances to the other bipartition without
+	assuming symmetry of the strategy. It is not the permutation
+	$U_\sigma U_\theta$ of Lemma~\ref{lem:symmetric-equivalents-transfer}.
+	Transporting the factors of an ordered product one at a time by point
+	self-consistency, then applying the squared-distance triangle inequality,
+	gives both ordered-product comparisons and self-consistency of $Q$ on
+	all opposite placements. For $0\leq\eps\leq1$ every term is bounded by
+	$K\eps^{1/8}$ for a universal $K\geq4$; for $\eps>1$ the bound $4$
+	for square-summable families suffices. Take $\delta_Q(\eps)=K\eps^{1/8}$.
 \end{proof}
 
+\begin{remark}[The source's linearity route for combined points]
+	\label{rem:combined-points-linearity-route}
+	The following is the source argument, whose common-ancilla step remains
+	open as described in Remark~\ref{rem:linearity-import}; it is not used by
+	the completed proof above. Throughout this argument every intermediate
+	error is a $\poly(\eps)$ function
+	that may differ from one use of $\approx_\delta$ to the next. For
+	$\omega = (x,z,r,s) \in \F_q^m \times \F_q^m \times \F_q \times \F_q$
+	and $a, b \in \F_2$ define the sandwich POVM
+	$\hat{R}^{\omega}_{a,b}
+	= \hat{M}^{(\mathrm{Point},Z),z,s}_{b}
+	\hat{M}^{(\mathrm{Point},X),x,r}_{a}
+	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}$
+	from the binary refinements of
+	Definition~\ref{def:expanded-point-trace-projection}; by the approximate
+	commutation of Lemma~\ref{lem:qld-comm-cons}, projectivity, and
+	Lemma~\ref{fact:add-a-proj}, on average over $\omega$ one has
+	$\hat{R}^{\omega}_{a,b}
+	\approx_{\sqrt{\delta_{\mathrm{acom}}}}
+	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}
+	\hat{M}^{(\mathrm{Point},X),x,r}_{a}$,
+	and a Cauchy--Schwarz chain with successive errors
+	$\delta_{\mathrm{acom}}^{1/4}$, $\delta_{\mathrm{acom}}^{1/4}$,
+	$\sqrt{\eps}$, $\eps$ establishes the self-consistency
+	$(\hat{R}^{\omega}_{a,b})_{\mathsf{A}\mathsf{A}'} \simeq_\delta
+	(\hat{R}^{\omega}_{a,b})_{\mathsf{B}\mathsf{A}''}$, hence the
+	corresponding $\approx_\delta$ relation by Lemma~\ref{fact:agreement}.
+	The orthonormalization lemma (Lemma~\ref{lem:ortho}) then produces
+	projective measurements $\{\hat{L}^{\omega}_{a,b}\}$ with
+	$\hat{L}^{\omega}_{a,b} \approx_\delta \hat{R}^{\omega}_{a,b}$ on
+	average over $\omega$. Next, the refined point measurements satisfy the
+	exact linearity
+	$\sum_{b+b'=c} \hat{M}^{(\mathrm{Point},W),u,r}_{b}
+	\hat{M}^{(\mathrm{Point},W),u,r'}_{b'}
+	= \hat{M}^{(\mathrm{Point},W),u,r+r'}_{c}$
+	(a direct consequence of projectivity of
+	$\{\hat{M}^{(\mathrm{Point},W),u}_a\}$), which transfers, on average over
+	$x, z, r, r', s, s'$, to an approximate linearity of the
+	$\{\hat{R}^{\omega}_{a,b}\}$ in the index pair $(r,s)$ and then to the
+	$\{\hat{L}^{\omega}_{a,b}\}$. Consequently the binary observables
+	$\mathcal{O}^{\omega}
+	= \sum_{a,b \in \F_2} (-1)^{a+b} \hat{L}^{\omega}_{a,b}$
+	satisfy
+	$\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
+	\approx_\delta \mathcal{O}^{x,z,r+r',s+s'}$
+	on average over $x, z, r, r', s, s'$. Identify $\F_q \cong \F_2^t$ so
+	that the pair $(r,s)$ ranges over $\F_2^{2t}$, and let $\rho$ be the
+	reduced density operator of $\ket{\hat\psi}$ on the registers carrying
+	the $\mathcal{O}^{\omega}$, so that $\Tr(S\rho)$ is the expectation
+	value of $S$ in $\ket{\hat\psi}$ for every operator $S$ on those
+	registers. For fixed $(x,z)$ let $\delta_{x,z}$ denote the
+	conditional average, given $(x,z)$, of the squared linearity defect
+	$\lVert (\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
+	- \mathcal{O}^{x,z,r+r',s+s'}) \ket{\hat\psi} \rVert^2$, so that
+	$\E_{x,z}\, \delta_{x,z} = O(\delta)$; expanding the square, using
+	unitarity of the observables, and relabelling the averaged index pair
+	shows that, for each $(x,z)$, the correlation hypothesis of
+	Theorem~\ref{thm:linearity} holds in the form
+	$\E\, \Tr(\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
+	\mathcal{O}^{x,z,r+r',s+s'} \rho)
+	= 1 - \tfrac{1}{2}\delta_{x,z}$,
+	the average being over $(r,s)$ and $(r',s')$ uniform in $\F_2^{2t}$.
+	Since Theorem~\ref{thm:linearity} imposes no upper bound on its error
+	parameter, it applies for every fixed $(x,z)$ with
+	$\delta := \tfrac{1}{2}\delta_{x,z}$ and yields binary observables
+	$\{\mathcal{L}^{x,z,r,s}\}$, exactly linear in $(r,s)$ for all pairs,
+	acting on an extension by an ancilla register in a pure state, with
+	$\E_{r,s}\, d\big(\mathcal{L}^{x,z,r,s},\ \mathcal{O}^{x,z,r,s} \ot
+	\Id\big)^2 \le \delta_{x,z}$
+	in the state-dependent distance of the extended state; taking the
+	expectation over $(x,z)$ shows that the two families are
+	$\delta$-close, in the sense of Definition~\ref{def:povm-distance},
+	on average over $x, z, r, s$, the averaged form of closeness being
+	the one Theorem~\ref{thm:linearity} supplies and the only one used
+	below (Remark~\ref{rem:linearity-import}).
+	% Import obligation (see rem:linearity-import): the ancilla register
+	% and its pure state produced by thm:linearity may depend on (x,z);
+	% following the source ("By assuming that |hat psi> has sufficiently
+	% many ancilla zero qubits, we do not need to extend the state
+	% further", references/qpbt-paper/
+	% 14_analysis_of_the_pauli_basis_test.tex:832), they are to be
+	% absorbed, uniformly in (x,z), into zero-state padding of the
+	% strategy state, so that the L^{x,z,r,s} act on hilb ot (C^q)^{ot M}
+	% as the statement requires. The source assumes this padding without
+	% construction; the absorption is an unresolved obligation of the
+	% import, not established here.
+	To finish this route, the ancilla register and its state would have to be
+	absorbed into zero-state padding of the strategy state, uniformly in
+	$(x,z)$, as recorded in Remark~\ref{rem:linearity-import}. After that
+	unproved step, one would define
+	$\hat{Q}^{x,z}_{a,b}
+	= \E_{r,s} (-1)^{\tr(ra+sb)} \mathcal{L}^{x,z,r,s}$
+	for $a, b \in \F_q$: exact linearity makes each $\hat{Q}^{x,z}_{a,b}$ a
+	projection, and the family sums to the identity because
+	$\sum_{a,b} \hat{Q}^{x,z}_{a,b} = \mathcal{L}^{x,z,0,0} = \Id$, the
+	latter identity because exact linearity at $(r,s) = (r',s') = (0,0)$
+	makes $\mathcal{L}^{x,z,0,0}$ an idempotent unitary; so
+	$\{\hat{Q}^{x,z}_{a,b}\}$ is a
+	projective measurement recovering $\F_q$-valued outcomes from the binary
+	data by Fourier averaging over $(r,s)$. Its self-consistency
+	\eqref{eq:qld-q-self-cons} follows from Lemma~\ref{lem:avg-closeness}
+	together with the self-consistency of the $\{\mathcal{O}^{\omega}\}$;
+	the consistency \eqref{eq:qld-q-cons-m-hat-zx} follows from a Fourier
+	computation that replaces $\mathcal{L}$ by $\mathcal{O}$, then by
+	$\hat{R}$, then by the ordered product of refined point measurements, and
+	finally resolves the averages over $r$ and $s$ using
+	Lemma~\ref{lem:cancellation}; and \eqref{eq:qld-q-cons-m-hat-xz} follows
+	by inserting one application of the approximate commutation of
+	Lemma~\ref{lem:qld-comm-cons} into the same chain. Repeating the argument
+	with the tensor factors on registers $\mathsf{B}\mathsf{B}'$ and
+	$\mathsf{A}\mathsf{B}''$ gives all symmetric equivalents.
+\end{remark}
+
 \section{Combined line measurements}
+
+\begin{lemma}[Completed point-to-line marginal distances]
+	\label{lem:combined-point-line-marginal-distance}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_distance_le}
+	\leanok
+	\uses{lem:qld-4-10, def:expanded-line-measurement, lem:qld-comm-line-cons,
+		def:line-point-dist, def:povm-distance, def:symmetric-equivalents}
+	There is a universal $C\geq1$ with the following property. Let
+	$(q,m,d)$ be admissible, let $\eps,\delta_Q\in\mathbb R$, and let
+	$\mathcal S$ be a projective strategy of value at least $1-\eps$.
+	Suppose joint point measurements $\{\hat Q^{x,z}_{a,b}\}$ are supplied
+	on both expanded local spaces, are projective, and satisfy the three
+	comparisons of Lemma~\ref{lem:qld-4-10} on all opposite placements,
+	with each averaged squared distance at most $\delta_Q$.
+	Sample $(\ell_X,x)$ and $(\ell_Z,z)$ independently from the line-point
+	distribution, and denote their product distribution by $\mu$.
+	Use the completed alphabet $\Omega=\F_q\cup\{\bot\}$ and write
+	\[
+		Q^{X,x,z}_a=\sum_b\hat Q^{x,z}_{a,b},\qquad
+		Q^{Z,x,z}_b=\sum_a\hat Q^{x,z}_{a,b},\qquad
+		Q^{X,x,z}_{\bot}=Q^{Z,x,z}_{\bot}=0.
+	\]
+	Let $E^{W,\ell,u}_c$ be the evaluated expanded-line effect of
+	Lemma~\ref{lem:qld-comm-line-cons}: for $c\in\F_q$ it sums the effects
+	with $f(u)=c$, and for $c=\bot$ it sums those without an evaluation at
+	$u$. For every directed opposite placement pair $(p_1,p_2)$ of
+	Definition~\ref{def:symmetric-equivalents} and each $W\in\{X,Z\}$,
+	putting $u_X=x$ and $u_Z=z$, one has
+	\[
+		\E_{\mu}\sum_{c\in\Omega}
+		\big\|\big((Q^{W,x,z}_c)_{p_1}
+		-(E^{W,\ell_W,u_W}_c)_{p_2}\big)\ket{\hat\psi}\big\|^2
+		\leq 8\delta_Q+C\bigl(\eps+\delta_{\mathrm{Line}}(\eps)\bigr),
+	\]
+	where $\delta_{\mathrm{Line}}(\eps)=\sqrt{\eps}$. This is a quantified
+	intermediate estimate for \cite{Ji2020MIPStar}
+	(source label \texttt{eq:pasting-q1}); it does not assert existence of
+	the combined line measurement.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, fact:add-a-proj, lem:cool-closeness-fact,
+		lem:qld-comm-cons, lem:qld-comm-line-cons, fact:triangle,
+		def:line-point-dist}
+	The marginal contraction calculation following
+	\eqref{eq:qld-q-cons-m-hat-zx} bounds the squared distance from the
+	$X$ marginal to the opposite $X$ point measurement by $4\delta_Q$;
+	the $Z$ marginal uses \eqref{eq:qld-q-cons-m-hat-xz} with the same
+	bound. Adding a zero effect at $\bot$ preserves these distances.
+	The point marginal of the line-point distribution is uniform, so
+	independent line-point sampling preserves both bounds. On placement
+	$p_2$, compare the evaluated line measurement first with the point
+	measurement on $p_1$ using Lemma~\ref{lem:qld-comm-line-cons}, and then
+	with the point measurement on $p_2$ using Lemma~\ref{lem:qld-comm-cons}.
+	The squared-distance triangle inequality gives
+	$C_0(\eps+\delta_{\mathrm{Line}}(\eps))$. A second application yields
+	$2(4\delta_Q)+2C_0(\eps+\delta_{\mathrm{Line}}(\eps))$; take $C=2C_0$.
+\end{proof}
+
+\begin{lemma}[Completed point-to-line marginal consistency defects]
+	\label{lem:combined-point-line-marginal-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_defect_le}
+	\leanok
+	\uses{lem:combined-point-line-marginal-distance, def:consistency}
+	There is a universal $C\geq1$ such that, for every projective strategy
+	and supplied projective joint point family satisfying the hypotheses of
+	Lemma~\ref{lem:combined-point-line-marginal-distance}, the following
+	holds. With its independent sampling distribution $\mu$, completed
+	alphabet $\Omega$, and completed families $Q^W,E^W$, for all directed
+	opposite placements $(p_1,p_2)$ and both $W\in\{X,Z\}$,
+	\[
+		\E_{\mu}\sum_{\substack{c,c'\in\Omega\\c\ne c'}}
+		\Re\bra{\hat\psi}(Q^{W,x,z}_c)_{p_1}
+		(E^{W,\ell_W,u_W}_{c'})_{p_2}\ket{\hat\psi}
+		\leq8\delta_Q+C\bigl(\eps+\delta_{\mathrm{Line}}(\eps)\bigr).
+	\]
+	Equivalently, first extend the joint outcome pair $(a,b)$ to
+	$\Omega^2$ with zero effects on pairs containing $\bot$, and then take
+	its coordinate marginals. These are the same completed $Q^X,Q^Z$.
+	This is the consistency-defect form of the two comparisons in the
+	source display \texttt{eq:pasting-q1}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-point-line-marginal-distance,
+		lem:sandwich-postprocess-compose, lem:sandwich-postprocess-projective,
+		def:expanded-line-measurement, fact:agreement}
+	Composition of postprocessings identifies the two descriptions of each
+	completed marginal. Projectivity follows from projectivity of the supplied
+	joint point measurements and of the constructed expanded-line measurements;
+	it is preserved by evaluation, completion, marginalization, and placement.
+	For projective families the consistency defect is bounded by their squared
+	state-dependent distance. Apply
+	Lemma~\ref{lem:combined-point-line-marginal-distance} to each coordinate.
+\end{proof}
+
+\begin{lemma}[Point self-consistency under line-point sampling]
+	\label{lem:combined-point-self-consistency-line-point}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
+		def:symmetric-equivalents}
+	This formalization-only auxiliary records the second pasting hypothesis
+	used in \cite{Ji2020MIPStar}, following the source display
+	\texttt{eq:pasting-q1}. Let $(q,m,d)$ be admissible, let
+	$\eps,\delta_Q\in\mathbb R$, and let $\mathcal S$ be a projective
+	strategy of value at least $1-\eps$. Suppose joint point measurements
+	$\{\hat Q^{x,z}_{a,b}\}_{a,b\in\F_q}$ are supplied on both expanded
+	local spaces, are projective, and satisfy the three comparisons of
+	Lemma~\ref{lem:qld-4-10} on all opposite placements, each with averaged
+	squared distance at most $\delta_Q$. Sample $(\ell_X,x)$ and
+	$(\ell_Z,z)$ independently from the line-point distribution, and write
+	$\mu=D_{\mathrm{Line}}\times D_{\mathrm{Line}}$ for their law.
+	For every directed opposite placement pair $(p_1,p_2)$ of
+	Definition~\ref{def:symmetric-equivalents},
+	\[
+		\E_{\mu}\sum_{\substack{(a,b),(c,d)\in\F_q^2\\(a,b)\ne(c,d)}}
+		\Re\bra{\hat\psi}(\hat Q^{x,z}_{a,b})_{p_1}
+		(\hat Q^{x,z}_{c,d})_{p_2}\ket{\hat\psi}
+		\leq\delta_Q.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:agreement, lem:alnf, lem:dlnf, def:line-point-dist}
+	Placement preserves projectivity, so Fact~\ref{fact:agreement} bounds
+	the consistency defect by the supplied squared-distance bound for
+	uniform point pairs. Lemmas~\ref{lem:alnf} and~\ref{lem:dlnf} give
+	uniform point marginals for both components of the line-point
+	distribution, hence also for their equal mixture. Independence of the
+	two samples makes $(x,z)$ a uniform point pair. Since the integrand
+	depends only on $(x,z)$, this change of sampling preserves the defect.
+\end{proof}
 
 \begin{lemma}[Formalization support for coefficient polynomial agreement]
 	\label{lem:coefficient-polynomial-agreement}
@@ -934,7 +1214,9 @@ assembled by Fourier averaging.
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents, def:concrete-paired-line-measurement,
+		def:symmetric-equivalents, lem:combined-point-line-marginal-defect,
+		lem:combined-point-self-consistency-line-point,
+		def:concrete-paired-line-measurement,
 		lem:concrete-paired-line-degree-support}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
@@ -973,7 +1255,13 @@ assembled by Fourier averaging.
 	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'} \simeq_{\delta_Q}
 	(\hat{M}^{(\mathrm{Line},X),\ell_X}
 	_{[\mathrm{eval}_x(\cdot)=a]})_{\mathsf{B}\mathsf{A}''}$
-	together with the analogous relation for $Z$. The conclusion now follows
+	together with the analogous relation for $Z$. The completed-alphabet forms
+	of these intermediate comparisons, with explicit error
+	$8\delta_Q+C(\eps+\delta_{\mathrm{Line}}(\eps))$, are proved in
+	Lemmas~\ref{lem:combined-point-line-marginal-distance}
+	and~\ref{lem:combined-point-line-marginal-defect}; the construction and
+	pasting argument for the joint line measurement remain unformalized.
+	The source's conclusion then follows
 	from the pasting lemma (Lemma~\ref{lem:pasting}) applied with
 	$\hat{Q}^{x,z}_{a,b}$ in the role of the combined measurement,
 	$\hat{M}^{(\mathrm{Line},X),\ell_X}$ and
@@ -983,7 +1271,10 @@ assembled by Fourier averaging.
 	Schwartz--Zippel bound (Lemma~\ref{lem:schwartz-zippel-total-degree})
 	applied to the polynomials $f_X, f_Z$ of total degree at most $md$; the
 	two hypotheses of the pasting lemma are supplied by the preceding display
-	and by \eqref{eq:qld-q-self-cons}, and the distribution over
+	and by \eqref{eq:qld-q-self-cons}, whose consistency-defect form under
+	the required sampling is proved in
+	Lemma~\ref{lem:combined-point-self-consistency-line-point}.
+	The distribution over
 	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines. The
 	register-exchanged comparison \eqref{eq:pasting-1-sym} is supplied by the
 	symmetric equivalents of that preceding display, which

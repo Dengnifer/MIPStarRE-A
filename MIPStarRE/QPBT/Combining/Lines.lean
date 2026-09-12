@@ -1,3 +1,9 @@
+import MIPStarRE.QPBT.Combining.Lines.PointSelfConsistency
+import MIPStarRE.QPBT.Combining.Lines.OptionPostprocessDistance
+import MIPStarRE.QPBT.Combining.Lines.SamePlacementDistance
+import MIPStarRE.QPBT.Combining.Lines.OptionPointMarginalTransport
+import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDistance
+import MIPStarRE.QPBT.Combining.Lines.CombinedPointLineMarginalDefect
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
