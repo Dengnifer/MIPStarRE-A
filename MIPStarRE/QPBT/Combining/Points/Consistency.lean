@@ -94,18 +94,6 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
 
-/-- The effects of a projective measurement are square-summable to the
-identity. -/
-theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
-    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (M.effect a)ᴴ * M.effect a ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (M.effect a)ᴴ * M.effect a = ∑ a, M.effect a := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := M.sum_eq_one
-
 /-! ## The overlap of two placed sandwiches -/
 
 section Abstract
@@ -299,7 +287,7 @@ theorem sandwich_defect_pointwise_le (ψ : EuclideanSpace ℂ ι)
     simp only [Fintype.sum_prod_type]
     refine Finset.sum_le_sum fun a _ => ?_
     exact sum_norm_mul_apply_le Z₂.effect (X₁.effect a - X₂.effect a) ψ
-      (sum_effect_conjTranspose_mul_self_le_one_of_projective Z₂ hZ₂)
+      (measurement_sum_adjoint_mul_le_one Z₂)
   have hsum := Finset.sum_le_sum fun ab (_ : ab ∈ Finset.univ) => hpt ab
   rw [← Finset.mul_sum, Finset.sum_add_distrib, Finset.sum_add_distrib] at hsum
   linarith

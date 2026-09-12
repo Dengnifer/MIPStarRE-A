@@ -1058,3 +1058,68 @@ unresolved findings. It launched no new model turn, edited no response or
 source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
+
+## 2026-09-09 - Simplify dispatcher worker reservations (#505)
+
+**Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
+and the issue #505 implementation entry for `orc-505-20260909-01`.
+**Change:** `sessions.md` and `DESIGN.md` define marker-only reservations using
+the two worker caps, missing as zero, ratio selection and 10-second polling.
+The router and shim drop retired gates; native lease and queue entrypoints are
+retired, and `useful-queue.md` becomes historical. Resume/model affinity,
+telemetry, fan-out restrictions and publication/review gates remain enforced.
+**Expected effect:** free configured worker slots are usable without the retired
+Space admission machinery. Installed qpbt-switch retirement belongs to the meta
+session; this branch changes neither that command nor live caps. Runtime effect
+is unverified until checked publication, independent review and deployment.
+
+## 2026-09-09 - Complete native review retirement (#505)
+
+**Trigger:** PR #508 review F1 found that a stale
+`MIPSTARRE_NATIVE_REVIEW_ROOT` export still diverted `review.sh` into the
+disabled lease-backed handler, while active operator prose still required the
+retired native pool. This is the review-facing remainder of the
+`results/telemetry/events.md` 2026-09-09T11:22Z stale-HOLD incident.
+**Change:** `review.sh` sends every new review through external `dispatch.sh`
+and clears inherited native-review variables after warning. `review.md`, the
+main persona, and active workflow summaries now direct new work through marker-
+reserved external dispatch; the former native review procedure remains marked
+as historical. **Expected effect:** stale shell configuration cannot strand a
+review in the retired lease verifier, and operators no longer receive mutually
+exclusive native-lease and external-capacity instructions.
+
+## 2026-09-09 - Tolerate telemetry-only base movement at merge (#498)
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-09 — Meta intervention:
+stalled \"Space\" main session replaced; detached-worker architecture
+reinstated", and the later same-day approved-refresh entries. Telemetry snapshot
+commits moved `main` while exact-head CI and review lanes were completing, so
+otherwise ready pull requests became stale without a source or blueprint change.
+Owner comment `5599043067` at `2026-09-09T08:45:54Z` delegated the B9 decision
+to main; main authorized option B with the conservative data-and-mode scope
+recorded below.
+
+**Change:** `pr_merge.py` gate 2b and its daemon-facing freshness helper retain
+base ancestry as the fast path. When ancestry fails, they parse NUL-delimited
+raw Git changes with rename detection disabled and accept only regular
+non-executable `.md`/`.jsonl` files below `results/telemetry/` and generated
+regular non-executable `.json` files below the exact
+`results/telemetry/github-snapshot/` subtree. Python, shell, JavaScript and other
+code; executable modes and mode changes; symlinks; unknown or boundary paths;
+and all nontelemetry paths remain freshness-relevant. Additions, deletions and
+renames are checked by path and tree mode. Missing merge bases, malformed raw
+records and failed Git commands still refuse. `issues-prs.md` records the rule,
+and `review.md` limits review carry-forward to refreshes still required by it.
+
+**Scope disposition:** PR #499 review F2 names the retired Space merge service.
+Main disposition is out of scope: this repair does not revive, edit or restart
+that service. The active v9f daemon must consume the accepted
+`pr_merge.head_is_fresh` predicate in a separately checked rollout after this
+change merges; no running daemon or rollout script is changed here.
+
+**Expected effect:** telemetry publication no longer serializes all otherwise
+mergeable pull requests behind another refresh lane, while executable telemetry
+tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
+symlink, unknown-path or other non-allowlisted base change still requires
+refresh, exact-head CI and independent review; all other merge gates are
+unchanged.
