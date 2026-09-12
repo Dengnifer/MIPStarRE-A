@@ -6,6 +6,7 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Consistency
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.LineResampling
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Strategy
 import MIPStarRE.QPBT.Combining.DirectLowDegree.GameValue
+import MIPStarRE.QPBT.Combining.DirectLowDegree.RejectionBounds
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PassConversion
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.SeedFiberValue
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Error
@@ -26,6 +27,8 @@ import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Simultaneous
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Combining.Error
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.PointAgreement
 import MIPStarRE.QPBT.Combining.DirectLowDegree.SeedIndexedSoundness
+import MIPStarRE.QPBT.Combining.DirectLowDegree.ResampledCoefficientConsistency
+import MIPStarRE.QPBT.Combining.DirectLowDegree.ExtendedCoefficientLoss
 
 /-!
 # The directly indexed low-degree game
