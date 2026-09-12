@@ -16,7 +16,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   a named mathfix assignment under `issues-prs.md` section 6 through external
   dispatch. Keep its shared attempt
   and working-time budget across continuations. Main adjudicates mathematical
-  and workflow questions with evidence; #26 is for owner-only permissions,
+  and workflow questions with evidence; #500 is for owner-only permissions,
   credentials, access or scope grants. An item already posted there waits for
   the owner unless the owner explicitly returns that item to main.
 - You do not implement issue content yourself. An orchestrator session per
@@ -27,7 +27,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for decisions only the human owner can make.
+  packets on #27. Reserve #500 for decisions only the human owner can make.
   Never push to GitHub anything the gate has not passed.
 
 ## Parallelism
@@ -65,6 +65,12 @@ as a new `dispatch.sh` session after rechecking account capacity and ownership.
 Main remains `gpt-6-astra`/`ultra`; routine and bounded subagent jobs default to
 exact `gpt-5.6-sol`/`ultra`, including routine existing-statement proofs and reviews.
 Use `model_policy.py` and published `local/model-policy.json` for each assignment.
+**Exception, in full speed mode: every role, reviewers included, runs the hard
+model.** A `fast` run resolves `models.override` to `astra-all`, `model_policy.py`
+reads it from `watchdog/model-override`, and the ratio excludes those rows rather
+than counting them as violations — so do not hand-pick models during a run, and do
+not report the ratio as out of range while an override is in force. Check
+`run_mode.py get model_override` before classifying anything.
 Genuinely hard, source-semantic, control-policy or escalated jobs use Astra with
 an explicit reason; file extension and role alone do not determine hardness.
 Target Sol:Astra 20:1 within 10:1..50:1 over successive NEW dispatches after
@@ -122,7 +128,8 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
   `sessions.jsonl` (automatic via dispatch.sh). This is research data for
   the project's paper — do not batch or reconstruct it after the fact.
 - Report merged, dispatched, live-worker, and next-critical-packet state to
-  Progress Log #27 at each stage boundary or PR merge.
+  Progress Log #27 at each stage boundary or PR merge; during a run the
+  half-hourly shape below replaces the ad-hoc one (Standing reports).
 - Protocol evolution: every amendment gets an `EVOLUTION.md` entry citing
   its trigger in `events.md`. Amend when the same failure recurs, never
   ad hoc.
@@ -147,6 +154,56 @@ merges; never merge a PR by hand or call the merge gate from the main turn.
 - Keep owner and worker messages concise, legible and actionable. State the
   observed result, next action and unresolved limitation; avoid repeated
   unchanged status scans and reports.
+
+## Standing reports (added 2026-09-12 after the full speed run)
+
+These are your duties, not instructions to be repeated to you in a pause
+message. Every number — caps, the occupancy floor, the cadence, the issue
+numbers — comes from the run mode (`local/bin/run_mode.py get ...`,
+`local/protocols/full-speed-mode.md`), never from a literal in this file, a
+goal text or an operator message.
+
+**(a) The half-hourly progress comment.** While the run is at `fast` speed
+(`run_mode.py get speed`), post one comment on the progress issue
+(`run_mode.py get progress_issue`) every 30 minutes, **five lines**:
+
+1. merges since your last post: numbers, and the head each merged from;
+2. live workers against the occupancy floor (`run_mode.py get floor`), per
+   account;
+3. holes on main now, and the change since the last post;
+4. the next three critical packets, by issue number;
+5. blockers: one line, or "none".
+
+**Skip the post, never pad it**: when nothing in those five lines changed since
+the previous comment, post nothing. A report is a measurement, not a heartbeat.
+Measure it from your own census (`status-snapshot.sh`, `gh`) and keep the whole
+thing under two minutes — on 2026-09-12 the dispatch queue sat empty while the
+main session wrote 25-minute reports, and the owner had to ask why slots were
+idle.
+
+**(b) Never prose on the estimate issue.** `run_mode.py get estimate_issue`
+is written by `local/bin/estimate_post.py` alone, which renders exactly two
+lines and refuses any other body (`issues-prs.md` section 6.1). Progress prose
+goes on the progress log. If you believe the estimate is wrong, repair the
+measurement in `results/telemetry/owner-tools/estimate.sh`; never annotate that
+issue.
+
+**(c) On the pause word.** One closing comment on the progress issue, then the
+handoff at `results/telemetry/owner-handoffs/<date>-main.md`, written from the
+committed `results/telemetry/owner-handoffs/TEMPLATE.md`. **Every number in it
+is measured by you at that moment** — `status-snapshot.sh --prs`, `gh`,
+`git rev-parse github/main`, `run_mode.py show` — and never copied from an
+operator or owner message: the 2026-09-12 handoff reads "Owner listed eight
+merges" and missed the ninth, which a later GitHub read found. A number you
+cannot measure is written as unknown, never as zero and never as an estimate.
+Then pause the goal and stop; do not resume it yourself.
+
+**(d) The owner inbox** (`run_mode.py get owner_inbox_issue`, #500 today; the
+retired #26 is archived) takes permission, credential, access or scope grants
+only: ten plain lines, one id, no progress, no mathematics, no project-outcome
+decision. An item already posted there waits for the owner unless the owner
+explicitly returns it to you. Park it and continue the queue rather than idling
+on the question.
 
 ## Scope control (added 2026-09-01 after the issue-0007 overbuild)
 
@@ -188,7 +245,7 @@ scaffolding work is a COST, not an achievement.  Binding rules:
   written disposition — are yours to exercise with the reason recorded in
   `results/telemetry/events.md`.  If you are genuinely blocked on the owner
   (credentials, access, permissions or the scope budget), post a
-  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
+  BLOCKER comment on the pinned Owner inbox issue #500 with your draft adjudication;
   park it and continue the queue without idling on a question.
 
 ## GitHub (the workflow authority as of 2026-09-01)

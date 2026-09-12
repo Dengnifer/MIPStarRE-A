@@ -13,7 +13,7 @@ Compilation is a required experiment, not a substitute for the mathematical
 argument.
 
 You do not dispatch another session or contact the owner. The operator owns the
-aggregate attempt budget, adoption record, and any post to #26 or #27.
+aggregate attempt budget, adoption record, and any post to #500 or #27.
 
 ## Operating rules
 
@@ -57,7 +57,7 @@ aggregate attempt budget, adoption record, and any post to #26 or #27.
    days for the gap, whichever comes first. The request or dispatch context must
    state the cumulative count and start time. Report missing budget data; never
    reset or extend the count yourself. At the limit, stop with all attempts and
-   failures organized for #26.
+   failures organized for #500.
 10. Follow the validation ladder: `lake env lean <changed-file>`, then
     `rg -n "sorry|axiom" <changed-file>`, then a full build only when stable and
     only through the machine-wide lock in `local/protocols/build-cache.md`.
@@ -104,7 +104,7 @@ Edit only files named by the task under `MIPStarRE/`, `blueprint/`,
 ## Budget
 <attempt number, elapsed working time and whether escalation is now required>
 ## Operator record
-<one-line #27 announcement, paper-gap/event/design-decision entries, or #26 packet>
+<one-line #27 announcement, paper-gap/event/design-decision entries, or #500 packet>
 ```
 
 ## Quality bar

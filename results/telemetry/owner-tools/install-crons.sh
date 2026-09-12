@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+# install-crons.sh — regenerate the operator crontab from the run mode (design §7.5).
+#
+# Why this exists: on 2026-09-12 the crontab was edited three times in sequence by in-place
+# `sed` with no backup, and one of those edits (a `#` inside an `s#...#...#` expression)
+# WIPED it.  This script never edits the live crontab: it reads it, writes a complete new
+# file under $W, installs THAT file, and verifies the result.  It fails if `crontab -l`
+# returns nothing, because that is what a wipe looks like.
+#
+# Usage:
+#   install-crons.sh [--paused] [--dry-run] [--allow-empty]
+#   install-crons.sh --restore FILE [--allow-empty]     # install FILE verbatim, guarded
+#
+#   --paused       render the paused schedule: estimate at the slow cadence, readiness
+#                  report off, capacityd restart row off.  (owner-pause.sh phase T+2:00;
+#                  the pause also writes watchdog/capacity/capacityd.stop, so the row
+#                  would refuse anyway — this is the second lock on the same door.)
+#   --dry-run      print the crontab that would be installed; touch nothing.
+#   --allow-empty  accept an empty `crontab -l` (first install on a fresh host only).
+#   --restore F    install F verbatim — no regeneration, no sed.  owner-resume.sh uses this
+#                  with the backup the pause recorded, because un-commenting by `sed` would
+#                  resurrect the watchdog / astra-poll / heartbeat rows that have been
+#                  deliberately commented out since 2026-09-09.
+#
+# Which rows this script owns (they come only from run-mode, never from the live crontab):
+#   estimate        every `run_mode.py get estimate_cadence_min` minutes (30 in fast mode)
+#   readiness       hourly, fixed schedule (see READY_SCHED below)
+#   capacityd       every 5 minutes, re-execing capacityd.sh; the loop takes a lock and a
+#                   second instance exits, so this row is a restart-if-dead supervisor and
+#                   never a second controller.  Without it a controller killed by an OOM or
+#                   a reboot never comes back and the caps freeze where they are.
+#   nudging crons   OFF.  The watchdog / heartbeat / astra-poll rows have been deliberately
+#                   disabled since 2026-09-09 and are written as comments, not as rows.
+# Every other line of the live crontab is carried through verbatim, INCLUDING lines that are
+# commented out: a `#PAUSED-...` row carries the schedule someone will want back, and
+# dropping it loses that schedule everywhere but the backup file.
+#
+# Exit codes: 0 ok · 2 usage · 3 `crontab -l` was empty or the install did not take effect
+set -u
+
+PROG="install-crons.sh"
+CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+W="$CACHE_ROOT/watchdog"
+OWNER_BIN="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}"
+CRONTAB_BIN="${MIPSTARRE_CRONTAB:-crontab}"
+TS="$(date -u +%Y%m%dT%H%M%SZ)"
+
+PAUSED=0; DRY=0; ALLOW_EMPTY=0; RESTORE=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --paused) PAUSED=1 ;;
+    --dry-run) DRY=1 ;;
+    --allow-empty) ALLOW_EMPTY=1 ;;
+    --restore) RESTORE="${2:-}"; [ -n "$RESTORE" ] || { echo "$PROG: --restore needs a file" >&2; exit 2; }; shift ;;
+    -h|--help) sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "$PROG: unknown argument '$1'" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+ROOT="${MIPSTARRE_REPO_ROOT:-}"
+if [ -z "$ROOT" ] && [ -r "$OWNER_BIN/repo-root" ]; then ROOT="$(cat "$OWNER_BIN/repo-root")"; fi
+if [ -z "$ROOT" ]; then ROOT="$HOME/MIPStarRE-qpbt"; fi
+RUN_MODE="${MIPSTARRE_RUN_MODE:-$ROOT/local/bin/run_mode.py}"
+
+VERSION="$(sed -n 's/^short=//p' "$OWNER_BIN/tools-version" 2>/dev/null | head -n 1)"
+echo "tool=$PROG version=${VERSION:-unreleased}"
+if [ ! -r "$RUN_MODE" ]; then
+  echo "$PROG: warning: no run_mode.py at $RUN_MODE; every schedule falls back to its" >&2
+  echo "$PROG: documented default (estimate 6-hourly, readiness hourly, nudgers off)." >&2
+fi
+
+rm_get() { # rm_get KEY [fallback]; loud when there is no fallback
+  local key="$1" fb="${2-}" out=""
+  out="$(python3 "$RUN_MODE" get "$key" 2>/dev/null)" || out=""
+  out="$(printf '%s' "$out" | head -n 1 | tr -d '\r')"
+  if [ -n "$out" ]; then printf '%s\n' "$out"; return 0; fi
+  if [ "$#" -ge 2 ]; then printf '%s\n' "$fb"; return 0; fi
+  echo "$PROG: run_mode.py get $key produced nothing ($RUN_MODE); refusing to guess" >&2
+  return 1
+}
+
+cron_every() { # cron_every <minutes> -> a 5-field schedule, or nonzero
+  local m="$1" h
+  case "$m" in ''|*[!0-9]*) return 1 ;; esac
+  [ "$m" -gt 0 ] || return 1
+  if [ "$m" -lt 60 ]; then
+    [ $((60 % m)) -eq 0 ] || return 1
+    printf '*/%s * * * *\n' "$m"; return 0
+  fi
+  [ $((m % 60)) -eq 0 ] || return 1
+  h=$((m / 60))
+  if [ "$h" -eq 24 ]; then printf '0 0 * * *\n'; return 0; fi
+  [ $((24 % h)) -eq 0 ] || return 1
+  printf '0 */%s * * *\n' "$h"; return 0
+}
+
+BEGIN='# BEGIN mipstarre-dev — generated by install-crons.sh from watchdog/run-mode.json; do not edit by hand'
+END='# END mipstarre-dev'
+LOG="$W/cron.log"
+
+# Historical rows this block now owns; they are dropped from the carried-through section so
+# a schedule can never exist twice (the 2026-09-12 crontab kept a 6-hourly estimate row and
+# a 30-minute one at the same time).
+OWNED_RE='(estimate\.sh|ready_report\.py|capacityd\.sh|qpbt-watchdog\.sh|owner-heartbeat-check\.sh|astra-poll\.sh|install-crons\.sh)'
+# ...but only LIVE rows.  A commented-out row is a record, not a schedule: dropping the
+# `#PAUSED-20260909 ...` watchdog / heartbeat / astra-poll lines would delete the original
+# schedules from the live crontab on the first regeneration, leaving them only in a backup.
+carry_through() { # stdin: the live crontab -> stdout: the lines this block does not own
+  awk -v b="$BEGIN" -v e="$END" '
+    index($0, b) == 1 { skip = 1; next }
+    index($0, e) == 1 { skip = 0; next }
+    skip != 1 { print }' \
+  | awk -v owned="${OWNED_RE//\\/\\\\}" '
+    /^[[:space:]]*$/ { next }
+    /^[[:space:]]*#/ { print; next }          # commented rows survive verbatim
+    $0 ~ owned { next }                        # live rows this block regenerates
+    { print }'
+}
+
+mkdir -p "$W"
+
+# distinct from owner-pause.sh's crontab.<ts>.bak, which is the file pause-state.json
+# records and owner-resume.sh restores: an install a second later must not overwrite it
+CUR_FILE="$W/crontab.$TS.install.bak"
+CUR="$("$CRONTAB_BIN" -l 2>/dev/null)"
+if [ -z "$CUR" ] && [ "$ALLOW_EMPTY" -eq 0 ]; then
+  echo "$PROG: crontab -l returned nothing — refusing to install over an empty crontab." >&2
+  echo "$PROG: if this host really has no crontab yet, re-run with --allow-empty." >&2
+  exit 3
+fi
+
+install_file() { # install_file <path>
+  local f="$1"
+  if [ "$DRY" -eq 1 ]; then
+    echo "$PROG: [dry-run] would install $f:"; sed 's/^/  | /' "$f"; return 0
+  fi
+  "$CRONTAB_BIN" "$f" || { echo "$PROG: crontab $f failed" >&2; return 3; }
+  local now; now="$("$CRONTAB_BIN" -l 2>/dev/null)"
+  if [ -z "$now" ]; then echo "$PROG: crontab is empty after the install — restore $CUR_FILE" >&2; return 3; fi
+  if ! printf '%s\n' "$now" | diff -q - "$f" >/dev/null 2>&1; then
+    echo "$PROG: warning: the installed crontab differs from $f (cron may normalise comments)" >&2
+  fi
+  echo "$PROG: installed $(grep -c -v '^[[:space:]]*$' "$f") crontab lines from $f"
+  return 0
+}
+
+if [ "$DRY" -eq 0 ]; then
+  printf '%s\n' "$CUR" > "$CUR_FILE"
+  echo "$PROG: previous crontab backed up verbatim to $CUR_FILE"
+fi
+
+if [ -n "$RESTORE" ]; then
+  [ -r "$RESTORE" ] || { echo "$PROG: cannot read $RESTORE" >&2; exit 2; }
+  if [ ! -s "$RESTORE" ] && [ "$ALLOW_EMPTY" -eq 0 ]; then
+    echo "$PROG: $RESTORE is empty; refusing (use --allow-empty)" >&2; exit 3
+  fi
+  install_file "$RESTORE"; exit $?
+fi
+
+SPEED="$(rm_get speed default)"
+CADENCE_FB=360; [ "$SPEED" = fast ] && CADENCE_FB=30
+CADENCE="$(rm_get estimate_cadence_min "$CADENCE_FB")"
+[ "$PAUSED" -eq 1 ] && CADENCE=360
+EST_SCHED="$(cron_every "$CADENCE")" || {
+  echo "$PROG: estimate_cadence_min=$CADENCE is not expressible as a cron schedule" >&2; exit 2; }
+# Not run-mode knobs: these two schedules are fixed policy, not per-run numbers the owner
+# briefs.  An environment override exists for tests; there is deliberately no brief field,
+# so nothing here silently falls back to a default while claiming to read the brief.
+READY_SCHED="${MIPSTARRE_READY_CRON:-17 * * * *}"
+CAPD_SCHED="${MIPSTARRE_CAPACITYD_CRON:-*/5 * * * *}"
+[ "$PAUSED" -eq 1 ] && READY_SCHED=off
+[ "$PAUSED" -eq 1 ] && CAPD_SCHED=off
+
+NEW="$W/crontab.$TS.new"
+{
+  # everything the block does not own, verbatim and in order (comments included)
+  printf '%s\n' "$CUR" | carry_through
+  printf '%s\n' "$BEGIN"
+  printf '# release %s · speed=%s%s · regenerate with install-crons.sh, never by hand\n' \
+    "${VERSION:-unreleased}" "$SPEED" "$([ "$PAUSED" -eq 1 ] && printf ' (paused)')"
+  printf '%s %s >> %s 2>&1\n' "$EST_SCHED" "$OWNER_BIN/estimate.sh" "$LOG"
+  if [ "$READY_SCHED" = off ]; then
+    printf '# readiness report: off (paused)\n'
+  else
+    printf '%s cd %s && python3 local/bin/ready_report.py >> %s 2>&1\n' "$READY_SCHED" "$ROOT" "$LOG"
+  fi
+  # capacityd restart-if-dead.  capacityd.sh takes a lock and a second instance exits, so
+  # this row can never start a second controller; it only brings one back after a kill.
+  if [ "$CAPD_SCHED" = off ]; then
+    printf '# capacity controller: off (paused)\n'
+  else
+    printf '%s [ -e %s/capacity/capacityd.stop ] || { setsid %s >> %s 2>&1 < /dev/null & }\n' \
+      "$CAPD_SCHED" "$W" "$OWNER_BIN/capacityd.sh" "$LOG"
+  fi
+  # The nudging crons have been deliberately off since 2026-09-09 (events.md); they are
+  # written as comments so the crontab says so rather than staying silent about them.
+  printf '# qpbt-watchdog.sh: off since 2026-09-09 (deliberate)\n'
+  printf '# owner-heartbeat-check.sh: off since 2026-09-09 (deliberate)\n'
+  printf '# astra-poll.sh: off since 2026-09-09 (deliberate)\n'
+  printf '%s\n' "$END"
+} > "$NEW"
+
+install_file "$NEW"
+exit $?

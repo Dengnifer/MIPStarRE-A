@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "owner_scope": "design full-speed-v2 §2 item 1; protocol local/protocols/capacity.md",
+  "ceiling_source": "brief",
+  "windows": {"counter_window_s": 300, "measured_hold_s": 600, "probe_timeout_s": 60},
+  "defaults": {
+    "floor": 1,
+    "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
+    "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
+               "probe_backoff_max_s": 600, "probes_to_recover": 2}
+  },
+  "accounts": {
+    "primary": {
+      "floor": 1,
+      "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
+      "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
+                 "probe_backoff_max_s": 600, "probes_to_recover": 2}
+    },
+    "second": {
+      "floor": 1,
+      "aimd": {"increase": 1, "decrease": 0.75, "quiet_window_s": 120},
+      "health": {"fivexx_threshold": 3, "fivexx_window_s": 120, "probe_backoff_s": 30,
+                 "probe_backoff_max_s": 600, "probes_to_recover": 2}
+    }
+  },
+  "failure_patterns": [
+    {"failure_class": "endpoint_5xx", "counts_as": "death",
+     "patterns": ["503 Service Unavailable", "502 Bad Gateway", "504 Gateway Timeout",
+                  "500 Internal Server Error", "Service Unavailable"]},
+    {"failure_class": "concurrency_limit", "counts_as": "refusal",
+     "patterns": ["Concurrency limit exceeded", "concurrency limit reached",
+                  "429 Too Many Requests"]},
+    {"failure_class": "refused", "counts_as": "refusal",
+     "patterns": ["account capacity exhausted; no reservation made"]},
+    {"failure_class": "retries_exhausted", "counts_as": "death",
+     "patterns": ["Reconnecting... 5/5", "stream disconnected before completion",
+                  "exceeded retry limit"]},
+    {"failure_class": "auth", "counts_as": "death",
+     "patterns": ["401 Unauthorized", "403 Forbidden", "invalid_api_key"]},
+    {"failure_class": "unknown", "counts_as": "neutral", "patterns": []}
+  ],
+  "priority_classes": {
+    "consumer": "deferred — design full-speed-v2 §9 item 2; nothing reads this table yet",
+    "classes": [
+      {"name": "merge-path", "rank": 1, "roles": ["reviewer"],
+       "job_classes": ["independent_review", "hard_review"]},
+      {"name": "repair", "rank": 2, "roles": ["orc"],
+       "job_classes": ["escalated", "hard", "review_directed_nonsemantic_cleanup"]},
+      {"name": "proof", "rank": 3, "roles": ["prover", "mathfix"],
+       "job_classes": ["general", "source_semantic", "control_policy"]},
+      {"name": "background", "rank": 4, "roles": ["scout", "simplifier", "blueprint", "splitter"],
+       "job_classes": ["routine", "bounded"]}
+    ]
+  }
+}

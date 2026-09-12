@@ -1123,3 +1123,418 @@ tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
 symlink, unknown-path or other non-allowlisted base change still requires
 refresh, exact-head CI and independent review; all other merge gates are
 unchanged.
+
+## 2026-09-12 - One owner briefing, one mode file, two standing reports (W1)
+
+**Trigger:** `results/telemetry/events.md` 2026-09-12 (the full speed run
+04:17Z-08:33Z) and the run summary's owner interventions 1, 3 and 6. (1) The
+owner had to restate the concurrency limits several times (5 on the primary;
+10 -> 40 -> 20 -> 30 on the second key), confirm that a forked local session
+shared the second key, and cap that session at 2, while the operator edited the
+cap files by hand ten times; a resume script announced caps that were already
+wrong and would have written empty cap files, after which every dispatch exits 4
+with `invalid literal for int()`. (3) The owner asked whether the project was
+progressing and then had to prescribe the exact two-line format for the estimate
+issue, because multi-line reports had been posted there and one had to be
+reformatted by hand; a missing `watchdog/estimate-issue` silently no-op'd the
+only progress channel. (6) The speed tier was switched three times by hand,
+each time by a string-surgery patch of the deployed PATH shim against a
+90-character anchor, and the main TUI never received the tier at all.
+
+**Change:** `local/bin/run_mode.py` is the single writer of
+`~/.cache/mipstarre-dev/watchdog/run-mode.json` and the single accessor
+(`apply/show/get/set speed/pause/resume`) for every capacity, schedule, speed
+and issue number in a run. The owner authors one artifact, the brief, from the
+committed `results/telemetry/owner-tools/run-brief.template.json`; `apply`
+validates it strictly (unknown key, missing endpoint, non-integer limit,
+`external_reserved >= nominal_limit`, occupancy above 1, unknown speed or
+override, non-positive or duplicated issue numbers, an account outside
+`{primary, second}`), writes the mode file atomically, derives the three
+`max-codex*` files, regenerates the shim for the briefed speed, and records the
+brief's `sha256` in `stages.jsonl` plus one row in `design-decisions.md`. A cap
+file is never written empty or non-numeric, and an unreadable one reads as
+unknown rather than zero. `set speed` regenerates the shim from the committed
+template and refuses, printing the diff, when the deployed copy matches no
+rendering of it. `local/bin/estimate_post.py` renders the two-line estimate body
+from command-line values and refuses any other body; `local/bin/ready_report.py`
+posts the hourly `ready N, merged-this-hour M` report with the reason each
+ready-but-open PR has not merged read from daemon state, `unexplained` being the
+alarm case. `local/protocols/full-speed-mode.md` is the runbook;
+`local/personas/main.md` gains the Standing reports duty (the five-line
+half-hourly comment, never prose on the estimate issue, the closing handoff from
+`results/telemetry/owner-handoffs/TEMPLATE.md` with every number measured by the
+session itself, and the owner inbox rule); `local/protocols/issues-prs.md` 6.1
+states the estimate/progress split. The retired owner inbox #26 is swept to #500
+in `main.md`, `orchestrator.md`, `mathfix.md` and `issues-prs.md`.
+
+**Expected effect:** a run starts from one briefing and the owner receives only
+the estimate one-liner and the progress log. No protocol, persona, script or
+goal text carries a literal cap, floor, cadence or issue number, so none can be
+stale; a bad brief fails at briefing time instead of at 05:00Z; and the estimate
+channel cannot drift back into prose.
+
+## 2026-09-12 - Classified provider failures, a survivable dispatch, an honest override (W2)
+
+**Trigger:** the full speed run's owner interventions 1, 2 and 7. About 90 worker
+sessions died — 69 while the primary endpoint answered 503, the rest above the
+second key's real concurrency limit — and every one of them was recorded as
+`failed` with an exit code, so a refusal by the provider was scored exactly like
+a proof the model could not close. `dispatch.sh` turned a router refusal into
+`die 4` and lost the prompt with it; the key label was recorded for the primary
+account only; two writers repeatedly met on one branch; `autofix.sh` defaulted
+`MIPSTARRE_FIX_MODEL` to a hard model that its own dispatcher preflight rejects,
+so every dispatched fixer died before doing any work; and "all workers on the
+hard model" was implemented as a `sol -> astra` rewrite inside the deployed PATH
+shim, so `sessions.jsonl` recorded a model that never ran.
+
+**Change:** `telemetry.py classify_failure` reads the serialized event stream and
+returns one of `concurrency_limit`, `endpoint_5xx`, `retries_exhausted`,
+`timeout`, `task_failure` or a neutral `unknown`, from the wordings in
+`local/capacity-policy.json` when it exists and built-in defaults otherwise; the
+class, the detail, the endpoint and the retries seen are recorded on every row,
+`refused` joins the statuses, and event bullets move to
+`results/telemetry/events.d/<date>-<session>.md` so two sessions never append to
+one path. `dispatch.sh` resolves the key label and endpoint for both accounts,
+claims `locks/branch-<branch>.claim` and refuses a second writer with exit 5,
+spools the request and the prompt before reserving, refuses an endpoint the
+controller marked `down`, and retries a transient class with jittered backoff up
+to the run's dispatch cutoff before exiting 7 with the spool left for the
+janitor. The model override becomes a policy object plus the runtime knob
+`watchdog/model-override`, which only narrows toward the hard model, never lowers
+effort, and travels as `override_mode`/`override_source` on the row; the shim's
+rewrite is deleted. `autofix.sh` defaults to the dispatcher's model, self-checks
+the policy before any worktree work (as does `review.sh`), and gains the
+fix → CI → review `--loop` that lived in `/tmp`, branching on a round record
+rather than on a log grep.
+
+**Expected effect:** a capacity refusal is distinguishable from a failed proof,
+so the controller below can act on it and the janitor can re-run it; a dispatch
+that is refused survives with its prompt instead of dying; and the session
+registry records the model that actually ran.
+
+## 2026-09-12 - The caps measure themselves and the endpoints have health (W3)
+
+**Trigger:** the same run's intervention 1. Nothing measured either key's real
+concurrency limit, nothing noticed that the primary endpoint had been returning
+503 for an hour, and the caps were therefore chased by hand ten times
+(39 -> 29 -> 20 -> 18 -> 14 -> 12 -> 6 -> 14 -> 22 -> 0). The pause/resume cap
+round-trip saved zeros and could not be parsed back.
+
+**Change:** `local/bin/capacity_controller.py` is the only writer of
+`watchdog/max-codex-{primary,second}` and `max-codex`. Each tick counts refusals
+and deaths per account from the structured `failure_class`/`endpoint` fields of
+`sessions.jsonl`, adds one slot only after a full quiet window at saturation, and
+cuts to `live - 1` on the first refusal and to `ceil(cap * 0.75)` on any further
+refusal in the same window, clamped to `[floor, ceiling]` with the briefed
+external consumers subtracted. Three `endpoint_5xx` deaths inside 120 s trip the
+account to `down` and cap 0 at once; recovery runs through a single half-open
+read-only probe, two consecutive successes restoring cap 1 and never the
+pre-outage cap. `pause` saves the live caps inside `state.json` and `resume`
+restores them; the measured limit is carried into the next run's seed.
+`local/protocols/capacity.md` is the protocol, `capacityd.sh` the loop, and
+`status-snapshot.sh` prints the per-account line.
+
+**Expected effect:** the owner states a ceiling once and the controller finds the
+real limit underneath it; a dead endpoint costs one tick rather than an hour of
+deaths; and a resume restores the caps it actually saved.
+
+## 2026-09-12 - One installer, one pause, one resume, one way to speak (W4)
+
+**Trigger:** the same run's interventions 6 and 7. Four pause variants, two
+`owner-say` revisions, two launchers and two estimate copies lived in `/tmp` and
+in `~/bin`; one of the pause scripts had wiped the crontab with a `sed`
+delimiter bug; the speed tier was switched three times by hand-patching the
+deployed shim against a 90-character anchor; and the goal keeper resumed a goal
+five minutes after the owner's stop order because the message script had no way
+to say "this one does not resume".
+
+**Change:** `results/telemetry/owner-tools/install.sh` is the one deployment
+path: it copies the tool table into `~/.cache/mipstarre-dev/owner-bin/`, writes a
+hash manifest and a version file, refuses (installing nothing) when a deployed
+file is a hand patch, attics what it replaces under `--force`, and offers
+`--verify` as the merge daemon's start gate and `--compat-tmp` as symlinks for
+the historical `/tmp` names. `install-crons.sh` regenerates a managed block from
+run-mode and carries every foreign row through verbatim, always backup-then-
+install and never a `sed`. `owner-pause.sh` implements the phased pause against
+the briefed deadline with every phase clamped to it, releasing queued dispatches
+through `watchdog/drain` rather than killing them, and records `pause-state.json`
+provisionally before it zeroes anything. `owner-resume.sh` restores from that
+record only, checking every precondition before restoring anything.
+`owner-say.sh` takes an explicit mode, and its `terminal` mode writes
+`watchdog/goal-hold` before the message so the keeper cannot win the race.
+
+**Expected effect:** the operator layer is versioned, hash-checked and
+reproducible; a pause finishes inside the owner's deadline without losing the
+crontab; and a stop order stays stopped.
+
+## 2026-09-12 - The merge path is promoted out of /tmp and its failures are classed (W5)
+
+**Trigger:** the same run's interventions 4 and 5. The merge daemon and the lane
+runner existed only as `/tmp/merge-daemon-v9h.sh` and `/tmp/lane-v17.sh`, and
+three lane-runner revisions were hand-patched there during the run. The daemon's
+`pr<N>.failed` markers were bare touch files with a fixed two-hour backoff, so a
+systemic lane failure silently blocked every affected PR; PAR was a constant;
+lanes numbered by anything other than the issue number died after the push; and
+the lane runner carried a fallback push with `MIPSTARRE_SKIP_HOOKS=1`.
+
+**Change:** `merge-daemon.sh`, `merge.sh`, `daemon-scan.py` and `daemon.conf`
+land under `results/telemetry/owner-tools/` and `lane.sh` and
+`worktree_resolve.sh` under `local/bin/`. A failure marker is now a JSON record
+carrying a class (`conflict`, `build`, `preflight`, `infra`, `gate`,
+`adjudication`), a reason and an attempt count, and it clears on an observable
+change — a new head, a finished repair, a conflict that no longer reproduces, a
+newer installed tool release — instead of on a timer. PAR is computed each loop
+from `nproc`, load and free worker slots. The lane derives its number from the
+issue, refuses to renumber, resolves its worktree registry-first, waits for a
+slot without holding the launch lock, and takes its pre-push full build through
+the machine-wide build lease. The `MIPSTARRE_SKIP_HOOKS` fallback push is
+deleted outright, which strengthens the publication gate rather than altering it.
+
+**Expected effect:** the merge path is reviewed code with honest names; a failed
+refresh is repairable rather than parked for two hours; and no lane can publish
+around the hooks.
+
+## 2026-09-12 - A janitor that repairs what the run leaves behind (W6)
+
+**Trigger:** the same run's interventions 2 and 8. Sessions killed by the
+provider were re-dispatched by hand in waves; parked lanes were repaired by an
+operator reading `needs-attention` files; PRs 329, 334, 336 and 337 sat open
+after their content was already on `main`; and twenty stale lane directories were
+swept with date globs and filename digit filters that would have deleted live
+state on a different day.
+
+**Change:** `local/bin/janitor.sh` is one idempotent sweep of five passes —
+dead sessions, parked lanes, superseded PRs, stale lane state, expired dispatch
+spool — each selecting by record field, with no date glob and no digit filter
+anywhere. A **reviewer** session that ended in a transient class is re-dispatched
+under a per-(PR, role, head) budget, a clean ending never is, and every abandoned
+row is marked `failed` so telemetry stops showing it live. The re-dispatch is
+deliberately reviewer-only, and the entry point is the one that exists:
+`review.sh` re-reviews the PR's exact head and its verdict supersedes, so the
+re-run cannot duplicate work. **A dead prover, orc or fixer is NOT re-dispatched**
+— its unfinished packet is the owning session's to re-plan — so it is marked
+`failed` with a `residue` field in `watchdog/janitor/actions.jsonl`, and
+`local/bin/ready_report.py` counts those rows per role into the hourly comment on
+the progress issue. Widening the scope means writing a re-dispatch entry point
+for those roles first and then listing them in
+`MIPSTARRE_JANITOR_REDISPATCH_ROLES`; until then the residue is reported rather
+than silently repaired. Parked lanes classed `merge`
+or `build` go to `fix-lane.sh`, which renders a committed brief
+(`local/briefs/lane-repair-{merge,build}.md`), dispatches one repair through
+`dispatch.sh` and relaunches the lane tail. `local/bin/pr_janitor.py` closes a
+pull request only when its three-dot diff against `main` is empty **and** its
+head is an ancestor of `main`, posting one comment naming both checks; it never
+touches an issue and never guesses.
+
+**Expected effect:** the reviews the provider interrupted resume without an
+operator, the run's own debris is cleared by record rather than by pattern, and
+the part that is not repaired — every dead non-reviewer session — is counted per
+role on the progress issue instead of sitting in a local report file nothing
+reads.
+
+## 2026-09-12 - Union merge for the append-only logs and a reachability guard (W7)
+
+**Trigger:** the same run's intervention 4 and the lane-runner defect in 5.
+Nearly every merge conflicted on `results/telemetry/events.md` and its
+siblings; the union merge driver that fixed it was written into one host's
+`.git/info/attributes` and therefore existed for exactly one checkout. Separately,
+`MIPStarRE.QPBT.Combining.Points.Absorption` and `...Points.MarginalContraction`
+were outside the umbrella import closure, so `lake build` produced no `.olean`
+for them and every lane's per-file pre-push gate failed three hours into the run.
+
+**Change:** a committed `.gitattributes` gives `results/telemetry/*.md`,
+`results/telemetry/**/*.md`, the matching `.jsonl` patterns and
+`local/protocols/EVOLUTION.md` the union merge driver, and
+`local/bin/worktree-setup.sh` asserts it on every bootstrap, warning exactly as
+it already does for the hooks. `scripts/check_umbrella_imports.py` walks the
+import closure of the re-export roots and names each unreachable module together
+with the exact import line and the re-export file it belongs in; it never edits a
+re-export file, reads no proof, and runs inside the existing `local-ci/build`
+step body, so the eight canonical contexts and `pr_merge.py` gate 3 are
+unchanged. The two known orphans are imported by this change; five older ones
+remain, so the step ships `--warn-only` under issue 551 rather than turning
+unrelated open PRs red.
+
+**Expected effect:** an append-only log merges without a conflict in every
+checkout, and a module left outside the closure is named in the PR that
+introduces it instead of breaking every lane hours later.
+
+## 2026-09-12 - Review round 2 of PR 552: the amendments the fixes required
+
+**Trigger:** the blocking review of PR 552 (the full-speed-v2 integration
+branch). Four of its findings are protocol questions rather than code defects,
+and meta.md amendment procedure step 5 requires the enforcement points to move in
+the same commit as the behaviour.
+
+**Change, in seven parts.**
+
+*The telemetry schema.* `local/protocols/meta.md` declared
+`stages.jsonl` as `event: start|end|milestone` over the six project stages, while
+this layer's tools write `stage: operator` and `stage: capacity` rows. The schema
+now declares both operational stages and their event names, and states the rule
+that makes the file survivable: **transitions only**. The capacity controller's
+60-second tick therefore writes `watchdog/capacity/ticks.jsonl` (runtime state,
+trimmed to 2880 rows by its own writer) instead of ~1440 committed rows a day,
+and only `init`, `set`, `pause`, `resume`, `endpoint-trip` and
+`endpoint-recovered` reach `stages.jsonl`. Nobody prunes a committed log, so
+nothing may grow one.
+
+*The one `codex` outside `dispatch.sh`.* `capacity.md` declared the endpoint
+health probe the single exception to "every external Codex session goes through
+`dispatch.sh`" while meta.md's telemetry duty and the AGENTS.md Sessions bullet
+still said there were none. Two normative documents contradicting each other on
+one rule is not a rule: all three now name the probe, with its constraints
+(read-only, no persona, no task, single-flight, suppressed while paused or held
+or disabled) and the requirement that a second exception amend all three
+together.
+
+*Telemetry publication on `main`.* `merge-daemon.sh`, `owner-pause.sh` and
+`owner-resume.sh` commit append-only telemetry straight to `main` without a
+reviewed PR. This is a deliberate deviation from "every repository change goes
+through a reviewed PR that closes an issue" (standing principle 3: deviations are
+recorded with the reason). The reason: these are records OF the run, written while
+the run is happening, on paths `pr_merge._is_tolerated_telemetry_path` already
+tolerates for exactly this reason; a PR per telemetry batch would make the merge
+queue a queue of its own logs. The constraints that make it acceptable are now
+enforced rather than assumed — publication goes through
+`local/bin/checked-push.sh` (the pre-push gate outside the transport,
+`--force-with-lease`, post-preflight tree and SHA re-verification), and the commit
+stages an EXPLICIT path list (`daemon.conf` `telemetry_paths`) rather than
+`git add results/telemetry`, which swept up whatever else happened to be dirty in
+the primary checkout. No tool in the layer calls `git push` directly any more.
+
+*Run-mode fields.* `run.main` (model, effort, `codex_home`) is added to the brief
+so `local/bin/main-session.sh` can actually read what it claims to read, and
+`models.override` now writes the runtime knob `model_policy.py` reads, so the
+field does something. Neither changes a gate.
+
+**Expected effect:** the committed telemetry stays readable by a human, the
+health probe is legal in every document that governs it, a telemetry publish
+cannot bypass the publication gate or commit someone else's work, and the two
+brief fields that were inert now drive the components they name.
+
+## 2026-09-12 - Deviation: full speed mode v2 landed as one episode (PR 552)
+
+**Trigger:** the blocking review of PR 552 observes that the branch is 74 files
+and ~17k insertions closing one issue, against `local/personas/main.md` §Scope
+control ("<=2 hours wall time and <=1000 changed lines ... the episode total is
+the PR diff, which the review checks") and against the design's own §8/§10, which
+specify seven work items with disjoint file sets, each a reviewed PR closing one
+sub-issue.
+
+**Change:** none to the scope rule, which stands unamended. This entry records
+the deviation, as standing principle 3 requires, so that it is a recorded fact
+rather than an unremarked one.
+
+*What happened:* the seven items were written as seven disjoint patch sets
+(`snapshot/patches/W1`-`W7`) and integrated onto one branch, because the
+dependency edges the design itself lists are not one-directional at the file
+level: W3's controller writes the cap files W2's dispatcher reads and W5's daemon
+reports, W5's daemon is the only runner of W6's janitor, W7's merge attributes
+decide which latency path W5 writes, and W1's `run_mode.py` is the accessor all
+of them call. Landing them separately would have put a half-wired control loop on
+`main` at each step - a controller nothing starts, a janitor nothing calls - which
+is the failure mode this very review found in the integrated branch and which the
+separate PRs would have shipped one at a time.
+
+*What is NOT claimed:* no owner authorisation for a single oversized episode is
+on record. The decision to land as one episode or to split along the design's
+disjoint file sets belongs to the owner, and the review's finding stands open
+until the owner rules on it. The size is stated here so that ruling is made on a
+number rather than an impression.
+
+*What it cost:* the review found a never-started daemon, a pause that did not
+stop it, an unreachable exit code and a broken cron interface — defects that a
+seven-PR sequence would have caught one work item at a time. That is the
+evidence for the scope rule, not against it.
+
+**Expected effect:** the rule keeps its force; the next workflow change of this
+size is split, or is authorised as one episode before it is written, not after.
+
+## 2026-09-12 - Full speed mode means every role on the hard model (W9, PR 552)
+
+**Trigger:** the owner's rule after the 2026-09-12 run — "in full speed mode all
+subagents are astra, reviewers included; review is a semantic-alignment phase and
+needs the strong model as much as proving" — and three leftovers the PR 552 review
+left open.
+
+**Change, in four parts.**
+
+*The override resolves from the speed tier.* `models.override: null` was read
+literally as "no override", so a fast run that did not repeat the field ran its
+reviewers on the cheap model and nothing said so. `run_mode.py` now resolves the
+field: `run.speed fast` means `astra-all`, `default` means the published
+`local/model-policy.json`, the explicit `"policy"` keeps the published policy at
+any speed and `"astra-all"` forces the hard model at any speed. `set speed`
+re-resolves it and rewrites `watchdog/model-override`, so the mode file and the
+runtime knob cannot disagree about which model is in force. `get model_override`
+answers with the effective value; `model_override_briefed` and
+`model_override_source` say what was written and why. The brief template carries
+a `_comment` key (accepted and ignored) explaining the resolution.
+
+*No script carries a model.* `lane.sh` defaulted `MIPSTARRE_CODEX_MODEL` to a
+literal `gpt-5.6-sol`, falling back to `watchdog/model.txt` — a second side
+channel that pinned a model behind the policy's back and that no override could
+move. It requests `auto` now and lets `dispatch.sh` ask `model_policy.py`.
+`autofix.sh`'s `MIPSTARRE_FIX_MODEL` already defaulted to empty (the dispatcher's
+default) and is unchanged; the two were verified together.
+
+*The one-line run mode exists.* `run_mode.py show` defined only `--json`, yet
+two shipped callers render owner-visible text from `show --oneline` —
+`owner-tools/goal-keeper.sh` (the `/goal` body) and `owner-tools/owner-resume.sh`
+(the single resume message) — and both file headers say so. The subcommand
+exited 2 with `unrecognized arguments`, both callers swallowed it and took their
+degraded fallback, and the pause/resume `stages.jsonl` note recorded the fallback
+string as if it were the mode. `show --oneline` now renders speed, the
+per-account caps, the total, the occupancy floor, the three issue numbers, the
+effective override, the account mode and the dispatch cutoff from the same
+accessors `show` uses, so the line cannot drift from the dump. The fallbacks stay
+where they are.
+
+*The account mode is derived, not a second file.* The deployed PATH shim gates
+the second key on `watchdog/account-mode`, which nothing in the brief path wrote
+or checked: absent, it reads `primary` and every dispatch whose `CODEX_HOME` is
+not `~/.codex` exits 4. A brief enabling `second` with a `nominal_limit` of 30
+could therefore hold a cap of 28 and dispatch nowhere, with the capacity
+controller seeing only deaths — intervention 2's idle slots, with nothing saying
+why, and a second file holding a capacity decision against full-speed-mode.md
+section 1. `run_mode.py apply`, `pause` and `resume` now derive the file from
+`accounts[].enabled` (`both` when more than one account is enabled, `primary`
+otherwise), print it, expose it as `get account_mode`, and `owner-resume.sh`
+exits 5 when the file and the brief disagree. The shim's own hard-coded
+`model=gpt-6-astra` default is removed with it: a caller that names no model now
+gets codex's default rather than this file's opinion.
+
+*`set speed` regenerates the crontab.* The estimate cadence lives in the crontab,
+and the command used to print a line asking the reader to regenerate it, so a run
+switched to `fast` kept posting its estimate every six hours. It now calls the
+tracked `results/telemetry/owner-tools/install-crons.sh`; a missing or failing
+installer is reported and never fails the speed change.
+
+*The leftover lane runner is deleted.* `results/telemetry/owner-tools/lane.sh`
+was superseded by `local/bin/lane.sh` and still carried
+`MIPSTARRE_SKIP_HOOKS=1 git push` as its push path — the blanket hook bypass that
+`local/protocols/issues-prs.md` restricts to a hand-run emergency, sitting in a
+file an operator could copy. Nothing in the layer referenced it (`git grep`
+finds only the historical `owner-log.md` line and session transcripts, both
+records of the past rather than call sites), and `lane-v2.sh`, which is
+referenced by those records too, has no such push. It is removed rather than
+repaired: two lane runners with different push rules is the defect.
+
+*The resolved model is counted every hour.* Recording the model on the session
+row is not the same as noticing that it is the wrong one: confirming that a fast
+run really put every role, reviewers included, on the hard model still meant
+reading `results/telemetry/sessions.jsonl` by hand — the audit the override
+exists to remove. The hourly comment of `local/bin/ready_report.py` now carries
+one `models` line: sessions started in the window grouped by the model that
+actually ran, the override in force, and, when the override names one model, the
+count of rows that disagree with it, flagged the way `unexplained` is. The same
+row goes to `merge-latency-<date>.jsonl`. That comment also carries the janitor's
+residue — dead sessions marked `failed` and not re-dispatched, per role (W6).
+
+**Expected effect:** a full speed run's reviewers run the hard model without the
+owner naming it, the model that ran is the model the session row records, a model
+that is not the briefed one shows up on the progress issue within the hour, one
+tier switch moves the shim, the models and the cadence together, and the only
+`MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
+`checked-push.sh`.

@@ -689,11 +689,23 @@ agent must know:
   `local/protocols/issues-prs.md`.
 - **Sessions.** Worker Codex sessions use `local/bin/dispatch.sh` (roles: orc,
   prover, reviewer, simplifier, blueprint, splitter, scout; `mathfix` is
-  reserved for astra after the #26 availability report) so token/time telemetry
+  reserved for astra after the #500 availability report) so token/time telemetry
   stays complete. Lease-backed native descendants are retired by issue #505;
   `local/protocols/sessions.md` retains their history. Current Fable 5.1
   math-fix sessions are owner-launched and use `owner-sessions.jsonl`.
-- **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
+  `dispatch.sh` claims the worktree's branch for the session (exit 5 names the
+  holder; read-only reviewers are exempt), refuses an endpoint the capacity
+  controller marked `down`, and retries a provider refusal from its spool
+  instead of dying — see `local/protocols/sessions.md` §4.1. The **one**
+  documented `codex` invocation outside `dispatch.sh` is the endpoint health
+  probe in `local/bin/capacity_controller.py`: bounded, read-only, no persona
+  and no task, single-flight, suppressed while paused or held, and recorded in
+  `watchdog/capacity/health-<account>.json` rather than in `sessions.jsonl`
+  (`local/protocols/meta.md` Telemetry duties, `local/protocols/capacity.md`).
+- **Telemetry duty.** Incidents go to `results/telemetry/events.d/` through
+  `local/bin/telemetry.py event` (one shard per date and session;
+  `results/telemetry/events.md` is the pre-shard history and is never
+  rewritten — read both with `telemetry.py events --since DATE`);
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.
 - **Fix commits**: `autofix.sh`'s automated commits are prefixed

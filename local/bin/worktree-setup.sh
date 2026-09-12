@@ -235,6 +235,81 @@ install_hooks() { # <worktree>
   return 1
 }
 
+# The union merge driver for the append-only records (.gitattributes).  Asserted
+# here, next to the hooks, for the same reason: a gate that is silently absent is
+# worse than one that is loudly missing.  Before it was committed the driver
+# lived only in $(git rev-parse --git-common-dir)/info/attributes on one host, so
+# a fresh clone or a reset of .git/info brought back a conflict on nearly every
+# merge of main.  `git check-attr` reports what is actually in effect, wherever
+# it came from, which is the thing worth checking.
+MERGE_UNION_PROBES="results/telemetry/events.md
+results/telemetry/sessions.jsonl
+local/protocols/EVOLUTION.md"
+
+# The other half of the assertion, and the reason .gitattributes names every
+# path instead of globbing `results/telemetry/**/*.md`: union merge on PROSE
+# keeps both versions of a replaced line and the merge daemon merges without
+# anyone reading the result.  These files live under the same directory as the
+# append-only records and must NOT carry the driver, so the scope cannot widen
+# again without this check failing.
+MERGE_UNION_NEVER_PROBES="results/telemetry/owner-tools/README.md
+results/telemetry/owner-handoffs/TEMPLATE.md
+results/telemetry/README.md"
+
+check_merge_attributes() { # <worktree>
+  local tree="$1" probe attr bad=0
+  while IFS= read -r probe; do
+    [ -n "$probe" ] || continue
+    attr="$(run_outside_git_env git -C "$tree" check-attr merge -- "$probe" 2>/dev/null \
+      | sed -n 's/.*: merge: //p' || true)"
+    if [ "$attr" = "union" ]; then
+      continue
+    fi
+    bad=1
+    warn "merge attribute for $probe is '${attr:-unreadable}', not 'union'"
+  done <<EOF
+$MERGE_UNION_PROBES
+EOF
+  local overreach=0
+  while IFS= read -r probe; do
+    [ -n "$probe" ] || continue
+    attr="$(run_outside_git_env git -C "$tree" check-attr merge -- "$probe" 2>/dev/null \
+      | sed -n 's/.*: merge: //p' || true)"
+    [ "$attr" = "union" ] && overreach=1
+  done <<EOF
+$MERGE_UNION_NEVER_PROBES
+EOF
+  if [ "$overreach" -eq 1 ]; then
+    # Loud, and deliberately NOT part of the exit status: on a host whose
+    # $(git rev-parse --git-common-dir)/info/attributes still carries the
+    # hand-installed 2026-09-12 globs, every lane bootstrap would otherwise go
+    # red for a condition no branch can fix.  The hard gate against the
+    # COMMITTED file widening again is
+    # scripts/tests/test_pr552_review_round2.py, which runs check-attr in a
+    # throwaway repository holding only this repository's .gitattributes.
+    warn "union merge is in effect for PROSE under results/telemetry"
+    warn "  (probed: $(printf '%s' "$MERGE_UNION_NEVER_PROBES" | tr '\n' ' '))"
+    warn "  A union merge of two edits to one line keeps BOTH versions, silently,"
+    warn "  and the merge daemon merges without anyone reading the result."
+    warn "  The committed .gitattributes names each append-only record and has no"
+    warn "  Markdown wildcard, so this comes from a local override:"
+    warn "    \$(git rev-parse --git-common-dir)/info/attributes"
+    warn "  Delete the 'results/telemetry/*.md' and 'results/telemetry/**/*.md'"
+    warn "  lines there; the committed file covers what they were installed for."
+  fi
+  if [ "$bad" -eq 0 ]; then
+    log "union merge driver in effect for the append-only telemetry records"
+    return 0
+  fi
+  warn "Append-only records will conflict on nearly every merge of main."
+  warn "The driver belongs in the COMMITTED .gitattributes at the repository root:"
+  warn "  results/telemetry/*.md        merge=union   (and the ** and .jsonl forms)"
+  warn "  local/protocols/EVOLUTION.md  merge=union"
+  warn "Check that this worktree's branch carries that file, and that nothing in"
+  warn "\$(git rev-parse --git-common-dir)/info/attributes overrides it."
+  return 1
+}
+
 # --------------------------------------------------------------------------- main
 
 main() {
@@ -310,6 +385,10 @@ main() {
 
   # 7. Local gates.  docs/ci-automation.md: run --check in each fresh worktree.
   install_hooks "$WORKTREE" || status=1
+
+  # 8. Merge hygiene.  Read-only in both modes: the driver is committed, so
+  #    there is nothing to install — only something to notice when it is gone.
+  check_merge_attributes "$WORKTREE" || status=1
 
   if [ "$status" -eq 0 ]; then
     log "worktree ready: $WORKTREE"

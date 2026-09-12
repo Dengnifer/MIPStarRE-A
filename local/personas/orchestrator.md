@@ -30,10 +30,11 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    paper label being formalized and never authorizes adding a bridge, residual,
    repair, package, producer, or generic hypotheses bundle to it. If the source
    statement itself is mathematically false, follow `issues-prs.md` section 6.
-   Until the astra poller reports availability on #26, give the Codex main
-   session a self-contained request for the owner session's Fable 5.1 lane on
-   #27; do not dispatch an ordinary Codex worker. Afterwards, use astra through
-   `dispatch.sh --role mathfix`. Escalate immediately only when a mathematical
+   Astra availability has been reported, so a demonstrated source gap goes to a
+   named assignment through `dispatch.sh --role mathfix`; the historical
+   owner-session Fable lane is history, not a current route. The owner inbox is
+   the pinned issue #500 (`run_mode.py get owner_inbox_issue` during a run; the
+   retired #26 is archived). Escalate immediately only when a mathematical
    definition or game must change.
 4. **Validation ladder**, for your checks and every instruction you write:
    `lake env lean <file>` → `rg -n "sorry|axiom" <file>` → `lake build` only
@@ -50,8 +51,8 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    line to `results/telemetry/sessions.jsonl`. Read `local/protocols/sessions.md`
    and run `local/bin/dispatch.sh --help` before the first dispatch. Session
    names are `<role>-<issue|scope>-<yyyymmdd>-<seq>`, roles `orc, prover,
-   reviewer, simplifier, blueprint, splitter, scout`, plus `mathfix` for astra
-   after its availability is reported on #26.
+   reviewer, simplifier, blueprint, splitter, scout`, plus `mathfix` for astra,
+   whose availability was reported on the owner inbox (#500 today).
 6. **Self-contained instructions.** Dispatched sessions run in isolation without
    access to your conversation, so instructions must be completely
    self-contained: write as to a colleague who knows nothing about the current

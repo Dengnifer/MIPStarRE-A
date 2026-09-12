@@ -1,0 +1,47 @@
+# Merge attributes.  Committed deliberately: before this file existed the same
+# driver lived only in $(git rev-parse --git-common-dir)/info/attributes on one
+# host (installed by hand on 2026-09-12), so a fresh clone, a second host, or a
+# reset of .git/info reintroduced a conflict on nearly every merge of main.
+#
+# `union` is a built-in git merge driver: on a conflict it keeps BOTH sides'
+# lines in order instead of writing conflict markers.  It is correct here and
+# nowhere else, because every path below is an APPEND-ONLY record — sessions
+# append their own rows and nobody rewrites another session's row, so the union
+# of two appends is the intended result.  Do NOT extend this list to source,
+# proofs or blueprint TeX, where a line replaces another line: union merge would
+# silently keep both versions of a changed statement.
+#
+# EVERY PATH IS NAMED, and there is deliberately no `results/telemetry/*.md` or
+# `results/telemetry/**/*.md` glob.  Those two globs were here first and they
+# also caught the PROSE under the same directory — `owner-tools/README.md`,
+# `owner-handoffs/*.md`, `README.md`, the dated one-off incident records — where
+# a line REPLACES another line, which is exactly the case the paragraph above
+# forbids.  This very stack demonstrated it: PR 552 rewrites
+# owner-tools/README.md and PR 554 edits the same file, and two lanes touching
+# one row would have merged with no conflict and both versions of the row kept,
+# with the merge daemon merging without anyone reading the result.  A new
+# append-only record gets a line here; a prose file gets none.
+#
+# Belt and braces, not the structural fix.  Sharding the event log so two
+# sessions never write one path is what removes the hazard; union merge keeps
+# the merge train moving until every writer is sharded, and afterwards keeps the
+# remaining shared records (builds.jsonl, sessions.jsonl, EVOLUTION.md)
+# mergeable.  Asserted by local/bin/worktree-setup.sh, next to the hook check —
+# both that these paths ARE union and that the prose beside them is NOT:
+#   git check-attr merge -- results/telemetry/events.md              # -> union
+#   git check-attr merge -- results/telemetry/owner-tools/README.md  # -> unspecified
+
+# Every .jsonl under results/telemetry is a record of appended rows by
+# construction (sessions, builds, stages, estimates, per-run merge latency, the
+# per-session captures under sessions/).
+results/telemetry/*.jsonl       merge=union
+results/telemetry/**/*.jsonl    merge=union
+
+# The append-only Markdown records, named one by one.
+results/telemetry/events.md            merge=union
+results/telemetry/events.d/*.md        merge=union
+results/telemetry/owner-log.md         merge=union
+results/telemetry/design-decisions.md  merge=union
+
+# Append-only by protocol: every session adds a dated entry.
+local/protocols/EVOLUTION.md    merge=union
