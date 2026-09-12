@@ -169,9 +169,9 @@ declaration \path{exists_combinedLinesWitness} preserves its original statement:
 it existentially obtains $\delta_Q$ and its point witnesses from the preceding
 point construction, then applies the conditional helper.
 
-The remaining construction target is
+The construction theorem is
 \path{combined_line_measurement_consistency}. For a joint point family
-with error $\delta_Q(\eps)=\poly(\eps)$, it asks for evaluated consistency
+with error $\delta_Q(\eps)=\poly(\eps)$, it proves evaluated consistency
 of the explicit unconditioned measurement
 \[
  T^{\ell_X,\ell_Z}_{f_X,f_Z}
@@ -180,18 +180,33 @@ of the explicit unconditioned measurement
 under the original product of line-point distributions, with error
 $\delta_P(\eps,md/q)=\poly(\eps,md/q)$ and every directed opposite
 placement. The point-to-line comparisons at source lines 900--941 and the
-pasting argument at lines 942--961 are the intended discharge. The POVM,
+pasting argument at lines 942--961 supply the proof. The POVM,
 axis-degree properties, and X marginal of this same measurement are proved.
 
-A bound for a measurement conditioned on nondegenerate lines would not by
-itself discharge this target. It would also require a defined conditioning
-event, its probability, an estimate for the discarded contribution, and a
-transfer of the defect back to the unconditioned measurement above under the
-original product law. No such transfer is asserted here. In particular,
-the preserved conditioned construction is not identified with
-\path{combinedLineMeasurement}; its saved proof remains historical work.
-The current target retains its explicit unfinished proof, without assuming
-any conditioning or transfer result in a source theorem.
+The proof conditions the sampling law on the event that the X direction
+is nonzero, whose probability lies between $1/2$ and $1$. It leaves the
+measurement unchanged. On this event, the polynomial root bound gives the
+conditional collision estimate needed for pasting. Multiplication by the
+retained probability and addition of the discarded contribution, at most
+$1/(2q)$, restore the original product law. Thus the result concerns the
+unconditioned X-Z-X measurement, with no conditioning premise in its
+statement. The current heterogeneous pasting theorem requires only the two
+forward marginal comparisons, both supplied by the point-to-line estimates.
+
+The directly indexed auxiliary
+\path{exists_extendedLinesWitness_established} then constructs the point
+witness internally, conditions the subline law on each extended line, and
+averages the polynomial combination of these actual paired-line effects.
+The real-part overlap estimates for both opposite placements give the
+corrected bound $C m\,\poly(\eps,md/q)$. This construction retains the
+completed answer alphabet and the directly indexed question law; it does not
+discharge their comparison with the printed source theorem.\footnote{The
+proof and its necessary dependencies were selectively recovered for
+\ghissue{512} from commit
+\path{6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa}, retained at
+\path{0f4ef05370350f4017439ebd839ef0561f13130f}. See
+\path{audits/2026-09-12-issue512-saved-proof-recovery.md} for the
+signature audit, axiom closure, and cumulative cost accounting.}
 
 \section{The source assertion and the two routes}
 

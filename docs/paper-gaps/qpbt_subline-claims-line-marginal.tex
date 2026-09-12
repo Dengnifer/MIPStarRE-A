@@ -22,8 +22,8 @@
 formal estimate requires the project's state-dependent Cauchy--Schwarz and
 restricted-distribution arguments. \textbf{Estimated weight.} The correction
 affects two Lean modules and their blueprint correspondence. It retains the
-unfinished scalar estimate and isolates the existing pasting consistency
-obligation. \textbf{Mathlib/project split.} Finite sums, positivity, and real
+unfinished scalar estimate. The pasting consistency construction has been
+recovered separately. \textbf{Mathlib/project split.} Finite sums, positivity, and real
 square roots use Mathlib; the measurement construction and subline law use
 the local quantum API. \textbf{Key mathematical inputs.} Completeness of a
 POVM, projectivity, and Cauchy--Schwarz suffice for the counterexample and
@@ -178,15 +178,15 @@ existence proofs construct their records with that measurement. A later
 argument needing the exact construction can use the consistency obligation
 and the same explicit record; merely choosing an unspecified existential
 witness does not recover its defining formula.\footnote{The Lean-only
-obligation is \leanid{combined\_line\_measurement\_consistency} in
-\path{MIPStarRE/QPBT/Combining/Lines.lean}. Its hypotheses explicitly supply
-a polynomially controlled point family. It retains the previously
-unfinished consistency proof, to be discharged by the source's point-to-line
-comparisons and pasting argument. The source-facing
+theorem is \leanid{combined\_line\_measurement\_consistency} in
+\path{MIPStarRE/QPBT/Combining/Lines/Construction.lean}. Its hypotheses explicitly supply
+a polynomially controlled point family. Its proof was recovered for
+\ghissue{512} from the saved point-to-line comparisons and pasting argument,
+including restoration of discarded zero-direction probability. The source-facing
 \leanid{exists\_combinedLinesWitness} has an unchanged statement.}
 
-There are two retained direct proof holes in the affected modules.
-The first is \leanid{subline\_remove\_X\_factor\_direct}: apply complex
+The retained direct proof hole in these two modules is
+\leanid{subline\_remove\_X\_factor\_direct}: apply complex
 weighted Cauchy--Schwarz to bound $|A(T)-B(T)|$ by the square root of the
 X-overlap deficit, then use the already proved
 \leanid{exists\_concreteXPointOverlap\_deficit\_le}. That estimate already
@@ -196,11 +196,11 @@ Transport of this argument and of the real-part estimates to the source
 law, including the complex estimate of Claim 17-1, is a separate remaining
 obligation. No additional hole is introduced for that transport.
 
-The second is \leanid{combined\_line\_measurement\_consistency}.
-It must prove consistency of the same unconditioned X-Z-X measurement
+The recovered theorem \leanid{combined\_line\_measurement\_consistency}
+proves consistency of the same unconditioned X-Z-X measurement
 with the supplied polynomially controlled joint point family on the
 original product of line-point distributions, in every opposite placement.
-The target and its discharge by the source point-to-line comparison and
+The construction and its discharge by the source point-to-line comparison and
 pasting argument are described in
 \path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}.
 No marginal identity, deficit bound, or producer is added to a paper theorem.
@@ -211,7 +211,7 @@ The discrepancy lies in the formal quantification over arbitrary witnesses,
 not in the paper's constructed-measurement assertion. The counterexample
 forces a domain correction. Using the defined sandwich restores the measurement domain. The complex
 scalar conclusion is restored for the directly indexed auxiliary obligation;
-transport to the source distribution and the consistency construction remain
+its complex proof and transport to the source distribution remain
 open. The source claims themselves retain their complex-modulus statements
 without unsupported formalization marks.
 

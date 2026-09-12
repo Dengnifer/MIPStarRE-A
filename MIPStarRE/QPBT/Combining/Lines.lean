@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
+import MIPStarRE.QPBT.Combining.Lines.Construction
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
@@ -37,40 +38,6 @@ noncomputable section
 
 /-! ## Combined line measurements -/
 
-/-- Lean-only consistency obligation for the particular X-Z-X measurement
-constructed in the proof of `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:942-961`.
-
-The point family is supplied with its polynomial error bound. The line error
-may depend on this function, as in `exists_combinedLinesWitness_ofPointsWitness`.
-The conclusion concerns `combinedLineMeasurement` itself, so subsequent uses of
-Claim 17-2 retain the source construction.
-
-**Proof obligation (issues #18 and #414):** This retains the unfinished
-consistency part of `exists_combinedLinesWitness_ofPointsWitness`. Discharge it
-by the point-to-line comparisons and pasting argument at paper lines 900--961.
-The degree support and POVM construction are already proved. See
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`; no equality or marginal
-assumption is added to a paper-facing theorem. -/
-theorem combined_line_measurement_consistency (deltaQ : ℝ → ℝ)
-    (hdeltaQ : IsPolyErr deltaQ) :
-    ∃ deltaP : ℝ → ℝ → ℝ, IsPolyErr₂ deltaP ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
-        (points : CombinedPointsWitness S (deltaQ ε))
-        (p1 p2 : Placement), p1.IsOpposite p2 →
-        consistencyDefect
-          (Distribution.prod (linePointDist P.toLdParams)
-            (linePointDist P.toLdParams))
-          (fun sample answer => S.place p1
-            (((S.combinedLineMeasurement p1.side sample.1.1 sample.2.1).postprocess
-              fun fs => (evalOpt sample.1.1 sample.1.2 fs.1,
-                evalOpt sample.2.1 sample.2.2 fs.2)).effect answer))
-          (fun sample answer => S.place p2
-            (((points.Q p2.side sample.1.2 sample.2.2).postprocess fun ab =>
-              (some ab.1, some ab.2)).effect answer))
-          S.psiHat ≤ deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)) := by
-  sorry
-
 /-- Conditional joint X/Z line measurements for a polynomially controlled
 point-witness family supporting `lem:qld-xz-lines`.
 
@@ -90,9 +57,9 @@ that family existentially and has an unchanged statement.  The obstruction and
 the named construction obligations are recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
-The witness below uses `S.combinedLineMeasurement` explicitly. Its remaining
-proof obligation is `combined_line_measurement_consistency`, as recorded in
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` and issue #414.
+The witness below uses `S.combinedLineMeasurement` explicitly. Its consistency
+is proved by `combined_line_measurement_consistency`, recovered for issue #512;
+see `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -131,9 +98,9 @@ quantifies the point error function and witness construction together with the
 line construction, as the preceding source lemma supplies those points.
 
 The proof constructs the line witness with `T := S.combinedLineMeasurement`.
-The only remaining line-construction obligation is
-`combined_line_measurement_consistency`, from paper lines 942--961 and tracked
-by issue #414 in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+The line consistency is proved by `combined_line_measurement_consistency`,
+from paper lines 942--961, recovered for issue #512 and documented in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 Downstream arguments requiring the construction use that consistency theorem
 and the same explicit record, rather than an unspecified existential witness.
 

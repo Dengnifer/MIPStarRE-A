@@ -37,7 +37,7 @@ noncomputable section
 
 set_option synthInstance.maxSize 400
 
-private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
+theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
   change 0 ≤ x ^ (1 / 4 : ℝ)
   rcases lt_or_ge x 0 with hx | hx
   · rw [Real.rpow_def_of_neg hx,
@@ -45,7 +45,7 @@ private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) 
     positivity
   · exact Real.rpow_nonneg hx _
 
-private theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
+theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
     (hQ : 0 ≤ δQ) :
     Real.sqrt (2 * Real.sqrt (4 * m ^ 2 * δP) + 2 * Real.sqrt (4 * δQ)) ≤
       2 * Real.sqrt m * (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
