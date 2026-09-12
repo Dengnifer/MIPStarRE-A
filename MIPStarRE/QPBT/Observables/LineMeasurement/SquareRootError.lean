@@ -34,8 +34,8 @@ theorem measurement_sum_adjoint_mul_le_one {α ι : Type*} [Fintype α]
     ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 :=
   MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M
 
-/-- A left-placed complete measurement is square-summable on the product
-space, by the public measurement bound applied to its tensor placement. -/
+/-- The adjoint squares of a left-placed complete measurement sum to at most
+the identity on the product space. -/
 theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιA) :
@@ -44,8 +44,8 @@ theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
   MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
     (leftPlacedMeasurement (ιB := ιB) M)
 
-/-- A right-placed complete measurement is square-summable on the product
-space, by the public measurement bound applied to its tensor placement. -/
+/-- The adjoint squares of a right-placed complete measurement sum to at most
+the identity on the product space. -/
 theorem rightPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
     (M : MIPStarRE.Quantum.Measurement α ιB) :
@@ -54,9 +54,10 @@ theorem rightPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
   MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
     (rightPlacedMeasurement (ιA := ιA) M)
 
-/-- The squared distance between two square-summable operator families is at
-most four on a unit vector. Formalization-only auxiliary bounding the
-state-dependent distance of `def:povm-distance` trivially. -/
+/-- For operator families satisfying `∑ a, (A a)ᴴ * A a ≤ 1` and
+`∑ a, (B a)ᴴ * B a ≤ 1`, the squared distance is at most four on a unit vector.
+Formalization-only auxiliary bounding the state-dependent distance of
+`def:povm-distance` trivially. -/
 theorem sum_norm_sub_apply_sq_le_four {α ι : Type*} [Fintype α]
     [Fintype ι] [DecidableEq ι] (A B : α → Op ι) (ψ : EuclideanSpace ℂ ι)
     (hψ : ‖ψ‖ = 1) (hA : ∑ a : α, (A a)ᴴ * A a ≤ 1)

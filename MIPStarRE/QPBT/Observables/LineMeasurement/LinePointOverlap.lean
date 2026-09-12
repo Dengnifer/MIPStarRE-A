@@ -114,7 +114,7 @@ theorem place_BB'_zero (S : ProjectiveSetting P ε) :
     S.place .BB' (0 : Op (S.ExpandedLocalSpace .bob)) = 0 :=
   place_zero S .BB'
 
-/-! ## Effects of the option-valued families -/
+/-! ## Effects of the completed measurement families -/
 
 /-- The completed point measurement agrees with the point measurement on
 proper values. -/
