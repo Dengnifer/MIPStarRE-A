@@ -162,6 +162,27 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 	$\{\tilde{M}^{W,\tilde{u}}_a\}_{a\in\F_q}$ is a projective measurement.
 \end{lemma}
 
+\begin{proof}
+	\leanok
+	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
+		lem:tau-dot-product-projective}
+	For fixed $W$, $\tilde{u}$, and $a$, each summand in \eqref{eq:tilde_M}
+	is a tensor product of two projections, hence is a projection.
+	If $g\ne g'$, then $\hat{S}^W_g\hat{S}^W_{g'}=0$ because
+	$\{\hat{S}^W_g\}_g$ is a projective measurement. Thus distinct summands
+	in \eqref{eq:tilde_M} are orthogonal, and their sum is a projection.
+	For completeness, fix $g$ and put $c_g=\mathrm{Dec}(g)\cdot\tilde{u}$.
+	The map $a\mapsto c_g-a$ is a bijection of $\F_q$, so
+	\[
+		\sum_a\tau^W_{c_g-a}(\tilde{u})=\Id.
+	\]
+	Interchanging the two finite sums in \eqref{eq:tilde_M} gives
+	\[
+		\sum_a\tilde{M}^{W,\tilde{u}}_a
+		=\sum_g\hat{S}^W_g\ot\Id=\Id.
+	\]
+\end{proof}
+
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
 	\lean{MIPStarRE.QPBT.tildeObs}
 	\leanok
