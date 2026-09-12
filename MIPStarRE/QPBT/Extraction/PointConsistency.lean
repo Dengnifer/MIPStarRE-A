@@ -50,8 +50,8 @@ theorem placePlayer_alice_mul_placeSide_bob_tensor (S : ProjectiveSetting P epsi
   ext row col
   simp [placePlayer, placeSide, sixRegExtractionEquiv, reindexOp, heteroKron,
     Matrix.kronecker, place, Matrix.mul_apply, Fintype.sum_prod_type,
-    Matrix.one_apply, Prod.ext_iff, ite_and, mul_ite, ite_mul]
-  split_ifs <;> first | exact mul_left_comm _ _ _ | rfl
+    Matrix.one_apply, Prod.ext_iff, ite_and, mul_ite, ite_mul, mul_left_comm]
+  rfl
 
 /-- Bob's extraction-block placement preserves finite sums. -/
 theorem placeSide_bob_finset_sum (S : ProjectiveSetting P epsilon)

@@ -129,3 +129,20 @@ workflow gates. This session does not launch a reviewer or merge the PR.
 Issue #518 should remain open while #517 leaves the target's axiom closure
 incomplete. The audit script is in the session's private checks directory
 under `~/.cache/mipstarre-dev/sessions/`.
+
+### First Published CI Run
+
+PR #533 first tested `16ddc770ad0ed4511d1e63bea6a3d661997aec6a`.
+The full build passed. Build-mode linting reported a flexible-tactic warning
+in the new register calculation; the subsequent correction makes the same
+simplification close its goal. The original file's `open scoped Classical`
+warning predates this packet.
+
+The blueprint-sync gate failed in the isolated model-policy dispatch fixture:
+the invoking session's `MIPSTARRE_HARDNESS_REASON` was inherited by a routine
+dispatch test. The model variables had been unset, but this associated
+classification setting had not. The corrected invocation also unsets
+`MIPSTARRE_JOB_CLASS` and `MIPSTARRE_HARDNESS_REASON`; no workflow code or
+model policy is changed. The failed exact-head evidence remains on GitHub.
+The isolated fixture passes with that environment, and the corrected auxiliary
+module passes a focused check with `linter.mathlibStandardSet=true`.

@@ -7642,3 +7642,14 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - PR #533 CI inherited a prover classification setting
+
+- Session `prover-518-20260912-01` ran exact-head CI on
+  `16ddc770ad0ed4511d1e63bea6a3d661997aec6a`. The full build passed, but
+  blueprint-sync's model-policy fixture failed because the session's
+  `MIPSTARRE_HARDNESS_REASON` accompanied a routine test dispatch. Unsetting
+  only the invoking, review, prose, and fix model variables was insufficient.
+  The next invocation also unsets `MIPSTARRE_JOB_CLASS` and
+  `MIPSTARRE_HARDNESS_REASON`. The failure is retained in the published CI
+  evidence; no model policy, workflow implementation, or other lane is changed.
