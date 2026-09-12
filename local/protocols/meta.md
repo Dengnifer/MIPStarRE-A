@@ -51,9 +51,23 @@ change, and the telemetry duties that make the project usable as research data.
 Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 
 - `results/telemetry/stages.jsonl` —
-  `{ts, stage, event: start|end|milestone, note?, tokens_note?}`
-  Stages: `1-skeleton`, `2-references`, `3-blueprint`, `4.1-minimal`,
-  `4.2-full-skeleton`, `4.3-proofs` (extend as needed).
+  `{ts, stage, event, note?, tokens_note?}`
+  Project stages: `1-skeleton`, `2-references`, `3-blueprint`, `4.1-minimal`,
+  `4.2-full-skeleton`, `4.3-proofs` (extend as needed), with
+  `event: start|end|milestone`.
+  Two operational stages share the file and carry their own event names:
+  `operator` (`pause`, `resume`, `run-mode-apply`, `run-mode-speed`,
+  `run-mode-pause`, `run-mode-resume`), written by the owner tools and
+  `local/bin/run_mode.py`, and `capacity` (`init`, `set`, `pause`, `resume`,
+  `endpoint-trip`, `endpoint-recovered`), written by
+  `local/bin/capacity_controller.py`. Both record **transitions only**: the
+  capacity controller's 60-second tick writes its per-tick record to
+  `$CACHE_ROOT/watchdog/capacity/ticks.jsonl` (runtime state, never committed),
+  which that writer itself trims to its last 2880 rows. Nothing appends a row
+  per tick to this file: it is a human-readable history of a hundred-odd lines
+  for the whole project, and every row committed here rides onto `main` in the
+  merge daemon's telemetry batch. Nobody prunes `stages.jsonl`; keep it small
+  by writing only transitions.
 - `results/telemetry/sessions.jsonl` —
   `{name, role, model?, account?, requested_effort?, issue, pr?, thread_id,
     start, end, wall_s, usage: {input, cached_input, cache_write, output, reasoning},
@@ -108,6 +122,17 @@ Duties:
 - **Every external Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
+  **One documented exception**, and only one: the endpoint health probe in
+  `local/bin/capacity_controller.py` (`probe_account`), a bounded
+  `codex exec --sandbox read-only` with a trivial prompt, no persona, no task and
+  no worktree write, single-flight under a lock and fired only to decide whether
+  a `down` endpoint has come back. It is not a work session and appends nothing
+  to `sessions.jsonl`; its record is `watchdog/capacity/health-<account>.json`
+  plus the `capacity` / `endpoint-recovered` row in `stages.jsonl`. It never runs
+  while the run is paused, while `watchdog/capacity/hold` exists, or against an
+  account the brief disabled. `local/protocols/capacity.md` §Health states the
+  same rule; adding a second exception means amending both, plus the AGENTS.md
+  Sessions bullet, in one commit.
 - **Incidents go to `events.d/`**, one shard per (date, session), through
   `telemetry.py event`. Never hand-append to `events.md`: it is the pre-shard
   history and is not rewritten.

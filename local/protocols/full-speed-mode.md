@@ -48,6 +48,37 @@ floor `run_mode.py get floor`, not the ceiling.
 
 ## 2. Applying it
 
+### The run-start sequence, in order
+
+Applying the brief configures a run; it does not start one. This is the whole
+list — nothing else has to be remembered, and nothing here is optional:
+
+```bash
+local/bin/run_mode.py apply                                   # 1. the brief
+results/telemetry/owner-tools/install.sh --crons --start-loops # 2. tools, crontab, capacityd
+setsid nohup ~/.cache/mipstarre-dev/owner-bin/merge-daemon.sh \
+    >> ~/.cache/mipstarre-dev/watchdog/lanes/daemon.log 2>&1 < /dev/null &   # 3. the merge queue
+setsid nohup ~/.cache/mipstarre-dev/owner-bin/goal-keeper.sh > /dev/null 2>&1 < /dev/null &
+setsid nohup ~/.cache/mipstarre-dev/owner-bin/stack-watch.sh \
+    >> ~/.cache/mipstarre-dev/watchdog/lanes/stack-watch.log 2>&1 < /dev/null &
+tmux new -s qpbt 'local/bin/main-session.sh'                  # 4. the main session
+```
+
+Step 2 is the one that is easy to skip and impossible to notice: without a
+running `capacityd.sh` nothing writes `watchdog/max-codex-*` again, so there is
+no AIMD, no 5xx trip and no half-open probe — the caps stay frozen at whatever
+seeded them, which is exactly the 2026-09-12 situation the controller exists to
+remove — and on a fresh host `lane.sh`'s `wait_for_slot` fails closed with
+`no-capacity-record`. The five-minute crontab row installed in the same step
+brings the loop back if it is killed; `capacityd.sh` takes a lock, so a start
+that is already running is a no-op.
+
+After a pause, `owner-resume.sh` performs steps 1-3 from the pause record and
+checks afterwards that the controller and the daemon are actually running
+(exit 5 if not); only the main session is started by hand.
+
+### `run_mode.py apply`
+
 ```bash
 local/bin/run_mode.py apply            # reads watchdog/run-brief.json
 local/bin/run_mode.py apply --brief PATH --dry-run
@@ -68,8 +99,19 @@ On success `apply`
 1. writes `watchdog/run-mode.json` atomically (temp file + `os.replace`);
 2. derives `watchdog/max-codex-primary`, `max-codex-second` and `max-codex`;
 3. regenerates the deployed PATH shim for the briefed speed (section 5);
-4. appends a `stages.jsonl` row carrying the brief's `sha256`;
-5. appends one row to `results/telemetry/design-decisions.md`.
+4. writes or removes `watchdog/model-override` from `models.override`, which is
+   what makes that field *do* something: `astra-all` writes the runtime knob
+   `model_policy.py` reads, `null` removes it. Validating the field is not
+   applying it, and until this step existed "every worker on the hard model"
+   still needed a hand-edited knob file or a reviewed PR mid-run;
+5. appends a `stages.jsonl` row carrying the brief's `sha256`;
+6. appends one row to `results/telemetry/design-decisions.md`.
+
+`run.main` (optional) carries the MAIN session's own launch values —
+`model`, `effort`, `codex_home` — read back by `local/bin/main-session.sh`
+through `run_mode.py get main.model|main.effort|main.codex_home`. Omitted, it
+defaults to `gpt-6-astra` / `xhigh` / the ambient `CODEX_HOME`; briefed, the
+brief wins, and the launcher prints which of the two it used.
 
 **The starting cap per account** is
 
