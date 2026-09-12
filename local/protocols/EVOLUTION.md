@@ -1059,6 +1059,31 @@ source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
 
+## 2026-09-09 - Move the permissions-only owner inbox to #500
+
+**Trigger:** the owner's 2026-09-09 08:40Z design decision, recorded by pinned
+issue #500 and implemented through issue #501.
+
+**Change:** `AGENTS.md`, `local/DESIGN.md`, the main, orchestrator, and mathfix
+personas, the issue/PR and session protocols, the pre-commit guidance, and the
+paper-gap policy and register now route live owner-inbox traffic to #500. The
+inbox accepts only permissions whose risk extends beyond project development;
+main decides and records project-outcome questions, including workflow-budget
+overrides and consecutive workflow-only episodes. The budget guard remains
+enforced. Each blocker is one comment with at most ten visible plain-language
+lines, lettered options, one recommendation, and the literal
+`DECISION B<n>: <letter>` reply, where the letter is an offered alternative.
+Ids continue from B11 and details are folded. The immutable
+`<!-- owner-inbox id=B<n> -->` marker keys both creation and resolution through
+`ensure-pr-comment`; a separate body field records open or closed status, and a
+resolved blocker adds `RESOLVED B<n>`. Issue #26 is archived. Existing #26
+citations in this ledger and the QPBT gap register remain unchanged or are
+explicitly marked as historical provenance.
+
+**Expected effect:** owner attention is reserved for actions requiring personal
+permission, while routine status, mathematical difficulty, and project-outcome
+decisions continue without avoidable stalls and with concise decision requests.
+
 ## 2026-09-09 - Simplify dispatcher worker reservations (#505)
 
 **Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
@@ -1123,3 +1148,17 @@ tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
 symlink, unknown-path or other non-allowlisted base change still requires
 refresh, exact-head CI and independent review; all other merge gates are
 unchanged.
+
+## 2026-09-12 - Reconcile owner inbox and dispatcher retirement in PR #503
+
+**Trigger:** the user's merge-resolution request for PR #503 in session
+`orc-pr503-20260912-01`, merging `github/main` at `ae124f8f` into
+`issue-501-owner-inbox-500`.
+
+**Change:** reconcile `AGENTS.md` and `issues-prs.md` so the permissions-only
+owner inbox remains #500 and mathematical-gap work uses external dispatch,
+consistent with #505's retirement of native descendants. Retain both branches'
+existing entries in this ledger.
+
+**Expected effect:** the merged instructions preserve #501's owner-permission
+boundary and #505's dispatcher retirement without reviving either archived path.

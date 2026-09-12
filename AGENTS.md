@@ -689,10 +689,16 @@ agent must know:
   `local/protocols/issues-prs.md`.
 - **Sessions.** Worker Codex sessions use `local/bin/dispatch.sh` (roles: orc,
   prover, reviewer, simplifier, blueprint, splitter, scout; `mathfix` is
-  reserved for astra after the #26 availability report) so token/time telemetry
-  stays complete. Lease-backed native descendants are retired by issue #505;
-  `local/protocols/sessions.md` retains their history. Current Fable 5.1
-  math-fix sessions are owner-launched and use `owner-sessions.jsonl`.
+  reserved for Astra source-statement repair under `local/protocols/issues-prs.md`
+  section 6) so token/time telemetry stays complete. Lease-backed native
+  descendants are retired by issue #505; `local/protocols/sessions.md` retains
+  their history. Historical Fable 5.1 math-fix sessions use `owner-sessions.jsonl`.
+- **Owner inbox.** Pinned issue #500 receives only permission blockers whose
+  risk extends beyond project development; main decides and records questions
+  whose only risk is failure to finish the project. Use one comment per blocker
+  and at most ten visible plain-language lines: what is stuck, lettered options,
+  one recommendation, and `DECISION B<n>: <letter>`. Ids continue from B11 and
+  details are folded. Issue #26 is archived and receives no new comments.
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.

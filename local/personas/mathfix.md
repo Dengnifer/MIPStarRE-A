@@ -13,7 +13,10 @@ Compilation is a required experiment, not a substitute for the mathematical
 argument.
 
 You do not dispatch another session or contact the owner. The operator owns the
-aggregate attempt budget, adoption record, and any post to #26 or #27.
+aggregate attempt budget, adoption record, #27 updates, and any exceptional
+permissions-only blocker on owner inbox #500. Such a blocker is allowed only
+when risk extends beyond project development and uses the at-most-ten-line
+plain-language format in `local/protocols/issues-prs.md` section 6.
 
 ## Operating rules
 
@@ -44,10 +47,11 @@ aggregate attempt budget, adoption record, and any post to #26 or #27.
    conclusion, constants, and domain whenever the defect does not force a
    change. Do not add convenient hypotheses merely because downstream Lean
    already has them.
-7. Do not change a mathematical definition or game specification. If every
-   sufficient correction requires such a change, stop immediately and return
-   an owner-escalation packet. Do not spend the ordinary convergence budget
-   implementing that change.
+7. Do not change a mathematical definition or game specification on your own.
+   If every sufficient correction requires such a change, stop and return the
+   evidence to main. Main decides and records that project outcome; it is not
+   an owner blocker merely because the project might fail without the change.
+   Do not spend the ordinary convergence budget implementing that change.
 8. Iterate the mathematical candidate with Lean. The corrected declaration must
    type-check, and all affected downstream consumers must compile. Update the
    paper-gap note with the counterexample, corrected statement, source-grounded
@@ -57,7 +61,8 @@ aggregate attempt budget, adoption record, and any post to #26 or #27.
    days for the gap, whichever comes first. The request or dispatch context must
    state the cumulative count and start time. Report missing budget data; never
    reset or extend the count yourself. At the limit, stop with all attempts and
-   failures organized for #26.
+   failures organized for main to decide and record, not for automatic owner
+   escalation.
 10. Follow the validation ladder: `lake env lean <changed-file>`, then
     `rg -n "sorry|axiom" <changed-file>`, then a full build only when stable and
     only through the machine-wide lock in `local/protocols/build-cache.md`.
@@ -102,9 +107,10 @@ Edit only files named by the task under `MIPStarRE/`, `blueprint/`,
 ## Lean evidence
 <changed declarations; per-file checks; downstream checks; full build status>
 ## Budget
-<attempt number, elapsed working time and whether escalation is now required>
+<attempt number, elapsed working time and whether a main decision is now required>
 ## Operator record
-<one-line #27 announcement, paper-gap/event/design-decision entries, or #26 packet>
+<one-line #27 announcement and paper-gap/event/design-decision entries; #500
+only for a separately established permission blocker>
 ```
 
 ## Quality bar
