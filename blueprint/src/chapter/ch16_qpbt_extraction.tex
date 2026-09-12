@@ -511,6 +511,108 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 
 \section{Proof of the soundness of the Pauli basis test}
 
+\subsection{Range projections and isometry conjugation}
+
+The following finite-dimensional estimates justify the insertion of range
+projections in the final soundness argument. The omitted step in the source
+is discussed in \cite{gap:qpbt_extraction-transfer}.
+
+\begin{theorem}[Range-projection estimate]\label{thm:pauli-range-projection-support}
+  \lean{MIPStarRE.QPBT.sum_norm_mul_projection_sub_sq_le}
+  \leanok
+  Let $\{N_a\}_{a\in A}$ be a complete POVM on a finite-dimensional complex
+  Hilbert space $\mathcal H$, with $A$ finite, and let $\{T_a\}_{a\in A}$ be
+  any operator family on $\mathcal H$. Let $Q$ be an orthogonal projection
+  and let $\theta,\Delta\in\mathcal H$ satisfy $Q\theta=\theta$. Then
+  \[
+    \sum_a\|(N_aQ-T_a)\Delta\|^2
+    \le 2\sum_a\|(N_a-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:sandwich-povm-square-sum}
+  \leanok
+  Since $I-Q$ is a contraction and annihilates $\theta$,
+  $\|(I-Q)\Delta\|\le\|\Delta-\theta\|$.
+  Decompose $(N_aQ-T_a)\Delta=(N_a-T_a)\Delta-N_a(I-Q)\Delta$
+  and use $\|x-y\|^2\le2\|x\|^2+2\|y\|^2$, a consequence of the
+  parallelogram identity. Summing the second terms uses
+  $\sum_a N_a^\dagger N_a\le I$ and gives the asserted estimate.
+\end{proof}
+
+\begin{theorem}[Isometry transfer]\label{thm:pauli-isometry-transfer-support}
+  \lean{MIPStarRE.QPBT.sum_norm_conjIsometry_sub_sq_le}
+  \leanok
+  Let $\phi\colon\mathcal H\to\mathcal K$ be a linear isometry between
+  finite-dimensional complex Hilbert spaces. Let $\{M_a\}_{a\in A}$ be
+  operators on $\mathcal H$, let $\{N_a\}_{a\in A}$ be a complete POVM on
+  $\mathcal K$, and let $\{T_a\}_{a\in A}$ be arbitrary operators on
+  $\mathcal K$, with $A$ finite. Suppose $N_a\phi=\phi M_a$ for every $a$.
+  For all $\psi\in\mathcal H$ and $\Delta\in\mathcal K$,
+  \[
+    \sum_a\|(\phi M_a\phi^\dagger-T_a)\Delta\|^2
+    \le2\sum_a\|(N_a-T_a)\Delta\|^2+2\|\Delta-\phi\psi\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Set $Q=\phi\phi^\dagger$. It is an orthogonal projection fixing
+  $\phi\psi$, and the intertwining identity gives
+  $N_aQ=\phi M_a\phi^\dagger$. Apply
+  Theorem~\ref{thm:pauli-range-projection-support}.
+\end{proof}
+
+\begin{theorem}[Alice's bipartite isometry transfer]
+  \label{thm:pauli-isometry-transfer-alice-support}
+  \lean{MIPStarRE.QPBT.sum_norm_leftTensor_conjIsometry_sub_sq_le}
+  \leanok
+  Let $\phi_{\mathrm A}\colon\mathcal H_{\mathrm A}\to\mathcal K_{\mathrm A}$
+  and $\phi_{\mathrm B}\colon\mathcal H_{\mathrm B}\to\mathcal K_{\mathrm B}$
+  be linear isometries between finite-dimensional complex Hilbert spaces.
+  Let $A$ be finite, let $\{M_a\}_{a\in A}$ be operators on
+  $\mathcal H_{\mathrm A}$, and let $\{N_a\}_{a\in A}$ be a complete POVM
+  on $\mathcal K_{\mathrm A}$ satisfying $N_a\phi_{\mathrm A}=\phi_{\mathrm A}M_a$.
+  For any operators $T_a$ on $\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$
+  and vectors $\psi\in\mathcal H_{\mathrm A}\ot\mathcal H_{\mathrm B}$,
+  $\Delta\in\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$, writing
+  $\theta=(\phi_{\mathrm A}\ot\phi_{\mathrm B})\psi$, we have
+  \[
+    \sum_a\|((\phi_{\mathrm A}M_a\phi_{\mathrm A}^\dagger)\ot I-T_a)\Delta\|^2
+    \le2\sum_a\|(N_a\ot I-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Apply Theorem~\ref{thm:pauli-range-projection-support} to the complete POVM
+  $\{N_a\ot I\}$ and projection $Q=(\phi_{\mathrm A}\phi_{\mathrm A}^\dagger)\ot I$.
+  The projection fixes $\theta$, and
+  $(N_a\ot I)Q=(\phi_{\mathrm A}M_a\phi_{\mathrm A}^\dagger)\ot I$.
+\end{proof}
+
+\begin{theorem}[Bob's bipartite isometry transfer]
+  \label{thm:pauli-isometry-transfer-bob-support}
+  \lean{MIPStarRE.QPBT.sum_norm_rightTensor_conjIsometry_sub_sq_le}
+  \leanok
+  Let the two isometries, finite answer set, comparison operators, and vectors
+  be as in Theorem~\ref{thm:pauli-isometry-transfer-alice-support}.
+  Let $M_a$ instead act on $\mathcal H_{\mathrm B}$ and let $\{N_a\}$ be a
+  complete POVM on $\mathcal K_{\mathrm B}$ satisfying
+  $N_a\phi_{\mathrm B}=\phi_{\mathrm B}M_a$. Then
+  \[
+    \sum_a\|(I\ot(\phi_{\mathrm B}M_a\phi_{\mathrm B}^\dagger)-T_a)\Delta\|^2
+    \le2\sum_a\|(I\ot N_a-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Apply Theorem~\ref{thm:pauli-range-projection-support} to $\{I\ot N_a\}$ and
+  $Q=I\ot(\phi_{\mathrm B}\phi_{\mathrm B}^\dagger)$, which fixes $\theta$.
+  Intertwining gives $(I\ot N_a)Q=I\ot(\phi_{\mathrm B}M_a\phi_{\mathrm B}^\dagger)$.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
@@ -603,6 +705,28 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 \end{remark}
 
 \section{Formalization support for the robustness bound}
+
+\begin{theorem}[Square root of the soundness error]
+  \label{thm:pauli-error-square-root-support}
+  \lean{MIPStarRE.QPBT.sqrt_deltaQld_le}
+  \leanok
+  For real $a,b$, write
+  $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)
+  =a(md)^a(\eps^b+q^{-b}+2^{-bmd})$.
+  For every admissible $(q,m,d)$, every $a\ge1$, every real $b$, and every
+  $\eps\ge0$,
+  \[
+    \sqrt{\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)}
+    \le \delta_{\mathrm{qld}}^{a,b/2}(\eps,m,d,q).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  Admissibility gives $md\ge1$, so $A=a(md)^a\ge1$ and $\sqrt A\le A$.
+  For the remaining sum, subadditivity of the square root gives
+  $\sqrt{x+y+z}\le\sqrt x+\sqrt y+\sqrt z$ for nonnegative $x,y,z$.
+  Taking the square root of each real power halves its exponent.
+\end{proof}
 
 The following monotonicity statement is not a named result of the source
 article.  It records, as a single inequality, the adjustment of the universal

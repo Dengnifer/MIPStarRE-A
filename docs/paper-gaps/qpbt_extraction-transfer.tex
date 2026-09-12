@@ -111,10 +111,24 @@ where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
 uses projectivity and orthogonality to keep the second term under control.
 The same argument is required for each player and each Pauli basis.
 
-This transfer is an open proof obligation for the next extraction stage.  It
-must be a theorem derived from the concrete swap unitaries, transformed-state
-estimate, and operator comparisons.  It must not be stored as a bridge field,
-residual assumption, or hypothesis of the source-labelled soundness theorem.
+The finite-dimensional estimate is now formalized in
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean}. For a complete POVM
+$\{N_h\}$, an orthogonal projection $Q$, and $Q\vartheta=\vartheta$, it proves
+\[
+  \sum_h\|(N_hQ-T_h)\Delta\|^2
+  \le 2\sum_h\|(N_h-T_h)\Delta\|^2+2\|\Delta-\vartheta\|^2.
+\]
+The proof uses $\sum_h N_h^\dagger N_h\le I$, so it applies to complete
+POVMs as well as projective measurements. The same module proves the
+isometry form under the exact intertwining identity $N_h\phi=\phi M_h$,
+including the two local placements on an arbitrary bipartite state.
+These estimates have no dependence on an assumed global polynomial-pair
+measurement or on an extraction theorem.
+
+Their application to the concrete swap unitaries, together with construction
+of the transformed state and its comparison estimates, remains a proof
+obligation. No such construction may be replaced by a bridge field, residual
+assumption, or hypothesis of the source-labelled soundness theorem.
 
 \section{Blueprint and formalization status}
 
@@ -148,8 +162,10 @@ polynomial-pair measurement explicitly and whose formal link points only to the
 conditional helper.  It therefore cannot be mistaken for the source result.
 Apart from that hypothesis the
 conclusion matches the Stage~4.2 extraction lemma, including the corrected
-numerical estimates; the later passage to the isometries in the soundness
-theorem is not formalized, and no declaration yet states that passage.
+numerical estimates. The general range-projection estimates described above
+justify the analytic part of the later passage to isometries. Constructing
+the concrete isometries and deriving their intertwining identities from the
+swap construction remain necessary before applying those estimates.
 
 The conditional character of the result is visible wherever the declaration is
 invoked: the suffix \path{ofGlobalPairWitness} names the extra premise in the
@@ -163,6 +179,8 @@ Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \path{exists_globalPairWitness}.  \ghissue{47} tracks the separate
 range-projection transfer needed by \path{pauli_soundness}; that theorem must
 be derived from the concrete data rather than stored in the witness.
+The independent range-projection estimates are recorded by \ghissue{529};
+that issue does not discharge the global-pair or extraction constructions.
 
 \section{Conclusion}
 
@@ -170,8 +188,8 @@ The printed triangle calculation has repairable numerical errors, and the
 last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
-the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  Independently of both defects, the
+the latter has a proved general analytic estimate, with its application to the
+concrete extraction data still outstanding. Independently of both defects, the
 present extraction declaration is conditional on the global polynomial-pair
 measurement, and that conditionality must be removed before it may be
 advertised as the source lemma.
