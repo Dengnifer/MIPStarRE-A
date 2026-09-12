@@ -1,8 +1,10 @@
 import MIPStarRE.QPBT.Combining.Lines.ConditionedPastingDefect
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
+import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
+import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
 import MIPStarRE.QPBT.Games.RestrictedAverage
@@ -248,11 +250,35 @@ place of the seed-indexed line-point distribution over `F_q^(2m+2)` of the
 source statement, so the statement carries no divisibility hypothesis and its
 transport to the source carrier remains open.  Its `source_mixture` field
 asserts only the separate X and Z marginal mixtures, not a stronger joint
-conditional law.  The proof is tracked by issue #18.  Discharge: formalize the
-two sampling cases of the cited construction for `DirectLineDesc`. -/
+conditional law.
+
+The witness is the sub-line law `subLineDist` of the sampling procedure.  Its
+pointwise fields follow from `subLineTripleOf_incidence`,
+`subLineTripleOf_compatibility`, and `subLineTripleOf_axis_closure`, after
+recovering the auxiliary sample with `exists_raw_of_mem_subLineDist_support`.
+Its extended-line marginal is `subLineDist_map_fst`, and its two projected
+point marginals are the separate mixtures of `subLineDist_source_mixture`. -/
 theorem exists_subLineWitness (P : AdmissibleParams) :
     Nonempty (SubLineWitness P) := by
-  sorry
+  refine ⟨{ D := subLineDist P
+            isProbability := subLineDist_isProbability P
+            extended_marginal := subLineDist_map_fst P
+            incidence := ?_
+            compatibility := ?_
+            source_mixture := subLineDist_source_mixture P
+            axis_closure := ?_ }⟩
+  · intro sample hsample u hu
+    obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
+      exists_raw_of_mem_subLineDist_support P hsample
+    exact subLineTripleOf_incidence P kind k w hx hz hu
+  · intro sample hsample
+    obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
+      exists_raw_of_mem_subLineDist_support P hsample
+    exact subLineTripleOf_compatibility P kind k w hx hz
+  · intro sample hsample haxis
+    obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
+      exists_raw_of_mem_subLineDist_support P hsample
+    exact subLineTripleOf_axis_closure P kind k w haxis
 
 end
 

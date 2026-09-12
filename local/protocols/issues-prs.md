@@ -143,7 +143,17 @@ that refuse by default:
 1. the PR is open, unmerged and not a draft (`draft is False`, not merely
    falsy), and reports a head SHA, a head ref and a base ref;
 2. the primary worktree is clean and on the base, and the local branch tip
-   equals the GitHub head SHA — the merge must be of the bytes built here;
+   equals the GitHub head SHA — the merge must be of the bytes built here. After
+   fetching the current GitHub base, the head is fresh when that base is its
+   ancestor, or when every raw tree change from their merge base to the base is
+   allowlisted passive telemetry: a regular non-executable (`100644`) `.md` or
+   `.jsonl` file below `results/telemetry/`, or a generated regular
+   non-executable `.json` file below the exact
+   `results/telemetry/github-snapshot/` subtree. The check uses
+   `git diff --raw -z --no-renames` so additions, deletions and both sides of a
+   rename retain their paths and modes. Executable files, executable-mode
+   changes, symlinks, code or unknown suffixes, malformed records, paths outside
+   those boundaries, a missing merge base and every failed Git command block;
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
@@ -171,7 +181,8 @@ The active owner service records, at each bounded tick, the local `main` SHA,
 the readable remote `refs/heads/main` SHA, primary cleanliness, transport
 result, and the age and exact head of the oldest CI-and-review-eligible open
 PR. A dirty primary, remote mismatch, unavailable transport, active fix or
-transaction lock, missing space-cap5/external-zero gate, or stale candidate is
+transaction lock, missing configured Space allocation or external-zero gate, or a stale
+candidate is
 a HOLD reason; it is never silently converted into a merge attempt. After a
 successful daemon-owned merge, the service re-reads remote `main` and records
 the new SHA before the next tick. The service may invoke `pr_merge.py` only as
@@ -179,7 +190,8 @@ its daemon-owned final action after these checks; workers never merge directly.
 Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
 exiting the loop. The cadence is monotonic: work time is subtracted from the
 configured interval (default 300 seconds). Candidate records distinguish stale
-exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+exact-head PRs from fresh actionable PRs using `pr_merge.head_is_fresh`, the
+same conservative predicate as gate 2b; `pr_age_s` is PR creation age, while
 eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text

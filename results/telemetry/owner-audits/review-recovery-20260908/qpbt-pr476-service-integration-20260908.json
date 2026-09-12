@@ -1,0 +1,41 @@
+{
+  "schema": "qpbt-pr476-service-integration-v1",
+  "recorded_at": "2026-09-08T21:36:00Z",
+  "pr": 476,
+  "head": "4c343e6c88b7714a3bbf121b3dc23839df303e3e",
+  "ci": {
+    "conclusion": "success",
+    "seconds": 249,
+    "all_nine_statuses_green": true,
+    "manifest": "/home/drx/.cache/mipstarre-dev/ci-manifests/pr476-4c343e6c88b7714a3bbf121b3dc23839df303e3e.json"
+  },
+  "review": {
+    "nonce": "961e897d615d44a7b8e2e281cc2e9695",
+    "reviewer_uuid": "01a082e1-7080-7ba0-ae2c-1023b26027bc",
+    "prompt_sha256": "16681a462623815f046cce0c4b02933e157a796a828efa1d572383c2f342fb2c",
+    "verdict": "APPROVED",
+    "unresolved_findings": 0,
+    "github_review_id": 5147206622,
+    "local_review_summary": "success"
+  },
+  "merge": {
+    "service": "local/bin/pr_merge.py",
+    "exit_code": 0,
+    "merged_at": "2026-09-08T21:33:07Z",
+    "merge_commit": "81148545f0752ec09b3efe88332b49bb771312be",
+    "parents": [
+      "ef722919001258438a7a087361945ac5860ba1d8",
+      "4c343e6c88b7714a3bbf121b3dc23839df303e3e"
+    ],
+    "local_tracking_live_equal": true
+  },
+  "finite_boundary": "/tmp/qpbt-pr476-service-boundary-20260908T2131Z/receipt.json",
+  "finite_restore": "/tmp/qpbt-pr476-postservice-restore-20260908T2133Z/receipt.json",
+  "duplicate_ci_attempt": {
+    "session": 91871,
+    "exit_code": 2,
+    "canonical_lock_refused_before_jobs_or_status_writes": true,
+    "second_real_ci": false
+  },
+  "activation": "merged workflow used successfully to consume PR400's preserved combined responses"
+}
