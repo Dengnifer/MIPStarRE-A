@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
+import MIPStarRE.QPBT.Combining.Lines.ConditionedPastingDefect
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
