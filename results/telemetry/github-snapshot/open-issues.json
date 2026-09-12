@@ -9208,81 +9208,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/242",
-  "id": 5362369888,
-  "node_id": "I_kwDOUJyJf88AAAABP59FYA",
-  "number": 242,
-  "title": "feat(Quantum): prove controlled unitary algebra for QPBT extraction",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T02:34:06Z",
-  "updated_at": "2026-09-06T02:34:06Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: 20260906-controlled-unitary-algebra -->\n### Independent mathematical task\n\nExclusive write scope NEW MIPStarRE/Quantum/ControlledUnitary.lean and a packet-specific audit. Provide the minimal reusable finite controlled-unitary calculation needed by QPBT extraction: for a complete pairwise orthogonal projective measurement P_i and unitary U_i, the operator sum_i P_i tensor U_i is unitary, with both adjoint products. Read source references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1687-1750, proof of lem:qld-unitary. Search Mathlib and Quantum APIs before proving; reuse any existing theorem rather than duplicate it. Use existing Measurement/IsProjective/heteroKron and generic actual operator hypotheses, not a conclusion-shaped bridge or source theorem assumption. Do not edit Extraction/Observables.lean or reimplement issue240 Pauli observable algebra. This supplies its later swap calculation through a separate importable helper; no target wrapper integration or shared blueprint edits until actual dependency results are available.\n\n### Integrity and lifecycle\n\nMain-selected disjoint prerequisite work under the owner concurrency deadline. Base is published main a61ee55. The original extraction packets keep their parent merge gates. No new sorry, axiom, native bypass, statement weakening or implicit proof-budget reset. Source first; targeted Lean and declaration axiom checks; normal hooks, CI, independent review and daemon-only merge. Do not mark an unfinished source theorem complete. Other active writers retain their exclusive files. Addresses #123 without closing it.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/242/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/234/labels{/name}",
@@ -9830,8 +9755,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 26,
-   "completed": 11,
-   "percent_completed": 42
+   "completed": 12,
+   "percent_completed": 46
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -10532,7 +10457,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
