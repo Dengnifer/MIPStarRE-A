@@ -39,6 +39,15 @@ private theorem stateQForm_zero_local {ι : Type*} [Fintype ι] [DecidableEq ι]
     DistanceCalculus.stateQForm ψ (0 : Op ι) = 0 := by
   simp [DistanceCalculus.stateQForm, applyOperatorToState]
 
+/-- Reindexing an operator along an equivalence preserves positivity.
+Formalization-only auxiliary for the placement bipartitions of blueprint
+`def:expanded-state`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`. -/
+theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
+    (e : ι ≃ κ) {M : Op κ} (hM : 0 ≤ M) :
+    0 ≤ reindexOp e M := by
+  exact MIPStarRE.Quantum.reindex_nonneg e.symm hM
+
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
