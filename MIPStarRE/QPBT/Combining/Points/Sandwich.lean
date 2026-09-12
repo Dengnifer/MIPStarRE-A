@@ -27,7 +27,7 @@ the self-consistency of each factor.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-748`
 (the sandwich and display `eq:qld-r-2`), blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960` (`lem:qld-4-10`); the
-route is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
+route is explained in `docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -98,7 +98,7 @@ point measurements, with outcomes in `F_q × F_q`.  This is the POVM of the
 first step of the proof of `lem:qld-4-10`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:731-736`,
 formed directly with field-valued outcomes rather than from the binary
-refinements; see `docs/paper-gaps/qpbt_combined-points-direct.tex`. -/
+refinements; see `docs/paper-gaps/qpbt_combined-points-field-valued.tex`. -/
 def sandwichPoint (S : ProjectiveSetting P ε) (side : PlayerSide)
     (x z : Fin P.m → PauliScalar P) :
     Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
@@ -166,6 +166,22 @@ theorem sandwichPoint_ordered_dist_le :
     (MagicSquareRigidity.norm_applyOperatorToState_le
       (S.place_conjTranspose_mul_self_le_one p
         (S.pointMeasExp_isProjective p.side .Z xz.2 ab.2)) _) 2
+
+/-- Formalization-only auxiliary: the placed effects of an expanded point
+measurement are square-summable to the identity. -/
+theorem sum_place_pointMeasExp_conjTranspose_mul_self (S : ProjectiveSetting P ε)
+    (p : Placement) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
+    ∑ a : PauliScalar P, (S.place p ((S.pointMeasExp p.side W u).effect a))ᴴ *
+        S.place p ((S.pointMeasExp p.side W u).effect a) ≤ 1 := by
+  refine le_of_eq ?_
+  calc ∑ a : PauliScalar P, (S.place p ((S.pointMeasExp p.side W u).effect a))ᴴ *
+        S.place p ((S.pointMeasExp p.side W u).effect a)
+      = ∑ a : PauliScalar P, S.place p ((S.pointMeasExp p.side W u).effect a) := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [← place_conjTranspose, ← place_mul, pointMeasExp_effect_conjTranspose,
+          pointMeasExp_effect_mul_self]
+    _ = 1 := by
+        rw [← place_finsetSum, (S.pointMeasExp p.side W u).sum_eq_one, place_one]
 
 /-- The ordered product `M^Z_b M^X_a` on one placement is close to the
 reversed ordered product `M^X_a M^Z_b` on the opposite placement, on average

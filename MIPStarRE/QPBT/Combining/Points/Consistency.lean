@@ -35,7 +35,7 @@ and the commutators on the two placements, since
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`,
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:851-880`
 (`lem:qld-4-10`, first step); the identity route is explained in
-`docs/paper-gaps/qpbt_combined-points-direct.tex`.
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -93,6 +93,18 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   refine MagicSquareRigidity.norm_applyOperatorToState_le ?_ v
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
+
+/-- The effects of a projective measurement are square-summable to the
+identity. -/
+theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
+    [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    ∑ a, (M.effect a)ᴴ * M.effect a ≤ 1 := by
+  refine le_of_eq ?_
+  calc ∑ a, (M.effect a)ᴴ * M.effect a = ∑ a, M.effect a := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
+    _ = 1 := M.sum_eq_one
 
 /-! ## The overlap of two placed sandwiches -/
 

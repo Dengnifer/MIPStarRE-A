@@ -18,7 +18,7 @@ one, and the elementary estimate collapsing the error terms `ε`, `√ε`, and
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:838-881`
 (self-consistency and consistency with `M̂` in the proof of `lem:qld-4-10`),
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960`; the route
-is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
+is explained in `docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -81,6 +81,16 @@ theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableE
               rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
           _ ≤ 4 := by linarith
     _ = 4 := avgOver_uniform_const _
+
+/-- The effects of a projective measurement, placed on a register pair, are
+square-summable to the identity. -/
+theorem ProjectiveSetting.sum_place_effect_conjTranspose_mul_self_le_one
+    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (p : Placement)
+    {α : Type*} [Fintype α] (M : Measurement α (S.ExpandedLocalSpace p.side))
+    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
+    ∑ a, (S.place p (M.effect a))ᴴ * S.place p (M.effect a) ≤ 1 := by
+  exact sum_effect_conjTranspose_mul_self_le_one_of_projective
+    (S.placedMeasurement p M) (S.placedMeasurement_isProjective p M hM)
 
 /-- The products `A_a B_b` of the effects of two projective measurements on a
 common space are square-summable to the identity. -/
