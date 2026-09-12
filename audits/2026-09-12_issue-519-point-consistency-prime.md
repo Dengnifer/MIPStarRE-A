@@ -68,9 +68,11 @@ are not certified by this work.
 The search covered saved Git refs and the history of `Extraction/Consistency`.
 No completed proof of the target was found. Commit
 `16ddc770ad0ed4511d1e63bea6a3d661997aec6a` (#518) contains the opposite-order
-calculation. Its auxiliary `Extraction/PointConsistency.lean` is reused
-verbatim (Git blob `08d862f0857e16046c0e3126dc494c64c9e31c30`), including the
-side-parametric convolution lemma. The Alice-side extension is isolated in
+calculation. Its auxiliary `Extraction/PointConsistency.lean` is reused from
+Git blob `08d862f0857e16046c0e3126dc494c64c9e31c30`, including the
+side-parametric convolution lemma. The only adjustment replaces a terminal
+`first` tactic by `ac_rfl` to satisfy the full build's flexible-tactic linter.
+The Alice-side extension is isolated in
 `Extraction/PointConsistencyPrime.lean`. No other change from that commit is
 copied. The averaged proof also reuses `sum_marginalPoly_eval_mul` and
 `marginalPoly_pointMeas_consistent_alice` from the existing marginal API.
@@ -110,6 +112,14 @@ operator identity, decoded-defect identity, pointwise mass comparison, and
 averaged bound each use only `propext`, `Classical.choice`, and `Quot.sound`.
 The target additionally uses `sorryAx` through the mass estimate. The audit
 file is `~/.cache/mipstarre-dev/sessions/prover-519-20260912-01-checks/Axioms.lean`.
+
+The first exact-head CI run passed the full project build and LDT axiom-audit
+build. Its workflow unit suite failed one model-policy fixture because the
+session's inherited `MIPSTARRE_HARDNESS_REASON` reached a routine dispatch
+fixture. Clearing the dispatch metadata as well as the invoking/review model
+settings makes that focused regression pass. The failed CI evidence is
+retained; a subsequent exact-head run verifies the linter correction and uses
+the fully scrubbed environment. No workflow source or policy is changed.
 
 The unchanged direct holes are `marginalPoly_sub_pointMeas_approx_zero`,
 `nonencodingMarginalMass_le`, `tildeM_consistent_pointMeas`, and
