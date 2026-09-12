@@ -125,8 +125,9 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
-  in the registry + worktree removal; the JSONL capture is the archive. Native
-  descendants use the root lease and `telemetry.py native-record` (`sessions.md`).
+  in the registry + worktree removal; the JSONL capture is the archive.
+  Historical native-descendant rows remain readable, but lease-backed native
+  dispatch is retired (`sessions.md`, issue #505).
 
 ## Telemetry (research-paper data)
 
@@ -153,15 +154,10 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
   selects exact `gpt-5.6-sol`/`ultra` for routine/bounded subagents, including
   routine independent reviewers; genuinely hard/escalated work uses Astra with
   an explicit reason. Unknown classes/models and other efforts fail closed.
-  External dispatch keeps fan-out off. Native descendants share their
-  root's verified configured cap and account allocation; neither is provider
-  throughput evidence. The current Space allocation is ten total sessions: the root plus
-  at most nine native descendants, with a useful target of nine, a floor of eight, and
-  external admission zero. This model policy does not resize that allocation or permit an
-  additional pool.
-- Every admission reads account mode (default primary; restoring both requires owner approval).
-  Twelve primary slots include main; only named interactive CWDs are exempt from accounting.
-  Other same-key use reduces capacity. See `protocols/sessions.md` for reconciliation and
-  checkpoint continuations. Historical Sol/Fable measurements are unchanged.
+  External dispatch keeps fan-out off. Native lease admission and the useful queue
+  are retired (#505). Worker reservations use only the two configured account caps;
+  missing caps disable admission. They do not measure provider throughput or unmarked use.
+- See `protocols/sessions.md` for marker accounting, resume affinity and checkpoint
+  continuations. Historical Sol/Fable measurements are unchanged.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.
