@@ -41,7 +41,7 @@ asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
 the `dispatcher` field. External session prompts prohibit further fan-out.
 
-### Native descendants (owner amendment, 2026-09-06)
+### Native descendants (owner amendments, 2026-09-06 and 2026-09-08)
 
 Main may assign useful native work under the published model policy without
 external admission. Main remains Astra Ultra; existing defaults may stay Astra
@@ -53,8 +53,10 @@ resume thread, process start identity, scoped space route, explicit Astra/Ultra
 main configuration, policy-authorized child default and unchanged shared cap. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
 `watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current Space episode the owner allocation is five total slots,
-external admission is zero, and the existing native lease has three descendants. The
+the current Space episode the owner allocation is ten total sessions: the root plus at
+most nine native descendants. The useful target is nine descendants, the floor is eight,
+and external admission is zero. This supersedes the historical five-session episode; it
+does not resize a live lease or create another pool. The
 router enforces `watchdog/primary-external-admission=0` (and the owner `max-codex=0`
 fallback) before creating any external reservation.
 Native leases, external processes/reservations, interactives and reserved non-Codex
@@ -63,13 +65,79 @@ use all consume it. Unknown/dead native leases are retained until explicit
 lease cannot be resized; checkpoint and refresh the process with owner coordination.
 
 Main owns task selection, one-writer worktree assignments and native replenishment.
-Main preauthorizes bounded, disjoint successor chains; after sending task-end/start,
-workers continue an available assigned successor without awaiting another decision.
-The central integration coordinator may use native `followup_task` to refill an
-idle sibling from main's approved queue during a long main turn. Count actual native
-running state plus recent attributable activity. Record vacancy durations/reasons,
-including main-decision latency; unknown is not zero and configured capacity or a
-ready list is not measured occupancy. No nested extra pool may exceed the shared cap.
+While slots are occupied, main and the central integration coordinator keep useful,
+disjoint successors prepared against expected completions. A prepared record binds the
+issue, worktree or read-only scope, exact current head or source snapshot, actually
+published inputs, an eligible native identity and role, current worktree or unique
+CI/review/publisher ownership, predecessor, job class, exact model and effort, a complete
+hash-bound dispatch body, deadline rule, completion condition, cumulative budget,
+authorized time limit, and any inherited deadline. Record `ready_at` when all checks finish
+while the predecessor still occupies its slot. A prose description of expected inputs or
+one nominal successor line is not ready. A head, dependency, ownership, role, or deadline
+change invalidates readiness.
+Each expected completion has a separately validated alternate; if none exists, record the
+exact frontier blocker and do not call that completion fully prepared.
+
+An ordinary proof or CI-handoff record may retain the complete body in either the existing
+literal activation message or an immutable full contract. The contract form records an
+absolute `contract_path`, the SHA-256 of its exact bytes, and the exact short activation
+message sealed before predecessor completion. The full contract still contains every field
+above, including preserved costs and a budget rule anchored to actual native `task_started`;
+the short message contains only actor, operation id, contract path and hash, and a
+conservative absolute deadline. The #471 brief fixes the schema and example. Existing full
+messages remain valid.
+
+On an attributable `task_complete` or equivalent terminal event, the coordinator first
+rechecks only shared-cap admission, target identity, prepared-record immutability, owned
+operation or worktree, and the remaining source budget. The activation payload carries
+an absolute source deadline no later than the native call time plus the authorized limit;
+a continuation retains an earlier inherited deadline. It then calls native `followup_task`
+or `spawn_agent` before detailed predecessor receipt adoption, rollout tail reads,
+capture hashing, broad censuses, or PR-history inspection. If the first prepared successor
+is blocked or its activation call fails, record the exact prerequisite or failure and try
+the prepared alternate in the same completion cycle. A quiet live turn remains occupied
+until assignment, budget, and owned-operation checks establish an actual completion or
+stall; silence alone does not create a vacancy.
+
+For a contract-form ordinary record, the activator also verifies the full-contract hash,
+the exact presealed short message, and every admission prerequisite that could have changed
+before making the native call. It sends that short message without regenerating the full
+arguments. A missing, unreadable, or mismatched contract or message invalidates the
+candidate and selects another prepared useful alternative. No additional root round trip
+is required for this already-authorized ordinary mechanical activation.
+
+Canonical review consumption is a required admission blocker, not detailed receipt
+adoption. A completed native reviewer thread remains idle and unavailable for follow-up
+until `native_review.py complete` has validated its genuine result and created the bound
+response, and the waiting canonical consumer has accepted that response. A response file
+alone is not consumer acceptance. The held reviewer is not useful activity or an occupied
+runtime slot; fill available capacity with another eligible prepared actor or job rather
+than resuming it before the hold is released.
+
+After the activation call, reconcile the fixed deadline against the successor's actual
+current `task_started`, then verify its thread and turn, requested and observed model and
+effort, and first useful output. Time before the first tool or progress report counts;
+neither event starts a fresh budget. The coordinator owns an append-only transition batch
+containing predecessor completion, `ready_at`, the actual activation call, successor start
+and first output, the absolute source deadline, and real blocker intervals. Only after that
+activation does detailed predecessor adoption proceed.
+For a contract-form ordinary task, the actor verifies the same hash and reads the full
+contract before any mutation. It rechecks its identity, model and effort, exact scope and
+ownership, current inputs, and deadline. The effective deadline is the earliest of the
+presealed absolute deadline, actual `task_started` plus the authorized duration, and any
+inherited deadline; no first-tool or progress event resets it.
+Waiting for successor start evidence or adopting one predecessor never serializes the
+activation-first handling of another real completion.
+An initial recovery of an old vacancy is labelled backlog, and one closing eight- or
+nine-worker snapshot is not evidence of a prompt reaction or sustained coverage. Count
+occupied runtime, fresh-output lower bounds, API usage, and proof delivery separately;
+unknown is not zero and a ready list is not occupancy. No nested extra pool may exceed
+the shared cap.
+Operational acceptance requires a natural post-merge completion whose coordinator-owned
+batch shows `ready_at` before completion, the actual activation call before detailed
+adoption, and the successor's current `task_started` and first useful output. That one
+transition establishes ordering, not sustained floor coverage; the existing interval audit
+remains the latter's evidence.
 Children do not write the primary index or shared telemetry concurrently. The primary
 telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
 `--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
@@ -78,6 +146,9 @@ Effective bound-turn contexts must satisfy the recorded classification. Root/par
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
 review uses the exact-head transport in `review.md`; it cannot bypass CI or merge gates.
+Canonical review assignments never use the ordinary short-contract form. Their literal
+nonce, head, prompt digest and root assignment, direct-parent and independence checks, and
+consumer identity holds remain in the activation message and review transport unchanged.
 The root's inherited permission envelope is unchanged; reviewers receive read-only
 assignments, not a falsely claimed separate read-only sandbox. Historical episodes,
 attempt counts and usage survive refreshes and route changes without a budget reset.
