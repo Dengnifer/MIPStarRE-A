@@ -755,8 +755,19 @@ def write_mode(mode: dict, *, root: Path | None = None) -> Path:
     return path
 
 
-def load_mode(root: Path | None = None) -> dict:
-    """The mode record, or ``LayerError`` — an unreadable mode is unknown."""
+def load_mode(root: Path | None = None, *, strict_accounts: bool = True) -> dict:
+    """The mode record, or ``LayerError`` — an unreadable mode is unknown.
+
+    ``strict_accounts=False`` keeps an INVALID accounts file from taking the
+    caller down with it.  It is for commands that can only ever narrow capacity
+    or that touch no ceiling at all: `pause` zeroes every cap file it finds, so a
+    stale name list cannot widen anything, and `get owner_inbox_issue` is how the
+    owner's remote repair path finds the issue to repair the file from.  Before
+    this, one mistyped field in the file the owner is invited to hand-edit made
+    `run_mode.py pause` exit 2 — so `owner-pause.sh` failed at T+0:00, admission
+    was never stopped, the pre-pause caps were never saved — and took the GitHub
+    channel down with it, exactly when the file needed remote repair.
+    """
     path = (root or cache_root()) / "watchdog" / "run-mode.json"
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -772,10 +783,26 @@ def load_mode(root: Path | None = None) -> dict:
     if not isinstance(doc, dict) or doc.get("schema") != MODE_SCHEMA:
         raise LayerError(f"{path} is not a {MODE_SCHEMA} document; re-run "
                          "'run_mode.py apply'")
-    return with_live_accounts(doc)
+    return with_live_accounts(doc, strict=strict_accounts)
 
 
-def with_live_accounts(mode: dict) -> dict:
+#: Keys of `value_for` that would ACT on a ceiling: an answer computed from the
+#: briefed snapshot instead of the owner's live file would restore a ceiling they
+#: had just lowered, so these keep the hard failure.  Everything else — the run's
+#: own scalars — is answered from the snapshot with a loud warning.
+STRICT_ACCOUNT_VALUES = ("floor", "max_codex", "accounts", "account_mode")
+
+
+def needs_live_accounts(key: str) -> bool:
+    """Whether ``get KEY`` must refuse rather than fall back to the snapshot."""
+    if key in SCALAR_KEYS:
+        return key == "account_mode"
+    if key in STRICT_ACCOUNT_VALUES:
+        return True
+    return key.partition(".")[0] in PER_ACCOUNT_KEYS
+
+
+def with_live_accounts(mode: dict, strict: bool = True) -> dict:
     """The mode document with its account list replaced by the live file.
 
     ``run-mode.json`` is a SNAPSHOT taken at ``apply``; ``accounts.json`` is
@@ -787,11 +814,24 @@ def with_live_accounts(mode: dict) -> dict:
     after those numbers were wrong).  A key added mid-run appears here too, so
     it gets a cap file, a `cap.<name>` accessor and a line in every report.
 
-    An invalid accounts file raises, and every caller treats that as unknown
-    rather than as zero capacity: silently falling back to the snapshot would
-    restore a ceiling the owner has just lowered.
+    An invalid accounts file raises when *strict*, and the caller treats that as
+    unknown rather than as zero capacity: silently falling back to the snapshot
+    would restore a ceiling the owner has just lowered.  When not strict it is a
+    loud warning and the snapshot's list, for the commands that cannot act on a
+    ceiling (see `load_mode`).
     """
-    entries = accounts_file.load()
+    try:
+        entries = accounts_file.load()
+    except accounts_file.AccountsError as exc:
+        if strict:
+            raise
+        sys.stderr.write(
+            f"run_mode.py: WARNING: {exc}\n"
+            "  Falling back to the account list recorded in run-mode.json. This "
+            "command cannot widen capacity, so a stale list is safe here — but "
+            "every ceiling below is the BRIEFED one, not the live one. Fix the "
+            "field named above with results/telemetry/owner-tools/accounts.sh.\n")
+        return mode
     if entries is None:
         return mode
     return dict(mode, accounts=accounts_file.as_mode_rows(entries),
@@ -1352,7 +1392,7 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 
 def cmd_get(args: argparse.Namespace) -> int:
-    mode = load_mode()
+    mode = load_mode(strict_accounts=needs_live_accounts(args.key))
     sys.stdout.write(f"{value_for(mode, args.key)}\n")
     return 0
 
@@ -1408,7 +1448,10 @@ def cmd_set(args: argparse.Namespace) -> int:
 
 
 def cmd_pause(args: argparse.Namespace) -> int:
-    mode = load_mode()
+    # Pausing only ever narrows capacity — every cap it finds goes to 0 — so it
+    # must not depend on the accounts file parsing.  T+0:00 of owner-pause.sh is
+    # this command, and it failing meant admission was never stopped at all.
+    mode = load_mode(strict_accounts=False)
     names = names_of(mode)
     saved = mode.get("saved_caps")
     if not (mode.get("paused") and isinstance(saved, dict) and saved):
@@ -1456,7 +1499,9 @@ def cmd_pause(args: argparse.Namespace) -> int:
 
 
 def cmd_resume(args: argparse.Namespace) -> int:
-    mode = load_mode()
+    # A resume restores SAVED caps, which were the live ones when the pause took
+    # them; the controller clamps them to the live ceilings at its next tick.
+    mode = load_mode(strict_accounts=False)
     if not mode.get("paused"):
         sys.stderr.write("run_mode.py: warning: the run mode is not paused; "
                          "restoring the briefed caps anyway\n")

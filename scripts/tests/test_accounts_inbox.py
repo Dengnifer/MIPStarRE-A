@@ -20,6 +20,7 @@ import os
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -119,14 +120,17 @@ class TestOwnerChannel(InboxHarness):
         self.assertEqual(entries["second"]["external_reserved"], 4)
         self.assertFalse(entries["primary"]["enabled"])
 
-    def test_a_comment_by_anyone_else_is_rejected_and_answered(self) -> None:
-        # Rejected, not ignored: an attempt must be visible to the owner.
+    def test_a_comment_by_anyone_else_is_ignored_and_reported(self) -> None:
+        # Never applied, and never answered in public: replying echoed the
+        # stranger's own text back, so anyone with comment access could make the
+        # bot comment once per comment they wrote.  The attempt stays visible —
+        # in the janitor's report, which is where the owner reads it.
         self.github.comment("ACCOUNTS: second ceiling=999\n", "a-stranger")
         report = self.sweep()
         self.assertEqual(self.ceiling("second"), 30)
-        self.assertTrue(any("rejected:" in line for line in report))
-        self.assertIn("repository owner", self.github.posted[0]["body"])
-        self.assertIn("a-stranger", self.github.posted[0]["body"])
+        self.assertTrue(any("a-stranger" in line for line in report))
+        self.assertTrue(any("repository owner" in line for line in report))
+        self.assertEqual(self.github.posted, [])
 
     def test_a_comment_is_applied_exactly_once(self) -> None:
         self.github.comment("ACCOUNTS: second ceiling=20\n", OWNER)
@@ -172,6 +176,69 @@ class TestOwnerChannel(InboxHarness):
         self.sweep()
         report = self.sweep()
         self.assertIn("no new ACCOUNTS: directive", report[0])
+
+
+class TestStaleness(InboxHarness):
+    """A directive the janitor never saw is stale capacity advice.
+
+    The count cap alone did not implement the module's own rule: the owner inbox
+    issue is permissions-only and low traffic, so every `ACCOUNTS:` comment ever
+    written stayed in scope forever.  With the pipeline deliberately paused, the
+    first sweep after a resume would have applied the whole backlog at once —
+    `enabled=false` included, which is cap 0 and no probe.
+    """
+
+    def old_comment(self, body: str, minutes: int) -> int:
+        number = self.github.comment(body, OWNER)
+        moment = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        self.github.comments[-1]["created_at"] = \
+            moment.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return number
+
+    def test_a_day_old_directive_is_neither_applied_nor_answered(self) -> None:
+        self.old_comment("ACCOUNTS: second enabled=false\n", 60 * 24)
+        report = self.sweep()
+        self.assertEqual(self.ceiling("second"), 30)
+        self.assertTrue(af.load_map(self.cache)["second"]["enabled"])
+        self.assertEqual(self.github.posted, [])
+        self.assertTrue(any("NOT applied" in line for line in report))
+
+    def test_a_recent_directive_still_applies(self) -> None:
+        self.old_comment("ACCOUNTS: second ceiling=20\n", 5)
+        self.sweep()
+        self.assertEqual(self.ceiling("second"), 20)
+        self.assertEqual(len(self.github.posted), 1)
+
+    def test_a_comment_with_no_timestamp_is_not_treated_as_stale(self) -> None:
+        # The REST API always supplies created_at; a missing one is an unusual
+        # payload, not an old comment, and dropping it would lose a real edit.
+        self.github.comment("ACCOUNTS: second ceiling=18\n", OWNER)
+        self.sweep()
+        self.assertEqual(self.ceiling("second"), 18)
+
+    def test_the_bound_can_be_turned_off(self) -> None:
+        self.old_comment("ACCOUNTS: second ceiling=20\n", 60 * 24)
+        self.sweep(max_age_min=0)
+        self.assertEqual(self.ceiling("second"), 20)
+
+
+class TestApplyOnce(InboxHarness):
+    def test_a_failed_reply_does_not_re_apply_the_directive(self) -> None:
+        # apply_directives writes the file; the reply marker lives on GitHub and
+        # is written after it.  If that POST fails, the next sweep must not
+        # re-apply the same directive and revert an `accounts.sh set` the owner
+        # made in between.
+        self.github.comment("ACCOUNTS: second ceiling=20\n", OWNER)
+        with mock.patch.object(inbox.gh_common, "ensure_pr_comment",
+                               side_effect=OSError("rate limited")):
+            with self.assertRaises(OSError):
+                self.sweep()
+        self.assertEqual(self.ceiling("second"), 20)
+        af.apply_fields(entries := af.load(self.cache), "second", {"ceiling": "9"})
+        af.save(entries, root=self.cache, actor="owner", action="set", detail="shell")
+        report = self.sweep()
+        self.assertEqual(self.ceiling("second"), 9)
+        self.assertTrue(any("already applied" in line for line in report))
 
 
 class TestOwnerLogin(InboxHarness):

@@ -470,5 +470,56 @@ class RunModeTestCase(unittest.TestCase):
         self.assertTrue(self.knob().exists())
 
 
+class TestInvalidAccountsFile(RunModeTestCase):
+    """A typo in the file the owner is invited to hand-edit must not break the
+    pause.  `owner-pause.sh` phase T+0:00 is `run_mode.py pause`; when that
+    exited 2, admission was never stopped, the pre-pause caps were never saved,
+    and the whole script exited 3 — while the GitHub channel, the one remote
+    repair path for that very file, was dead for the same reason."""
+
+    def break_accounts(self) -> None:
+        path = self.cache / "watchdog" / "accounts.json"
+        document = json.loads(path.read_text(encoding="utf-8"))
+        document["accounts"][0]["cieling"] = 5      # the owner's typo
+        path.write_text(json.dumps(document), encoding="utf-8")
+
+    def test_pause_still_zeroes_and_saves_the_caps(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        self.break_accounts()
+        code, _, err = run(["pause", "--reason", "owner word"])
+        self.assertEqual(code, 0)
+        self.assertIn("WARNING", err)
+        self.assertIn("cieling", err)
+        self.assertEqual((self.cap("max-codex-primary"), self.cap("max-codex-second"),
+                          self.cap("max-codex")), ("0", "0", "0"))
+        self.assertEqual(self.mode()["saved_caps"], {"primary": 5, "second": 28})
+
+    def test_resume_still_restores_the_saved_caps(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        self.assertEqual(run(["pause"])[0], 0)
+        self.break_accounts()
+        self.assertEqual(run(["resume"])[0], 0)
+        self.assertEqual(self.cap("max-codex-primary"), "5")
+
+    def test_a_run_scalar_is_still_answerable(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        expected = run(["get", "owner_inbox_issue"])[1].strip()
+        self.break_accounts()
+        code, out, err = run(["get", "owner_inbox_issue"])
+        self.assertEqual(code, 0)
+        self.assertEqual(out.strip(), expected)
+        self.assertIn("WARNING", err)
+
+    def test_a_ceiling_question_still_fails_hard(self) -> None:
+        # These would ACT on a ceiling, so answering from the briefed snapshot
+        # would restore a number the owner had just lowered.
+        self.assertEqual(run(["apply"])[0], 0)
+        self.break_accounts()
+        for key in ("cap.primary", "nominal_limit.second", "floor", "max_codex",
+                    "accounts", "account_mode"):
+            self.assertEqual(run(["get", key])[0], 2, key)
+        self.assertEqual(run(["show"])[0], 2)
+
+
 if __name__ == "__main__":
     unittest.main()
