@@ -169,9 +169,9 @@ declaration \path{exists_combinedLinesWitness} preserves its original statement:
 it existentially obtains $\delta_Q$ and its point witnesses from the preceding
 point construction, then applies the conditional helper.
 
-The remaining construction target is
+The construction is proved in
 \path{combined_line_measurement_consistency}. For a joint point family
-with error $\delta_Q(\eps)=\poly(\eps)$, it asks for evaluated consistency
+with error $\delta_Q(\eps)=\poly(\eps)$, it establishes evaluated consistency
 of the explicit unconditioned measurement
 \[
  T^{\ell_X,\ell_Z}_{f_X,f_Z}
@@ -180,18 +180,36 @@ of the explicit unconditioned measurement
 under the original product of line-point distributions, with error
 $\delta_P(\eps,md/q)=\poly(\eps,md/q)$ and every directed opposite
 placement. The point-to-line comparisons at source lines 900--941 and the
-pasting argument at lines 942--961 are the intended discharge. The POVM,
+pasting argument at lines 942--961 give the proof. The POVM,
 axis-degree properties, and X marginal of this same measurement are proved.
 
-A bound for a measurement conditioned on nondegenerate lines would not by
-itself discharge this target. It would also require a defined conditioning
-event, its probability, an estimate for the discarded contribution, and a
-transfer of the defect back to the unconditioned measurement above under the
-original product law. No such transfer is asserted here. In particular,
-the preserved conditioned construction is not identified with
-\path{combinedLineMeasurement}; its saved proof remains historical work.
-The current target retains its explicit unfinished proof, without assuming
-any conditioning or transfer result in a source theorem.
+The proof conditions the question distribution on nonzero X-line direction;
+the measurement itself remains the displayed sandwich. Write $r$ for the
+retained mass. Every axis line has nonzero direction, so $r\ge1/2$.
+The completed point-to-line marginal defects are bounded by
+$\Delta=8\delta_Q(\eps)+C(\eps+\sqrt{\eps})$ before conditioning and by
+$\Delta/r$ afterwards, for a universal $C\ge1$. Uniform affine-parameter
+resampling and the univariate root bound give the conditional collision
+parameter $md/q$.
+
+The heterogeneous pasting theorem, with the answers ordered Z then X,
+therefore bounds the conditional defect of this same sandwich by
+$\delta_{\mathrm{pasting}}(md/q,\Delta/r)$. On the discarded event the
+pointwise defect is at most one. Its probability is at most $1/(2q)$:
+axis lines contribute zero, and the last raw direction coordinate of a
+diagonal line is uniform. Consequently the defect under the original law
+is at most
+\[
+ r\,\delta_{\mathrm{pasting}}(md/q,\Delta/r)+\frac1{2q}.
+\]
+Taking the minimum with the independent unit bound and using
+$1/2\le r\le1$ and $md\ge1$ gives a polynomial error in the corrected sum
+sense. This proves the original unconditioned statement without an
+additional hypothesis.\footnote{Recovered and checked under \ghissue{515}.
+The conditional and restored estimates are
+\path{exists_combinedLine_conditioned_defect_le} and
+\path{exists_combinedLine_restored_defect_le}; the final scalar step is
+\path{exists_conditioned_polynomial_bound}.}
 
 \subsection{Unrestricted point witnesses in the extended-line assertion}
 

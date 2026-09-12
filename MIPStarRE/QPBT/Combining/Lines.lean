@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.Marginal
+import MIPStarRE.QPBT.Combining.Lines.RestoredConsistency
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
@@ -37,7 +38,7 @@ noncomputable section
 
 /-! ## Combined line measurements -/
 
-/-- Lean-only consistency obligation for the particular X-Z-X measurement
+/-- Consistency of the particular X-Z-X measurement
 constructed in the proof of `lem:qld-xz-lines`, paper
 `14_analysis_of_the_pauli_basis_test.tex:942-961`.
 
@@ -46,12 +47,13 @@ may depend on this function, as in `exists_combinedLinesWitness_ofPointsWitness`
 The conclusion concerns `combinedLineMeasurement` itself, so subsequent uses of
 Claim 17-2 retain the source construction.
 
-**Proof obligation (issues #18 and #414):** This retains the unfinished
-consistency part of `exists_combinedLinesWitness_ofPointsWitness`. Discharge it
-by the point-to-line comparisons and pasting argument at paper lines 900--961.
-The degree support and POVM construction are already proved. See
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`; no equality or marginal
-assumption is added to a paper-facing theorem. -/
+The point-to-line comparisons feed heterogeneous pasting after conditioning on
+nonzero X-line direction. Restoring the discarded mass costs at most `1/(2q)`;
+the scalar polynomial bound absorbs this cost and the supplied point error.
+This discharges the obligation tracked by issues #18, #414, and #515, without
+an equality or marginal assumption. See blueprint
+`lem:combined-line-measurement-consistency` and
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
 theorem combined_line_measurement_consistency (deltaQ : ℝ → ℝ)
     (hdeltaQ : IsPolyErr deltaQ) :
     ∃ deltaP : ℝ → ℝ → ℝ, IsPolyErr₂ deltaP ∧
@@ -69,7 +71,53 @@ theorem combined_line_measurement_consistency (deltaQ : ℝ → ℝ)
             (((points.Q p2.side sample.1.2 sample.2.2).postprocess fun ab =>
               (some ab.1, some ab.2)).effect answer))
           S.psiHat ≤ deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)) := by
-  sorry
+  classical
+  obtain ⟨constant, hconstant, pastingError, hpasting, hrestored⟩ :=
+    exists_combinedLine_restored_defect_le
+  obtain ⟨lineError, hlineError, hscalar⟩ :=
+    exists_conditioned_polynomial_bound deltaQ hdeltaQ constant hconstant pastingError hpasting
+  refine ⟨lineError, hlineError, ?_⟩
+  intro params error setting points first second hopposite
+  have hreverse : second.IsOpposite first := by
+    cases first <;> cases second <;> trivial
+  rw [consistencyDefect_opposite_symm setting first second hopposite]
+  have hbound := hrestored params error (deltaQ error) setting points second first hreverse
+  have hcard : Fintype.card (ScalarQ params.toLdParams) = params.q :=
+    @FieldModel.card params.q params.model.toFieldModel
+  rw [hcard] at hbound
+  have hq : (0 : ℝ) < params.q := by
+    rw [← hcard]
+    exact_mod_cast Fintype.card_pos (α := ScalarQ params.toLdParams)
+  have hmd : (1 : ℝ) ≤ (params.m * params.d : ℕ) := by
+    exact_mod_cast (show 1 ≤ params.m * params.d by
+      simpa using Nat.mul_le_mul params.one_le_m params.hd)
+  have hdiscard : 1 / (2 * (params.q : ℝ)) ≤
+      (params.m * params.d : ℕ) / (params.q : ℝ) := by
+    calc
+      _ ≤ 1 / (params.q : ℝ) := one_div_le_one_div_of_le hq (by linarith)
+      _ ≤ _ := div_le_div_of_nonneg_right hmd hq.le
+  have hunit : consistencyDefect
+      (Distribution.prod (linePointDist params.toLdParams) (linePointDist params.toLdParams))
+      (fun sample answer => setting.place second
+        (((points.Q second.side sample.1.2 sample.2.2).postprocess
+          (fun pair => (some pair.1, some pair.2))).effect answer))
+      (fun sample answer => setting.place first
+        (((setting.combinedLineMeasurement first.side sample.1.1 sample.2.1).postprocess
+          (fun polys => (evalOpt sample.1.1 sample.1.2 polys.1,
+            evalOpt sample.2.1 sample.2.2 polys.2))).effect answer)) setting.psiHat ≤ 1 := by
+    unfold consistencyDefect
+    calc
+      _ ≤ avgOver (Distribution.prod (linePointDist params.toLdParams)
+          (linePointDist params.toLdParams)) (fun _ => 1) :=
+        avgOver_mono _ _ _ fun sample =>
+          consistencyDefect_integrand_le_one setting second first hreverse _ _
+      _ = 1 := avgOver_const_of_isProbability _
+        (Distribution.prod_isProbability _ _ (linePointDist_isProbability params.toLdParams)
+          (linePointDist_isProbability params.toLdParams)) 1
+  exact (le_min hunit (hbound.trans (add_le_add le_rfl hdiscard))).trans
+    (hscalar error _ _ setting.eps_nonneg (by positivity)
+      (nondegenerateLinePastingMass_bounds params.toLdParams).1
+      (nondegenerateLinePastingMass_bounds params.toLdParams).2)
 
 /-- Conditional joint X/Z line measurements for a polynomially controlled
 point-witness family supporting `lem:qld-xz-lines`.
@@ -90,8 +138,8 @@ that family existentially and has an unchanged statement.  The obstruction and
 the named construction obligations are recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
-The witness below uses `S.combinedLineMeasurement` explicitly. Its remaining
-proof obligation is `combined_line_measurement_consistency`, as recorded in
+The witness below uses `S.combinedLineMeasurement` explicitly. Its consistency
+is `combined_line_measurement_consistency`, as recorded in
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` and issue #414.
 
 **Error contract:** the polynomial bound printed in the source is carried
