@@ -7657,3 +7657,13 @@ Prior attempt provenance and the lower bound of 14789 recorded author wall
 seconds before this session are in
 `audits/2026-09-12-subline-complex-X-removal.md`. This is a scalar-proof
 advance, not a reset of the broader gap episode or its costs.
+
+The first exact-head CI run for PR #538 at
+`b8955b0d6881d144855c7135b1ba6c68165a6332` passed the full Lean build,
+blueprint rendering, and all mathematical audits, but its blueprint-sync
+workflow tests inherited `MIPSTARRE_HARDNESS_REASON` from the prover session.
+`test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra` rejected
+the routine fixture with "an escalation reason requires a hard job
+classification". Clearing that variable in addition to the invoking and
+review model settings makes the isolated regression pass. The CI rerun uses
+that clean environment; no model-policy, dispatch, or proof code changes.

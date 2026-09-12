@@ -94,3 +94,11 @@ source-transport marker. The marker is required by this packet and its
 deviation is still open. Both completion marks are therefore withheld on the
 direct entry, whose prose explicitly records that its Lean proof is complete.
 No hook is bypassed and the source entry remains unchanged.
+
+PR #538's first exact-head CI run passed the full `lake build` (9218 jobs),
+the LDT axiom audit, blueprint rendering, paper-gap and proof-integrity gates.
+One workflow fixture failed because the author session's inherited
+`MIPSTARRE_HARDNESS_REASON` conflicts with the fixture's routine job class.
+The isolated test passes when that variable is unset along with the invoking
+and review model settings. A clean-environment CI rerun follows the telemetry
+checkpoint; no workflow or Lean repair is required.
