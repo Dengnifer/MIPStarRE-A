@@ -353,13 +353,17 @@ class OwnerExperienceTestCase(unittest.TestCase):
         self.assertEqual(json.loads(text(knob))["mode"], "astra-all")
         self.assertIn("model override astra-all active", out)
 
-    def test_apply_removes_the_knob_when_the_brief_says_null(self) -> None:
+    def test_apply_removes_the_knob_when_the_brief_declines_the_override(self) -> None:
+        # W9 made `null` mean "resolve from run.speed", so the word that clears
+        # the knob during a fast run is the explicit `policy`.  A knob left by an
+        # earlier run must still not survive the next brief.
         knob = self.cache / "watchdog" / "model-override"
         knob.parent.mkdir(parents=True, exist_ok=True)
         knob.write_text("astra-all\n", encoding="utf-8")
+        self.write_brief(lambda doc: doc["models"].update(override="policy"))
         self.assertEqual(self.run_cli(["apply"])[0], 0)
         self.assertFalse(knob.exists(),
-                         "`override: null` must clear a knob left by an earlier run")
+                         "`override: policy` must clear a knob left by an earlier run")
 
     def test_the_override_reaches_model_policy(self) -> None:
         self.write_brief(lambda doc: doc["models"].update(override="astra-all"))

@@ -1,4 +1,16 @@
 {
+  "_comment": [
+    "JSON has no comments; this key is accepted and ignored by run_mode.py.",
+    "models.override: null is NOT 'no override' - it resolves from run.speed.",
+    "  run.speed fast    -> astra-all: every role, reviewers included, runs the",
+    "                      hard model (the owner's full speed rule of 2026-09-12;",
+    "                      review is a semantic-alignment phase and needs it).",
+    "  run.speed default -> the published local/model-policy.json.",
+    "Write \"policy\" to keep the published policy during a fast run, or",
+    "\"astra-all\" to force the hard model at default speed. run_mode.py set speed",
+    "re-resolves the field, so the tier and the models never disagree, and",
+    "run_mode.py get model_override answers with what is actually in force."
+  ],
   "schema": "mipstarre-run-brief/1",
   "run": {
     "label": "full speed 2026-09-13",

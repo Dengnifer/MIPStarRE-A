@@ -342,6 +342,130 @@ class RunModeTestCase(unittest.TestCase):
         self.assertIn("shim was NOT regenerated", err)
         self.assertEqual(self.cap("max-codex"), "33")
 
+    # -- models.override resolved from the speed tier (W9) ---------------
+
+    def knob(self) -> Path:
+        return self.cache / "watchdog" / "model-override"
+
+    def test_fast_speed_with_no_override_puts_every_role_on_the_hard_model(self) -> None:
+        """The owner's full speed rule, as a default rather than a field to remember."""
+        self.assertEqual(json.loads(TEMPLATE.read_text("utf-8"))["models"]["override"], None)
+        code, out, err = run(["apply"])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.mode()["run"]["speed"], "fast")
+        self.assertEqual(self.mode()["models"]["effective"], "astra-all")
+        self.assertEqual(json.loads(self.knob().read_text("utf-8"))["mode"], "astra-all")
+        self.assertIn("model override astra-all active", out)
+        self.assertEqual(run(["get", "model_override"])[1].strip(), "astra-all")
+        self.assertEqual(run(["get", "model_override_briefed"])[1].strip(), "null")
+        self.assertIn("run.speed fast", run(["get", "model_override_source"])[1])
+
+    def test_policy_is_how_a_fast_run_keeps_the_published_policy(self) -> None:
+        self.write_brief(lambda doc: doc["models"].update(override="policy"))
+        code, out, err = run(["apply"])
+        self.assertEqual(code, 0, err)
+        self.assertIsNone(self.mode()["models"]["effective"])
+        self.assertFalse(self.knob().exists())
+        self.assertEqual(run(["get", "model_override"])[1].strip(), "none")
+        self.assertEqual(run(["get", "model_override_briefed"])[1].strip(), "policy")
+
+    def test_default_speed_leaves_the_published_policy_in_charge(self) -> None:
+        self.write_brief(lambda doc: doc["run"].update(speed="default"))
+        self.assertEqual(run(["apply"])[0], 0)
+        self.assertIsNone(self.mode()["models"]["effective"])
+        self.assertFalse(self.knob().exists())
+
+    def test_an_explicit_astra_all_holds_at_default_speed(self) -> None:
+        self.write_brief(lambda doc: (doc["run"].update(speed="default"),
+                                      doc["models"].update(override="astra-all")))
+        self.assertEqual(run(["apply"])[0], 0)
+        self.assertEqual(self.mode()["models"]["effective"], "astra-all")
+        self.assertEqual(json.loads(self.knob().read_text("utf-8"))["mode"], "astra-all")
+
+    def test_an_unknown_override_word_fails_at_briefing_time(self) -> None:
+        self.write_brief(lambda doc: doc["models"].update(override="astra-some"))
+        code, _, err = run(["apply"])
+        self.assertEqual(code, 2)
+        self.assertIn("models.override", err)
+        self.assertIn("'policy'", err)
+
+    def test_set_speed_re_resolves_the_override_in_both_directions(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        self.assertTrue(self.knob().exists())
+        code, out, err = run(["set", "speed", "default"])
+        self.assertEqual(code, 0, err)
+        self.assertFalse(self.knob().exists(),
+                         "leaving fast speed must return the routine roles to the policy")
+        self.assertIsNone(self.mode()["models"]["effective"])
+        self.assertIn("model override cleared", out)
+        self.assertEqual(run(["set", "speed", "fast"])[0], 0)
+        self.assertEqual(json.loads(self.knob().read_text("utf-8"))["mode"], "astra-all")
+        self.assertEqual(run(["get", "model_override"])[1].strip(), "astra-all")
+
+    def test_set_speed_does_not_override_an_explicit_policy_brief(self) -> None:
+        self.write_brief(lambda doc: doc["models"].update(override="policy"))
+        self.assertEqual(run(["apply"])[0], 0)
+        self.assertEqual(run(["set", "speed", "default"])[0], 0)
+        self.assertEqual(run(["set", "speed", "fast"])[0], 0)
+        self.assertFalse(self.knob().exists(),
+                         "an explicit 'policy' is a decision, not an omission")
+
+    def test_the_template_documents_what_null_means(self) -> None:
+        comment = " ".join(json.loads(TEMPLATE.read_text("utf-8"))["_comment"])
+        for fragment in ("astra-all", "policy", "reviewers", "run.speed"):
+            self.assertIn(fragment, comment)
+
+    def test_show_names_the_effective_override_and_its_source(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        line = [row for row in run(["show"])[1].splitlines() if row.startswith("models")][0]
+        self.assertIn("astra-all", line)
+        self.assertIn("run.speed fast", line)
+
+    # -- `set speed` regenerates the crontab (W9) ------------------------
+
+    def install_crons(self, body: str) -> Path:
+        path = self.cache / "owner-bin" / "install-crons.sh"
+        path.write_text(body, encoding="utf-8")
+        path.chmod(0o755)
+        return path
+
+    def test_set_speed_regenerates_the_crontab(self) -> None:
+        receipt = self.cache / "crons-ran"
+        self.install_crons("#!/bin/sh\nprintf ran > %s\n" % receipt)
+        self.assertEqual(run(["apply"])[0], 0)
+        code, out, err = run(["set", "speed", "default"])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(receipt.read_text("utf-8"), "ran",
+                         "the estimate cadence lives in the crontab; a speed change "
+                         "that does not regenerate it is not a speed change")
+        self.assertIn("crontab regenerated", out)
+
+    def test_a_failing_crontab_installer_never_loses_the_speed_change(self) -> None:
+        self.install_crons("#!/bin/sh\necho 'crontab -l was empty' >&2\nexit 3\n")
+        self.assertEqual(run(["apply"])[0], 0)
+        code, out, _ = run(["set", "speed", "default"])
+        self.assertEqual(code, 0)
+        self.assertIn("crontab NOT regenerated", out)
+        self.assertIn("crontab -l was empty", out)
+        self.assertEqual(run(["get", "speed"])[1].strip(), "default")
+
+    def test_a_missing_crontab_installer_says_which_command_installs_it(self) -> None:
+        self.assertEqual(run(["apply"])[0], 0)
+        out = run(["set", "speed", "default"])[1]
+        self.assertIn("is not installed", out)
+        self.assertIn("install.sh --crons", out)
+
+    def test_set_speed_dry_run_still_writes_nothing(self) -> None:
+        receipt = self.cache / "crons-ran"
+        self.install_crons("#!/bin/sh\nprintf ran > %s\n" % receipt)
+        self.assertEqual(run(["apply"])[0], 0)
+        code, out, _ = run(["set", "speed", "default", "--dry-run"])
+        self.assertEqual(code, 0)
+        self.assertIn("would regenerate the crontab", out)
+        self.assertFalse(receipt.exists())
+        self.assertEqual(run(["get", "speed"])[1].strip(), "fast")
+        self.assertTrue(self.knob().exists())
+
 
 if __name__ == "__main__":
     unittest.main()

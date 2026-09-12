@@ -19,6 +19,13 @@ Subcommands::
     run_mode.py pause [--reason TEXT]
     run_mode.py resume
 
+``models.override`` is resolved against the speed tier rather than read
+literally: ``null`` means ``astra-all`` whenever ``run.speed`` is ``fast`` — in
+full speed mode every role, reviewers included, runs the hard model — and the
+published ``local/model-policy.json`` otherwise.  The literal ``"policy"`` keeps
+the published policy at any speed; ``"astra-all"`` forces the hard model at any
+speed.  ``set speed`` re-resolves it, so the tier and the models never disagree.
+
 Validation fails loudly at briefing time rather than at 05:00Z: an unknown
 key, a missing endpoint, a non-integer limit, ``external_reserved >=
 nominal_limit``, an occupancy target above 1, an unknown speed or model
@@ -66,7 +73,19 @@ MODE_SCHEMA = "mipstarre-run-mode/1"
 ACCOUNT_NAMES = ("primary", "second")
 
 SPEEDS = ("fast", "default")
-OVERRIDES = (None, "astra-all")
+
+#: ``models.override`` as the owner may write it.  ``null`` is not "no
+#: override": it means *resolve from the speed tier*.  ``"policy"`` is the
+#: explicit "leave the published ``local/model-policy.json`` alone" and
+#: ``"astra-all"`` forces the hard model for every role at any speed.
+OVERRIDES = (None, "astra-all", "policy")
+
+#: The owner's rule of 2026-09-12: in full speed mode every role, reviewers
+#: included, runs the hard model — review is a semantic-alignment phase and
+#: needs the strong model as much as proving does.  It is the DEFAULT rather
+#: than a field the brief must remember, because a fast run that forgets the
+#: field runs its reviewers on the cheap model and nothing says so.
+SPEED_DEFAULT_OVERRIDE = {"fast": "astra-all", "default": None}
 
 #: The literal `run.dispatch_cutoff` that means "no cutoff".
 CUTOFF_OPEN = "until my word"
@@ -76,6 +95,8 @@ TURN_MAX_MIN = {"fast": 8, "default": 20}
 ESTIMATE_CADENCE_MIN = {"fast": 30, "default": 360}
 
 BRIEF_KEYS = ("schema", "run", "accounts", "models")
+#: Accepted and ignored: JSON carries no comments and the template needs one.
+BRIEF_KEYS_OPTIONAL = ("_comment",)
 RUN_KEYS_REQUIRED = (
     "label", "start", "dispatch_cutoff", "pause_deadline_min", "speed",
     "occupancy_target", "progress_issue", "estimate_issue", "owner_inbox_issue",
@@ -383,14 +404,50 @@ def _validate_models(models) -> dict:
     override = models.get("override")
     if override not in OVERRIDES:
         raise BriefError("models.override",
-                         f"models.override must be null or 'astra-all', got {override!r}")
+                         "models.override must be null (resolve from run.speed), "
+                         f"'astra-all' or 'policy', got {override!r}")
     return {"override": override}
+
+
+def resolve_override(speed: str, briefed: str | None) -> tuple[str | None, str]:
+    """The override actually in force for *speed*, and where it came from.
+
+    A briefed ``null`` resolves from the speed tier: ``fast`` is ``astra-all``,
+    because in full speed mode every role — reviewers included — runs the hard
+    model.  ``"policy"`` is how a fast run says "leave the published policy
+    alone"; it is deliberately a word rather than the absence of one, so the
+    file records a decision instead of an omission.
+    """
+    published = "published local/model-policy.json"
+    if briefed == "policy":
+        return (None, f"brief: models.override 'policy' ({published})")
+    if briefed is not None:
+        return (briefed, "brief: models.override")
+    resolved = SPEED_DEFAULT_OVERRIDE.get(speed)
+    if resolved is None:
+        return (None, f"default for run.speed {speed} ({published})")
+    return (resolved, f"default for run.speed {speed} (every role, reviewers included)")
+
+
+def resolved_models(briefed: str | None, speed: str) -> dict:
+    """The mode file's ``models`` block: what was briefed, what is in force, why."""
+    effective, source = resolve_override(speed, briefed)
+    return {"override": briefed, "effective": effective, "source": source}
+
+
+def mode_override(mode: dict) -> tuple[str | None, str]:
+    """The effective override of a mode document; an older one is re-resolved."""
+    models = mode.get("models") if isinstance(mode.get("models"), dict) else {}
+    if "effective" in models:
+        return (models["effective"], models.get("source") or "run mode")
+    run = mode.get("run") if isinstance(mode.get("run"), dict) else {}
+    return resolve_override(run.get("speed", "default"), models.get("override"))
 
 
 def validate_brief(doc) -> dict:
     """Return the normalized brief, or raise ``BriefError`` naming the key."""
     _require_mapping(doc, "brief")
-    unknown = sorted(set(doc) - set(BRIEF_KEYS))
+    unknown = sorted(set(doc) - set(BRIEF_KEYS) - set(BRIEF_KEYS_OPTIONAL))
     if unknown:
         raise BriefError(unknown[0], f"unknown top-level key(s): {', '.join(unknown)}")
     missing = [key for key in BRIEF_KEYS if key not in doc]
@@ -523,20 +580,22 @@ MODEL_OVERRIDE_REL = Path("watchdog") / "model-override"
 
 def write_model_override(mode: dict, *, root: Path | None = None,
                          dry_run: bool = False) -> str:
-    """Make ``models.override`` real: write or remove the runtime knob.
+    """Make the resolved ``models.override`` real: write or remove the knob.
 
     Validating the field and exposing it through ``get model_override`` is not
     the same as applying it. Until this ran, ``models.override`` was inert: the
     only live overrides were the committed ``local/model-policy.json`` (a
     reviewed PR, impossible mid-run) and a knob file a human typed — so "every
     worker on the hard model" still cost a hand edit, the intervention the field
-    exists to remove.  ``astra-all`` writes the knob, ``null`` removes it.
+    exists to remove.  What is written is the EFFECTIVE override
+    (``mode_override``), not the briefed word: a fast run with no override in
+    the brief still puts every role on the hard model.
     """
     path = (root or cache_root()) / MODEL_OVERRIDE_REL
-    override = mode["models"]["override"]
+    override, source = mode_override(mode)
     if dry_run:
-        return (f"{path} removed (no override)" if override is None
-                else f"{path} = {override}")
+        return (f"{path} removed (no override; {source})" if override is None
+                else f"{path} = {override} ({source})")
     if override is None:
         try:
             path.unlink()
@@ -546,10 +605,10 @@ def write_model_override(mode: dict, *, root: Path | None = None,
             raise LayerError(f"cannot remove the model override knob {path}: {exc}") from exc
         return f"model override cleared ({path} removed)"
     document = {"mode": override,
-                "set_by": f"run_mode.py apply, brief sha256 {mode['brief_sha256'][:12]}",
-                "reason": "models.override in the run brief"}
+                "set_by": f"run_mode.py, brief sha256 {mode['brief_sha256'][:12]}",
+                "reason": source}
     atomic_write(path, json.dumps(document, ensure_ascii=False) + "\n")
-    return f"model override {override} active (runtime knob {path})"
+    return f"model override {override} active ({source}; runtime knob {path})"
 
 
 def read_live_caps(root: Path | None = None) -> dict[str, int | None]:
@@ -594,7 +653,7 @@ def build_mode(brief: dict, digest: str, source: Path,
         "brief_sha256": digest,
         "run": run,
         "accounts": accounts,
-        "models": dict(brief["models"]),
+        "models": resolved_models(brief["models"]["override"], run["speed"]),
         "derived": {
             "caps": dict(caps),
             "max_codex": sum(caps.values()),
@@ -666,7 +725,12 @@ SCALAR_KEYS = {
     "progress_issue": lambda m: m["run"]["progress_issue"],
     "estimate_issue": lambda m: m["run"]["estimate_issue"],
     "owner_inbox_issue": lambda m: m["run"]["owner_inbox_issue"],
-    "model_override": lambda m: m["models"]["override"] or "none",
+    # The EFFECTIVE override: what a component asking this question needs.  A
+    # brief that says nothing plus `fast` speed is `astra-all`, and answering
+    # "none" there is how a full speed run reviews on the cheap model.
+    "model_override": lambda m: mode_override(m)[0] or "none",
+    "model_override_briefed": lambda m: m["models"].get("override") or "null",
+    "model_override_source": lambda m: mode_override(m)[1],
     "brief_sha256": lambda m: m["brief_sha256"],
     "paused": lambda m: "yes" if m.get("paused") else "no",
     # The MAIN session's launch values.  main-session.sh reads exactly these
@@ -737,7 +801,8 @@ def render_show(mode: dict, root: Path | None = None) -> str:
         f"max-codex        {total}  (sum of the per-account caps; no admission meaning)",
         f"issues           progress #{run['progress_issue']}, estimate "
         f"#{run['estimate_issue']}, owner inbox #{run['owner_inbox_issue']}",
-        f"models           override {mode['models']['override'] or 'none (local/model-policy.json)'}",
+        f"models           override {mode_override(mode)[0] or 'none'}  "
+        f"({mode_override(mode)[1]})",
         f"main session     {run.get('main', MAIN_DEFAULTS)['model']} effort "
         f"{run.get('main', MAIN_DEFAULTS)['effort']}, CODEX_HOME "
         f"{run.get('main', MAIN_DEFAULTS)['codex_home'] or '(ambient)'}",
@@ -940,6 +1005,41 @@ def controller_caps(root: Path | None = None) -> dict[str, int]:
     return out
 
 
+#: `set speed` changes the estimate cadence, and the cadence lives in the
+#: crontab.  Until this ran the command printed "the estimate cadence changes
+#: only when the crontab is regenerated" and left the regenerating to whoever
+#: read the line — so a run switched to `fast` kept posting its estimate every
+#: six hours.  The installer is the tracked one, never an in-place `crontab -e`.
+CRONTAB_INSTALLER = "install-crons.sh"
+
+
+def crontab_installer() -> Path:
+    return owner_bin() / CRONTAB_INSTALLER
+
+
+def regenerate_crontab(*, dry_run: bool = False) -> str:
+    """Re-render the operator crontab for the current run mode.
+
+    Never fatal, and never raises: a speed change that reached the shim and the
+    mode file is a real change, so a missing or failing installer is a warning
+    to act on rather than a reason to leave the run half-switched.
+    """
+    path = crontab_installer()
+    if not path.exists():
+        return (f"crontab NOT regenerated: {path} is not installed "
+                "(run results/telemetry/owner-tools/install.sh --crons)")
+    if dry_run:
+        return f"would regenerate the crontab through {path}"
+    try:
+        proc = subprocess.run([str(path)], capture_output=True, text=True)
+    except OSError as exc:
+        return f"crontab NOT regenerated: cannot run {path} ({exc}); run it by hand"
+    if proc.returncode != 0:
+        detail = (proc.stdout + proc.stderr).strip()[:400] or f"exit {proc.returncode}"
+        return f"crontab NOT regenerated: {path} failed ({detail}); run it by hand"
+    return f"crontab regenerated for the new estimate cadence through {path}"
+
+
 def call_controller(command: str) -> tuple[bool, str]:
     path = controller_path()
     if not path.exists():
@@ -969,7 +1069,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
                f"cutoff {run['dispatch_cutoff']}, issues "
                f"progress #{run['progress_issue']} estimate #{run['estimate_issue']} "
                f"inbox #{run['owner_inbox_issue']}, override "
-               f"{mode['models']['override'] or 'none'}")
+               f"{mode_override(mode)[0] or 'none'}")
 
     if args.dry_run:
         sys.stdout.write(render_show(mode))
@@ -1050,33 +1150,47 @@ def cmd_set(args: argparse.Namespace) -> int:
     if speed not in SPEEDS:
         raise LayerError(f"speed must be one of {SPEEDS}, got {speed!r}")
     note = apply_speed(mode, speed, dry_run=args.dry_run)
+    briefed = mode.get("models", {}).get("override")
     if args.dry_run:
+        preview = dict(mode, models=resolved_models(briefed, speed))
         sys.stdout.write(f"{note}; speed would become {speed}\n")
+        sys.stdout.write(f"  {write_model_override(preview, dry_run=True)}\n")
+        sys.stdout.write(f"  {regenerate_crontab(dry_run=True)}\n")
         return 0
     previous = mode["run"]["speed"]
     mode["run"]["speed"] = speed
     mode["run"]["turn_max_min"] = TURN_MAX_MIN[speed]
     mode["run"]["estimate_cadence_min"] = ESTIMATE_CADENCE_MIN[speed]
+    # The models follow the tier.  A brief that left `models.override` null
+    # means "whatever this speed implies", so switching to `fast` puts every
+    # role on the hard model and switching back to `default` returns the routine
+    # roles to the published policy — with no second command, and with the mode
+    # file and the runtime knob never disagreeing about which is in force.
+    mode["models"] = resolved_models(briefed, speed)
     mode["generated"] = utcnow()
     write_mode(mode)
+    override_note = write_model_override(mode)
+    cron_note = regenerate_crontab()
     append_stage(f"run-mode speed {previous} -> {speed}: {note}; turn max "
                  f"{mode['run']['turn_max_min']} min, estimate cadence "
-                 f"{mode['run']['estimate_cadence_min']} min", "run-mode-speed")
+                 f"{mode['run']['estimate_cadence_min']} min; {override_note}; "
+                 f"{cron_note}", "run-mode-speed")
     append_decision(
         f"Run speed {previous} -> {speed}",
         "operator via run_mode.py set speed",
-        "one switch regenerates the deployed shim from the committed template; "
+        "one switch regenerates the deployed shim from the committed template, "
+        "re-resolves models.override for the new tier and regenerates the crontab; "
         "a hand-edited shim is refused, not clobbered",
         f"{shim_path()}; {mode_path()}; stages.jsonl event=run-mode-speed")
     sys.stdout.write(
         f"{note}\n"
         f"speed {previous} -> {speed} (turn max {mode['run']['turn_max_min']} min, "
         f"estimate cadence {mode['run']['estimate_cadence_min']} min)\n"
+        f"{override_note}\n"
         "picked up by: worker sessions dispatched from now on (yes), lane and daemon "
         "children started from now on (yes), the running main TUI (NO — relaunch it "
         "through local/bin/main-session.sh), sessions already running (NO)\n"
-        "the estimate cadence changes only when the crontab is regenerated "
-        "(results/telemetry/owner-tools/install-crons.sh)\n")
+        f"{cron_note}\n")
     return 0
 
 
