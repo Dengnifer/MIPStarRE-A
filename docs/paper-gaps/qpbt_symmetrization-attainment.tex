@@ -16,7 +16,7 @@
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
-\date{2026-08-30}
+\date{2026-09-12}
 
 \begin{document}
 \maketitle
@@ -42,6 +42,12 @@
   definitions of symmetric games and tensor product values in the source
   \cite[Section~5]{Ji2020MIPStar}.  The note is audited against the
   proof-gap protocol in \ghissue{173}.
+  \item \textbf{Formal domain obstruction:} the current Lean game structure
+  also permits an empty answer alphabet.  Its strategy type is then empty,
+  while the real conditional supremum defining its value is zero.  This gives
+  a kernel-checked counterexample to the exact Lean statement at $\eps=1$;
+  see the domain calculation below and \ghissue{524}.  It does not settle
+  attainment for games with nonempty answer alphabets.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -150,6 +156,48 @@ this note does not need to settle.  The local verdict is about the proof: the
 cited argument proves the approximate form and does not prove the attainment
 form.
 
+\section{An additional obstruction in the formal domain}
+
+The current Lean structure for a symmetric game assumes finiteness of its
+answer alphabet but does not require that alphabet to be nonempty.  Consider
+the game with question alphabet $\mathcal X=\{*\}$, answer alphabet
+$\mathcal A=\varnothing$, the probability distribution concentrated on
+$(*,*)$, and the unique decision predicate on the empty answer domain.
+Both symmetry requirements hold.  There is no tensor product strategy for
+this game: a unit vector in $\mathcal H_A\ot\mathcal H_B$ forces both local
+spaces to be nonzero, whereas completeness of Alice's empty measurement
+would give
+\[
+  0=\sum_{a\in\varnothing} A^*_a=I_{\mathcal H_A},
+\]
+which is impossible on a nonzero space.
+
+Lean defines the game value using the conditional supremum operation on
+$\mathbb R$.  For the empty set this operation is assigned the value zero,
+as expressed by Mathlib's \leanid{Real.sSup\_empty}.  This is a convention
+outside the nonempty domain on which the usual least-upper-bound property
+holds; it is not an attainment principle.  Thus \leanid{Game.value} assigns
+the example the value $0=1-\eps$ with $\eps=1\geq0$, but it has no symmetric
+projective strategy, since it has no strategy at all.  Consequently the exact
+current Lean statement is false on its admitted domain, independently of the
+unbounded-dimension issue.  The complete verification and its axiom audit are
+recorded in \path{audits/2026-09-12_issue-524-symmetrization-obstruction.md}.%
+\footnote{The verification reuses the existing
+\leanid{nonempty\_of\_unit\_vector} and
+\leanid{measurement\_outcome\_nonempty} lemmas.  Its declarations depend only
+on \leanid{propext}, \leanid{Classical.choice}, and \leanid{Quot.sound},
+not on the unfinished symmetrization theorem.}
+
+This example concerns a boundary of the formal encoding.  Although the
+printed definition of a game lists finite alphabets without an explicit
+nonemptiness condition, it does not specify a real value for the supremum
+over an empty strategy class.  The example therefore does not establish
+nonattainment for the intended class of games with nonempty alphabets.
+Making that domain condition explicit would exclude this example but would
+leave the source proof's attainment step unproved.  The public Lean statement
+and its existing proof-gap marker are preserved in issue~\#524; any domain
+correction requires a separate statement-integrity review.
+
 \section{Uses of the lemma}
 
 The source invokes the lemma twice.
@@ -207,8 +255,9 @@ symmetric conclusion as that node, and its proof is complete.
 
 \section{Conclusion}
 
-The verdict is a proof-level gap in the cited lemma: the symmetrization
-argument proves the given-strategy and approximate forms, while the printed
+For games with nonempty answer alphabets, the verdict remains a proof-level
+gap in the cited lemma: the symmetrization argument proves the given-strategy
+and approximate forms, while the printed
 conclusion additionally asserts that the supremum defining $\val^*(\game)$ is
 attained, which does not follow.  The gap is harmless for the results built
 on the lemma, since both uses in the source, and all planned uses in this
@@ -218,9 +267,15 @@ suffices.  Stage~4 has carried out the recommendation of this note: the
 given-strategy symmetrization lemma is formalized and proved as the workhorse
 statement, while the source-labelled lemma keeps its source shape with the
 attainment step an explicit, tracked proof obligation.  If a later
-investigation settles the counterexample question for symmetric games, the
-statement should then be reclassified from an unproved step to a documented
+investigation settles the counterexample question for symmetric games with
+nonempty answer alphabets, the statement should then be reclassified from
+an unproved step to a documented
 statement correction.
+
+The exact current Lean domain has the additional empty-answer counterexample
+above.  An unrestricted attainment theorem cannot discharge that statement;
+the domain must first be reviewed separately.  No public statement is changed
+by this note, and neither obstruction is discharged.
 
 \bibliographystyle{alpha}
 \bibliography{references}
