@@ -146,3 +146,46 @@ classification setting had not. The corrected invocation also unsets
 model policy is changed. The failed exact-head evidence remains on GitHub.
 The isolated fixture passes with that environment, and the corrected auxiliary
 module passes a focused check with `linter.mathlibStandardSet=true`.
+
+## Failover Continuation
+
+Session `prover-518-20260912-03` continues the same assignment. The first
+session ended at 05:43:01Z after exhausted HTTP 503 retries; its dispatcher
+records 2532 seconds, failure, and unknown token usage. These observations
+remain unchanged and are not treated as zero cost. The separate failed
+session `prover-518-20260912-02` records another 59 seconds and unknown usage
+in the independent-attempt worktree. No descendant is launched here.
+
+The continuation found new mathematical evidence in saved PR #543, commit
+`e36fd1aa056782007917b0d6c5e19b85ea28179b`: the encoding-supported reference
+comparison and non-encoding mass estimate have proofs without `sorryAx`.
+Five necessary modules are recovered byte-for-byte from that commit:
+`PairStateConsistencyTransport`, `PolynomialCollision`, `SupportMass`,
+`DistanceTheorems.TensorConsistency`, and `NonencodingSupport`. Their earlier
+provenance is retained in their documentation and in the #517 audit at that
+commit. The encoding measurement and tensor API are already present in the
+current base, so no replacement of those files is needed. The corresponding
+Alice-side application in commit `6521816f` concerns issue #519 and is not
+the target of this packet.
+
+The target now uses the Bob-side reference estimate directly. It bounds the
+non-encoding mass by `deltaG + C * sqrt epsilon + md/q`, adds the witness
+error using the previously proved defect comparison, and absorbs the result
+in `deltaConstructPaulis (C + 1)`. The separately owned declaration
+`nonencodingMarginalMass_le` is unchanged and is no longer a dependency of
+the target. The original signature, error definition, uniform distribution,
+and player ordering remain unchanged. The statement-integrity verdict is
+exact preservation of the assigned conditional theorem; construction of the
+supplied global witness remains outside this result. No blueprint completion
+marker is added for the other assertions of the source lemma.
+
+Focused compilation of all five recovered modules and `Consistency.lean`
+passes. A fresh artifact audit reports exactly `propext`, `Classical.choice`,
+and `Quot.sound` for `tildeM_consistent_pointMeas` and its defect comparison.
+The four unrelated direct holes remain unchanged. The signature matches the
+assigned base byte-for-byte; the hook-installation check, whitespace check,
+and recovered-module proof-integrity scan pass.
+
+The cumulative active-work limit requires a publication checkpoint: fresh
+exact-head full CI and independent review remain the next gates. Earlier
+green CI at `3d412206` is historical evidence, not validation of this change.

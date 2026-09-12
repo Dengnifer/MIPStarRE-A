@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.PointConsistency
+import MIPStarRE.QPBT.Extraction.NonencodingSupport
 
 /-!
 # Consistency of the pulled-apart Pauli measurements
@@ -878,12 +879,11 @@ The source reuses `deltaS` after absorbing the non-encoding and game-error
 terms. The bound keeps the global polynomial-pair witness error `deltaG`
 separate in `deltaConstructPaulis`.
 
-**Proof obligation:** issue #47 tracks the non-encoding-mass estimate required
-by the restricted decoder identity; see
-`docs/paper-gaps/qpbt_decoding-identity.tex`. The proof below uses
-`nonencodingMarginalMass_le`, whose proof remains open in issue #517. The
-preceding defect bound is independent of that estimate; neither result
-certifies the source-facing construction of the supplied witness. -/
+The encoding-supported reference and Schwartz--Zippel estimates in
+`NonencodingSupport` control the non-encoding mass required by the restricted
+decoder identity; see `docs/paper-gaps/qpbt_decoding-identity.tex`.
+The supplied `GlobalPairWitness` remains an explicit premise: this result
+does not construct the source-facing global measurement. -/
 theorem tildeM_consistent_pointMeas :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -898,17 +898,29 @@ theorem tildeM_consistent_pointMeas :
                 (tildeM w .bob W (indicatorVec u) a))
               S.psiHat ≤
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  obtain ⟨C, hC, hmass⟩ := nonencodingMarginalMass_le
+  classical
+  obtain ⟨C, hC, hreference⟩ := global_marginal_encoding_consistency
   refine ⟨C + 1, by linarith, ?_⟩
-  intro P epsilon deltaG hepsilon hepsilon_one hdeltaG S w W
+  intro P epsilon deltaG hepsilon _ hdeltaG S w W
   have hdefect := tildeM_consistencyDefect_le_deltaG_add_nonencoding w W
-  have hm := hmass P epsilon deltaG hepsilon hepsilon_one hdeltaG S w .bob W
-  have hscale : deltaG ≤ deltaG + Real.sqrt epsilon +
-      ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by
-    have hnonneg : 0 ≤ Real.sqrt epsilon +
-        ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
-    linarith
-  unfold deltaConstructPaulis at hm ⊢
+  have href := (hreference P epsilon deltaG hepsilon S w W).2
+  have hmass := right_mass_outside_encoding_le_evaluated_defect
+    (S.encodingPauliMeas .alice W) (w.marginalPoly .bob W)
+    (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+    (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .alice W)
+  have hm : nonencodingMarginalMass w .bob W ≤
+      deltaG + C * Real.sqrt epsilon + (P.m * P.d : ℝ) / P.q := by
+    unfold nonencodingMarginalMass
+    change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+      stateQForm S.psiHat (S.placeSide .bob
+        (heteroKron ((w.marginalPoly .bob W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+    simp_rw [stateQForm_placeSide_bob_tensor_one S _
+      (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .bob W).pos _)).isHermitian]
+    exact hmass.trans (add_le_add href le_rfl)
+  unfold deltaConstructPaulis
+  rw [Nat.cast_mul]
+  have hratio : 0 ≤ (P.m * P.d : ℝ) / P.q := by positivity
+  have hsqrt : 0 ≤ Real.sqrt epsilon := Real.sqrt_nonneg epsilon
   nlinarith
 
 /-- Alice's pulled-apart measurement is consistent with Bob's original point
