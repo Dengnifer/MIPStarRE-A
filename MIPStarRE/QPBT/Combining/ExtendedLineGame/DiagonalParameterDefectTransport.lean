@@ -8,7 +8,7 @@ import MIPStarRE.QPBT.Observables.WinImplications.Averages
 This module identifies the diagonal coefficient defect used in the same-line
 rejection bound with the diagonal parameter-evaluation defect used in the
 supplied-line comparison. The proof composes the measurement postprocessings
-and uses `diagonalRead_eval` to compare the two coefficient readers.
+and identifies the two coefficient readers definitionally.
 
 The equality is a formalization-only bridge supporting the classical-game
 construction in the proof of `lem:qld-4-7`. It retains the original diagonal
@@ -50,6 +50,19 @@ theorem diagonal_parameter_evaluated_coefficient_defect_eq
     | _ => 0
   let μ := Distribution.prod (uniformDistribution (DirectLdSpace P.extendedDirectLd))
     (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+  have heffect (side : PlayerSide) (sample : DirectLdSpace P.extendedDirectLd)
+      (parameter value : DirectScalarQ P.extendedDirectLd) :
+      ((((lines.Qline side (directDLineDescOf P.extendedDirectLd sample)).postprocess
+          (diagonalRead P)).postprocess
+            (fun coefficients => evalCoefficient coefficients parameter)).effect value) =
+        (((answerMeasurement lines side
+          (.dline, directLdMap P.extendedDirectLd .dline sample)).postprocess
+            (fun answer => evalCoefficient (readDiagonal answer) parameter)).effect value) := by
+    unfold answerMeasurement
+    rw [diagonal_description_canonical]
+    rw [MIPStarRE.Quantum.Measurement.postprocess_comp,
+      MIPStarRE.Quantum.Measurement.postprocess_comp]
+    rfl
   have hmeasurement :
       diagonalParameterEvaluatedCoefficientDefect lines =
         consistencyDefect μ
@@ -70,66 +83,11 @@ theorem diagonal_parameter_evaluated_coefficient_defect_eq
     intro sample
     apply avgOver_congr
     intro parameter
-    have hA (value : DirectScalarQ P.extendedDirectLd) :
-        heteroKron
-            (((lines.Qline .alice
-              (directDLineDescOf P.extendedDirectLd sample)).postprocess
-                (fun coefficients =>
-                  evalCoefficient (diagonalRead P coefficients) parameter)).effect value)
-            (1 : Op (setting.ExpandedLocalSpace .bob)) =
-          heteroKron
-            (((answerMeasurement lines .alice
-              (.dline, directLdMap P.extendedDirectLd .dline sample)).postprocess
-                (fun answer => evalCoefficient (readDiagonal answer) parameter)).effect value)
-            1 := by
-      apply congrArg (fun effect => heteroKron effect 1)
-      unfold answerMeasurement
-      rw [diagonal_description_canonical]
-      rw [SandwichProduct.postprocess_postprocess_effect]
-      apply congrArg (fun read =>
-        ((lines.Qline .alice
-          (directDLineDescOf P.extendedDirectLd sample)).postprocess read).effect value)
-      funext coefficients
-      calc
-        evalCoefficient (diagonalRead P coefficients) parameter =
-            evalCoefficient coefficients parameter :=
-          diagonalRead_eval P coefficients parameter
-        _ = evalCoefficient (readDiagonal (diagonalAnswer P coefficients)) parameter := by
-          rw [show readDiagonal (diagonalAnswer P coefficients) =
-            diagonalRead P coefficients by rfl]
-          exact (diagonalRead_eval P coefficients parameter).symm
-    have hB (value : DirectScalarQ P.extendedDirectLd) :
-        heteroKron (1 : Op (setting.ExpandedLocalSpace .alice))
-            (((lines.Qline .bob
-              (directDLineDescOf P.extendedDirectLd sample)).postprocess
-                (fun coefficients =>
-                  evalCoefficient (diagonalRead P coefficients) parameter)).effect value) =
-          heteroKron (1 : Op (setting.ExpandedLocalSpace .alice))
-            (((answerMeasurement lines .bob
-              (.dline, directLdMap P.extendedDirectLd .dline sample)).postprocess
-                (fun answer => evalCoefficient (readDiagonal answer) parameter)).effect value) := by
-      apply congrArg (fun effect => heteroKron 1 effect)
-      unfold answerMeasurement
-      rw [diagonal_description_canonical]
-      rw [SandwichProduct.postprocess_postprocess_effect]
-      apply congrArg (fun read =>
-        ((lines.Qline .bob
-          (directDLineDescOf P.extendedDirectLd sample)).postprocess read).effect value)
-      funext coefficients
-      calc
-        evalCoefficient (diagonalRead P coefficients) parameter =
-            evalCoefficient coefficients parameter :=
-          diagonalRead_eval P coefficients parameter
-        _ = evalCoefficient (readDiagonal (diagonalAnswer P coefficients)) parameter := by
-          rw [show readDiagonal (diagonalAnswer P coefficients) =
-            diagonalRead P coefficients by rfl]
-          exact (diagonalRead_eval P coefficients parameter).symm
     apply Finset.sum_congr rfl
     intro valueA _
     apply Finset.sum_congr rfl
     intro valueB _
-    simp only [SandwichProduct.postprocess_postprocess_effect]
-    rw [hA valueA, hB valueB]
+    rw [heffect .alice sample parameter valueA, heffect .bob sample parameter valueB]
   rw [hmeasurement]
   change consistencyDefect μ
       (fun sample value => heteroKron
