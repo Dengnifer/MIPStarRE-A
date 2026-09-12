@@ -7642,3 +7642,12 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - Issue 519 publication attempted before commit completion
+
+- Session `prover-519-20260912-01` invoked `pr_open.py` while its source commit
+  was still running the pre-commit audits. The tool refused with no commits
+  ahead of main; no push or PR creation occurred. The commit subsequently
+  passed its hooks as `ab6a2079`. Publication is retried only after the commit
+  process exits successfully and the branch head is checked. This was a
+  sequencing error by the prover, not a GitHub or proof failure.
