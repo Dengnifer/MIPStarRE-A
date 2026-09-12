@@ -5,12 +5,16 @@ import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.LDT.Basic.DistributionAvg
 
 /-!
-# A uniform point of the extended space from the sub-line law
+# A uniform point of the extended space from the directly indexed sub-line law
 
 The first scalar estimate in the combining argument samples an extended line
-from the sub-line witness and then a uniform affine parameter on that line.
+from the auxiliary `SubLineWitness` and then a uniform affine parameter on that line.
 This module records that the resulting extended point is uniform and hence
-that its two source coordinate blocks are independent uniform points.
+that its two source coordinate blocks are independent uniform points. These
+identities concern `directLinePointDist`. Transport to the source's seed-indexed
+carrier remains open, as recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law".
 
 ## References
 

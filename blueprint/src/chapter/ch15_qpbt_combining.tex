@@ -1226,10 +1226,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{definition}[Restricted line distributions]
 	\label{def:ith-restricted-line}
-	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
-	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
-	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
 	Use coordinate indices $i\in\{0,\dots,m-1\}$ throughout this definition,
 	the following mixture estimates, and the sub-line construction below. Write
@@ -1248,12 +1244,73 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
 \end{definition}
 
-\begin{lemma}[Restricted line distributions and error inflation]
-	\label{lem:restricted-line-mixture-bounds}
+\begin{definition}[Seed-bearing restricted line distributions]
+	\label{def:ith-restricted-line-refined}
+	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
+	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
+	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
+	\leanok
+	\uses{def:line-point-dist, def:ith-restricted-line}
+	Write $\widetilde D_{\mathrm v}$ for the seed-bearing refinement of
+	$D_{\mathrm v}$ in Definition~\ref{def:line-point-dist}, where
+	$\mathrm v\in\{\mathrm{ALine},\mathrm{DLine}\}$. For these auxiliary
+	laws, number coordinates from $0$ to $m-1$ and put
+	$\chi_0(s)=\chi(s)-1$. For $i\in\{0,\ldots,m-1\}$, let
+	$\widetilde D_{\mathrm v,i}$ be its normalized restriction to
+	$\chi_0(s)=i$. Equivalently, condition the corresponding CL distribution
+	on this seed event before decoding the line description. Each restricted
+	law has total mass one. An axis description still records $(u_0,s)$;
+	distinct seeds in $\chi_0^{-1}(i)$
+	remain distinct outcomes. A diagonal description records $(u_0,s,v)$,
+	with $v_j=0$ for $j<i$.
+\end{definition}
+
+Thus $\widetilde D_{\mathrm v,i}$ denotes the seed-bearing restriction,
+not the source law $D_{\mathrm v,i+1}$. Identifying its push-forward with
+the source restriction requires the corresponding carrier maps; in the axis
+case the map must forget the residual seed. These source-law identities
+remain open, as recorded in \cite{gap:qpbt_ld-dimension-divisibility}.
+
+\begin{lemma}[Mixtures and nonnegative averages on seed-bearing lines]
+	\label{lem:restricted-line-refined-mixture-bounds}
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
-	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
+	\uses{def:ith-restricted-line-refined, def:line-point-dist}
+	Each refined law is a uniform mixture of its restrictions:
+	\[
+		\widetilde D_{\mathrm v}
+		=\frac1m\sum_{i=0}^{m-1}\widetilde D_{\mathrm v,i}.
+	\]
+	For admissible $(q,m,d)$, put
+	$\widetilde D_{\mathrm{Line}}
+	=\tfrac12(\widetilde D_{\mathrm{ALine}}+\widetilde D_{\mathrm{DLine}})$.
+	If a nonnegative real-valued function has average at most $\delta$
+	under $\widetilde D_{\mathrm{Line}}$, its average under any
+	$\widetilde D_{\mathrm v,i}$ is at most $2m\delta$. If a nonnegative
+	function of two line-point samples has average at most $\delta$ under
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$,
+	its average under any
+	$\widetilde D_{\mathrm v_1,i}\times\widetilde D_{\mathrm v_2,j}$
+	is at most $4m^2\delta$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Every fiber of $\chi_0$ has size $q/m$. Partitioning the uniform seed by
+	these fibers proves the mixture identities, retaining the seed when
+	decoding. Each restriction has weight $1/(2m)$ in the full mixture;
+	nonnegativity bounds its average by $2m$ times the full average. Apply
+	this argument successively to the two coordinates for the product bound.
+\end{proof}
+
+Once the source-law push-forward identities are established, pushing the
+mixtures forward and composing nonnegative functions with the carrier maps
+will give the first two items of the following source observation. This
+argument does not identify coefficient answers with functions on lines.
+
+\begin{lemma}[Restricted line distributions and error inflation]
+	\label{lem:restricted-line-mixture-bounds}
+	\notready
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
@@ -1290,7 +1347,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
-	\leanok
 	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
 	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
 	axis-parallel and diagonal components and, within each component, uniform
@@ -1305,6 +1361,67 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	side of \eqref{eq:qld-xz-lines-restricted}, averaged over
 	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$, is at most $\delta_P$.
 \end{proof}
+
+\begin{lemma}[Auxiliary restricted consistency with completed answers]
+	\label{lem:restricted-lines-completed-consistency}
+	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
+	\leanok
+	\uses{def:ith-restricted-line-refined,
+		lem:restricted-line-refined-mixture-bounds, lem:qld-4-10,
+		def:consistency, def:expanded-state}
+	There is a universal constant $C>0$ with the following property.
+	Fix admissible parameters, a projective setting, and projective joint
+	point measurements $Q$ satisfying the self-consistency and both
+	ordered-product comparisons of Lemma~\ref{lem:qld-4-10} with error
+	$\delta_Q$. Let $T$ be complete paired-line measurements on seed-bearing
+	descriptions, with coefficient-polynomial answers of degree at most $md$
+	and the degree-$d$ support bounds on axis lines.
+
+	For a description $\lambda=(u_0,s,v)$ and a coefficient polynomial $f$,
+	let $\widehat{\mathrm{ev}}_{\lambda,u}(f)\in\F_q\sqcup\{\perp\}$ be
+	$a$ if at least one parameter $t$ satisfies $u=u_0+tv$ and every such
+	parameter satisfies $f(t)=a$; otherwise let it be $\perp$.
+	For axis descriptions use $v=e_{\chi_0(s)}$, with coordinates numbered
+	from $0$ to $m-1$. Postprocess $T$ by the pair
+	of these evaluations to obtain $T^{\mathrm{ev}}$, with outcomes in
+	$(\F_q\sqcup\{\perp\})^2$. Extend $Q$ to $Q^+$ on this alphabet by
+	setting its effect to zero whenever either component is $\perp$.
+	Assume that the consistency defect between $T^{\mathrm{ev}}$ and
+	$Q^+$ is at most $\delta_P$ under
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$
+	for every directed pair of opposite placements. Then, for every such
+	pair $p_1,p_2$, every pair of line types $\mathrm v_1,\mathrm v_2$,
+	and every $i,j\in\{0,\ldots,m-1\}$,
+	\[
+		\E_{(\lambda_X,x)\sim\widetilde D_{\mathrm v_1,i}}
+		\E_{(\lambda_Z,z)\sim\widetilde D_{\mathrm v_2,j}}
+		\sum_{c\in(\F_q\sqcup\{\perp\})^2}
+		\operatorname{Re}\bra{\hat\psi}
+		(T^{\mathrm{ev}}_c)_{p_1}
+		\bigl(\Id-(Q^+_c)_{p_2}\bigr)\ket{\hat\psi}
+		\le C m^2\delta_P.
+	\]
+	Here $T^{\mathrm{ev}}$ depends on $(\lambda_X,\lambda_Z,x,z)$ and
+	$Q^+$ on $(x,z)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:restricted-line-refined-mixture-bounds, def:consistency}
+	Take $C=4$. The consistency defect of complete measurements on opposite
+	placements is a nonnegative average. Apply the product estimate of
+	Lemma~\ref{lem:restricted-line-refined-mixture-bounds}; completeness of
+	$Q^+$ identifies its off-diagonal sum with the displayed expression.
+\end{proof}
+
+This auxiliary estimate does not certify
+\eqref{eq:qld-xz-lines-restricted}, whose answers are polynomial functions
+on lines and whose point outcomes lie in $\F_q^2$. On a zero-direction
+line, the coefficient polynomial $f(t)=t$ has undefined completed evaluation,
+whereas a function on the singleton line has a value there. The auxiliary
+hypotheses do not require such coefficient answers to have zero effect.
+The conversion to function-valued answers, together with the corresponding
+measurement transport to the source laws, remains open in issue~\#387 and
+PR~\#400. The source statement and proof above therefore remain uncertified.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
@@ -1528,7 +1645,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Formalization support: the ordered product on one placement]
 	\label{lem:qld-4-10-same-placement}
-	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedZX_dist_le}
 	\leanok
 	\uses{lem:qld-4-10, fact:triangle, def:povm-distance}
@@ -1547,8 +1663,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
 	\leanok
 	\uses{def:povm-distance, def:expanded-state}
-	A complete measurement weights the real part of the overlap gap between operator families by
-	at most the square root of their state-dependent squared distance.
+	For a probability distribution and a unit state, the difference of the
+	real parts of the overlaps weighted by a complete measurement is at most
+	the square root of the state-dependent squared distance of the two
+	operator families.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -1602,7 +1720,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[Formalization support: a uniform point under the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
-	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_uniform_directLdSpace_line_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
@@ -1619,8 +1736,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}
 	\leanok
 	\uses{def:direct-subline-law, def:line-representative, def:combine-map}
-	The representative--parameter map has constant fibers of size $q$; the
-	coordinate split and scalar identification are bijections.
+	For a fixed direction $v$, the map $(y,t)\mapsto L_v(y)+tv$ on
+	ambient-point--parameter pairs has fibers of size $q$. If $v\ne0$,
+	$y$ varies over a coset while $L_v(y)$ and $t$ are fixed; if $v=0$,
+	$y$ is fixed and $t$ is free. The coordinate split and scalar
+	identification are bijections.
 \end{proof}
 
 \begin{lemma}[Formalization support: real-part replacement under the directly indexed law]
@@ -1756,8 +1876,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-4-10, lem:qld-4-10-same-placement, lem:qld-sublines,
-		lem:qld-xz-lines, lem:overlap-gap-distance,
-		lem:qld-sublines-uniform-point, def:line-point-dist}
+		lem:qld-xz-lines, def:line-point-dist}
 	The scalar approximation here is a complex-modulus bound. Its formal
 	proof over the source law remains open; the real-part auxiliary above
 	does not establish it. See \cite{gap:qpbt_subline-claims-line-marginal}.
@@ -1913,6 +2032,71 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$O(m(\sqrt{\delta_P} + \sqrt{\delta_Q}) + \sqrt{\eps})$, and taking the
 	square root gives the claim.
 \end{proof}
+
+The following two auxiliary statements use the directly indexed extended-line
+carrier. Fix admissible parameters, a projective setting $S$, projective joint
+point measurements $Q$ with self-consistency and both opposite-placement
+ordered-product squared distances at most $\delta_Q$, and complete paired-line
+measurements $T$ with the axis-degree bounds and completed evaluation
+consistency defect at most $\delta_P$.
+Let $D_{\rm dir}$ be any auxiliary subline distribution of mass one whose
+extended-line marginal is the line marginal of the line-point law with
+coordinate indices sampled uniformly and directly. Require incidence and affine
+compatibility with its two source lines, separate X and Z point marginal
+mixtures as in Property~2, and axis-line closure. No equality with the
+seed-indexed law $D$ is assumed or established.
+Write $A_Q$, $A_{ZX}$ and $A_Z$ for the three overlap averages displayed in
+Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}, using $D_{\rm dir}$ and
+a uniform affine parameter on each extended line. Here all line answers are
+polynomial representatives of degree at most $md$, evaluations take values in
+$\F_q\cup\{\perp\}$, and completed point effects are zero at undefined
+evaluations. The placements remain $\mathsf{A}\mathsf{A}'$ and
+$\mathsf{B}\mathsf{A}''$.
+
+\begin{lemma}[Auxiliary real-part estimate for the ordered product]
+	\label{lem:claim-17-1-direct-real}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
+	\leanok
+	There is a universal constant $C>0$ such that, for every choice of the
+	auxiliary data just stated,
+	\[
+		|\operatorname{Re} A_Q-\operatorname{Re} A_{ZX}|
+		\le C\sqrt{\delta_Q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:qld-sublines-uniform-point}
+	Take $C=2$. Apply the real-part overlap estimate with squared distance
+	$4\delta_Q$ and use the uniform point marginal of $D_{\rm dir}$.
+\end{proof}
+
+\begin{lemma}[Auxiliary real-part estimate for the Z correlation]
+	\label{lem:claim-17-3-direct-real}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
+	\leanok
+	There is a universal constant $C>0$ such that, for every choice of the
+	same auxiliary data,
+	\[
+		|\operatorname{Re} A_Z-1|\le
+		C\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:restricted-line-refined-mixture-bounds}
+	Take $C=2$. The separate Z marginal mixture bounds the deficit by
+	$2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}$. Since the real overlap lies
+	in $[0,1]$, its squared deficit is no larger than its deficit. Taking
+	a square root and using $m\ge1$ gives the displayed bound.
+\end{proof}
+
+Neither auxiliary result completes its source-labelled counterpart. The
+missing distribution transport and the complex overlap obligation are
+recorded in \cite{gap:qpbt_ld-dimension-divisibility}; the source statements
+and their proof obligations remain unchanged.
 
 \begin{proof}[Proof of Lemma~\ref{lem:qld-4-13}]
 	\proves{lem:qld-4-13}

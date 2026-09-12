@@ -6825,6 +6825,21 @@ not actual commit/publication hooks. No productive session was killed.
   nine-worker census. No native/Fable worker, manual merge, main commit/push,
   new proof attempt on B8, or duplicate CI was introduced. New telemetry is
   left for daemon publication.
+- 2026-09-09T16:53:06+08:00: PR #400's final author repair committed as
+  `d688e60edb187f73d0cec004cb497eda921de060`. Canonical checked publication
+  passed the changed-file Lean checks, statement-integrity audits, and
+  blueprint rendering/synchronization, then failed before transport in the
+  reverse-coverage warning check: `git diff --merge-base origin/main HEAD`
+  reported multiple merge bases. At diagnosis, `origin/main` was
+  `1c297a4b8fb8a74b64784ba4c8fe7e10d0ffc6ee`; the bases were
+  `a111c34ab3ca8b0db115b73156ddcd5bf886e9f8` and
+  `d9be57dedd4ea3a3321943539f0785fde00f172d`. The remote PR remained at
+  `0ddc67e8923f8d2c27cbb2fbce6ea9d495861257`. The author retained all commits
+  and did not bypass the hook, alter shared refs, merge, or patch workflow
+  code. Main must reconcile the ancestry/publication precondition through
+  its authorized integration workflow; any multiple-base guard correction
+  belongs in a separate workflow change. Four full reviews and all earlier
+  attempts remain charged; B8 is still 13 attempts and 26509 working seconds.
 ### 2026-09-09 - Required CI command failures masked by the step subshell (#504)
 - Session `orc-504-20260909-01` reproduced the PR487 incident recorded in
   `~/.cache/mipstarre-dev/recoveries/pr487-b1ae4d2f-handoff.md`: both retained
@@ -7642,3 +7657,33 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+### 2026-09-12 - PR400 merge resolution and validation
+
+- Session `orc-pr400-20260912-01` resolved seven conflicted paths while merging
+  `ae124f8f09ee` into `8c4b320ea9c9`. Both telemetry histories are retained.
+  Main's shared placement lemmas and concrete X-Z-X measurement are preserved;
+  the branch's real-part estimates remain available under their original names
+  through aliases of the explicitly scoped declarations from main.
+- Statement integrity: paper `claim:17-1` and `claim:17-3` in
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1239`
+  use the source subline distribution and complex scalar comparisons. The
+  existing Lean estimates assume the directly indexed `SubLineWitness` and
+  combined point/line witnesses, and bound real parts with the same error
+  orders. Verdict: existing auxiliary scope restriction and weaker scalar
+  conclusion, unchanged by this merge; no additional hypotheses. Source
+  claims remain uncertified. Main's concrete-measurement Claim 17-2 obligation
+  remains unfinished; no completed proof was replaced by a proof hole.
+- The first placement check used an old compiled line-measurement module and
+  could not find `place_finset_sum`. Dependency-ordered single-file Lean checks
+  refresh the worktree's private artifacts. Blueprint synchronization initially
+  found aliases unsupported by its source scanner, a stale proof-certification
+  tag, and an old generated declaration index. The blueprint now names the
+  canonical declarations, the source-only proof has no certification tag, and
+  the ignored declaration index and bibliography have been regenerated.
+  Blueprint rendering, synchronization, and the pending merge-loss guard pass.
+- All 32 Lean files changed from the pre-merge head passed `lake env lean`,
+  with 135 single-file checks including affected dependencies. The five
+  conflicted Lean files pass; their sole direct proof hole is the Claim 17-2
+  obligation already present in both parents. `lake exe checkdecls` also
+  passed. No full project build, worker dispatch, or push was performed.

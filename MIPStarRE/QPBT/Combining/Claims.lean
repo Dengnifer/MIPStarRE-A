@@ -486,6 +486,14 @@ theorem subline_Z_term_near_one_re_direct :
         mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
       nlinarith [mul_nonneg hsm hε]
 
+/-- The original name for the auxiliary real-part estimate. This has the same
+scope restriction as `subline_replace_by_ordered_product_re_direct`. -/
+alias subline_replace_by_ordered_product := subline_replace_by_ordered_product_re_direct
+
+/-- The original name for the auxiliary real-part Z-correlation bound. This has
+the same scope restriction as `subline_Z_term_near_one_re_direct`. -/
+alias subline_Z_term_near_one := subline_Z_term_near_one_re_direct
+
 end
 
 end MIPStarRE.QPBT

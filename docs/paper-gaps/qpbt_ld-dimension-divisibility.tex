@@ -35,6 +35,10 @@
   indexed game is now established by an independent application of the low
   individual degree theorem.  That proof avoids the tensor-code import; it
   does not discharge either of these two source-import obligations.
+  The subline scalar estimates are likewise established on the directly
+  indexed auxiliary law, with real-part conclusions. Their source carrier
+  transport and the complex overlap estimate remain open, as detailed in
+  Section~\ref{sec:auxiliary-subline-scalars}.
   \item \textbf{Estimated weight:} the directly indexed game, its soundness
   theorem, the reduction from general simultaneity to one, the correlated
   residue lift from the seed-indexed game, and the compression of the two
@@ -424,6 +428,85 @@ is then only approximately uniform, the identification with the external
 test fails exactly, and every distributional identity in the sub-line
 analysis acquires an error term; this amounts to re-proving the imported
 soundness theorem for a perturbed game and is not recommended.
+
+\section{Scalar estimates on the auxiliary subline law}
+\label{sec:auxiliary-subline-scalars}
+
+Claims \path{claim:17-1} and \path{claim:17-3} use the distribution $D$
+of the source subline lemma. Their formal counterparts currently use a
+different distribution $D_{\rm dir}$, represented by
+\leanid{SubLineWitness}: the extended line is directly indexed, its marginal
+is that of \leanid{directLinePointDist}, and its separate X and Z point
+marginals are mixtures of refined seed-bearing restricted line-point laws,
+represented by \leanid{restrictedALineDist} and \leanid{restrictedDLineDist}.
+These are the laws of blueprint \path{def:ith-restricted-line-refined}, not
+the source restrictions of \path{def:ith-restricted-line}. Identifying their
+source push-forwards, including forgetting the residual seed on axis lines,
+remains open. Existence of this auxiliary distribution does not identify it
+with $D$. In particular,
+sampling a coordinate index directly does not construct the seed-indexed
+extended-line questions where the divisibility condition above fails.%
+\footnote{The claims are at lines 1140--1166 and 1204--1239 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.
+The restricted formal results are
+\leanid{subline\_replace\_by\_ordered\_product} and
+\leanid{subline\_Z\_term\_near\_one} in
+\path{MIPStarRE/QPBT/Combining/Claims.lean}; their scope is tracked by
+\ghissue{387} and PR \#400.}
+
+There is also a distinction in the scalar conclusion. Let $A_Q(D)$,
+$A_{ZX}(D)$ and $A_Z(D)$ denote the averaged joint-point, ordered-product,
+and Z-point overlaps in these claims. The source assertions are
+\[
+ |A_Q(D)-A_{ZX}(D)|=O(\sqrt{\delta_Q}),\qquad
+ |A_Z(D)-1|=O\bigl(\sqrt m\,
+   (\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})\bigr).
+\]
+For projective joint point measurements and complete paired-line
+measurements satisfying the witness hypotheses, and
+any auxiliary subline witness, the established statements instead bound
+\[
+ |\operatorname{Re}A_Q(D_{\rm dir})-
+     \operatorname{Re}A_{ZX}(D_{\rm dir})|\le2\sqrt{\delta_Q},\qquad
+ |\operatorname{Re}A_Z(D_{\rm dir})-1|\le
+ 2\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+\]
+Their evaluations use the completed answer alphabet: an undefined
+evaluation contributes zero point effect. The joint-point and paired-line
+witnesses retain their stated consistency and degree hypotheses; neither
+new transport data nor a reality assumption is imposed on these results.
+
+The ordered product $M_ZM_X$ need not be Hermitian. Thus a real-part bound
+alone does not establish the first source assertion. With
+$W=Q-M_ZM_X$, the Cauchy--Schwarz argument bounds the second squared factor
+using $W^\dagger W$, not $W^2$. The same-placement squared distance is at
+most $4\delta_Q$, obtained by inserting the opposite-placement joint
+measurement and applying the squared-distance triangle inequality. This
+gives $2\sqrt{\delta_Q}$, which preserves the source's asymptotic order.
+The complex Cauchy--Schwarz estimate still needs a formal proof; an
+assumption that the ordered overlap is real would not replace it.
+
+The remaining obligations have distinct mathematical content. The proposed
+target \leanid{subline\_source\_distribution\_transport} must construct
+the seed-indexed law where it is defined and prove the corresponding
+pushforward, evaluation, and separate point-marginal identities; the
+unrestricted source domain still requires resolution of the definition-level
+obstruction above. The proposed target
+\leanid{subline\_complex\_overlap\_bound} must prove the complex modulus
+estimate from positivity, completeness, the point marginal, and the
+same-placement distance, without an added reality hypothesis. For the Z
+overlap, positivity of the two commuting opposite-placement factors gives
+reality, which must also be recorded when passing from the real-part result
+to the source scalar statement. These are named future proof targets, not
+assumed or axiomatized declarations.
+
+The blueprint therefore leaves both source-labelled claims pending and
+records the proved auxiliary results separately, with their carrier,
+completed evaluations, measurement hypotheses, and real-part conclusions
+explicit. Their Lean statements and proofs are retained. No new proof hole
+is introduced by this scope correction, and the existing Claim 17-2 proof
+obligation is unchanged. Discharge requires the transport and complex
+estimate just described; the auxiliary results do not certify them.
 
 \section{Comparison with the blueprint}
 

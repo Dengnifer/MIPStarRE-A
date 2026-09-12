@@ -41,8 +41,7 @@ noncomputable section
 depends on the answer only through its two evaluations is summing the
 evaluation classes of the paired-line measurement against that family.  This
 is the fiber regrouping of the proofs of `lem:claim-17-1`, `lem:claim-17-2`,
-and `lem:claim-17-3`, blueprint
-`blueprint/src/chapter/ch15_qpbt_combining.tex:2651-2830`. -/
+and `lem:claim-17-3` in the blueprint. -/
 theorem regroup_line_answer_sum_at {P : AdmissibleParams} {ε δQ δP : ℝ}
     {S : ProjectiveSetting P ε} {points : CombinedPointsWitness S δQ}
     (lines : CombinedLinesWitness S points δP)
@@ -319,8 +318,9 @@ theorem SubLineWitness.avgOver_zPointOverlap_le_one (sublines : SubLineWitness P
   exact SubLineWitness.avgOver_zPointOverlap_le_one_at sublines lines .AA' .BA'' trivial
 
 /-- The deficit of the sub-line average of the `Z`-point overlap is bounded by
-the inflated line and point consistency errors.  This is the bound on the
-deficit in the proof of `lem:claim-17-3`, blueprint
+the inflated line and point consistency errors. This is the directly indexed
+auxiliary deficit estimate supporting `lem:claim-17-3-direct-real`, near
+the source `lem:claim-17-3`, blueprint
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`. -/
 theorem SubLineWitness.one_sub_avgOver_zPointOverlap_le_at
