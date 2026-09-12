@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.QuadraticPointObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -92,7 +93,7 @@ theorem exists_extendedLinesWitness :
 /-- Construction of the extended-line measurements with the estimate actually
 delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
 
-This is an established auxiliary form of the argument, not the source-labelled
+This is an auxiliary interface for the first-route estimate, not the source-labelled
 `lem:qld-4-13`; it must not be advertised as that theorem. The source discrepancy
 is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the
 companion directly indexed declaration, the extended questions use the directly
@@ -101,6 +102,16 @@ constructed point witness; the obligation below supplies it existentially. Relat
 its game to the source's seed-bearing game requires the transport and soundness
 obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Unfaithful:** The unrestricted scalar `δQ` is omitted from the line error,
+although `claim:17-1` retains the error of its constructed points. Issue #511 and
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` record the obstruction.
+`QuadraticPointObstruction.exists_quadratic_point_witness` admits the deterministic
+quadratic answers at some scalar error; the POVM obstruction and its eight-element
+specialization in that namespace have closed proofs. Transport of their scalar
+average to the full direct line law and a closed perfect-strategy construction
+remain separate obligations. Elimination requires a separately scoped interface
+repair retaining the point error or constructing controlled points internally.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form

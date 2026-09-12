@@ -262,9 +262,24 @@ unrestricted auxiliary assertion, independently of the printed-error
 discrepancy and the diagonal-line degeneracy.
 
 This is a mathematical counterexample to the auxiliary quantifiers, not to
-the source theorem with its constructed points.  It is not claimed as a
-kernel-checked refutation: the formal perfect-strategy construction and
-the formal integration of this lower bound remain to be supplied.
+the source theorem with its constructed points. Several finite parts now have
+kernel-checked proofs in
+\path{MIPStarRE/QPBT/Combining/QuadraticPointObstruction.lean}.
+The deterministic quadratic family satisfies all point-witness fields at some
+scalar error, and its completed coarse-graining is exactly
+$\operatorname{some}(\alpha x^2)$. For any normalized state and any POVM
+supported on affine polynomials, the formal consistency defect is at least
+$1-2/q$ when $\alpha\ne0$, also after completing the answer alphabet.
+Averaging over uniform $\alpha$ gives $(1-1/q)(1-2/q)$; the canonical
+eight-element field gives the explicit bound $21/32$.
+The proof uses the polynomial root bound followed by positivity and
+normalization of the outcome probabilities, without any completeness admission.
+The finite-error witness lemma is reused from
+\path{CombinedPointsWitness.exists_error_of_projective}, proved for issue~\ghissue{509}.
+These results are not a kernel-checked refutation of the full auxiliary:
+the formal perfect-strategy construction and transport of this scalar average
+to the full directly indexed line law, including its mixture mass, remain
+to be supplied.
 The existing auxiliary statement is preserved pending a separately scoped
 repair.  A source-faithful existence proof must construct polynomially
 controlled points internally and retain their error through the line
