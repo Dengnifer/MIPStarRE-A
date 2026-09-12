@@ -6,7 +6,6 @@
 #
 # Usage:
 #   local/bin/review.sh <pr-number> [--force-review] [--dry-run]
-#     [--resume-native-request CODE_REQUEST [--resume-native-prose-request PROSE_REQUEST]]
 #
 #   <pr-number>      GitHub PR number ("12").  Branch, base and head SHA come
 #                    from gh_common.py pr-view; the local branch tip must be
@@ -16,12 +15,6 @@
 #                    iteration cap (local/protocols/autofix.md).
 #   --dry-run        Resolve the worktree, diff and prompts, print where they
 #                    landed, and stop before dispatching an agent.
-#   --resume-native-request REQUEST
-#                    Consume one completed native code-review request without
-#                    dispatching a model or creating a replacement request.
-#   --resume-native-prose-request REQUEST
-#                    Required alongside the code request when the diff touches
-#                    blueprint/. Both completed lanes must validate before publication.
 #
 # Local replacement for .github/workflows/pr-review.yml (gate + code-review +
 # prose-review jobs).  Protocol: local/protocols/review.md.
@@ -59,8 +52,10 @@
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
 #   MIPSTARRE_REVIEW_EFFORT    ultra (required, default)
-#   MIPSTARRE_NATIVE_REVIEW_ROOT  root thread servicing native review requests
-#   MIPSTARRE_NATIVE_REVIEW_AUTHORS comma-separated author thread IDs (required for native)
+#   MIPSTARRE_NATIVE_REVIEW_ROOT
+#   MIPSTARRE_NATIVE_REVIEW_AUTHORS
+#                              retired legacy routing variables; ignored for
+#                              current reviews. Unset both before operation.
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail
@@ -295,27 +290,17 @@ resolve_worktree() {
 }
 
 # run_agent <role> <sandbox> <worktree> <persona-path> <task-file>
-#           <standalone-prompt> <context-file> <out-file> <model>
+#           <context-file> <out-file> <model>
 #
-# All codex invocations go through local/bin/dispatch.sh when it exists, so the
-# session lands in results/telemetry/sessions.jsonl (DESIGN.md, "Agent
-# sessions").  The fallback is a direct codex exec with a loud warning.
+# All codex invocations go through local/bin/dispatch.sh, so the session lands
+# in results/telemetry/sessions.jsonl (DESIGN.md, "Agent sessions").
 run_agent() {
   local role="$1" sandbox="$2" wt="$3" persona="$4" taskfile="$5"
-  local standalone="$6" ctx="$7" out="$8" model="$9"
+  local ctx="$6" out="$7" model="$8"
   local dlog="$out.dispatch.log" task_text last rc=0
   model="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
     --model "$model" --effort "$REVIEW_EFFORT" --field model)" || return 4
   task_text="$(cat "$taskfile")"
-
-  if [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ]; then
-    local native_args=(--job-class "$REVIEW_JOB_CLASS" --model "$model")
-    [ -z "$REVIEW_HARDNESS_REASON" ] ||
-      native_args+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
-    python3 "$BIN_DIR/native_review.py" request "$CACHE" "$ROOT" "$HEAD_SHA" \
-      "$wt" "$standalone" "$out" "$PR_NUM" "$REVIEW_TIMEOUT" "${native_args[@]}" >"$dlog"
-    return $?
-  fi
 
   if [ -x "$DISPATCH" ]; then
     local args
@@ -443,6 +428,11 @@ if [ "$RESUME_NATIVE" -eq 1 ]; then
     die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_ROOT"
   [ -n "${MIPSTARRE_NATIVE_REVIEW_AUTHORS:-}" ] ||
     die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_AUTHORS"
+elif [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ] ||
+     [ -n "${MIPSTARRE_NATIVE_REVIEW_AUTHORS:-}" ]; then
+  warn "legacy native-review variables are retired and ignored;" \
+    "unset MIPSTARRE_NATIVE_REVIEW_ROOT and MIPSTARRE_NATIVE_REVIEW_AUTHORS"
+  unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS
 fi
 
 # ------------------------------------------------------------- resolve the PR
@@ -1289,8 +1279,8 @@ if [ "$RESUME_NATIVE" -eq 1 ]; then
 else
   ( rc=0
     run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
-      "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
-      "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
+      "$RUN_DIR/code-task.md" "$RUN_DIR/diff.sanitized.txt" \
+      "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
     printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
   CODE_LANE_PID=$!
 fi
@@ -1312,8 +1302,8 @@ if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
     log "the diff touches blueprint/; running the prose review in parallel"
     ( rc=0
       run_agent reviewer read-only "$WORKTREE" "$PROSE_PERSONA_PATH" \
-        "$RUN_DIR/prose-task.md" "$RUN_DIR/prose-standalone.md" \
-        "$RUN_DIR/diff.sanitized.txt" "$PROSE_OUT" "$PROSE_MODEL" || rc=$?
+        "$RUN_DIR/prose-task.md" "$RUN_DIR/diff.sanitized.txt" \
+        "$PROSE_OUT" "$PROSE_MODEL" || rc=$?
       printf '%s\n' "$rc" > "$PROSE_RC_FILE" ) &
     PROSE_LANE_PID=$!
   fi
