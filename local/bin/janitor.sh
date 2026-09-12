@@ -49,9 +49,15 @@
 # dispatch.sh (agents never invoke codex directly) and the lane tail is
 # relaunched through the repository's own local/bin/lane.sh.
 #
+# Runner: results/telemetry/owner-tools/merge-daemon.sh calls this once every
+# `janitor_interval_s` (daemon.conf), detached and bounded; the sweep takes its
+# own lock, so an overlapping call exits instead of doubling up.  Nothing else
+# runs it: a checkout whose merge daemon is not running has no self-repair.
+#
 # Output: one line per action on stdout, the same lines in
-# $CACHE_ROOT/watchdog/janitor/report.md (read by the hourly readiness report)
-# and one append-only JSONL row per action in
+# $CACHE_ROOT/watchdog/janitor/report.md (the operator's log of the sweep; the
+# hourly readiness report does NOT read it — it reports merges and readiness
+# from daemon state) and one append-only JSONL row per action in
 # $CACHE_ROOT/watchdog/janitor/{retries,repairs,actions,closures}.jsonl.
 #
 # Exit codes: 0 all passes completed; 1 at least one pass failed (the others
@@ -378,6 +384,42 @@ fix_lane_cmd() {
   if [ -f "$installed" ]; then printf '%s\n' "$installed"
   elif [ -f "$checked_out" ]; then printf '%s\n' "$checked_out"
   else return 1; fi
+}
+
+daemon_scan_cmd() {
+  local installed="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}/daemon-scan.py"
+  local checked_out="$REPO_ROOT/results/telemetry/owner-tools/daemon-scan.py"
+  if [ -r "$installed" ]; then printf '%s\n' "$installed"
+  elif [ -r "$checked_out" ]; then printf '%s\n' "$checked_out"
+  else return 1; fi
+}
+
+# The daemon's failure marker, written by the daemon's own writer.  A marker is a
+# JSON record {pr, head, ts, class, reason, attempts, lane_log} whose class decides
+# the backoff; a bare `touch` produces an empty file that daemon-scan.py degrades to
+# class `infra`, and the infra backoff clears it after five minutes — so the "hold
+# this PR while it is being repaired" marker would expire while the repair runs.
+# There is deliberately NO `touch` fallback: no marker at all is honest, an
+# unclassed one is a five-minute lie.
+write_repair_marker() { # write_repair_marker PR LANE JANITOR_CLASS REASON
+  local pr="$1" lane="$2" cls="$3" reason="$4" scan head version
+  case "$cls" in
+    merge) cls=conflict ;;
+    build) cls=build ;;
+    *) report "janitor: refusing to write a marker for PR $pr: class '$cls' is not repairable"
+       return 1 ;;
+  esac
+  scan="$(daemon_scan_cmd)" || {
+    report "janitor: no daemon-scan.py; PR $pr is repaired WITHOUT a failure marker"
+    return 1; }
+  head="$(timeout 60 gh pr view "$pr" --json headRefOid --jq .headRefOid 2>/dev/null </dev/null || true)"
+  version="$(head -n 1 "${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}/tools-version" 2>/dev/null | tr -d '\n')"
+  timeout 60 python3 "$scan" marker-write --path "$D/pr$pr.failed" --pr "$pr" \
+    --head "${head:-}" --class "$cls" --reason "${reason:0:200}" \
+    --lane-log "$L/$lane.lane.log" --tools-version "${version:-uninstalled}" \
+    >/dev/null 2>&1 && return 0
+  report "janitor: daemon-scan.py marker-write failed for PR $pr (class $cls)"
+  return 1
 }
 
 # --------------------------------------------------------------- GitHub reads
@@ -737,7 +779,12 @@ pass_parked_lanes() {
       report "janitor: lane $lane parked (class $class, PR $pr, branch $branch): would run $fixer $pr $lane $branch $mode (dry run)"
       continue
     fi
-    touch "$D/pr$pr.failed" 2>/dev/null || true
+    # A CLASSED marker, written the way the daemon writes one.  A bare `touch`
+    # leaves an empty file that daemon-scan.py's load_marker degrades to class
+    # `infra`, whose five-minute backoff clears it — so the "hold this PR while
+    # it is repaired" marker would last five minutes and the daemon would queue
+    # the PR back into the repair that is still running.
+    write_repair_marker "$pr" "$lane" "$class" "$text"
     ledger_append "$J/actions.jsonl" ts "$(now)" pass parked-lanes action repair lane "$lane" \
       pr "$pr" branch "$branch" class "$class" tool "$fixer"
     ( cd "$REPO_ROOT" \

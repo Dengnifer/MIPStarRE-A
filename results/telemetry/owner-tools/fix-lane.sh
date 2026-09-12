@@ -207,8 +207,15 @@ rc=$?
 log "orc exited $rc"
 
 if [ "$rc" -ne 0 ]; then
+  # Exit here, do not fall through to the relaunch.  A failed dispatch (exit 4
+  # no capacity, exit 5 the branch is claimed by another session) never touched
+  # the worktree, so relaunching the lane tail would re-run the SAME failing
+  # lane and report `relaunched`; the daemon's repair-done marker then clears
+  # the PR's failure marker and the PR is re-queued into the same failure.
+  log "orc dispatch failed (exit $rc); lane $LANE stays parked and is not relaunched"
   ledger key "lane:$LANE" event outcome action repair mode "$MODE" pr "$PR" lane "$LANE" \
          branch "$BR" outcome dispatch-failed rc "$rc" ts "$(date -u +%FT%TZ)"
+  exit 3
 fi
 
 # --------------------------------------------------------------- relaunch
@@ -235,6 +242,19 @@ rm -f "$L/$LANE.done" "$L/$LANE.needs-attention"
     $DETACH nohup "$LANE_SH" "$LANE" "$SLUG" prover > "$L/$LANE.lane.log" 2>&1 < /dev/null & \
   echo $! > "$L/$LANE.lane.pid" )
 LP="$(cat "$L/$LANE.lane.pid" 2>/dev/null || echo 0)"
+# `$!` after `setsid nohup ... &` is setsid's pid.  Plain setsid normally execs
+# in place from a non-interactive shell, so that IS the lane's pid — but the
+# watcher below ("clear the marker only when the tail finishes") is load-bearing,
+# so confirm it against the process table and correct it when setsid forked.
+if ! kill -0 "$LP" 2>/dev/null || \
+   ! tr '\0' ' ' < "/proc/$LP/cmdline" 2>/dev/null | grep -q "lane\.sh"; then
+  CONFIRMED="$(pgrep -f "bash $LANE_SH $LANE( |\$)" 2>/dev/null | head -n 1)"
+  [ -z "$CONFIRMED" ] && CONFIRMED="$(pgrep -f "$LANE_SH $LANE( |\$)" 2>/dev/null | head -n 1)"
+  if [ -n "$CONFIRMED" ]; then
+    log "lane pid corrected from $LP (setsid) to $CONFIRMED (confirmed by pgrep)"
+    LP="$CONFIRMED"; printf '%s\n' "$LP" > "$L/$LANE.lane.pid"
+  fi
+fi
 log "worktree repaired; lane tail $LANE relaunched (pid $LP) via $LANE_SH"
 ledger key "lane:$LANE" event outcome action repair mode "$MODE" pr "$PR" lane "$LANE" \
        branch "$BR" outcome relaunched lane_pid "$LP" ts "$(date -u +%FT%TZ)"

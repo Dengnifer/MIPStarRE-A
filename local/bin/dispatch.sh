@@ -1016,6 +1016,37 @@ transient_class() {
   return 1
 }
 
+retry_is_safe() {
+  # A transient CLASS is not by itself a licence to re-run the prompt.
+  # `refused`, `endpoint_down`, `concurrency_limit` and `endpoint_5xx` are
+  # admission failures: the model never ran, the worktree was never touched, and
+  # a retry is a pure re-attempt.  `retries_exhausted` is different — the client
+  # gave up reconnecting, which can happen twenty minutes in, and re-running the
+  # same prompt from scratch in a worktree that now holds the dead session's
+  # partial, uncommitted edits is not a retry, it is a second worker on a dirty
+  # tree.  review.sh already draws this line (ended-started < 15 s, tokens 0);
+  # draw the same one here: retry only a death that did no work and left a clean
+  # tree.  Anything else is left to the janitor's dead-session pass, which
+  # re-dispatches under a per-(pr, role, head) budget with the state in hand.
+  local dirty=""
+  case "$FAILURE_CLASS" in retries_exhausted) ;; *) return 0 ;; esac
+  case "${DISPATCH_USAGE_TOTAL:-0}" in
+    ''|0) ;;
+    *) note "not retrying '$FAILURE_CLASS': the session used ${DISPATCH_USAGE_TOTAL} tokens \
+before dying, so a re-run would repeat work in a tree that holds its partial edits"
+       return 1 ;;
+  esac
+  if [ -n "${WORKTREE_ABS:-}" ]; then
+    dirty="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null | grep -v '^?? ' || true)"
+  fi
+  if [ -n "$dirty" ]; then
+    note "not retrying '$FAILURE_CLASS': $WORKTREE_ABS has uncommitted changes from the \
+dead session; the janitor's dead-session pass owns this one"
+    return 1
+  fi
+  return 0
+}
+
 backoff_or_give_up() {
   # Jittered exponential backoff, base 30 s and cap 10 min. Returns 0 to retry.
   local exponent delay jitter total
@@ -1318,7 +1349,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   FAILURE_CLASS="${DISPATCH_FAILURE_CLASS:-unknown}"
   FAILURE_DETAIL="${DISPATCH_FAILURE_DETAIL:-}"
 
-  if [ "$CODEX_EXIT" -ne 0 ] && transient_class "$FAILURE_CLASS"; then
+  if [ "$CODEX_EXIT" -ne 0 ] && transient_class "$FAILURE_CLASS" && retry_is_safe; then
     if backoff_or_give_up; then
       continue
     fi

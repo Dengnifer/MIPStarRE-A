@@ -15,6 +15,7 @@ Subcommands::
     telemetry.py build --kind warm --outcome success --seconds 812
     telemetry.py event --text "symptom -> diagnosis -> fix -> lesson"
     telemetry.py events --since 2026-09-12 [--until D] [--format md|json]
+    telemetry.py classify-failure CAPTURE.jsonl [--exit N] [--field NAME]
 
 Event bullets are **sharded**: ``telemetry.py event`` writes
 ``results/telemetry/events.d/<YYYY-MM-DD>-<session>.md`` so that two sessions
@@ -1459,7 +1460,46 @@ def _build_parser() -> argparse.ArgumentParser:
     events.add_argument("--format", choices=("md", "json"), default="md")
     events.set_defaults(func=cmd_events)
 
+    classify = subparsers.add_parser(
+        "classify-failure",
+        help="classify how a captured session ended (one shared classifier)",
+    )
+    classify.add_argument("capture", type=Path, help="the session's capture .jsonl")
+    classify.add_argument("--exit", dest="exit_code", type=int, default=None,
+                          help="the session's exit code, when known")
+    classify.add_argument("--field",
+                          choices=("failure_class", "failure_detail",
+                                   "failure_endpoint", "retries_seen"),
+                          help="print one field instead of the JSON object")
+    classify.set_defaults(func=cmd_classify_failure)
+
     return parser
+
+
+def cmd_classify_failure(args: argparse.Namespace) -> int:
+    """Expose ``classify_failure`` to the shell tools.
+
+    ``local/bin/janitor.sh`` (``capture_class`` in ``auto`` mode) and
+    ``local/protocols/capacity.md`` both say the pipeline has ONE failure
+    classifier.  Without this subcommand that was a claim, not a fact: the
+    janitor's probe for it always failed and it silently fell back to its own
+    built-in string matching, so the janitor and the capacity controller could
+    classify the same death differently.
+    """
+    events, parse_errors = read_jsonl(args.capture)
+    if parse_errors:
+        sys.stderr.write(
+            f"telemetry.py: {args.capture}: {parse_errors} unparsable line(s); "
+            "classifying the rest\n")
+    result = classify_failure(
+        events, args.exit_code,
+        patterns=load_failure_patterns(args.repo_root))
+    if args.field:
+        value = result.get(args.field)
+        sys.stdout.write(f"{'' if value is None else value}\n")
+    else:
+        sys.stdout.write(json.dumps(result, ensure_ascii=False) + "\n")
+    return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:

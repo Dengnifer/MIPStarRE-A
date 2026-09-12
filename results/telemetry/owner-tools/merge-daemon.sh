@@ -26,6 +26,15 @@
 #     retried, not repaired; the lane tail is relaunched only when the
 #     worktree is clean and not mid-merge.  Refreshes and repairs share one
 #     PAR budget, so repairs cannot starve merges.
+#   * every janitor_interval_s the loop runs local/bin/janitor.sh once
+#     (detached, bounded, self-locking): the dead-session, parked-lane,
+#     superseded-PR, stale-lane and spool passes of design §4 have no other
+#     runner, and without them a provider outage's dead workers are
+#     re-dispatched by hand as they were on 2026-09-12;
+#   * pending telemetry is committed from an EXPLICIT path list
+#     (daemon.conf telemetry_paths) and published through
+#     local/bin/checked-push.sh — never `git add results/telemetry` and never
+#     a direct `git push github main`.
 #
 # Failure markers are JSON records with a class and a reason, and clear on an
 # observable change — the head moved, the repair finished, the recorded reason
@@ -59,7 +68,7 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --once) ONCE=1 ;;
     --dry-run) DRY=1; ONCE=1 ;;
-    -h|--help) sed -n '2,49p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,58p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) printf '%s: unknown argument %s\n' "$PROG" "$1" >&2; exit 2 ;;
   esac
   shift
@@ -172,6 +181,82 @@ if [ -z "$LATENCY_FILE" ]; then
     LATENCY_FILE="results/telemetry/merge-latency-$(date -u +%F).jsonl"
   fi
 fi
+
+# The telemetry batch: EXACT paths, and local/bin/checked-push.sh — never a bare
+# `git add results/telemetry` and never `git push github main`.  checked-push.sh
+# is the repository's only publisher (it runs .githooks/pre-push outside the
+# transport, pushes with --force-with-lease and re-verifies the tree and the SHA
+# afterwards); a direct push would drop all three.  The deviation this still
+# carries — a telemetry-only commit landing on main without a reviewed PR — is
+# recorded in local/protocols/EVOLUTION.md (2026-09-12, telemetry publication).
+telemetry_batch_paths() { # the configured paths that actually exist, one per line
+  local p
+  # shellcheck disable=SC2086  # telemetry_paths is a deliberate word list
+  for p in $telemetry_paths "$LATENCY_FILE"; do
+    [ -n "$p" ] || continue
+    [ -e "$CHECKOUT/$p" ] || continue   # `git add` errors on a pathspec matching nothing
+    printf '%s\n' "$p"
+  done
+}
+
+publish_telemetry() { # publish_telemetry MESSAGE
+  local msg="$1" branch p
+  local -a paths=()
+  branch="$(git -C "$CHECKOUT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+  if [ "$branch" != main ]; then
+    log "telemetry batch skipped: $CHECKOUT is on '$branch', not main"
+    return 1
+  fi
+  while IFS= read -r p; do [ -n "$p" ] && paths+=("$p"); done <<< "$(telemetry_batch_paths)"
+  if [ "${#paths[@]}" -eq 0 ]; then
+    log "telemetry batch: none of \$telemetry_paths exists in $CHECKOUT"
+    return 1
+  fi
+  git add -- "${paths[@]}" >/dev/null 2>&1 || { log "telemetry batch: git add failed"; return 1; }
+  if git diff --cached --quiet -- "${paths[@]}"; then
+    log "telemetry batch: nothing of ours to commit"
+    return 1
+  fi
+  git commit -qm "$msg" -- "${paths[@]}" >/dev/null 2>&1 || {
+    log "telemetry batch: commit failed (hooks refused it?)"; return 1; }
+  if [ ! -x "$CHECKOUT/local/bin/checked-push.sh" ]; then
+    log "no checked-push.sh at $CHECKOUT/local/bin; the telemetry stays committed locally"
+    return 1
+  fi
+  if "$CHECKOUT/local/bin/checked-push.sh" --repo-root "$CHECKOUT" \
+       github refs/heads/main:refs/heads/main >/dev/null 2>&1; then
+    return 0
+  fi
+  log "checked-push.sh could not publish the telemetry batch; it stays committed locally"
+  return 1
+}
+
+telemetry_pending() {
+  local p
+  local -a paths=()
+  while IFS= read -r p; do [ -n "$p" ] && paths+=("$p"); done <<< "$(telemetry_batch_paths)"
+  [ "${#paths[@]}" -gt 0 ] || return 1
+  [ -n "$(git -C "$CHECKOUT" status --porcelain -- "${paths[@]}" 2>/dev/null)" ]
+}
+
+# The self-repair sweep (design §4).  Nothing else in the layer runs it: the
+# dead-session, parked-lane, stale-lane and spool passes exist only if this loop
+# calls them.  It is detached, bounded by a timeout, and idempotent; janitor.sh
+# holds its own lock, so an overlapping sweep exits instead of doubling up.
+LAST_JANITOR=0
+run_janitor() {
+  local sweep="$CHECKOUT/local/bin/janitor.sh"
+  [ "${janitor_interval_s:-0}" -gt 0 ] 2>/dev/null || return 0
+  [ "$(( $(date +%s) - LAST_JANITOR ))" -ge "$janitor_interval_s" ] || return 0
+  LAST_JANITOR="$(date +%s)"
+  [ -r "$sweep" ] || { log "no janitor at $sweep; the self-repair sweep is NOT running"; return 0; }
+  if [ "$DRY" = 1 ]; then log "would run the janitor sweep ($sweep)"; return 0; fi
+  ( cd "$CHECKOUT" && MIPSTARRE_CACHE_ROOT="$CACHE_ROOT" MIPSTARRE_REPO_ROOT="$CHECKOUT" \
+      timeout "${janitor_timeout_s:-1800}" bash "$sweep" >> "$D/janitor.log" 2>&1
+    printf '== %s janitor sweep exited %s\n' "$(date -u +%FT%TZ)" "$?" >> "$D/janitor.log" ) \
+    < /dev/null > /dev/null 2>&1 &
+  log "janitor sweep started (log $D/janitor.log)"
+}
 
 PAR=1; PAR_INPUTS="not computed"
 mark_event() { # PR HEAD EVENT [CLASS] [REASON]
@@ -345,9 +430,20 @@ launch_repair() { # PR N BR HEAD CLASS
   if [ "$DRY" = 1 ]; then log "would repair PR $PR ($BR) mode=$mode"; return 0; fi
   printf '%s\n' "$(( used + 1 ))" > "$ledger"
   rm -f "$D/pr$PR.repair-done"
+  # The repair-done marker means "a repair ran and finished", and clearing the
+  # PR's failure marker keys on it.  A repair that never touched the worktree
+  # (fix-lane.sh exit 3: the orc dispatch failed; exit 5: the branch is claimed
+  # by another session) must NOT clear it, or the daemon re-queues the PR into
+  # the same failure until the per-head repair budget is spent.
   ( timeout "$repair_timeout_s" bash "$FIX_LANE" "$PR" "$N" "$BR" "$mode" >> "$L/$N.fix.log" 2>&1
-    printf '== %s repair (%s) for PR %s exited %s\n' "$(date -u +%FT%TZ)" "$mode" "$PR" "$?" >> "$L/$N.fix.log"
-    touch "$D/pr$PR.repair-done"
+    frc=$?
+    printf '== %s repair (%s) for PR %s exited %s\n' "$(date -u +%FT%TZ)" "$mode" "$PR" "$frc" >> "$L/$N.fix.log"
+    if [ "$frc" -eq 0 ]; then
+      touch "$D/pr$PR.repair-done"
+    else
+      printf '== %s repair for PR %s did not complete (exit %s); pr%s.failed stays\n' \
+        "$(date -u +%FT%TZ)" "$PR" "$frc" "$PR" >> "$L/$N.fix.log"
+    fi
     rm -f "$D/pr$PR.repairing" ) &
   echo $! > "$D/pr$PR.repairing"
   log "repairing PR $PR ($BR) mode=$mode, pid $(cat "$D/pr$PR.repairing")"
@@ -373,10 +469,9 @@ try_merge() { # PR N MODE HEAD
     mark_event "$PR" "$H" merged
     # v9e: pending telemetry is committed AFTER a merge (main moved anyway); a
     # commit before the merge tripped gate 2b for PR 359.
-    if [ -n "$(git status --porcelain -- results/telemetry)" ]; then
-      git add results/telemetry &&
-        git commit -qm "chore(telemetry): batch after the PR $PR merge" >/dev/null 2>&1 &&
-        git push -q github main >/dev/null 2>&1 && log "telemetry batch committed after PR $PR"
+    if telemetry_pending; then
+      publish_telemetry "chore(telemetry): batch after the PR $PR merge" &&
+        log "telemetry batch published after PR $PR (checked-push.sh)"
     fi
     return 0
   fi
@@ -509,6 +604,8 @@ while true; do
     report_markers; LAST_REPORT="$(date +%s)"
   fi
 
+  run_janitor
+
   if [ "${#CANDS[@]}" -eq 0 ] && [ "${#REPAIRS[@]}" -eq 0 ]; then
     [ "$ONCE" = 1 ] && exit 0
     sleep "$idle_sleep_s"; continue
@@ -555,12 +652,11 @@ while true; do
   # commit pending telemetry now (one refresh may be wasted).
   if [ "$DRY" != 1 ]; then
     LASTS="$(stat -c %Y "$D/merged" 2>/dev/null || echo 0)"
-    if [ -n "$(git status --porcelain -- results/telemetry)" ] &&
+    if telemetry_pending &&
        [ "$(( $(date +%s) - LASTS ))" -gt "$telemetry_batch_idle_s" ] &&
        [ "$(refreshing_count)" -eq 0 ]; then
-      git add results/telemetry &&
-        git commit -qm "chore(telemetry): hourly batch (no merge in the last hour)" >/dev/null 2>&1 &&
-        git push -q github main >/dev/null 2>&1 && log "telemetry hourly batch committed"
+      publish_telemetry "chore(telemetry): hourly batch (no merge in the last hour)" &&
+        log "telemetry hourly batch published (checked-push.sh)"
     fi
   fi
 

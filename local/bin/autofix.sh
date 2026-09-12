@@ -460,7 +460,13 @@ PY
     head="$(pr_head_sha "$PR_ARG")" || die "cannot re-read PR #$PR_ARG after round $round"
     [ -n "$head" ] || die "PR #$PR_ARG reports no head SHA after round $round"
     if [ -x "$ROOT/local/bin/review.sh" ]; then
-      "$ROOT/local/bin/review.sh" "$PR_ARG" </dev/null ||
+      # The guard belongs on THIS call.  The driver runs before the
+      # `export MIPSTARRE_AUTOFIX_ACTIVE=1` below (it is the parent of each
+      # round, not a round), so nothing on the loop path sets it: an
+      # autofix -> review -> autofix cycle — the very cycle the guard exists to
+      # refuse — was reachable from here.  The rounds still get a clean child
+      # environment, because only this review invocation carries it.
+      MIPSTARRE_AUTOFIX_ACTIVE=1 "$ROOT/local/bin/review.sh" "$PR_ARG" </dev/null ||
         warn "review.sh exited nonzero for $head; re-reading the verdict anyway"
     else
       die "local/bin/review.sh not found; a loop that cannot review cannot terminate"

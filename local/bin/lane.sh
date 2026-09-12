@@ -162,8 +162,11 @@ TASK="$STATE/$N.task.md"
 } > "$TASK"
 
 # ------------------------------------------------------------- admission
-# ONE cap definition: the per-account caps and live sessions, read through
-# local/bin/account_router.py (its ACCOUNTS and its cap-file convention).
+# ONE cap definition, and it is account_router.py's: `effective_caps` (which forces
+# a `down` endpoint's cap to zero) and `live_pids` (which reaps dead markers).
+# Re-implementing the cap read here is what let a lane launch a dispatch into an
+# outage the router would have refused: a dead endpoint keeps freeing slots as its
+# sessions die, so a local `cap - live` count reads an outage as headroom.
 # Prints "free live cap"; exit 3 means no capacity record exists at all.
 slots() {
   python3 - "$P" "$CACHE_ROOT" <<'PY'
@@ -171,9 +174,10 @@ import os, sys
 from pathlib import Path
 checkout, cache = Path(sys.argv[1]), Path(sys.argv[2])
 sys.path.insert(0, str(checkout / "local" / "bin"))
+router = None
 try:
-    import account_router
-    accounts = list(account_router.ACCOUNTS)
+    import account_router as router
+    accounts = list(router.ACCOUNTS)
 except Exception:
     accounts = ["primary", "second"]
 def alive(pid):
@@ -186,6 +190,18 @@ def alive(pid):
     except OSError:
         return False
     return True
+if router is not None and any((cache / "watchdog" / f"max-codex-{a}").exists()
+                              for a in accounts):
+    try:
+        caps = router.effective_caps(cache)          # a `down` endpoint counts as 0
+        live = sum(len(router.live_pids(cache / "accounts" / a)) for a in accounts)
+        cap = sum(max(0, value) for value in caps)
+        print(f"{max(0, cap - live)} {live} {cap}")
+        raise SystemExit(0)
+    except SystemExit:
+        raise
+    except Exception:
+        pass  # fall through to the file read below; never fail a lane on this
 cap = live = 0
 seen = False
 for account in accounts:
