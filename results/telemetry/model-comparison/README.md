@@ -1,11 +1,13 @@
 # codex model comparison — `gpt-5.6-sol` vs `gpt-6-astra`
 
-The models did not historically run at the same provider-reported effort.
-Debug probes on 2026-09-05 showed that the astra endpoint reported `medium` for
-an `ultra` request, while it honoured `xhigh`; sol honoured its legacy `ultra`
-request as `max`. Astra rows before the 22:25Z handoff boundary must therefore
-be read as provider-reported `medium`. New astra dispatches request `xhigh`, and
-sol retains `ultra`. The tables do not stratify these periods by effort.
+The historical tables do not establish equal effort or stratify runs by verified
+effort. The six saved Astra probes on September 5, 2026 record requested/client
+`ultra` → completion `medium`, `max` → `max`, and `xhigh` → `xhigh`, once per
+account/effort pair. These are configuration observations, not project-quality
+samples or measurements of backend computation. They do not relabel all earlier
+Astra runs as medium or establish every historical Sol run's effort. See the
+[probe records](../owner-messages/qpbt-meta-20260905-230133/effort-probes.json)
+and [initial project observations](astra-effort-20260906.md).
 
 A side product of the model switch on 2026-09-05: `gpt-6-astra` became the
 default for codex sessions at 2026-09-05T15:46Z, and `gpt-5.6-sol` — used for
@@ -22,6 +24,10 @@ The 03:26 UTC owner update keeps main at `max` and lets main select worker `max`
 or `xhigh` by role, difficulty, quality and latency. Sol is not an active option.
 Historical records remain unchanged; `requested_effort` describes the launch
 request, not a new measurement of backend compute.
+
+The [post-merge integration note](astra-effort-integration-20260906.md) links the
+archived API-max/official-Ultra finding without identifying those modes or
+changing the max/xhigh policy. Historical run logs and reports remain unchanged.
 
 ## Re-run
 

@@ -232,12 +232,51 @@ issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
 c8f1999): read-only research data, never edited or read as active input.
 
-## 6. Owner inbox and mathematical-gap escalation
+## 6. Access-only owner inbox and main mathematical decisions
 
-Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. Following the availability report on #26 and the September 6
-owner decision, main selects Astra Ultra for the mathematical-gap lane through
+Pinned issue #26 is the owner inbox: it receives only **actual access or
+permission blockers requiring human action**, such as an owner-only GitHub
+operation or CLI permission change. Main decides mathematical and internal
+workflow questions, including definition/game proposals, review disposition and
+exhausted budgets, with rationale and evidence recorded before further work.
+Main owns plans, task selection, decomposition, dispatch order, individual
+worker assignments and pipeline execution; meta provides guidance only.
+Neither main nor a worker may bypass permissions, proof integrity, CI, review or
+merge gates. Internal security questions belong to main; a credential/access
+change that actually requires the human is an owner blocker, never a workaround.
+
+The owner decision at **2026-09-06T05:05Z**, recorded at **05:17:03Z**, explicitly
+withdraws the posted-#26 human hold, **including B7 and B8** (issue #247/PR #260).
+The 02:55:29Z delegation and its 02:58:41Z withdrawal remain historical records;
+neither is the current rule. This new explicit decision, not quotas or role
+guidance, transfers mathematical and internal workflow decisions to main.
+B7 terminal disposition requires exact-head evidence and `review.md` §12: no
+fifth full review, fabricated carry-forward or CI/proof/merge/access bypass.
+An unresolved evidence requirement stays blocked internally, not automatically
+escalated to the human. No mathematical result is declared solved without proof.
+
+Under the owner's 2026-09-06T05:56Z guidance, main autonomously reassesses
+useful parallelism every cycle, after completion/failure, newly unblocked work
+or compaction, and before waiting or ending, without owner/meta prompts.
+Main selects useful, disjoint successors, rechecks dependencies, ownership,
+account capacity, service evidence and cumulative budgets, and reports concrete
+constraints and the next admission condition. Idle reservations, duplicate
+writers, completed sessions and filler do not qualify. The September 6
+eight-to-eleven allocation is historical; current admission uses the configured
+account caps in `sessions.md` section 4. Issue #505 retired queue #257 and native
+leases; replenishment uses external `dispatch.sh` assignments.
+
+Main remains Astra Ultra; routine workers use Sol Ultra and hard assignments use
+Astra Ultra with an explicit reason under `local/model-policy.json`. Record
+selection, rationale and observed outcomes separately from provider-measured
+effort. Preserve the historical max/xhigh observations, raw provenance, sample
+counts and unknowns in `results/telemetry/model-comparison/`; no benchmark,
+probe, filler session or gate/budget relaxation follows from this guidance.
+
+A source statement found to be mathematically false goes to main, not #26,
+unless actual access or permission requires human action. Following the
+availability report on #26 and the September 6 owner decision, main selects
+Astra Ultra for the mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
@@ -255,25 +294,42 @@ A correction is adopted only when it meets all four conditions below.
    insufficient.
 3. **Minimality:** the correction is the closest sufficient statement to the
    source, with no unnecessary hypothesis or weakened conclusion and no change
-   to the source semantics; definition or game corrections require an explicit
-   faithfulness audit and independent mathematical review.
+   to the source semantics. A necessary definition/game correction first
+   returns to main for a separately recorded decision and scoped task, with an
+   explicit faithfulness audit and independent mathematical review. It is never
+   silently adopted as the printed theorem or exempted from consumer analysis.
 4. **Lean convergence:** the corrected statement type-checks and all affected
    downstream consumers compile. Lean success alone does not establish the
    preceding three conditions.
 
-The operator iterates mathematics and Lean for at most ten `mathfix` sessions
+The ordinary budget is at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
 is shared across the historical owner-launched Fable lane and the Astra lane; a
-model or telemetry change does not reset it. Main decides mathematical
-corrections with the preceding evidence and independent review, including
-definition/game corrections that preserve the intended source semantics;
-changing the project goal is outside that authority. If the current authorized
-budget expires, stop that lane and record the attempted statements,
+model or telemetry change does not reset it. If a correction requires changing
+a mathematical definition or game, the worker stops and returns it to main
+immediately. Main decides source-semantic corrections with the preceding evidence
+and independent review; changing the project goal is outside that authority.
+At budget exhaustion, stop that lane and record attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Use #26 only for an owner-only
-permission, credential, access or scope/resource grant; mathematical difficulty
-alone is not an owner decision. An already-posted #26 item waits for the owner
-unless the owner explicitly returns it to main.
+note. Main decides whether to stop, rescope or record a separately bounded tranche
+within existing authority. Workers never self-extend or reset attempts or time.
+Owner-only permission, credential, access or scope/resource grants go to #26;
+mathematical difficulty alone is not an owner decision. Already-posted items
+await the owner unless explicitly returned to main, as B7/B8 were above.
+
+**Recorded #118/B8 tranche (September 6 amendment):** main authorized
+attempts **11 and 12**, each at most **2700 seconds**, on primary Astra **max**.
+The carried baseline is **10 completed attempts / 19931 completed seconds**,
+with original anchor **2026-09-05T19:24:00Z**. Attempt 12 is conditional on
+main's recorded evaluation of attempt 11; it is not an automatic dispatch.
+The maximum additional allocation is 5400 seconds, not time already spent.
+Maintain a cumulative ledger of actual attempt times, failures, interruptions
+and original session links. This exception is confined to that recorded tranche;
+it does not grant attempt 13, a new anchor or unlimited renewals. Any later work
+requires a new explicit main decision with evidence and a finite bound, not
+another owner budget question unless actual access/permission is blocked.
+See `sessions.md` §4.1 for unchanged continuation validation; this amendment
+does not authorize editing historical limits or bypassing a dispatcher refusal.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the
