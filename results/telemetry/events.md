@@ -7921,3 +7921,9 @@ not actual commit/publication hooks. No productive session was killed.
   owner's explicit word. At 08:33:00Z: main at bc7d69bd, 30 merges today through the daemon. Stopped: goal keeper, merge daemon
   (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
   goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
+- 08:33Z PAUSE (owner 08:18Z: the unlimited quota period ended; finalize within 15 minutes). Run summary 04:17Z-08:33Z: 8 PRs merged
+  (525 530 532 263 280 281 282 251), direct holes 20 -> 19, workers peaked at 39 (04:55Z) and ran 13-14 on the yxy key after its real
+  limit (20, shared with the owner's local session) was found; about 90 sessions lost to the relay-us7 503 outage and the limit.
+  Structural fixes that stay in place: lane runner v20, union merge driver for telemetry logs, fix-lane/autofix-loop tools, daemon
+  PAR=8. Caps recorded for the resume: second 27 (the owner limited the local session to 2 of the 30 slots). Leftover workers were
+  stopped at the deadline; the main session's goal is paused; resume only on the owner's word (/tmp/owner-resume.sh, PAR=8).
