@@ -148,7 +148,10 @@ class RunModeTestCase(unittest.TestCase):
             "accounts[0].endpoint": lambda doc: doc["accounts"][0].pop("endpoint"),
             "accounts[1].nominal_limit":
                 lambda doc: doc["accounts"][1].update(nominal_limit="30"),
-            "accounts[0].name": lambda doc: doc["accounts"][0].update(name="third"),
+            # A brief may name ANY number of accounts (W10: the two historical
+            # names are entries, not a closed set), so the rejected case is a
+            # name outside the character class, not an unfamiliar one.
+            "accounts[0].name": lambda doc: doc["accounts"][0].update(name="Third Key"),
             "schema": lambda doc: doc.update(schema="mipstarre-run-brief/2"),
             "accounts": lambda doc: doc.update(accounts=[]),
         }
