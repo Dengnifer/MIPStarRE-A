@@ -5,6 +5,14 @@
   "main_model": "gpt-6-astra",
   "effort": "ultra",
   "owner_scope": "Issue #301 comment5573256033; supersedes the former sole-cleanup whitelist",
+  "override": null,
+  "override_schema": {
+    "mode": "astra-all (the only mode; null/absent means no override)",
+    "reason": "why the owner narrowed routing, in one line",
+    "set_by": "who set it (owner, or the session acting on the owner's briefing)",
+    "expires": "optional ISO-8601 timestamp with offset; past means inactive",
+    "semantics": "Narrows every role and job class to hard_model. It may only narrow toward the hard model and may NEVER lower effort. Mid-run the same mode is written to $MIPSTARRE_CACHE_ROOT/watchdog/model-override, which takes precedence and needs no PR. Rows dispatched while it is active carry override_mode/override_source and are excluded from the Sol:Astra ratio rather than read as violations."
+  },
   "dispatch_ratio": {"target": 20, "minimum": 10, "maximum": 50},
   "audit": {
     "reference": "Issue #301; /tmp/qpbt-sol-routing-audit-20260907.md",

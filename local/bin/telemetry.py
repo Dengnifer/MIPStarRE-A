@@ -14,6 +14,15 @@ Subcommands::
     telemetry.py stage --stage 4.3-proofs --event start [--note TEXT]
     telemetry.py build --kind warm --outcome success --seconds 812
     telemetry.py event --text "symptom -> diagnosis -> fix -> lesson"
+    telemetry.py events --since 2026-09-12 [--until D] [--format md|json]
+
+Event bullets are **sharded**: ``telemetry.py event`` writes
+``results/telemetry/events.d/<YYYY-MM-DD>-<session>.md`` so that two sessions
+never append to one path and a merge of ``main`` cannot conflict on the log
+(2026-09-12: append-only telemetry conflicted on nearly every merge).
+``results/telemetry/events.md`` keeps its full history unrewritten and carries a
+header pointing at the shard directory; ``telemetry.py events --since`` reads
+both, so an existing reader keeps seeing one stream.
 
 ``session-summarize`` is the one that does real work: it reads a captured
 ``codex exec --json`` event stream (JSONL on stdout: ``thread.started``,
@@ -81,7 +90,10 @@ KNOWN_STAGES = (
 )
 KNOWN_BUILD_KINDS = ("warm", "rebuild", "cache-get", "ci-build")
 KNOWN_OUTCOMES = ("success", "failed", "partial", "skipped")
-KNOWN_STATUSES = ("active", "done", "failed", "archived")
+# `refused` is not a failed attempt: the dispatch was never admitted, or the
+# session died before any model turn.  Scoring it as `failed` would charge a
+# proof packet's budget for the provider's refusal (2026-09-12: ~90 sessions).
+KNOWN_STATUSES = ("active", "done", "failed", "archived", "refused")
 ROLES = (
     "orc",
     "prover",
@@ -95,11 +107,90 @@ ROLES = (
 
 TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
+# A key label / endpoint label is a bare token that travels into JSON records
+# and into log lines.  It is NEVER interpolated into a shell command or a path
+# without quoting, and a label outside this class fails closed rather than
+# being silently rewritten to `unknown` (which is what hid the 2026-09-12
+# account attribution).  `relay-1`, `space` and `unknown` are inside the class,
+# so every historical row stays valid.
+LABEL_RE = re.compile(r"^[a-z0-9.-]{1,40}$")
+UNKNOWN_LABEL = "unknown"
+
 EVENTS_HEADER = """# Incident and observation log
 
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
 """
+
+EVENTS_SHARD_SUBDIR = "events.d"
+
+EVENTS_SHARD_HEADER = """# Incident and observation log — shard
+
+One session's dated bullets.  `results/telemetry/events.md` holds the history
+before sharding; `telemetry.py events --since DATE` reads both.
+"""
+
+# ---------------------------------------------------------------------------
+# Failure classification
+# ---------------------------------------------------------------------------
+
+# The provider's terminal wordings, as literal case-insensitive substrings.
+# They are DATA, not code: `local/capacity-policy.json` (shipped by the
+# capacity controller) may override the whole table under `failure_patterns`,
+# so a provider wording change is a one-file edit rather than a code change.
+# Order is precedence: the first class whose pattern appears wins, because a
+# concurrency refusal and a 5xx outage both end in an exhausted reconnect and
+# the root cause is the one the controller must act on.
+DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
+    "concurrency_limit": [
+        "Concurrency limit exceeded for account",
+        "concurrency limit exceeded",
+    ],
+    "endpoint_5xx": [
+        "503 Service Unavailable",
+        "502 Bad Gateway",
+        "504 Gateway Timeout",
+        "Service Unavailable",
+    ],
+    "retries_exhausted": [
+        "Reconnecting... 5/5",
+    ],
+    "timeout": [
+        "deadline exceeded",
+        "request timed out",
+        "connection timed out",
+    ],
+}
+
+# Classes the dispatcher may retry (a refusal is not the session's fault).
+TRANSIENT_FAILURE_CLASSES = (
+    "refused",
+    "endpoint_down",
+    "concurrency_limit",
+    "endpoint_5xx",
+    "retries_exhausted",
+)
+KNOWN_FAILURE_CLASSES = (
+    "none",
+    "refused",
+    # `endpoint_down` is never produced by the stream: it is what the dispatcher
+    # records when it refused to reserve on an endpoint the controller had
+    # already marked down, so a preflight refusal is distinguishable from a
+    # death the provider caused.
+    "endpoint_down",
+    "concurrency_limit",
+    "endpoint_5xx",
+    "retries_exhausted",
+    "timeout",
+    "task_failure",
+    "unknown",
+)
+
+# `Reconnecting... 3/5`
+RETRY_RE = re.compile(r"reconnecting\.{2,}\s*(\d{1,3})\s*/\s*(\d{1,3})", re.I)
+URL_HOST_RE = re.compile(r"https?://([A-Za-z0-9.-]{1,64})")
+# Exit statuses `timeout(1)` uses for TERM and KILL of the session guard.
+TIMEOUT_EXIT_CODES = (124, 137)
 
 
 def warn(message: str) -> None:
@@ -319,6 +410,149 @@ def find_rollout(thread_id: str | None) -> str | None:
     return str(matches[-1]) if matches else None
 
 
+def load_failure_patterns(repo_root: Path | None = None) -> dict[str, list[str]]:
+    """Failure wordings, from ``local/capacity-policy.json`` when it exists.
+
+    The controller ships that file (work item W3).  Until then — and whenever it
+    is missing, malformed, or silent about a class — the built-in table above is
+    used, so this function never raises and never returns an empty table: an
+    unreadable knob file degrades to today's static behaviour instead of
+    classifying every death as ``unknown``.
+    """
+    patterns = {key: list(value) for key, value in DEFAULT_FAILURE_PATTERNS.items()}
+    root = Path(repo_root) if repo_root else REPO_ROOT_DEFAULT
+    knob = root / "local" / "capacity-policy.json"
+    try:
+        raw = json.loads(knob.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return patterns
+    table = raw.get("failure_patterns") if isinstance(raw, dict) else None
+    if not isinstance(table, dict):
+        return patterns
+    for name, value in table.items():
+        if name not in DEFAULT_FAILURE_PATTERNS:
+            warn(f"capacity-policy.json: ignoring unknown failure class {name!r}")
+            continue
+        if isinstance(value, str):
+            value = [value]
+        if not isinstance(value, list):
+            warn(f"capacity-policy.json: failure_patterns.{name} is not a list")
+            continue
+        cleaned = [item for item in value if isinstance(item, str) and item.strip()]
+        if cleaned:
+            patterns[name] = cleaned
+    return patterns
+
+
+def _event_text(events: Sequence[dict[str, Any]]) -> str:
+    """One searchable blob of the captured stream, control characters kept out.
+
+    The provider's refusal arrives in different shapes across codex builds
+    (an ``error`` event, a stderr passthrough, a message item), so the scan is
+    over the serialized events rather than over one field that may move.
+    """
+    chunks: list[str] = []
+    for event in events:
+        try:
+            chunks.append(json.dumps(event, ensure_ascii=False))
+        except (TypeError, ValueError):
+            chunks.append(str(event))
+    return "\n".join(chunks)
+
+
+def has_model_output(events: Sequence[dict[str, Any]]) -> bool:
+    """Whether the session ever produced a model turn.
+
+    A dispatch that died before this point was never really admitted: it is
+    recorded ``refused``, never as a failed attempt against a packet budget.
+    """
+    for event in events:
+        if event.get("type") in ("turn.completed", "turn.started"):
+            return True
+        if event.get("type") == "item.completed":
+            item = event.get("item")
+            if isinstance(item, dict) and item.get("item_type") in (
+                "assistant_message",
+                "agent_message",
+                "reasoning",
+                "command_execution",
+            ):
+                return True
+    return False
+
+
+def classify_failure(
+    events: Sequence[dict[str, Any]],
+    exit_code: int | None = None,
+    patterns: dict[str, list[str]] | None = None,
+) -> dict[str, Any]:
+    """Classify a captured session ending.
+
+    Returns ``{failure_class, failure_detail, failure_endpoint, retries_seen}``.
+
+    ``unknown`` is the safe default and the capacity controller must treat it as
+    **neutral** — neither an increase nor a decrease — so that a provider
+    wording change degrades to today's static behaviour rather than collapsing
+    the cap.  Classes:
+
+    ``concurrency_limit``  the account is at its real limit (retryable)
+    ``endpoint_5xx``       the endpoint is down (retryable, trips health)
+    ``retries_exhausted``  the client gave up reconnecting (retryable)
+    ``timeout``            our own session guard fired (NOT retryable)
+    ``task_failure``       a clean nonzero exit with model output (NOT retryable)
+    ``none``               exit 0
+    ``unknown``            anything else — neutral
+    """
+    table = patterns if patterns is not None else load_failure_patterns()
+    text = _event_text(events)
+    lowered = text.lower()
+
+    retries_seen = 0
+    retry_total = 0
+    for match in RETRY_RE.finditer(text):
+        seen, total = int(match.group(1)), int(match.group(2))
+        retries_seen = max(retries_seen, seen)
+        retry_total = max(retry_total, total)
+
+    matched_class = ""
+    matched_pattern = ""
+    for name in ("concurrency_limit", "endpoint_5xx", "retries_exhausted", "timeout"):
+        for pattern in table.get(name) or ():
+            if pattern.lower() in lowered:
+                matched_class, matched_pattern = name, pattern
+                break
+        if matched_class:
+            break
+
+    if not matched_class and retry_total and retries_seen >= retry_total:
+        matched_class, matched_pattern = "retries_exhausted", f"{retries_seen}/{retry_total}"
+
+    endpoint = None
+    host = URL_HOST_RE.search(text)
+    if host:
+        candidate = host.group(1).lower().strip(".")
+        if LABEL_RE.match(candidate):
+            endpoint = candidate
+
+    if matched_class:
+        failure_class, detail = matched_class, matched_pattern
+    elif exit_code in TIMEOUT_EXIT_CODES:
+        failure_class, detail = "timeout", f"killed by the session guard (exit {exit_code})"
+    elif exit_code == 0:
+        failure_class, detail = "none", ""
+    elif has_model_output(events):
+        failure_class, detail = "task_failure", "clean nonzero exit with model output"
+    else:
+        failure_class, detail = "unknown", ""
+
+    return {
+        "failure_class": failure_class,
+        "failure_detail": sanitize_text(detail, limit=200) or None,
+        "failure_endpoint": endpoint,
+        "retries_seen": retries_seen,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Text sanitization (untrusted-data invariant, DESIGN.md core invariant 6)
 # ---------------------------------------------------------------------------
@@ -365,6 +599,8 @@ def session_record(
     model: str | None = None,
     account: str | None = None,
     requested_effort: str | None = None,
+    endpoint: str | None = None,
+    failure: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     record: dict[str, Any] = {
         "name": name,
@@ -393,6 +629,15 @@ def session_record(
             "status": status,
         }
     )
+    # The endpoint a failure is attributed to travels on EVERY row, so a key
+    # moved between homes keeps its identity and the controller can read health
+    # per endpoint instead of per account slot.
+    record["endpoint"] = endpoint or UNKNOWN_LABEL
+    if failure is not None:
+        record["failure_class"] = failure.get("failure_class") or "unknown"
+        record["failure_detail"] = failure.get("failure_detail")
+        record["failure_endpoint"] = failure.get("failure_endpoint") or record["endpoint"]
+        record["retries_seen"] = failure.get("retries_seen") or 0
     if capture:
         record["capture"] = capture
     if rollout:
@@ -457,6 +702,15 @@ def write_shell_out(path: Path, record: dict[str, Any]) -> None:
         "DISPATCH_CAPTURE": record.get("capture"),
         "DISPATCH_ROLLOUT": record.get("rollout"),
         "DISPATCH_TURNS": record.get("turns"),
+        # dispatch.sh branches on these: a transient class is retried, and lane,
+        # autofix and review callers read them off dispatch.sh's stdout report.
+        "DISPATCH_FAILURE_CLASS": record.get("failure_class"),
+        "DISPATCH_FAILURE_DETAIL": record.get("failure_detail"),
+        "DISPATCH_FAILURE_ENDPOINT": record.get("failure_endpoint"),
+        "DISPATCH_RETRIES_SEEN": record.get("retries_seen"),
+        "DISPATCH_ENDPOINT": record.get("endpoint"),
+        "DISPATCH_KEY_LABEL": record.get("key_label"),
+        "DISPATCH_OVERRIDE_MODE": record.get("override_mode"),
         "DISPATCH_USAGE_INPUT": usage.get("input"),
         "DISPATCH_USAGE_OUTPUT": usage.get("output"),
         "DISPATCH_USAGE_TOTAL": (sum(int(usage.get(k) or 0) for k in USAGE_KEYS)
@@ -471,21 +725,43 @@ def write_shell_out(path: Path, record: dict[str, Any]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# events.md
+# events.md and events.d/
 # ---------------------------------------------------------------------------
 
 
-def append_event_bullet(path: Path, text: str, date_str: str) -> str:
+def event_session_label(raw: str | None = None) -> str:
+    """Filename-safe shard label for the writing session.
+
+    Two sessions must never touch one path: that is the whole point of the
+    shard.  The label is the dispatching session name (``MIPSTARRE_SESSION``)
+    reduced to ``[A-Za-z0-9._-]``; an unnamed writer gets ``unknown``, and
+    concurrent unnamed writers still serialize on the per-path lock below.
+    """
+    value = raw if raw is not None else os.environ.get("MIPSTARRE_SESSION", "")
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", (value or "").strip()).strip("-.")
+    return cleaned[:60] or "unknown"
+
+
+def event_shard_path(telemetry_root: Path, date_str: str, session: str) -> Path:
+    """``results/telemetry/events.d/<YYYY-MM-DD>-<session>.md``."""
+    return telemetry_root / EVENTS_SHARD_SUBDIR / f"{date_str}-{session}.md"
+
+
+def append_event_bullet(
+    path: Path, text: str, date_str: str, header: str = EVENTS_HEADER
+) -> str:
     """Append a dated bullet, creating today's ``## YYYY-MM-DD`` section."""
     bullet_lines = sanitize_text(text, limit=8000).split("\n")
     bullet = "- " + bullet_lines[0]
     for continuation in bullet_lines[1:]:
         bullet += "\n  " + continuation.strip()
     heading = f"## {date_str}"
-    with named_lock("events-md"):
+    # The lock is per path: sharded writers never contend, and two writers that
+    # do share a path (two unnamed callers) still cannot interleave a bullet.
+    with named_lock("events-" + re.sub(r"[^A-Za-z0-9._-]+", "-", path.name)):
         path.parent.mkdir(parents=True, exist_ok=True)
         original = (
-            path.read_text(encoding="utf-8") if path.exists() else EVENTS_HEADER
+            path.read_text(encoding="utf-8") if path.exists() else header
         )
         lines = original.splitlines()
         try:
@@ -509,6 +785,66 @@ def append_event_bullet(path: Path, text: str, date_str: str) -> str:
     return bullet
 
 
+DATE_HEADING_RE = re.compile(r"^##\s+(\d{4}-\d{2}-\d{2})")
+
+
+def read_event_sections(path: Path) -> list[tuple[str, str, str]]:
+    """Split a log file into ``(date, heading, body)`` sections.
+
+    Historical headings carry a title or a timestamp after the date
+    (``## 2026-09-12T06:38:22Z - Recover primary failures``); only the leading
+    date is parsed, and anything before the first dated heading is ignored.
+    """
+    if not path.exists():
+        return []
+    sections: list[tuple[str, str, str]] = []
+    current_date = ""
+    current_heading = ""
+    body: list[str] = []
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        match = DATE_HEADING_RE.match(line)
+        if match:
+            if current_date:
+                sections.append((current_date, current_heading, "\n".join(body).strip("\n")))
+            current_date, current_heading, body = match.group(1), line, []
+            continue
+        if current_date:
+            body.append(line)
+    if current_date:
+        sections.append((current_date, current_heading, "\n".join(body).strip("\n")))
+    return sections
+
+
+def collect_events(
+    telemetry_root: Path, since: str | None = None, until: str | None = None
+) -> list[dict[str, str]]:
+    """Merge ``events.md`` and every ``events.d/*.md`` shard, oldest first.
+
+    Existing readers keep working because the pre-shard history is still read
+    from ``events.md``; new bullets are found in the shards.
+    """
+    rows: list[dict[str, str]] = []
+    sources = [telemetry_root / "events.md"]
+    shard_dir = telemetry_root / EVENTS_SHARD_SUBDIR
+    if shard_dir.is_dir():
+        sources.extend(sorted(shard_dir.glob("*.md")))
+    for source in sources:
+        try:
+            relative = str(source.relative_to(telemetry_root.parents[1]))
+        except (ValueError, IndexError):
+            relative = str(source)
+        for date_str, heading, body in read_event_sections(source):
+            if since and date_str < since:
+                continue
+            if until and date_str > until:
+                continue
+            rows.append(
+                {"date": date_str, "heading": heading, "body": body, "source": relative}
+            )
+    rows.sort(key=lambda row: (row["date"], row["source"]))
+    return rows
+
+
 def _atomic_write(path: Path, content: str) -> None:
     handle = tempfile.NamedTemporaryFile(
         "w", encoding="utf-8", dir=str(path.parent), delete=False
@@ -529,6 +865,20 @@ def _atomic_write(path: Path, content: str) -> None:
 
 def telemetry_dir(args: argparse.Namespace) -> Path:
     return args.repo_root.resolve() / TELEMETRY_SUBDIR
+
+
+def checked_label(value: str | None, what: str) -> str | None:
+    """Validate one key/endpoint label, failing closed outside the class."""
+    if value is None or value == "":
+        return None
+    if not LABEL_RE.match(value):
+        fail(
+            f"{what} {value!r} is not [a-z0-9.-]{{1,40}}.\n"
+            "  Labels travel into records and log lines; a malformed one is "
+            "refused rather than rewritten to 'unknown', which would hide which "
+            "key a failure belongs to."
+        )
+    return value
 
 
 def native_rollout(path: Path, thread: str, *, role: str = 'orc', job_class: str = 'general',
@@ -631,10 +981,13 @@ def record_native(args: argparse.Namespace) -> int:
             raise ValueError('a resumed native task is not a new dispatch')
         if not activated or not started or started < activated:
             raise ValueError('new dispatch must follow its explicit activation boundary')
+    key_label = checked_label(args.key_label, '--key-label')
     record = {key: value for key, value in observation.items() if key != 'final'}
     record.update(name=args.name, role=args.role, issue=args.issue, pr=args.pr,
                   worktree=str(args.worktree), root_thread_id=args.root_thread_id,
-                  key_label=args.key_label, account=args.key_label, dispatcher='native',
+                  endpoint=checked_label(getattr(args, 'endpoint', None), '--endpoint')
+                  or key_label or UNKNOWN_LABEL,
+                  key_label=key_label, account=key_label, dispatcher='native',
                   dispatch_kind=kind, activation_at=activation,
                   status=args.status, usage=None, usage_scope='unknown',
                   usage_provenance='rollout token_count.total_token_usage; not additive',
@@ -690,9 +1043,34 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         if float(wall_s).is_integer():
             wall_s = int(wall_s)
 
+    key_label = checked_label(args.key_label, "--key-label")
+    endpoint = checked_label(getattr(args, "endpoint", None), "--endpoint")
+
+    failure = classify_failure(
+        events,
+        exit_code=args.exit_code,
+        patterns=load_failure_patterns(args.repo_root),
+    )
+    if getattr(args, "failure_class", None):
+        # The caller saw something the stream cannot show — a router refusal
+        # leaves no capture at all.  It may only name a documented class.
+        if args.failure_class not in KNOWN_FAILURE_CLASSES:
+            fail(f"--failure-class {args.failure_class!r} is not one of {KNOWN_FAILURE_CLASSES}")
+        failure["failure_class"] = args.failure_class
+
     status = args.status
     if status is None:
         status = "done" if (args.exit_code or 0) == 0 else "failed"
+        # Never admitted, or dead before the first model turn: `refused`, so the
+        # provider's refusal is not scored as a failed attempt against a proof
+        # packet's budget (2026-09-12, ~90 sessions lost to 503s and the cap).
+        if (
+            status == "failed"
+            and failure["failure_class"] in TRANSIENT_FAILURE_CLASSES
+            and not turns
+            and not has_model_output(events)
+        ):
+            status = "refused"
     if status not in KNOWN_STATUSES:
         warn(f"status {status!r} is not one of {KNOWN_STATUSES}")
 
@@ -721,6 +1099,8 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
         status=status,
         capture=capture_field,
         rollout=None if args.no_rollout_scan else find_rollout(thread_id),
+        endpoint=endpoint or key_label,
+        failure=failure,
     )
     if args.continuation_json:
         record['continuation'] = json.loads(args.continuation_json)
@@ -737,10 +1117,17 @@ def cmd_session_summarize(args: argparse.Namespace) -> int:
                       job_class=selection['job_class'], model_policy=selection,
                       dispatch_kind=getattr(args, 'dispatch_kind', None),
                       activation_at=getattr(args, 'activation_at', None))
+        # An owner model override is recorded on the row, not hidden in a PATH
+        # shim: the ratio audit excludes override-period rows by this field
+        # instead of reading them as violations, and sessions.jsonl keeps
+        # naming the model that actually ran (2026-09-12 telemetry inaccuracy).
+        if selection.get('override_mode'):
+            record.update(override_mode=selection['override_mode'],
+                          override_source=selection.get('override_source'))
         if mismatch:
             record.update(status='failed', model_policy_mismatch=True)
-    if args.key_label:
-        record.update(key_label=args.key_label, wire_effort=None, returned_effort=None,
+    if key_label:
+        record.update(key_label=key_label, wire_effort=None, returned_effort=None,
                       usage_provenance='codex exec turn.completed; native delegation disabled')
         if not turns:
             record.update(usage=None, usage_scope='unknown')
@@ -857,9 +1244,38 @@ def cmd_event(args: argparse.Namespace) -> int:
     if not text:
         fail("--text is empty; an events.md bullet must say something", code=2)
     date_str = args.date or datetime.now().astimezone().strftime("%Y-%m-%d")
-    path = args.out or (telemetry_dir(args) / "events.md")
-    bullet = append_event_bullet(path, text, date_str)
+    session = event_session_label(getattr(args, "session", None))
+    header = EVENTS_SHARD_HEADER
+    if args.out is not None:
+        path = args.out
+        if path.name == "events.md":
+            header = EVENTS_HEADER
+    else:
+        # Sharded by (date, session): two sessions never touch one path, so a
+        # merge of `main` no longer conflicts on the incident log.  The path is
+        # inside the results/telemetry allowlist pr_merge tolerates.
+        path = event_shard_path(telemetry_dir(args), date_str, session)
+    bullet = append_event_bullet(path, text, date_str, header)
     sys.stdout.write(bullet + "\n")
+    sys.stderr.write(f"telemetry.py: wrote {path}\n")
+    return 0
+
+
+def cmd_events(args: argparse.Namespace) -> int:
+    """Read events.md and every events.d/ shard as one stream."""
+    for bound in (args.since, args.until):
+        if bound and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", bound):
+            fail(f"expected YYYY-MM-DD, got {bound!r}", code=2)
+    rows = collect_events(telemetry_dir(args), args.since, args.until)
+    if args.format == "json":
+        sys.stdout.write(json.dumps(rows, ensure_ascii=False, indent=2) + "\n")
+        return 0
+    for row in rows:
+        sys.stdout.write(f"{row['heading']}\n")
+        sys.stdout.write(f"<!-- source: {row['source']} -->\n")
+        if row["body"]:
+            sys.stdout.write(row["body"] + "\n")
+        sys.stdout.write("\n")
     return 0
 
 
@@ -898,7 +1314,22 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument('--dispatch-kind', choices=('new', 'resume', 'grandfathered'))
     summarize.add_argument('--activation-at')
     summarize.add_argument("--account", choices=("primary", "second"))
-    summarize.add_argument('--key-label', choices=('relay-1', 'space', 'unknown'))
+    summarize.add_argument(
+        '--key-label',
+        help="key label for the account that ran the session; [a-z0-9.-]{1,40} "
+             "(relay-1|space|unknown remain valid)",
+    )
+    summarize.add_argument(
+        '--endpoint',
+        help="endpoint the session was routed to; failures and health are "
+             "attributed to it, so a key moved between homes keeps its identity",
+    )
+    summarize.add_argument(
+        '--failure-class',
+        help=f"override the classification from the stream; one of {KNOWN_FAILURE_CLASSES}. "
+             "Used when the dispatcher knows more than the capture (a router "
+             "refusal leaves no capture at all).",
+    )
     summarize.add_argument("--continuation-json", help="validated checkpoint and shared budget link")
     summarize.add_argument(
         "--requested-effort",
@@ -949,7 +1380,9 @@ def _build_parser() -> argparse.ArgumentParser:
     for option in ('name', 'thread-id', 'root-thread-id', 'issue'):
         native.add_argument('--' + option, required=True)
     native.add_argument('--role', choices=ROLES, required=True)
-    native.add_argument('--key-label', choices=('relay-1', 'space'), required=True)
+    native.add_argument('--key-label', required=True,
+                        help="[a-z0-9.-]{1,40}; relay-1|space remain valid")
+    native.add_argument('--endpoint', help="endpoint label (default: the key label)")
     native.add_argument('--worktree', type=Path, required=True)
     native.add_argument('--pr')
     native.add_argument('--job-class', default='general')
@@ -1001,15 +1434,30 @@ def _build_parser() -> argparse.ArgumentParser:
     build.add_argument("--out", type=Path, help="override the output file")
     build.set_defaults(func=cmd_build)
 
-    event = subparsers.add_parser("event", help="append a dated bullet to events.md")
+    event = subparsers.add_parser(
+        "event", help="append a dated bullet to results/telemetry/events.d/"
+    )
     event.add_argument(
         "--text",
         required=True,
         help="bullet text ('-' reads stdin): symptom, diagnosis, fix, lesson",
     )
     event.add_argument("--date", help="YYYY-MM-DD section (default: today)")
+    event.add_argument(
+        "--session",
+        help="shard label (default: $MIPSTARRE_SESSION, else 'unknown')",
+    )
     event.add_argument("--out", type=Path, help="override the output file")
     event.set_defaults(func=cmd_event)
+
+    events = subparsers.add_parser(
+        "events",
+        help="read events.md and every events.d/ shard as one dated stream",
+    )
+    events.add_argument("--since", help="earliest YYYY-MM-DD to print")
+    events.add_argument("--until", help="latest YYYY-MM-DD to print")
+    events.add_argument("--format", choices=("md", "json"), default="md")
+    events.set_defaults(func=cmd_events)
 
     return parser
 
