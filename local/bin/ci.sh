@@ -799,6 +799,36 @@ require_tool() {
 step_build() {
   cd "$WORKTREE"
 
+  # Reachability guard, run BEFORE the machine's single full-build budget is
+  # spent.  A module outside the import closure of the re-export roots gets no
+  # .olean from `lake build`, so it compiles here and then fails the per-file
+  # pre-push gate in a lane hours later — the 2026-09-12 failure where
+  # Combining.Points.Absorption and Points.MarginalContraction had no oleans and
+  # every lane's gate failed.  Pure source check over import headers: sub-second,
+  # reads no proof, and it NEVER edits a re-export file (re-exports are
+  # serialized by the operator).
+  #
+  # Deliberately inside the EXISTING build step.  The eight canonical
+  # local-ci/<step> contexts plus local-ci/summary are what pr_merge.py gate 3
+  # requires; adding a ninth context would be a merge-gate change.
+  #
+  # A branch that predates the script gets a warning, not a failure: this step
+  # must not turn red on unrelated open PRs.
+  #
+  # Shipped --warn-only for one run: on the head this guard landed on, five
+  # modules that predate it are already outside the closure (issue 551 lists
+  # them and the re-export file each belongs in).  Making the step fail before
+  # those five imports exist would turn every open PR red for a defect none of
+  # them introduced.  Issue 551 removes --warn-only.
+  if [ -f scripts/check_umbrella_imports.py ]; then
+    echo "+ scripts/check_umbrella_imports.py --root . --ci --warn-only"
+    run_outside_git_env python3 scripts/check_umbrella_imports.py --root . --ci \
+      --warn-only
+  else
+    note_warning "scripts/check_umbrella_imports.py is not in $WORKTREE; the \
+unreachable-module guard did not run for this branch"
+  fi
+
   # Warm .lake/build from the hot main snapshot before compiling.  The warmer
   # is the only writer of the shared snapshot; this worktree gets a private
   # copy-on-write clone (DESIGN.md invariant 1).

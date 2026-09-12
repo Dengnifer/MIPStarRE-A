@@ -1,5 +1,7 @@
 import MIPStarRE.QPBT.Combining.Points.Closeness
 import MIPStarRE.QPBT.Combining.PointsDataProcessing
+import MIPStarRE.QPBT.Combining.Points.Absorption
+import MIPStarRE.QPBT.Combining.Points.MarginalContraction
 
 /-!
 # Combining the point measurements

@@ -1,0 +1,27 @@
+# Merge attributes.  Committed deliberately: before this file existed the same
+# driver lived only in $(git rev-parse --git-common-dir)/info/attributes on one
+# host (installed by hand on 2026-09-12), so a fresh clone, a second host, or a
+# reset of .git/info reintroduced a conflict on nearly every merge of main.
+#
+# `union` is a built-in git merge driver: on a conflict it keeps BOTH sides'
+# lines in order instead of writing conflict markers.  It is correct here and
+# nowhere else, because every path below is an APPEND-ONLY record — sessions
+# append their own rows and nobody rewrites another session's row, so the union
+# of two appends is the intended result.  Do NOT extend this list to source,
+# proofs or blueprint TeX, where a line replaces another line: union merge would
+# silently keep both versions of a changed statement.
+#
+# Belt and braces, not the structural fix.  Sharding the event log so two
+# sessions never write one path is what removes the hazard; union merge keeps
+# the merge train moving until every writer is sharded, and afterwards keeps the
+# remaining shared records (builds.jsonl, sessions.jsonl, EVOLUTION.md)
+# mergeable.  Asserted by local/bin/worktree-setup.sh, next to the hook check:
+#   git check-attr merge -- results/telemetry/events.md   # -> merge: union
+
+results/telemetry/*.md          merge=union
+results/telemetry/**/*.md       merge=union
+results/telemetry/*.jsonl       merge=union
+results/telemetry/**/*.jsonl    merge=union
+
+# Append-only by protocol: every session adds a dated entry.
+local/protocols/EVOLUTION.md    merge=union

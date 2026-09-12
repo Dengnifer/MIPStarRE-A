@@ -235,6 +235,44 @@ install_hooks() { # <worktree>
   return 1
 }
 
+# The union merge driver for the append-only records (.gitattributes).  Asserted
+# here, next to the hooks, for the same reason: a gate that is silently absent is
+# worse than one that is loudly missing.  Before it was committed the driver
+# lived only in $(git rev-parse --git-common-dir)/info/attributes on one host, so
+# a fresh clone or a reset of .git/info brought back a conflict on nearly every
+# merge of main.  `git check-attr` reports what is actually in effect, wherever
+# it came from, which is the thing worth checking.
+MERGE_UNION_PROBES="results/telemetry/events.md
+results/telemetry/sessions.jsonl
+local/protocols/EVOLUTION.md"
+
+check_merge_attributes() { # <worktree>
+  local tree="$1" probe attr bad=0
+  while IFS= read -r probe; do
+    [ -n "$probe" ] || continue
+    attr="$(run_outside_git_env git -C "$tree" check-attr merge -- "$probe" 2>/dev/null \
+      | sed -n 's/.*: merge: //p' || true)"
+    if [ "$attr" = "union" ]; then
+      continue
+    fi
+    bad=1
+    warn "merge attribute for $probe is '${attr:-unreadable}', not 'union'"
+  done <<EOF
+$MERGE_UNION_PROBES
+EOF
+  if [ "$bad" -eq 0 ]; then
+    log "union merge driver in effect for the append-only telemetry records"
+    return 0
+  fi
+  warn "Append-only records will conflict on nearly every merge of main."
+  warn "The driver belongs in the COMMITTED .gitattributes at the repository root:"
+  warn "  results/telemetry/*.md        merge=union   (and the ** and .jsonl forms)"
+  warn "  local/protocols/EVOLUTION.md  merge=union"
+  warn "Check that this worktree's branch carries that file, and that nothing in"
+  warn "\$(git rev-parse --git-common-dir)/info/attributes overrides it."
+  return 1
+}
+
 # --------------------------------------------------------------------------- main
 
 main() {
@@ -310,6 +348,10 @@ main() {
 
   # 7. Local gates.  docs/ci-automation.md: run --check in each fresh worktree.
   install_hooks "$WORKTREE" || status=1
+
+  # 8. Merge hygiene.  Read-only in both modes: the driver is committed, so
+  #    there is nothing to install — only something to notice when it is gone.
+  check_merge_attributes "$WORKTREE" || status=1
 
   if [ "$status" -eq 0 ]; then
     log "worktree ready: $WORKTREE"

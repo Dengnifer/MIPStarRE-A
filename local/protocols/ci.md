@@ -60,7 +60,7 @@ blueprint-fix, everything else → never auto-fixed) ports without translation.
 
 | Step | Parent job | What it runs (in the worktree) | Gate |
 |---|---|---|---|
-| `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
+| `build` | `build` (`pr-ci.yml:115-168`) | `check_umbrella_imports.py --root . --ci` (local addition, §7.1), warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
 | `blueprint-render` | `blueprint-render` (`:173-243`) | remove the prior PDF, run the project `latexmk` configuration noninteractively, require its exit zero and a fresh non-empty `blueprint/print/print.pdf` (`:210-218`), `texra-blueprint bbl` (`:222-223`), `texra-blueprint web` with `grep '^ERROR:'` (`:225-243`) | `blueprint_src ∨ workflow` |
 | `paper-gaps` | `paper-gaps` (`:248-271`) | `texra-blueprint --root . paper-gaps check` | `paper_gaps ∨ workflow` |
 | `blueprint-sync` | `blueprint-sync` (`:273-317`) | `python3 -m unittest discover -s scripts/tests`, `blueprint_lean_sync.py --update-lean-decls`, `blueprint_lean_sync.py --ci`, `blueprint_axiom_audit_needed.py --base-ref` | `lean ∨ blueprint ∨ scripts ∨ workflow` |
@@ -259,6 +259,9 @@ policy, whose rationale is documented at `pr-ci.yml:137-142`: per-PR saves of
 so no run ever restored usable oleans. The local failure mode is identical if a
 worktree writes into the shared snapshot, so it does not.
 
+The step opens with the reachability guard (§7.1) — the one sub-check that can
+fail without spending the machine's single full-build budget — and then:
+
 1. If `.lake/build` is absent, run `local/bin/warm-worktree.sh <worktree>`,
    which resolves the hot-main snapshot and clones it copy-on-write. Contract:
    idempotent, exit 0 when it populated or deliberately declined, nonzero on a
@@ -291,6 +294,55 @@ older than the merge base is safe — but only within one
 `hash(lean-toolchain, lake-manifest.json, lakefile.toml)` class. Crossing that
 boundary is `build-cache.md`'s problem, not this protocol's: `ci.sh` delegates
 the check to `warm-worktree.sh` and simply builds whatever it is handed.
+
+### 7.1 The reachability guard
+
+**Staged rollout.** The guard ships `--warn-only` (issue 551). Five modules that
+predate it are already outside the closure on the head it landed on, so a fatal
+step would have failed every open PR for a defect none of them introduced. Issue
+551 adds the five import lines to their re-export files and removes the flag;
+until then the step reports the orphans and stays green.
+
+`lake build` compiles the import closure of the re-export roots and nothing
+else. A module outside that closure type checks under `lake env lean` and still
+gets **no `.olean`**, so it passes CI and then fails the per-file pre-push gate
+in a lane hours later. That is the 2026-09-12 failure: nothing imported
+`MIPStarRE.QPBT.Combining.Points.Absorption` or `…Points.MarginalContraction`,
+every lane's gate failed on the missing oleans, and the lane runner grew three
+hand-patched revisions before anyone looked at the import graph.
+
+`scripts/check_umbrella_imports.py` walks `MIPStarRE/**/*.lean` (excluding
+`*/Test/*`), computes the transitive import closure of the re-export roots —
+`MIPStarRE.lean` and every `MIPStarRE/<Name>.lean` that shadows a
+`MIPStarRE/<Name>/` directory, today `LDT`, `QPBT` and `Quantum` — and exits
+nonzero listing each unreachable module with the exact `import …` line to add
+and the re-export file it belongs in (the nearest existing ancestor module).
+
+Four properties are not negotiable. **It never edits a re-export file** —
+re-exports are serialized by the operator and workers are told not to touch
+`MIPStarRE/QPBT.lean`, so the check prints the line and stops (a regression test
+asserts the file is byte-identical after a run). **It reads no proof**, only
+import headers. **It adds no CI context**: it runs inside the *existing* `build`
+step body, because the eight canonical `local-ci/<step>` contexts plus
+`local-ci/summary` are what `pr_merge.py` gate 3 requires and a ninth would be a
+merge-gate change. **A deeper re-export file is not a root** — `Points.lean` must
+itself be reachable, since an unimported re-export file yields no oleans for its
+whole subtree.
+
+A module imported only from a `*/Test/*` module counts as unreachable and is
+reported with that note: a test target produces no library olean. An unreadable
+file is reported, not crashed on; a file that is not valid UTF-8 is parsed with
+replacement characters and reported as a warning (import lines are ASCII). A
+branch that predates the script gets a `note_warning`, not a failure, so the
+guard cannot turn an unrelated open PR red. `--warn-only` prints the same report
+and exits 0, for a single run over a tree whose orphans are filed as a follow-up
+issue rather than fixed in place.
+
+One caution for the auto-fix dispatcher (§4's `failure` row maps `build` →
+`ci-fix`): the fix for this finding is an `import` line in a re-export file, and
+re-exports are serialized by the operator. A `ci-fix` worker that is handed this
+failure adds the printed line and nothing else — no statement, no proof, no
+axiom, no signature — or hands it back.
 
 ## 8. The axiom audit is reported, not run
 
@@ -349,6 +401,7 @@ consumer's explicit, visible responsibility.
 | `--github-annotations` on the duplicate-helper audit | dropped | annotation-only flag |
 | `push`-to-main and docs-only `pull_request` triggers | none | the docs-only paths existed solely to emit the completion event that started PR Review (`pr-ci.yml:31-33`); locally the lifecycle script calls `review.sh` directly |
 | implicit "PR event" job conditions | every run is a PR run | `ci.sh` is only ever invoked on a GitHub PR number |
+| no reachability check | `check_umbrella_imports.py` opens the `build` step (§7.1) | on GitHub a missing olean surfaced in the same job; locally it surfaced in a lane hours after the merge (2026-09-12). Added *inside* the existing step, so the eight canonical contexts are unchanged |
 
 ## 12. Amendments
 
