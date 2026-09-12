@@ -1208,3 +1208,4 @@
 {"ts": "2026-09-12T15:11:40+0900", "kind": "ci-build", "trigger": "ci.sh pr=272", "seconds": 40, "outcome": "success", "sha": "0f75e68f01f813db957cff62f1a6067faafcb167", "note": "branch issue-266-tensor-consistency-transfer"}
 {"ts": "2026-09-12T15:12:04+0900", "kind": "ci-build", "trigger": "ci.sh pr=263", "seconds": 175, "outcome": "success", "sha": "42e50b35fa90738691f90fb59af1dd26910b48b4", "note": "branch issue-258-encoding-supported-measurement"}
 {"ts": "2026-09-12T15:12:27+0900", "kind": "ci-build", "trigger": "ci.sh pr=493", "seconds": 65, "outcome": "success", "sha": "2aa0dcd5ce57b7f269600be171059859fc5bff0d", "note": "branch issue-477-nondegenerate-pasting-resampling"}
+{"ts": "2026-09-12T15:15:38+0900", "kind": "ci-build", "trigger": "ci.sh pr=280", "seconds": 24, "outcome": "success", "sha": "bc1be8180c5fc86d5f0a623ebfa334ccea15d02f", "note": "branch issue-277-ground-compression"}

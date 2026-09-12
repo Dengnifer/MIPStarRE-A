@@ -151,7 +151,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 1,
+   "blocking": 0,
    "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-19-pauli-soundness -->\n### Target\n\n`MIPStarRE/QPBT/Test/Soundness.lean`: `pauli_soundness` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\n\nopen scoped BigOperators Matrix ComplexOrder\n\nnamespace MIPStarRE.QPBT\n\nopen MIPStarRE.LDT\nopen MIPStarRE.Quantum\n\nnoncomputable section\n\n/-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits\nlocal isometries and an auxiliary unit state for which the state and both\noperator families are close at scale `deltaQld`.  The theorem uses the\nonce-and-for-all self-dual-normal field model selected by `fixedFieldModel` for\neach admissible size, rather than a freshly quantified field identification.\nBlueprint\n`thm:pauli`; paper origin\n`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`.\n\nThe paper's asymptotic constants are encoded by the explicit `deltaQld`\nfunctional; the squared operator distances use the quantitative convention of\nblueprint `def:povm-distance`.\n-/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem pauli_soundness :\n    \u2203 a b : \u211d, 1 \u2264 a \u2227 0 < b \u2227 b < 1 \u2227\n      \u2200 (P : AdmissibleParams) (\u03b5 : \u211d), 0 \u2264 \u03b5 \u2192\n        \u2200 S : Strategy (pauliBasisTest P), 1 - \u03b5 \u2264 S.value \u2192\n          \u2203 w : PauliSoundnessWitness P S,\n            \u2016isometryTensor w.\u03c6A w.\u03c6B S.\u03c8 - idealState P w.aux\u2016 \u2264\n                deltaQld a b \u03b5 P.m P.d P.q \u2227\n            (\u2200 W : PauliKind,\n              pauliOperatorDistanceA P S w W \u2264 deltaQld a b \u03b5 P.m P.d P.q) \u2227\n            (\u2200 W : PauliKind,\n              pauliOperatorDistanceB P S w W \u2264 deltaQld a b \u03b5 P.m P.d P.q) := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run concurrent full builds.\n\nUse primary-repository local/bin tools for all workflow operations and gh_common.py for GitHub. Scrub invoking-model and review-model settings before CI or workflow fixtures. Commit conventional source changes with all useful work preserved, open a PR through pr_open.py, and run required exact-head CI after verifying published-head propagation. Do not merge a PR, push/commit main, fo",
@@ -169,93 +169,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/529/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/528",
-  "id": 5431300983,
-  "node_id": "I_kwDOUJyJf88AAAABQ7sTdw",
-  "number": 528,
-  "title": "feat(QPBT/Test): discharge pauli_soundness_qubit",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-12T05:07:45Z",
-  "updated_at": "2026-09-12T05:07:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
-  "issue_dependencies_summary": {
-   "blocked_by": 1,
-   "total_blocked_by": 1,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-18-pauli-soundness-qubit -->\n### Target\n\n`MIPStarRE/QPBT/Test/QubitForm.lean`: `pauli_soundness_qubit` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\nexistence conclusion of `cor:pauli-binary`. -/\ntheorem qubit_operator_distance_b_to_qubit\n    (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))\n    (w : PauliSoundnessWitness P S) (W : PauliKind) :\n    qubitOperatorDistanceB P S w.toQubit W = pauliOperatorDistanceB P S w W := by\n  unfold qubitOperatorDistanceB pauliOperatorDistanceB\n  refine Finset.sum_congr rfl fun label _ => ?_\n  have hnorm := BinaryWitnessTransport.operator_error_reindex\n    (BinaryWitnessTransport.jointEquiv P w.\u03b9A' w.\u03b9B')\n    (liftedBEffect S w.\u03c6B\n      (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect label))\n    (pauliProjOnB'' P W label) (idealState P w.aux)\n  rw [BinaryWitnessTransport.lifted_effect_b_reindex,\n    BinaryWitnessTransport.ideal_projector_b_reindex,\n    BinaryWitnessTransport.ideal_state_reindex] at hnorm\n  exact congrArg (fun error : \u211d => error ^ 2) hnorm\n\n/-- `cor:pauli-binary`: soundness of the Pauli basis test in qubit\ncoordinates. Blueprint `cor:pauli-binary`, paper\n`08_classical_and_quantum_low_degree_tests.tex:1450-1491`.\n\nThe theorem assumes a nonnegative error parameter, as in the source, and uses\nonly `P.model` and its stored basis dimension. -/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem pauli_soundness_qubit :\n    \u2203 a b : \u211d, 1 \u2264 a \u2227 0 < b \u2227 b < 1 \u2227\n      \u2200 (P : AdmissibleParams) (\u03b5 : \u211d), 0 \u2264 \u03b5 \u2192\n        \u2200 S : Strategy (pauliBasisTest P), 1 - \u03b5 \u2264 S.value \u2192\n          \u2203 w : QubitSoundnessWitness P S,\n            \u2016isometryTensor w.\u03c6A w.\u03c6B S.\u03c8 - idealQubitState P w.aux\u2016 \u2264\n                deltaQld a b \u03b5 P.m P.d P.q \u2227\n            (\u2200 W : PauliKind,\n              qubitOperatorDistanceA P S w W \u2264\n                deltaQld a b \u03b5 P.m P.d P.q) \u2227\n            \u2200 W : PauliKind,\n              qubitOperatorDistanceB P S w W \u2264\n                deltaQld a b \u03b5 P.m P.d P.q := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run c",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/528/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -10526,8 +10439,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 13,
-   "completed": 8,
-   "percent_completed": 61
+   "completed": 9,
+   "percent_completed": 69
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
