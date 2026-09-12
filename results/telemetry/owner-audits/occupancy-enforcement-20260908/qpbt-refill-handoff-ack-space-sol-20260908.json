@@ -1,0 +1,50 @@
+{
+  "schema": "qpbt-refill-handoff-ack-v1",
+  "recorded_at": "2026-09-08T08:49:30Z",
+  "from": "/root/astra_refill_coordinator",
+  "to": "/root/space_sol_publication_finish",
+  "root_authorized": true,
+  "acknowledged": true,
+  "effective_at": "2026-09-08T08:46:37.885Z",
+  "policy": {
+    "space_total": 10,
+    "native_limit": 9,
+    "useful_native_floor": 8,
+    "aim": 9,
+    "active_main": 1,
+    "active_other": 0,
+    "activity_max_interval_seconds": 60,
+    "idle_reservations_count": false,
+    "completed_workers_count": false
+  },
+  "preserved": {
+    "goal_and_counters": true,
+    "all_predecessor_budgets": true,
+    "b8_attempts": 13,
+    "b8_working_seconds": 26509,
+    "b8_reset": false,
+    "lease_or_capacity_changed": false,
+    "model_policy_changed": false,
+    "nested_pool_created": false,
+    "frozen_main": "af87d3f2f5787ea3fea793260f995ea93f47ba85",
+    "main_publication_before_next_service_merge": false
+  },
+  "mechanics": {
+    "sampler": "/tmp/qpbt-worker-live-sampler-20260908.py",
+    "journal": "/tmp/qpbt-worker-live-refill-20260908.jsonl",
+    "selection_owner": "/root",
+    "primary_telemetry_writer": "/root/space_sol_publication_finish",
+    "refill_rule": "Only root-approved dependency-ready same-turn successors after a verified real completion; count only fresh attributable work."
+  },
+  "current_handles": {
+    "pr356_review_exec_session": 94290,
+    "pr356_code_nonce_completed": "d9306f0d65294889bf6acd1cc56e2bfe",
+    "pr356_prose_nonce_running": "8142050df0794159aa6f0244b768b866",
+    "pr356_head": "99f88dcf722677bec0de5a3e635726ce46a647e4",
+    "pr358_ci_exec_session": 98640,
+    "pr358_ci_exit": 0,
+    "pr358_head": "c8ede4f44295c109f6890fcea2622a78e4ed6afc",
+    "pr358_ci_manifest": "/home/drx/.cache/mipstarre-dev/ci-manifests/pr358-c8ede4f44295c109f6890fcea2622a78e4ed6afc.json"
+  },
+  "delegate_receipt": "/tmp/qpbt-refill-delegate-status-20260908.json"
+}
