@@ -211,7 +211,7 @@ theorem subline_replace_by_ordered_product_re_direct :
                     (projZ (directPointToPauli P
                       (s.1.1.base + s.2 • s.1.1.direction))) o.1 o.2))) := by
     intro G
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     exact (regroup_placed_line_answer_sum lines sample.2.1 sample.2.2 _ _ (G _ _)).symm
@@ -281,7 +281,7 @@ theorem subline_replace_by_ordered_product_re_direct :
                           (projX (directPointToPauli P
                             (sample.1.base + t • sample.1.direction)))).effect ab.1))
                   S.psiHat‖ ^ 2)) :=
-        avgOver_prod _ _ _
+        SandwichProduct.avgOver_distribution_prod _ _ _
       _ = avgOver (uniformDistribution
             ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
           (fun xz => ∑ ab : PauliScalar P × PauliScalar P,
