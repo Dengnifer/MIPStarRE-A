@@ -93,11 +93,17 @@ justifies the substitution.  On the complement, the proof must bound
   \sum_{g\ \mathrm{not\ an\ encoding}}
   \langle\widehat\psi,\widehat S_g^W\widehat\psi\rangle.
 \]
-The blueprint derives an $O(\delta_S)+md/q$ bound from point consistency and
-the combined point measurement.  A non-encoding polynomial differs from every
-encoded polynomial, so Schwartz--Zippel bounds the probability that their
-evaluations coincide.  This estimate is the open reduction; it must be proved
-from the paper hypotheses rather than inserted as an extraction hypothesis.
+For a supplied global polynomial-pair witness with point-consistency error
+$\delta_G$, the formal proof derives an
+$O(\delta_G+\sqrt\eps)+md/q$ bound. Measure the original Pauli answer $h$ and
+the ancillary ideal Pauli answer $h'$ and return $g_{h+h'}$. This reference
+measurement is supported on encodings. Perfect ancillary consistency and the
+Pauli-basis check bound its evaluated inconsistency with the given marginal.
+A non-encoding polynomial differs from every encoded polynomial, so
+Schwartz--Zippel bounds the probability that their evaluations coincide.
+Completeness and positivity then bound the non-encoding mass by the full
+polynomial inconsistency. No support estimate is inserted as an extraction
+hypothesis.
 
 The printed reindexing at lines~1805--1822 replaces
 $g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
@@ -139,7 +145,11 @@ and \path{decodeFq_dotProduct_indicatorVec} carry complete proofs: the degree
 side-condition on $g_h$, the two linearity laws, the inversion
 $\operatorname{Dec}_{\mathbb F_q}(g_h)=h$, and the evaluation identity under the
 explicit \path{IsEncoding} hypothesis.  The complementary estimate
-\path{nonencodingMarginalMass_le} is the remaining open proof of this note.
+\path{nonencodingMarginalMass_le} is also proved, in issue~\#517, with its
+original assumptions and conclusion. Its proof depends only on the standard
+Lean axioms \path{propext}, \path{Classical.choice}, and \path{Quot.sound}.
+The auxiliary module \path{MIPStarRE/QPBT/Extraction/NonencodingSupport.lean}
+provides the evaluated reference comparison and the support reduction.
 Issue~\#19 owns the Stage~4.2 statements and this discrepancy record;
 \ghissue{47} owns the Stage~4.3 decoder calculations, now discharged, and the
 non-encoding support estimate.  No unrestricted theorem, residual assumption, or
@@ -149,8 +159,10 @@ additional witness field was introduced.
 
 The decoding identity is false for a general polynomial outcome.  Restricting
 it to the encoding image is a necessary local correction.  Recovering the
-source's measurement-consistency conclusion then requires the separate
-non-encoding-mass estimate, which remains an open proof obligation.
+source's measurement-consistency conclusion uses the separate
+non-encoding-mass estimate, now proved for a supplied global polynomial-pair
+witness. Constructing that witness and completing the remaining extraction
+estimates are separate obligations.
 
 \bibliographystyle{alpha}
 \bibliography{references}
