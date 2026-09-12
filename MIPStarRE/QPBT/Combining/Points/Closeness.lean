@@ -18,7 +18,7 @@ one, and the elementary estimate collapsing the error terms `ε`, `√ε`, and
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:838-881`
 (self-consistency and consistency with `M̂` in the proof of `lem:qld-4-10`),
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:803-960`; the route
-is explained in `docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
+is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -82,21 +82,6 @@ theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableE
           _ ≤ 4 := by linarith
     _ = 4 := avgOver_uniform_const _
 
-/-- The effects of a projective measurement, placed on a register pair, are
-square-summable to the identity. -/
-theorem ProjectiveSetting.sum_place_effect_conjTranspose_mul_self_le_one
-    {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε) (p : Placement)
-    {α : Type*} [Fintype α] (M : Measurement α (S.ExpandedLocalSpace p.side))
-    (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
-    ∑ a, (S.place p (M.effect a))ᴴ * S.place p (M.effect a) ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a, (S.place p (M.effect a))ᴴ * S.place p (M.effect a)
-      = ∑ a, S.place p (M.effect a) := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [← S.place_conjTranspose, ← S.place_mul,
-          (hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
-    _ = 1 := by rw [← S.place_finsetSum, M.sum_eq_one, S.place_one]
-
 /-- The products `A_a B_b` of the effects of two projective measurements on a
 common space are square-summable to the identity. -/
 theorem sum_mul_conjTranspose_mul_self_eq_one {α β ι : Type*} [Fintype α]
@@ -135,24 +120,9 @@ theorem sum_mul_conjTranspose_mul_self_eq_one' {α β ι : Type*} [Fintype α]
     (hB : MIPStarRE.QPBT.Measurement.IsProjective B) :
     ∑ ab : α × β, (B.effect ab.2 * A.effect ab.1)ᴴ * (B.effect ab.2 * A.effect ab.1) =
       1 := by
-  have hpt : ∀ (a : α) (b : β),
-      (B.effect b * A.effect a)ᴴ * (B.effect b * A.effect a) =
-        A.effect a * B.effect b * A.effect a := by
-    intro a b
-    rw [Matrix.conjTranspose_mul, (hA a).isSelfAdjoint.isHermitian.eq,
-      (hB b).isSelfAdjoint.isHermitian.eq, Matrix.mul_assoc _ _ (B.effect b * A.effect a),
-      ← Matrix.mul_assoc (B.effect b) (B.effect b), (hB b).isIdempotentElem.eq,
-      ← Matrix.mul_assoc]
-  rw [Fintype.sum_prod_type]
-  calc ∑ a : α, ∑ b : β, (B.effect b * A.effect a)ᴴ * (B.effect b * A.effect a)
-      = ∑ a : α, A.effect a * (∑ b : β, B.effect b) * A.effect a := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [Finset.mul_sum, Finset.sum_mul]
-        exact Finset.sum_congr rfl fun b _ => hpt a b
-    _ = 1 := by
-        simp_rw [B.sum_eq_one, mul_one]
-        rw [Finset.sum_congr rfl fun a _ => (hA a).isIdempotentElem.eq]
-        exact A.sum_eq_one
+  have h := sum_mul_conjTranspose_mul_self_eq_one B A hB hA
+  rw [Fintype.sum_prod_type, Finset.sum_comm] at h
+  simpa only [Fintype.sum_prod_type] using h
 
 /-! ## The chain of closeness estimates -/
 
