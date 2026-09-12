@@ -21,10 +21,10 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
    `.worktrees/`, run `local/bin/worktree-setup.sh` there, then
    `local/bin/pr_open.py --branch issue-<number>-slug --title "..." --body-file pr.md --issue N` (the body follows the PR template in `local/protocols/issues-prs.md`),
    which pushes the branch and opens the GitHub PR.
-3. **Dispatch external agents**: only via `local/bin/dispatch.sh --role prover
+3. **Dispatch agents**: only via `local/bin/dispatch.sh --role prover
    --issue NNNN --worktree .worktrees/<name> -- "task"`. Session telemetry
-   lands in `results/telemetry/`. Native Ultra descendants follow
-   `protocols/sessions.md` under a shared root capacity lease.
+   lands in `results/telemetry/`. Lease-backed native descendants are retired;
+   `protocols/sessions.md` retains their history separately.
 4. **CI**: `local/bin/ci.sh PPPP` (build via hot cache + audits + blueprint
    checks) → per-step `local-ci/*` statuses and the manifest PR comment.
 5. **Review**: `local/bin/review.sh PPPP` — runs only after green CI; publishes
@@ -49,7 +49,7 @@ unblocks its dependents with no edit anywhere.
 
 ## Telemetry
 
-Optional useful-work queue: [protocol and rollout](protocols/useful-queue.md).
+Retired useful-work queue: [historical protocol](protocols/useful-queue.md).
 
 Session, stage, build, and incident records live under `results/telemetry/` as
 described in [`protocols/meta.md`](protocols/meta.md). The
@@ -68,8 +68,8 @@ pointed event or owner log rather than expanding the index into a second log.
   `github-sync.sh`, and `autofix.sh`) so the gate finishes before push transport
   starts.
 - One session never reviews its own diff.
-- External sessions use `dispatch.sh`; native descendants use the shared lease,
-  independent-review transport and native telemetry protocol in `sessions.md`.
+- Worker sessions use `dispatch.sh`; the native lease and review transport in
+  `sessions.md` are historical and must not be used for new work.
 - Invoke workflow tools through the primary checkout's path
   (`/…/MIPStarRE-dev/local/bin/…`), never through a worktree's copy — a
   branch's copy can predate protocol fixes (EVOLUTION.md, 2026-08-30).

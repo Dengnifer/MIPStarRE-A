@@ -7,7 +7,9 @@ import Mathlib.Algebra.Polynomial.Roots
 
 This module identifies coefficient-list evaluation with Mathlib polynomial
 evaluation and derives the finite root-count bound for distinct line
-polynomials.
+polynomials. The general coefficient bound is re-exported from
+`MIPStarRE.QPBT.Algebra.Coefficients`; `degPoly_collision_card_le` retains the
+specialized proof for the low-degree game's coefficient type.
 
 ## References
 
@@ -32,9 +34,9 @@ theorem polynomial_ofFn_eval_eq_evalCoefficient {K : Type*} [CommSemiring K]
 /-- Distinct coefficient polynomials of degree at most `bound` agree at no
 more than `bound` field elements. This is the univariate root bound underlying
 the Schwartz-Zippel step at paper
-`14_analysis_of_the_pauli_basis_test.tex:955`. No restriction of the degree
-relative to the field size is required. -/
-theorem evalCoefficient_collision_card_le {L : LdParams} {bound : ℕ}
+`14_analysis_of_the_pauli_basis_test.tex:955`, specialized to `DegPoly`.
+No restriction of the degree relative to the field size is required. -/
+theorem degPoly_collision_card_le {L : LdParams} {bound : ℕ}
     (first second : DegPoly L bound) (hne : first ≠ second) :
     (Finset.univ.filter fun param => evalCoefficient first param =
       evalCoefficient second param).card ≤ bound := by
