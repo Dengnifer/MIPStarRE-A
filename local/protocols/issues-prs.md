@@ -288,8 +288,7 @@ Pinned issue #26 is the owner inbox: it receives only decisions that require
 the human owner. A source statement found to be mathematically false does not
 go there first. Following the availability report on #26 and the September 6
 owner decision, main selects Astra Ultra for the mathematical-gap lane through
-`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
-or the shared native protocol in `sessions.md`.
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
