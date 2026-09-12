@@ -260,6 +260,23 @@ if [ -z "$DAEMON_PID" ] || ! kill -0 "$DAEMON_PID" 2>/dev/null; then
   echo "$PROG: POST-CONDITION: no merge daemon is running (daemon.pid '${DAEMON_PID:-none}')" >&2
   RC=5
 fi
+# The PATH shim refuses every CODEX_HOME other than ~/.codex while
+# watchdog/account-mode says `primary` (or is absent, which reads the same), so
+# an enabled second account plus `primary` is a key with a cap and nowhere to
+# dispatch — the idle-slot failure of 2026-09-12 intervention 2, invisible
+# except as deaths in the AIMD.  run_mode.py derives the file from
+# accounts[].enabled on apply, pause and resume; this checks that it landed.
+AM="$(cat "$W/account-mode" 2>/dev/null || echo absent)"
+AM_WANT="$(python3 "$RUN_MODE" get account_mode 2>/dev/null || echo unknown)"
+if [ "$AM_WANT" != unknown ] && [ "$AM" != "$AM_WANT" ]; then
+  echo "$PROG: POST-CONDITION: $W/account-mode is '$AM', and accounts[].enabled derives '$AM_WANT'" >&2
+  echo "$PROG: with 'primary' the codex shim exits 4 for every non-default CODEX_HOME:" >&2
+  echo "$PROG: an enabled second account would hold a cap and dispatch nowhere." >&2
+  echo "$PROG: fix with: python3 $RUN_MODE resume   (it writes the file)" >&2
+  RC=5
+else
+  printf '  %-10s %s (derived from accounts[].enabled)\n' account-mode "$AM"
+fi
 if [ -e "$W/drain" ]; then echo "$PROG: POST-CONDITION: watchdog/drain still exists" >&2; RC=5; fi
 if [ -e "$W/goal-hold" ]; then echo "$PROG: POST-CONDITION: watchdog/goal-hold still exists" >&2; RC=5; fi
 if [ ! -s "$W/max-codex" ]; then echo "$PROG: POST-CONDITION: $W/max-codex is missing or empty" >&2; RC=5; fi
