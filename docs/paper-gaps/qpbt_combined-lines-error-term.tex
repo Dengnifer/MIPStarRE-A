@@ -362,6 +362,20 @@ first-route bound is not dominated by any such function: along the
 scaling $\eps = m^{-4}$ with $q/(md) \to \infty$, both $m^2\eps = m^{-2}$
 and $md/q$ tend to $0$, while the term $m\,\eps^{1/4} = 1$ does not.
 Hence the established derivation supports no bound of the claimed form.
+This obstruction persists on the admissible numerical domain, even if the
+first-route term is capped by the independent unit bound on consistency.
+Indeed, set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and
+$\eps_n=m_n^{-4}$. The field-size exponent $6n+3$ is odd and
+$m_n\mid q_n$, so these parameters are admissible. Both $m_n^2\eps_n$
+and $m_nd_n/q_n$ equal $m_n^{-2}$ and tend to zero, whereas
+$\min\{1,m_n\eps_n^{1/4}\}=1$. Thus no bound of the corrected sum form
+$C((m^2\eps)^r+(md/q)^s)$ with positive exponents can dominate this
+capped term uniformly.%
+\footnote{This numerical obstruction is proved by
+\leanid{MIPStarRE.QPBT.not\_exists\_combining\_quarter\_power\_bound} in
+\path{MIPStarRE/QPBT/Combining/ErrorObstruction.lean}, tracked by
+\ghissue{510}. It does not construct a strategy attaining the first-route
+upper bound and does not refute the extended-line existence statement.}
 The second-route bound, even granting the missing decomposition, carries
 the separate prefactor $m^2$: writing $\delta_P = \poly(\eps, md/q)$
 with some fixed positive exponents, the contribution
