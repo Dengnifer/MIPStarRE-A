@@ -902,7 +902,7 @@ assembled by Fourier averaging.
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
 	\lean{MIPStarRE.QPBT.exists_combinedLinesWitness}
-	\notready
+	\leanok
 	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:symmetric-equivalents,
 		def:ideg-deg-polynomials}
@@ -931,66 +931,17 @@ assembled by Fourier averaging.
 	$\ell_W$ is axis-parallel, then $f_W \in \deg_{d}(\ell_W)$.
 \end{lemma}
 \begin{proof}
-	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
-		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
-		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents, def:concrete-paired-line-measurement,
+	\leanok
+	\uses{lem:qld-4-10, lem:combined-line-measurement-consistency,
+		def:concrete-paired-line-measurement,
 		lem:concrete-paired-line-degree-support}
-	Define, for all lines $\ell_X, \ell_Z$ and
-	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
-	operator
-	$T^{\ell_X,\ell_Z}_{f_X,f_Z}
-	= \hat{M}^{(\mathrm{Line},X),\ell_X}_{f_X}
-	\hat{M}^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
-	\hat{M}^{(\mathrm{Line},X),\ell_X}_{f_X}$,
-	which forms a valid POVM; since the lines measurements come from a valid
-	strategy for the low-degree test, on an axis-parallel line $\ell_W$ the
-	outcome $f_W$ lies in $\deg_d(\ell_W)$, and this property is inherited by
-	$T$. As intermediate consistency relations, write
-	$\hat{Q}^{x,z}_{a,\bullet} = \sum_b \hat{Q}^{x,z}_{a,b}$ and
-	$\hat{Q}^{x,z}_{\bullet,b} = \sum_a \hat{Q}^{x,z}_{a,b}$ for the two
-	marginals of the combined point measurement of
-	Lemma~\ref{lem:qld-4-10}. Applying
-	Lemma~\ref{fact:add-a-proj} to \eqref{eq:qld-q-cons-m-hat-zx} and then
-	Lemma~\ref{lem:cool-closeness-fact} gives, on average over uniform
-	$x, z$,
-	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'}
-	\approx_\delta
-	\sum_b (\hat{Q}^{x,z}_{a,b})_{\mathsf{A}\mathsf{A}'}
-	(\hat{M}^{(\mathrm{Point},Z),z}_{b})_{\mathsf{B}\mathsf{A}''}$,
-	and a direct norm computation from this display and
-	\eqref{eq:qld-q-cons-m-hat-zx} yields the marginal consistencies
-	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
-	(\hat{M}^{(\mathrm{Point},X),x}_{a})_{\mathsf{B}\mathsf{A}''}$ and
-	$(\hat{Q}^{x,z}_{\bullet,b})_{\mathsf{A}\mathsf{A}'} \approx_{\delta_Q}
-	(\hat{M}^{(\mathrm{Point},Z),z}_{b})_{\mathsf{B}\mathsf{A}''}$.
-	From items 1 and 3 of Lemma~\ref{lem:qld-comm-line-cons}, converting
-	between $\approx$ and $\simeq$ with Lemma~\ref{fact:agreement} and
-	summing outcomes with Lemma~\ref{fact:data-processing}, the lines
-	measurements are consistent with the points measurements, and combining
-	with the marginal consistencies gives, on average over the line-point
-	distribution,
-	$(\hat{Q}^{x,z}_{a,\bullet})_{\mathsf{A}\mathsf{A}'} \simeq_{\delta_Q}
-	(\hat{M}^{(\mathrm{Line},X),\ell_X}
-	_{[\mathrm{eval}_x(\cdot)=a]})_{\mathsf{B}\mathsf{A}''}$
-	together with the analogous relation for $Z$. The conclusion now follows
-	from the pasting lemma (Lemma~\ref{lem:pasting}) applied with
-	$\hat{Q}^{x,z}_{a,b}$ in the role of the combined measurement,
-	$\hat{M}^{(\mathrm{Line},X),\ell_X}$ and
-	$\hat{M}^{(\mathrm{Line},Z),\ell_Z}$ in the roles of the two factor
-	measurements, $T^{\ell_X,\ell_Z}$ in the role of the pasted measurement,
-	$\delta := \delta_Q$, and $\eta := md/q$, the last justified by the
-	Schwartz--Zippel bound (Lemma~\ref{lem:schwartz-zippel-total-degree})
-	applied to the polynomials $f_X, f_Z$ of total degree at most $md$; the
-	two hypotheses of the pasting lemma are supplied by the preceding display
-	and by \eqref{eq:qld-q-self-cons}, and the distribution over
-	$(\ell_X, \ell_Z)$ is that of two independent uniformly random lines. The
-	register-exchanged comparison \eqref{eq:pasting-1-sym} is supplied by the
-	symmetric equivalents of that preceding display, which
-	Lemma~\ref{lem:qld-4-10} establishes for all of its approximations.
-	This gives the stated relation with $\delta_P$ equal to the pasting
-	error, a $\poly(\eps, md/q)$ function, and the identical argument with
-	the registers modified gives all symmetric equivalents.
+	Choose the joint point family and its polynomial error function from
+	Lemma~\ref{lem:qld-4-10}. Take the POVM of
+	Definition~\ref{def:concrete-paired-line-measurement}.
+	Lemma~\ref{lem:combined-line-measurement-consistency} gives its evaluated
+	consistency with the chosen points, in every directed opposite placement.
+	The axis-degree conclusion is
+	Lemma~\ref{lem:concrete-paired-line-degree-support}.
 \end{proof}
 
 \begin{definition}[The concrete paired-line POVM]
@@ -1035,9 +986,10 @@ assembled by Fourier averaging.
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
-	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting-heterogeneous,
 		def:concrete-paired-line-measurement, def:consistency}
-	This is a Lean-only construction obligation. Fix a polynomially small
+	This is a formalization auxiliary lemma. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
 	such that for every projective strategy passing with error $\eps$ and
@@ -1056,6 +1008,43 @@ assembled by Fourier averaging.
 	part of the preceding construction while retaining its defining
 	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-line-cons, lem:pasting-heterogeneous,
+		fact:agreement, fact:add-a-proj, lem:cool-closeness-fact,
+		lem:schwartz-zippel-total-degree, def:line-point-dist,
+		def:concrete-paired-line-measurement}
+	The two ordered-product comparisons imply the X and Z point-marginal
+	bounds. Combining these with line-point consistency and line
+	self-consistency bounds each completed point-to-line marginal defect by
+	$\Delta=8\delta_Q(\eps)+C(\eps+\sqrt{\eps})$, for a universal $C\ge1$.
+
+	Condition the product line-point law on the X line having nonzero
+	direction. Its retained mass $r$ is at least $1/2$, since every axis
+	direction is nonzero. Resampling an independent uniform affine
+	parameter preserves the line-point law. On each nondegenerate X line,
+	the root bound therefore gives conditional collision probability at
+	most $md/q$. Both marginal defects under the restricted law are at
+	most $\Delta/r$.
+
+	Reindex the expanded state according to the chosen opposite placements,
+	keeping the unused registers on the line-measurement side. Apply
+	Lemma~\ref{lem:pasting-heterogeneous} with answer order Z then X:
+	its sandwich is precisely the X-Z-X POVM in the statement.
+	Reversing both answer coordinates preserves the consistency defect.
+
+	The discarded zero-direction mass is at most $1/(2q)$: it is zero
+	for axis lines, and at most $1/q$ for diagonal lines, since their
+	last direction coordinate is uniform. Every pointwise consistency
+	defect lies in $[0,1]$. Restoring the original law gives the bound
+	\[
+		r\,\delta_{\mathrm{pasting}}(md/q,\Delta/r)+\frac1{2q}.
+	\]
+	Take the minimum with the independent unit bound. Since
+	$1/2\le r\le1$, $md\ge1$, and $\delta_Q$ is polynomially small,
+	the result has a uniform bound of the required corrected sum form.
+	The same argument applies to every directed opposite placement.
+\end{proof}
 
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
