@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Games.DistributionRestriction
 
 /-!
 # Generating laws of the restricted line-point distributions
@@ -29,66 +30,6 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 noncomputable section
-
-/-! ## Restriction of a push-forward -/
-
-/-- Formalization-only auxiliary: restricting a push-forward distribution to a
-decidable event is the push-forward of the restriction to the pre-image of
-that event.  Blueprint `lem:qld-sublines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem Distribution.restrict_map {α β : Type*} [DecidableEq α] [DecidableEq β]
-    (μ : Distribution α) (f : α → β) (p : β → Prop) [DecidablePred p]
-    (q : α → Prop) [DecidablePred q] (hq : ∀ a, q a ↔ p (f a))
-    (hpos : 0 < ∑ b ∈ (μ.map f).support.filter p, (μ.map f).weight b)
-    (hpos' : 0 < ∑ a ∈ μ.support.filter q, μ.weight a) :
-    Distribution.restrict (μ.map f) p hpos =
-      (Distribution.restrict μ q hpos').map f := by
-  classical
-  have hfiber : ∀ b : β, p b →
-      μ.support.filter (fun a => f a = b) =
-        (μ.support.filter q).filter (fun a => f a = b) := by
-    intro b hb
-    ext a
-    simp only [Finset.mem_filter]
-    constructor
-    · rintro ⟨ha, hab⟩
-      exact ⟨⟨ha, (hq a).mpr (hab ▸ hb)⟩, hab⟩
-    · rintro ⟨⟨ha, -⟩, hab⟩
-      exact ⟨ha, hab⟩
-  have himg : (μ.map f).support.filter p = (μ.support.filter q).image f := by
-    ext b
-    simp only [Distribution.map_support, Finset.mem_filter, Finset.mem_image]
-    constructor
-    · rintro ⟨⟨a, ha, rfl⟩, hpb⟩
-      exact ⟨a, ⟨ha, (hq a).mpr hpb⟩, rfl⟩
-    · rintro ⟨a, ⟨ha1, ha2⟩, rfl⟩
-      exact ⟨⟨a, ha1, rfl⟩, (hq a).mp ha2⟩
-  have hmass : (∑ b ∈ (μ.map f).support.filter p, (μ.map f).weight b) =
-      ∑ a ∈ μ.support.filter q, μ.weight a := by
-    rw [himg]
-    rw [← Finset.sum_fiberwise_of_maps_to
-      (s := μ.support.filter q) (t := (μ.support.filter q).image f)
-      (g := f) (fun a ha => Finset.mem_image_of_mem f ha) μ.weight]
-    refine Finset.sum_congr rfl fun b hb => ?_
-    obtain ⟨a0, ha0, rfl⟩ := Finset.mem_image.mp hb
-    rw [Distribution.map_weight,
-      hfiber _ ((hq a0).mp (Finset.mem_filter.mp ha0).2)]
-  refine Distribution.ext_of_support_of_weight ?_ ?_
-  · exact himg
-  · funext b
-    show (if p b then (μ.map f).weight b /
-        ∑ c ∈ (μ.map f).support.filter p, (μ.map f).weight c else 0) =
-      ∑ a ∈ (μ.support.filter q).filter (fun a => f a = b),
-        (if q a then μ.weight a / ∑ c ∈ μ.support.filter q, μ.weight c else 0)
-    by_cases hb : p b
-    · rw [if_pos hb, hmass, Distribution.map_weight, hfiber b hb,
-        Finset.sum_div]
-      refine Finset.sum_congr rfl fun a ha => ?_
-      rw [if_pos (Finset.mem_filter.mp (Finset.mem_filter.mp ha).1).2]
-    · rw [if_neg hb]
-      refine (Finset.sum_eq_zero fun a ha => ?_).symm
-      obtain ⟨ha1, ha2⟩ := Finset.mem_filter.mp ha
-      exact absurd (ha2 ▸ (hq a).mp (Finset.mem_filter.mp ha1).2) hb
 
 /-! ## The coordinate-index event on a single uniform vector -/
 

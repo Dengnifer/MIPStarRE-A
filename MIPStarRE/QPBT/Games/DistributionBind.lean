@@ -1,24 +1,17 @@
-import MIPStarRE.QPBT.Combining.Lines.SubLinePrefix
+import MIPStarRE.QPBT.Games.DistributionAux
 
 /-!
 # Rewriting rules for dependent mixtures of finite distributions
 
-This module records the elementary rewriting rules for the dependent mixture
-of finite distributions that the sampling procedure of the sub-line lemma
-uses: a mixture indexed along a push-forward is the mixture indexed along the
-original law, iterated mixtures associate, a mixture is unchanged when the
-mixed family is changed only outside the index support, a mixture of a
-constant family is that constant, a product with a fixed independent factor
-distributes over a mixture, and an equal two-term mixture is the mixture
-indexed by a uniform pair of labels.
+Push-forwards commute with dependent mixtures, iterated mixtures associate,
+and products distribute over mixtures with a fixed independent factor.
 
 ## References
 
-The rewriting rules support `lem:qld-sublines` in
-blueprint `lem:qld-sublines`, whose source is
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The mixture, product and equal-mixture operations are those of
-blueprint `def:line-point-dist`.
+These formalization-only identities support blueprint `lem:qld-sublines` and
+`lem:restricted-line-mixture-bounds`, using the operations of
+`Games/DistributionAux.lean`. The sampling argument is in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1116`.
 -/
 
 open scoped BigOperators
@@ -28,6 +21,47 @@ namespace MIPStarRE.QPBT
 open MIPStarRE.LDT
 
 noncomputable section
+
+/-- Formalization-only auxiliary: a push-forward commutes with a dependent
+bind.  Blueprint `lem:restricted-line-mixture-bounds`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`. -/
+theorem Distribution.bind_map {α β γ : Type*} [DecidableEq β] [DecidableEq γ]
+    (μ : Distribution α) (ν : α → Distribution β) (f : β → γ) :
+    (Distribution.bind μ ν).map f =
+      Distribution.bind μ (fun a => (ν a).map f) := by
+  classical
+  refine Distribution.ext_of_support_of_weight ?_ ?_
+  · change (μ.support.biUnion fun a => (ν a).support).image f =
+      μ.support.biUnion fun a => (ν a).support.image f
+    ext c
+    constructor
+    · intro hc
+      obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hc
+      obtain ⟨a, ha, hb'⟩ := Finset.mem_biUnion.mp hb
+      exact Finset.mem_biUnion.mpr ⟨a, ha, Finset.mem_image_of_mem f hb'⟩
+    · intro hc
+      obtain ⟨a, ha, hc'⟩ := Finset.mem_biUnion.mp hc
+      obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hc'
+      exact Finset.mem_image.mpr ⟨b, Finset.mem_biUnion.mpr ⟨a, ha, hb⟩, rfl⟩
+  · funext c
+    change (∑ b ∈ (μ.support.biUnion fun a => (ν a).support).filter
+          (fun b => f b = c),
+        ∑ a ∈ μ.support, μ.weight a * (ν a).weight b) =
+      ∑ a ∈ μ.support, μ.weight a *
+        ∑ b ∈ (ν a).support.filter (fun b => f b = c), (ν a).weight b
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun a ha => ?_
+    rw [Finset.mul_sum]
+    refine (Finset.sum_subset ?_ ?_).symm
+    · intro b hb
+      obtain ⟨hb1, hb2⟩ := Finset.mem_filter.mp hb
+      exact Finset.mem_filter.mpr
+        ⟨Finset.mem_biUnion.mpr ⟨a, ha, hb1⟩, hb2⟩
+    · intro b hb hbnot
+      have hfb : f b = c := (Finset.mem_filter.mp hb).2
+      have hnot : b ∉ (ν a).support := fun hmem =>
+        hbnot (Finset.mem_filter.mpr ⟨hmem, hfb⟩)
+      rw [(ν a).outsideSupport b hnot, mul_zero]
 
 /-! ## Reindexing a dependent mixture -/
 

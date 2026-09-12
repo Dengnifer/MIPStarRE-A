@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Games.DistanceTheorems
+import MIPStarRE.QPBT.Games.DistributionAverage
 import MIPStarRE.QPBT.Games.Sandwich.Defs
 
 /-! # Quantitative support for sandwiched measurements
@@ -30,24 +31,8 @@ theorem avgOver_distribution_prod {X Y : Type*}
     [DecidableEq X] [DecidableEq Y] (μ : Distribution X) (ν : Distribution Y)
     (f : X × Y → ℝ) :
     avgOver (Distribution.prod μ ν) f =
-      avgOver μ (fun x => avgOver ν (fun y => f (x, y))) := by
-  unfold avgOver
-  change (∑ p ∈ μ.support.product ν.support,
-    (μ.weight p.1 * ν.weight p.2) * f p) = _
-  calc
-    (∑ p ∈ μ.support.product ν.support,
-        (μ.weight p.1 * ν.weight p.2) * f p) =
-        ∑ x ∈ μ.support, ∑ y ∈ ν.support,
-          (μ.weight x * ν.weight y) * f (x, y) := by
-      exact Finset.sum_product' μ.support ν.support
-        (fun x y => (μ.weight x * ν.weight y) * f (x, y))
-    _ = _ := by
-      apply Finset.sum_congr rfl
-      intro x _
-      rw [Finset.mul_sum]
-      apply Finset.sum_congr rfl
-      intro y _
-      ring
+      avgOver μ (fun x => avgOver ν (fun y => f (x, y))) :=
+  avgOver_prod μ ν f
 
 /-- The diagonal overlap after a common relabeling is the sum over pairs of
 original outcomes with equal labels. This is the formalization-only identity
