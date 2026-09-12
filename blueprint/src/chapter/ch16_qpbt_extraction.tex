@@ -291,14 +291,34 @@ Each displayed construction estimate below has its own universal constant $C_E \
 \label{lem:qld-nonencoding-mass-bound}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass_le}
+	\leanok
 	\uses{def:s-w-marginals, def:qld-full-field-decoder, def:expanded-state,
 		lem:qld-4-7}
-	For either player and either Pauli basis, the non-encoding marginal mass in
+	Fix a global polynomial-pair witness satisfying the two point-consistency
+	bounds of Lemma~\ref{lem:qld-4-7}, with error $\delta_G$. For either player and
+	either Pauli basis, the non-encoding marginal mass in
 	Equation~\eqref{eq:qld-nonencoding-mass} is at most
 	$\delta_P^{\mathrm{supp}}=C_{\mathrm{supp}}B$ for a universal
 	$C_{\mathrm{supp}}\geq1$. This bound must be derived from point consistency and
 	Schwartz--Zippel; it is not an additional extraction hypothesis.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-win-implications, lem:qld-comm-cons,
+		fact:triangle-for-simeq, lem:schwartz-zippel-individual}
+	Measure the original Pauli answer $h$ and the ancillary Pauli answer $h'$
+	and return $g_{h+h'}$. This reference measurement is supported on encodings.
+	Perfect ancillary consistency preserves the point and Pauli-basis
+	consistency defects under additive convolution. The consistency triangle
+	therefore bounds the evaluated inconsistency between the given marginal and
+	the reference by $\delta_G+c\sqrt\eps$, for a universal $c$.
+	Schwartz--Zippel bounds their full polynomial inconsistency by
+	$\delta_G+c\sqrt\eps+md/q$. Every non-encoding outcome of the marginal is
+	an unequal outcome against the reference, so its total mass satisfies this
+	bound. Enlarging the universal constant gives $C_{\mathrm{supp}}B$.
+	The argument proves the estimate for the supplied witness; it does not
+	construct that witness.
+\end{proof}
 
 % Following the source, the next lemma is stated after
 % lem:qld-construct-the-paulis, whose proof invokes it; its own proof
