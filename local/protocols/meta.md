@@ -57,13 +57,26 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 - `results/telemetry/sessions.jsonl` —
   `{name, role, model?, account?, requested_effort?, issue, pr?, thread_id,
     start, end, wall_s, usage: {input, cached_input, cache_write, output, reasoning},
-    exit, dispatcher, worktree, status: active|done|failed|archived}`
+    exit, dispatcher, worktree, status: active|done|failed|archived|refused,
+    endpoint, failure_class, failure_detail?, failure_endpoint?, retries_seen,
+    key_label?, override_mode?, override_source?}`
   Written only by `local/bin/dispatch.sh` / `telemetry.py`. New dispatches always
   supply `account` (`primary` or `second`) and the exact resolved `model`
   passed to the CLI (environment override, otherwise selected-account config).
   External rows use allocator accounts `primary|second`; native rows use the
   active key label (`space` or historical `relay-1`) in both `account` and
   `key_label`, with `dispatcher: native`.
+  `status: refused` means the dispatch was never admitted, or died before any
+  model turn: it is **not** a failed attempt and must not be scored against a
+  proof packet's budget. `failure_class` is one of `none`, `refused`,
+  `endpoint_down`, `concurrency_limit`, `endpoint_5xx`, `retries_exhausted`,
+  `timeout`, `task_failure`, `unknown` (`sessions.md` §4.1); `unknown` is the
+  safe default and the capacity controller treats it as neutral. `key_label` is
+  recorded for **both** accounts and matches `[a-z0-9.-]{1,40}`; `endpoint` is
+  on every row, so a key moved between homes keeps the identity failures and
+  health are attributed to. `override_mode` / `override_source` appear only
+  while an owner model override is in force, and the Sol:Astra ratio audit
+  **excludes** those rows rather than reading them as violations.
   When the dispatcher supplies a reasoning override, `requested_effort` is its
   effective value after model-specific normalization. It records the CLI request,
   not provider-measured effort. All three fields remain optional for historical
@@ -77,14 +90,31 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
 - `results/telemetry/builds.jsonl` —
   `{ts, kind: warm|rebuild|cache-get|ci-build, trigger, seconds, outcome,
     sha?, note?}`
-- `results/telemetry/events.md` — dated bullets; free prose; one incident per
-  bullet: symptom → diagnosis → fix → lesson.
+- `results/telemetry/events.d/<YYYY-MM-DD>-<session>.md` — dated bullets; free
+  prose; one incident per bullet: symptom → diagnosis → fix → lesson. **This is
+  where new bullets go.** `telemetry.py event` writes the shard for (today, the
+  writing session), so two sessions never touch one path and a merge of `main`
+  cannot conflict on the log — append-only telemetry conflicted on nearly every
+  merge on 2026-09-12. The shard label is `MIPSTARRE_SESSION` (or `--session`).
+- `results/telemetry/events.md` — the same log before sharding. It keeps its
+  full history and is **never rewritten**; it carries a header pointing at
+  `events.d/`. Read the two together with
+  `telemetry.py events --since YYYY-MM-DD [--until D] [--format md|json]`,
+  which merges them in date order; every existing reader that greps `events.md`
+  still finds the history it always found.
 
 Duties:
 
 - **Every external Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
+- **Incidents go to `events.d/`**, one shard per (date, session), through
+  `telemetry.py event`. Never hand-append to `events.md`: it is the pre-shard
+  history and is not rewritten.
+- **The recorded model is the model that ran.** No tool may rewrite a model
+  between the policy's selection and the CLI — a PATH shim that did so on
+  2026-09-12 made `sessions.jsonl` name a model no session used. A run-wide
+  model decision is a policy override (`override_mode`, `override_source`).
 - Historical native descendants were recorded with `telemetry.py native-record`
   under `sessions.md`:
   `dispatcher: native`, root/parent IDs, key label, actual model/requested effort,
@@ -122,7 +152,7 @@ The project doubles as a study of a self-evolving formalization workflow.
 Three artifacts must therefore stay trustworthy:
 
 - `EVOLUTION.md` — complete: every protocol change has an entry.
-- `events.md` — honest: failures are recorded as failures, including agent
-  mistakes, wasted builds, and reverted work.
+- `events.md` + `events.d/` — honest: failures are recorded as failures,
+  including agent mistakes, wasted builds, and reverted work.
 - `sessions.jsonl` + `stages.jsonl` — quantitative: per-stage cost
   (time, tokens, session counts) reconstructible by a script, not by memory.

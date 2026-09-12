@@ -220,7 +220,7 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6: main selects Astra Ultra after the #26 availability report,
+`issues-prs.md` section 6: main selects Astra Ultra after the #500 availability report,
 supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 
 ## 3. Naming
@@ -306,6 +306,101 @@ switch model or reset budgets. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` an
 being normalized. The owner's verified space login is not rewritten here; the
 historical scoped-home directory name may still contain `relay1` for continuity.
 `requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
+
+`watchdog/max-codex` is the mechanical sum of the per-account caps and has **no
+admission meaning**: the router reads only `max-codex-{primary,second}`. It is
+kept for the lane runner's internal parallelism and the operator display
+(`local/protocols/capacity.md`).
+
+#### Failure classes
+
+Every session ending is classified by `telemetry.py classify_failure` over the
+captured event stream and recorded on the registry row as `failure_class`, with
+`failure_detail`, `failure_endpoint` and `retries_seen` beside it. The provider
+wordings are data, not code: `local/capacity-policy.json` may replace the whole
+table under `failure_patterns`, so a wording change is a one-file edit.
+
+| Class | What it means | Retryable |
+|---|---|---|
+| `none` | exit 0 | — |
+| `refused` | the router never admitted the dispatch | yes |
+| `endpoint_down` | the dispatcher refused to reserve on an endpoint the controller had marked `down` | yes |
+| `concurrency_limit` | `Concurrency limit exceeded for account` | yes |
+| `endpoint_5xx` | 503/502/504 from the endpoint | yes |
+| `retries_exhausted` | the client gave up reconnecting (`Reconnecting... 5/5`) | yes |
+| `timeout` | our own `MIPSTARRE_SESSION_TIMEOUT` guard fired | **no** |
+| `task_failure` | a clean nonzero exit with model output — the work failed | **no** |
+| `unknown` | anything else | **no** |
+
+`unknown` is the safe default and the capacity controller treats it as
+**neutral**: neither an increase nor a decrease. A provider wording change
+therefore degrades to static behaviour instead of collapsing the caps.
+When a transient class ends a session that produced **no model turn**, the row's
+`status` is `refused`, not `failed`: the dispatch was never admitted, so it is
+not scored as a failed attempt against a proof packet's budget.
+
+#### Key labels and endpoints
+
+`dispatch.sh` takes the key label and the endpoint for the **selected** account
+from the run mode file (`run_mode.py get`, else `watchdog/run-mode.json`), and
+passes both to `telemetry.py` for **both** accounts. `MIPSTARRE_KEY_LABEL`
+overrides them. A label must match `[a-z0-9.-]{1,40}`; one outside that class
+fails the dispatch closed rather than being rewritten to `unknown`, and a label
+is never interpolated into a shell command or a path unquoted. `relay-1`,
+`space` and `unknown` are inside the class, so historical rows stay valid. Every
+row carries an `endpoint`, so a key moved between homes keeps the identity that
+failures and health are attributed to.
+
+#### Endpoint preflight, spool and retry
+
+Before reserving, `dispatch.sh`:
+
+1. **refuses a `down` endpoint.** `watchdog/capacity/health-<account>.json` is
+   written by the capacity controller; its absence means healthy. A retry
+   against a `down` account waits for half-open instead of firing — five
+   client-side retries against a dead endpoint are exactly how 69 refusals
+   became 69 deaths on 2026-09-12.
+2. **claims the branch** (below).
+3. **spools the request** to `watchdog/capacity/spool/<name>.json`: role, issue,
+   PR, worktree, branch, persona ref, effort, job class, sandbox, the prompt
+   file path, the attempt count and the deadline. The prompt is copied beside
+   it, so the janitor can replay the exact dispatch.
+
+A `refused` / `endpoint_down` / `concurrency_limit` / `endpoint_5xx` /
+`retries_exhausted` outcome is **not** a death: the dispatcher sleeps a jittered
+exponential backoff (base 30 s, cap 10 min) and re-reserves, up to
+`MIPSTARRE_DISPATCH_ATTEMPTS` (default 5) or the run's dispatch cutoff
+(`run.dispatch_cutoff`; the literal `until my word` means none). When those run
+out it exits **7** and leaves the spool entry for the janitor. A router refusal
+is therefore a retryable condition of the day, not a preflight death.
+
+Two rules on that retry are load-bearing:
+
+- **A transient-class retry never consumes a proof packet attempt** and never
+  resets a budget. The continuation handoff is validated once, before the loop,
+  so the `account_router.continuation()` budget fields are untouched; the
+  retried dispatch reuses the same session name with an `-a<N>` suffix, so
+  telemetry keeps one episode rather than N unrelated sessions.
+- **A retry is gated on endpoint health**, per (1) above.
+
+A successful dispatch clears its spool entry; anything else leaves it.
+
+#### Branch claim — one writer per branch
+
+A branch can be checked out in more than one worktree, so the worktree lock is
+not enough: on 2026-09-12 an autofix loop and a prover ran on PR 342's branch at
+once and every later wave needed a `git stash push` preamble.
+
+Before reserving, `dispatch.sh` takes `locks/branch-<branch>.claim` holding the
+role, the pid and the session name, for the whole session, released in
+`release_locks()` with the usual stale-pid breaking. A second writer is refused
+with **exit 5** and the message names the holding session. Exemptions:
+
+- a session with `--sandbox read-only` (it writes nothing, and a lane's own
+  review step must not refuse against its own prover's claim);
+- `--allow-concurrent`, which is a deliberate operator decision and belongs in
+  `events.md` with its reason;
+- a detached-HEAD worktree, which has no branch to claim.
 
 Preconditions the dispatcher (human or orchestrator) owns:
 
@@ -504,13 +599,18 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 | codex rollout | `~/.codex/sessions/YYYY/MM/DD/rollout-*-<thread-id>.jsonl` | outside the repo; path recorded, contents not relied on |
 | worktree | `.worktrees/<branch>` | removed at archival |
 | locks | `~/.cache/mipstarre-dev/locks/` | released at exit |
+| branch claim | `~/.cache/mipstarre-dev/locks/branch-<branch>.claim` | released at exit; stale pids broken |
+| spool entry | `~/.cache/mipstarre-dev/watchdog/capacity/spool/<name>.json` | cleared on delivery; left for the janitor otherwise |
 
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
 stream) and, when resolvable, `rollout`. New dispatches record `account` and the
 explicitly resolved `model` as described in §4.1. They also record
 `requested_effort` when §4.1 produces a nonempty override; historical rows are
-unchanged. Token usage is summed over
+unchanged. Every new row also carries `endpoint`, `failure_class`,
+`failure_detail`, `failure_endpoint` and `retries_seen` (§4.1, Failure classes),
+`key_label` for **both** accounts, and — while an owner model override is in
+force — `override_mode` and `override_source`. Token usage is summed over
 `turn.completed` events and normalized to
 `{input, cached_input, cache_write, output, reasoning}`; `dispatch.sh` writes
 `status: done` or `failed` at the end of a run, and `active` is reserved for
@@ -525,13 +625,16 @@ backfilled or externally started sessions.
 | 0 | session ran and codex exited 0 |
 | 2 | usage error (unknown role, bracketed scope, oversized prompt, missing task) |
 | 3 | disabled by a kill switch |
-| 4 | preflight failure (no codex, no worktree, unreadable persona, hooks not installable) |
-| 5 | worktree busy |
+| 4 | preflight failure (no codex, no worktree, unreadable persona, hooks not installable, a key label outside the character class, an unreadable dispatch cutoff) |
+| 5 | worktree busy, **or** the branch is claimed by another session (the message names it) |
 | 6 | telemetry append failed — the capture is intact and the message says how to replay it |
+| 7 | not admitted after every attempt (endpoint down, router refusal, or a transient provider class); the spool entry is left for the janitor |
 | other | codex's own exit status, propagated after the registry line is written |
 
 Codes 2–5 are decided before codex starts, so no registry line exists for
 them; a session that produced a registry line always reports codex's status.
+Code 7 records exactly one `refused` row for the whole episode: a refusal is
+never scored as a failed attempt.
 
 ## 12. Amendments
 

@@ -1,6 +1,13 @@
 # Incident and observation log
 Dated bullets, one incident each: symptom → diagnosis → fix → lesson.
 This file is the raw feed for `local/protocols/EVOLUTION.md`.
+
+**New bullets go to `results/telemetry/events.d/<YYYY-MM-DD>-<session>.md`.**
+One shard per date and writing session, written by `local/bin/telemetry.py event`,
+so two sessions never append to one path and a merge of `main` cannot conflict on
+this log. The history below is kept verbatim and is never rewritten; read the two
+together with `python3 local/bin/telemetry.py events --since YYYY-MM-DD`.
+
 ## 2026-09-05
 - **Owner-side `.lake` relocation shim.** Worktree build directories consumed the
   87%-full root volume, whose fsync writes measured nine times slower than the
@@ -7927,3 +7934,52 @@ not actual commit/publication hooks. No productive session was killed.
   Structural fixes that stay in place: lane runner v20, union merge driver for telemetry logs, fix-lane/autofix-loop tools, daemon
   PAR=8. Caps recorded for the resume: second 27 (the owner limited the local session to 2 of the 30 slots). Leftover workers were
   stopped at the deadline; the main session's goal is paused; resume only on the owner's word (/tmp/owner-resume.sh, PAR=8).
+
+## 2026-09-12 — Dispatch, telemetry and model policy after the full speed run (W2)
+
+- **A provider refusal was invisible, unsurvivable, and charged to the task.** On
+  2026-09-12 about 90 worker sessions died: 69 when the primary endpoint answered
+  503 for half an hour, the rest above the second key's real concurrency limit.
+  Nothing read those endings — `sessions.jsonl` recorded `failed` with an exit
+  code, so a refusal by the provider was scored exactly like a proof the model
+  could not close, the caps were chased by hand ten times, and `dispatch.sh`
+  turned a router refusal into `die 4`. Diagnosis: the endings were prose in a
+  capture file nobody parsed, the key label was recorded for the primary account
+  only (the other value was hard-coded `unknown`), and the retry decision lived
+  in the operator's head. Fix: `telemetry.py classify_failure` classifies each
+  ending against the provider's wordings — read from
+  `local/capacity-policy.json` when it exists, built-in defaults otherwise —
+  into `concurrency_limit`, `endpoint_5xx`, `retries_exhausted`, `timeout`,
+  `task_failure` or a neutral `unknown`; `refused` joins the statuses so a
+  dispatch that never reached a model turn is not a failed attempt;
+  `dispatch.sh` spools the whole request before reserving, retries a transient
+  class with jittered backoff (never consuming a packet attempt, never firing at
+  an endpoint the controller marked `down`), takes a per-branch claim that
+  refuses a second writer with exit 5, and passes the key label and endpoint for
+  **both** accounts. Lesson: a failure that has no class has no owner — every
+  automatic decision downstream was waiting for a human to read a log.
+- **The fixers died before they ran, and the loop that drove them read a log
+  tail.** `autofix.sh` defaulted `MIPSTARRE_FIX_MODEL` to a bare hard model,
+  which the published policy refuses for a routine job, so every fix session
+  exited at the dispatcher's preflight; the `/tmp` loop around it decided when to
+  stop by grepping the tail of a shared append-only log. Fix: the default is
+  empty (the dispatcher's default), one startup self-check dies with the
+  policy's own message before any worktree work, the same check guards
+  `review.sh`, and `--loop [N]` replaces the grep with round records and the
+  exit codes 0 approved / 3 no-change / 4 cap / 2 phase failure. Lesson: a
+  default that the next gate rejects is not a default, it is a delayed failure.
+- **The model the owner asked for and the model telemetry recorded were
+  different.** "All workers on the hard model" was implemented as a `sol -> astra`
+  rewrite inside the deployed PATH shim, so every row said `sol` for a session
+  that ran Astra and the ratio audit became unreadable. Fix: the override is a
+  model-policy object plus a runtime knob (`watchdog/model-override`) that only
+  narrows toward the hard model and never lowers effort; it travels as
+  `override_mode` / `override_source` on the row, and the ratio excludes those
+  rows rather than reading them as violations. The rewrite is gone from the
+  shim. Lesson: a switch that hides itself from the record buys speed today and
+  spends the study's data.
+- **Append-only telemetry conflicted on nearly every merge.** `events.md` is one
+  path every session appends to. Fix: `telemetry.py event` writes
+  `results/telemetry/events.d/<date>-<session>.md`, `events.md` keeps its history
+  unrewritten behind a pointer header, and `telemetry.py events --since` reads
+  both. This bullet is the last one written into `events.md` by hand.
