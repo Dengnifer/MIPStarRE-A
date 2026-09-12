@@ -130,3 +130,63 @@ Publication and exact-head local CI are the next workflow gates, followed by
 independent review. Issue #519 should remain open while #517 leaves its axiom
 closure incomplete. The final session report records publication and CI
 outcomes; this session does not launch a reviewer or merge the PR.
+
+## Completion after the saved support proof became available
+
+This section supersedes the earlier residual-dependency status. During the
+publication checks, the saved commit
+`e36fd1aa056782007917b0d6c5e19b85ea28179b` from #517 became available. Its
+support proof gives new mathematical evidence beyond the initial reduction.
+The necessary source modules were read and recovered, with their original
+provenance retained:
+
+- `Extraction/EncodingSupport.lean` and the public tensor-measurement API in
+  `Games/DistanceTheorems.lean`, originally from `55ae7487`.
+- `Extraction/PolynomialCollision.lean`, originally from `36c07381`.
+- `Games/SupportMass.lean`, originally from `ff4c92d1`.
+- `Games/DistanceTheorems/TensorConsistency.lean`, originally from `84c7ec43`.
+- `Combining/Lines/PairStateConsistencyTransport.lean`, originally from `7f916eb8`.
+- `Extraction/NonencodingSupport.lean`, proved in `e36fd1aa`.
+
+Only these necessary support files and the tensor API change were recovered.
+The other packet's `Consistency.lean`, blueprint, audit, and gap-note edits
+were not copied. In particular, `nonencodingMarginalMass_le` remains untouched
+in this branch; the target no longer uses that declaration.
+
+The reference returns the encoding of the sum of the strategy's Pauli answer
+and the ideal ancillary answer. Its evaluated consistency with Alice's
+global marginal is at most `deltaG + C * sqrt epsilon`, by the point and
+Pauli-basis checks and exact preservation under independent ancillary
+convolution. Schwartz-Zippel adds `md/q`, and completeness bounds the marginal
+mass outside encodings by that inconsistency. Applying these recovered
+lemmas directly proves Alice's mass bound inside the target. Combining it
+with the new defect estimate gives
+
+\[
+  \operatorname{Defect}(\widetilde M_{\mathrm A},M_{\mathrm B})
+  \leq 2\delta_G+C\sqrt\epsilon+md/q
+  \leq (C+1)(\delta_G+\sqrt\epsilon+md/q),
+\]
+
+using `C >= 1` and nonnegative errors. The public existential constant,
+quantifier order, assumptions, distribution, register ordering, and conclusion
+are unchanged. A fresh byte comparison of the target signature succeeds.
+
+Focused compilation of every recovered file and the updated target succeeds.
+After regenerating the target's branch-private `.olean`, the fresh axiom
+audit reports exactly `propext`, `Classical.choice`, and `Quot.sound` for
+`tildeM_consistent_pointMeas'`, as well as the four earlier new estimates.
+The separate `nonencodingMarginalMass_le` still reports `sorryAx`, confirming
+that its unchanged proof hole is outside the target's dependency closure.
+
+The earlier #517 blocking edge records the provenance of the support work,
+whose verified content is now included in this branch. The completed target
+still assumes the supplied global witness exactly as before; it does not
+construct that witness or prove the other items of the extraction lemma.
+No blueprint proof-completion tag is added to the combined source lemma.
+
+The #517 session is additional to the prerequisite cost table above, with
+its final time and usage retained in the dispatcher record when available.
+The full-build and exact-head CI results for the completed target are recorded
+in PR #539 and the final session report. Independent review remains the next
+gate after green CI.
