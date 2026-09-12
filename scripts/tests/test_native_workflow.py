@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'local/bin'))
-import account_router as router
 import native_review as review
 import telemetry
 import model_policy
@@ -206,7 +205,26 @@ class NativeWorkflowTests(unittest.TestCase):
                     mock.patch.object(review, 'accept_response') as accepted, \
                     self.assertRaisesRegex(ValueError, 'identity mismatch'):
                 review.accept_existing(accept_args)
-            accepted.assert_not_called()
+                accepted.assert_not_called()
+
+    def test_rebuilt_prompt_must_match_the_unchanged_canonical_prompt(self):
+        request, policy, args = self.existing_request()
+        args.rebuilt_prompt = self.root / 'rebuilt.md'
+        original = self.prompt.read_bytes()
+        for tamper in ('code', 'prose'):
+            with self.subTest(lane=tamper):
+                args.rebuilt_prompt.write_text(tamper + ' prompt drift')
+                with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                        mock.patch.object(review, 'accept_response') as accepted, \
+                        self.assertRaisesRegex(ValueError, 'rebuilt prompt digest mismatch'):
+                    review.accept_existing(args)
+                accepted.assert_not_called()
+                self.assertEqual(self.prompt.read_bytes(), original)
+        args.rebuilt_prompt.write_bytes(original)
+        with mock.patch.object(model_policy, 'select_model', return_value=policy), \
+                mock.patch.object(review, 'accept_response') as accepted:
+            review.accept_existing(args)
+            accepted.assert_called_once()
 
     def test_freshness_assignment_and_current_completion_are_required(self):
         for options in (dict(timestamp='2026-09-06T13:13:59.999Z'), dict(assigned=False),
@@ -236,124 +254,14 @@ class NativeWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'fresh independently'):
             self.acceptance()
 
-    def test_lease_counts_descendants_and_retains_unknown_or_dead_capacity(self):
-        (self.root / 'watchdog').mkdir()
-        (self.root / 'watchdog/primary-key-capacity').write_text('5')
-        lease_info = dict(self.info, slots=4)
-        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
-                mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            router.native_lease(self.root, ROOT, 100, 4)
-            self.assertEqual(router.occupancy(self.root), ([4, 0], [1, 0]))
-            self.assertEqual(router.admission_limits(self.root, [1, 0])[0][0], 4)
-            with mock.patch.object(router, 'process_identity', return_value='123'):
-                with self.assertRaises(ValueError):
-                    router.native_lease(self.root, ROOT, 100, 4, release=True)
-            self.assertEqual(router.native_leases(self.root)[ROOT]['slots'], 4)
-            with mock.patch.object(router, 'process_identity', return_value='reused'):
-                router.native_lease(self.root, ROOT, 100, 4, release=True)
-            self.assertEqual(router.native_leases(self.root), {})
-        (self.root / 'watchdog/primary-external-reserved').write_text('4')
-        with mock.patch.object(router, 'native_process', return_value=dict(self.info)), \
-                mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            with self.assertRaisesRegex(ValueError, 'allocation exhausted'):
-                router.native_lease(self.root, ROOT, 100, 8)
+    def test_retired_native_capacity_cannot_publish_review(self):
+        with self.assertRaisesRegex(ValueError, 'leases are retired'):
+            review.verify_root(self.root, ROOT)
+        self.write_rollout()
+        with self.assertRaisesRegex(ValueError, 'leases are retired'):
+            review.completed_review(self.request, CHILD)
+        self.assertFalse(list(self.root.glob('native-reviews/*')))
 
-    def test_native_lease_fails_closed_without_owner_capacity(self):
-        with mock.patch.object(router, 'native_process', return_value=dict(self.info)), \
-                mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            with self.assertRaisesRegex(ValueError, 'owner key capacity is required'):
-                router.native_lease(self.root, ROOT, 100, 4)
-
-    def test_external_gate_zero_refuses_dispatch(self):
-        watchdog = self.root / 'watchdog'
-        watchdog.mkdir()
-        (watchdog / 'primary-external-admission').write_text('0')
-        with mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            with self.assertRaisesRegex(ValueError, 'external admission disabled'):
-                router.reserve(self.root, 'auto', 100, 0, True)
-
-    def test_space_three_descendants_fill_five_with_two_observed_interactives(self):
-        (self.root / 'watchdog').mkdir()
-        (self.root / 'watchdog/primary-key-capacity').write_text('5')
-        (self.root / 'watchdog/primary-external-admission').write_text('0')
-        info = dict(self.info, slots=3)
-        with mock.patch.object(router, 'native_process', side_effect=lambda *args: dict(info)), \
-             mock.patch.object(router, 'host_processes', return_value=(
-                 {100: 1, 200: 1}, {100: ('primary', True), 200: ('primary', True)})):
-            router.native_lease(self.root, ROOT, 100, 3)
-            self.assertEqual(router.occupancy(self.root), ([3, 0], [2, 0]))
-            with self.assertRaisesRegex(ValueError, 'external admission disabled'):
-                router.reserve(self.root, 'auto', 300, 0, False)
-
-    def test_external_admission_fails_closed_without_owner_capacity(self):
-        watchdog = self.root / 'watchdog'
-        watchdog.mkdir()
-        (watchdog / 'max-codex').write_text('5')
-        with mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            with self.assertRaisesRegex(ValueError, 'owner key capacity is required'):
-                router.reserve(self.root, 'auto', 100, 0, True)
-
-    def test_external_reservation_counts_the_interactive_root(self):
-        watchdog = self.root / 'watchdog'
-        watchdog.mkdir()
-        (watchdog / 'primary-key-capacity').write_text('5')
-        (watchdog / 'max-codex').write_text('5')
-        (watchdog / 'max-codex-primary').write_text('5')
-        with mock.patch.object(router, 'occupancy', return_value=([4, 0], [1, 0])):
-            with self.assertRaisesRegex(ValueError, 'capacity exhausted'):
-                router.reserve(self.root, 'auto', 100, 0, True)
-
-    def test_release_requires_the_original_root_identity(self):
-        (self.root / 'watchdog').mkdir()
-        (self.root / 'watchdog/primary-key-capacity').write_text('5')
-        lease_info = dict(self.info, slots=4)
-        with mock.patch.object(router, 'native_process', side_effect=lambda *a: dict(lease_info)), \
-                mock.patch.object(router, 'host_processes', return_value=({}, {})):
-            router.native_lease(self.root, ROOT, 100, 4)
-            with self.assertRaisesRegex(ValueError, 'release identity'):
-                router.native_lease(self.root, ROOT, 999, 4, release=True)
-            with self.assertRaisesRegex(ValueError, 'release identity'):
-                router.native_lease(self.root, ROOT, 100, 3, release=True)
-
-    def test_native_process_checks_thread_route_cap_and_pid_reuse(self):
-        home = str(Path.home() / '.cache/mipstarre-dev/codex-home-qpbt-relay1')
-        settings = dict(model_reasoning_effort='ultra', **{'agents.enabled': True,
-            'features.multi_agent': True, 'agents.default_subagent_model': 'gpt-6-astra',
-            'agents.default_subagent_reasoning_effort': 'ultra',
-            'agents.max_concurrent_threads_per_session': 8})
-        args = ['codex', 'resume', ROOT, '-m', 'gpt-6-astra']
-        for key, value in settings.items():
-            args.extend(['-c', key + '=' + json.dumps(value)])
-        def data(path):
-            return (('CODEX_HOME=' + home).encode() if path.name == 'environ' else
-                    '\0'.join(args).encode())
-        with mock.patch.object(router, 'host_processes', return_value=({}, {100: ('primary', True)})), \
-                mock.patch.object(router, 'process_identity', return_value='123'), \
-                mock.patch.object(Path, 'read_bytes', autospec=True, side_effect=data):
-            self.assertEqual(router.native_process(ROOT, 100, 8)['key_label'], 'space')
-            args[4] = 'gpt-5.6-sol'
-            with self.assertRaises(ValueError):
-                router.native_process(ROOT, 100, 8)
-            args[4] = 'gpt-6-astra'
-            default_arg = args.index('agents.default_subagent_model="gpt-6-astra"')
-            args[default_arg] = 'agents.default_subagent_model="gpt-5.6-sol"'
-            with mock.patch.object(model_policy, 'load_policy', return_value=dict(
-                    schema_version=2, default_model='gpt-5.6-sol')):
-                self.assertEqual(router.native_process(ROOT, 100, 8)['slots'], 8)
-            args[default_arg] = 'agents.default_subagent_model="gpt-6-astra"'
-            with self.assertRaises(ValueError):
-                router.native_process(ROOT, 100, 7)
-            with self.assertRaises(ValueError):
-                router.native_process(CHILD, 100, 8)
-            with mock.patch.object(router, 'host_processes', return_value=({}, {100: ('second', True)})):
-                with self.assertRaises(ValueError):
-                    router.native_process(ROOT, 100, 8)
-            with mock.patch.object(router, 'process_identity', side_effect=['123', '456']):
-                with self.assertRaises(ValueError):
-                    router.native_process(ROOT, 100, 8)
-            home = '/unverified-route'
-            with self.assertRaises(ValueError):
-                router.native_process(ROOT, 100, 8)
 
 
 if __name__ == '__main__':

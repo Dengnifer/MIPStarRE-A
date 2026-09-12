@@ -1,4 +1,4 @@
-"""Bridge independent native reviews into review.sh's unchanged exact-head publisher."""
+"""Historical native-review transport retained for archived review evidence."""
 
 import argparse
 import hashlib
@@ -10,7 +10,6 @@ import subprocess
 import time
 import uuid
 
-from account_router import native_leases, native_process
 from telemetry import native_rollout, now_ts, parse_ts, record_native
 from wf_util import atomic_write
 
@@ -29,14 +28,11 @@ def canonical_thread(value: object, field: str) -> str:
 
 
 def verify_root(cache: Path, thread: str) -> dict:
-    canonical_thread(thread, 'native root thread')
-    lease = native_leases(cache).get(thread)
-    if not lease:
-        raise ValueError('native review requires a live, capacity-leased root')
-    observed = native_process(thread, lease['pid'], lease['slots'])
-    if any(observed[key] != value for key, value in lease.items()):
-        raise ValueError('native review root lease identity changed')
-    return observed
+    """Reject the retired lease-backed review path before reading runtime state."""
+    raise ValueError(
+        'native capacity leases are retired; unset legacy variables and use '
+        'external review dispatch'
+    )
 
 
 def completed_review(request: dict, thread: str) -> tuple[dict, Path]:
@@ -153,6 +149,10 @@ def accept_existing(args: argparse.Namespace) -> None:
     prompt_digest = hashlib.sha256(args.prompt.read_bytes()).hexdigest()
     if request.get('prompt_sha256') != prompt_digest:
         raise ValueError('native review request prompt digest mismatch')
+    rebuilt_prompt = getattr(args, 'rebuilt_prompt', None)
+    if (rebuilt_prompt is not None and
+            hashlib.sha256(rebuilt_prompt.read_bytes()).hexdigest() != prompt_digest):
+        raise ValueError('native review rebuilt prompt digest mismatch')
     from model_policy import select_model
     expected_policy = select_model('reviewer', args.job_class, args.model, args.effort,
                                    args.hardness_reason)
@@ -223,6 +223,7 @@ def main() -> None:
     accept.add_argument('--head', required=True)
     accept.add_argument('--worktree', type=Path, required=True)
     accept.add_argument('--prompt', type=Path, required=True)
+    accept.add_argument('--rebuilt-prompt', type=Path)
     accept.add_argument('--pr', required=True)
     accept.add_argument('--root-thread', required=True)
     accept.add_argument('--authors', required=True)
