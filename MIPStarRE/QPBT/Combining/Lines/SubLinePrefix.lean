@@ -18,8 +18,9 @@ two identified scalar fields.
 The block computations support `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The truncation is the prefix restriction of blueprint
-`def:ld-question-distribution`; the coordinate blocks are those of
+The truncation is the prefix restriction of paper `eq:cl-dlnf`,
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:230-237`,
+and blueprint `def:ld-question-distribution`; the coordinate blocks are those of
 blueprint `def:combine-map`.
 -/
 

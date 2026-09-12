@@ -1,7 +1,9 @@
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
+import MIPStarRE.QPBT.Combining.Lines.AxisLineResampling
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
+import MIPStarRE.QPBT.Combining.Lines.MixedResampling
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Points
@@ -23,8 +25,8 @@ divisibility hypothesis at dimension `2 * m + 2`.
 The declarations formalize `lem:qld-xz-lines` and
 `lem:restricted-line-mixture-bounds` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`; `exists_subLineWitness`
-instead supports `lem:qld-sublines` through the directly indexed extended-line
-carrier and probability law.  Their paper sources
+formalizes `thm:direct-sub-line-distribution`, which supports `lem:qld-sublines`
+through the directly indexed extended-line carrier and probability law.  Their paper sources
 are `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`
 and `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1069`.
 -/
@@ -227,11 +229,11 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
   refine (avgOver_prod_restrictedLinePointDist_le f hf kindX kindZ i j).trans ?_
   exact mul_le_mul_of_nonneg_left havg (by positivity)
 
-/-- Formalization-only auxiliary for item 3 of
-`lem:restricted-line-mixture-bounds`: a consistency defect of two complete
+/-- Formalization-only auxiliary for
+`lem:restricted-line-consistency-bound`: a consistency defect of two complete
 measurements placed on opposite registers inflates by at most `4m^2` when
 both line-point coordinates are restricted.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+`lem:restricted-line-consistency-bound`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`. -/
 private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
     {ε δ : ℝ} {α : Type*} [Fintype α] [DecidableEq α]
@@ -266,9 +268,9 @@ private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
 /-- The evaluated joint line measurement remains consistent with the joint
 point measurement on every product of restricted line distributions.
 
-**Source statement:** item 3 and Equation `eq:qld-xz-lines-restricted` of
-blueprint
-`lem:restricted-line-mixture-bounds`, from
+**Source statement:** Equation `eq:qld-xz-lines-restricted`, recorded with
+the given point and line measurements in the auxiliary blueprint lemma
+`lem:restricted-line-consistency-bound`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
 Here `consistencyDefect` is the finite POVM form of the displayed expectation
 against `Id - Q` after both measurements are postprocessed by evaluation.
@@ -305,7 +307,8 @@ theorem restricted_lines_consistency_bound :
 /-! ## The sub-line distribution -/
 
 /-- Existence of the directly indexed sub-line distribution with its two
-separate projected point marginals and axis-line closure.  It supports
+separate projected point marginals and axis-line closure.  This is blueprint
+`thm:direct-sub-line-distribution`, supporting
 `lem:qld-sublines` and `rem:qld-sublines-property-three` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1069` with

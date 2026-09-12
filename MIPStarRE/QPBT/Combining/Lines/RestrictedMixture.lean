@@ -138,12 +138,11 @@ theorem Distribution.bind_uniform_restrict_eq {α ι : Type*} [DecidableEq α]
 
 /-! ## The uniform coordinate-index law of the retained seed -/
 
-/-- The retained scalar seed of a uniformly sampled low-degree vector is
-uniform.  This is a public copy of the private
-`MIPStarRE.QPBT.map_uniformDistribution_seed` in
-`MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`, which belongs to another
-packet; the duplication is tracked by issue #204.  Formalization-only
-auxiliary for blueprint `def:ith-restricted-line`, paper
+-- Duplication with `map_uniformDistribution_seed` in
+-- `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean` is tracked by issue #204.
+/-- The scalar-coordinate projection of a uniformly distributed ambient
+vector is uniform.  Formalization-only auxiliary for blueprint
+`def:ith-restricted-line`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem uniformDistribution_map_ldSeed (L : LdParams) :
     (uniformDistribution (LdSpace L)).map (fun z : LdSpace L => z.seed) =

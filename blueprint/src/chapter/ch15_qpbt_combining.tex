@@ -871,6 +871,85 @@ assembled by Fourier averaging.
 
 \section{Combined line measurements}
 
+\begin{theorem}[Resampling a line parameter]
+	\label{thm:line-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_lineRepMap_resample_parameter}
+	\leanok
+	\uses{def:line-representative}
+	This auxiliary identity isolates the conditional sampling used in the
+	proof of Lemma~\ref{lem:qld-xz-lines}; it is not a named statement of
+	\cite{Ji2020MIPStar}. Let $K$ be a finite field, $m \geq 0$, and
+	$v \in K^m$, and write $R_v = L^{\mathrm{Ln}}_v$ for the canonical line
+	representative map of Definition~\ref{def:line-representative}.
+	For every $f : K^m \times K^m \to \mathbb{R}$,
+	\[
+		\mathbb{E}_{u \in K^m} f(R_v(u),u)
+		= \mathbb{E}_{u \in K^m}\mathbb{E}_{t \in K}
+		f(R_v(u),R_v(u)+tv),
+	\]
+	where all averages are uniform. The identity includes $v=0$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative, lem:line-representative-idempotent}
+	The point $R_v(u)+tv$ is uniform on $K^m$: each point has exactly
+	$|K|$ preimages under $(u,t) \mapsto R_v(u)+tv$. Moreover,
+	$R_v(R_v(u)+tv)=R_v(u)$. Applying these two identities to $f$ gives
+	the result. When $v=0$, $R_v$ is the identity and $t$ is free.
+\end{proof}
+
+\begin{corollary}[Resampling a point from the line-point distribution]
+	\label{cor:line-point-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_aLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_dLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_resample_parameter}
+	\leanok
+	\uses{def:ld-game, def:line-point-dist}
+	This auxiliary identity is not a named statement of
+	\cite{Ji2020MIPStar}; it isolates the line-point resampling used in the
+	proof of Lemma~\ref{lem:qld-xz-lines}. For low-degree parameters
+	$(q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $\widetilde D$ be any
+	of the seed-bearing laws $\widetilde D_{\mathrm{ALine}}$,
+	$\widetilde D_{\mathrm{DLine}}$, or their equal mixture
+	$\widetilde D_{\mathrm{Line}}$ from
+	Definition~\ref{def:line-point-dist}. Write $b_\ell$ and $v_\ell$ for the
+	canonical base and direction of a seed-bearing line. For every real-valued
+	function $f$ on seed-bearing line-point pairs,
+	\[
+		\E_{(\ell,u)\sim \widetilde D} f(\ell,u)
+		= \E_{(\ell,u)\sim \widetilde D}\E_{t\in\F_q}
+		f(\ell,b_\ell+t v_\ell),
+	\]
+	where $t$ is uniform and independent. This includes diagonal lines of
+	direction zero, for which the resampled point is always $b_\ell$.
+	For each choice of $\widetilde D$, let $D$ be the corresponding source law
+	and $\rho$ the corresponding map among
+	$\rho_{\mathrm{ALine}}$, $\rho_{\mathrm{DLine}}$, and
+	$\rho_{\mathrm{Line}}$ from Definition~\ref{def:line-point-dist}. Since
+	$\rho$ preserves the canonical base and direction, substituting
+	$f=g\circ\rho$ gives
+	\[
+		\E_{(\bar\ell,u)\sim D} g(\bar\ell,u)
+		=\E_{(\bar\ell,u)\sim D}\E_{t\in\F_q}
+		g(\bar\ell,b_{\bar\ell}+t v_{\bar\ell}),
+	\]
+	for every real-valued function $g$ on source line-point pairs. Thus the
+	linked declarations prove the refined identity, including functions that
+	depend on the retained seed, and the source identity is its push-forward.
+\end{corollary}
+\begin{proof}
+	\leanok
+	\uses{thm:line-parameter-resampling, def:line-point-dist,
+		lem:uniform-map-equivalence, lem:line-representative-idempotent}
+	In each component, condition on the scalar seed and direction data.
+	The remaining point is uniform in $\F_q^m$, so
+	Theorem~\ref{thm:line-parameter-resampling} applies with that fixed
+	direction. Averaging over these data proves the axis and diagonal
+	identities. Taking their equal mixture proves the mixed identity. Composing
+	the test function with the forgetful map gives the source push-forward
+	identity.
+\end{proof}
+
 \begin{lemma}[Formalization support for coefficient polynomial agreement]
 	\label{lem:coefficient-polynomial-agreement}
 	\lean{MIPStarRE.QPBT.evalCoefficient_collision_card_le}
@@ -1221,8 +1300,14 @@ analyzed, together with candidate repairs, in
 Before proving the lemma we record definitions and estimates concerning
 distributions over lines and points. Recall from
 Definition~\ref{def:line-point-dist} that the line-point distribution over
-$\F_q^m$ is an even mixture of an axis-parallel component $D_{\mathrm{ALine}}$
-and a diagonal component $D_{\mathrm{DLine}}$.
+$\F_q^m$ is an even mixture of source laws $D_{\mathrm{ALine}}$ and
+$D_{\mathrm{DLine}}$, and that their seed-bearing refinements are denoted by
+$\widetilde D_{\mathrm{ALine}}$, $\widetilde D_{\mathrm{DLine}}$, and
+$\widetilde D_{\mathrm{Line}}$. In the auxiliary statements below, tilded
+symbols denote these refined laws and untilded symbols denote the source laws.
+Coordinate indices below are zero-based: at ambient dimension $r$, the index
+$i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
+\cite{Ji2020MIPStar}.
 
 \begin{definition}[Restricted line distributions]
 	\label{def:ith-restricted-line}
@@ -1237,78 +1322,194 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	Definition~\ref{def:ld-question-distribution}. Thus $\bar\chi$ takes
 	values in $\{0,\dots,m-1\}$, and index $i$ here denotes coordinate $i+1$
 	in the one-based notation of \cite{Ji2020MIPStar}.
-	For any such $i$, the \emph{$i$-th restricted
-	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
-	restriction of $D_{\mathrm{ALine}}$ to pairs $(\ell, u)$ where the line
-	$\ell$ is along the direction $e_i$, i.e.\ is of the form
-	$\ell = (u_0, e_i)$. Similarly, the \emph{$i$-th restricted diagonal line
-	distribution} $D_{\mathrm{DLine},i}$ is the restriction of
-	$D_{\mathrm{DLine}}$ to pairs $(\ell, u)$ where the line
-	$\ell = (u_0, s, v)$ satisfies $\bar\chi(s) = i$ and coordinates
+	For any such $i$, the \emph{$i$-th restricted refined
+	axis-parallel line distribution} $\widetilde D_{\mathrm{ALine},i}$ is the
+	restriction of $\widetilde D_{\mathrm{ALine}}$ to seed-bearing pairs
+	$(\ell,u)$ whose retained seed $s$ satisfies $\bar\chi(s)=i$, so the geometric
+	direction of $\ell$ is $e_i$. Similarly, the \emph{$i$-th restricted
+	refined diagonal line distribution} $\widetilde D_{\mathrm{DLine},i}$ is
+	the restriction of $\widetilde D_{\mathrm{DLine}}$ to pairs $(\ell,u)$
+	where $\ell=(u_0,s,v)$ satisfies $\bar\chi(s)=i$ and coordinates
 	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
+	Their push-forwards under $\rho_{\mathrm{ALine}}$ and
+	$\rho_{\mathrm{DLine}}$ from
+	Definition~\ref{def:line-point-dist} are the source restrictions
+	$D_{\mathrm{ALine},i}$ and $D_{\mathrm{DLine},i}$ of
+	\cite{Ji2020MIPStar}. Both refined restricted distributions have total
+	mass one.
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]
 	\label{lem:restricted-line-mixture-bounds}
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
-	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
-	\uses{def:ith-restricted-line, def:line-point-dist, lem:qld-xz-lines,
-		lem:qld-4-10, def:expanded-state}
-	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
-	distributions $D_{\mathrm{ALine},i}$ for $i \in \{0, \dots, m-1\}$, and
-	likewise $D_{\mathrm{DLine}}$ is a uniform mixture of the
-	$D_{\mathrm{DLine},i}$. As a consequence:
+	\uses{def:ith-restricted-line, def:line-point-dist}
+	The refined distribution $\widetilde D_{\mathrm{ALine}}$ is a uniform
+	mixture of the distributions $\widetilde D_{\mathrm{ALine},i}$ for
+	$i \in \{0, \dots, m-1\}$, and likewise
+	$\widetilde D_{\mathrm{DLine}}$ is a uniform mixture of the
+	$\widetilde D_{\mathrm{DLine},i}$. For nonnegative real-valued functions
+	on seed-bearing line-point samples, the following bounds hold:
 	\begin{enumerate}
-		\item any approximation that holds on average over the line-point
-		distribution $D_{\mathrm{Line}}$ with error $\delta$ holds over each
-		restricted distribution $D_{\mathrm{ALine},i}$ and
-		$D_{\mathrm{DLine},i}$ with error $2m\delta$;
-		\item any approximation that holds on average over
-		$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ holds over any product
-		of restricted distributions with error $4m^2\delta$;
-		\item in particular, by Lemma~\ref{lem:qld-xz-lines}, for any types
-		$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine},
-		\mathrm{DLine}\}$ and any $i, j \in \{0, \dots, m-1\}$,
-		\begin{equation}
-			\label{eq:qld-xz-lines-restricted}
-			\E_{(\ell_X,x) \sim D_{\mathrm{v}_1,i}}\
-			\E_{(\ell_Z,z) \sim D_{\mathrm{v}_2,j}}
-			\sum_{f_X,f_Z}
-			\bra{\hat\psi}
-			\big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'}
-			\ot
-			\big(\Id - \hat{Q}^{x,z}_{f_X(x),f_Z(z)}
-			\big)_{\mathsf{B}\mathsf{A}''}
-			\ket{\hat\psi}
-			= O(m^2 \delta_P)\,.
-		\end{equation}
+		\item any average over $\widetilde D_{\mathrm{Line}}$ bounded by
+		$\delta$ is bounded over each restricted distribution
+		$\widetilde D_{\mathrm{ALine},i}$ and
+		$\widetilde D_{\mathrm{DLine},i}$ by $2m\delta$;
+		\item any average over
+		$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$
+		bounded by $\delta$ is bounded over any product of refined restricted
+		distributions by $4m^2\delta$.
 	\end{enumerate}
+	Pulling a source function back along the forgetful maps gives the same
+	mixture identities and bounds for the untilded source laws.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
-	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
-	axis-parallel and diagonal components and, within each component, uniform
-	weight on the index $i$, so each restricted distribution carries mixture
-	weight $\tfrac{1}{2m}$ in $D_{\mathrm{Line}}$. A nonnegative average that
-	is at most $\delta$ therefore bounds each mixture component by
+	\uses{def:ith-restricted-line, def:line-point-dist}
+	The refined line-point distribution places weight $\tfrac{1}{2}$ on each of
+	the axis-parallel and diagonal components and, within each component,
+	uniform weight on the index $i$, so each refined restriction carries mixture
+	weight $\tfrac{1}{2m}$ in $\widetilde D_{\mathrm{Line}}$. A nonnegative
+	average that is at most $\delta$ therefore bounds each mixture component by
 	$2m\delta$, and products of two such mixtures give the factor
-	$(2m)^2 = 4m^2$. The instance \eqref{eq:qld-xz-lines-restricted} is item
-	2 applied to the conclusion of Lemma~\ref{lem:qld-xz-lines}, whose
-	$\simeq_{\delta_P}$ relation over two independent copies of the
-	line-point distribution is precisely the statement that the left-hand
-	side of \eqref{eq:qld-xz-lines-restricted}, averaged over
-	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$, is at most $\delta_P$.
+	$(2m)^2 = 4m^2$.
+\end{proof}
+
+\begin{lemma}[Restriction of a given line consistency bound]
+	\label{lem:restricted-line-consistency-bound}
+	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
+	\leanok
+	\uses{lem:qld-xz-lines, lem:qld-4-10, def:ith-restricted-line,
+		def:consistency, def:expanded-state}
+	This auxiliary estimate isolates the application following
+	Definition~\ref{def:ith-restricted-line} in \cite{Ji2020MIPStar}.
+	There is a universal constant $C>0$ such that the following holds.
+	Fix admissible parameters and a projective setting, and suppose that
+	point measurements $\hat Q$ and line measurements $T$ satisfying the
+	conclusions of Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines}
+	are given in the seed-bearing presentation, with consistency error
+	$\delta_P$ for the latter over
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$.
+	For any types $\mathrm{v}_1,\mathrm{v}_2\in
+	\{\mathrm{ALine},\mathrm{DLine}\}$ and indices $i,j\in\{0,\dots,m-1\}$,
+	\begin{equation}
+		\label{eq:qld-xz-lines-restricted}
+		\E_{(\ell_X,x)\sim \widetilde D_{\mathrm{v}_1,i}}\
+		\E_{(\ell_Z,z)\sim \widetilde D_{\mathrm{v}_2,j}}
+		\sum_{f_X,f_Z}
+		\bra{\hat\psi}
+		\big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'}
+		\ot
+		\big(\Id-\hat Q^{x,z}_{f_X(x),f_Z(z)}\big)_{\mathsf{B}\mathsf{A}''}
+		\ket{\hat\psi}
+		\le C m^2\delta_P\,.
+	\end{equation}
+	The same bound holds for every directed pair of opposite placements.
+	The constant $C$ is independent of the parameters and measurements. If the
+	line measurements factor through the source line descriptions, forgetting
+	the retained seeds gives the source restriction estimate of
+	\cite{Ji2020MIPStar}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:restricted-line-mixture-bounds, def:consistency}
+	Take $C=4$. Each summand is nonnegative, since the two positive operators act on
+	opposite registers. Apply item 2 of
+	Lemma~\ref{lem:restricted-line-mixture-bounds} to this defect and the
+	given bound $\delta_P$ over
+	$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$.
+\end{proof}
+
+\begin{theorem}[Formalization support for the sub-line distribution]
+	\label{thm:direct-sub-line-distribution}
+	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
+	\uses{def:admissible, def:line, def:line-representative,
+		def:ith-restricted-line, def:combine-map}
+	This auxiliary result is not the source statement of
+	Lemma~\ref{lem:qld-sublines}. Fix admissible $(q,m,d)$ and put
+	$n=2m+2$. Let $D^{\mathrm{dir}}_{\mathrm{Line}}$ be the directly
+	indexed line-point law of \cite{gap:qpbt_ld-dimension-divisibility}:
+	choose a kind and an index $j\in\{0,\dots,n-1\}$
+	independently and uniformly, a uniform point $u\in\F_q^n$, and direction
+	$e_j$ in the axis case or a uniform direction with coordinates before $j$ zero in
+	the diagonal case. The line records $j$, its direction $v$, and the
+	canonical base $L_v^{\mathrm{Ln}}(u)$. No hypothesis $n\mid q$ is imposed.
+	There exists a probability distribution $D$ on triples
+	$(\ell,\ell_X,\ell_Z)$, with $\ell$ directly indexed and
+	$\ell_X,\ell_Z$ seed-indexed lines in $\F_q^m$, such that:
+	\begin{enumerate}
+		\item The marginal of $\ell$ is the line marginal of
+		$D^{\mathrm{dir}}_{\mathrm{Line}}$.
+		\item For every triple in the support of $D$, write
+		$\ell=b+\F_q v$, $\ell_X=b_X+\F_q v_X$, and
+		$\ell_Z=b_Z+\F_q v_Z$ with their recorded bases and directions.
+		There are $a_X,c_X,a_Z,c_Z\in\F_q$ such that, for all $t\in\F_q$,
+		\[
+			\operatorname{proj}_X(b+tv)=b_X+(a_X+c_Xt)v_X,
+			\qquad
+			\operatorname{proj}_Z(b+tv)=b_Z+(a_Z+c_Zt)v_Z.
+		\]
+		Thus every point of $\ell$ projects onto both recorded sub-lines,
+		with the affine compatibility of Definition~\ref{def:combine-map}.
+		\item Sample a triple from $D$ and set $u=b_\ell+tv_\ell$ for
+		independent uniform $t\in\F_q$, writing
+		$u=(u_X,u_Z,\alpha,\beta)$. There is a probability vector
+		$(\lambda_{\mathrm v,i,j})$ on
+		$\{\mathrm{ALine},\mathrm{DLine}\}\times\{0,\dots,m-1\}^2$,
+		such that, if $\widetilde L_{\mathrm v,i}$ denotes the line marginal
+		of $\widetilde D_{\mathrm v,i}$, the two separate marginal laws are
+		\begin{align*}
+			\mathcal L\big((\ell_X,u_X),\ell_Z\big)
+			&=\sum_{\mathrm v,i,j}\lambda_{\mathrm v,i,j}
+			\widetilde D_{\mathrm v,i}\otimes
+			\widetilde L_{\mathrm v,j},\\
+			\mathcal L\big(\ell_X,(\ell_Z,u_Z)\big)
+			&=\sum_{\mathrm v,i,j}\lambda_{\mathrm v,i,j}
+			\widetilde L_{\mathrm v,i}\otimes
+			\widetilde D_{\mathrm v,j}.
+		\end{align*}
+		The tildes are essential because both projected lines lie on the
+		seed-bearing carriers; in particular, an axis line does not lie on the
+		source carrier until its seed is forgotten. Applying the forgetful maps
+		to the two projected-line coordinates gives the corresponding identities
+		for the untilded source restrictions.
+		These identities make no assertion of conditional independence of
+		$u_X$ and $u_Z$.
+		\item If $\ell$ is axis-parallel, both $\ell_X$ and $\ell_Z$ are
+		axis-parallel.
+	\end{enumerate}
+	Transport to the seed-indexed extended line-point law in
+	Lemma~\ref{lem:qld-sublines} remains unresolved, as recorded in
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative, def:ith-restricted-line, def:line-point-dist}
+	Sample the extended kind and coordinate index directly. For each source
+	block, use the coordinate's index within that block when it lies there,
+	and the first coordinate otherwise; choose a seed uniformly in the corresponding
+	fiber of $\bar\chi$. In the axis case use the chosen coordinate direction.
+	In the diagonal case truncate a uniform direction block at that index,
+	reusing the extended direction block whenever its projection is retained.
+	Take canonical representatives of the projected sampled point for the
+	two source bases. All sampling laws are normalized, and forgetting the
+	sub-lines recovers the directly indexed extended line marginal. In each branch,
+	the projected direction is a scalar multiple of the chosen sub-line
+	direction, giving the affine identities and axis closure. Canonical
+	representatives are unchanged along each extended line. Resampling its
+	point therefore preserves the two sub-lines; regrouping the independent
+	point, seed, and direction coordinates gives the two restricted product
+	marginals. Averaging over the branch indices gives their common weights
+	$\lambda_{\mathrm v,i,j}$.
 \end{proof}
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
-	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
