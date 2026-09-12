@@ -613,7 +613,7 @@ private theorem quditQubitLabelEquiv_add {q : ℕ} {ι : Type*}
   simp
 
 /-- A shift observable is the permutation matrix for addition by its label. -/
-private theorem tauObservable_X_apply
+theorem tauObservable_X_apply
     {K ι : Type*} [Field K] [DecidableEq K]
     [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
     (a x y : ι → K) :
@@ -626,7 +626,7 @@ private theorem tauObservable_X_apply
   simp only [hsupport]
 
 /-- A phase observable is diagonal, with its phase given by the trace pairing. -/
-private theorem tauObservable_Z_apply
+theorem tauObservable_Z_apply
     {K ι : Type*} [Field K] [DecidableEq K]
     [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
     (a x y : ι → K) :

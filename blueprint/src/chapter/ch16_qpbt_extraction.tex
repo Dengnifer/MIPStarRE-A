@@ -428,6 +428,57 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
 \end{proof}
 
+\begin{theorem}[EPR projection estimates]\label{thm:qld-epr-projection-estimates}
+	\lean{MIPStarRE.QPBT.Extraction.pauliCorrelation_mul_eq_epr}
+	\lean{MIPStarRE.QPBT.Extraction.norm_sub_eprProjection_le}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.idealExpState_extractionAux0}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_unit_aux_near_eprProjection}
+	\leanok
+	\uses{def:generalized-pauli, def:EPR, lem:projective-strategy-setup}
+	This auxiliary statement isolates the projection and normalization
+	calculations in the proof of Lemma~\ref{lem:qld-unitary}.
+	Write $E=\ket{\mathrm{EPR}_q}^{\ot M}$ and
+	\[
+		H_W=\frac{1}{q^M}\sum_{u\in\F_q^M}\tau^W(u)\ot\tau^W(u).
+	\]
+	Then $H_XH_Z=\ketbra{E}{E}$. Let $R$ be an auxiliary register and
+	$\vartheta$ a unit vector on $R\ot A''\ot B''$. If $\delta\geq0$ and
+	\[
+		\Re\langle\vartheta,(\Id_R\ot H_W)\vartheta\rangle
+		\geq1-\delta/2\qquad(W\in\{X,Z\}),
+	\]
+	then, writing $\Pi=\Id_R\ot\ketbra{E}{E}$, one has
+	\[
+		\|\vartheta-\Pi\vartheta\|\leq2\sqrt\delta.
+	\]
+	In the projective setting of Lemma~\ref{lem:projective-strategy-setup},
+	take $R=AA'BB'$. For every unit vector $\vartheta$ on the six registers,
+	set $\mathrm{aux}_0=(\Id_R\ot\bra{E})\vartheta$. Then
+	$\mathrm{aux}_0\ot E=\Pi\vartheta$, and there is a unit vector
+	$\mathrm{aux}$ on $R$ such that
+	\[
+		\|\vartheta-\mathrm{aux}\ot E\|
+		\leq2\|\vartheta-\Pi\vartheta\|.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:pauli-observable-expansion, def:generalized-pauli, def:EPR}
+	Fourier inversion shows that $H_Z$ keeps precisely the equal computational
+	labels. Averaging the simultaneous shifts gives $H_XH_Z=\ketbra{E}{E}$.
+	Each $\Id_R\ot H_W$ is an average of unitaries, hence is a contraction.
+	Expanding the squared distance gives
+	$\|\vartheta-(\Id_R\ot H_W)\vartheta\|^2\leq\delta$.
+	The product identity and the triangle inequality now bound
+	$\|\vartheta-\Pi\vartheta\|$ by $2\sqrt\delta$.
+	The partial-inner-product formula gives
+	$\mathrm{aux}_0\ot E=\Pi\vartheta$. Normalizing $\mathrm{aux}_0$
+	at most doubles its distance from $\vartheta$, by the reverse triangle
+	inequality. If $\mathrm{aux}_0=0$, the projection error is one; the
+	original strategy state tensored with one EPR pair supplies a unit
+	reference vector on $R$, and the required distance is at most two.
+\end{proof}
+
 \begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
