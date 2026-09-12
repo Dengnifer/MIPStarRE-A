@@ -1305,93 +1305,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/510",
-  "id": 5431238638,
-  "node_id": "I_kwDOUJyJf88AAAABQ7of7g",
-  "number": 510,
-  "title": "feat(QPBT/Combining): discharge exists_extendedLinesWitness",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-12T04:53:51Z",
-  "updated_at": "2026-09-12T04:53:51Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-01-exists-extendedlineswitness -->\n### Target\n\n`MIPStarRE/QPBT/Combining/Apply.lean`: `exists_extendedLinesWitness` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\n        Nonempty (ExtendedLinesWitness S points\n          (deltaCombine ((P.m : \u211d) ^ 2 * \u03b5)\n            ((P.m * P.d : \u2115) / (P.q : \u211d)))) := by\n  sorry\n\n/-! The following directly indexed obligation supplies the point witness from\n`lem:qld-4-10` rather than taking it as an external hypothesis. -/\n\n/-- Directly indexed extended-line obligation with the numerical error expression\nprinted in `lem:qld-4-13`, paper lines 1020--1034.\n\nThe `_ofPointsWitness` companion assumes a point witness, while this declaration\nsupplies one existentially. Both declarations use the directly indexed questions,\nlaw, and completed answer alphabet, so neither is the source-facing paper statement.\n\n**Error contract:** the polynomial bound printed in the source is carried\nby `IsPolyErr\u2082`, which states the corrected sum form\n`f x y \u2264 C * (x ^ r + y ^ s)` with `1 \u2264 C` and positive exponents on the\nclosed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`\nof the source shorthand at `04_preliminaries.tex:22-29`.  The correction and\nthe two-dimensional strategy that refutes the product form are recorded in\n`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.\nHere `poly(m^2 * epsilon, md / q)` is read in that sense. -/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem exists_extendedLinesWitness :\n    \u2203 deltaQ : \u211d \u2192 \u211d, IsPolyErr deltaQ \u2227\n      \u2203 deltaCombine : \u211d \u2192 \u211d \u2192 \u211d, IsPolyErr\u2082 deltaCombine \u2227\n        \u2200 (P : AdmissibleParams) (\u03b5 : \u211d) (S : ProjectiveSetting P \u03b5),\n          \u2203 points : CombinedPointsWitness S (deltaQ \u03b5),\n            Nonempty (ExtendedLinesWitness S points\n              (deltaCombine ((P.m : \u211d) ^ 2 * \u03b5)\n                ((P.m * P.d : \u2115) / (P.q : \u211d)))) := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run concurrent full builds.\n\nUse primary-repository local/bin tools for all workflow operations and gh_com",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/510/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/509",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/509/labels{/name}",
@@ -10395,8 +10308,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 30,
-   "completed": 15,
-   "percent_completed": 50
+   "completed": 16,
+   "percent_completed": 53
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
