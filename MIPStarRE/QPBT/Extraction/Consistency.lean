@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Extraction.Observables
 
 /-!
@@ -9,9 +10,8 @@ explicitly. It also states the consistency of the pulled-apart
 measurements with the original point measurements and the self-consistency of
 the corresponding observables.
 
-The direct `AA'`--`BA''` and `BB'`--`AB''` marginal agreement estimates are
-proved from the given global polynomial-pair witness. The conclusions
-quantified over all placements remain separate proof obligations.
+The direct marginal agreement estimates and the reverse-placement correlation
+transports are developed from the given global polynomial-pair witness.
 
 ## References
 
@@ -22,7 +22,7 @@ The remaining declarations formalize blueprint `lem:qld-construct-the-paulis`,
 from paper lines 1458-1608.
 -/
 
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
@@ -113,6 +113,31 @@ private theorem placedMeasurement_effect {P : AdmissibleParams} {epsilon : ℝ}
     (placedMeasurement S placement measurement).effect answer =
       S.place placement (measurement.effect answer) :=
   (place_eq_reindex S placement (measurement.effect answer)).symm
+
+/-- A placed measurement effect is Hermitian. -/
+private theorem placedMeasurement_effect_hermitian
+    {P : AdmissibleParams} {epsilon : ℝ}
+    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
+    (placement : Placement) (measurement : Measurement Outcome
+      (S.ExpandedLocalSpace placement.side)) (answer : Outcome) :
+    (S.place placement (measurement.effect answer))ᴴ =
+      S.place placement (measurement.effect answer) := by
+  simpa only [placedMeasurement_effect] using
+    (measurement_effect_hermitian (placedMeasurement S placement measurement) answer)
+
+/-- Reversing two Hermitian factors does not change the real quadratic form. -/
+private theorem stateQForm_mul_comm_of_hermitian
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (psi : EuclideanSpace ℂ ι) (A B : Op ι)
+    (hA : Aᴴ = A) (hB : Bᴴ = B) :
+    stateQForm psi (A * B) = stateQForm psi (B * A) := by
+  unfold stateQForm applyOperatorToState
+  rw [show A * B = (B * A)ᴴ by
+    rw [Matrix.conjTranspose_mul, hA, hB]]
+  rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint,
+    LinearMap.adjoint_inner_right]
+  simpa using (inner_re_symm (𝕜 := ℂ)
+    ((Matrix.toEuclideanLin (B * A)) psi) psi)
 
 /-- Tensoring with an identity and changing finite coordinates preserve
 projectivity, as needed to apply `lem:cool-closeness-fact` to a placed POVM. -/
@@ -220,6 +245,127 @@ theorem marginalPoly_pointMeas_consistent_bob {P : AdmissibleParams}
       (fun point answer => S.place .AB''
         ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ deltaG := by
   simpa only [w.marginalPoly_postprocess_eval] using w.point_consistent_bob W
+
+/-- The Alice marginal consistency estimate is unchanged when both active
+operators are moved from the first EPR pair to the second one. -/
+private theorem marginalPoly_pointMeas_consistent_alice_reversed
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .AB''
+        (((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .BB'
+        ((S.pointMeasExp .bob W point).effect answer)) S.psiHat ≤ deltaG := by
+  calc
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+        (fun point answer => S.place .AB''
+          (((w.marginalPoly .alice W).postprocess
+            (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+        (fun point answer => S.place .BB'
+          ((S.pointMeasExp .bob W point).effect answer)) S.psiHat =
+      consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+        (fun point answer => S.place .AA'
+          (((w.marginalPoly .alice W).postprocess
+            (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+        (fun point answer => S.place .BA''
+          ((S.pointMeasExp .bob W point).effect answer)) S.psiHat := by
+      unfold consistencyDefect
+      apply avgOver_congr
+      intro point
+      apply Finset.sum_congr rfl
+      intro answer _
+      apply Finset.sum_congr rfl
+      intro other _
+      by_cases hanswer : answer = other
+      · simp [hanswer]
+      · simp only [hanswer, if_false, consistency_term_eq_stateQForm]
+        let A := ((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer
+        let B := (S.pointMeasExp .bob W point).effect other
+        have hA : A.IsHermitian :=
+          (Matrix.nonneg_iff_posSemidef.mp
+            (((w.marginalPoly .alice W).postprocess
+              (fun poly => MvPolynomial.eval point poly.1)).pos answer)).isHermitian
+        have hB : B.IsHermitian :=
+          (Matrix.nonneg_iff_posSemidef.mp
+            ((S.pointMeasExp .bob W point).pos other)).isHermitian
+        exact
+          (ExtendedLineGame.stateQForm_pairState_eq_AB''_BB' S A B hA hB).symm.trans
+            (ExtendedLineGame.stateQForm_pairState_eq_AA'_BA'' S A B hA hB)
+    _ ≤ deltaG := marginalPoly_pointMeas_consistent_alice w W
+
+/-- The Bob marginal consistency estimate is unchanged when both active
+operators are moved from the second EPR pair to the first one. -/
+private theorem marginalPoly_pointMeas_consistent_bob_reversed
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place .BA''
+        (((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place .AA'
+        ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ deltaG := by
+  calc
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+        (fun point answer => S.place .BA''
+          (((w.marginalPoly .bob W).postprocess
+            (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+        (fun point answer => S.place .AA'
+          ((S.pointMeasExp .alice W point).effect answer)) S.psiHat =
+      consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+        (fun point answer => S.place .BB'
+          (((w.marginalPoly .bob W).postprocess
+            (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+        (fun point answer => S.place .AB''
+          ((S.pointMeasExp .alice W point).effect answer)) S.psiHat := by
+      unfold consistencyDefect
+      apply avgOver_congr
+      intro point
+      apply Finset.sum_congr rfl
+      intro answer _
+      apply Finset.sum_congr rfl
+      intro other _
+      by_cases hanswer : answer = other
+      · simp [hanswer]
+      · simp only [hanswer, if_false, consistency_term_eq_stateQForm]
+        let A := (S.pointMeasExp .alice W point).effect other
+        let B := ((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer
+        have hA : A.IsHermitian :=
+          (Matrix.nonneg_iff_posSemidef.mp
+            ((S.pointMeasExp .alice W point).pos other)).isHermitian
+        have hB : B.IsHermitian :=
+          (Matrix.nonneg_iff_posSemidef.mp
+            (((w.marginalPoly .bob W).postprocess
+              (fun poly => MvPolynomial.eval point poly.1)).pos answer)).isHermitian
+        have hBA : (S.place .BA'' B)ᴴ = S.place .BA'' B :=
+          placedMeasurement_effect_hermitian S .BA''
+            ((w.marginalPoly .bob W).postprocess
+              (fun poly => MvPolynomial.eval point poly.1)) answer
+        have hAA : (S.place .AA' A)ᴴ = S.place .AA' A :=
+          placedMeasurement_effect_hermitian S .AA'
+            (S.pointMeasExp .alice W point) other
+        have hBB : (S.place .BB' B)ᴴ = S.place .BB' B :=
+          placedMeasurement_effect_hermitian S .BB'
+            ((w.marginalPoly .bob W).postprocess
+              (fun poly => MvPolynomial.eval point poly.1)) answer
+        have hAB : (S.place .AB'' A)ᴴ = S.place .AB'' A :=
+          placedMeasurement_effect_hermitian S .AB''
+            (S.pointMeasExp .alice W point) other
+        calc
+          stateQForm S.psiHat (S.place .BA'' B * S.place .AA' A) =
+              stateQForm S.psiHat (S.place .AA' A * S.place .BA'' B) :=
+            stateQForm_mul_comm_of_hermitian S.psiHat _ _ hBA hAA
+          _ = stateQForm (ExtendedLineGame.pairState S) (heteroKron A B) :=
+            (ExtendedLineGame.stateQForm_pairState_eq_AA'_BA'' S A B hA hB).symm
+          _ = stateQForm S.psiHat (S.place .AB'' A * S.place .BB' B) :=
+            ExtendedLineGame.stateQForm_pairState_eq_AB''_BB' S A B hA hB
+          _ = stateQForm S.psiHat (S.place .BB' B * S.place .AB'' A) :=
+            stateQForm_mul_comm_of_hermitian S.psiHat _ _ hAB hBB
+    _ ≤ deltaG := marginalPoly_pointMeas_consistent_bob w W
 
 /-- Alice's evaluated marginal on `AA'` is within squared distance `2 * deltaG`
 of Bob's expanded point measurement on `BA''`, with the answer sum over the
@@ -374,6 +520,156 @@ theorem sum_marginalPoly_pointMeas_approx_id_bob {P : AdmissibleParams}
   rw [opDistSq, opFamilyDistSq_symm] at hSum
   exact hSum
 
+set_option maxHeartbeats 800000 in
+-- The explicit measurement aliases keep the six-register instance search local.
+/-- The Alice-first agreement sum has the same identity-absorption bound on
+the `AB''`--`BB'` EPR pair. -/
+private theorem sum_marginalPoly_pointMeas_approx_id_alice_reversed
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) :
+    opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point => ∑ poly : Poly P,
+        S.place .AB'' ((w.marginalPoly .alice W).effect poly) *
+          S.place .BB' ((S.pointMeasExp .bob W point).effect
+            (MvPolynomial.eval point poly.1)))
+      (fun _ => 1) S.psiHat ≤ 2 * deltaG := by
+  let evaluated : (Fin P.m → PauliScalar P) →
+      MIPStarRE.Quantum.Measurement (PauliScalar P)
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun point =>
+    placedMeasurement S .AB'' ((w.marginalPoly .alice W).postprocess
+      (fun poly => MvPolynomial.eval point poly.1))
+  let comparison : (Fin P.m → PauliScalar P) →
+      MIPStarRE.Quantum.Measurement (PauliScalar P)
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun point =>
+    placedMeasurement S .BB' (S.pointMeasExp .bob W point)
+  have hProjective (point : Fin P.m → PauliScalar P) :
+      Measurement.IsProjective (evaluated point) := by
+    apply placedMeasurement_isProjective
+    rw [w.marginalPoly_postprocess_eval]
+    exact SandwichProduct.postprocess_isProjective
+      (w.Smeas .alice) (w.projective .alice) (evalAt W point)
+  have hAgreement :
+      opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat ≤
+        2 * consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat :=
+    opFamilyDistSq_le_two_mul_consistencyDefect
+      (X := Fin P.m → PauliScalar P) (α := PauliScalar P)
+      (ι := SixReg P S.toStrategy.ιA S.toStrategy.ιB)
+      (uniformDistribution (Fin P.m → PauliScalar P)) evaluated comparison S.psiHat
+  have hConsistency :
+      consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat ≤ deltaG := by
+    simpa only [evaluated, comparison, placedMeasurement_effect] using
+      marginalPoly_pointMeas_consistent_alice_reversed w W
+  have hDistance : opFamilyDistSq
+      (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => (evaluated point).effect answer)
+      (fun point answer => S.place .BB'
+        ((S.pointMeasExp .bob W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+    simpa only [comparison, placedMeasurement_effect] using
+      hAgreement.trans (mul_le_mul_of_nonneg_left hConsistency (by norm_num))
+  have hSum := opDistSq_sum_sub_mul_le_of_projective
+    (uniformDistribution (Fin P.m → PauliScalar P)) evaluated
+    (fun point answer => S.place .BB'
+      ((S.pointMeasExp .bob W point).effect answer)) S.psiHat (2 * deltaG)
+    hProjective hDistance Finset.univ
+  simp only [MIPStarRE.Quantum.Measurement.sum_eq_one] at hSum
+  simp only [evaluated, placedMeasurement_effect] at hSum
+  have hRegroup (point : Fin P.m → PauliScalar P) :
+      (∑ answer : PauliScalar P, S.place .AB''
+        (((w.marginalPoly .alice W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer) *
+          S.place .BB' ((S.pointMeasExp .bob W point).effect answer)) =
+        ∑ poly : Poly P, S.place .AB''
+          ((w.marginalPoly .alice W).effect poly) *
+            S.place .BB' ((S.pointMeasExp .bob W point).effect
+              (MvPolynomial.eval point poly.1)) :=
+    sum_marginalPoly_eval_mul w .AB'' W point
+      (fun answer => S.place .BB' ((S.pointMeasExp .bob W point).effect answer))
+  simp only [hRegroup] at hSum
+  rw [opDistSq, opFamilyDistSq_symm] at hSum
+  exact hSum
+
+set_option maxHeartbeats 800000 in
+-- The explicit measurement aliases keep the six-register instance search local.
+/-- The Bob-first agreement sum has the same identity-absorption bound on
+the `BA''`--`AA'` EPR pair. -/
+private theorem sum_marginalPoly_pointMeas_approx_id_bob_reversed
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) :
+    opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point => ∑ poly : Poly P,
+        S.place .BA'' ((w.marginalPoly .bob W).effect poly) *
+          S.place .AA' ((S.pointMeasExp .alice W point).effect
+            (MvPolynomial.eval point poly.1)))
+      (fun _ => 1) S.psiHat ≤ 2 * deltaG := by
+  let evaluated : (Fin P.m → PauliScalar P) →
+      MIPStarRE.Quantum.Measurement (PauliScalar P)
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun point =>
+    placedMeasurement S .BA'' ((w.marginalPoly .bob W).postprocess
+      (fun poly => MvPolynomial.eval point poly.1))
+  let comparison : (Fin P.m → PauliScalar P) →
+      MIPStarRE.Quantum.Measurement (PauliScalar P)
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun point =>
+    placedMeasurement S .AA' (S.pointMeasExp .alice W point)
+  have hProjective (point : Fin P.m → PauliScalar P) :
+      Measurement.IsProjective (evaluated point) := by
+    apply placedMeasurement_isProjective
+    rw [w.marginalPoly_postprocess_eval]
+    exact SandwichProduct.postprocess_isProjective
+      (w.Smeas .bob) (w.projective .bob) (evalAt W point)
+  have hAgreement :
+      opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat ≤
+        2 * consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat :=
+    opFamilyDistSq_le_two_mul_consistencyDefect
+      (X := Fin P.m → PauliScalar P) (α := PauliScalar P)
+      (ι := SixReg P S.toStrategy.ιA S.toStrategy.ιB)
+      (uniformDistribution (Fin P.m → PauliScalar P)) evaluated comparison S.psiHat
+  have hConsistency :
+      consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+          (fun point answer => (evaluated point).effect answer)
+          (fun point answer => (comparison point).effect answer) S.psiHat ≤ deltaG := by
+    simpa only [evaluated, comparison, placedMeasurement_effect] using
+      marginalPoly_pointMeas_consistent_bob_reversed w W
+  have hDistance : opFamilyDistSq
+      (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => (evaluated point).effect answer)
+      (fun point answer => S.place .AA'
+        ((S.pointMeasExp .alice W point).effect answer)) S.psiHat ≤ 2 * deltaG := by
+    simpa only [comparison, placedMeasurement_effect] using
+      hAgreement.trans (mul_le_mul_of_nonneg_left hConsistency (by norm_num))
+  have hSum := opDistSq_sum_sub_mul_le_of_projective
+    (uniformDistribution (Fin P.m → PauliScalar P)) evaluated
+    (fun point answer => S.place .AA'
+      ((S.pointMeasExp .alice W point).effect answer)) S.psiHat (2 * deltaG)
+    hProjective hDistance Finset.univ
+  simp only [MIPStarRE.Quantum.Measurement.sum_eq_one] at hSum
+  simp only [evaluated, placedMeasurement_effect] at hSum
+  have hRegroup (point : Fin P.m → PauliScalar P) :
+      (∑ answer : PauliScalar P, S.place .BA''
+        (((w.marginalPoly .bob W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer) *
+          S.place .AA' ((S.pointMeasExp .alice W point).effect answer)) =
+        ∑ poly : Poly P, S.place .BA''
+          ((w.marginalPoly .bob W).effect poly) *
+            S.place .AA' ((S.pointMeasExp .alice W point).effect
+              (MvPolynomial.eval point poly.1)) :=
+    sum_marginalPoly_eval_mul w .BA'' W point
+      (fun answer => S.place .AA' ((S.pointMeasExp .alice W point).effect answer))
+  simp only [hRegroup] at hSum
+  rw [opDistSq, opFamilyDistSq_symm] at hSum
+  exact hSum
+
 /-- The polynomial marginal and the opposite player's expanded point
 measurement resolve the identity on average. Quantification over the directed
 opposite-placement relation gives all four instances of the source's
@@ -388,13 +684,10 @@ The source absorbs constant factors and the game error into `deltaS`. Here
 `deltaG` is the global polynomial-pair witness error, and
 `deltaConstructPaulis` records that enlargement explicitly.
 
-The two direct placements are proved in
-`sum_marginalPoly_pointMeas_approx_id_alice` and
-`sum_marginalPoly_pointMeas_approx_id_bob`.
-
-**Proof obligation:** issue #47 and the register-transfer work in issue #115
-track the remaining two directed placements and the common error enlargement.
-The independent direct-placement argument is recorded in the audit for issue #243. -/
+The direct placements use the witness fields themselves. The two remaining
+directions follow by transporting the same correlations between the two EPR
+pairs and, for the Bob-first ordering, reversing two Hermitian factors inside
+the real quadratic form. -/
 theorem sum_marginalPoly_pointMeas_approx_id :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -409,7 +702,29 @@ theorem sum_marginalPoly_pointMeas_approx_id :
                       (MvPolynomial.eval u g.1)))
                 (fun _ => 1) S.psiHat ≤
                   deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  refine ⟨2, by norm_num, ?_⟩
+  intro P epsilon deltaG _ _ _ S w W p₁ p₂ hopp
+  have hbase :
+      opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+        (fun u => ∑ g : Poly P,
+          S.place p₁ ((w.marginalPoly p₁.side W).effect g) *
+            S.place p₂ ((S.pointMeasExp p₂.side W u).effect
+              (MvPolynomial.eval u g.1)))
+        (fun _ => 1) S.psiHat ≤ 2 * deltaG := by
+    cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+    · simpa only [Placement.side] using
+        sum_marginalPoly_pointMeas_approx_id_alice w W
+    · simpa only [Placement.side] using
+        sum_marginalPoly_pointMeas_approx_id_bob_reversed w W
+    · simpa only [Placement.side] using
+        sum_marginalPoly_pointMeas_approx_id_bob w W
+    · simpa only [Placement.side] using
+        sum_marginalPoly_pointMeas_approx_id_alice_reversed w W
+  refine hbase.trans ?_
+  unfold deltaConstructPaulis
+  have hsqrt : 0 ≤ Real.sqrt epsilon := Real.sqrt_nonneg epsilon
+  have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
+  nlinarith
 
 /-- Each polynomial marginal annihilates the complement of the corresponding
 same-side expanded point effect on average. The answer summation is over the
