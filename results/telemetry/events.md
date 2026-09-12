@@ -7642,3 +7642,18 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - Issue 514 direct-law proof and retained transport marker
+
+Session `prover-514-20260912-01` proved `subline_remove_X_factor_direct`
+without changing its public signature. Focused checks and the target's axiom
+closure contain no proof hole. The initial commit hook rejected the direct
+blueprint entry's proof-level completion mark because the declaration retains
+the required `Unfaithful` marker for source-law transport. That transport is
+outside this packet and remains open. The completion marks were removed and
+the direct entry now states in prose that its Lean proof is complete; the
+source entry and the transport marker remain unchanged. No hook was bypassed.
+Prior attempt provenance and the lower bound of 14789 recorded author wall
+seconds before this session are in
+`audits/2026-09-12-subline-complex-X-removal.md`. This is a scalar-proof
+advance, not a reset of the broader gap episode or its costs.

@@ -19,11 +19,11 @@
 \section{At a glance}
 
 \textbf{Difficulty.} The domain correction is elementary; the remaining
-formal estimate requires the project's state-dependent Cauchy--Schwarz and
-restricted-distribution arguments. \textbf{Estimated weight.} The correction
-affects two Lean modules and their blueprint correspondence. It retains the
-unfinished scalar estimate and isolates the existing pasting consistency
-obligation. \textbf{Mathlib/project split.} Finite sums, positivity, and real
+source transport is separate from the proved directly indexed estimate.
+\textbf{Estimated weight.} The scalar proof uses a finite-sum complex
+Cauchy--Schwarz lemma and the existing restricted-distribution deficit bound.
+The pasting consistency obligation remains open.
+\textbf{Mathlib/project split.} Finite sums, positivity, and real
 square roots use Mathlib; the measurement construction and subline law use
 the local quantum API. \textbf{Key mathematical inputs.} Completeness of a
 POVM, projectivity, and Cauchy--Schwarz suffice for the counterexample and
@@ -137,12 +137,12 @@ vanishing error depending on $\eps$ alone absorbs this difference.
 
 \section{Blueprint and formal comparison}
 
-The concrete measurement domain is retained. The scalar obligation now
+The concrete measurement domain is retained. The proved scalar estimate
 compares complex expectations with the complex modulus, preserving the
 universal constant, factor $m$, and square-root error. It is named
 \leanid{subline\_remove\_X\_factor\_direct}. Its distribution is still the
 directly indexed law represented by \leanid{SubLineWitness}, not the
-source law $D$. Thus it is a formalization-only obligation, linked from
+source law $D$. Thus it is a formalization-only result, linked from
 \path{lem:claim-17-2-direct}, and is not a formalization of the source
 claim. The source statement remains at \path{lem:claim-17-2}, with neither
 a Lean link nor a completion mark.
@@ -167,8 +167,9 @@ does not supply the divisibility needed to instantiate the source line law
 at dimension $2m+2$. The current correction neither adds that divisibility
 as a hypothesis nor identifies the directly indexed law with the source law.
 Scalar realignment is tracked in \ghissue{474} and review of PR~478.
-The distribution and complex-overlap work under \ghissue{118} remains open;
-its historical budget is unchanged.
+The directly indexed complex X-factor estimate is proved in \ghissue{514}.
+The distribution transport and the other complex-overlap obligations under
+\ghissue{118} remain open; their historical budget is unchanged.
 
 The abstract combined-line witness record remains unchanged. Its fields
 faithfully express the existential conclusion of the combined-lines lemma,
@@ -185,18 +186,24 @@ unfinished consistency proof, to be discharged by the source's point-to-line
 comparisons and pasting argument. The source-facing
 \leanid{exists\_combinedLinesWitness} has an unchanged statement.}
 
-There are two retained direct proof holes in the affected modules.
-The first is \leanid{subline\_remove\_X\_factor\_direct}: apply complex
+The proof of \leanid{subline\_remove\_X\_factor\_direct} applies complex
 weighted Cauchy--Schwarz to bound $|A(T)-B(T)|$ by the square root of the
-X-overlap deficit, then use the already proved
-\leanid{exists\_concreteXPointOverlap\_deficit\_le}. That estimate already
+X-overlap deficit, then uses
+\leanid{exists\_concreteXPointOverlap\_deficit\_le}. For each sample, the
+positive line effect defines a sesquilinear form. Cauchy--Schwarz for this
+form bounds the complex correlation by the product of the square roots
+of its diagonal values. Summing over outcomes and then averaging uses the
+ordinary finite-sum Cauchy--Schwarz inequality. Completeness bounds the
+Z diagonal sum by one; projectivity turns the complementary X diagonal
+sum into the deficit. The existing deficit estimate
 uses \leanid{combinedLineMeasurement\_sum\_Z}, expanded line-point
 consistency, and the separate X marginal of the directly indexed law.
 Transport of this argument and of the real-part estimates to the source
 law, including the complex estimate of Claim 17-1, is a separate remaining
 obligation. No additional hole is introduced for that transport.
 
-The second is \leanid{combined\_line\_measurement\_consistency}.
+The retained direct proof hole is
+\leanid{combined\_line\_measurement\_consistency}.
 It must prove consistency of the same unconditioned X-Z-X measurement
 with the supplied polynomially controlled joint point family on the
 original product of line-point distributions, in every opposite placement.
@@ -210,7 +217,7 @@ No marginal identity, deficit bound, or producer is added to a paper theorem.
 The discrepancy lies in the formal quantification over arbitrary witnesses,
 not in the paper's constructed-measurement assertion. The counterexample
 forces a domain correction. Using the defined sandwich restores the measurement domain. The complex
-scalar conclusion is restored for the directly indexed auxiliary obligation;
+scalar conclusion is proved for the directly indexed auxiliary theorem;
 transport to the source distribution and the consistency construction remain
 open. The source claims themselves retain their complex-modulus statements
 without unsupported formalization marks.
