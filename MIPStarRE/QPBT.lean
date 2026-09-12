@@ -65,6 +65,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.DiagonalParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PassingValue
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SuppliedDirectSoundness
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
