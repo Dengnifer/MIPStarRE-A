@@ -871,6 +871,30 @@ assembled by Fourier averaging.
 
 \section{Combined line measurements}
 
+\begin{lemma}[Formalization support for joint line-point resampling]
+	\label{lem:line-representative-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_lineRepMap_resample_parameter}
+	\leanok
+	\uses{def:line-representative}
+	Let $K$ be a finite field, $m\in\N$, and $v\in K^m$.
+	Write $r_v$ for the canonical representative map of
+	Definition~\ref{def:line-representative}. For every
+	$F:K^m\times K^m\to\R$, uniform independent $u\in K^m$ and $t\in K$ satisfy
+	\[
+		\E_u F(r_v(u),u)
+		= \E_u\E_t F(r_v(u),r_v(u)+tv).
+	\]
+	This includes $v=0$ and is a formalization-only auxiliary for the
+	conditional sampling in Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	The point $r_v(u)+tv$ is uniform on $K^m$, and its canonical
+	representative is $r_v(u)$. Applying these two identities to the
+	joint expectation gives the result.
+\end{proof}
+
 \begin{lemma}[Formalization support for coefficient polynomial agreement]
 	\label{lem:coefficient-polynomial-agreement}
 	\lean{MIPStarRE.QPBT.evalCoefficient_collision_card_le}

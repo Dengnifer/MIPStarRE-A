@@ -6412,7 +6412,9 @@ not actual commit/publication hooks. No productive session was killed.
   a budget reset or an additional mathematical attempt; B8 remains exhausted
   at the previously recorded 13 attempts and 26509 working seconds. No
   mathematical proof attempt, additional model session, or full build ran.
+
 ## 2026-09-09 - PR424 merged and existing review findings assigned (07:28Z)
+
 - GitHub confirms PR424 merged at07:24:41Z as0ee46930fd6fbd2017e84e2115ad171c031327de
   from exact head09682990cef329ebe8fde59b23aa516dc7253a5f; all ten CI/review statuses
   are success. The daemon completed its record at07:25:53Z and published snapshot550b392f.
@@ -6425,6 +6427,50 @@ not actual commit/publication hooks. No productive session was killed.
 - B9/B10 still have no owner disposition. Main made no manual telemetry commit or push,
   daemon change, one-off merge/refresh command or proof-budget reset. The verified merge
   is reported on #27.
+
+## 2026-09-09 - PR488 failed refresh conflict repair
+
+- The daemon refresh failed at 08:06:08Z while merging main into
+  `issue-484-product-weighted-collision`. The registered repair session
+  `orc-484-20260909-01` preserved parents
+  `5cb9b05d4380ab2c04b825883470269da3e92609` and
+  `a45258248d39dccc43d3a4a5d451ed4a1cfbc335`, all 3378 existing stage-0
+  entries, and a runtime snapshot of the index and conflicted files.
+- The three conflict resolutions retain both line imports, the incoming
+  coefficient-column wording, and the existing qualified
+  `DistanceCalculus.applyOperatorToState_mul` calls. Incoming documentation
+  references and every other staged change are retained. No theorem statement
+  or mathematical argument is changed by the resolution.
+- Source comparison used `lem:qld-4-10`, `eq:qld-rw-self-cons-1` through
+  `eq:qld-rw-self-cons-4`, and the application of `lem:pasting` in
+  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`.
+  Statement-integrity verdict: the resolution preserves all Lean hypotheses
+  and conclusions, including the existing nonzero first-direction restriction
+  of the auxiliary product collision estimate. It introduces no source claim.
+- The canonical pending merge-loss guard passed against all three best merge
+  bases. Focused Lean checks passed for `Lines`, `Points.Commutation`,
+  `Points.Consistency`, and `Lines.ProductWeightedCollision`; the first
+  `Lines` check required compiling the incoming `Games.RestrictedAverage`
+  dependency. The two existing `Lines` proof holes remain unchanged.
+- `lake build MIPStarRE.QPBT` passed all 9185 jobs while holding the active
+  machine-wide flock lock. Its log is retained with the runtime index snapshot.
+- The active machine-wide build lock was a regular flock file, whereas the
+  primary checkout's `ci.sh` still uses a directory lock and would remove an
+  ownerless file as stale. This repair does not alter the lock or daemon.
+  Canonical CI can run under an outer machine-wide flock while its documented
+  `MIPSTARRE_FULL_BUILD_LOCK` override names a private nested directory lock.
+  The outer lock remains held throughout CI, preserving serialization without
+  removing the active lock file. Previous CI and review success apply only to
+  the old parent. Independent review remains with main. No proof attempt,
+  budget reset, or subagent ran.
+- The first commit-hook run failed one of 616 Python tests because
+  `MIPSTARRE_HARDNESS_REASON` from the registered orchestrator environment
+  leaked into the routine-model dispatch fixture. The isolated fixture
+  reported that an escalation reason requires a hard job classification.
+  Clearing only that variable caused four fixtures to reject the inherited
+  hard job class. Validation subprocesses must clear the paired
+  `MIPSTARRE_JOB_CLASS` and `MIPSTARRE_HARDNESS_REASON` variables; the session's
+  model policy and accounting remain unchanged.
 ## 2026-09-09 - PR458 failed refresh conflict repair
 - The daemon refresh stopped at 08:04:32Z with three conflicts in
   `QPBT/Combining/Points/Consistency.lean`. The immutable merge parents are
@@ -7212,6 +7258,47 @@ not actual commit/publication hooks. No productive session was killed.
 - Daemon refreshes431/458. No duplicate writer or extra full-build lane was
   started while capacity is occupied. One short27 update records current
   counts. No primary key, native worker, qpbt-switch or HOLD/STOP use.
+
+### 2026-09-09 - PR488 second failed refresh preservation repair
+
+- Session `orc-484-20260909-02`, admitted at 20:11:02 +08:00 with a
+  45-minute working limit, resolves the pending refresh of immutable parents
+  `38f57aad2a322eabe57576c0b6085d46c5217525` and
+  `ed2caf063ceb0cec0a0c0639d3bba91b4b5a19ac`. The original index and
+  conflicted files are retained under
+  `~/.cache/mipstarre-dev/pr488-refresh-repair-orc-484-20260909-02/`.
+- The resolution retains every line-module import and the incoming public
+  `QPBT.reindexOp_nonneg` proof via `Quantum.reindex_nonneg`, alongside the
+  branch's distinct `ProjectiveSetting.reindexOp_nonneg` and placement API.
+  The deleted `Lines.PolynomialCollision` import path is retained with its
+  original polynomial-evaluation identity and an import of the incoming
+  shared coefficient module. The incoming general finite-integral-domain
+  collision theorem supplies the former finite-field instance without
+  duplicating its declaration. Both immutable proofs remain in git history.
+- The mathematical comparison uses `lem:qld-xz-lines` at
+  `14_analysis_of_the_pauli_basis_test.tex:950-955`, `lem:pasting` at
+  `06_nonlocal_games_and_mipstar.tex:504-525`, and the register bipartitions
+  at `14_analysis_of_the_pauli_basis_test.tex:420-450`. Statement integrity:
+  the product collision theorem and proof are unchanged; its nonnegative
+  line-dependent weight, distinct polynomials, nonzero first direction, and
+  degree-to-field-cardinality bound remain as reviewed. The retained
+  reindexing and evaluation identities have their original assumptions and
+  conclusions. Verdict: faithful auxiliary statements, with the existing
+  scope restriction preserved and no new assumptions or proof holes.
+- All 3638 original stage-0 entries are retained byte-for-byte. The event-log
+  conflict retains both parents' records in order, including the earlier
+  failed attempts and validation incidents. The pending merge-loss guard
+  passes against all three best merge bases. A focused check of the
+  compatibility module first reported a missing incoming coefficient olean;
+  its target dependency build supplies that artifact without a cache reset.
+- Validation subprocesses clear only the five invoking-model metadata
+  variables: `MIPSTARRE_CODEX_MODEL`, `MIPSTARRE_DISPATCH_ROLE`,
+  `MIPSTARRE_JOB_CLASS`, `MIPSTARRE_REQUESTED_EFFORT`, and
+  `MIPSTARRE_HARDNESS_REASON`. While #504 remains outside these parents,
+  actual unittest outcomes must be inspected in addition to CI statuses.
+  Exact publication, CI results, marker removal and independent-review
+  handoff are recorded in the runtime handoff. No reviewer or other worker
+  is spawned; prior review and B8 budgets are not reset.
 ### 2026-09-09T12:07:06Z - Train review and bounded remaining fixes
 - Required snapshot completed; previous cycle progressed. Census9 workers,
  4 orcs. PR507 e1dd7bb0 has complete CI and626 tests OK; independent
@@ -7642,6 +7729,30 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - PR488 merge conflict resolution
+
+- Session `orc-pr488-20260912-01` resolved the pending merge of
+  `13409f63dea11a0e8a2f5d336215175448d4fccd` into
+  `2fc7a102dfdbcba2e10d2909e068835c2676e9b5`. The conflicts were confined to
+  `QPBT/Combining/Lines.lean` imports and this event log. Both parents' imports,
+  both PR488 incident entries, and the complete incoming event sequence remain.
+- Statement integrity: all declarations and proofs in `Lines.lean` match main;
+  all 11 PR-specific supporting Lean files remain unchanged from the branch.
+  The source-facing joint-line theorem and the product collision estimate keep
+  their respective hypotheses and conclusions. No new proof hole, axiom, or
+  assumption was introduced. The two existing holes in `Lines` and `Claims`
+  are inherited unchanged from main.
+- The first direct check lacked the incoming `CombinedMeasurement` object file.
+  Targeted builds of `Combining.Lines`, `Combining.Claims`, and
+  `Combining.ZEvalDeficit` supplied the dependencies and passed. All 38 Lean
+  files changed relative to either merge parent passed `lake env lean` checks.
+  The pending merge-loss guard and staged whitespace check also passed.
+- Automatic approval review rejected the canonical full-build helper before
+  execution because its service reported an account concurrency limit. No full
+  build ran. Validation used module-specific builds inside this worktree and
+  direct file checks; full CI and publication remain with the publishing lane.
+  No subagent, independent review, or push was performed by this session.
 
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 
