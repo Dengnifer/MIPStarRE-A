@@ -1,5 +1,92 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/537",
+  "id": 5431449347,
+  "node_id": "I_kwDOUJyJf88AAAABQ71XAw",
+  "number": 537,
+  "title": "fix(QPBT): include public point helpers in canonical build",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-12T05:36:12Z",
+  "updated_at": "2026-09-12T05:36:12Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-canonical-point-imports-20260912 -->\n### Problem\n\nMeta05:15Z traced repeated branch publication failures to existing QPBT modules outside the main umbrella import closure. A successful default build does not produce `MIPStarRE.QPBT.Combining.Points.Absorption` and `MIPStarRE.QPBT.Combining.Points.MarginalContraction` artifacts. Lane-v18 works around this by building changed modules, but main needs the intended import graph repaired.\n\n### Scope\n\nInspect the current QPBT umbrella and submodule re-exports and the actual dependency graph. Add the two existing reusable modules to the appropriate canonical import surface without cycles or duplicate declarations. Check whether the same immediate ownership surface has another missing public helper; include it only if required by the actual build contract. Do not sweep unrelated internal or experimental modules into the public API. Do not rewrite proofs, change theorem signatures, or modify workflow gates/locks. Preserve the repository's re-export style and source citations.\n\nThis is an explicitly requested repository fix, not permission to weaken missing-artifact checks. Read relevant module documentation and mathematical source before any mathematical changes; none should be necessary. Keep the patch minimal. Demonstrate that the default canonical build now produces the affected artifacts, using the shared machine-wide build lock and an isolated worktree. Do not delete the main or hot cache, run lake update, write to the hot cache, or start a second full build. Focused import/type checks first, then required build/CI. No test-only mechanism that bypasses the real import graph.\n\n### Workflow\n\nOwner2026-09-12 all-Astra xhigh priority mode applies; use local/bin tools and preserve telemetry. Work only in the supplied isolated branch. Commit, publish through pr_open.py, run exact-head CI and hand off independent review without launching descendants. No main push/commit or PR merge, no force/reset/rebase, no native agents, no HOLD/STOP or qpbt-switch. Scrub invoking-model and review-model fields before CI fixture processes. Limit to45 active minutes, checkpoint if blocked, stop new work at08:00Z. Main/meta existing PR lanes are not yours to alter.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/529",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/529/labels{/name}",
@@ -261,93 +348,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/526",
-  "id": 5431290831,
-  "node_id": "I_kwDOUJyJf88AAAABQ7rrzw",
-  "number": 526,
-  "title": "feat(QPBT/Test): discharge exists_spcc_value_one",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-12T05:05:59Z",
-  "updated_at": "2026-09-12T05:05:59Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/164",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-16-exists-spcc-value-one -->\n### Target\n\n`MIPStarRE/QPBT/Test/Completeness.lean`: `exists_spcc_value_one` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\n          (try exact Bool.noConfusion hvB) <;>\n          rfl\n\n/-- The symmetric presentation of the Pauli basis test. The field and basis\nare those fixed by `P.model`; no additional model is quantified. -/\nnoncomputable def pauliBasisTestSymm (P : AdmissibleParams) : SymmetricGame where\n  Question := PauliQuestion P\n  Answer := PauliAnswer P\n  \u03bc := pauliQuestionDistribution P\n  \u03bc_prob := (pauliBasisTest P).\u03bc_prob\n  \u03bc_symm := pauliQuestionDistribution_symm P\n  decide := pauliWinPredicate P\n  decide_symm := pauliWinPredicate_symm P\n\n/-- The symmetric presentation has the Pauli basis test as its\nunderlying game. -/\ntheorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :\n    (pauliBasisTestSymm P).toGame = pauliBasisTest P := by\n  rfl\n\n/-- `lem:pauli-completeness`: every admissible Pauli basis test has a\nvalue-one SPCC strategy. Blueprint `lem:pauli-completeness`, paper\n`08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem exists_spcc_value_one (P : AdmissibleParams) :\n    \u2203 S : SymmetricStrategy (pauliBasisTestSymm P),\n      S.IsSPCC \u2227 S.toStrategy.value = 1 := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run concurrent full builds.\n\nUse primary-repository local/bin tools for all workflow operations and gh_common.py for GitHub. Scrub invoking-model and review-model settings before CI or workflow fixtures. Commit conventional source changes with all useful work preserved, open a PR through pr_open.py, and run required exact-head CI after verifying published-head propagation. Do not merge a PR, push/commit main, force/reset/rebase, invoke qpbt-switch, create HOLD/STOP files, or launch a reviewer yourself. Finish with the proved target, exact head, tests/axioms, source-statement audit, remaining prerequisites and next gate. If publication/build waits would exceed the active",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/526/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/524",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/524/labels{/name}",
@@ -522,93 +522,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/522",
-  "id": 5431278653,
-  "node_id": "I_kwDOUJyJf88AAAABQ7q8PQ",
-  "number": 522,
-  "title": "feat(QPBT/Extraction): discharge swapUnitary_conj_tildeM",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-12T05:03:45Z",
-  "updated_at": "2026-09-12T05:03:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-13-swapunitary-conj-tildem -->\n### Target\n\n`MIPStarRE/QPBT/Extraction/Observables.lean`: `swapUnitary_conj_tildeM` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\n`14_analysis_of_the_pauli_basis_test.tex:1701-1713`.\n\n**Proof obligation:** issue #47 tracks the diagonal projector reduction.\nDischarge: substitute `tildeObs_eq_heteroKron`, eliminate off-diagonal outcomes,\nand cancel the phase using `tauObservable_X_mul_Z`. -/\ntheorem swapUnitary_conj_tildeObs {P : AdmissibleParams}\n    {epsilon delta : \u211d} {S : ProjectiveSetting P epsilon}\n    (w : GlobalPairWitness S delta) (side : PlayerSide) (W : PauliKind)\n    (u : PauliRegister P) (j : Fin P.model.basisDim) :\n    conjBy (swapUnitary w side) (tildeObs w side W u j) =\n      heteroKron (1 : Op (S.ExpandedLocalSpace side))\n        (tauObservable W (P.model.basis j \u2022 u)) := by\n  sorry\n\n/-- Exact conjugation of a pulled-apart point effect by the swap map. This is\nEquation `eq:qld-unitary-6` in `lem:v-swap-conjugation`, blueprint\n`eq:qld-unitary-6`; its calculation occurs at paper\n`14_analysis_of_the_pauli_basis_test.tex:1805-1822`.\n\n**Proof obligation:** issue #47 tracks the exact relabeling calculation.\nDischarge: expand `tildeM`, conjugate each Pauli projector, and translate the\ndot-product constraint with `lowDegreeEnc_eq_dotProduct`; no unrestricted\ndecoder interpolation identity is used. -/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem swapUnitary_conj_tildeM {P : AdmissibleParams}\n    {epsilon delta : \u211d} {S : ProjectiveSetting P epsilon}\n    (w : GlobalPairWitness S delta) (side : PlayerSide) (W : PauliKind)\n    (u : Fin P.m -> PauliScalar P) (a : PauliScalar P) :\n    conjBy (swapUnitary w side) (tildeM w side W (indicatorVec u) a) =\n      heteroKron (1 : Op (S.ExpandedLocalSpace side))\n        (bracketOp (pauliProj W) (fun h => lowDegreeEnc h u) a) := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run concurrent full builds.\n\nUse primary-repository local/bin tools for all workflow operations and gh_common.py for GitHub. Scrub i",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/522/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/520",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/520/labels{/name}",
@@ -758,8 +671,8 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
+   "blocked_by": 1,
+   "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
   },
@@ -934,8 +847,8 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 1,
-   "total_blocking": 1
+   "blocking": 2,
+   "total_blocking": 2
   },
   "body": "<!-- mipstarre-issue-key: qpbt-proof-20260912-08-nonencodingmarginalmass-le -->\n### Target\n\n`MIPStarRE/QPBT/Extraction/Consistency.lean`: `nonencodingMarginalMass_le` at main `ae124f8f09ee002444ac5b9711822c0f1daae142`.\n\nDischarge this named remaining obligation, retaining all public assumptions and conclusions.\n\n### Source Context\n\n    (w : GlobalPairWitness S deltaS) (side : PlayerSide) (W : PauliKind) : \u211d := by\n  classical\n  exact \u2211 g \u2208 Finset.univ.filter (fun g : Poly P => \u00ac IsEncoding g),\n    (inner \u2102 S.psiHat\n      (applyOperatorToState\n        (S.placeSide side\n          (heteroKron ((w.marginalPoly side W).effect g)\n            (1 : Op (PauliRegister P))))\n        S.psiHat)).re\n\n/-- The non-encoding support estimate required by the Chapter 16 extraction\nargument. For either player side and either Pauli basis, the marginal mass on\npolynomial representatives outside the encoding image is bounded by the\ncommon construction error.\n\nThis is the named obligation for blueprint\n`eq:qld-nonencoding-mass`, paper\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.\nThe estimate is intentionally not folded into a decoder identity; its proof\nmust use the point-consistency hypotheses and Schwartz--Zippel. See\n`docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.\n\n**Proof obligation:** issue #47 tracks this support estimate. -/\n\n### Current Statement\n\n\u200b`\u200b`\u200b`lean\ntheorem nonencodingMarginalMass_le :\n    \u2203 C : \u211d, 1 \u2264 C \u2227\n      \u2200 (P : AdmissibleParams) (epsilon deltaG : \u211d),\n        0 \u2264 epsilon \u2192 epsilon \u2264 1 \u2192 0 \u2264 deltaG \u2192\n          \u2200 (S : ProjectiveSetting P epsilon)\n            (w : GlobalPairWitness S deltaG)\n            (side : PlayerSide) (W : PauliKind),\n            nonencodingMarginalMass w side W \u2264\n              deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by\n  sorry\n\u200b`\u200b`\u200b`\n\n### Scope and Validation\n\nOwner-authorized 2026-09-12 proof packet. Work only in your assigned isolated worktree. All workers use Astra xhigh priority through the owner shim; local tools retain their legacy ultra argument. No descendants or native agents. The owner requested bulk work on the remaining proof holes at04:45Z; this is one named packet in that renewed attempt, not a reset of earlier episode history. Record prior relevant attempts and accumulate their costs honestly. Limit this attempt to60 active minutes, checkpoint when that is reached, and never start new work after08:00Z.\n\nRead the paper passage cited by the target declaration before proving anything, then its blueprint entry, current Lean statement and Mathlib/local APIs. Preserve the public signature, hypotheses, quantifiers, error constants and source domain. Do not add axioms, sorry, bridge inputs, residual packages, weaker conclusions or stronger load-bearing assumptions. Do not turn an unproved intermediate step into a hypothesis of the paper theorem. Retain existing unfaithful/scope markers until their exact deviation has been discharged. In particular, a supplied GlobalPairWitness is an explicit conditional premise of some existing helpers, not evidence that the source-facing construction is complete.\n\nFirst search existing main and saved open-PR commits for the target proof and useful intermediate lemmas. Reuse verified proof content with provenance; do not reprove a result already available or copy an entire divergent branch. If the target is already discharged at the current source statement, report the exact commit/declaration and stop without filler. Existing meta-owned PRs, loops and lanes are not yours to modify. Other packet worktrees may own nearby declarations; change only your named target and genuinely necessary helpers, preferably in a dedicated auxiliary module imported by the target file.\n\nFor a real proof obstruction, return to the source proof. Do not guess tactics or silently alter the theorem. If the source assertion is false or an existing gap episode already establishes non-derivability, preserve the statement and supply a precise cited obstruction or useful independently proved lemma. A dead end is not permission to add assumptions. Do not restart an exhausted mathematical-gap approach without new mathematical evidence; this packet may advance a different named prerequisite, with the remaining source obligation explicit.\n\nProve as much of the actual target as justified, typecheck focused files, inspect the target's axiom closure, and synchronize blueprint links only for statements/proofs that really match. A proof depending on another existing sorry does not certify the paper theorem; identify that dependency explicitly. Full builds must use the shared local/bin helpers and their machine-wide lock, and only after focused work stabilizes. Never lake update, write to the hot cache, or run concurrent full builds.\n\nUse primary-repository local/bin tools for all workflow operations and gh_common.py for GitHub. Scrub invoking-model and review-model settings before CI or workflow fixtures. Commit conventional source changes with all useful work preserved, open a PR through pr_open.py, and run required e",
   "closed_by": null,
@@ -10256,9 +10169,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 34,
+  "comments": 35,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-12T05:25:14Z",
+  "updated_at": "2026-09-12T05:38:07Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -10373,8 +10286,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 26,
-   "completed": 10,
-   "percent_completed": 38
+   "completed": 11,
+   "percent_completed": 42
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -10481,9 +10394,9 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 29,
+   "total": 30,
    "completed": 15,
-   "percent_completed": 51
+   "percent_completed": 50
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -10700,8 +10613,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 13,
-   "completed": 7,
-   "percent_completed": 53
+   "completed": 8,
+   "percent_completed": 61
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -12525,9 +12438,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 272,
+  "comments": 273,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-12T05:16:13Z",
+  "updated_at": "2026-09-12T05:52:25Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
