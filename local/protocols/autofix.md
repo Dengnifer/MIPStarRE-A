@@ -10,11 +10,13 @@ Replaces `.github/workflows/auto-fix.yml` — the `setup`, `auto-fix-ci`,
 `attach-pr-branch` and `fetch-review-comments` composite actions.
 
     local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]
+    local/bin/autofix.sh <pr-id> --mode review --loop [N]
 
 The loop is bounded on four independent axes, and every one of them was paid
 for by an incident in the parent repository: **what** may be fixed (§3),
 **how many times** (§5), **how many at once** (§4), and **whether at all**
-(§2).  Removing any one of them re-opens a documented failure mode.
+(§2).  Removing any one of them re-opens a documented failure mode.  §11 adds
+the outer `--loop`, which is bounded by the same iteration cap.
 
 ---
 
@@ -285,11 +287,13 @@ runs, which is the correct failure: no silent no-op, no stale green.
 
     local/bin/autofix.sh 7 --mode auto        # dispatch from the manifest
     local/bin/autofix.sh 7 --mode ci          # only the build fix, if warranted
+    local/bin/autofix.sh 7 --mode review --loop 3   # rounds until APPROVED or the cap
     local/bin/autofix.sh 7 --mode auto --dry-run   # resolve and build prompts only
     LOCAL_AUTO_FIX_ENABLED=false local/bin/autofix.sh 7 --mode auto
 
-Exit codes: `0` fixes applied, or an intentional skip (kill switch, nothing to
-fix, superseded, cap reached) · `1` usage/environment · `2` a phase failed.
+Exit codes of a **single pass**: `0` fixes applied, or an intentional skip (kill
+switch, nothing to fix, superseded, cap reached) · `1` usage/environment ·
+`2` a phase failed.  `--loop` uses the distinct codes in §11.
 
 Artefacts:
 
@@ -298,6 +302,7 @@ Artefacts:
 | the fix commits on the branch | yes | the fix itself |
 | the PR on GitHub | on GitHub | auto-fix label state and the cap-reached comment |
 | `~/.cache/mipstarre-dev/autofix/<pr>/<sha>/` | no | prompts, sanitized logs, raw agent output, commit messages |
+| `~/.cache/mipstarre-dev/autofix/<pr>/round-result.json` | no | the single pass's machine-readable outcome, read by `--loop` |
 | `~/.cache/mipstarre-dev/locks/fix-<branch>.lock` | no | the fix lock and its `cancel` sentinel |
 
 Sessions go through `local/bin/dispatch.sh` when present, so each fix appears in
@@ -329,8 +334,77 @@ force this; doing it earlier is cheaper.
   configured author, pushed (§8) over the operator's own git credentials: no
   bot token, no bot account.
 * **The provider cascade and `allowed_tools` presets.**  codex sandbox modes
-  and `MIPSTARRE_FIX_MODEL`.
+  and the model policy (§11).
 * **The linter-warning sweep** (`lean-linter-warning-autofix.yml`), which shares
   the `LOCAL_AUTO_FIX_ENABLED` switch and the `[…-auto-fix]` prefix but is a
   separate dispatch-only pipeline with its own double diff guard.  It belongs to
   `local/bin/housekeeping.sh`, not here.
+
+## 11. The outer loop, the model, and the exit codes
+
+Two 2026-09-12 defects live here.  The first: `autofix.sh` defaulted
+`MIPSTARRE_FIX_MODEL` to a bare hard model.  The published model policy refuses
+an explicit hard model for a routine job, so **every** fixer died at the
+dispatcher's policy preflight, one silent death per session, and the owner spent
+the morning asking why slots were idle.  The second: the outer loop existed only
+as a `/tmp` script whose termination test was a `grep` over the tail of a shared
+append-only log —
+`verdict=APPROVED|produced no changes|nothing to fix|cap reached|refusing` — which
+can match another round's line, or a PR's own prose.
+
+### 11.1 The model
+
+`MIPSTARRE_FIX_MODEL` defaults to **empty**, meaning the dispatcher's default
+under `local/model-policy.json`, which is what this script's header always
+documented.  A genuinely hard fix is expressed as
+`--job-class escalated --hardness-reason "…"` through `dispatch.sh`, never as a
+bare model: the job class is what the policy classifies, and the reason is what
+the audit reads.
+
+Before any worktree work, `autofix.sh` runs
+
+    model_policy.py --role prover --job-class general --model "${MIPSTARRE_FIX_MODEL:-auto}" --field model
+
+once and dies with the **policy's own message** if it is refused.  One loud line
+replaces N silent deaths.  `review.sh` carries the same self-check for its code
+and prose reviewer models, resolved once before it touches a worktree, a diff or
+GitHub.
+
+### 11.2 `--loop [N]`
+
+`--loop` runs rounds of
+
+    fix  ->  checked-push  ->  ci.sh  ->  review.sh  ->  re-read the verdict for the NEW head
+
+`N` defaults to `MIPSTARRE_FIX_CAP`.  That cap is not a second counter: it is the
+same commit-subject count of §5, so a restarted loop re-enters the cap ritual at
+once rather than minting fresh iterations.
+
+Each round is a child invocation of this same script, so the per-round work is
+byte-identical to a single pass — the same lock, the same supersession check, the
+same dirty-tree refusal, the same one prefixed commit.  The child writes its
+outcome to `autofix/<pr>/round-result.json` (`fixed`, `no-change`,
+`nothing-to-fix`, `cap`, `failed`, `dirty`, `superseded`, `disabled`,
+`not-open`) and the driver branches on that record, never on log text.
+
+The verdict is re-read **for the new head SHA** through the per-head marker
+`<!-- mipstarre-review pr=N head=SHA -->`, exactly as §3's review-fix
+precondition does: a verdict written against an older head is not evidence about
+this one.  The loop stops on `APPROVED`, on `COMMENTED` with no unresolved
+findings, on no unresolved findings at all, on `no-change`, on `nothing-to-fix`,
+on the cap, on a dirty tree, and on a round that produced no verdict at all
+(fixing blind is worse than stopping).
+
+### 11.3 Exit codes
+
+| Code | `--loop` meaning |
+|---|---|
+| 0 | the head is APPROVED (or COMMENTED with nothing unresolved), or a clean stop: superseded, kill switch, PR not open |
+| 1 | usage or environment error |
+| 2 | a phase failed, the worktree was dirty, or a round left no readable result |
+| 3 | nothing changed — no fix was warranted, or the fix produced no diff |
+| 4 | the iteration cap or the round cap was reached |
+
+A single pass keeps its historical codes (`0` for every intentional skip), so no
+existing caller has to change; `--loop` is what needed to distinguish "approved"
+from "gave up".

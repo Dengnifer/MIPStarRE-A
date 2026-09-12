@@ -6,6 +6,7 @@
 #
 # Usage:
 #   local/bin/autofix.sh <pr-id> --mode {ci|blueprint|review|auto} [--dry-run]
+#   local/bin/autofix.sh <pr-id> --mode review --loop [N]
 #
 #   <pr-id>     GitHub PR number, e.g. "7" (GitHub is the source of truth for
 #               PR metadata now; there is no local PR record).
@@ -14,16 +15,26 @@
 #          review     fix unresolved review findings (needs the auto-fix label)
 #          auto       dispatch from the head's CI statuses and run every
 #                     applicable fix strictly in the order ci -> blueprint -> review
+#   --loop [N]  Run rounds of fix -> checked-push -> ci.sh -> review.sh and
+#               re-read the verdict for the NEW head, at most N times
+#               (default: MIPSTARRE_FIX_CAP, which already counts the fix
+#               commits on the branch, so the cap survives a restart).
 #   --dry-run   Resolve the dispatch and build the prompts, then stop.
 #
 # Local replacement for .github/workflows/auto-fix.yml (setup + auto-fix-ci +
 # auto-fix-blueprint + auto-fix-review).  Protocol: local/protocols/autofix.md.
 #
 # Exit codes:
-#   0  fixes applied, or an intentional skip (kill switch, nothing to fix,
-#      superseded by a newer run, iteration cap reached)
+#   0  fixes applied, the loop reached APPROVED, or an intentional skip (kill
+#      switch, superseded by a newer run, PR not open)
 #   1  usage or environment error
-#   2  a fix phase failed (agent error, or a rejected commit)
+#   2  a fix phase failed (agent error, a rejected commit, a dirty worktree)
+#   3  nothing changed: no fix was warranted, or the fix produced no diff
+#   4  the iteration cap (or the --loop round cap) was reached
+#
+#   Codes 3 and 4 replace the log-tail grep the /tmp loop used on 2026-09-12
+#   ("verdict=APPROVED|produced no changes|nothing to fix|cap reached"), which
+#   read the tail of a shared append-only log and could match another round.
 #
 # Environment:
 #   LOCAL_AUTO_FIX_ENABLED    disables every fix path on the literal string
@@ -31,7 +42,14 @@
 #   MIPSTARRE_FIX_CAP         combined fix-iteration cap (default 5)
 #   MIPSTARRE_TRUSTED_REF     git ref the fixer personas are read from
 #                             (default: main).  Never the branch being fixed.
-#   MIPSTARRE_FIX_MODEL       codex model (default: the dispatcher's default)
+#   MIPSTARRE_FIX_MODEL       codex model (default: empty — the dispatcher's
+#                             default under the published model policy).  A
+#                             genuinely hard fix is expressed as
+#                             `--job-class escalated --hardness-reason '…'`
+#                             through dispatch.sh, never as a bare model: a
+#                             bare `gpt-6-astra` here is rejected by the policy
+#                             preflight and every fixer dies at exit 4
+#                             (2026-09-12, every fix session lost).
 #   MIPSTARRE_CACHE_ROOT       runtime state root (default ~/.cache/mipstarre-dev)
 #   MIPSTARRE_FIX_LOCK_WAIT   seconds to wait for a superseded fix to stop
 #                             (default 900)
@@ -58,7 +76,11 @@ TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
 GH_COMMON="$ROOT/local/bin/gh_common.py"
 AUTO_FIX_LABEL="${MIPSTARRE_AUTO_FIX_LABEL:-auto-fix-codex}"
-FIX_MODEL="${MIPSTARRE_FIX_MODEL:-gpt-6-astra}"
+# Empty means "the dispatcher's default", which is what this script's own header
+# has always documented.  The former literal default was a bare hard model; the
+# model policy rejects an explicit hard model for a routine job, so every fixer
+# died at the policy preflight before reaching a worktree.
+FIX_MODEL="${MIPSTARRE_FIX_MODEL:-}"
 FIX_CAP="${MIPSTARRE_FIX_CAP:-5}"
 LOCK_WAIT="${MIPSTARRE_FIX_LOCK_WAIT:-900}"
 LOG_TAIL_LINES="${MIPSTARRE_LOG_TAIL_LINES:-400}"
@@ -284,6 +306,8 @@ run_agent() {
 MODE=""
 DRY_RUN=0
 PR_ARG=""
+LOOP=0
+LOOP_CAP=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -293,8 +317,23 @@ while [ $# -gt 0 ]; do
       MODE="$1"
       ;;
     --mode=*)  MODE="${1#--mode=}" ;;
+    --loop)
+      LOOP=1
+      case "${2:-}" in
+        ''|-*) ;;
+        *[!0-9]*) die "--loop takes a round count, got '$2'" ;;
+        *) LOOP_CAP="$2"; shift ;;
+      esac
+      ;;
+    --loop=*)
+      LOOP=1
+      LOOP_CAP="${1#--loop=}"
+      case "$LOOP_CAP" in
+        ''|*[!0-9]*) die "--loop takes a round count, got '$LOOP_CAP'" ;;
+      esac
+      ;;
     --dry-run) DRY_RUN=1 ;;
-    -h|--help) sed -n '2,37p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,50p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*) die "unknown option: $1" ;;
     *)
       [ -z "$PR_ARG" ] || die "unexpected extra argument: $1"
@@ -315,6 +354,145 @@ command -v git >/dev/null 2>&1 || die "git is required"
 case "$FIX_CAP" in
   ""|*[!0-9]*) die "MIPSTARRE_FIX_CAP must be a non-negative integer, got '$FIX_CAP'" ;;
 esac
+case "$PR_ARG" in
+  ""|*[!0-9]*) die "PR id '$PR_ARG' is not a GitHub PR number" ;;
+esac
+[ -n "$LOOP_CAP" ] || LOOP_CAP="$FIX_CAP"
+[ "$LOOP" -eq 0 ] || [ "$LOOP_CAP" -ge 1 ] || die "--loop needs at least one round"
+
+# ------------------------------------------------------- model policy self-check
+# One loud line before any worktree work, instead of N silent deaths at the
+# dispatcher's preflight.  The message is the policy's own.
+check_fix_model() {
+  local requested="${FIX_MODEL:-auto}" out rc=0
+  out="$(python3 "$ROOT/local/bin/model_policy.py" --role prover --job-class general \
+    --model "$requested" --field model 2>&1)" || rc=$?
+  if [ "$rc" -ne 0 ]; then
+    die "the model policy refuses MIPSTARRE_FIX_MODEL='${FIX_MODEL:-}':
+  ${out}
+  Leave MIPSTARRE_FIX_MODEL empty for the dispatcher's default. A genuinely hard
+  fix is '--job-class escalated --hardness-reason \"…\"' through dispatch.sh,
+  never a bare model (local/protocols/autofix.md §11)."
+  fi
+  log "model policy: fix sessions resolve to '$out' (requested '${FIX_MODEL:-auto}')"
+}
+check_fix_model
+
+# --------------------------------------------------------------- round result
+# Each single-pass run records what it did, so the --loop driver branches on a
+# record instead of grepping a shared log tail.
+ROUND_RESULT="${MIPSTARRE_AUTOFIX_ROUND_RESULT:-}"
+
+round_result() {
+  # round_result <outcome> — one of fixed, no-change, nothing-to-fix, cap,
+  # failed, dirty, superseded, disabled, not-open.
+  [ -n "$ROUND_RESULT" ] || return 0
+  mkdir -p "$(dirname "$ROUND_RESULT")"
+  python3 - "$ROUND_RESULT" "$1" "${HEAD_SHA:-}" "${FIX_ITERATIONS:-0}" <<'PY' || true
+import json, sys, time
+
+path, outcome, head, iterations = sys.argv[1:5]
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump({"outcome": outcome, "head": head or None,
+               "iterations": int(iterations or 0),
+               "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, handle)
+    handle.write("\n")
+PY
+}
+
+# ---------------------------------------------------------------- --loop driver
+# One round is one invocation of this script: fix -> checked-push -> ci.sh (the
+# single pass does those three), then review.sh and a re-read of the verdict
+# marker for the NEW head.  The driver owns the round cap and the exit code; it
+# never sets MIPSTARRE_AUTOFIX_ACTIVE, so each round is a clean child.
+
+loop_verdict() {
+  # loop_verdict <head-sha> — two lines: the verdict word, then the number of
+  # unresolved findings, read from the review bound to THAT head.  A verdict
+  # written for an older head is not evidence about this one.
+  local head="$1" dir="$CACHE/autofix/$PR_ARG/loop"
+  mkdir -p "$dir"
+  gh_common pr-reviews "$PR_ARG" >"$dir/reviews.json" || return 1
+  python3 - "$dir/reviews.json" "<!-- mipstarre-review pr=$PR_ARG head=$head -->" <<'PY'
+import json, re, sys
+
+src, marker = sys.argv[1], sys.argv[2]
+body = ""
+for row in json.load(open(src, encoding="utf-8")) or []:
+    if marker in (row.get("body") or ""):
+        body = row.get("body") or ""          # last wins: a re-review supersedes
+match = re.search(r"^VERDICT:\s*(APPROVED|COMMENTED|CHANGES_REQUESTED)", body, re.M)
+print(match.group(1) if match else "NONE")
+print(len(re.findall(r"^[ \t]*[-*][ \t]+\[ \]", body, re.M)))
+PY
+}
+
+run_fix_loop() {
+  local round=0 rc outcome head verdict unresolved result
+  result="$CACHE/autofix/$PR_ARG/round-result.json"
+  while [ "$round" -lt "$LOOP_CAP" ]; do
+    round=$((round + 1))
+    log "--loop round $round of $LOOP_CAP for PR $PR_ARG (mode $MODE)"
+    rm -f "$result"
+    rc=0
+    MIPSTARRE_AUTOFIX_IN_LOOP=1 MIPSTARRE_AUTOFIX_ROUND_RESULT="$result" \
+      "$ROOT/local/bin/autofix.sh" "$PR_ARG" --mode "$MODE" </dev/null || rc=$?
+    outcome="$(python3 - "$result" <<'PY' || true
+import json, sys
+try:
+    print((json.load(open(sys.argv[1], encoding="utf-8")) or {}).get("outcome") or "")
+except Exception:
+    print("")
+PY
+)"
+    case "$outcome" in
+      fixed) ;;
+      no-change)        log "round $round changed nothing; stopping"; exit 3 ;;
+      nothing-to-fix)   log "round $round found nothing to fix; stopping"; exit 3 ;;
+      cap)              log "the fix-iteration cap was reached; stopping"; exit 4 ;;
+      superseded|disabled|not-open)
+                        log "round $round stopped cleanly ($outcome)"; exit 0 ;;
+      dirty)            die "the worktree is dirty; commit or stash before looping" ;;
+      failed)           log "round $round failed a phase"; exit 2 ;;
+      *)                log "round $round ended with no readable result (rc=$rc)"; exit 2 ;;
+    esac
+
+    head="$(pr_head_sha "$PR_ARG")" || die "cannot re-read PR #$PR_ARG after round $round"
+    [ -n "$head" ] || die "PR #$PR_ARG reports no head SHA after round $round"
+    if [ -x "$ROOT/local/bin/review.sh" ]; then
+      "$ROOT/local/bin/review.sh" "$PR_ARG" </dev/null ||
+        warn "review.sh exited nonzero for $head; re-reading the verdict anyway"
+    else
+      die "local/bin/review.sh not found; a loop that cannot review cannot terminate"
+    fi
+
+    verdict="$(loop_verdict "$head")" || die "cannot read the review verdict for $head"
+    unresolved="$(printf '%s\n' "$verdict" | sed -n 2p)"
+    verdict="$(printf '%s\n' "$verdict" | sed -n 1p)"
+    log "round $round: head $head verdict=$verdict unresolved=${unresolved:-?}"
+    case "$verdict" in
+      APPROVED) log "APPROVED on $head after $round round(s)"; exit 0 ;;
+      COMMENTED)
+        [ "${unresolved:-0}" -gt 0 ] || { log "COMMENTED with no unresolved findings"; exit 0; }
+        ;;
+      NONE)
+        warn "no verdict bound to $head; stopping rather than fixing blind"
+        exit 2
+        ;;
+    esac
+    if [ "${unresolved:-0}" -eq 0 ]; then
+      log "no unresolved findings on $head; stopping"
+      exit 3
+    fi
+  done
+  log "--loop reached its round cap ($LOOP_CAP) for PR $PR_ARG"
+  exit 4
+}
+
+if [ "$LOOP" -eq 1 ] && [ "${MIPSTARRE_AUTOFIX_IN_LOOP:-}" != "1" ]; then
+  [ "$DRY_RUN" -eq 0 ] || die "--loop and --dry-run are mutually exclusive"
+  run_fix_loop
+fi
 
 # ------------------------------------------------------------- no recursion
 # autofix -> ci.sh -> review.sh -> autofix would deadlock on the branch lock and
@@ -330,6 +508,7 @@ export MIPSTARRE_AUTOFIX_ACTIVE=1
 # fix paths (auto-fix.yml:40-44).
 if [ "${LOCAL_AUTO_FIX_ENABLED:-}" = "false" ]; then
   log "LOCAL_AUTO_FIX_ENABLED=false; no fixes will run for PR $PR_ARG"
+  round_result disabled
   exit 0
 fi
 
@@ -376,6 +555,7 @@ if [ "$BRANCH" = "$TRUSTED_REF" ]; then
 fi
 if [ "$PR_STATE" != "open" ]; then
   log "PR $PR_NUM is '$PR_STATE', not open; nothing to fix"
+  round_result not-open
   exit 0
 fi
 
@@ -525,6 +705,7 @@ esac
 
 if [ "$WANT_CI" -eq 0 ] && [ "$WANT_BLUEPRINT" -eq 0 ] && [ "$WANT_REVIEW" -eq 0 ]; then
   log "nothing to fix for PR $PR_NUM in mode '$MODE' (build_fix=$CI_FIX blueprint_fix=$BLUEPRINT_FIX review_fix=$REVIEW_FIX)"
+  round_result nothing-to-fix
   exit 0
 fi
 
@@ -551,6 +732,7 @@ WORKTREE="$(resolve_worktree "$BRANCH")"
 cap_reached() {
   local marker="<!-- autofix:cap-reached pr=$PR_NUM -->" note="$RUN_DIR/cap-note.md"
   log "combined fix-iteration cap reached ($FIX_ITERATIONS/$FIX_CAP) for PR $PR_NUM"
+  round_result cap
   {
     printf '## Auto-fix cap reached — operator review required\n\n'
     printf 'The combined auto-fix iteration cap (%s) was reached at %s on head `%s`.\n\n' \
@@ -688,6 +870,7 @@ run_phase() {
   fi
   if superseded; then
     log "superseded by a newer autofix run; stopping cleanly before the $kind fix"
+    round_result superseded
     exit 0
   fi
 
@@ -714,6 +897,7 @@ run_phase() {
   # Refuse to start on a dirty worktree: the squash commit below would sweep
   # unrelated local edits into a bot commit.
   if [ -n "$(git -C "$WORKTREE" status --porcelain)" ]; then
+    round_result dirty
     die "worktree $WORKTREE has uncommitted changes; refusing to run the $kind fix (commit or stash them first)"
   fi
 
@@ -807,6 +991,7 @@ fi
 if [ "$WANT_BLUEPRINT" -eq 1 ] && [ "$PHASE_FAILED" -eq 0 ]; then
   if superseded; then
     log "superseded by a newer autofix run; stopping cleanly before the blueprint fix"
+    round_result superseded
     exit 0
   fi
   CTX="$RUN_DIR/blueprint-log.txt"
@@ -832,6 +1017,7 @@ fi
 if [ "$WANT_REVIEW" -eq 1 ] && [ "$PHASE_FAILED" -eq 0 ]; then
   if superseded; then
     log "superseded by a newer autofix run; stopping cleanly before the review fix"
+    round_result superseded
     exit 0
   fi
   RAW="$RUN_DIR/review-findings.raw.md"
@@ -884,6 +1070,15 @@ if [ "$FIXED_ANY" -eq 1 ]; then
 fi
 
 if [ "$PHASE_FAILED" -eq 1 ]; then
+  round_result failed
   exit 2
+fi
+if [ "$FIXED_ANY" -eq 1 ]; then
+  round_result fixed
+else
+  # Every applicable phase ran and produced no diff.  A single pass still exits
+  # 0 here (its callers read 0 as "nothing further to do"); the --loop driver
+  # reads the round record and exits 3.
+  round_result no-change
 fi
 exit 0
