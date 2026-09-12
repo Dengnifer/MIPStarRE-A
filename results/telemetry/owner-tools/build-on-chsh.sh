@@ -23,9 +23,23 @@
 #      filesystem, no data copied) and point <lane>/.lake/packages at the
 #      shared Mathlib cache
 #   3. run `lake build [targets]` in the lane on chsh
-#   4. rsync back only the files that build wrote under .lake/build/{lib,ir}
-#      (Mathlib lives in .lake/packages and is never touched)
+#   4. rsync the WHOLE of .lake/build back into the worktree (Mathlib lives in
+#      .lake/packages and is never touched)
 #   5. exit with lake's exit code
+#
+# Step 4 returns the whole tree and not the delta ON PURPOSE.  Returning only
+# `find lib ir -newer .offload-stamp` returns what chsh rebuilt RELATIVE TO ITS
+# OWN SEED, and the two hosts' starting points are not the same object: chsh's
+# seed is refreshed after every merge and therefore tracks `main`, while a ghz
+# worktree is warmed from the hot-main snapshot, which lags it by hours.  Every
+# module that moved on main inside that gap has an olean in chsh's seed — not
+# rebuilt, not newer than the stamp, not returned — and NO olean on ghz.  The
+# build then "succeeds" with host=chsh, nothing falls back, and the lane dies
+# later at the pre-push per-file `lake env lean` gate, which needs those
+# imports' oleans on THIS host, or triggers an unbounded local rebuild outside
+# the machine-wide build lease it has already released.  rsync's own size/mtime
+# delta still transfers only what is missing, so the cost is one file-list walk;
+# the stamp survives only as the `artifacts=N` field in the log.
 #
 # Exit codes — the caller must be able to tell "chsh is unusable" from "the
 # proof does not compile", because the first falls back to a local build and
@@ -48,6 +62,7 @@
 #              CHSH_HOST CHSH_ADDR CHSH_PORT CHSH_KNOWN_HOSTS CHSH_SSH_BIN
 #              CHSH_SSH_OPTS CHSH_BUILDS CHSH_SEED CHSH_PACKAGES CHSH_CHECKOUT
 #              CHSH_SEED_MIN_INTERVAL_S CHSH_BUILD_TIMEOUT_S
+#              CHSH_RSYNC_TIMEOUT_S
 set -uo pipefail
 
 PROG="build-on-chsh.sh"
@@ -75,6 +90,12 @@ CHSH_CHECKOUT="${CHSH_CHECKOUT:-/home/drx/MIPStarRE-qpbt}"
 SEED_MIN_INTERVAL_S="${CHSH_SEED_MIN_INTERVAL_S:-3600}"
 BUILD_TIMEOUT_S="${CHSH_BUILD_TIMEOUT_S:-2700}"
 RSYNC_BIN="${CHSH_RSYNC_BIN:-rsync}"
+# rsync's own I/O timeout.  ssh's ServerAlive only notices a DEAD link (~90 s);
+# a slow-but-alive one stalls the transfer indefinitely, and this script runs
+# while the caller holds the machine-wide full-build lease, so one stalled lane
+# stops every build on ghz.  A timed-out rsync fails, which is exit 64 or 65,
+# which is a local rebuild - the documented fallback.
+RSYNC_TIMEOUT_S="${CHSH_RSYNC_TIMEOUT_S:-300}"
 
 DRY=0; CHECK=0; SEED_REFRESH=0
 ARGS=()
@@ -186,25 +207,32 @@ seed_refresh() {
         exit 0
       fi
     fi
-    : > "$stamp"
+    # The stamp is written AFTER the rebuild succeeds, at the end of this
+    # function.  Written here it would rate-limit the RETRIES of a refresh that
+    # failed: after a toolchain bump that means every offload exits 64 on the
+    # toolchain-equality check for a full hour, gracefully and with the farm
+    # silently unused.
   fi
 
   log "seed refresh: pushing $checkout to $CHSH_HOST:$CHSH_CHECKOUT"
   if [ "$DRY" = 1 ]; then
-    say "$RSYNC_BIN -a --delete --exclude=/.lake --exclude=/.git --exclude=/.worktrees --exclude=/results/telemetry -e '$RSYNC_SHELL' $checkout/ $CHSH_HOST:$CHSH_CHECKOUT/"
+    say "$RSYNC_BIN -a --delete --timeout=$RSYNC_TIMEOUT_S --exclude=/.lake --exclude=/.git --exclude=/.worktrees --exclude=/results/telemetry -e '$RSYNC_SHELL' $checkout/ $CHSH_HOST:$CHSH_CHECKOUT/"
   else
-    "$RSYNC_BIN" -a --delete --info=stats1 \
+    "$RSYNC_BIN" -a --delete --info=stats1 --timeout="$RSYNC_TIMEOUT_S" \
       --exclude='/.lake' --exclude='/.git' --exclude='/.worktrees' \
       --exclude='/results/telemetry' \
       -e "$RSYNC_SHELL" "$checkout/" "$CHSH_HOST:$CHSH_CHECKOUT/" \
-      || unusable "seed refresh: source rsync failed"
+      || unusable "seed refresh: source rsync failed (or timed out after ${RSYNC_TIMEOUT_S}s)"
   fi
 
   rsh "set -e; export PATH=\$HOME/.elan/bin:\$PATH; cd '$CHSH_CHECKOUT'; \
        lake build MIPStarRE.QPBT; mkdir -p '$CHSH_SEED'; \
        rsync -a --delete .lake/build/ '$CHSH_SEED/'" \
     || unusable "seed refresh: the rebuild on $CHSH_HOST failed"
-  [ "$DRY" = 0 ] && offload_log "seed-refresh host=$CHSH_HOST rc=0 checkout=$checkout"
+  if [ "$DRY" = 0 ]; then
+    : > "$stamp"
+    offload_log "seed-refresh host=$CHSH_HOST rc=0 checkout=$checkout"
+  fi
   log "seed refresh done"
   exit 0
 }
@@ -271,13 +299,13 @@ rsh "set -e; \
 # ---- 2. push sources -------------------------------------------------------
 log "pushing sources"
 if [ "$DRY" = 1 ]; then
-  say "$RSYNC_BIN -a --delete --exclude=/.lake --exclude=/.git --exclude=/.worktrees --exclude=/results/telemetry -e '$RSYNC_SHELL' $SRC/ $CHSH_HOST:$LANE/"
+  say "$RSYNC_BIN -a --delete --timeout=$RSYNC_TIMEOUT_S --exclude=/.lake --exclude=/.git --exclude=/.worktrees --exclude=/results/telemetry -e '$RSYNC_SHELL' $SRC/ $CHSH_HOST:$LANE/"
 else
-  "$RSYNC_BIN" -a --delete --info=stats1 \
+  "$RSYNC_BIN" -a --delete --info=stats1 --timeout="$RSYNC_TIMEOUT_S" \
     --exclude='/.lake' --exclude='/.git' --exclude='/.worktrees' \
     --exclude='/results/telemetry' \
     -e "$RSYNC_SHELL" "$SRC/" "$CHSH_HOST:$LANE/" \
-    || unusable "source rsync to $CHSH_HOST failed"
+    || unusable "source rsync to $CHSH_HOST failed (or timed out after ${RSYNC_TIMEOUT_S}s)"
 fi
 
 # ---- 3. build --------------------------------------------------------------
@@ -300,30 +328,29 @@ else
   log "lake exit code $RC"
 fi
 
-# ---- 4. bring back what the build wrote ------------------------------------
+# ---- 4. bring back the whole artifact closure ------------------------------
+# NOT the delta.  The post-condition the callers rely on is "this worktree's
+# .lake/build holds everything the build produced", because the next thing that
+# happens is a per-file `lake env lean` on THIS host.  See the header.
 RETURNED="dry-run"
 if [ "$DRY" = 1 ]; then
-  say "$CHSH_SSH_BIN ... $CHSH_HOST 'cd $LANE/.lake/build && find lib ir -type f -newer $LANE/.lake/.offload-stamp -print0'"
-  say "$RSYNC_BIN -a --from0 --files-from=<list> -e '$RSYNC_SHELL' $CHSH_HOST:$LANE/.lake/build/ $SRC/.lake/build/"
+  say "$CHSH_SSH_BIN ... $CHSH_HOST 'cd $LANE/.lake/build && find lib ir -type f -newer $LANE/.lake/.offload-stamp | wc -l'   # the artifacts=N log field only"
+  say "$RSYNC_BIN -a --timeout=$RSYNC_TIMEOUT_S -e '$RSYNC_SHELL' $CHSH_HOST:$LANE/.lake/build/ $SRC/.lake/build/   # the WHOLE tree"
   say "exit <lake exit code>"
   exit 0
 fi
-LIST="$(mktemp "${TMPDIR:-/tmp}/build-on-chsh.XXXXXX")"
-trap 'rm -f "$LIST"' EXIT
-if rsh "cd '$LANE/.lake/build' && find lib ir -type f -newer '$LANE/.lake/.offload-stamp' -print0" \
-     > "$LIST" 2>/dev/null && [ -s "$LIST" ]; then
-  RETURNED="$(tr -cd '\0' < "$LIST" | wc -c | tr -d ' ')"
-  log "returning $RETURNED changed artifacts"
-  mkdir -p "$SRC/.lake/build"
-  if ! "$RSYNC_BIN" -a --from0 --files-from="$LIST" --info=stats1 \
-       -e "$RSYNC_SHELL" "$CHSH_HOST:$LANE/.lake/build/" "$SRC/.lake/build/"; then
-    log "artifact rsync failed; the worktree may hold a partial artifact set"
-    offload_log "lane=$NAME host=$CHSH_HOST rc=no-artifacts targets=$TARGET_TEXT seconds=$(( $(date +%s) - STARTED ))"
-    exit "$EXIT_NO_ARTIFACTS"
-  fi
-else
-  RETURNED=0
-  log "no new artifacts to return"
+# The stamp is a log field and nothing else: how much of the closure this build
+# actually rebuilt, for the offload.log row.  A failure to count is not a
+# failure to return.
+RETURNED="$(rsh "cd '$LANE/.lake/build' && find lib ir -type f -newer '$LANE/.lake/.offload-stamp' 2>/dev/null | wc -l" 2>/dev/null | tr -cd '0-9')"
+[ -n "$RETURNED" ] || RETURNED=unknown
+log "chsh rebuilt $RETURNED artifacts; returning the whole .lake/build closure"
+mkdir -p "$SRC/.lake/build"
+if ! "$RSYNC_BIN" -a --timeout="$RSYNC_TIMEOUT_S" --info=stats1 \
+     -e "$RSYNC_SHELL" "$CHSH_HOST:$LANE/.lake/build/" "$SRC/.lake/build/"; then
+  log "artifact rsync failed; the worktree may hold a partial artifact set"
+  offload_log "lane=$NAME host=$CHSH_HOST rc=no-artifacts targets=$TARGET_TEXT seconds=$(( $(date +%s) - STARTED ))"
+  exit "$EXIT_NO_ARTIFACTS"
 fi
 
 offload_log "lane=$NAME host=$CHSH_HOST rc=$RC targets=$TARGET_TEXT artifacts=$RETURNED seconds=$(( $(date +%s) - STARTED ))"

@@ -28,12 +28,24 @@
 # between the two callers); without one, a plain `lake build` in the worktree
 # is used.
 #
-# Environment: MIPSTARRE_OFFLOAD_SCRIPT (the offload script to use),
-#   MIPSTARRE_OFFLOAD=0 (never offload, for a run that must stay on this host),
-#   MIPSTARRE_CACHE_ROOT, MIPSTARRE_OWNER_BIN, MIPSTARRE_CHECKOUT.
+# Environment: MIPSTARRE_OFFLOAD_SCRIPT (the offload script to use; it can only
+#   ever point at a DIFFERENT script, never turn the offload on — the run mode is
+#   asked here as well, so a script whose `--check` exits 0 still offloads
+#   nothing outside full speed mode), MIPSTARRE_OFFLOAD=0 (never offload, for a
+#   run that must stay on this host), MIPSTARRE_OFFLOAD_TIMEOUT_S (wall clock for
+#   one offload, default 3300; a timeout is a fallback, not a lane failure),
+#   MIPSTARRE_RUN_MODE, MIPSTARRE_CACHE_ROOT, MIPSTARRE_OWNER_BIN,
+#   MIPSTARRE_CHECKOUT.
 
 OFFLOAD_UNUSABLE=64
 OFFLOAD_NO_ARTIFACTS=65
+#: `timeout`'s own code for "the command was killed at the deadline".
+OFFLOAD_TIMED_OUT=124
+#: Wall clock for ONE offload, a little above build-on-chsh.sh's own remote
+#: `timeout 2700 lake build`.  The offload runs while the caller holds the
+#: machine-wide full-build lease, so an offload that never returns stops every
+#: build on this host; ssh's ServerAlive only notices a link that is dead, not
+#: one that is merely slow.
 
 offload_state_dir() {
   printf '%s/watchdog/chsh\n' "${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
@@ -62,9 +74,35 @@ offload_script() {
   return 1
 }
 
+offload_run_mode() { # the run_mode.py this host answers with, or nothing
+  local cache checkout candidate
+  cache="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+  checkout="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
+  for candidate in "${MIPSTARRE_RUN_MODE:-}" \
+                   "$checkout/local/bin/run_mode.py" \
+                   "$HOME/MIPStarRE-qpbt/local/bin/run_mode.py"; do
+    [ -n "$candidate" ] && [ -r "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  done
+  return 1
+}
+
+offload_run_mode_says_yes() { # 0 = this run may use a second host at all
+  local py answer
+  py="$(offload_run_mode)" || return 1
+  answer="$(python3 "$py" get offload 2>/dev/null | head -n 1 | tr -d '[:space:]')"
+  [ "$answer" = yes ]
+}
+
 offload_enabled_for_run() { # 0 = the run mode enables the offload
   local script
   [ "${MIPSTARRE_OFFLOAD:-1}" = 0 ] && return 1
+  # The run mode is asked HERE, before MIPSTARRE_OFFLOAD_SCRIPT is honoured, so
+  # that variable can only ever redirect the offload to a different script — it
+  # cannot turn the farm on.  full-speed-mode.md section 5.1 claims exactly
+  # that ("no environment variable that turns it on"), and until this check
+  # existed any environment pointing the variable at a script whose `--check`
+  # exits 0 made the claim false.
+  offload_run_mode_says_yes || return 1
   script="$(offload_script)" || return 1
   bash "$script" --check > /dev/null 2>&1
 }
@@ -79,8 +117,13 @@ offload_lake_build() { # <worktree> <label> [targets ...]
     # `|| rc=$?`, never a bare call: ci.sh runs its step bodies under `set -e`,
     # where a failing build would kill the step before the fallback could run.
     rc=0
-    bash "$script" "$wt" "$@" || rc=$?
+    timeout "${MIPSTARRE_OFFLOAD_TIMEOUT_S:-3300}" bash "$script" "$wt" "$@" || rc=$?
     elapsed=$(( $(date +%s) - started ))
+    if [ "$rc" = "$OFFLOAD_TIMED_OUT" ]; then
+      # A stalled offload is "chsh is unusable", never a verdict on the proof.
+      offload_note "$label: the offload passed its wall clock; treating it as unusable"
+      rc="$OFFLOAD_UNUSABLE"
+    fi
     if [ "$rc" != "$OFFLOAD_UNUSABLE" ] && [ "$rc" != "$OFFLOAD_NO_ARTIFACTS" ]; then
       offload_note "$label built on chsh in ${elapsed}s (lake exit $rc) host=chsh"
       return "$rc"
