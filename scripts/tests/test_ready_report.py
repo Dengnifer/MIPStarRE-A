@@ -357,10 +357,17 @@ class MainFlowTestCase(unittest.TestCase):
         self.assertIn("stale: main moved 12 min ago", body)
         rows = [json.loads(line) for line
                 in self.latency_files()[0].read_text("utf-8").splitlines()]
-        self.assertEqual([row["event"] for row in rows], ["ready", "report"])
+        # `models` and `dead-sessions` are the W9(5) census and the janitor's
+        # residue: one summary row each, every pass, so a run's model split and
+        # its unrepaired dead sessions are in the record and not only in the
+        # comment.
+        self.assertEqual([row["event"] for row in rows],
+                         ["ready", "report", "models", "dead-sessions"])
         state = json.loads(ready_report.state_path(self.cache).read_text("utf-8"))
         self.assertEqual(state["ready"], 1)
         self.assertEqual(state["unexplained"], 0)
+        self.assertEqual(state["off_policy_models"], 0)
+        self.assertEqual(state["dead_not_redispatched"], 0)
 
     def test_an_unchanged_hour_is_suppressed(self) -> None:
         self.assertEqual(self.run_main(["--issue", "27"]), 0)

@@ -25,8 +25,15 @@ Output: one comment per hour on the run's progress issue in the compact form
 against the briefed floor — the number the owner asked for three times on
 2026-09-12 and which nothing measured, because the half-hourly live-vs-floor
 line is a main-session duty and a stalled main session reports nothing), one
-line per ready-but-open PR with its reason, and the same rows appended to
-``results/telemetry/merge-latency-<YYYY-MM-DD>.jsonl``.  A post is suppressed
+line per ready-but-open PR with its reason, one **models** line (sessions
+started in the window grouped by the model that actually ran, against the
+override the run mode has in force — follow-up item W9(5), so a run whose
+reviewers slipped onto the cheap model shows up within the hour instead of in a
+hand audit of ``sessions.jsonl``), one **dead sessions** line when the janitor
+marked sessions ``failed`` without re-dispatching them (it re-dispatches
+``reviewer`` only; every other role is the owning session's to re-plan, and that
+residue previously existed only in a local report file nothing reads), and the
+same rows appended to ``results/telemetry/merge-latency-<YYYY-MM-DD>.jsonl``.  A post is suppressed
 when the ready set and the reasons are unchanged and nothing merged, and forced
 at least every six hours.  Elapsed timers are deliberately excluded from the
 suppression signature, or nothing would ever be identical.
@@ -256,8 +263,107 @@ def occupancy(cache: Path) -> dict | None:
             "by_account": live, "below": total < int(floor)}
 
 
+def _rows_in_window(path: Path, since: datetime, field: str) -> list[dict]:
+    """JSONL rows whose *field* parses as a timestamp at or after *since*."""
+    out: list[dict] = []
+    try:
+        handle = path.open(encoding="utf-8", errors="replace")
+    except OSError:
+        return out
+    with handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(row, dict):
+                continue
+            try:
+                moment = run_mode.parse_timestamp(row.get(field), field)
+            except LayerError:
+                continue
+            if moment >= since:
+                out.append(row)
+    return out
+
+
+def model_census(repo_root: Path, since: datetime) -> dict | None:
+    """Sessions started since *since*, grouped by the model that actually ran.
+
+    Follow-up item W9(5): *"a check in the janitor or the daily digest that
+    counts sessions per resolved model so a wrong model shows up within an
+    hour"*.  Without it the only way to confirm that a fast run really put every
+    role — reviewers included — on the hard model was to read sessions.jsonl by
+    hand, which is exactly the owner audit the override exists to remove.
+
+    ``model`` on a session row is the RESOLVED model (``dispatch.sh`` records
+    what it asked ``model_policy.py`` for and what ran).  The expectation comes
+    from the run mode's effective ``model_override``: ``astra-all`` means every
+    row should read ``gpt-6-astra``.  With no override in force there is no
+    single expected model and ``off_policy`` is 0 — the census still reports the
+    split, which is the number the ratio is argued from.
+    """
+    path = repo_root / "results" / "telemetry" / "sessions.jsonl"
+    try:
+        override = str(run_mode.value_for(run_mode.load_mode(), "model_override"))
+    except (LayerError, KeyError, TypeError, ValueError):
+        override = "unknown"
+    try:
+        import model_policy  # noqa: PLC0415 - same directory, optional
+        expected = model_policy.ASTRA if override == "astra-all" else None
+    except Exception:  # pragma: no cover - a policy import failure must not lose the report
+        expected = "gpt-6-astra" if override == "astra-all" else None
+
+    by_model: dict[str, int] = {}
+    for row in _rows_in_window(path, since, "start"):
+        name = str(row.get("model") or "unrecorded")
+        by_model[name] = by_model.get(name, 0) + 1
+    total = sum(by_model.values())
+    if not total:
+        return {"override": override, "expected": expected, "by_model": {},
+                "total": 0, "off_policy": 0}
+    off = 0 if expected is None else sum(
+        count for name, count in by_model.items() if name != expected)
+    return {"override": override, "expected": expected, "by_model": by_model,
+            "total": total, "off_policy": off}
+
+
+#: Roles the janitor re-dispatches itself (`MIPSTARRE_JANITOR_REDISPATCH_ROLES`).
+#: Everything else it marks `failed` and leaves for the owning session.
+JANITOR_REDISPATCHED_ROLES = ("reviewer",)
+
+
+def dead_session_residue(cache: Path, since: datetime) -> dict | None:
+    """Dead sessions the janitor marked `failed` and did NOT re-dispatch, per role.
+
+    The janitor's dead-session pass has a real entry point for `reviewer` only,
+    so a dead prover, orc or fixer is marked `failed` and written to
+    `watchdog/janitor/report.md`, which nothing reads.  On 2026-09-12 about
+    ninety sessions died across all roles and an operator re-dispatched the
+    non-reviewer ones by hand.  Counting the ledger rows here puts that residue
+    in the owner's hourly channel, where the unrepaired remainder is visible
+    without opening a file on the host.
+    """
+    path = cache / "watchdog" / "janitor" / "actions.jsonl"
+    by_role: dict[str, int] = {}
+    for row in _rows_in_window(path, since, "ts"):
+        if row.get("action") != "mark-failed" or row.get("pass") != "dead-sessions":
+            continue
+        if str(row.get("dry_run") or "0") == "1":
+            continue
+        role = str(row.get("role") or "unknown")
+        by_role[role] = by_role.get(role, 0) + 1
+    total = sum(by_role.values())
+    return {"by_role": by_role, "total": total,
+            "redispatched_roles": list(JANITOR_REDISPATCHED_ROLES)}
+
+
 def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
-           unexplained: int, occ: dict | None = None) -> str:
+           unexplained: int, occ: dict | None = None,
+           models: dict | None = None, dead: dict | None = None) -> str:
     """The compact hourly comment."""
     ready = [row for row in rows if row["ready"]]
     lines = [f"ready {len(ready)}, merged-this-hour {merged}"]
@@ -272,6 +378,28 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
                      f"{row['reason']['detail']}")
     if not ready:
         lines.append("- no ready-but-open PR")
+    if models is not None:
+        if models["total"]:
+            split = ", ".join(f"{name} {count}" for name, count
+                              in sorted(models["by_model"].items()))
+        else:
+            split = "no session started"
+        line = (f"models {split} (last {window_min} min); "
+                f"override {models['override']}")
+        if models["expected"] is not None:
+            line += (f", expected {models['expected']}, off-policy "
+                     f"{models['off_policy']}")
+            if models["off_policy"]:
+                line += "  <- alarm: a session ran a model the run mode did not choose"
+        lines.append(line)
+    if dead is not None and dead["total"]:
+        split = ", ".join(f"{role} {count}" for role, count
+                          in sorted(dead["by_role"].items()))
+        lines.append(
+            f"dead sessions marked failed and NOT re-dispatched: {split} "
+            f"(last {window_min} min; the janitor re-dispatches "
+            f"{', '.join(dead['redispatched_roles'])} only — every other role is "
+            f"the owning session's to re-plan)")
     lines.append(f"unexplained {unexplained}" +
                  ("" if unexplained == 0 else "  <- alarm: a ready PR with no daemon record"))
     lines.append(f"<sub>ready_report.py, {ts}; merges counted over the last "
@@ -396,7 +524,8 @@ def latency_path(repo_root: Path, now: datetime) -> Path:
     return repo_root / "results" / "telemetry" / name
 
 
-def latency_rows(rows: list[dict], merged: int, unexplained: int, ts: str) -> list[dict]:
+def latency_rows(rows: list[dict], merged: int, unexplained: int, ts: str,
+                 models: dict | None = None, dead: dict | None = None) -> list[dict]:
     out = [{"ts": ts, "pr": row["pr"], "head": row["head"], "event": "ready",
             "class": row["reason"]["class"], "reason": row["reason"]["detail"],
             "seconds": None, "par": None}
@@ -405,6 +534,22 @@ def latency_rows(rows: list[dict], merged: int, unexplained: int, ts: str) -> li
                 "class": "summary",
                 "reason": f"ready {len(out)}, merged {merged}, unexplained {unexplained}",
                 "seconds": None, "par": None})
+    if models is not None:
+        split = " ".join(f"{name}={count}" for name, count
+                         in sorted(models["by_model"].items())) or "none"
+        out.append({"ts": ts, "pr": None, "head": None, "event": "models",
+                    "class": "summary",
+                    "reason": (f"override={models['override']} "
+                               f"expected={models['expected'] or 'any'} "
+                               f"off_policy={models['off_policy']} {split}"),
+                    "seconds": None, "par": None})
+    if dead is not None:
+        split = " ".join(f"{role}={count}" for role, count
+                         in sorted(dead["by_role"].items())) or "none"
+        out.append({"ts": ts, "pr": None, "head": None, "event": "dead-sessions",
+                    "class": "summary",
+                    "reason": f"not-re-dispatched total={dead['total']} {split}",
+                    "seconds": None, "par": None})
     return out
 
 
@@ -471,8 +616,11 @@ def main(argv: list[str] | None = None) -> int:
     unexplained = sum(1 for row in rows if row["ready"]
                       and row["reason"]["class"] == "unexplained")
     occ = occupancy(cache)
+    since = now - timedelta(minutes=args.window_min)
+    models = model_census(repo_root, since)
+    dead = dead_session_residue(cache, since)
     body = render(rows, merged, window_min=args.window_min, ts=ts,
-                  unexplained=unexplained, occ=occ)
+                  unexplained=unexplained, occ=occ, models=models, dead=dead)
     digest = signature(rows, occ)
     state_file = state_path(cache)
     state = read_state(state_file)
@@ -494,12 +642,14 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     path = latency_path(repo_root, now)
-    for record in latency_rows(rows, merged, unexplained, ts):
+    for record in latency_rows(rows, merged, unexplained, ts, models, dead):
         run_mode.locked_append(path, json.dumps(record, ensure_ascii=False))
     atomic_write(state_file, json.dumps(
         {"signature": digest, "posted_at": ts, "issue": issue,
          "ready": sum(1 for row in rows if row["ready"]), "merged": merged,
-         "unexplained": unexplained}, indent=1) + "\n")
+         "unexplained": unexplained,
+         "off_policy_models": (models or {}).get("off_policy", 0),
+         "dead_not_redispatched": (dead or {}).get("total", 0)}, indent=1) + "\n")
     sys.stdout.write(f"posted on #{issue} ({why}); ready "
                      f"{sum(1 for row in rows if row['ready'])}, merged {merged}, "
                      f"unexplained {unexplained}\n")
