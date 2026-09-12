@@ -2,6 +2,7 @@ import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
+import MIPStarRE.QPBT.Combining.Lines.PointMarginalTransport
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Points
