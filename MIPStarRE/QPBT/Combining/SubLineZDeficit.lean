@@ -4,28 +4,27 @@ import MIPStarRE.QPBT.Combining.UniformLinePoint
 /-!
 # Sub-line averages of the Z-point overlap
 
-The overlap of the paired-line measurement with the expanded `Z`-point effect
-depends only on the two source lines and the `Z`-point. The separate Z marginal
-of the auxiliary subline law is a mixture of products of restricted line-point
-laws, with the fresh X point unused. Regrouping the line answers by evaluation
-at that point permits the Z deficit estimates of
-`MIPStarRE.QPBT.Combining.ZEvalDeficit` to apply component by component.
+The Z-point overlap of the paired-line measurement depends on the two source
+lines and the Z block of the sampled extended point. The separate projected-point
+mixture properties of the directly indexed sub-line law identify each one-point
+marginal as a mixture of restricted product laws. Both marginal averaging
+identities are recorded here. Regrouping line answers by their evaluations
+then transfers the Z-overlap deficit from
+`MIPStarRE.QPBT.Combining.ZEvalDeficit` to this law.
 
-The `_at` estimates and `zPointOverlapAt` retain arbitrary
-opposite placements. The original overlap definitions and first-player
-statements are unchanged. Only the separate Z marginal mixture is used.
-The concrete X-marginal argument for Claim 17-2 is in
-`MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit`. Transport of the auxiliary
-subline law to the paper's carrier remains open; see
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+The Z-overlap estimates hold for arbitrary opposite placements, with separate
+first-player specializations. The concrete X-overlap deficit instead uses the
+exact X marginal of the X-Z-X sandwich and is proved in
+`MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit`.
 
 ## References
 
-The statements support the auxiliary `lem:claim-17-3-direct-real`, near
-the source `lem:claim-17-3` in
-`blueprint/src/chapter/ch15_qpbt_combining.tex`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`; the
-mixture is Property~2 of `lem:qld-sublines`.
+The Z estimates support blueprint `lem:claim-17-3-re-direct`, alongside the
+source `lem:claim-17-3`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`.
+The separate marginal identities encode the analogue of Property 2 of
+`lem:qld-sublines` for the directly indexed law; source-distribution transport
+remains separate.
 -/
 
 open scoped BigOperators

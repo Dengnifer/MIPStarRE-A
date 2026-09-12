@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
+import MIPStarRE.QPBT.Combining.ComplexOverlapGap
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit
 import MIPStarRE.QPBT.Combining.SubLineZDeficit
@@ -10,20 +11,18 @@ import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 /-!
 # Scalar claims for combining the Pauli bases
 
-This module proves three real-part estimates on the directly indexed subline
-law. The middle estimate uses the concrete X-Z-X line measurement; the first
-and third retain the combined point and line witnesses. The expectations
-include a uniform affine parameter on each extended line. Evaluation uses
-`Option` completion, with zero point effect at an undefined evaluation.
-
-These are auxiliary statements. Transport to the source's seed-indexed law and
-the complex overlap estimates remain open, as recorded in
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. The source-labelled
-blueprint claims remain visible without completed Lean links.
+This module records auxiliary scalar estimates for the directly indexed subline
+law. Claims 17-1 and 17-3 compare real parts; they do not establish the complex
+modulus comparisons over the source distribution. The Claim 17-2 analogue
+is proved both for real parts and for the complex modulus. The source claims
+remain separate, uncertified blueprint statements until the distribution and
+scalar transport obligations are discharged. Line-polynomial evaluation uses the
+existing `Option` completion, so no field value is substituted when an evaluation
+is undefined.
 
 ## References
 
-The nearby source claims are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
+The source comparisons are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
 `lem:claim-17-3`, with paper origin
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
 -/
@@ -38,27 +37,6 @@ open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 noncomputable section
 
 set_option synthInstance.maxSize 400
-
-/-- Place an Alice-side measurement on `AA'` by the current tensor
-bipartition API. -/
-private noncomputable def placedAAMeasurement {P : AdmissibleParams} {ε : ℝ}
-    (S : ProjectiveSetting P ε) {α : Type*} [Fintype α]
-    (M : Measurement α (S.ExpandedLocalSpace .alice)) :
-    Measurement α (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
-  reindexMeasurement
-    (ProjectiveSetting.aaBaBipartition P S.toStrategy.ιA S.toStrategy.ιB)
-    (leftPlacedMeasurement M)
-
-/-- The effects of `placedAAMeasurement` are the `AA'` placements of the
-original effects. -/
-private theorem placedAAMeasurement_effect {P : AdmissibleParams} {ε : ℝ}
-    (S : ProjectiveSetting P ε) {α : Type*} [Fintype α]
-    (M : Measurement α (S.ExpandedLocalSpace .alice)) (a : α) :
-    (placedAAMeasurement S M).effect a = S.place .AA' (M.effect a) := by
-  change reindexOp
-    (ProjectiveSetting.aaBaBipartition P S.toStrategy.ιA S.toStrategy.ιB)
-      (heteroKron (M.effect a) 1) = S.place .AA' (M.effect a)
-  exact ProjectiveSetting.reindexOp_aaBaBipartition_left S (M.effect a)
 
 private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
   change 0 ≤ x ^ (1 / 4 : ℝ)
@@ -129,76 +107,36 @@ private theorem regroup_placed_line_answer_sum {P : AdmissibleParams} {ε δQ δ
       Op (S.ExpandedLocalSpace Placement.BA''.side)) :
     (∑ o : Option (PauliScalar P) × Option (PauliScalar P),
         stateQForm S.psiHat
-          (((placedAAMeasurement S (lines.T .alice lineX lineZ)).postprocess
+          (((S.placedMeasurement .AA' (lines.T .alice lineX lineZ)).postprocess
             (fun fs => (evalOpt lineX x fs.1, evalOpt lineZ z fs.2))).effect o *
             S.place .BA'' (G o.1 o.2))) =
       ∑ fX, ∑ fZ, stateQForm S.psiHat
         (S.place .AA' ((lines.T .alice lineX lineZ).effect (fX, fZ)) *
           S.place .BA'' (G (evalOpt lineX x fX) (evalOpt lineZ z fZ))) := by
   classical
-  have hsum : ∀ (s : Finset (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)))
-      (M : DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d) →
-        Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB))
-      (N : Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB)),
-      stateQForm S.psiHat ((∑ fs ∈ s, M fs) * N) =
-        ∑ fs ∈ s, stateQForm S.psiHat (M fs * N) := by
-    intro s M N
-    simp [stateQForm, applyOperatorToState, Finset.sum_mul]
-  calc
-    (∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          stateQForm S.psiHat
-            (((placedAAMeasurement S
-              (lines.T .alice lineX lineZ)).postprocess (fun fs =>
-                (evalOpt lineX x fs.1, evalOpt lineZ z fs.2))).effect o *
-              S.place .BA'' (G o.1 o.2))) =
-        ∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          ∑ fs ∈ Finset.univ.filter (fun fs =>
-              (evalOpt lineX x fs.1, evalOpt lineZ z fs.2) = o),
-            stateQForm S.psiHat
-              (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-                S.place .BA'' (G o.1 o.2)) := by
-      refine Finset.sum_congr rfl fun o _ => ?_
-      rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
-      refine (hsum _ _ _).trans ?_
-      exact Finset.sum_congr rfl fun fs _ => by
-        rw [placedAAMeasurement_effect]
-    _ = ∑ o : Option (PauliScalar P) × Option (PauliScalar P),
-          ∑ fs ∈ Finset.univ.filter (fun fs =>
-              (evalOpt lineX x fs.1, evalOpt lineZ z fs.2) = o),
-            stateQForm S.psiHat
-              (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-                S.place .BA''
-                  (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))) := by
-      refine Finset.sum_congr rfl fun o _ =>
-        Finset.sum_congr rfl fun fs hfs => ?_
-      rw [← (Finset.mem_filter.mp hfs).2]
-    _ = ∑ fs : DegPoly P.toLdParams (P.m * P.d) ×
-          DegPoly P.toLdParams (P.m * P.d),
-          stateQForm S.psiHat
-            (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-              S.place .BA''
-                (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))) :=
-      Finset.sum_fiberwise_of_maps_to (fun fs _ => Finset.mem_univ _) _
-    _ = ∑ fX, ∑ fZ, stateQForm S.psiHat
-          (S.place .AA' ((lines.T .alice lineX lineZ).effect (fX, fZ)) *
-            S.place .BA'' (G (evalOpt lineX x fX) (evalOpt lineZ z fZ))) :=
-      Fintype.sum_prod_type (f := fun fs => stateQForm S.psiHat
-        (S.place .AA' ((lines.T .alice lineX lineZ).effect fs) *
-          S.place .BA'' (G (evalOpt lineX x fs.1) (evalOpt lineZ z fs.2))))
+  refine Eq.trans ?_ (regroup_line_answer_sum lines lineX lineZ x z G)
+  refine Finset.sum_congr rfl fun o _ => ?_
+  apply congrArg (fun M => stateQForm S.psiHat (M * S.place .BA'' (G o.1 o.2)))
+  rw [ProjectiveSetting.placedMeasurement_effect,
+    MIPStarRE.Quantum.Measurement.postprocess_effect,
+    MIPStarRE.Quantum.Measurement.postprocess_effect]
+  refine Eq.trans (Finset.sum_congr rfl fun fs _ =>
+    S.placedMeasurement_effect .AA' _ fs) ?_
+  exact (S.place_finsetSum .AA' _ _).symm
 
 set_option maxHeartbeats 400000 in
-/-- On the directly indexed subline law, the real parts of the joint-point
-and ordered `Z`-then-`X` overlaps differ by at most a square-root point error.
-This is auxiliary blueprint `lem:claim-17-1-direct-real`, supporting paper
-`claim:17-1`, lines 1140--1145 of the cited mirror.
+-- The nested polynomial and completed-outcome sums require extra elaboration steps.
+/-- Formalization-only real-part estimate for the directly indexed subline law.
 
-**Scope restriction:** The statement uses `SubLineWitness` and real parts.
-It does not establish source-distribution transport or a complex modulus
-estimate. The obligations and discharge plan are recorded in
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
-theorem subline_replace_by_ordered_product :
+**Scope restriction:** The conclusion bounds the absolute difference of real parts
+by `2 * sqrt δQ`. Paper `claim:17-1`, at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1166`,
+bounds the complex modulus over the source law. Neither the imaginary-part bound
+nor transport from `SubLineWitness` is asserted here. See issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`; distribution transport is
+recorded in `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+The source statement remains blueprint `lem:claim-17-1`, without certification. -/
+theorem subline_replace_by_ordered_product_re_direct :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
         (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
@@ -262,7 +200,7 @@ theorem subline_replace_by_ordered_product :
             (uniformDistribution (DirectScalarQ P.extendedDirectLd)))
           (fun s => ∑ o : Option (PauliScalar P) × Option (PauliScalar P),
             stateQForm S.psiHat
-              (((placedAAMeasurement S
+              (((S.placedMeasurement .AA'
                 (lines.T .alice s.1.2.1 s.1.2.2)).postprocess (fun fs =>
                   (evalOpt s.1.2.1 (projX (directPointToPauli P
                       (s.1.1.base + s.2 • s.1.1.direction))) fs.1,
@@ -274,7 +212,7 @@ theorem subline_replace_by_ordered_product :
                     (projZ (directPointToPauli P
                       (s.1.1.base + s.2 • s.1.1.direction))) o.1 o.2))) := by
     intro G
-    rw [SandwichProduct.avgOver_distribution_prod]
+    rw [avgOver_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     exact (regroup_placed_line_answer_sum lines sample.2.1 sample.2.2 _ _ (G _ _)).symm
@@ -326,8 +264,7 @@ theorem subline_replace_by_ordered_product :
                       (projX (directPointToPauli P
                         (s.1.1.base + s.2 • s.1.1.direction)))).effect ab.1))
               S.psiHat‖ ^ 2) :=
-        avgOver_congr _ _ _ fun s =>
-          S.completedPair_norm_sq_sum_ZX points .BA'' _ _
+        avgOver_congr _ _ _ fun s => S.completedPair_norm_sq_sum_ZX points .BA'' _ _
       _ = avgOver sublines.D (fun sample =>
             avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
               (fun t => ∑ ab : PauliScalar P × PauliScalar P,
@@ -345,7 +282,7 @@ theorem subline_replace_by_ordered_product :
                           (projX (directPointToPauli P
                             (sample.1.base + t • sample.1.direction)))).effect ab.1))
                   S.psiHat‖ ^ 2)) :=
-        SandwichProduct.avgOver_distribution_prod _ _ _
+        avgOver_prod _ _ _
       _ = avgOver (uniformDistribution
             ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
           (fun xz => ∑ ab : PauliScalar P × PauliScalar P,
@@ -367,7 +304,7 @@ theorem subline_replace_by_ordered_product :
   have hgap := abs_overlap_gap_le_sqrt_of_opFamilyDistSq
     (Distribution.prod sublines.D
       (uniformDistribution (DirectScalarQ P.extendedDirectLd)))
-    (fun s => (placedAAMeasurement S
+    (fun s => (S.placedMeasurement .AA'
       (lines.T .alice s.1.2.1 s.1.2.2)).postprocess (fun fs =>
         (evalOpt s.1.2.1 (projX (directPointToPauli P
             (s.1.1.base + s.2 • s.1.1.direction))) fs.1,
@@ -392,7 +329,7 @@ theorem subline_replace_by_ordered_product :
           (projX (directPointToPauli P
             (s.1.1.base + s.2 • s.1.1.direction)))).effect o.1))
     S.psiHat hprob S.psiHat_norm (4 * δQ) hdist
-  simp only [← S.pointMeasExpOption_effect_evalOpt]
+  simp only [← ProjectiveSetting.pointMeasExpOption_effect_evalOpt]
   rw [hside (fun x z o1 o2 => ((points.Q .bob x z).postprocess fun ab =>
       (some ab.1, some ab.2)).effect (o1, o2)),
     hside (fun x z o1 o2 => (S.pointMeasExpOption .bob .Z z).effect o2 *
@@ -630,16 +567,185 @@ theorem subline_remove_X_factor :
         Real.sqrt_eq_rpow (deltaLine ε)
       rw [hsqrt]
 
-/-- On the directly indexed subline law, the real part of the `Z`-point
-correlation is close to one with the fourth-root point and line error.
-This is auxiliary blueprint `lem:claim-17-3-direct-real`, supporting paper
-`claim:17-3`, lines 1204--1209 of the cited mirror.
+/-- Complex-modulus removal of the X factor for the directly indexed subline law.
 
-**Scope restriction:** The statement retains the `SubLineWitness` carrier and
-real-part conclusion. Transport and the source scalar correspondence remain
-open, as recorded in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
-The auxiliary result does not certify the source-labelled claim. -/
-theorem subline_Z_term_near_one :
+**Scope restriction:** This is a formalization-only analogue of paper `claim:17-2`,
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`,
+using the concrete X-Z-X measurement defined at paper lines 942--949.
+The source-law statement remains blueprint `lem:claim-17-2`.
+
+The complex weighted Cauchy--Schwarz inequality and
+`exists_concreteXPointOverlap_deficit_le` prove the bound without a reality
+assumption. The deficit theorem uses `combinedLineMeasurement_sum_Z`.
+Transport of `SubLineWitness` to the source law remains separate, as recorded
+in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issues #414, #474,
+and #480) and `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+No deficit or transport is assumed.
+The finite weighted sums below are complex expectations, without taking real parts. -/
+theorem subline_remove_X_factor_direct :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ)
+        (S : ProjectiveSetting P ε) (sublines : SubLineWitness P),
+        ‖(∑ sample ∈ sublines.D.support,
+            (sublines.D.weight sample : ℂ) *
+              (Fintype.card (DirectScalarQ P.extendedDirectLd) : ℂ)⁻¹ *
+                ∑ t : DirectScalarQ P.extendedDirectLd,
+              let u := directPointToPauli P
+                (sample.1.base + t • sample.1.direction)
+              let x := projX u
+              let z := projZ u
+              ∑ fX, ∑ fZ,
+                (inner ℂ S.psiHat ((EuclideanSpace.equiv
+                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
+                    ((S.place .AA'
+                        ((S.combinedLineMeasurement .alice sample.2.1
+                          sample.2.2).effect (fX, fZ)) *
+                      S.place .BA''
+                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ *
+                          S.expPointEffectAtLineAnswer .bob .X sample.2.1 x fX)).mulVec
+                            S.psiHat)))) -
+          (∑ sample ∈ sublines.D.support,
+            (sublines.D.weight sample : ℂ) *
+              (Fintype.card (DirectScalarQ P.extendedDirectLd) : ℂ)⁻¹ *
+                ∑ t : DirectScalarQ P.extendedDirectLd,
+              let u := directPointToPauli P
+                (sample.1.base + t • sample.1.direction)
+              let z := projZ u
+              ∑ fX, ∑ fZ,
+                (inner ℂ S.psiHat ((EuclideanSpace.equiv
+                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
+                    ((S.place .AA'
+                        ((S.combinedLineMeasurement .alice sample.2.1
+                          sample.2.2).effect (fX, fZ)) *
+                      S.place .BA''
+                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
+                          S.psiHat))))‖ ≤
+          C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+  obtain ⟨K, hK, hdeficit⟩ := exists_concreteXPointOverlap_deficit_le
+  refine ⟨Real.sqrt K, Real.sqrt_pos.2 hK, ?_⟩
+  intro P ε S sublines
+  classical
+  let μ := Distribution.prod sublines.D
+    (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+  let A : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
+      Measurement (DegPoly P.toLdParams (P.m * P.d) ×
+        DegPoly P.toLdParams (P.m * P.d))
+        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s =>
+    S.placedMeasurement .AA'
+      (S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2)
+  let B : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
+      (DegPoly P.toLdParams (P.m * P.d) ×
+        DegPoly P.toLdParams (P.m * P.d)) →
+      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
+    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .X s.1.2.1
+      (projX (directPointToPauli P
+        (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
+  let R : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
+      (DegPoly P.toLdParams (P.m * P.d) ×
+        DegPoly P.toLdParams (P.m * P.d)) →
+      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
+    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
+      (projZ (directPointToPauli P
+        (s.1.1.base + s.2 • s.1.1.direction))) fs.2)
+  let RB : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
+      (DegPoly P.toLdParams (P.m * P.d) ×
+        DegPoly P.toLdParams (P.m * P.d)) →
+      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
+    S.place .BA''
+      (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
+          (projZ (directPointToPauli P
+            (s.1.1.base + s.2 • s.1.1.direction))) fs.2 *
+        S.expPointEffectAtLineAnswer .bob .X s.1.2.1
+          (projX (directPointToPauli P
+            (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
+  have hprob : μ.IsProbability :=
+    Distribution.prod_isProbability _ _ sublines.isProbability
+      (uniformDistribution_isProbability _)
+  have hcs := norm_overlap_gap_le_sqrt_one_sub_of_isProj
+    μ A B R RB S.psiHat hprob S.psiHat_norm
+    (fun s fs => by
+      dsimp only [B]
+      rw [← S.pointMeasExpOption_effect_evalOpt]
+      exact S.place_isProj .BA''
+        (S.pointMeasExpOption_isProj .bob .X _ _))
+    (fun s fs => by
+      dsimp only [R]
+      rw [← S.pointMeasExpOption_effect_evalOpt]
+      exact S.place_isProj .BA''
+        (S.pointMeasExpOption_isProj .bob .Z _ _))
+    (fun s fs => by
+      change Commute
+        (S.place .AA'
+          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
+        (S.place .BA'' _)
+      exact S.place_comm .AA' .BA'' trivial _ _)
+    (fun s fs => by
+      change Commute
+        (S.place .AA'
+          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
+        (S.place .BA'' _)
+      exact S.place_comm .AA' .BA'' trivial _ _)
+    (fun s fs => by
+      dsimp only [RB, R, B]
+      exact S.place_mul .BA'' _ _)
+  have hoverlap : avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
+        ((A s).effect fs * B s fs)) =
+        avgOver sublines.D (fun sample =>
+          avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+            (fun t => concreteXPointOverlap S
+              (sample.2, projX (directPointToPauli P
+                (sample.1.base + t • sample.1.direction))))) := by
+    rw [SandwichProduct.avgOver_distribution_prod]
+    refine avgOver_congr _ _ _ fun sample => ?_
+    refine avgOver_congr _ _ _ fun t => ?_
+    simp only [A, B, concreteXPointOverlap,
+      Placement.side, ProjectiveSetting.placedMeasurement_effect,
+      Fintype.sum_prod_type]
+  have hm : 0 ≤ (P.m : ℝ) := by positivity
+  have hbound :
+      ‖(∑ s ∈ μ.support, (μ.weight s : ℂ) * ∑ fs,
+          inner ℂ S.psiHat (applyOperatorToState ((A s).effect fs * RB s fs) S.psiHat)) -
+        (∑ s ∈ μ.support, (μ.weight s : ℂ) * ∑ fs,
+          inner ℂ S.psiHat (applyOperatorToState ((A s).effect fs * R s fs) S.psiHat))‖ ≤
+        Real.sqrt K * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+    calc
+      _ ≤ Real.sqrt (1 - avgOver μ (fun s => ∑ fs,
+          stateQForm S.psiHat ((A s).effect fs * B s fs))) := hcs
+      _ ≤ Real.sqrt (K * (P.m : ℝ) ^ 2 * deltaLine ε) := by
+        apply Real.sqrt_le_sqrt
+        rw [hoverlap]
+        exact hdeficit P ε S sublines
+      _ = Real.sqrt K * Real.sqrt ((P.m : ℝ) ^ 2 * deltaLine ε) := by
+        rw [show K * (P.m : ℝ) ^ 2 * deltaLine ε =
+            K * ((P.m : ℝ) ^ 2 * deltaLine ε) by ring,
+          Real.sqrt_mul (le_of_lt hK)]
+      _ = Real.sqrt K *
+          (Real.sqrt ((P.m : ℝ) ^ 2) * Real.sqrt (deltaLine ε)) := by
+        rw [Real.sqrt_mul (sq_nonneg (P.m : ℝ))]
+      _ = Real.sqrt K * (P.m : ℝ) * Real.sqrt (deltaLine ε) := by
+        rw [Real.sqrt_sq hm]
+        ring
+      _ = Real.sqrt K * (P.m : ℝ) *
+          Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+        have hsqrt : Real.sqrt (deltaLine ε) =
+            Real.rpow (deltaLine ε) (1 / 2 : ℝ) :=
+          Real.sqrt_eq_rpow (deltaLine ε)
+        rw [hsqrt]
+  convert hbound using 1
+  simp [μ, Distribution.prod, uniformDistribution, Finset.sum_product,
+    A, RB, R, ProjectiveSetting.placedMeasurement_effect, Fintype.sum_prod_type,
+    applyOperatorToState, mul_assoc, Finset.mul_sum,
+    Matrix.toLpLin_apply, Matrix.mulVec_mulVec]
+
+/-- Formalization-only real-part Z-correlation bound for the directly indexed law.
+
+**Scope restriction:** This uses `SubLineWitness` and compares the real part with one.
+It supports, but does not certify, blueprint `lem:claim-17-3`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`.
+The source-law and scalar comparison remain separate obligations, recorded in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issue #474) and
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
+theorem subline_Z_term_near_one_re_direct :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
         (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
@@ -692,7 +798,7 @@ theorem subline_Z_term_near_one :
           (fun t => zPointOverlap lines (sample.2, projZ (directPointToPauli P
             (sample.1.base + t • sample.1.direction))))) := by
     refine avgOver_congr _ _ _ fun sample => avgOver_congr _ _ _ fun t => ?_
-    simp only [zPointOverlap, ← S.pointMeasExpOption_effect_evalOpt]
+    simp only [zPointOverlap, ← ProjectiveSetting.pointMeasExpOption_effect_evalOpt]
     rfl
   rw [hLHS]
   set L := avgOver sublines.D (fun sample =>
@@ -720,6 +826,70 @@ theorem subline_Z_term_near_one :
       have hsm : 0 ≤ 2 * Real.sqrt (P.m : ℝ) :=
         mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
       nlinarith [mul_nonneg hsm hε]
+
+/-- Compatibility name for the directly indexed real-part ordered-product estimate. -/
+theorem subline_replace_by_ordered_product :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
+        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
+        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
+        |avgOver sublines.D (fun sample =>
+            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
+              let u := directPointToPauli P
+                (sample.1.base + t • sample.1.direction)
+              let x := projX u
+              let z := projZ u
+              ∑ fX, ∑ fZ,
+                (inner ℂ S.psiHat ((EuclideanSpace.equiv
+                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
+                    ((S.place .AA'
+                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+                      S.place .BA''
+                        (((points.Q .bob x z).postprocess fun ab =>
+                          (some ab.1, some ab.2)).effect
+                            (evalOpt sample.2.1 x fX,
+                              evalOpt sample.2.2 z fZ))).mulVec S.psiHat))).re)) -
+          avgOver sublines.D (fun sample =>
+            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
+              let u := directPointToPauli P
+                (sample.1.base + t • sample.1.direction)
+              let x := projX u
+              let z := projZ u
+              ∑ fX, ∑ fZ,
+                (inner ℂ S.psiHat ((EuclideanSpace.equiv
+                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
+                    ((S.place .AA'
+                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+                      S.place .BA''
+                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ *
+                          S.expPointEffectAtLineAnswer .bob .X sample.2.1 x fX)).mulVec
+                            S.psiHat))).re))| ≤
+          C * Real.rpow δQ (1 / 2 : ℝ) :=
+  subline_replace_by_ordered_product_re_direct
+
+/-- Compatibility name for the directly indexed real-part Z-correlation estimate. -/
+theorem subline_Z_term_near_one :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
+        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
+        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
+        |avgOver sublines.D (fun sample =>
+            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
+              let u := directPointToPauli P
+                (sample.1.base + t • sample.1.direction)
+              let z := projZ u
+              ∑ fX, ∑ fZ,
+                (inner ℂ S.psiHat ((EuclideanSpace.equiv
+                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
+                    ((S.place .AA'
+                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+                      S.place .BA''
+                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
+                          S.psiHat))).re)) - 1| ≤
+          C * Real.sqrt (P.m : ℝ) *
+            (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ) +
+              Real.rpow ε (1 / 4 : ℝ)) :=
+  subline_Z_term_near_one_re_direct
 
 end
 

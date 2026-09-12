@@ -13,6 +13,9 @@ properties.
 
 The construction is the paired-line measurement in `lem:qld-xz-lines`, with
 source `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:942-949`.
+Its separate blueprint entries are `def:concrete-paired-line-measurement` and
+`lem:concrete-paired-line-degree-support`; consistency remains the distinct
+obligation `lem:combined-line-measurement-consistency`.
 -/
 
 namespace MIPStarRE.QPBT

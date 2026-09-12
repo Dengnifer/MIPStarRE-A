@@ -171,10 +171,16 @@ private theorem concreteXPointOverlap_restricted_deficit_le
   · intro w f
     exact S.place_comm .AA' .BA'' trivial _ _
 
-/-- The concrete X overlap over the sub-line law has deficit at most a
+/-- The concrete X overlap over the directly indexed subline law has deficit at most a
 universal constant times `m² * deltaLine ε`. This is the restricted-line
 estimate used after Cauchy--Schwarz in `lem:claim-17-2`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`. -/
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`.
+
+**Scope restriction:** `SubLineWitness` describes the directly indexed law.
+Transport to the source law remains open as recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. This real deficit estimate
+does not itself prove the complex scalar comparison; see issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
 theorem exists_concreteXPointOverlap_deficit_le :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ)
