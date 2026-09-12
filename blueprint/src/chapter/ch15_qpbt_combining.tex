@@ -2630,3 +2630,73 @@ nonnegative domains.
 	constant and the power of $md$. For $\eps>1$, this final expression
 	is at least one and hence bounds the capped error.
 \end{proof}
+
+\begin{theorem}[Both errors in the direct-game passing bound]
+	\label{thm:qld-direct-passing-polynomial-bound}
+	\lean{MIPStarRE.QPBT.exists_direct_passing_polynomial_bound}
+	\leanok
+	Let $p(x)=\poly(x)$, let $f(x,y)=\poly(x,y)$, and fix $c\ge0$.
+	There exists $g(x,y)=\poly(x,y)$ such that for all
+	$\eps,\rho\ge0$ and all real $D\ge1$,
+	\[
+		\min\{1,3(\sqrt{p(\eps)+cD f(\eps,\rho)}+\rho)\}
+		\le Dg(\eps,\rho).
+	\]
+	This is a scalar auxiliary for the directly indexed game. The point
+	error $p(\eps)$ and the line error $cD f(\eps,\rho)$ both contribute
+	to its passing bound; neither measurement is constructed here.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Write $p(\eps)\le A\eps^p$ and
+	$f(\eps,\rho)\le B(\eps^r+\rho^s)$, with positive exponents.
+	Set $t=\min\{p,r\}$, $u=\min\{s,2\}$, and $K=A+cB$.
+	For $0\le\eps,\rho\le1$, the expression inside the square root
+	is at most $DK(\eps^t+\rho^u)$. Subadditivity of the square root,
+	$\sqrt D\le D$, and $\rho\le\rho^{u/2}$ give the bound with
+	\[
+		g(\eps,\rho)=\bigl(3(\sqrt K+1)+1\bigr)
+			(\eps^{t/2}+\rho^{u/2}).
+	\]
+	If either argument exceeds one, $Dg(\eps,\rho)\ge1$, which
+	bounds the minimum.
+\end{proof}
+
+\begin{theorem}[Absorption of the direct-game passing error]
+	\label{thm:qld-direct-global-pair-error-bound}
+	\lean{MIPStarRE.QPBT.exists_direct_global_pair_error_bound}
+	\leanok
+	\uses{def:admissible}
+	Let $p(x)=\poly(x)$, $f(x,y)=\poly(x,y)$, $c,C\ge0$,
+	$a\ge1$, and $0<b\le1$. There exist $a'>1$ and $0<b'<1$,
+	depending only on these functions and constants, such that for every
+	admissible $(q,m,d)$ and every $\eps\ge0$, writing
+	\[
+		\rho=md/q,\qquad
+		\eta=3\bigl(\sqrt{p(\eps)+cmf(\eps,\rho)}+\rho\bigr),
+	\]
+	one has
+	\[
+		\begin{split}
+		\min\{1,C(&\delta_{\mathrm{ld}}
+			(a,b,\eta+\eps,q,2m+2,d,1)+\sqrt{p(\eps)}+\rho)\}
+		\\ &\le a'(md)^{a'}(\eps^{b'}+q^{-b'}+2^{-b'md}).
+		\end{split}
+	\]
+	This numerical substitution retains both errors in the game conversion
+	and the subsequent point-consistency loss. It does not establish
+	Lemma~\ref{lem:qld-4-7}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:qld-direct-passing-polynomial-bound,
+		thm:qld-global-pair-error-bound}
+	First replace $\eta$ by $\min\{1,\eta\}$ and use
+	Theorem~\ref{thm:qld-direct-passing-polynomial-bound} followed by
+	Theorem~\ref{thm:qld-global-pair-error-bound}, with final scale $C+1$.
+	If $\eta\le1$, monotonicity of the low-degree error in its error
+	argument and $C\le C+1$ prove the claim. If $\eta>1$, the capped
+	input is $1+\eps$, so its low-degree error is at least one.
+	The bound just proved then makes the right-hand side at least one,
+	which also bounds the uncapped expression after its final cap.
+\end{proof}
