@@ -125,16 +125,30 @@ for pr in pulls:
 print("\n".join(seen))' "$SNAP")"
 NPR="$(printf '%s\n' "$BRANCHES" | grep -c . || true)"
 
-WT="$CACHE_ROOT/estimate-worktree"
+# Per-run path.  A fixed one is removed with `git worktree remove --force` both at
+# startup and in the EXIT trap, so a slow run and the next 30-minute tick would
+# delete each other's tree mid-diff.
+WT="$CACHE_ROOT/estimate-worktree.$$"
 REMOVED="$CACHE_ROOT/estimate-removed.$$"
 : > "$REMOVED"
 cleanup() {
   rm -f "$REMOVED"
   git worktree remove --force "$WT" >/dev/null 2>&1 || true
+  rm -rf "$WT" 2>/dev/null || true
   git worktree prune >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
-git worktree remove --force "$WT" >/dev/null 2>&1 || true
+# Sweep trees left by a run that was killed before its trap ran; `worktree prune`
+# then drops their registry entries.  Never touches a tree still registered live.
+for stale in "$CACHE_ROOT"/estimate-worktree.*; do
+  [ -e "$stale" ] || continue
+  [ "$stale" = "$WT" ] && continue
+  pid="${stale##*.}"
+  case "$pid" in ''|*[!0-9]*) continue ;; esac
+  kill -0 "$pid" 2>/dev/null && continue     # another estimate run owns it
+  git worktree remove --force "$stale" >/dev/null 2>&1 || rm -rf "$stale" 2>/dev/null || true
+done
+git worktree prune >/dev/null 2>&1 || true
 if git worktree add --detach "$WT" github/main >/dev/null 2>&1; then
   while IFS= read -r B; do
     [ -n "$B" ] || continue
@@ -160,10 +174,21 @@ if [ "$DRY" -eq 1 ]; then
   exit 0
 fi
 if [ -r "$POST" ]; then
-  python3 "$POST" --issue "$ISSUE" --timestamp "$TS" --percent "$PCT" --days "$DAYS" \
-    --open-sites "$NOW" --denominator "$DENOM" --main "$MAIN" --in-pr "$INPR" \
+  # These option names are estimate_post.py's, exactly.  The 2026-09-12-era
+  # spelling (--timestamp/--in-pr) made argparse exit 2 on every tick, and the
+  # `||` below swallowed it: the owner's only progress channel would have posted
+  # nothing for a whole run while this log looked almost normal.
+  # scripts/tests/test_estimate_post.py runs this vector with --dry-run.
+  python3 "$POST" --issue "$ISSUE" --ts "$TS" --percent "$PCT" --days "$DAYS" \
+    --open-sites "$NOW" --denominator "$DENOM" --main "$MAIN" --in-open-prs "$INPR" \
     --open-prs "$NPR" --in-pr-source "github-snapshot" --snapshot-generated "$SNAP_AT" \
-    --rate "$RATE" || echo "$PROG: estimate_post.py failed; the row below is still recorded" >&2
+    --rate "$RATE"
+  POST_RC=$?
+  if [ "$POST_RC" -ne 0 ]; then
+    echo "$PROG: ESTIMATE NOT POSTED: estimate_post.py exited $POST_RC." >&2
+    echo "$PROG: the estimates.jsonl row below is still recorded, but issue #$ISSUE has" >&2
+    echo "$PROG: NOT been updated — check the option names against estimate_post.py." >&2
+  fi
 else
   echo "$PROG: no estimate_post.py at $POST; the estimate is NOT posted." >&2
   echo "$PROG: body would have been: **$TS — implemented ≈ ${PCT}% · days to go ≈ $DAYS** / <sub>$SUB</sub>" >&2

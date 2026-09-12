@@ -80,7 +80,17 @@ RUN_KEYS_REQUIRED = (
     "label", "start", "dispatch_cutoff", "pause_deadline_min", "speed",
     "occupancy_target", "progress_issue", "estimate_issue", "owner_inbox_issue",
 )
-RUN_KEYS_OPTIONAL = ("turn_max_min",)
+RUN_KEYS_OPTIONAL = ("turn_max_min", "main")
+
+#: The main session's own launch values, read by ``local/bin/main-session.sh``
+#: through ``run_mode.py get main.<field>``.  Optional in the brief and defaulted
+#: here to what the 2026-09-12 launcher hard-coded, so an existing brief keeps
+#: working — but defaulted in ONE place that ``get`` can actually answer, rather
+#: than in a shell fallback behind a ``get`` that always exits 2.
+MAIN_DEFAULTS = {"model": "gpt-6-astra", "effort": "xhigh", "codex_home": ""}
+MAIN_KEYS = tuple(MAIN_DEFAULTS)
+EFFORTS = ("low", "medium", "high", "xhigh")
+MODEL_RE = re.compile(r"^[A-Za-z0-9._-]{1,60}$")
 ACCOUNT_KEYS = ("name", "label", "endpoint", "codex_home", "nominal_limit",
                 "external_reserved", "enabled")
 ISSUE_KEYS = ("progress_issue", "estimate_issue", "owner_inbox_issue")
@@ -274,6 +284,40 @@ def _validate_run(run: dict) -> dict:
     else:
         out["turn_max_min"] = TURN_MAX_MIN[speed]
     out["estimate_cadence_min"] = ESTIMATE_CADENCE_MIN[speed]
+    out["main"] = _validate_main(run.get("main"))
+    return out
+
+
+def _validate_main(main) -> dict:
+    """``run.main``: the launch values of the MAIN session, validated once here.
+
+    Optional; every field defaults to what ``main-session.sh`` used to hard-code.
+    Validated at briefing time so a typo is an exit 2 at ``apply`` rather than a
+    codex CLI error at 04:00Z.
+    """
+    if main is None:
+        return dict(MAIN_DEFAULTS)
+    _require_mapping(main, "run.main")
+    unknown = sorted(set(main) - set(MAIN_KEYS))
+    if unknown:
+        raise BriefError(f"run.main.{unknown[0]}",
+                         f"unknown key(s) under 'run.main': {', '.join(unknown)}")
+    out = dict(MAIN_DEFAULTS)
+    if main.get("model") is not None:
+        out["model"] = _require_text(main["model"], "run.main.model", pattern=MODEL_RE)
+    if main.get("effort") is not None:
+        effort = main["effort"]
+        if effort not in EFFORTS:
+            raise BriefError("run.main.effort",
+                             f"run.main.effort must be one of {EFFORTS}, got {effort!r}")
+        out["effort"] = effort
+    if main.get("codex_home") is not None:
+        # "" is meaningful: use the ambient CODEX_HOME rather than forcing one.
+        home = main["codex_home"]
+        if not isinstance(home, str):
+            raise BriefError("run.main.codex_home",
+                             f"run.main.codex_home must be text, got {home!r}")
+        out["codex_home"] = home.strip()
     return out
 
 
@@ -473,6 +517,41 @@ def write_caps(caps: dict[str, int], *, root: Path | None = None,
     return values
 
 
+#: The runtime knob `model_policy.py` reads (`model_policy.OVERRIDE_KNOB`).
+MODEL_OVERRIDE_REL = Path("watchdog") / "model-override"
+
+
+def write_model_override(mode: dict, *, root: Path | None = None,
+                         dry_run: bool = False) -> str:
+    """Make ``models.override`` real: write or remove the runtime knob.
+
+    Validating the field and exposing it through ``get model_override`` is not
+    the same as applying it. Until this ran, ``models.override`` was inert: the
+    only live overrides were the committed ``local/model-policy.json`` (a
+    reviewed PR, impossible mid-run) and a knob file a human typed — so "every
+    worker on the hard model" still cost a hand edit, the intervention the field
+    exists to remove.  ``astra-all`` writes the knob, ``null`` removes it.
+    """
+    path = (root or cache_root()) / MODEL_OVERRIDE_REL
+    override = mode["models"]["override"]
+    if dry_run:
+        return (f"{path} removed (no override)" if override is None
+                else f"{path} = {override}")
+    if override is None:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            return "no model override (runtime knob absent)"
+        except OSError as exc:
+            raise LayerError(f"cannot remove the model override knob {path}: {exc}") from exc
+        return f"model override cleared ({path} removed)"
+    document = {"mode": override,
+                "set_by": f"run_mode.py apply, brief sha256 {mode['brief_sha256'][:12]}",
+                "reason": "models.override in the run brief"}
+    atomic_write(path, json.dumps(document, ensure_ascii=False) + "\n")
+    return f"model override {override} active (runtime knob {path})"
+
+
 def read_live_caps(root: Path | None = None) -> dict[str, int | None]:
     """Cap files as the router sees them; unreadable is None, never zero."""
     base = (root or cache_root()) / "watchdog"
@@ -590,6 +669,13 @@ SCALAR_KEYS = {
     "model_override": lambda m: m["models"]["override"] or "none",
     "brief_sha256": lambda m: m["brief_sha256"],
     "paused": lambda m: "yes" if m.get("paused") else "no",
+    # The MAIN session's launch values.  main-session.sh reads exactly these
+    # three; without them every `get` exited 2 and the launcher silently used
+    # its own defaults, so the account the main session ran on came from the
+    # ambient CODEX_HOME rather than from the brief.
+    "main.model": lambda m: m["run"].get("main", MAIN_DEFAULTS)["model"],
+    "main.effort": lambda m: m["run"].get("main", MAIN_DEFAULTS)["effort"],
+    "main.codex_home": lambda m: m["run"].get("main", MAIN_DEFAULTS)["codex_home"],
 }
 
 PER_ACCOUNT_KEYS = ("cap", "endpoint", "codex_home", "label", "enabled",
@@ -652,6 +738,9 @@ def render_show(mode: dict, root: Path | None = None) -> str:
         f"issues           progress #{run['progress_issue']}, estimate "
         f"#{run['estimate_issue']}, owner inbox #{run['owner_inbox_issue']}",
         f"models           override {mode['models']['override'] or 'none (local/model-policy.json)'}",
+        f"main session     {run.get('main', MAIN_DEFAULTS)['model']} effort "
+        f"{run.get('main', MAIN_DEFAULTS)['effort']}, CODEX_HOME "
+        f"{run.get('main', MAIN_DEFAULTS)['codex_home'] or '(ambient)'}",
         f"pause deadline   {run['pause_deadline_min']} min",
     ]
     if mode.get("paused"):
@@ -889,6 +978,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         for name, value in values.items():
             sys.stdout.write(f"  {watchdog_dir() / name} = {value}\n")
         sys.stdout.write(f"  {shim_path()} rendered at {run['speed']} speed\n")
+        sys.stdout.write(f"  {write_model_override(mode, dry_run=True)}\n")
         sys.stdout.write(f"  brief sha256 {digest}\n")
         return 0
 
@@ -899,6 +989,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         pass
     path = write_mode(mode)
     write_caps(caps)
+    override_note = write_model_override(mode)
     # Hand the briefed caps to the capacity controller, which is the sole writer
     # of watchdog/capacity/state.json and therefore the thing `pause` asks to
     # save them and `resume` asks to restore them.  Without this seed the
@@ -912,8 +1003,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
             f"{detail}\nThe cap files above are correct, but pause/resume will "
             "not round-trip until the controller has state. Fix it, then run "
             "'python3 local/bin/capacity_controller.py init'.\n")
-    append_stage(f"run-mode apply: {summary}; brief {source} sha256 {digest}",
-                 "run-mode-apply")
+    append_stage(f"run-mode apply: {summary}; {override_note}; brief {source} "
+                 f"sha256 {digest}", "run-mode-apply")
     append_decision(
         f"Run mode applied: {summary}",
         "owner brief via run_mode.py apply",
@@ -921,6 +1012,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         "watchdog/run-brief.json and are read through run_mode.py get",
         f"brief sha256 {digest[:12]}; {path}; stages.jsonl event=run-mode-apply")
     sys.stdout.write(render_show(mode))
+    sys.stdout.write(override_note + "\n")
     if previous_paused:
         sys.stdout.write("note: the previous run mode was paused; this brief restores "
                          "capacity now.\n")
@@ -1063,6 +1155,9 @@ def cmd_resume(args: argparse.Namespace) -> int:
                        "floor": floor_for(caps, mode["run"]["occupancy_target"])}
     mode["generated"] = utcnow()
     write_mode(mode)
+    # Re-assert the briefed override: the knob and the mode must never diverge,
+    # and a resume is exactly when someone would notice that they had.
+    resume_override = write_model_override(mode)
 
     ok, detail = call_controller("resume")
     if ok:
@@ -1098,7 +1193,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
     note = ("run-mode resume: caps " +
             ", ".join(f"{name} {live[name]}" for name in ACCOUNT_NAMES) +
             f", max-codex {live_total}, floor {mode['derived']['floor']} "
-            f"via {source}")
+            f"via {source}; {resume_override}")
     append_stage(note, "run-mode-resume")
     append_decision(
         "Admission resumed from the saved caps in the run mode",

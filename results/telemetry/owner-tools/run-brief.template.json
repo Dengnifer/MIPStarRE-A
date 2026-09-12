@@ -9,7 +9,12 @@
     "occupancy_target": 0.8,
     "progress_issue": 27,
     "estimate_issue": 168,
-    "owner_inbox_issue": 500
+    "owner_inbox_issue": 500,
+    "main": {
+      "model": "gpt-6-astra",
+      "effort": "xhigh",
+      "codex_home": "~/.codex"
+    }
   },
   "accounts": [
     {

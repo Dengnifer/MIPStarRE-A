@@ -12,7 +12,8 @@
 # Worker sessions are still started only via dispatch.sh.
 #
 # THROUGH THE SHIM.  The model, the reasoning effort, the CODEX_HOME and the SPEED TIER all
-# come from the run mode (local/bin/run_mode.py get), and codex is invoked through the
+# come from the run mode (`run_mode.py get main.model|main.effort|main.codex_home|speed`,
+# briefed under `run.main`), and codex is invoked through the
 # installed PATH shim ~/.cache/mipstarre-dev/owner-bin/codex, which is where the speed tier
 # is applied.  The 2026-09-12 launcher (main-session-astra-v3.sh) `exec`'d an absolute
 # ~/.local/bin/codex and therefore never received service_tier="priority": the owner
@@ -51,6 +52,14 @@ if [ ! -x "$CODEX" ]; then
   [ -n "$CODEX" ] || { printf 'main-session.sh: codex CLI not found on PATH\n' >&2; exit 1; }
 fi
 
+# `main.model`, `main.effort` and `main.codex_home` are run_mode keys (run.main in
+# the brief, defaulted there to these same values).  The fallbacks below apply only
+# when run_mode.py is absent or the run has not been briefed at all; when it IS
+# briefed, the brief wins.  Say which happened rather than looking identical either
+# way — the 2026-09-12 launcher's silent fallback is why the main session ran on the
+# ambient CODEX_HOME while the brief named an account.
+SOURCE="run-mode"
+python3 "$RUN_MODE" get main.model >/dev/null 2>&1 || SOURCE="defaults (run mode unreadable)"
 MODEL="$(rm_get main.model "${MAIN_MODEL:-gpt-6-astra}")"
 EFFORT="$(rm_get main.effort "${MAIN_EFFORT:-xhigh}")"
 SPEED="$(rm_get speed default)"
@@ -81,8 +90,8 @@ authoritative for state and next steps. Your working directory is the
 repository root: $ROOT — all workflow tools are invoked as
 local/bin/<tool> from there."
 
-printf 'main-session.sh: %s model=%s effort=%s speed=%s codex_home=%s\n' \
-  "$CODEX" "$MODEL" "$EFFORT" "$SPEED" "${CODEX_HOME:-$HOME/.codex}" >&2
+printf 'main-session.sh: %s model=%s effort=%s speed=%s codex_home=%s (source: %s)\n' \
+  "$CODEX" "$MODEL" "$EFFORT" "$SPEED" "${CODEX_HOME:-$HOME/.codex}" "$SOURCE" >&2
 
 if [ "${1:-}" = "--print" ]; then
   printf '%s' "$CODEX"

@@ -21,8 +21,11 @@ state, never guessed**:
 | `unexplained` | ready, fresh, and no daemon record — **the alarm case; it should always be zero** |
 
 Output: one comment per hour on the run's progress issue in the compact form
-``ready N, merged-this-hour M`` plus one line per ready-but-open PR with its
-reason, and the same rows appended to
+``ready N, merged-this-hour M``, one **occupancy** line (live worker sessions
+against the briefed floor — the number the owner asked for three times on
+2026-09-12 and which nothing measured, because the half-hourly live-vs-floor
+line is a main-session duty and a stalled main session reports nothing), one
+line per ready-but-open PR with its reason, and the same rows appended to
 ``results/telemetry/merge-latency-<YYYY-MM-DD>.jsonl``.  A post is suppressed
 when the ready set and the reasons are unchanged and nothing merged, and forced
 at least every six hours.  Elapsed timers are deliberately excluded from the
@@ -226,11 +229,43 @@ def classify_reason(row: dict, *, daemon_dir: Path, lanes_dir: Path,
 # Rendering, signature and suppression
 # ---------------------------------------------------------------------------
 
+def occupancy(cache: Path) -> dict | None:
+    """Live worker sessions against the briefed occupancy floor, or ``None``.
+
+    Intervention 2 of 2026-09-12 ("why are slots idle? it should be close to
+    30") is addressed by four separate cause fixes, but nothing MEASURED the
+    thing the owner was asking about.  The half-hourly live-vs-floor line is a
+    main-session duty, so a stalled main session reports no occupancy at all —
+    exactly what happened.  This report already runs hourly from cron; one line
+    here means occupancy is never unreported.
+    """
+    try:
+        mode = run_mode.load_mode()
+        caps = run_mode.current_caps(mode, cache)
+        floor = run_mode.floor_for(caps, mode["run"]["occupancy_target"])
+    except (LayerError, KeyError, TypeError, ValueError):
+        return None
+    try:
+        import account_router  # noqa: PLC0415 - same directory, optional
+        live = {name: len(account_router.live_pids(cache / "accounts" / name))
+                for name in account_router.ACCOUNTS}
+    except Exception:  # pragma: no cover - a census failure must not lose the report
+        return None
+    total = sum(live.values())
+    return {"live": total, "floor": int(floor), "cap": sum(caps.values()),
+            "by_account": live, "below": total < int(floor)}
+
+
 def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
-           unexplained: int) -> str:
+           unexplained: int, occ: dict | None = None) -> str:
     """The compact hourly comment."""
     ready = [row for row in rows if row["ready"]]
     lines = [f"ready {len(ready)}, merged-this-hour {merged}"]
+    if occ is not None:
+        detail = ", ".join(f"{name} {count}" for name, count in sorted(occ["by_account"].items()))
+        lines.append(f"occupancy {occ['live']} live of cap {occ['cap']} ({detail}), "
+                     f"floor {occ['floor']}" +
+                     ("  <- alarm: below the occupancy floor" if occ["below"] else ""))
     for row in sorted(ready, key=lambda item: item["pr"]):
         issue = f"issue {row['issue']}" if row.get("issue") else "no issue in the branch"
         lines.append(f"- PR {row['pr']} ({issue}, head {row['head'][:8]}) "
@@ -244,11 +279,18 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
     return "\n".join(lines) + "\n"
 
 
-def signature(rows: list[dict]) -> str:
-    """Stable digest of the ready set and its reasons (no elapsed timers)."""
+def signature(rows: list[dict], occ: dict | None = None) -> str:
+    """Stable digest of the ready set and its reasons (no elapsed timers).
+
+    The occupancy ALARM state joins it — not the live count, which changes every
+    minute and would defeat the suppression — so that crossing the floor in
+    either direction posts instead of being suppressed as "unchanged".
+    """
     keys = sorted(f"{row['pr']}:{row['head']}:{row['reason']['key']}"
                   for row in rows if row["ready"])
     payload = f"ready={len(keys)}\n" + "\n".join(keys)
+    if occ is not None:
+        payload += f"\noccupancy_below={int(bool(occ['below']))}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -428,9 +470,10 @@ def main(argv: list[str] | None = None) -> int:
 
     unexplained = sum(1 for row in rows if row["ready"]
                       and row["reason"]["class"] == "unexplained")
+    occ = occupancy(cache)
     body = render(rows, merged, window_min=args.window_min, ts=ts,
-                  unexplained=unexplained)
-    digest = signature(rows)
+                  unexplained=unexplained, occ=occ)
+    digest = signature(rows, occ)
     state_file = state_path(cache)
     state = read_state(state_file)
     post, why = should_post(state, digest, merged, now, force=args.force)

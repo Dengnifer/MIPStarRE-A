@@ -19,6 +19,16 @@ renders and posts::
     **2026-09-13 05:00Z — implemented ≈ 89% · days to go ≈ 2.1**
     <sub>21 of 197 sites open on main (60dbabef); 9 proved in open PRs; trailing-24h rate 14 sites/day.</sub>
 
+``--open-prs``, ``--in-pr-source`` and ``--snapshot-generated`` are optional and
+name where the in-PR figure came from — ``estimate.sh`` counts it in a throwaway
+worktree from the committed GitHub snapshot, and a number read off a stale
+snapshot must not read like a live count.  They are the ONLY extra options, and
+the option names here and in ``estimate.sh`` are one interface: an option
+``estimate.sh`` passes and this parser does not define makes ``argparse`` exit 2
+on every cron tick, which posts nothing for a whole run while the cron log still
+looks almost normal.  ``scripts/tests/test_estimate_post.py`` runs the exact
+argument vector ``estimate.sh`` builds.
+
 The issue number comes from the run mode (``run.estimate_issue``, validated at
 briefing time), so a missing ``watchdog/estimate-issue`` can no longer silently
 no-op the owner's only progress channel: an unbriefed run exits 2 and says so.
@@ -50,8 +60,14 @@ from wf_util import LayerError  # noqa: E402
 
 HEADLINE = "**{ts} — implemented ≈ {percent}% · days to go ≈ {days}**"
 PROVENANCE = ("<sub>{open_sites} of {denominator} sites open on main ({main}); "
-              "{in_open_prs} proved in open PRs; trailing-24h rate {rate} "
+              "{in_open_prs} proved in{where}; trailing-24h rate {rate} "
               "sites/day.</sub>")
+#: How the in-PR figure was obtained, when the caller says.  `estimate.sh` counts
+#: the open PRs from the committed GitHub snapshot, so the sub line names the
+#: snapshot and its age: an in-PR number from a stale snapshot must not read like
+#: a live count.  Angle brackets are excluded on purpose — BODY_RE forbids them
+#: inside the <sub>, which is what keeps the estimate issue to two rendered lines.
+SOURCE_LABELS = {"github-snapshot": "GitHub snapshot", "live": "live"}
 
 #: The only body this tool will publish: two lines, nothing before or after.
 BODY_RE = re.compile(
@@ -62,8 +78,29 @@ BODY_RE = re.compile(
 TS_FMT = "%Y-%m-%d %H:%MZ"
 
 
+def _where(open_prs: int | None, source: str | None, generated: str | None) -> str:
+    """The ` open PRs` clause, with its provenance when the caller supplied it."""
+    if open_prs is None:
+        return " open PRs"
+    if open_prs < 0:
+        raise LayerError(f"--open-prs {open_prs} must not be negative")
+    clause = f" {open_prs} open PRs"
+    label = SOURCE_LABELS.get((source or "").strip(), (source or "").strip())
+    detail = " ".join(part for part in (label, (generated or "").strip()) if part)
+    if detail:
+        clause += f" ({_clean(detail)})"
+    return clause
+
+
+def _clean(text: str) -> str:
+    """No angle brackets and no newline inside the ``<sub>``; see ``BODY_RE``."""
+    return re.sub(r"\s+", " ", text.replace("<", "").replace(">", "")).strip()
+
+
 def render(*, percent: int, days: str, open_sites: int, denominator: int,
-           main: str, in_open_prs: int, rate: int, ts: str | None = None) -> str:
+           main: str, in_open_prs: int, rate: int, ts: str | None = None,
+           open_prs: int | None = None, in_pr_source: str | None = None,
+           snapshot_generated: str | None = None) -> str:
     """The two-line body, or ``LayerError`` when a value cannot be rendered."""
     moment = ts or datetime.now(timezone.utc).strftime(TS_FMT)
     if not 0 <= percent <= 100:
@@ -77,7 +114,8 @@ def render(*, percent: int, days: str, open_sites: int, denominator: int,
         raise LayerError(f"--main {main!r} is not a commit SHA")
     body = (HEADLINE.format(ts=moment, percent=percent, days=days) + "\n" +
             PROVENANCE.format(open_sites=open_sites, denominator=denominator,
-                              main=main, in_open_prs=in_open_prs, rate=rate))
+                              main=main, in_open_prs=in_open_prs, rate=rate,
+                              where=_where(open_prs, in_pr_source, snapshot_generated)))
     check(body)
     return body
 
@@ -115,6 +153,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="initial obligations (default 197: keep the series comparable)")
     parser.add_argument("--main", help="short SHA of github/main")
     parser.add_argument("--in-open-prs", type=int, help="sites proved in open PRs, deduplicated")
+    parser.add_argument("--open-prs", type=int,
+                        help="how many open PRs those sites came from (optional)")
+    parser.add_argument("--in-pr-source", choices=tuple(SOURCE_LABELS),
+                        help="how the in-PR figure was obtained (optional)")
+    parser.add_argument("--snapshot-generated",
+                        help="age/stamp of the snapshot the in-PR figure came from (optional)")
     parser.add_argument("--rate", type=int, help="trailing-24h sites/day")
     parser.add_argument("--ts", help=f"timestamp, default now as {TS_FMT}")
     parser.add_argument("--issue", type=int, help="estimate issue (default: run-mode)")
@@ -141,7 +185,9 @@ def main(argv: list[str] | None = None) -> int:
         body = render(percent=args.percent, days=args.days,
                       open_sites=args.open_sites, denominator=args.denominator,
                       main=args.main, in_open_prs=args.in_open_prs,
-                      rate=args.rate, ts=args.ts)
+                      rate=args.rate, ts=args.ts, open_prs=args.open_prs,
+                      in_pr_source=args.in_pr_source,
+                      snapshot_generated=args.snapshot_generated)
         if args.dry_run:
             sys.stdout.write(body + "\n")
             return 0
