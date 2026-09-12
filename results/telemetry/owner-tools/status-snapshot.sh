@@ -4,10 +4,16 @@
 # Run it at the start of every operator cycle; act on every line that names something actionable:
 #   workers far below the slots, a PR with unresolved findings and no loop, a failed marker, a needs-attention lane,
 #   a stack child whose base merged, a ready packet without a lane.
+# The accounts line is live/cap (health) waiters per account plus the occupancy floor from the run brief; a (down)
+# account is already at cap 0 and is probing itself back (local/protocols/capacity.md), so it needs no operator action,
+# while waiters far above zero with live below the floor means the caps, not the queue, are the constraint.
 export PATH="$HOME/.local/bin:$PATH"
 S="$HOME/.cache/mipstarre-dev/watchdog"; L="$S/lanes"; ROOT="$HOME/MIPStarRE-qpbt"
 cd "$ROOT" || exit 1
 echo "== $(date -u +%FT%TZ) load $(cut -d' ' -f1 /proc/loadavg) | main $(git rev-parse --short github/main 2>/dev/null) | max-codex $(cat "$S/max-codex" 2>/dev/null)"
+# max-codex above is a derived display and lane-parallelism value only: admission reads the
+# per-account caps (local/protocols/capacity.md §4). The line below is the admission picture.
+echo "== accounts: $(timeout 20 python3 local/bin/capacity_controller.py status --brief 2>/dev/null || echo 'capacity controller unavailable') | occupancy floor $(timeout 20 python3 local/bin/run_mode.py get floor 2>/dev/null || echo '?')"
 live=0; declare -A byhome
 for p in $(pgrep -f "^node [^ ]*codex(\.js)?( |$).* exec( |$)" 2>/dev/null); do
   h=$(tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | sed -n 's/^CODEX_HOME=//p' | head -1); h="${h:-$HOME/.codex}"
@@ -29,4 +35,4 @@ if [ "${1:-}" = "--prs" ]; then
     echo "   PR $p: $v unresolved=$u$loop"
   done
 fi
-echo "== #26 open blockers: $(timeout 20 gh issue view 500 --json comments --jq '[.comments[] | select(.body|test("owner-inbox id=B[0-9]+ status=open"))] | length' 2>/dev/null)"
+echo "== #500 open blockers: $(timeout 20 gh issue view 500 --json comments --jq '[.comments[] | select(.body|test("owner-inbox id=B[0-9]+ status=open"))] | length' 2>/dev/null)"

@@ -1,4 +1,11 @@
-"""Atomic dispatcher account reservations and resume affinity."""
+"""Atomic dispatcher account reservations and resume affinity.
+
+Two admission inputs are additive and fail open to the historical behaviour:
+``watchdog/capacity/health-<account>.json`` (a ``down`` endpoint is cap 0) and
+``watchdog/drain`` (a pause releases queued dispatches with `DRAIN_EXIT`).
+Absent files reproduce the previous behaviour exactly, and neither input can
+widen capacity — both only turn a waiting reservation into a clean refusal.
+"""
 
 import argparse
 import fcntl
@@ -12,9 +19,59 @@ import time
 
 ACCOUNTS = ("primary", "second")
 
+#: Exit status of a reservation released by an operator drain.  Distinct from
+#: the exit 4 every other routing failure uses, so a caller can tell "the run is
+#: pausing, come back later" from "this request is wrong".
+DRAIN_EXIT = 6
+
+
+class DrainRequested(Exception):
+    """``watchdog/drain`` appeared while this dispatch was queued.
+
+    The pause path touches that file, and a queued dispatch must then release
+    itself: on 2026-09-12 forty-nine waiters sat behind twelve workers and the
+    pause could only clear them by killing the processes, which threw away the
+    dispatch requests with them.
+    """
+
 
 def choose_account(live: list[int], caps: list[int]) -> str:
     return "primary" if live[0] * caps[1] <= live[1] * caps[0] else "second"
+
+
+def health_state(root: Path, account: str) -> str:
+    """Endpoint health as ``capacity_controller.py`` last recorded it.
+
+    Absent, unreadable or unrecognized is ``up``: with no controller running the
+    router behaves exactly as it did before this field existed, and the cap
+    files alone govern admission.
+    """
+    path = root / "watchdog" / "capacity" / f"health-{account}.json"
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "up"
+    state = document.get("state") if isinstance(document, dict) else None
+    return state if state in ("up", "degraded", "down") else "up"
+
+
+def effective_caps(root: Path) -> list[int]:
+    """Per-account caps with a dead endpoint forced to zero.
+
+    Without this the router *prefers* the dead account: `choose_account` picks
+    the lower live/cap ratio, and an endpoint answering 503 keeps freeing slots
+    as its sessions die, so every new dispatch is routed into the outage.  That
+    is how one hour of relay-us7 503s cost 69 sessions on 2026-09-12.  Forcing
+    the cap to zero only ever narrows admission; it can never widen it.
+    """
+    caps = []
+    for account in ACCOUNTS:
+        path = root / 'watchdog' / f'max-codex-{account}'
+        cap = int(path.read_text().strip()) if path.exists() else 0
+        if cap < 0:
+            raise ValueError(f'{path}: cap must be nonnegative')
+        caps.append(0 if health_state(root, account) == "down" else cap)
+    return caps
 
 
 def live_pids(directory: Path) -> set[int]:
@@ -142,22 +199,24 @@ def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict
 
 
 def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool = False) -> str:
-    """Reserve one worker slot under the lock shared by all dispatchers."""
+    """Reserve one worker slot under the lock shared by all dispatchers.
+
+    ``watchdog/drain`` is checked on every poll iteration, before the lock, and
+    raises `DrainRequested` so a queued dispatch releases itself during a pause
+    instead of being killed.  Absent file, absent health file: unchanged
+    behaviour in every respect.
+    """
     if requested not in ('auto', *ACCOUNTS) or pid <= 0 or wait < 0:
         raise ValueError('expected a valid account, positive pid and nonnegative wait')
     accounts = root / "accounts"
     accounts.mkdir(parents=True, exist_ok=True)
     deadline = time.monotonic() + wait
     while True:
+        if (root / "watchdog" / "drain").exists():
+            raise DrainRequested('drain in progress; no reservation made')
         with (accounts / "router.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            caps = []
-            for account in ACCOUNTS:
-                path = root / 'watchdog' / f'max-codex-{account}'
-                cap = int(path.read_text().strip()) if path.exists() else 0
-                if cap < 0:
-                    raise ValueError(f'{path}: cap must be nonnegative')
-                caps.append(cap)
+            caps = effective_caps(root)
             live = [len(live_pids(accounts / account)) for account in ACCOUNTS]
             available = [account for index, account in enumerate(ACCOUNTS)
                          if live[index] < caps[index] and requested in ('auto', account)]
@@ -209,6 +268,8 @@ def main() -> None:
         selected = reserve(args.root, args.account, args.pid, args.wait, args.dry_run)
         print(selected)
         print(model)
+    except DrainRequested as error:
+        parser.exit(DRAIN_EXIT, f"account routing: {error}\n")
     except (OSError, ValueError) as error:
         parser.exit(4, f"account routing: {error}\n")
 
