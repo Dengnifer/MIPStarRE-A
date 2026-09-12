@@ -5522,6 +5522,23 @@ not actual commit/publication hooks. No productive session was killed.
   13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
   /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
   (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
+- Owner-approved default-home app-server occupancy correction (#345): the canonical
+  host census counted PID 3286270, a VS Code ChatGPT extension `codex app-server`
+  started September 8, 2026 at 10:16:05 +0800 with effective Codex home
+  `/home/drx/.codex` and CWD `/home/drx`, as a worker. The owner receipt
+  `~/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-correction-20260908.json`
+  defines total `k` as one main plus `k - 1` native descendants with no unrelated-use
+  reservation, and requires eight actually active native workers at `k = 10`. The narrow
+  repair extends the existing validated CWD exclusion only to the exact default-home
+  `app-server` command; generic workers, scoped homes, reservations, leases and unknown
+  visibility remain guarded. This branch did not signal the process, activate a lease,
+  restart main or change credentials. PID 3286270 exited naturally before the switch
+  checkpoint, after which meta bound the nine-descendant lease using the unchanged
+  published guard. A post-switch read-only check with the branch code verified root
+  PID 3846730/start187183661 at nine descendants, census `[9, 0]` workers and
+  `[1, 0]` interactives within capacity ten, external reservation zero, no live
+  `app-server`, and an unchanged lease-file timestamp and SHA-256. The router fix
+  remains unmerged and subject to normal CI, independent review and service merge.
 - PR310's coordinator published telemetry commit
   00565abd6d9dcfded2c914601ecef07542d2f4d8 and snapshot
   fcfb392b01a33ea4779e92776a96f2bd77b99fef before merging the already
@@ -7642,3 +7659,15 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - PR #350 merge conflicts after router retirement
+
+- Session `orc-pr350-20260912-01` found eight workflow-only conflicts while merging
+  `ae124f8f09ee002444ac5b9711822c0f1daae142` into `issue-345-app-server-occupancy`.
+  Issue #505 (router commit `24394eef`, merged in PR #508) had removed host-process
+  occupancy and native leases after issue #345 changed the app-server exclusion.
+  The resolution keeps main's marker-only router, tests and retirement documentation,
+  and preserves the earlier issue #345 records. The legacy exclusion setting is added
+  to the retired-settings regression. Every Lean file already matched incoming main;
+  no mathematical declaration or proof was changed by the conflict resolution.
+  Historical admission fixes must be reconciled with the current router contract.

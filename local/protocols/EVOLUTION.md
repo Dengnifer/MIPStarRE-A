@@ -929,6 +929,25 @@ claiming broader capability evidence from the earlier two-case audit.
 its recorded 15:40Z boundary and extension request5572932276, not a fresh two-hour
 allocation. Old 597 tests cover the narrow draft only; revised tests and exact-head
 CI/control-policy review/publication gates are recorded separately. No activation yet.
+## 2026-09-08 - Exclude allowlisted default-home app-server use (#345)
+
+**Trigger:** `results/telemetry/events.md` 2026-09-08, "Owner-approved default-home
+app-server occupancy correction", and the owner worker-occupancy receipt dated
+September 8, 2026.
+
+**Change:** `account_router.py` extends the existing owner-designated CWD exclusion
+only to an exact `app-server` command on the known primary default home. Tests cover
+global options, prompt boundaries, generic worker commands, scoped and secondary homes,
+unlisted CWDs, reservations, native leases and unavailable host visibility. Current
+normative allocation text now defines total `k` as one main plus `k - 1` native workers,
+with no unrelated-use reservation and an active-worker floor of
+`ceil (0.8 * (k - 1))`.
+
+**Expected effect:** the unrelated VS Code application server no longer consumes a
+native worker slot after normal merge and deployment. At Space `k = 10`, meta can bind
+the reviewed nine-descendant lease while requiring eight actual active native workers;
+main, other processes and configured capacity do not satisfy the activity floor. All
+credential, visibility, reservation, lease, review and merge guards remain unchanged.
 
 ## 2026-09-08 - Blueprint PDF exit and freshness are blocking (#352)
 
@@ -1123,3 +1142,14 @@ tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
 symlink, unknown-path or other non-allowlisted base change still requires
 refresh, exact-head CI and independent review; all other merge gates are
 unchanged.
+
+## 2026-09-12 - Reconcile the app-server fix with router retirement (#350)
+
+**Trigger:** `results/telemetry/events.md`, September 12, 2026, "PR #350 merge
+conflicts after router retirement", and the requested merge of `github/main`.
+**Change:** retain main's issue #505 marker-only account router and current
+protocols while preserving the issue #345 brief, incident and amendment as history.
+The legacy CWD-exclusion setting is covered by the retired-settings regression.
+**Expected effect:** an unmarked application server consumes no worker reservation;
+merging the older fix does not restore host scans, native leases or retired gates.
+This reconciliation changes no Lean declarations, live allocation or credentials.
