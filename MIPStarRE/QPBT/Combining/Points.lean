@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Combining.Points.Closeness
+import MIPStarRE.QPBT.Combining.Points.MarginalContraction
 import MIPStarRE.QPBT.Combining.PointsDataProcessing
 
 /-!
