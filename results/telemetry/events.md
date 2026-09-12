@@ -7642,3 +7642,24 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - Inherited hardness reason in PR 531 CI
+
+- Session `prover-509-20260912-01` ran canonical CI on published head
+  `506aa56a06188948a53b7ecc3bbd5cfbc851eae5`. The full 9218-job build and
+  LDT axiom audit passed. Blueprint-sync stopped in the 629-test workflow
+  suite with one error in
+  `test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra`.
+- The invoking, review, prose, and fix model overrides had been unset, but
+  `MIPSTARRE_HARDNESS_REASON` remained inherited. Reproducing the fixture's
+  captured stderr showed: `an escalation reason requires a hard job
+  classification`. Its requested routine job was therefore rejected before
+  its dry-run command could be inspected; no live agent was started.
+- Unsetting the inherited hardness reason, job class, dispatch role, requested
+  effort, and review effort in addition to the model overrides makes that
+  isolated test pass. No workflow code or model policy was changed. A fresh
+  exact-head CI run follows this incident checkpoint with those variables
+  removed from its environment. The first failed manifest remains preserved.
+- The mathematical result remains the two obstruction-support lemmas and the
+  preserved target hole. The original B8 count and 26,509-second history are
+  retained; this bounded successor session is additional time, not a reset.
