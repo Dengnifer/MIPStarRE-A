@@ -1,24 +1,41 @@
 #!/usr/bin/env bash
-# Start a fresh codex main session in tmux session `qpbt` and brief it.
-# Expects /tmp/qpbt-main-handoff.md on this host. Idempotent-ish: refuses if
-# a codex TUI is still showing in the pane.
+# launch_qpbt_main.sh — RETIRED.  Use local/bin/main-session.sh.
+#
+# This script started a codex TUI in tmux `qpbt` with a hard-coded /goal line and pasted
+# /tmp/qpbt-main-handoff.md into it.  Three things made it wrong to keep:
+#   - it invoked `codex` with no model, effort or speed tier, so the main session ran at
+#     whatever the ambient default was;
+#   - its sibling main-session-astra-v3.sh `exec`'d an absolute ~/.local/bin/codex, bypassing
+#     the PATH shim and therefore the run's service_tier (2026-09-12: the owner switched to
+#     fast speed three times and the main session never received it);
+#   - it carried a goal and a handoff path inside the script, so the briefing lived in two
+#     places at once.
+#
+# local/bin/main-session.sh replaces all of it: model, effort, CODEX_HOME and speed come
+# from local/bin/run_mode.py get, and codex is invoked THROUGH the installed shim.  The goal
+# is set by the owner (or rendered by goal-keeper.sh from run_mode.py show), and the state
+# briefing is the run brief plus the persona, not a file in /tmp.
+#
+# To start the main session inside the tmux pane, from the repository root:
+#     tmux send-keys -t qpbt 'cd <repo> && local/bin/main-session.sh' Enter
+#
+# This stub stays only so an old crontab row, alias or note reaches the replacement instead
+# of failing silently.  It never starts a session.
 set -u
-S=qpbt
-if tmux capture-pane -p -t "$S" | grep -q "gpt-5.6-sol"; then
-  echo "codex still running in $S; not starting another"; exit 1
-fi
-tmux send-keys -t "$S" 'cd ~/MIPStarRE-qpbt && codex' Enter
-for _ in $(seq 1 90); do
-  tmux capture-pane -p -t "$S" | grep -q "Ask Codex" && break
-  sleep 2
-done
-tmux capture-pane -p -t "$S" | grep -q "Ask Codex" || { echo "TUI did not appear"; tmux capture-pane -p -t "$S" | tail -15; exit 1; }
-sleep 2
-tmux send-keys -t "$S" '/goal Formalize the quantum Pauli basis test in Lean 4 per the standing briefing at ~/.codex/prompts/goal.md; work the queue continuously; the only owner-gated control is MIPSTARRE_INFRA_OVERRIDE; when blocked on the owner, file a needs-owner issue and continue' Enter
-sleep 2
-tmux send-keys -t "$S" Enter
-sleep 4
-tmux load-buffer /tmp/qpbt-main-handoff.md && tmux paste-buffer -p -t "$S" && sleep 1 && tmux send-keys -t "$S" Enter
-sleep 20
-echo "--- pane ---"
-tmux capture-pane -p -t "$S" -S -30 | grep -v "^\s*$" | tail -18
+
+CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
+OWNER_BIN="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}"
+ROOT="${MIPSTARRE_REPO_ROOT:-}"
+if [ -z "$ROOT" ] && [ -r "$OWNER_BIN/repo-root" ]; then ROOT="$(cat "$OWNER_BIN/repo-root")"; fi
+if [ -z "$ROOT" ]; then ROOT="$HOME/MIPStarRE-qpbt"; fi
+
+cat >&2 <<EOF
+launch_qpbt_main.sh is retired (see results/telemetry/owner-tools/README.md).
+Start the main session with:
+
+    cd $ROOT && local/bin/main-session.sh
+
+which reads the model, effort, CODEX_HOME and speed tier from run_mode.py and goes through
+the installed PATH shim.  Nothing was started.
+EOF
+exit 2
