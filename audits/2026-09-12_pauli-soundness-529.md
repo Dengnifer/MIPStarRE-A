@@ -130,3 +130,54 @@ separately; exact-head CI and its status are recorded on the PR.
 The next gate is independent review of these auxiliary estimates after
 exact-head CI. Completion of #529 still requires source-faithful global-pair
 and extraction constructions and their application to the unchanged theorem.
+
+## Continuation on 2026-09-12
+
+Session `prover-529-20260912-03` resumed the preserved commit
+`3a269dd892be695123c19f7efd143cef0cce7979` in the same worktree. The primary
+registry records predecessor `prover-529-20260912-01`, thread
+`01a09404-79d8-78e2-b21a-1263d768ff97`, as failed after exhausted HTTP 503
+retries, with 1903 wall seconds and unknown usage. The independent attempt
+`prover-529-20260912-02` also failed, with 48 wall seconds and unknown usage.
+Neither unknown usage is zero. Thus the recorded wall subtotal, including
+the six prerequisite sessions above, is 7971 seconds before this continuation;
+the known token subtotal above remains only a lower bound. The dispatcher
+records this continuation separately; no cumulative counter is reset.
+
+The local main and all saved histories of `Test/Soundness.lean` still contain
+the target hole. Saved commit `4109e55aecca3e0b7f17e47fcf07d39624a31a9f`
+adds EPR projection and normalization results, but retains
+`exists_extractionWitness_ofGlobalPairWitness` as an obligation. Its remaining
+steps are correlation estimates for the swapped state and the total-Pauli
+measurement comparison. No new evidence discharges the global-pair
+construction or the documented classical-game domain and error comparisons.
+Those approaches were not restarted, and no divergent branch was copied.
+
+`Test/Soundness/Ancilla.lean` now constructs the isometry
+`J psi = psi tensor eta`, in the actual extraction register order `(AA')A''`,
+and proves `(M tensor I tensor I) J = J M` for every original operator `M`.
+It then constructs `phi = U J` from `U.adjoint * U = I` and proves the exact
+identity `(U (M tensor I tensor I) U.adjoint) phi = phi M`. This discharges
+the algebraic intertwining hypothesis of the preserved range-projection
+estimates for these maps. The proofs use the existing coordinate tensor norm
+and matrix-isometry API; no closeness, success, global-pair, or extraction
+hypothesis is introduced. The new blueprint support entry explicitly states
+the unit-ancilla and matrix-isometry conditions.
+
+The public `pauli_soundness` declaration remains byte-for-byte unchanged from
+the packet base. Its assumptions, quantifier order, fixed field model, error
+functional, and all three conclusions therefore retain the statement-integrity
+verdict above. This is an independently proved prerequisite, not a completed
+proof of `thm:pauli`. Its new constructions and lemmas have only `propext`,
+`Classical.choice`, and `Quot.sound` in their axiom closures; the target still
+contains `sorryAx`.
+
+PR #536 already preserves the earlier work. Its first CI run passed the Lean
+build and mathematical audits but failed workflow tests within blueprint
+synchronization because inherited `MIPSTARRE_HARDNESS_REASON` conflicted with
+routine fixture classifications. The continuation clears model, classification,
+and review overrides for publication and CI. Exact-head CI is recorded on the
+updated PR. The next gate remains independent review, which this author session
+does not launch. Full soundness additionally requires both upstream constructions,
+the zero-error endpoint, concrete state and measurement transport, Naimark
+compression back to the original strategy, and absorption of transfer constants.

@@ -125,6 +125,14 @@ including the two local placements on an arbitrary bipartite state.
 These estimates have no dependence on an assumed global polynomial-pair
 measurement or on an extraction theorem.
 
+The exact intertwining identity for adjoining a unit ancilla and applying a
+unitary is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/Ancilla.lean}. In the extraction register
+order, it constructs $J\psi=\psi\ot\eta$ and $\phi=UJ$, and proves
+$U(M\ot I\ot I)U^\dagger\phi=\phi M$ from $\|\eta\|=1$ and
+$U^\dagger U=I$. Thus this algebraic identity is available without a
+separate intertwining assumption for these explicitly constructed maps.
+
 Their application to the concrete swap unitaries, together with construction
 of the transformed state and its comparison estimates, remains a proof
 obligation. No such construction may be replaced by a bridge field, residual

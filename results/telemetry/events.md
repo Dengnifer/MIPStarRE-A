@@ -7642,3 +7642,14 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+## 2026-09-12 - Pauli soundness continuation and inherited CI environment
+
+- Session `prover-529-20260912-03` preserves predecessor commit `3a269dd8`
+  and PR #536. The preceding primary-account attempt failed after exhausted
+  HTTP 503 retries (1903 wall seconds, usage unknown); the separate second
+  attempt failed after 48 seconds with usage unknown. No history or budget
+  counter was reset. PR #536's previous blueprint-sync failure was in workflow
+  fixtures: inherited `MIPSTARRE_HARDNESS_REASON` conflicted with their routine
+  classifications. The retry clears invoking-model, classification, hardness,
+  and review-model settings for publication and CI; no workflow code is changed.

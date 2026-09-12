@@ -613,6 +613,38 @@ is discussed in \cite{gap:qpbt_extraction-transfer}.
   Intertwining gives $(I\ot N_a)Q=I\ot(\phi_{\mathrm B}M_a\phi_{\mathrm B}^\dagger)$.
 \end{proof}
 
+\begin{theorem}[Ancilla isometry and intertwining]
+  \label{thm:pauli-ancilla-intertwining-support}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry_matrix_apply}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry_intertwines}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry_matrix}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry_intertwines}
+  \leanok
+  Let $\eta\in\mathcal K\ot\mathcal L$ be a unit vector, and define
+  $J\colon\mathcal H\to(\mathcal H\ot\mathcal K)\ot\mathcal L$ by
+  $J\psi=\psi\ot\eta$, with the indicated reassociation of factors.
+  Then $J$ is an isometry and, for every operator $M$ on $\mathcal H$,
+  $(M\ot I\ot I)J=JM$.
+  If $U^\dagger U=I$ on the enlarged space, then $\phi=UJ$ is an isometry
+  and
+  \[
+    \bigl(U(M\ot I\ot I)U^\dagger\bigr)\phi=\phi M.
+  \]
+  These identities hold for arbitrary finite-dimensional spaces. They give
+  the exact intertwining relation used in the final soundness proof when
+  $\eta$ is the local EPR state and $U$ is the swap unitary.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The tensor norm gives $\|J\psi\|=\|\psi\|\|\eta\|=\|\psi\|$.
+  The operator $M$ acts on the first tensor factor, so
+  $(M\ot I\ot I)J\psi=J(M\psi)$.
+  Finally, $\phi^\dagger\phi=J^\dagger U^\dagger UJ=I$, and
+  $U(M\ot I\ot I)U^\dagger UJ=UJM$.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
