@@ -39,6 +39,11 @@
 #   5. The pre-push full build takes the machine-wide build lock ci.sh uses
 #      (DESIGN.md invariant 7); the v20 explicit changed-module build stays as
 #      belt-and-braces for modules outside the MIPStarRE.QPBT import closure.
+#   6. Both builds go through offload-build.sh: in full speed mode, and only
+#      then, they run on the chsh build farm, and they fall back to this host
+#      on ANY ssh or rsync failure.  A lane never fails because chsh is
+#      unreachable; the lane log always names the host that built.  The
+#      per-file `lake env lean` push gate stays on ghz.
 #
 # Markers: $CACHE_ROOT/watchdog/lanes/<N>.{done,needs-attention}, each naming
 # the tool version that wrote it.  A needs-attention marker's first line is
@@ -48,7 +53,8 @@
 # Environment: MIPSTARRE_CHECKOUT, MIPSTARRE_CACHE_ROOT, MIPSTARRE_LAKE_DATA,
 #   LANE_BRANCH (refresh an existing PR branch), SKIP_DISPATCH=1 (the worktree
 #   already holds the finished work), SKIP_REVIEW=1 (stacked PR),
-#   MIPSTARRE_LANE_SLOT_WAIT_S (default 1800), MIPSTARRE_REVIEW_CMD.
+#   MIPSTARRE_LANE_SLOT_WAIT_S (default 1800), MIPSTARRE_REVIEW_CMD,
+#   MIPSTARRE_OFFLOAD=0 (never use the chsh build farm, whatever the run mode).
 set -u
 
 P="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
@@ -73,6 +79,17 @@ BUILD_LOCK_WAIT_S="${MIPSTARRE_LANE_BUILD_LOCK_WAIT_S:-14400}"
 BUILD_LOCK_STALE_S="${MIPSTARRE_FULL_BUILD_LOCK_STALE_S:-10800}"
 DATA="${MIPSTARRE_LAKE_DATA:-/data/users/drx/mipstarre-cache}"
 REVIEW_CMD="${MIPSTARRE_REVIEW_CMD:-local/bin/review.sh}"
+
+# The chsh offload and its fallback rule, shared with ci.sh.
+LANE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -r "$LANE_DIR/offload-build.sh" ]; then
+  . "$LANE_DIR/offload-build.sh"
+else
+  offload_lake_build() { local label="$2"; shift 2
+    printf 'offload: %s built on ghz (no offload-build.sh in this checkout) host=ghz\n' "$label"
+    offload_local_build "$@"; }
+fi
+offload_local_build() { ( cd "$W" && timeout 2700 lake build "$@" ); }
 
 #: pr_open.py:37 — the one branch convention a lane may exist for.
 BRANCH_RE='^(codex/|claude/)?issue-([0-9]+)-([a-z0-9][a-z0-9-]*)$'
@@ -324,9 +341,21 @@ acquire_build_lock() {
 }
 release_build_lock() { [ -n "$HELD_LOCK" ] && rm -rf "$HELD_LOCK"; HELD_LOCK=""; }
 
+# The machine-wide lease is held across an offloaded build too: the artifacts
+# land in this worktree, and a local `lake build` of the same tree running
+# beside the offload is the one concurrency the build farm must not have.
+build_step() { # <label> <lake targets ...>
+  local label="$1" rc; shift
+  offload_lake_build "$W" "$label" "$@" >> "$STATE/$N.build.log" 2>&1
+  rc=$?
+  log "$(grep '^offload: ' "$STATE/$N.build.log" | tail -1)"
+  return "$rc"
+}
+
 acquire_build_lock || fail build-lock-timeout "could not take $BUILD_LOCK within ${BUILD_LOCK_WAIT_S}s"
 log "lake build MIPStarRE.QPBT before the push gate (build lock held)"
-( cd "$W" && timeout 2700 lake build MIPStarRE.QPBT > "$STATE/$N.build.log" 2>&1 ) || {
+: > "$STATE/$N.build.log"
+build_step "lane-$N" MIPStarRE.QPBT || {
   release_build_lock; fail build-failed "lake build before push failed (see $STATE/$N.build.log)"; }
 # v20 (2026-09-12): modules outside the MIPStarRE.QPBT import closure (e.g.
 # Combining.Points.Absorption, MarginalContraction) get no olean from the
@@ -337,7 +366,7 @@ CHANGED_MODS="$(git -C "$W" diff --name-only --diff-filter=ACMR github/main HEAD
   | grep -v -E '/Test/' | sed -e 's#/#.#g' -e 's#\.lean$##' | tr '\n' ' ')"
 if [ -n "$CHANGED_MODS" ]; then
   log "lake build of changed modules: $(printf '%s' "$CHANGED_MODS" | wc -w)"
-  ( cd "$W" && timeout 2700 lake build $CHANGED_MODS >> "$STATE/$N.build.log" 2>&1 ) || {
+  build_step "lane-$N-changed" $CHANGED_MODS || {
     release_build_lock; fail build-failed "lake build of changed modules failed (see $STATE/$N.build.log)"; }
 fi
 release_build_lock
