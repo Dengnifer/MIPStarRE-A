@@ -1247,3 +1247,4 @@
 {"ts": "2026-09-12T16:42:53+0900", "kind": "ci-build", "trigger": "ci.sh pr=251", "seconds": 78, "outcome": "success", "sha": "aa8ca301289df40599ec2fdf8c3bfa31dc49bb94", "note": "branch issue-242-controlled-unitary-algebra"}
 {"ts": "2026-09-12T16:42:57+0900", "kind": "ci-build", "trigger": "ci.sh pr=536", "seconds": 30, "outcome": "error", "sha": "b37ebc1faac601a5c2a8405fc4bdbb7f0f1359e7", "note": "branch issue-529-proof-pauli-soundness"}
 {"ts": "2026-09-12T16:43:25+0900", "kind": "ci-build", "trigger": "ci.sh pr=385", "seconds": 71, "outcome": "success", "sha": "ed6ddf6a0bc5f516ab9e5fa661288c68ec7536ed", "note": "branch issue-379-recover-subline-ordered-product"}
+{"ts": "2026-09-12T16:47:50+0900", "kind": "ci-build", "trigger": "ci.sh pr=541", "seconds": 31, "outcome": "success", "sha": "434ad161492395feac788bb412082f5be29ffc03", "note": "branch issue-537-canonical-point-imports"}
