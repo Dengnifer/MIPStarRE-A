@@ -2034,6 +2034,32 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{lemma}[Obstruction to absorbing the first combined-line estimate]
+	\label{lem:qld-combining-quarter-power-obstruction}
+	\lean{MIPStarRE.QPBT.not_exists_combining_quarter_power_bound}
+	\leanok
+	\uses{def:admissible}
+	There is no function $f:\mathbb R^2\to\mathbb R$ satisfying
+	$0\leq f(x,y)\leq C(x^r+y^s)$ on the closed nonnegative quadrant,
+	for constants $C\geq 1$ and
+	$r,s>0$, which satisfies
+	\[
+		\min\{1,m\eps^{1/4}\}\leq f(m^2\eps,md/q)
+	\]
+	for every admissible $(q,m,d)$ and every $\eps\geq0$.
+	This is a scalar obstruction to the first proof route in
+	Remark~\ref{rem:qld-4-13-source-defects}, not a counterexample to
+	Lemma~\ref{lem:qld-4-13}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and $\eps_n=m_n^{-4}$.
+	These parameters are admissible: $q_n=2^{6n+3}$ has odd exponent and
+	$m_n\mid q_n$. Both arguments of $f$ equal $m_n^{-2}$, so the assumed
+	polynomial upper bound tends to zero. But
+	$\min\{1,m_n\eps_n^{1/4}\}=1$ for every $n$, a contradiction.
+\end{proof}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
