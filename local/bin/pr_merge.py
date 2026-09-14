@@ -426,7 +426,8 @@ def check_dependencies(repo_root: Path, number: int, body: str,
                         or "no 'Closes #N' footer; nothing to depend on"))
 
 
-def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
+def run_gate(repo_root: Path, number: int, *, adjudicated: bool,
+             integration_base: str | None = None) -> dict:
     """Raise ``GateFailure`` unless the PR may merge; return the merge facts."""
     pr = gh_common.pr_view(number)
     state = pr.get("state")
@@ -449,17 +450,23 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     # Gate 2b — the head must contain the current base tip unless the base has
     # advanced only through allowlisted passive telemetry records.  CI and review
     # remain bound to the exact head.  Fetch first so "current" means GitHub's
-    # tip, not a stale local remote-tracking ref.
+    # tip, not a stale local remote-tracking ref.  Trains instead require the
+    # frozen integration base to remain unchanged, even for passive telemetry.
     if not git_ok(repo_root, "fetch", "github", base):
         raise GateFailure(f"gate 2b (fresh base): 'git fetch github {base}' failed; cannot "
                           "verify the branch is up to date with the base.")
-    if not head_is_fresh(repo_root, f"github/{base}", head_sha):
+    if integration_base is not None:
+        if base != "main" or git(repo_root, "rev-parse", "github/main") != integration_base:
+            raise GateFailure("gate 2b (train): main changed from the frozen integration base")
+    elif not head_is_fresh(repo_root, f"github/{base}", head_sha):
         base_tip = git(repo_root, "rev-parse", "--short", f"github/{base}", check=False)
         raise GateFailure(f"gate 2b (fresh base): {base} is at {base_tip} and the PR head "
                           f"{head_sha[:12]} neither contains it nor predates only tolerated "
                           "passive telemetry changes. Merge or rebase the base into the "
                           "branch, re-run CI and review on the new head, then merge.")
-    passed(f"gate 2b head is fresh against current {base} "
+    passed("gate 2b frozen integration base unchanged; combined-commit CI required"
+           if integration_base is not None else
+           f"gate 2b head is fresh against current {base} "
            "(ancestry or passive-telemetry-only move)")
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)

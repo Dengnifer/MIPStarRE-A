@@ -1055,6 +1055,43 @@ class MergeGateTests(LayerTestCase):
             with self.subTest(path=path):
                 self.assertFalse(pr_merge._is_tolerated_telemetry_path(path))
 
+    def test_train_accepts_frozen_base_with_combined_ci_required(self) -> None:
+        self._advance_main("local/train-base.py", "source before the train freezes")
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        self._arm()
+        output = io.StringIO()
+        with mock.patch.object(pr_merge, "head_is_fresh") as ordinary_freshness, \
+                mock.patch("sys.stdout", output):
+            gate = pr_merge.run_gate(self.repo, 7, adjudicated=False,
+                                     integration_base=frozen)
+        self.assertEqual(gate["head_sha"], self.head)
+        ordinary_freshness.assert_not_called()
+        self.assertIn("frozen integration base unchanged; combined-commit CI required",
+                      output.getvalue())
+        self.assertNotIn("ancestry or passive-telemetry-only move", output.getvalue())
+        self.assertFalse(any(call["method"] != "GET" for call in self.gh.calls()))
+
+    def test_train_rejects_telemetry_and_source_movement_after_freeze(self) -> None:
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        self._arm()
+        for path in ("results/telemetry/events.md", "local/train-base.py"):
+            with self.subTest(path=path):
+                self._advance_main(path, "base moved after the train froze")
+                with self.assertRaisesRegex(pr_merge.GateFailure,
+                                             "main changed from the frozen integration base"):
+                    pr_merge.run_gate(self.repo, 7, adjudicated=False,
+                                      integration_base=frozen)
+
+    def test_train_rejects_non_main_base(self) -> None:
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        _git(self.repo, "checkout", "-q", "-b", "release")
+        self.gh.route(r"^pulls/7$", {
+            "number": 7, "state": "open", "draft": False, "merged": False,
+            "head": {"sha": self.head, "ref": self.BRANCH}, "base": {"ref": "release"}})
+        with self.assertRaisesRegex(pr_merge.GateFailure,
+                                     "main changed from the frozen integration base"):
+            pr_merge.run_gate(self.repo, 7, adjudicated=False, integration_base=frozen)
+
     def test_freshness_rejects_mixed_telemetry_data_and_code(self) -> None:
         (self.repo / "results/telemetry/events.md").write_text(
             "allowed record\n", encoding="utf-8")

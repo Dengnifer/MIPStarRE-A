@@ -1059,6 +1059,37 @@ source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
 
+## 2026-09-09 - Reviewed merge trains (issue #502)
+
+**Trigger:** the 09:05Z meta decision in `results/telemetry/design-decisions.md`
+(D1, issue #502) records that each single-PR merge invalidates other refreshed
+heads. See the issue #502 development entry in `results/telemetry/events.md`.
+
+**Change:** add `pr_train.py`, a non-publishing integration mode in `ci.sh`,
+and a train-manifest check after `checked-push.sh` preflight. Reuse the existing
+member gates and CI steps; replace only individual-head base ancestry with
+mandatory combined-commit validation. Preserve exact-head independent review,
+dependency gates, checked fast-forward publication, and the full-build lock.
+CI step bodies stop on command failure; cache warming cannot start a nested
+full build. `issues-prs.md` documents the operator-owned invocation and recovery.
+
+**Expected effect:** two or more ready PRs share one integration build and CI
+run without losing a member's evidence or silently discarding accepted work.
+Activation remains subject to independent review and daemon-owner deployment.
+
+## 2026-09-09 - PR507 review repair: build coverage and publication outcomes
+
+**Trigger:** Canonical review `5154118210` on `e1dd7bb0`, findings F1-F3;
+see the issue #502 review-repair entry in `results/telemetry/events.md`.
+**Change:** Combined CI builds the full library and axiom audit in one locked
+invocation. Train names satisfy the external Lake-root validator. Ambiguous
+pushes retain unknown outcomes when reconciliation fails and recognize remote
+descendants containing the train. Outcomes are retained in runtime and telemetry.
+**Expected effect:** Cold publication has its root artifact, untouched downstream
+failures block publication, and operators receive no false refusal after an
+unresolved push. This is the authorized bounded repair of the original episode;
+deployment and independent review remain separate.
+
 ## 2026-09-09 - Simplify dispatcher worker reservations (#505)
 
 **Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
@@ -1123,3 +1154,13 @@ tools and unrecognized data remain protected. Any Lean, blueprint, code, mode,
 symlink, unknown-path or other non-allowlisted base change still requires
 refresh, exact-head CI and independent review; all other merge gates are
 unchanged.
+
+## 2026-09-09 - PR507 bounded refresh composition
+
+**Trigger:** main's priority recovery instruction for issue #502; see the
+`orc-502-20260909-03` entry in `results/telemetry/events.md`.
+**Change:** preserve the train's exact frozen-base condition while composing
+the reviewed ordinary-PR telemetry freshness predicate and PR506's step-failure
+explanation. No allowlist, member gate, publication, or cleanup rule changes.
+**Expected effect:** ordinary telemetry movement remains tolerated; any train
+base movement still refuses. Independent verification follows genuine green CI.

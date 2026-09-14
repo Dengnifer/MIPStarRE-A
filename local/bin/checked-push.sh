@@ -12,7 +12,7 @@ SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 usage() {
   cat <<'EOF'
-Usage: local/bin/checked-push.sh [--repo-root PATH] REMOTE LOCAL_REF:REMOTE_REF
+Usage: local/bin/checked-push.sh [--repo-root PATH] [--train-manifest PATH] REMOTE LOCAL_REF:REMOTE_REF
 
 Run .githooks/pre-push against one explicit branch ref, then push that ref.
 Both refs must use their full refs/heads/... names.
@@ -38,11 +38,14 @@ require_validation_checkout() {
 }
 
 REPO_ROOT="$SCRIPT_ROOT"
-if [ "${1:-}" = "--repo-root" ]; then
-  [ "$#" -ge 2 ] || die "--repo-root requires a path"
-  REPO_ROOT="$2"
-  shift 2
-fi
+TRAIN_MANIFEST=""
+while :; do
+  case "${1:-}" in
+    --repo-root) [ "$#" -ge 2 ] || die "--repo-root requires a path"; REPO_ROOT="$2"; shift 2 ;;
+    --train-manifest) [ "$#" -ge 2 ] || die "--train-manifest requires a path"; TRAIN_MANIFEST="$2"; shift 2 ;;
+    *) break ;;
+  esac
+done
 
 case "${1:-}" in
   --help|-h)
@@ -76,6 +79,7 @@ git -C "$REPO_ROOT" check-ref-format "$REMOTE_REF" >/dev/null ||
   die "invalid remote ref $REMOTE_REF"
 
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
+  [ -z "$TRAIN_MANIFEST" ] || die "a train cannot bypass checked publication"
   unset MIPSTARRE_EXPECTED_PUSH_TUPLE
   # The bypass skips validation, not the explicit one-ref publication boundary.
   exec git -C "$REPO_ROOT" -c push.followTags=false push --no-follow-tags \
@@ -136,6 +140,12 @@ CURRENT_LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}
 [ "$CURRENT_LOCAL_SHA" = "$LOCAL_SHA" ] ||
   die "local branch $LOCAL_REF changed during preflight"
 require_validation_checkout
+
+if [ -n "$TRAIN_MANIFEST" ]; then
+  python3 "$SCRIPT_ROOT/local/bin/pr_train.py" --verify-manifest "$TRAIN_MANIFEST" \
+    --expected-main "$REMOTE_SHA" --expected-head "$LOCAL_SHA" \
+    --expected-ref "$REMOTE_REF" || die "train changed during preflight"
+fi
 
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
 # Freeze the source object and atomically require the preflight remote tip.  The
