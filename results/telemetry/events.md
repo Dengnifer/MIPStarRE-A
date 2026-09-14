@@ -2602,6 +2602,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - exists_pasting_error is sorry-free with error (3C+19)(eta^(1/4) + delta^(1/8)), C the constant of the coarse commutator bound; the adopted statement (with eq:pasting-1-sym) stands. Two Fable math-fix sessions and eight Opus prover sessions over about ten hours, following the constant-explicit proof written into the paper-gap note. Commit e1289bd on the #201 branch (PR 205); publication tail launched.
 ## 2026-09-05T12:15Z — prop:ld-simultaneous-general-k proved (packet #210 complete)
 - exists_direct_ld_soundness is sorry-free: the general-k low-degree soundness via the NEEXP combining reduction (combined strategy, question law, value transport with constant 10, exact linearity m d / q, recovery (m+k) d / q, scalar absorption with a = 1e23 and b = 1/80000). Ten Opus sessions after the #196 math-fix refuted the coordinatewise sandwich route for k at least 2. Commit e1d8eaa on the #210 branch; publication tail launched (base #134 merged as PR 191).
+
 ## 2026-09-05T12:42Z — lane runner v17: post-merge silent-loss guard (issue #222 task 2)
 - After merging github/main the lane now lists every path present on main but absent in the result; unless a non-merge branch commit deleted it, the lane stops with needs-attention naming the paths. Merge daemon v8 and stack-watch v3 use v17; lanes already running on v16 finish on v16.
 ## 2026-09-05T12:52Z — lem:qld-sublines proved (sub-line witness, packet #118)
@@ -5838,6 +5839,28 @@ not actual commit/publication hooks. No productive session was killed.
   remain null rather than being inferred as zero latency. These are read-only
   cache artifacts, not selected-window occupancy, API-utilization, or runtime
   acceptance claims.
+
+## 2026-09-09 - PR213 historical-worktree merge repair
+
+Session `orc-116-20260909-01` inherited a pending merge of `a111c34ab3ca`
+into the historical preservation branch at `f1dc47039573`. PR213 already
+publishes `b04ced12caec` on its canonical branch and targets main; PR207 and
+PR298 are merged. The initial index and all conflicted working files are
+archived under `~/.cache/mipstarre-dev/sessions/orc-116-20260909-01-repair/`.
+The resolution preserves the completed expanded-line proofs, the published
+restriction module, incoming imports, and both incident-log additions.
+The owner-session conflict retains the incoming clock-reanchored records;
+the superseded rows remain in the archived index and original history, not
+as duplicate charges. No historical mathematical budget is reset.
+
+The first normal commit hook ran 616 tests and failed one model-policy
+fixture because this session's routing variables leaked into the fixture.
+That test passes with `MIPSTARRE_CODEX_MODEL`, `MIPSTARRE_JOB_CLASS`, and
+`MIPSTARRE_HARDNESS_REASON` unset for the command. Subsequent validation uses
+that process-local isolation, without changing account or service settings.
+An initial direct SeedFiber check also saw stale State artifacts; refreshing
+this worktree's private build cache made the unchanged incoming file pass.
+
 ## 2026-09-09 — Meta intervention: stalled "Space" main session replaced; detached-worker architecture reinstated (2026-09-09T03:15:13Z)
 - Owner report 2026-09-09 03:00Z: concurrency low and main without progress for five hours. Findings: last daemon/service merge
   PR 308 at 2026-09-08 04:53Z; forty-one open PRs; zero worker sessions; the main session (relay1 home, fan-out on, native worker

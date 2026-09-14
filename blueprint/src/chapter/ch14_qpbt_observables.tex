@@ -1642,7 +1642,7 @@ variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
-	\lean{MIPStarRE.QPBT.tauLineMeas, MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.tauLineMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1686,6 +1686,29 @@ variants.
 	In all cases
 	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$ is a
 	projective measurement.
+\end{definition}
+
+\begin{definition}[Product of strategy and ancillary line measurements]
+	\label{def:line-tau-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_effect_eq_lineTauMeas_postprocess}
+	\leanok
+	\uses{def:expanded-line-measurement}
+	For either player, $W\in\{X,Z\}$ and a line $\ell$, the product
+	measurement on the strategy register and one Pauli register has
+	separate outcomes $(f',f'')\in\deg_{md}(\ell)\times\deg_{md}(\ell)$
+	and effects
+	\[
+		N^{W,\ell}_{f',f''}
+		=M^{(\mathrm{Line},W),\ell}_{f'}\otimes\tau^{W,\ell}_{f''}.
+	\]
+	This auxiliary measurement retains the two polynomial outcomes in
+	Definition~\ref{def:expanded-line-measurement}. Tensor products
+	preserve positivity, and completeness of both factors gives
+	$\sum_{f',f''}N^{W,\ell}_{f',f''}=\Id$.
+	The expanded line measurement is its postprocessing by the addition
+	map $(f',f'')\mapsto f'+f''$.
 \end{definition}
 
 \begin{lemma}[Consistency of the expanded line measurements]
@@ -1759,7 +1782,7 @@ variants.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
+	\uses{def:expanded-line-measurement, def:line-tau-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1769,7 +1792,8 @@ variants.
 	Lemma~\ref{lem:qld-win-implications}), the Pauli projections
 	$\{\tau^{W,\ell}_{f''}\}$ are perfectly self-consistent between
 	registers $\mathsf{A}'$ and $\mathsf{A}''$, and the data processing
-	inequality (Lemma~\ref{fact:data-processing}). For
+	inequality (Lemma~\ref{fact:data-processing}) applied to the addition
+	postprocessing of Definition~\ref{def:line-tau-measurement}. For
 	item~\ref{eq:qld-comm-line-pt-cons}: for the outcomes $f'$ that
 	evaluate at $u$, insert the projection
 	$M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_u(\cdot)=f'(u)]}$ by
