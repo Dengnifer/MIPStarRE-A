@@ -39,7 +39,7 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
   rw [← hblock]
   simp only [Distribution.avgOver_map]
   rw [uniformDistribution_prod]
-  simp only [avgOver_prod]
+  simp only [SandwichProduct.avgOver_distribution_prod]
   rw [avgOver_comm, avgOver_comm (uniformDistribution (Fin L.m -> ScalarQ L))]
   apply congrArg
   funext block
@@ -61,7 +61,8 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
     have hmap := uniformDistribution_map_lineRepMap_add_smul direction
     have havg := congrArg (fun dist => avgOver dist
       (fun point => quantity (lineRepMap direction point) point)) hmap
-    rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
+    rw [Distribution.avgOver_map, uniformDistribution_prod,
+      SandwichProduct.avgOver_distribution_prod] at havg
     simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
   change avgOver (uniformDistribution (Fin L.m -> ScalarQ L)) (fun point =>
       value (LineDesc.diagonal (lineRepMap direction point) block.1 direction
