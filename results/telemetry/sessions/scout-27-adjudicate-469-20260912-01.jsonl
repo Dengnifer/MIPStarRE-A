@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a09428-d9ef-76f3-bc13-ff77cc25fc07"}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: a96cf8a8-e4e9-44be-8605-fbe46e7fb5f9)"}
+{"type":"error","message":"Reconnecting... 2/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: 0d466a6d-ce9a-4da5-8cdb-1d9ec5726aa8)"}
+{"type":"error","message":"Reconnecting... 3/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: eb36e178-9ec3-447e-9d66-4533509e66f3)"}
+{"type":"error","message":"Reconnecting... 4/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: 088cf83b-0c74-4f6f-a729-25c506e7c59f)"}
+{"type":"error","message":"Reconnecting... 5/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: cb6700b8-9531-4b08-a721-5e238a7a2a9b)"}
+{"type":"error","message":"unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: e3fe5624-7053-4b9d-88be-d73e327bebca"}
+{"type":"turn.failed","error":{"message":"unexpected status 503 Service Unavailable: Service temporarily unavailable, url: http://relay-us7.virvm.com:39479/responses, request id: e3fe5624-7053-4b9d-88be-d73e327bebca"}}
