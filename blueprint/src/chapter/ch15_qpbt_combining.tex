@@ -2230,6 +2230,78 @@ projective measurement whose outcomes are pairs of global polynomials.
 	the registers swapped yield \eqref{eq:qld-s-point-con-bob}.
 \end{proof}
 
+\begin{theorem}[Polynomial consistency from point comparisons]
+\label{thm:qld-polynomial-consistency-from-points}
+\lean{MIPStarRE.QPBT.direct_polynomial_consistency_le_point_bounds}
+\leanok
+This is an auxiliary estimate for the polynomial measurements in
+Lemma~\ref{lem:qld-4-7}. Let $(q,n,d,k)$ be directly indexed low-degree
+parameters, and let $A$ and $B$ be complete POVMs on two finite-dimensional
+spaces whose outcomes are $k$-tuples of individual-degree-$d$ polynomials in
+$n$ variables over $\F_q$. Let $Q_A^u,Q_B^u$ be complete POVMs with outcomes
+in $\F_q^k$, and let the bipartite state be normalized. Write $A^u,B^u$ for
+the evaluation of every component at $u$, and write
+$\operatorname{Cons}$ for the off-diagonal consistency defect, averaged over
+uniform $u$ when the measurements depend on $u$. If
+\[
+\operatorname{Cons}(A^u,Q_B^u)\leq\eta_A,\qquad
+\operatorname{Cons}(Q_A^u,B^u)\leq\eta_B,\qquad
+\operatorname{Cons}(Q_A^u,Q_B^u)\leq\delta_Q,
+\]
+then
+\[
+\operatorname{Cons}(A,B)
+\leq \eta_A+2\sqrt{\delta_Q+\eta_B}+\frac{nd}{q}.
+\]
+No projectivity assumption is required.
+\end{theorem}
+\begin{proof}
+\lean{MIPStarRE.QPBT.direct_poly_tuple_collision_le}
+\leanok
+The consistency comparison through $Q_B^u,Q_A^u$ bounds
+$\operatorname{Cons}(A^u,B^u)$ by
+$\eta_A+2\sqrt{\delta_Q+\eta_B}$. Distinct polynomial tuples differ in
+at least one component. The Schwartz--Zippel bound for that component gives
+collision probability at most $nd/q$ for the entire tuple. Summing the
+nonnegative bipartite outcome weights therefore bounds the full polynomial
+defect by the evaluated defect plus $nd/q$.
+\end{proof}
+
+\begin{theorem}[Consistency after ground compression]
+\label{thm:qld-compressed-polynomial-consistency}
+\lean{MIPStarRE.QPBT.direct_point_consistency_le_point_rejection}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.point_consistency_le}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.compressed_polynomial_consistency_le}
+\leanok
+This is an auxiliary estimate for the directly indexed strategy constructed
+from combined point and extended line measurements with errors $\delta_Q$
+and $\delta_L$. Its point readout maps wrong-format answers to the zero tuple.
+For any directly indexed strategy, the consistency defect of these readouts
+is at most the point/point rejection probability. For the constructed
+extended strategy it is therefore at most $\delta_Q$.
+
+Let $A,B$ be polynomial POVMs on the Naimark dilation of this strategy,
+with the two opposite point-consistency defects at most $\eta_A,\eta_B$.
+If $J_A,J_B$ insert the distinguished ancillary coordinates and
+$A_g^0=J_A^*A_gJ_A$, $B_g^0=J_B^*B_gJ_B$, then on the original expanded
+bipartite state,
+\[
+\operatorname{Cons}(A^0,B^0)
+\leq\eta_A+2\sqrt{\delta_Q+\eta_B}+\frac{(2m+2)d}{q}.
+\]
+In applying direct soundness, both point-comparison errors retain the
+passing error $3(\sqrt{\delta_Q+\delta_L}+md/q)$.
+\end{theorem}
+\begin{proof}
+\leanok
+Different point readouts force rejection; wrong-format answers also reject.
+The established point/point rejection estimate gives the bound $\delta_Q$.
+Ground compression preserves every bipartite correlation on the padded state
+and commutes with outcome postprocessing. Apply
+Theorem~\ref{thm:qld-polynomial-consistency-from-points} to the compressed
+POVMs with $n=2m+2$ and $k=1$.
+\end{proof}
+
 % This remark records a defect of the source argument; it is not a statement
 % from the paper.
 \begin{remark}[Divisibility obstruction in the application of the classical
