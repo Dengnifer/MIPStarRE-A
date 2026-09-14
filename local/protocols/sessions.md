@@ -220,8 +220,12 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6: main selects Astra Ultra after the #26 availability report,
-supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
+`issues-prs.md` section 6: main selects Astra Ultra and supplies cumulative
+per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
+Main decides and records nonconverged project outcomes. Pinned owner inbox #500
+is only for permission whose risk extends beyond project development, and any
+such blocker uses section 6's at-most-ten-line plain-language format with ids
+continuing from B11. Issue #26 is archived and receives no new comments.
 
 ## 3. Naming
 

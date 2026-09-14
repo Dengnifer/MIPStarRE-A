@@ -217,9 +217,11 @@ keeps its path-traversal rejection for externally sourced citations.
 location); `MIPSTARRE_GITHUB_REPO` overrides the `owner/name` otherwise read
 from the `github` remote; `MIPSTARRE_FIX_CAP` (default 5) bounds `autofix.sh`'s
 own loop only — the merge gate does not read it — and is operator-tunable with
-the reason recorded in `results/telemetry/events.md`, unlike
-`MIPSTARRE_INFRA_OVERRIDE` (the pre-commit budget), the one owner-gated control
-in the layer. `MIPSTARRE_LLM_ENABLED` and
+the reason recorded in `results/telemetry/events.md`. The pre-commit budget
+guard remains mandatory; main may authorize `MIPSTARRE_INFRA_OVERRIDE=1` only
+through a recorded project-scope decision. Neither control creates an owner
+blocker unless the proposed action independently crosses the permissions
+boundary in section 6. `MIPSTARRE_LLM_ENABLED` and
 `LOCAL_REVIEW_ENABLED` keep kill-switch semantics (DESIGN.md:73-75).
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only
@@ -232,12 +234,49 @@ issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
 c8f1999): read-only research data, never edited or read as active input.
 
-## 6. Owner inbox and mathematical-gap escalation
+## 6. Owner inbox and mathematical-gap decisions
 
-Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. Following the availability report on #26 and the September 6
-owner decision, main selects Astra Ultra for the mathematical-gap lane through
+Pinned issue #500 is the permissions-only owner inbox. Post there only when an
+action needs the owner's permission because its risk extends beyond the
+project's development, for example changing the owner's files, the machine or
+its accounts, spending money, or acting outside this repository. A decision
+whose only risk is failing to finish the project is main's to make and record
+in `results/telemetry/design-decisions.md` and on #27, never a blocker. Routine
+reports, watchdog and poller notes, and progress also go to #27. Issue #26 is
+archived and receives no new comments.
+
+Use one #500 comment per blocker. The visible part is at most ten lines in
+plain words and has this form; ids continue from B11.
+
+```markdown
+<!-- owner-inbox id=B<n> -->
+<!-- owner-inbox-status=open -->
+### BLOCKER B<n> — <five-word title>
+What is stuck: one line.
+Options: A one line. B one line. (C one line.)
+Recommendation: one line.
+Reply: DECISION B<n>: <letter>
+```
+
+The reply letter must be one of the offered alternatives (`A`, `B`, or `C`).
+Put any additional detail in a folded `<details>` block. The first HTML comment
+is an immutable identity marker; pass it unchanged as the marker argument on
+both creation and resolution:
+
+```bash
+python3 local/bin/gh_common.py ensure-pr-comment 500 \
+  "<!-- owner-inbox id=B<n> -->" --body-file BLOCKER.md
+```
+
+`BLOCKER.md` starts with the separate `<!-- owner-inbox-status=open -->` line,
+not the identity marker. After an owner reply, update that same body file to
+`<!-- owner-inbox-status=closed -->`, add `RESOLVED B<n>`, and rerun the command
+with the unchanged identity marker. This PATCHes the original comment instead
+of creating a second comment for the blocker.
+
+A source statement found to be mathematically false does not create an owner
+blocker. Astra availability has been reported, so main selects Astra Ultra for
+the mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
@@ -267,13 +306,13 @@ is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. Main decides mathematical
 corrections with the preceding evidence and independent review, including
 definition/game corrections that preserve the intended source semantics;
-changing the project goal is outside that authority. If the current authorized
+main must not silently change the stated project goal. If the current authorized
 budget expires, stop that lane and record the attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Use #26 only for an owner-only
-permission, credential, access or scope/resource grant; mathematical difficulty
-alone is not an owner decision. An already-posted #26 item waits for the owner
-unless the owner explicitly returns it to main.
+note. Do not reset attempts or working time. Main then decides and records the
+project outcome from that evidence; mathematical difficulty alone is not an
+owner decision. Use #500 only when the next action independently crosses the
+owner-permission boundary stated above.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the

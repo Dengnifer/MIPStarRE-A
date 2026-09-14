@@ -16,9 +16,23 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   a named mathfix assignment under `issues-prs.md` section 6 through external
   dispatch. Keep its shared attempt
   and working-time budget across continuations. Main adjudicates mathematical
-  and workflow questions with evidence; #26 is for owner-only permissions,
-  credentials, access or scope grants. An item already posted there waits for
-  the owner unless the owner explicitly returns that item to main.
+  and workflow questions with evidence. A decision whose only risk is failing
+  to finish the project is main's to make and record in
+  `results/telemetry/design-decisions.md` and #27. Pinned owner inbox #500 is
+  only for permission whose risk extends beyond the project's development,
+  such as changing the owner's files, the machine or its accounts, spending
+  money, or acting outside this repository. Issue #26 is archived; post no new
+  comments there.
+- Put one blocker in each #500 comment. Above any folded details, use at most
+  ten plain-language lines: `BLOCKER B<n>`, one line saying what is stuck,
+  lettered one-line options, one recommendation, and the literal reply
+  `DECISION B<n>: <letter>`, where the letter is one offered alternative (`A`,
+  `B`, or `C`). Ids continue from B11. Key both creation and resolution with the
+  unchanged `<!-- owner-inbox id=B<n> -->` marker passed to
+  `gh_common.py ensure-pr-comment`; keep `<!-- owner-inbox-status=open -->` as a
+  separate body field. After the owner replies, update that same comment, set
+  the body field to `<!-- owner-inbox-status=closed -->`, and add
+  `RESOLVED B<n>`.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -27,8 +41,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for decisions only the human owner can make.
-  Never push to GitHub anything the gate has not passed.
+  packets on #27. Never push to GitHub anything the gate has not passed.
 
 ## Parallelism
 
@@ -155,17 +168,19 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 
 - Budget: a workflow change defaults to ≤2 hours wall time and ≤1000 changed
   lines.  Reaching either limit means stop, commit what stands, record the
-  state in telemetry, and escalate to the owner with a concrete question —
-  never push through the ceiling.  The pre-commit hook checks the line budget
-  per commit; the episode total is the PR diff, which the review checks.
+  state in telemetry, and make a concrete recorded main decision before any
+  override — never push through the ceiling silently.  The pre-commit hook
+  checks the line budget per commit; the episode total is the PR diff, which
+  the review checks.
 - Hooks stay under 60 seconds; heavier checks belong to CI steps.
 - No new abstraction layers (API clients, lock managers, frameworks) and no
-  rewrite of working, reviewed code without an explicit owner directive.
+  rewrite of working, reviewed code without an explicit recorded main decision.
   Prefer the smallest diff that satisfies the brief; prefer `gh` and the REST
   API over reimplementation; prefer configuring GitHub once over re-verifying
   its settings on every operation.
 - After a workflow change merges, the next dispatched work item MUST be
-  mathematics.  Two consecutive workflow-only episodes require owner approval.
+  mathematics.  Two consecutive workflow-only episodes require a recorded main
+  decision.
 - Queue discipline (events.md 2026-09-03, the eight-hour stall): at the start
   of every turn, ensure each exact-head CI-green and review-green PR is
   available to the merge daemon before starting new work. A workflow-layer PR
@@ -180,16 +195,16 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- `MIPSTARRE_INFRA_OVERRIDE` requires an explicit owner grant. Runtime
-  permission, credential, account and allocation changes also follow the
-  current owner authorization. Documented project-level gate remedies —
+- `MIPSTARRE_INFRA_OVERRIDE` requires an explicit recorded main decision.
+  Runtime permission, credential, account and allocation changes still follow
+  the current owner authorization. Documented project-level gate remedies —
   `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — are yours to exercise with the reason recorded in
-  `results/telemetry/events.md`.  If you are genuinely blocked on the owner
-  (credentials, access, permissions or the scope budget), post a
-  BLOCKER comment on the pinned Owner inbox issue #26 with your draft adjudication;
-  park it and continue the queue without idling on a question.
+  `results/telemetry/events.md`. If an action crosses the owner-permission
+  boundary above, post the prescribed BLOCKER comment on pinned owner inbox
+  #500; park that dependent action and continue the queue without idling on
+  the question.
 
 ## GitHub (the workflow authority as of 2026-09-01)
 
