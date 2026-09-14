@@ -898,6 +898,137 @@ assembled by Fourier averaging.
 	difference would force them to be equal, contradicting $f\ne g$.
 \end{proof}
 
+\begin{lemma}[Formalization support for affine evaluation on a nondegenerate line]
+	\label{lem:nondegenerate-affine-evaluation}
+	\lean{MIPStarRE.QPBT.evalOpt_affine_parameter_of_direction_ne_zero}
+	\lean{MIPStarRE.QPBT.polynomial_ofFn_eval_eq_evalCoefficient}
+	\leanok
+	\uses{def:line, def:ideg-deg-polynomials}
+	Let $\ell \subseteq \F_q^m$ be a line with base point $b$ and direction
+	$v \ne 0$, and let $f$ be a polynomial of degree at most $c$ given by its
+	coefficient vector. For every $t \in \F_q$ the evaluation of $f$ at the
+	point $b + tv$ of $\ell$ is defined and equals
+	$\sum_{i=0}^{c} f_i t^i$. The same coefficient convention agrees with
+	evaluation of the univariate polynomial having those coefficients.
+	This is a formalization-only auxiliary for the Schwartz--Zippel step in
+	the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	A nonzero direction determines the affine parameter of a point of $\ell$
+	uniquely: if $b + tv = b + sv$ then $(t-s)v = 0$, hence $t = s$. Therefore
+	the evaluation at $b + tv$ is the value of the coefficient polynomial at
+	$t$. The second identity expands the polynomial as a sum of monomials.
+\end{proof}
+
+\begin{lemma}[Formalization support for affine parameter resampling]
+	\label{lem:line-point-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_uniform_lineRepMap_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_aLinePointDist_resample_parameter,
+		MIPStarRE.QPBT.avgOver_dLinePointDist_resample_parameter,
+		MIPStarRE.QPBT.avgOver_linePointDist_resample_parameter}
+	\leanok
+	\uses{def:line-point-dist}
+	Let $F$ be a real-valued function of a line and a point of $\F_q^m$, and
+	write $b_\ell$ and $v_\ell$ for the base point and the direction of a line
+	$\ell$. Then
+	\[
+		\E_{(\ell,x)} F(\ell,x)
+		= \E_{(\ell,x)} \E_{t} F(\ell, b_\ell + t v_\ell),
+	\]
+	where $(\ell,x)$ is drawn from the line-point distribution
+	(Definition~\ref{def:line-point-dist}) and $t$ is uniform on $\F_q$. The
+	identity holds separately for the axis-parallel and the diagonal component
+	of that mixture, with no restriction on the direction.
+\end{lemma}
+\begin{proof}
+	\leanok
+	For a uniformly distributed point $x$ and a fixed direction $v$, the
+	canonical representative of the coset $x + \F_q v$ is unchanged by
+	translation along $v$, and $x$ is uniform on that coset. Hence replacing
+	$x$ by the representative shifted by an independent uniform $t$ leaves the
+	joint law of the pair unchanged; this gives the axis-parallel and the
+	diagonal case, and for a zero direction both sides coincide. The
+	line-point identity is the corresponding convex combination of the two.
+\end{proof}
+
+\begin{lemma}[Formalization support for weighted collision mass on nondegenerate lines]
+	\label{lem:nondegenerate-weighted-line-collision}
+	\lean{MIPStarRE.QPBT.evalOpt_uniform_parameter_collision_le}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_weighted_collision_le}
+	\leanok
+	\uses{def:line-point-dist, def:ideg-deg-polynomials}
+	Let $f \ne g$ be polynomials of degree at most $c$ on a line $\ell$ with
+	direction $v \ne 0$. Under a uniform affine parameter $t$ on $\F_q$,
+	\[
+		\Pr_{t}\bigl[f(b_\ell + t v) = g(b_\ell + t v)\bigr] \le \frac{c}{q}.
+	\]
+	Consequently, for every weight $w$ on lines with $w(\ell) \ge 0$ for all
+	$\ell$,
+	\[
+		\E_{(\ell,x)}\bigl[\bone{v_\ell \ne 0}\, w(\ell)\,
+			\bone{f(x) = g(x)}\bigr]
+		\le \frac{c}{q}\,
+			\E_{(\ell,x)}\bigl[\bone{v_\ell \ne 0}\, w(\ell)\bigr],
+	\]
+	the expectation being over the line-point distribution
+	(Definition~\ref{def:line-point-dist}). The restriction to nonzero
+	directions is part of the assertion: the corresponding unrestricted
+	inequality is false for the degenerate fibers of that mixture.
+	This is a formalization-only auxiliary for the Schwartz--Zippel step in
+	the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:coefficient-polynomial-agreement,
+		lem:nondegenerate-affine-evaluation,
+		lem:line-point-parameter-resampling}
+	By Lemma~\ref{lem:nondegenerate-affine-evaluation} the two evaluations
+	along $\ell$ are the values of the coefficient polynomials of $f$ and $g$
+	at $t$, and by Lemma~\ref{lem:coefficient-polynomial-agreement} these
+	agree for at most $c$ of the $q$ values of $t$, which gives the first
+	bound. For the second, resample the point by an independent uniform affine
+	parameter using Lemma~\ref{lem:line-point-parameter-resampling}, and apply
+	the first bound fiberwise, multiplied by the nonnegative weight; on
+	fibers with zero direction both integrands vanish.
+\end{proof}
+
+\begin{lemma}[Formalization support for collision mass on a fixed nondegenerate line]
+	\label{lem:nondegenerate-fiber-line-collision}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_fiber_collision_le}
+	\leanok
+	\uses{def:line-point-dist, def:ideg-deg-polynomials}
+	Let $\ell_0$ be a line of $\F_q^m$ with direction $v_{\ell_0} \ne 0$ and
+	let $f \ne g$ be polynomials of degree at most $c$. Then
+	\[
+		\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\,\bone{f(x) = g(x)}\bigr]
+		\le \frac{c}{q}\,
+			\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\bigr],
+	\]
+	the expectation being over the line-point distribution
+	(Definition~\ref{def:line-point-dist}). Both sides are unnormalized
+	masses; when the fiber mass on the right is positive, dividing by it gives
+	the conditional collision probability at most $c/q$ that
+	Lemma~\ref{lem:pasting} takes as its hypothesis with $\eta = c/q$. The
+	nonzero-direction hypothesis on $\ell_0$ is part of the assertion.
+	This is a formalization-only auxiliary for the Schwartz--Zippel step in
+	the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}); the
+	transport to the product law and to the register presentation of the
+	pasting lemma is separate.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:nondegenerate-weighted-line-collision}
+	Apply Lemma~\ref{lem:nondegenerate-weighted-line-collision} with the
+	nonnegative weight $w(\ell) = \bone{\ell = \ell_0}$. Since
+	$v_{\ell_0} \ne 0$, the indicator $\bone{v_\ell \ne 0}$ is redundant
+	against $\bone{\ell = \ell_0}$ on both sides, which turns the weighted
+	inequality into the stated one.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
