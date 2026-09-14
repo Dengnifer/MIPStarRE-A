@@ -1356,3 +1356,4 @@
 {"ts": "2026-09-14T17:42:47+0900", "kind": "ci-build", "trigger": "ci.sh pr=559", "seconds": 248, "outcome": "success", "sha": "c6f2a2e1e6e3c637b9acffc79ae1061a086f5131", "note": "branch issue-551-umbrella-imports"}
 {"ts": "2026-09-14T17:42:54+0900", "kind": "ci-build", "trigger": "ci.sh pr=430", "seconds": 162, "outcome": "success", "sha": "b6a08a4cf0a9a2644edd3a0108e183db4e88e732", "note": "branch issue-425-option-linepoint-marginal"}
 {"ts": "2026-09-14T17:43:14+0900", "kind": "ci-build", "trigger": "ci.sh pr=483", "seconds": 244, "outcome": "success", "sha": "aaebda0359b9e1add6294aaabea01b74640e77af", "note": "branch issue-482-line-fiber-collision"}
+{"ts": "2026-09-14T17:44:15+0900", "kind": "ci-build", "trigger": "ci.sh pr=288", "seconds": 223, "outcome": "success", "sha": "337e1f9b4df2134a5f0fdf66a98aca24e59149f3", "note": "branch issue-283-block-specialization"}
