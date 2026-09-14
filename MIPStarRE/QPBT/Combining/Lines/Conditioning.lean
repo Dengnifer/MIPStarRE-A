@@ -12,10 +12,8 @@ bounds apply there, and the discarded probability is restored explicitly.
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The construction is recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512; the
-source and completed-answer distinctions remain as documented in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions are
+documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -28,7 +26,8 @@ noncomputable section
 
 /-- Indicator averages express the positive-fiber collision predicate of
 `lem:pasting`, paper `06_nonlocal_games_and_mipstar.tex:504-525`.
-This formalization-only adapter is applied below with a proved fiber estimate. -/
+This formalization-only auxiliary lemma is applied below with the proved fiber
+estimate. -/
 theorem collision_bound_of_fiber_averages {X Y₁ Y₂ R₂ Γ₂ : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
     [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
@@ -321,10 +320,6 @@ theorem ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned
     (fun sample => (S.combinedLineMeasurement p2.side sample.1.1 sample.2.1).postprocess
       (fun polys => (evalOpt sample.1.1 sample.1.2 polys.1,
         evalOpt sample.2.1 sample.2.2 polys.2)))
-
-/-! ## Unequal-dimensional bipartite transport -/
-
-open DistanceCalculus in
 
 end
 

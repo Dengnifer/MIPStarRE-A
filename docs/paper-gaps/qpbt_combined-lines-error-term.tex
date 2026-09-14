@@ -205,7 +205,7 @@ proof and its necessary dependencies were selectively recovered for
 \ghissue{512} from commit
 \path{6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa}, retained at
 \path{0f4ef05370350f4017439ebd839ef0561f13130f}. See
-\path{audits/2026-09-12-issue512-saved-proof-recovery.md} for the
+\path{audits/2026-09-12_issue512-saved-proof-recovery.md} for the
 signature audit, axiom closure, and cumulative cost accounting.}
 
 \section{The source assertion and the two routes}
@@ -395,7 +395,13 @@ established error form is linked from the separate formalization-support node
 \path{lem:qld-4-13-established}, whose declaration
 \path{exists_extendedLinesWitness_established} has the explicit form
 $C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
-convention that constants are absorbed into $\poly$.  Both proofs are open.
+convention that constants are absorbed into $\poly$.  The two declarations now
+have different statuses.  The printed error form is still unproved: the proof of
+\path{exists_extendedLinesWitness} is the tracked obligation, and
+\path{lem:qld-4-13} carries no formalization mark.  The established error form
+is proved: \path{exists_extendedLinesWitness_established} has a complete proof,
+and the support node \path{lem:qld-4-13-established} carries both a
+statement-level and a proof-level mark.
 
 Neither declaration is source-shaped beyond its error form, and this note does
 not claim otherwise.  Both return the carrier \path{ExtendedLinesWitness},
@@ -407,9 +413,13 @@ distribution instantiated at dimension $2m+2$, and compares both sides of its
 two consistency displays on the completed answer alphabet
 $\F_q\cup\{\bot\}$, whose extra outcome collects the line polynomials that
 admit no evaluation at the sampled point, in place of the source's answer
-summation over $a\in\F_q$.  Neither blueprint node therefore carries a
-statement-level formalization mark, and relating the two formulations is the
-transport obligation of that note.
+summation over $a\in\F_q$.  The source-labelled node \path{lem:qld-4-13}
+therefore carries no formalization mark.  The support node
+\path{lem:qld-4-13-established} does carry one, because its blueprint statement
+displays all three replacements --- the directly indexed question carrier and
+law, the completed answer comparison, and the established error form --- so what
+is marked there is the auxiliary assertion and not the source lemma.  Relating
+the two formulations remains the transport obligation of that note.
 
 \section{Conclusion}
 

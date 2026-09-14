@@ -10,10 +10,8 @@ comparisons used by the X-Z-X line construction.
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The construction is recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512; the
-source and completed-answer distinctions remain as documented in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions are
+documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT

@@ -13,10 +13,8 @@ original line-point law.
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The construction is recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512; the
-source and completed-answer distinctions remain as documented in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions are
+documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -103,7 +101,7 @@ theorem avgOver_le_restrict_add_discarded_mass {Sample : Type*} [DecidableEq Sam
     mul_le_of_le_one_right (dist.nonnegative sample) (hunit sample)) _
 
 /-- Under the unchanged diagonal line-point law, zero projected directions have
-probability at most the inverse field size: the last raw direction coordinate must
+probability at most the inverse field size: the last sampled direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. This proof-only bound
 supports the collision restriction in issue #118. -/

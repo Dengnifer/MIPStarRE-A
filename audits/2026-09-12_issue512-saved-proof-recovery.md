@@ -1,3 +1,20 @@
+---
+title: "Issue 512: recovery of the established extended-line construction"
+date: 2026-09-12
+purpose: >
+  Records the recovery of the proof of `exists_extendedLinesWitness_established`
+  from a saved commit, its statement-integrity comparison with the source
+  lemma, the per-module provenance of the recovered declarations, and the
+  verification and cost accounting a reviewer needs to check that the recovery
+  introduced no new mathematical content.
+status: active
+track: qpbt
+kind: proof-recovery-audit
+origin: "issue #512"
+issue: "#512"
+pr: "#549"
+---
+
 # Issue 512: Recovery of the established extended-line construction
 
 The proof of `exists_extendedLinesWitness_established` was recovered from
@@ -7,7 +24,40 @@ worktree based at `ae124f8f09ee002444ac5b9711822c0f1daae142`.
 The preceding receipt is `prover-512-20260912-01.last.md` in the local
 session archive. This is recovery of that proof, not a new mathematical attempt.
 
-## Construction and Provenance
+This audit is the reader-facing record of that provenance. The Lean module and
+theorem docstrings carry only mathematical source and gap references; the
+commit-level recovery history of each module is kept here instead.
+
+## Scope
+
+The recovered declarations and the modules holding them:
+
+- `MIPStarRE/QPBT/Combining/Lines/{Sampling,PointComparison,Conditioning,
+  Construction}.lean`
+- `MIPStarRE/QPBT/Combining/{XEvalDeficit,SubLineXDeficit}.lean`
+- `MIPStarRE/QPBT/Combining/ExtendedLines/{Measurement,Overlap,Estimates}.lean`
+- the target `exists_extendedLinesWitness_established` in
+  `MIPStarRE/QPBT/Combining/Apply.lean`
+
+Each of these modules was recovered from the saved commit named above. The
+blueprint counterpart is the formalization-support node
+`lem:qld-4-13-established` in `blueprint/src/chapter/ch15_qpbt_combining.tex`;
+the paired-line consistency theorem it rests on is recorded in
+`lem:combined-line-measurement-consistency` and the supporting nodes beside it.
+
+## Source of Truth
+
+The source is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`,
+`lem:qld-xz-lines` (882-961), `lem:qld-4-10` (689-709), and
+`lem:qld-4-13` with its first proof route (1020-1034, 1118-1246).
+The auxiliary blueprint entry is `lem:qld-4-13-established`. The divergences
+between that entry and the printed lemma are governed by
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+## Findings
+
+### Construction and provenance
 
 Only declarations needed by the construction were recovered. Existing proofs
 of the combined point witness, subline law, Z deficits, polynomial absorption,
@@ -32,7 +82,10 @@ wholesale. The recovered material is divided into modules below 1000 lines.
 - `ExtendedLines/Measurement`, `Overlap`, and `Estimates` recover the
   conditional law, affine polynomial construction, degree support, and
   two-placement real-part overlap estimates from saved `Apply.lean`.
-  The existing numerical lemmas in `Claims` are exported for reuse.
+- The two scalar estimates `rpow_quarter_nonneg` and `sqrt_deficit_bound_le`,
+  which the recovered estimates share with the claims module, are stated in
+  `Combining/ErrorBounds.lean` with the other formalization-only scalar
+  bounds; neither is specific to Claims 17-1 through 17-3.
 - The saved established-error construction is inlined into the target.
   Its universal outer constant remains `1`. No narrower helper replaces the
   current `exists_extendedLinesWitness_established_ofPointsWitness`: that
@@ -40,12 +93,7 @@ wholesale. The recovered material is divided into modules below 1000 lines.
   helper first fixes a polynomially controlled point family. Its signature
   and proof hole are left unchanged.
 
-The source is `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`,
-`lem:qld-xz-lines` (882-961), `lem:qld-4-10` (689-709), and
-`lem:qld-4-13` with its first proof route (1020-1034, 1118-1246).
-The auxiliary blueprint entry is `lem:qld-4-13-established`.
-
-## Statement Integrity
+### Statement integrity
 
 Paper assumptions: an admissible parameter tuple and a projective strategy
 passing the Pauli basis test with error epsilon; the preceding construction
@@ -76,7 +124,28 @@ and recovered state. Its SHA-256, excluding ` := by`, is
 `fd0305b7aa316707f14f917a4974499ece4c6223a67eec4d3f05fd1445c5a02a`.
 The witness, parameter, carrier, law, and error definitions were not changed.
 
-## Verification and Accounting
+## Required Action
+
+No follow-up is required for the recovery itself. The obligations it leaves
+open are the pre-existing ones, and they are tracked outside this audit:
+
+- transport of the question carrier and line-point law, in
+  `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`;
+- conversion of the completed answer comparison to the source summation over
+  `a` in `F_q`, including zero-direction singleton lines, in
+  `docs/paper-gaps/qpbt_combined-lines-error-term.tex`;
+- the printed error form `poly(m^2 * epsilon, md/q)`, whose declaration
+  `exists_extendedLinesWitness` remains unproved;
+- the unchanged proof hole of
+  `exists_extendedLinesWitness_established_ofPointsWitness` and the complex
+  Claim 17-2 obligation.
+
+A reader checking this audit should confirm that the source-labelled entries
+`lem:qld-xz-lines` and `lem:qld-4-13` still carry no formalization mark, and
+that the marks introduced by the recovery sit only on support nodes whose
+statements display their restrictions.
+
+## Validation
 
 Focused Lean checks passed for the recovered modules and the target under
 the worktree's actual Lean v4.32.0 toolchain. A recursive audit traversed

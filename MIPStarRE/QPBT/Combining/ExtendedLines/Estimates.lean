@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Combining.ExtendedLines.Overlap
-import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.ErrorBounds
 
 
 /-!
@@ -12,8 +12,7 @@ and corrected error convention retain their existing meanings.
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1118-1246`,
-blueprint `lem:qld-4-13-established`. Recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512.
+blueprint `lem:qld-4-13-established`.
 See `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` for the remaining
 comparison with the printed source theorem.

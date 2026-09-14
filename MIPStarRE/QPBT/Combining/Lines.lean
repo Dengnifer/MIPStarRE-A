@@ -58,8 +58,8 @@ the named construction obligations are recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
 The witness below uses `S.combinedLineMeasurement` explicitly. Its consistency
-is proved by `combined_line_measurement_consistency`, recovered for issue #512;
-see `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+is proved by `combined_line_measurement_consistency`; see
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -99,7 +99,7 @@ line construction, as the preceding source lemma supplies those points.
 
 The proof constructs the line witness with `T := S.combinedLineMeasurement`.
 The line consistency is proved by `combined_line_measurement_consistency`,
-from paper lines 942--961, recovered for issue #512 and documented in
+from paper lines 942--961, documented in
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 Downstream arguments requiring the construction use that consistency theorem
 and the same explicit record, rather than an unspecified existential witness.

@@ -1032,13 +1032,51 @@ assembled by Fourier averaging.
 	It is a factor of the defining sandwich, so the sandwich vanishes.
 \end{proof}
 
+\begin{lemma}[Formalization support: the restored defect of the paired-line
+	measurement]
+	\label{lem:combined-line-restored-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
+	\leanok
+	\uses{lem:qld-comm-line-cons, lem:pasting,
+		def:concrete-paired-line-measurement, def:consistency}
+	This formalization-only auxiliary statement isolates the pasting estimate
+	behind Lemma~\ref{lem:combined-line-measurement-consistency} before the
+	polynomial error functions are composed. There are a constant $c\ge1$ and a
+	function $f(x,y)=\poly(x,y)$ with the following property. Let a projective
+	strategy pass with error $\eps$, let a joint point family have consistency
+	error $\delta_Q$, and let $\mu$ be the probability that the sampled $X$
+	direction is nonzero. For every directed opposite placement, the consistency
+	defect between the joint point family and the evaluated POVM
+	$T^{\ell_X,\ell_Z}$, averaged over two independent line-point samples of the
+	unconditioned law, is at most
+	\[
+		\mu\, f\!\left(\frac{md}{q},\,
+			\frac{8\delta_Q+c\,(\eps+\sqrt{\eps})}{\mu}\right)
+		+\frac{1}{2q}.
+	\]
+	Both sides of the comparison use the completed answer alphabet described in
+	Lemma~\ref{lem:combined-line-measurement-consistency}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-line-cons, lem:pasting,
+		def:concrete-paired-line-measurement}
+	Condition the line-point law on the sampled $X$ direction being nonzero.
+	On that event the point-to-line comparisons of
+	Lemma~\ref{lem:qld-comm-line-cons} supply the collision and consistency
+	inputs of Lemma~\ref{lem:pasting} for the sandwich
+	$T^{\ell_X,\ell_Z}$, with the conditional error obtained by dividing by
+	the retained mass $\mu$; this gives the first summand. The discarded
+	event has probability at most $1/q$ and contributes a defect at most one,
+	so restoring the original law costs at most $1/(2q)$.
+\end{proof}
+
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
 	\leanok
-	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
-		def:concrete-paired-line-measurement, def:consistency}
-	This is a Lean-only construction theorem. Fix a polynomially small
+	\uses{lem:qld-4-10, def:concrete-paired-line-measurement, def:consistency}
+	This is a formalization-only auxiliary theorem. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
 	such that for every projective strategy passing with error $\eps$ and
@@ -1052,11 +1090,39 @@ assembled by Fourier averaging.
 	\]
 	has evaluated consistency defect at most $\delta_P(\eps,md/q)$ with that
 	joint point family, averaged over two independent line-point samples,
-	for every directed opposite placement. The line-error function is chosen
-	after $\delta_Q$ and its polynomial bound. This isolates the consistency
-	part of the preceding construction while retaining its defining
-	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
+	for every directed opposite placement.
+
+	The two measurements are compared on the completed answer alphabet
+	$(\F_q\cup\{\bot\})^2$. An outcome $(f_X,f_Z)$ of $T^{\ell_X,\ell_Z}$ is
+	postprocessed to the pair of evaluations of $f_X$ and $f_Z$ at the two
+	sampled points, with $\bot$ recorded in a coordinate whose polynomial
+	admits no evaluation at its point. The joint point family is extended to
+	the same alphabet by the inclusion $\F_q\subseteq\F_q\cup\{\bot\}$ in each
+	coordinate, so it assigns the zero operator to every answer having $\bot$
+	in a coordinate. The quantity bounded is therefore the full off-diagonal
+	defect on $(\F_q\cup\{\bot\})^2$: pairs in which a line evaluation is
+	undefined while the point family answers in $\F_q$ contribute to it, and
+	it is not the summation over answers in $\F_q$ alone.
+
+	The line-error function is chosen after $\delta_Q$ and its polynomial
+	bound. This isolates the consistency part of the preceding construction
+	while retaining its defining measurement; see
+	\cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-line-restored-defect,
+		thm:qld-conditioned-polynomial-bound}
+	Lemma~\ref{lem:combined-line-restored-defect} bounds the defect of the
+	two measurements under the unconditioned line-point law by
+	$\mu f(md/q,(8\delta_Q(\eps)+c(\eps+\sqrt{\eps}))/\mu)+md/q$, since the
+	retained mass satisfies $\mu\in[1/2,1]$ and $1/(2q)\le md/q$.
+	Theorem~\ref{thm:qld-conditioned-polynomial-bound} converts that
+	expression into a single function $\delta_P(\eps,md/q)=\poly(\eps,md/q)$
+	of the two arguments, chosen after $\delta_Q$ and its polynomial bound.
+	The unit bound on the consistency defect of normalized POVMs covers the
+	parameter ranges in which the composed expression exceeds one.
+\end{proof}
 
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
@@ -2013,6 +2079,98 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{example}[The paired-line construction given a joint point family]
+	\label{lem:combined-lines-given-points}
+	\lean{MIPStarRE.QPBT.exists_combinedLinesWitness_ofPointsWitness}
+	\leanok
+	\uses{lem:combined-line-measurement-consistency,
+		def:concrete-paired-line-measurement,
+		lem:concrete-paired-line-degree-support}
+	This formalization-only auxiliary statement displays its point family as an
+	explicit hypothesis and is therefore not a formalization of
+	Lemma~\ref{lem:qld-xz-lines}, whose statement quantifies the point family
+	existentially. Fix a polynomially small function $\delta_Q(\eps)$. There is
+	a function $\delta_P(\eps,md/q)=\poly(\eps,md/q)$ such that for every
+	projective strategy passing with error $\eps$ and every joint point family
+	with consistency error $\delta_Q(\eps)$, the POVM $T^{\ell_X,\ell_Z}$ of
+	Definition~\ref{def:concrete-paired-line-measurement} has the two axis-degree
+	properties and consistency defect at most $\delta_P(\eps,md/q)$ with that
+	point family.
+	The linked declaration is quarantined by its conditional name: it is recorded
+	here, in a separate formalization-support node that displays the point-family
+	assumption, and Lemma~\ref{lem:qld-xz-lines} links neither it nor any
+	statement-level formalization mark.
+\end{example}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-line-measurement-consistency,
+		lem:concrete-paired-line-degree-support}
+	The three components are
+	Lemma~\ref{lem:concrete-paired-line-degree-support} for the two axis-degree
+	properties and Lemma~\ref{lem:combined-line-measurement-consistency} for the
+	consistency bound, assembled on the explicitly given point family.
+\end{proof}
+
+\begin{lemma}[Formalization support: the paired subline overlap]
+	\label{lem:subline-joint-overlap}
+	\lean{MIPStarRE.QPBT.subline_joint_overlap_near_one_at}
+	\leanok
+	\uses{lem:qld-sublines, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3,
+		def:combine-map}
+	There is a constant $c>0$ such that, for every projective strategy with
+	error $\eps$, every joint point family with error $\delta_Q$, every paired
+	line family with error $\delta_P$, every subline witness, and every directed
+	opposite placement, the average paired subline overlap differs from $1$ by at
+	most
+	\[
+		c\left(\delta_Q^{1/2}+\sqrt{m}\,
+			\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr)\right).
+	\]
+	This is the first-route estimate of the proof of
+	Lemma~\ref{lem:qld-4-13}, stated for both opposite placements. It compares
+	real parts of overlaps; it does not assert the complex modulus comparisons of
+	Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3} over the source
+	distribution, which remain separate and uncertified. See
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-sublines, def:combine-map}
+	Chain the paired-to-ordered overlap gap, the removal of the $X$ factor, and
+	the near-one estimate for the remaining $Z$ term, each taken over the
+	directly indexed subline law, and collect the resulting quarter powers with
+	the scalar estimate of that chaining.
+\end{proof}
+
+\begin{lemma}[Formalization support: the extended-line measurement of a subline
+	witness]
+	\label{lem:extended-line-measurement-support}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extended_consistencyDefect_le}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_axis_degree}
+	\leanok
+	\uses{lem:qld-sublines, def:combine-map, def:consistency,
+		def:ideg-deg-polynomials}
+	Let a subline witness and a paired line family be given, and let the extended
+	line measurement be the conditional average of the paired-line POVMs along
+	the sublines of an extended line, pushed forward by the combining map. Two
+	properties hold. First, on the completed answer alphabet its consistency
+	defect with the zero-extended joint point family, taken over the directly
+	indexed extended line-point law, is at most $1$ minus the average paired
+	subline overlap, for both directed opposite placements. Second, on an
+	extended axis line it has no outcome of degree exceeding $d$ in the axis
+	variable.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-sublines, def:combine-map}
+	The first property is the identification of a consistency defect with one
+	minus the corresponding overlap for a probability law and normalized POVMs,
+	applied to the extended measurement and the zero-extended point family. The
+	second follows because the axis closure of the subline witness keeps each
+	conditioned sample on an axis line, where the degree support of the paired
+	line POVM and the combining map give the bound.
+\end{proof}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
@@ -2048,14 +2206,24 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
-		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
+	\uses{lem:qld-4-10, lem:qld-sublines, lem:combined-lines-given-points,
+		lem:subline-joint-overlap, lem:extended-line-measurement-support,
+		thm:qld-combining-polynomial-bound}
 	The formal construction conditions the directly indexed subline law on
 	the extended line and averages the combined polynomial outcomes of the
-	constructed $X$-$Z$-$X$ line measurement. The real-part overlap estimates
-	for both opposite placements give a bound of the form
-	$m \cdot \poly(\eps, md/q)$, with the unit bound on consistency handling
-	large errors. This proves the stated directly indexed auxiliary.
+	constructed $X$-$Z$-$X$ line measurement. The point family is the one
+	supplied by Lemma~\ref{lem:qld-4-10}; applied to it, the conditional
+	construction of~\ref{lem:combined-lines-given-points} produces the
+	paired line family, so that construction enters here as a formalization
+	auxiliary with its point family already fixed, not as a certification of
+	Lemma~\ref{lem:qld-xz-lines}. The two properties of
+	Lemma~\ref{lem:extended-line-measurement-support} give the degree support
+	and reduce both consistency displays to the paired subline overlap, which
+	Lemma~\ref{lem:subline-joint-overlap} estimates for both opposite
+	placements; Theorem~\ref{thm:qld-combining-polynomial-bound} collects the
+	resulting quarter powers into the form $m\cdot\poly(\eps,md/q)$, with the
+	unit bound on consistency handling large errors. This proves the stated
+	directly indexed auxiliary.
 	Applying it to the source statement remains conditional
 	on transporting the question space and distribution and on converting the
 	completed answer comparison, including zero-direction singleton lines, to
