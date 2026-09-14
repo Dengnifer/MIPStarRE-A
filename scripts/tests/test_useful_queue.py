@@ -14,6 +14,20 @@ sys.path.insert(0, str(REPO_ROOT / 'local/bin'))
 import useful_queue as queue
 HEAD, PARENT = 'a' * 40, 'b' * 40
 
+class QueueRetirementTests(unittest.TestCase):
+    def test_retired_entrypoints_have_no_side_effects(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with mock.patch.object(queue.subprocess, 'Popen') as launch:
+                self.assertEqual(queue.main(['--run', '--watch', '5']), 4)
+                with self.assertRaisesRegex(ValueError, 'retired'):
+                    queue.Supervisor(root, root)
+                with self.assertRaisesRegex(ValueError, 'retired'):
+                    queue.execute(root, root, 'packet')
+                launch.assert_not_called()
+            self.assertEqual(list(root.iterdir()), [])
+
+@unittest.skip('Historical useful-queue scenarios; entrypoints retired by #505')
 class QueueTests(unittest.TestCase):
     def patch(self, target, name, **kwargs):
         return self.stack.enter_context(mock.patch.object(target, name, **kwargs))
