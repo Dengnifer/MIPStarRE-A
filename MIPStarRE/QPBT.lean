@@ -77,6 +77,7 @@ import MIPStarRE.QPBT.Extraction.EncodingSupport
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.Unitary
+import MIPStarRE.Quantum.ControlledUnitary
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
@@ -86,6 +87,11 @@ set_option linter.style.header false
 
 This aggregate module provides the QPBT algebraic, game-theoretic, and test
 declarations.
+
+`MIPStarRE.Quantum.ControlledUnitary` is re-exported here rather than from the
+`MIPStarRE.Quantum` umbrella: its statements live in the `MIPStarRE.Quantum`
+namespace, but it imports QPBT material, and the foundational quantum umbrella
+must stay free of any QPBT or LDT dependency.
 
 ## References
 
