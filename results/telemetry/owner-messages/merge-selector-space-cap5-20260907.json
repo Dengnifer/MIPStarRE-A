@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-09-07T16:02:26.635946+00:00",
+  "previous_pid": 1354901,
+  "pid": 2104266,
+  "script": "/home/drx/.cache/mipstarre-dev/owner-tools/merge-service-space-cap5-review-fix-20260907.py",
+  "script_sha256": "c31105c736bc985fb5c682a196e06f242e79bb0ea057d0e39d626a5693c0e8a1",
+  "log": "/home/drx/.cache/mipstarre-dev/logs/merge-service-space-cap5-review-fix-20260907.log",
+  "shared_lock": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.lock",
+  "shared_journal": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.jsonl",
+  "interval_seconds": 300,
+  "tests": {
+    "tests_run": 17,
+    "failures": 0,
+    "baseline_failed_assertions": 45
+  },
+  "change": "Adapt the existing canonical merge selector to owner-confirmed Space cap5/native3",
+  "unchanged": [
+    "canonical pr_merge.py authority",
+    "review independence",
+    "freshness",
+    "clean worktree",
+    "fix locks",
+    "external0"
+  ]
+}

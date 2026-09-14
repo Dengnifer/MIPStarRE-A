@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Algebra.Coefficients
 import MIPStarRE.QPBT.Algebra.FieldBasis
 import MIPStarRE.QPBT.Algebra.Lines
 import MIPStarRE.QPBT.Games.CondLinear
@@ -686,15 +687,6 @@ instance (P : LdParams) : Inhabited (LdAnswer P) :=
 
 noncomputable instance (P : LdParams) : Fintype (LdAnswer P) :=
   Fintype.ofEquiv (LdAnswerCode P) (ldAnswerEquiv P).symm
-
-/-- Evaluation of a coefficient tuple at a field element.  This is the
-representative convention used by the line answers in blueprint
-`def:ld-win-predicate`, paper origin
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:31-391`.
--/
-def evalCoefficient {K : Type*} [Semiring K] {n : ℕ}
-    (c : Fin n → K) (t : K) : K :=
-  ∑ i : Fin n, c i * t ^ i.val
 
 /-- Check that an answer has the constructor prescribed by its question type;
 Lean encoding of the rejection clause in blueprint

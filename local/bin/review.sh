@@ -41,7 +41,7 @@
 #   MIPSTARRE_TRUSTED_REF      git ref the reviewer personas are read from
 #                              (default: main).  Never the branch under review.
 #   MIPSTARRE_REVIEW_MODEL     codex model for the code review
-#                              (required: gpt-6-astra)
+#                              (auto: routine Sol, justified hard Astra)
 #   MIPSTARRE_PROSE_MODEL      codex model for the blueprint prose review
 #                              (default: MIPSTARRE_REVIEW_MODEL)
 #   MIPSTARRE_CACHE_ROOT        runtime state root (default ~/.cache/mipstarre-dev)
@@ -52,8 +52,10 @@
 #                              citation map (default 30000)
 #   MIPSTARRE_REVIEW_TIMEOUT   reviewer safety timeout in seconds (default 10800)
 #   MIPSTARRE_REVIEW_EFFORT    ultra (required, default)
-#   MIPSTARRE_NATIVE_REVIEW_ROOT  root thread servicing native review requests
-#   MIPSTARRE_NATIVE_REVIEW_AUTHORS comma-separated author thread IDs (required for native)
+#   MIPSTARRE_NATIVE_REVIEW_ROOT
+#   MIPSTARRE_NATIVE_REVIEW_AUTHORS
+#                              retired legacy routing variables; ignored for
+#                              current reviews. Unset both before operation.
 #   MIPSTARRE_GITHUB_REPO      owner/repo override for gh_common.py
 #
 set -euo pipefail
@@ -83,8 +85,17 @@ GH_COMMON="$BIN_DIR/gh_common.py"
 CACHE="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 TRUSTED_REF="${MIPSTARRE_TRUSTED_REF:-main}"
 DISPATCH="$ROOT/local/bin/dispatch.sh"
-REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-${MIPSTARRE_CODEX_MODEL:-gpt-6-astra}}"
+REVIEW_MODEL="${MIPSTARRE_REVIEW_MODEL:-auto}"
 PROSE_MODEL="${MIPSTARRE_PROSE_MODEL:-$REVIEW_MODEL}"
+REVIEW_JOB_CLASS="${MIPSTARRE_REVIEW_JOB_CLASS:-independent_review}"
+REVIEW_HARDNESS_REASON="${MIPSTARRE_REVIEW_HARDNESS_REASON:-}"
+REVIEW_POLICY_ARGS=(--role reviewer --job-class "$REVIEW_JOB_CLASS")
+[ -z "$REVIEW_HARDNESS_REASON" ] ||
+  REVIEW_POLICY_ARGS+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
+REVIEW_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+  --model "$REVIEW_MODEL" --field model)" || exit 2
+PROSE_MODEL="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+  --model "$PROSE_MODEL" --field model)" || exit 2
 LOCK_WAIT="${MIPSTARRE_REVIEW_LOCK_WAIT:-1800}"
 DIFF_MAX_LINES="${MIPSTARRE_DIFF_MAX_LINES:-4000}"
 CITATION_MAX_BYTES="${MIPSTARRE_CITATION_MAX_BYTES:-30000}"
@@ -279,22 +290,17 @@ resolve_worktree() {
 }
 
 # run_agent <role> <sandbox> <worktree> <persona-path> <task-file>
-#           <standalone-prompt> <context-file> <out-file> <model>
+#           <context-file> <out-file> <model>
 #
-# All codex invocations go through local/bin/dispatch.sh when it exists, so the
-# session lands in results/telemetry/sessions.jsonl (DESIGN.md, "Agent
-# sessions").  The fallback is a direct codex exec with a loud warning.
+# All codex invocations go through local/bin/dispatch.sh, so the session lands
+# in results/telemetry/sessions.jsonl (DESIGN.md, "Agent sessions").
 run_agent() {
   local role="$1" sandbox="$2" wt="$3" persona="$4" taskfile="$5"
-  local standalone="$6" ctx="$7" out="$8" model="$9"
+  local ctx="$6" out="$7" model="$8"
   local dlog="$out.dispatch.log" task_text last rc=0
+  model="$(python3 "$BIN_DIR/model_policy.py" "${REVIEW_POLICY_ARGS[@]}" \
+    --model "$model" --effort "$REVIEW_EFFORT" --field model)" || return 4
   task_text="$(cat "$taskfile")"
-
-  if [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ]; then
-    python3 "$BIN_DIR/native_review.py" request "$CACHE" "$ROOT" "$HEAD_SHA" \
-      "$wt" "$standalone" "$out" "$PR_NUM" "$REVIEW_TIMEOUT" >"$dlog"
-    return $?
-  fi
 
   if [ -x "$DISPATCH" ]; then
     local args
@@ -302,6 +308,8 @@ run_agent() {
           --worktree "$wt" --sandbox "$sandbox"
           --persona "$persona" --persona-ref "$TRUSTED_REF"
           --effort "$REVIEW_EFFORT")
+    args+=(--job-class "$REVIEW_JOB_CLASS")
+    [ -z "$REVIEW_HARDNESS_REASON" ] || args+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
     # The bounded citation map goes first so dispatch.sh's aggregate attachment
     # cap cannot let a large diff starve it from the reviewer context.
     if [ -s "$BLUEPRINT_CITATION_MAP" ]; then
@@ -364,12 +372,31 @@ run_agent() {
 
 FORCE_REVIEW=0
 DRY_RUN=0
+RESUME_NATIVE=0
+RESUME_NATIVE_REQUEST=""
+RESUME_NATIVE_PROSE_REQUEST=""
 PR_ARG=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --force-review) FORCE_REVIEW=1 ;;
     --dry-run)      DRY_RUN=1 ;;
+    --resume-native-request)
+      [ $# -ge 2 ] || die "--resume-native-request requires a request path"
+      [ "$RESUME_NATIVE" -eq 0 ] || die "--resume-native-request may be given only once"
+      [ -n "$2" ] || die "--resume-native-request requires a nonempty request path"
+      RESUME_NATIVE=1
+      RESUME_NATIVE_REQUEST="$2"
+      shift
+      ;;
+    --resume-native-prose-request)
+      [ $# -ge 2 ] || die "--resume-native-prose-request requires a request path"
+      [ -z "$RESUME_NATIVE_PROSE_REQUEST" ] ||
+        die "--resume-native-prose-request may be given only once"
+      [ -n "$2" ] || die "--resume-native-prose-request requires a nonempty request path"
+      RESUME_NATIVE_PROSE_REQUEST="$2"
+      shift
+      ;;
     -h|--help)      sed -n '2,49p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*)             die "unknown option: $1" ;;
     *)
@@ -379,7 +406,11 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-[ -n "$PR_ARG" ] || die "usage: $PROG <pr-number> [--force-review] [--dry-run]"
+[ -n "$PR_ARG" ] ||
+  die "usage: $PROG <pr-number> [--force-review] [--dry-run]" \
+    "[--resume-native-request REQUEST]"
+[ -z "$RESUME_NATIVE_PROSE_REQUEST" ] || [ "$RESUME_NATIVE" -eq 1 ] ||
+  die "--resume-native-prose-request requires --resume-native-request"
 
 command -v python3 >/dev/null 2>&1 || die "python3 is required"
 command -v git >/dev/null 2>&1 || die "git is required"
@@ -389,6 +420,19 @@ command -v git >/dev/null 2>&1 || die "git is required"
 if [ "${LOCAL_REVIEW_ENABLED:-}" = "false" ]; then
   log "LOCAL_REVIEW_ENABLED=false; skipping review of PR $PR_ARG"
   exit 0
+fi
+if [ "$RESUME_NATIVE" -eq 1 ]; then
+  [ "$DRY_RUN" -eq 0 ] || die "--resume-native-request cannot be combined with --dry-run"
+  [ -z "${MIPSTARRE_QUEUE_TICKET:-}" ] || die "queued reviews cannot resume a native request"
+  [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ] ||
+    die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_ROOT"
+  [ -n "${MIPSTARRE_NATIVE_REVIEW_AUTHORS:-}" ] ||
+    die "--resume-native-request requires MIPSTARRE_NATIVE_REVIEW_AUTHORS"
+elif [ -n "${MIPSTARRE_NATIVE_REVIEW_ROOT:-}" ] ||
+     [ -n "${MIPSTARRE_NATIVE_REVIEW_AUTHORS:-}" ]; then
+  warn "legacy native-review variables are retired and ignored;" \
+    "unset MIPSTARRE_NATIVE_REVIEW_ROOT and MIPSTARRE_NATIVE_REVIEW_AUTHORS"
+  unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS
 fi
 
 # ------------------------------------------------------------- resolve the PR
@@ -482,7 +526,9 @@ fi
 
 # ---------------------------------------------------------------------- lock
 LOCK_DIR="$CACHE/locks/review-$PR_NUM.lock"
-acquire_lock "$LOCK_DIR" "$LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
+RESUME_LOCK_WAIT="$LOCK_WAIT"
+[ "$RESUME_NATIVE" -eq 0 ] || RESUME_LOCK_WAIT=0
+acquire_lock "$LOCK_DIR" "$RESUME_LOCK_WAIT" "review pr=$PR_NUM sha=$HEAD_SHA"
 
 # A fix in flight rewrites the very worktree the reviewer reads.  Concurrency
 # keys differ on purpose (per-PR for reviews, per-branch for fixes), so this
@@ -529,7 +575,12 @@ fi
 # Runtime artefacts live under the cache root, never in the repository
 # (DESIGN.md:37): $RUN_ROOT/<sha>/ holds the scratch of one run, and the lane
 # ledgers land next to it as <sha>-{code,prose,combined}.md.
-RUN_DIR="$RUN_ROOT/$HEAD_SHA"
+PROMPT_CONTEXT_DIR="$RUN_ROOT/$HEAD_SHA"
+RUN_DIR="$PROMPT_CONTEXT_DIR"
+if [ "$RESUME_NATIVE" -eq 1 ]; then
+  # Rebuild the expected prompts without overwriting their canonical bound copies.
+  RUN_DIR="$(mktemp -d "$RUN_ROOT/$HEAD_SHA-resume.XXXXXX")"
+fi
 mkdir -p "$RUN_DIR"
 ROUND_JSON="$RUN_DIR/pr-reviews.json"
 ghc pr-reviews "$PR_NUM" >"$ROUND_JSON" 2>/dev/null ||
@@ -575,6 +626,25 @@ sys.exit(any(row.get('commit_id') == sys.argv[2] and
 PY
     die "queued review already has publication evidence; adoption required"
 fi
+if [ "$RESUME_NATIVE" -eq 1 ]; then
+  [ "$ROUND" -le 4 ] || die "native review resume reached the four-round cap"
+  ghc latest-statuses "$HEAD_SHA" >"$RUN_ROOT/statuses.json" ||
+    die "native review resume cannot recheck exact-head evidence"
+  [ "$(json_get "$RUN_ROOT/statuses.json" 'local-ci/summary.state')" = success ] ||
+    die "native review resume lost green exact-head CI"
+  [ -z "$(json_get "$RUN_ROOT/statuses.json" 'local-review/summary.state')" ] ||
+    die "native review request was already consumed: exact-head summary evidence exists"
+  if python3 - "$ROUND_JSON" "$PR_NUM" "$HEAD_SHA" <<'PY'
+import json, sys
+rows, pr, head = json.load(open(sys.argv[1])), sys.argv[2], sys.argv[3]
+marker = f"<!-- mipstarre-review pr={pr} head={head} -->"
+sys.exit(0 if any(row.get('commit_id') == head and marker in (row.get('body') or '')
+                  for row in rows) else 1)
+PY
+  then
+    die "native review request was already consumed: exact-head review evidence exists"
+  fi
+fi
 
 MERGE_BASE="$(git -C "$ROOT" merge-base "$BASE" "$HEAD_SHA" 2>/dev/null || true)"
 [ -n "$MERGE_BASE" ] || die "no merge base between '$BASE' and $HEAD_SHA"
@@ -592,6 +662,17 @@ sanitize_to "$RUN_DIR/diff.patch" "$RUN_DIR/diff.sanitized.txt" "$DIFF_MAX_LINES
 
 TOUCHES_BLUEPRINT=0
 if grep -q '^blueprint/' "$RUN_DIR/files.txt"; then TOUCHES_BLUEPRINT=1; fi
+if [ "$RESUME_NATIVE" -eq 1 ]; then
+  if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
+    [ -n "$RESUME_NATIVE_PROSE_REQUEST" ] ||
+      die "blueprint review resume requires --resume-native-prose-request"
+    [ "$RESUME_NATIVE_REQUEST" != "$RESUME_NATIVE_PROSE_REQUEST" ] ||
+      die "code and prose resume requests must be distinct"
+  else
+    [ -z "$RESUME_NATIVE_PROSE_REQUEST" ] ||
+      die "prose resume request supplied for a diff without blueprint changes"
+  fi
+fi
 
 WORKTREE="$(resolve_worktree "$BRANCH")"
 # The reviewer also reads worktree FILES, not just the diff: dirty bytes could
@@ -701,7 +782,7 @@ PY
   done
   return 1
 }
-if [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
+if [ "$RESUME_NATIVE" -eq 0 ] && [ "$FORCE_REVIEW" -eq 0 ] && carry_forward; then
   CARRIED_FROM="$(cat "$RUN_ROOT/$HEAD_SHA-carried-from")"
   CARRIED_MD="$RUN_ROOT/$HEAD_SHA-carried.md"
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -782,7 +863,7 @@ this head SHA.
   cite a diff path:line or broken cross-file contract. Do not mine telemetry or
   caches; report truncation honestly and treat diff.patch as authoritative.
 - The diff under review is attached as untrusted data, and the full patch is on
-  disk at $RUN_DIR/diff.patch.  Read the checkout freely: references/ldt-paper/,
+  disk at $PROMPT_CONTEXT_DIR/diff.patch.  Read the checkout freely: references/ldt-paper/,
   blueprint/src/chapter/, AGENTS.md, docs/project_conventions.md and
   docs/CONTRIBUTING.md §5 (the review checklist you are applying, unchanged by
   the move to GitHub-native records).
@@ -1156,8 +1237,27 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-SPARSE_WORKTREE="$WORKTREE"; git -C "$WORKTREE" sparse-checkout set --no-cone '/*' '!/results/telemetry/sessions/' 2>/dev/null ||
-  die "could not exclude transcript corpus from reviewer worktree"
+if [ "$RESUME_NATIVE" -eq 0 ]; then
+  SPARSE_WORKTREE="$WORKTREE"
+  git -C "$WORKTREE" sparse-checkout set --no-cone '/*' '!/results/telemetry/sessions/' 2>/dev/null ||
+    die "could not exclude transcript corpus from reviewer worktree"
+fi
+
+# Reuse the same trust validator for each completed lane; it checks both the
+# original bound prompt and the independently rebuilt expected prompt.
+accept_native_lane() {
+  local request="$1" kind="$2" out="$3" model="$4"
+  local native_args=(accept "$request" "$out"
+    --cache "$CACHE" --repo "$ROOT" --head "$HEAD_SHA" --worktree "$WORKTREE"
+    --prompt "$PROMPT_CONTEXT_DIR/$kind-standalone.md"
+    --rebuilt-prompt "$RUN_DIR/$kind-standalone.md" --pr "$PR_NUM"
+    --root-thread "$MIPSTARRE_NATIVE_REVIEW_ROOT"
+    --authors "$MIPSTARRE_NATIVE_REVIEW_AUTHORS" --job-class "$REVIEW_JOB_CLASS"
+    --model "$model" --effort "$REVIEW_EFFORT")
+  [ -z "$REVIEW_HARDNESS_REASON" ] ||
+    native_args+=(--hardness-reason "$REVIEW_HARDNESS_REASON")
+  python3 "$BIN_DIR/native_review.py" "${native_args[@]}" >"$out.dispatch.log"
+}
 
 # The two review lanes are independent per head: dispatch them CONCURRENTLY
 # (EVOLUTION.md 2026-08-31, "Review lanes run in parallel").  Parsing stays
@@ -1168,28 +1268,48 @@ log "running code review for PR $PR_NUM @ ${HEAD_SHA:0:12}"
 CODE_OUT="$RUN_DIR/code-last-message.md"
 rm -f "$CODE_OUT"
 CODE_RC_FILE="$RUN_DIR/code.rc"
-( rc=0
-  run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
-    "$RUN_DIR/code-task.md" "$RUN_DIR/code-standalone.md" \
-    "$RUN_DIR/diff.sanitized.txt" "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
-  printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
-CODE_LANE_PID=$!
+CODE_LANE_PID=""
+if [ "$RESUME_NATIVE" -eq 1 ]; then
+  log "resuming completed native code review request $RESUME_NATIVE_REQUEST"
+  CODE_RC=0
+  accept_native_lane "$RESUME_NATIVE_REQUEST" code "$CODE_OUT" "$REVIEW_MODEL" || CODE_RC=$?
+  printf '%s\n' "$CODE_RC" >"$CODE_RC_FILE"
+  [ "$CODE_RC" -eq 0 ] ||
+    die "completed native review request failed validation; publishing nothing"
+else
+  ( rc=0
+    run_agent reviewer read-only "$WORKTREE" "$CODE_PERSONA_PATH" \
+      "$RUN_DIR/code-task.md" "$RUN_DIR/diff.sanitized.txt" \
+      "$CODE_OUT" "$REVIEW_MODEL" || rc=$?
+    printf '%s\n' "$rc" > "$CODE_RC_FILE" ) &
+  CODE_LANE_PID=$!
+fi
 
 PROSE_LANE_PID=""
 PROSE_RC_FILE="$RUN_DIR/prose.rc"
 if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
-  log "the diff touches blueprint/; running the prose review in parallel"
   PROSE_OUT="$RUN_DIR/prose-last-message.md"
   rm -f "$PROSE_OUT"
-  ( rc=0
-    run_agent reviewer read-only "$WORKTREE" "$PROSE_PERSONA_PATH" \
-      "$RUN_DIR/prose-task.md" "$RUN_DIR/prose-standalone.md" \
-      "$RUN_DIR/diff.sanitized.txt" "$PROSE_OUT" "$PROSE_MODEL" || rc=$?
-    printf '%s\n' "$rc" > "$PROSE_RC_FILE" ) &
-  PROSE_LANE_PID=$!
+  if [ "$RESUME_NATIVE" -eq 1 ]; then
+    log "resuming completed native prose review request $RESUME_NATIVE_PROSE_REQUEST"
+    PROSE_RC=0
+    accept_native_lane "$RESUME_NATIVE_PROSE_REQUEST" prose "$PROSE_OUT" "$PROSE_MODEL" ||
+      PROSE_RC=$?
+    printf '%s\n' "$PROSE_RC" >"$PROSE_RC_FILE"
+    [ "$PROSE_RC" -eq 0 ] ||
+      die "completed native prose review request failed validation; publishing nothing"
+  else
+    log "the diff touches blueprint/; running the prose review in parallel"
+    ( rc=0
+      run_agent reviewer read-only "$WORKTREE" "$PROSE_PERSONA_PATH" \
+        "$RUN_DIR/prose-task.md" "$RUN_DIR/diff.sanitized.txt" \
+        "$PROSE_OUT" "$PROSE_MODEL" || rc=$?
+      printf '%s\n' "$rc" > "$PROSE_RC_FILE" ) &
+    PROSE_LANE_PID=$!
+  fi
 fi
 
-wait "$CODE_LANE_PID" 2>/dev/null || true
+[ -z "$CODE_LANE_PID" ] || wait "$CODE_LANE_PID" 2>/dev/null || true
 CODE_RC="$(cat "$CODE_RC_FILE" 2>/dev/null || echo 1)"
 if [ "$CODE_RC" -ne 0 ] && [ ! -s "$CODE_OUT" ]; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
@@ -1205,6 +1325,9 @@ if ! CODE_RESULT="$(write_review code "$CODE_OUT" "$CODE_MD" \
       "$(sed -n 's/^name: //p' "$CODE_OUT.dispatch.log" 2>/dev/null | tail -1)" \
       "$REVIEW_MODEL" "$REVIEW_EFFORT")"; then
   [ -n "$PROSE_LANE_PID" ] && kill "$PROSE_LANE_PID" 2>/dev/null || true
+  if [ "$RESUME_NATIVE" -eq 1 ] && [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
+    die "completed native code review has no verdict trailer; publishing nothing"
+  fi
   post_summary failure "code review returned no verdict trailer @ ${HEAD_SHA:0:12}"
   printf '%s: %s\n' "$PROG" \
     "the code review produced no usable verdict; local-review/summary=failure (raw output kept at $CODE_OUT)" >&2
@@ -1217,7 +1340,7 @@ log "code review: $CODE_VERDICT ($CODE_UNRESOLVED unresolved findings) -> $CODE_
 # -------------------------------------------------------------- prose review
 PROSE_VERDICT=""
 if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
-  wait "$PROSE_LANE_PID" 2>/dev/null || true
+  [ -z "$PROSE_LANE_PID" ] || wait "$PROSE_LANE_PID" 2>/dev/null || true
   PROSE_RC="$(cat "$PROSE_RC_FILE" 2>/dev/null || echo 1)"
   # pr-review.yml:218-224 — prose-review SKIPS where code-review FAILS.  The
   # split is deliberate: a prose failure must not block a PR whose code review
@@ -1233,6 +1356,8 @@ if [ "$TOUCHES_BLUEPRINT" -eq 1 ]; then
       PROSE_VERDICT="$(printf '%s\n' "$PROSE_RESULT" | sed -n 's/^verdict=//p')"
       log "prose review: $PROSE_VERDICT -> $PROSE_MD"
     else
+      [ "$RESUME_NATIVE" -eq 0 ] ||
+        die "completed native prose review has no verdict trailer; publishing nothing"
       warn "the prose review returned no verdict trailer; keeping the code-review verdict (raw output at $PROSE_OUT)"
     fi
   fi

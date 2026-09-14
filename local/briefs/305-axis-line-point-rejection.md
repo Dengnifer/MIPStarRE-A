@@ -1,0 +1,23 @@
+# Axis-line/point rejection transport
+
+Issue #305 is an auxiliary proof task under #119, stacked on the expanded-state
+transport from #302 and using the line witness from #244. The source context is
+the strategy construction in the proof of `lem:qld-4-7` at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1279-1288`.
+
+The new theorem identifies the rejection probability of the axis-line/point
+branch with `completedLinePointDefect` for the supplied `ExtendedLinesWitness`.
+Its proof unfolds the finite game postprocessing, uses the line-degree support
+condition and zero mass of invalid answer tags, then applies the exact
+`AA'`--`BA''` state correlation from #302.
+
+The Lean statement assumes the existing `CombinedPointsWitness` and
+`ExtendedLinesWitness`; it adds no passing premise, producer input, or bridge
+hypothesis. Its conclusion is only the exact branch equality. It does not prove
+the full passing bound in `lem:qld-4-7`, construct a global measurement, or
+discharge the separate extraction-witness frontier tracked by #119.
+
+Completion requires per-file Lean validation, a standard-only axiom check, and
+the normal publication, canonical CI, independent review, and merge gates. The
+expanded-state transport from #302 is integrated through merged PR304. Existing
+#119 usage and the B8 budget of 13 attempts / 26509 seconds remain unchanged.
