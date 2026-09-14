@@ -11,7 +11,7 @@
 
 \title{A Field-Valued Construction of the Combined Point Measurements}
 \author{}
-\date{2026-09-09}
+\date{2026-09-14}
 
 \begin{document}
 \maketitle
@@ -37,9 +37,8 @@ theorems, with Mathlib supplying finite sums, inner products, matrix
 adjoints, and real powers.  This note documents a change of proof, not a
 change of the source theorem.\footnote{The implementation is in
 \path{MIPStarRE/QPBT/Combining/Points.lean} and its supporting modules under
-\path{MIPStarRE/QPBT/Combining/Points/}.  See
-\ghpr{410},
-review findings F2--F3.}
+\path{MIPStarRE/QPBT/Combining/Points/}, reviewed in \ghpr{424} and
+\ghpr{410}.}
 
 \section{Key theorem forms}
 
@@ -119,10 +118,13 @@ $q^2$ for equal frequency pairs and zero otherwise, cancelling two of the
 four inverse powers of $q$.  The right-hand side is thus an average, not
 an unnormalized sum.  The observable commutation bound underlying the
 source's binary-refinement estimate implies that the average of either side
-is $O(\sqrt\eps)$.\footnote{See \path{lem:qld-comm-cons} and its proof,
-paper lines 466--505.  The exact identity is
-\leanid{sum\_norm\_place\_expPointOp\_commutator\_sq}; its averaged consequence
-is \leanid{expPoint\_comm}, in \path{Points/Commutation.lean}.}
+is $O(\sqrt\eps)$.\footnote{The Fourier description of the expanded point
+measurements is at paper lines 382--418; the observable commutation estimate
+is \path{lem:qld-comm-cons} and its proof, paper lines 466--505.  The exact
+identity is \leanid{sum\_norm\_place\_expPointOp\_commutator\_sq}, resting on the
+elementary orthogonality lemma \leanid{sum\_norm\_sum\_smul\_sq\_of\_orthogonal};
+its averaged consequence is \leanid{expPoint\_comm}, in
+\path{Points/Commutation.lean}.}
 
 \paragraph{The field-valued sandwich.}
 Set $R_i(a,b)=Z_i(b)X_i(a)Z_i(b)$.  These operators are positive because
@@ -135,7 +137,17 @@ $d_{\hat\psi}^2(R_i,Z_iX_i)=O(\sqrt\eps)$.
 For a fixed $(x,z)$, define $D^X_a=X_1(a)-X_2(a)$,
 $D^Z_b=Z_1(b)-Z_2(b)$, $W_b=Z_1(b)Z_2(b)$, and
 $K^i_{a,b}=[X_i(a),Z_i(b)]$.
-Two applications of the projective overlap identity give
+For any two complete projective measurements $P,Q$ on a common space and any
+vector $w$, expanding the squared norms gives the overlap identity
+\[
+ \sum_c\operatorname{Re}\langle w,P_cQ_cw\rangle
+ =\|w\|^2-\frac12\sum_c\|(P_c-Q_c)w\|^2.
+\]
+Opposite-placement commutation rewrites the product of the two sandwiches as
+$R_1(a,b)R_2(a,b)=W_b^*X_1(a)X_2(a)W_b$, so the overlap below is real.
+Applying the identity first to the $X$ measurements on the vector
+$W_b\ket{\hat\psi}$, and then to the $Z$ measurements on $\ket{\hat\psi}$,
+gives
 \[
  1-\sum_{a,b}\langle\hat\psi,R_1(a,b)R_2(a,b)\hat\psi\rangle
  =\frac12\sum_b\|D^Z_b\hat\psi\|^2
@@ -147,8 +159,9 @@ sum, use only opposite-placement commutation to write
  D^X_aW_b=W_bD^X_a+Z_2(b)K^1_{a,b}-Z_1(b)K^2_{a,b}.
 \]
 The squared norm of three terms is at most three times the sum of their
-squared norms.  Projection contraction and
-$\sum_b\|Z_2(b)v\|^2=\|v\|^2$ then bound the consistency mass by
+squared norms.  Projection contraction together with
+$\sum_b\|W_bv\|^2\leq\sum_b\|Z_2(b)v\|^2=\|v\|^2$ then bounds the consistency
+mass by
 \[
  c_{x,z}=\frac12\sum_b\|D^Z_b\hat\psi\|^2
   +\frac32\left(\sum_a\|D^X_a\hat\psi\|^2
@@ -235,7 +248,10 @@ applies \path{thm:linearity}.  The replacement is stated in the proof of
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex}
 (``The formal proof works with field-valued outcomes directly'') and
 formalized as \leanid{exists\_combinedPointsWitness} in
-\path{MIPStarRE/QPBT/Combining/Points.lean}.}
+\path{MIPStarRE/QPBT/Combining/Points.lean}.  This note is the single account
+of that replacement; a duplicate note describing the same construction, which
+asserted instead that the blueprint had retained the source's
+binary-refinement proof, has been removed.}
 No hypothesis supplying a common ancilla, approximate linearity, or exact
 same-player commutation is added.  Finite field models and finite nonempty
 register types encode the source's ambient spaces.

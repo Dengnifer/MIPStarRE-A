@@ -10,7 +10,12 @@ X-then-Z field; no commutation of point effects on one player is assumed.
 
 ## References
 
-Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:917-935`.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:914-930`:
+the two marginal displays inside the proof of `lem:qld-xz-lines`, namely
+`eq:qld-qxz-close-to-point` at lines 914--917 with its supporting calculation
+at lines 918--927, and the symmetric `eq:qld-qxz-close-to-point-2` at lines
+928--930.  The line-measurement-to-point consistency bounds at lines 931--935
+are a separate later step of that proof and are not formalized here.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -25,9 +30,10 @@ noncomputable section
 set_option maxHeartbeats 800000 in
 -- Expanding the nested finite sums and projector products exceeds the default limit.
 /-- The X marginal of any joint point witness is within squared distance
-`4 * δQ` of the opposite X point measurement. This is
-`eq:qld-qxz-close-to-point`, paper lines 917--932, with the supplied witness
-error retained; the source later specializes to its constructed points. -/
+`4 * δQ` of the opposite X point measurement. This is the display
+`eq:qld-qxz-close-to-point`, paper lines 914--917, whose supporting
+calculation is at lines 918--927. The supplied witness error is retained;
+the source later specializes to its constructed points. -/
 theorem CombinedPointsWitness.marginal_X_distance_le
     {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δQ)
@@ -64,8 +70,10 @@ theorem CombinedPointsWitness.marginal_X_distance_le
 set_option maxHeartbeats 800000 in
 -- Expanding the nested finite sums and projector products exceeds the default limit.
 /-- The Z marginal of any joint point witness is within squared distance
-`4 * δQ` of the opposite Z point measurement. This is the symmetric
-calculation `eq:qld-qxz-close-to-point-2`, paper lines 933--935. -/
+`4 * δQ` of the opposite Z point measurement. This is the symmetric display
+`eq:qld-qxz-close-to-point-2`, paper lines 928--930, which the source states
+at the end of line 927 and proves by the argument just given for the X
+marginal. -/
 theorem CombinedPointsWitness.marginal_Z_distance_le
     {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δQ)
