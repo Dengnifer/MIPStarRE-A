@@ -31,8 +31,10 @@ private def pullingPlacedMeasurement {P : AdmissibleParams} {epsilon : ℝ}
   refine Measurement.ofSumEqOne (fun a => S.placeSide side (M.effect a)) ?_ ?_
   · intro a
     cases side
-    · exact reindexOp_nonneg _ (kronecker_nonneg (M.pos a) Matrix.PosSemidef.one.nonneg)
-    · exact reindexOp_nonneg _ (kronecker_nonneg Matrix.PosSemidef.one.nonneg (M.pos a))
+    · exact ProjectiveSetting.reindexOp_nonneg _
+        (kronecker_nonneg (M.pos a) Matrix.PosSemidef.one.nonneg)
+    · exact ProjectiveSetting.reindexOp_nonneg _
+        (kronecker_nonneg Matrix.PosSemidef.one.nonneg (M.pos a))
   · cases side
     · rw [← S.placeSide_alice_finset_sum, M.sum_eq_one]
       change reindexOp _ (heteroKron (1 : Op (ExtractionBlock P S.toStrategy.ιA))
