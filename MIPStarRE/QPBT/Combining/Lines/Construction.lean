@@ -355,31 +355,6 @@ theorem exists_combinedLine_restored_defect_le :
     (prod_linePointDist_nondegenerate_mass_pos params.toLdParams).le
   exact add_le_add (mul_le_mul_of_nonneg_left hnatural hmass) le_rfl
 
-/-- The retained product-law mass lies between one half and one. The sharper
-single-line lower bound is three quarters. This proof-only estimate is used in
-the quantitative specialization of `lem:qld-xz-lines`, paper lines 950--963. -/
-theorem nondegenerateLinePastingMass_bounds (params : LdParams) :
-    1 / 2 ≤ nondegenerateLinePastingMass params ∧
-      nondegenerateLinePastingMass params ≤ 1 := by
-  classical
-  have hmass : nondegenerateLinePastingMass params =
-      ∑ sample ∈ (linePointDist params).support.filter
-        (fun sample => sample.1.direction ≠ 0), (linePointDist params).weight sample := by
-    unfold nondegenerateLinePastingMass
-    rw [Distribution.sum_filter_weight_eq_avgOver, avgOver_prod]
-    change avgOver (linePointDist params) (fun sample => avgOver (linePointDist params)
-      (fun _ => if sample.1.direction ≠ 0 then 1 else 0)) = _
-    simp_rw [avgOver_const_of_isProbability _ (linePointDist_isProbability params)]
-    rw [Distribution.sum_filter_weight_eq_avgOver]
-  rw [hmass]
-  refine ⟨(by norm_num : (1 / 2 : ℝ) ≤ 3 / 4).trans
-    (linePointDist_nondegenerate_mass_ge params), ?_⟩
-  rw [Distribution.sum_filter_weight_eq_avgOver]
-  calc
-    _ ≤ avgOver (linePointDist params) (fun _ => 1) :=
-      avgOver_mono _ _ _ fun _ => by split_ifs <;> norm_num
-    _ = 1 := avgOver_const_of_isProbability _ (linePointDist_isProbability params) 1
-
 /-- Consistency is symmetric for measurements on opposite registers. The
 operator commutation, rather than symmetry of the state or equality of local
 dimensions, justifies exchanging the placements in `lem:qld-xz-lines`. -/

@@ -1,6 +1,7 @@
 import MIPStarRE.QPBT.Combining.Lines.PointComparison
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
+import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
 import MIPStarRE.QPBT.Games.Sandwich
 
 /-!
@@ -23,131 +24,6 @@ open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 noncomputable section
-
-/-- Indicator averages express the positive-fiber collision predicate of
-`lem:pasting`, paper `06_nonlocal_games_and_mipstar.tex:504-525`.
-This formalization-only auxiliary lemma is applied below with the proved fiber
-estimate. -/
-theorem collision_bound_of_fiber_averages {X Y₁ Y₂ R₂ Γ₂ : Type*}
-    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
-    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
-    [Fintype Γ₂] (dist : Distribution ((X × Y₁) × Y₂))
-    (eval₂ : Γ₂ → Y₂ → R₂) (eta : ℝ)
-    (hbound : ∀ fixed : X × Y₁, ∀ first second : Γ₂, first ≠ second →
-      avgOver dist (fun sample => if sample.1 = fixed then
-        (if eval₂ first sample.2 = eval₂ second sample.2 then 1 else 0) else 0) ≤
-      eta * avgOver dist (fun sample => if sample.1 = fixed then 1 else 0)) :
-    HasConditionalCollisionBound dist eval₂ eta := by
-  classical
-  intro question point _ first second hne
-  have havg (value : ((X × Y₁) × Y₂) → ℝ) :
-      avgOver dist value = ∑ sample, dist.weight sample * value sample := by
-    exact (dist.sum_univ_eq_sum_support _ (fun sample hout => by
-      rw [dist.outsideSupport sample hout, zero_mul])).symm
-  have hmass : (dist.map Prod.fst).weight (question, point) =
-      avgOver dist (fun sample => if sample.1 = (question, point) then 1 else 0) := by
-    rw [Distribution.map_weight, Distribution.sum_filter_weight_eq_avgOver]
-  rw [hmass]
-  have h := hbound (question, point) first second hne
-  simpa [havg, Fintype.sum_prod_type, mul_ite] using h
-
-/-- Independent Z sampling preserves the weighted collision estimate on nonzero
-X directions. The weight may depend on the entire Z sample but only on the X
-line, not its point. This is proof-only support for `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-955`. No Z direction is discarded. -/
-theorem prod_linePointDist_nondegenerate_weighted_collision_le {L : LdParams} {bound : ℕ}
-    (weight : LineDesc L → (LineDesc L × (Fin L.m → ScalarQ L)) → ℝ)
-    (hweight : ∀ line sample, 0 ≤ weight line sample)
-    (first second : DegPoly L bound) (hne : first ≠ second) :
-    avgOver (Distribution.prod (linePointDist L) (linePointDist L)) (fun samples =>
-      if samples.1.1.direction ≠ 0 then weight samples.1.1 samples.2 *
-        (if evalOpt samples.1.1 samples.1.2 first =
-          evalOpt samples.1.1 samples.1.2 second then 1 else 0) else 0) ≤
-    (bound : ℝ) / Fintype.card (ScalarQ L) *
-      avgOver (Distribution.prod (linePointDist L) (linePointDist L)) (fun samples =>
-        if samples.1.1.direction ≠ 0 then weight samples.1.1 samples.2 else 0) := by
-  classical
-  simp only [avgOver_prod]
-  rw [avgOver_comm, avgOver_comm (linePointDist L) (linePointDist L)
-    (fun firstSample secondSample =>
-      if firstSample.1.direction ≠ 0 then weight firstSample.1 secondSample else 0)]
-  rw [← avgOver_const_mul]
-  apply avgOver_mono
-  intro sample
-  exact linePointDist_nondegenerate_weighted_collision_le
-    (fun line => weight line sample) (fun line => hweight line sample) first second hne
-
-/-- The event that the X direction is nonzero has positive mass under the
-product line-point law. This formalization-only consequence of the retained-mass
-bound permits conditioning in `lem:qld-xz-lines`, paper lines 950--963. -/
-theorem prod_linePointDist_nondegenerate_mass_pos (L : LdParams) :
-    0 < ∑ samples ∈ (Distribution.prod (linePointDist L) (linePointDist L)).support.filter
-      (fun samples => samples.1.1.direction ≠ 0),
-      (Distribution.prod (linePointDist L) (linePointDist L)).weight samples := by
-  classical
-  rw [Distribution.sum_filter_weight_eq_avgOver, avgOver_prod]
-  change 0 < avgOver (linePointDist L) (fun sample => avgOver (linePointDist L)
-    (fun _ => if sample.1.direction ≠ 0 then 1 else 0))
-  simp_rw [avgOver_const_of_isProbability _ (linePointDist_isProbability L)]
-  rw [← Distribution.sum_filter_weight_eq_avgOver]
-  exact lt_of_lt_of_le (by norm_num) (linePointDist_nondegenerate_mass_ge L)
-
-/-- Proof-only question law for one-sided pasting in `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-963`. Condition the source product
-law on nonzero X direction, and send `(sX,sZ)` to
-`(((sX.line,sZ.line),sZ),sX)`. Thus `G1 = Z` and `G2 = X`; the evaluation
-questions retain their line descriptors. This is not a modified game sampler.
-See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`, issue #118. -/
-def nondegenerateLinePastingDist (L : LdParams) :
-    Distribution (((LineDesc L × LineDesc L) ×
-      (LineDesc L × (Fin L.m → ScalarQ L))) × (LineDesc L × (Fin L.m → ScalarQ L))) :=
-  (Distribution.restrict (Distribution.prod (linePointDist L) (linePointDist L))
-    (fun samples => samples.1.1.direction ≠ 0)
-    (prod_linePointDist_nondegenerate_mass_pos L)).map
-      (fun samples => (((samples.1.1, samples.2.1), samples.2), samples.1))
-
-/-- The actual conditioned product question law satisfies the conditional
-collision predicate with parameter `bound/q`. This discharges, rather than
-assumes, the collision premise of `lem:pasting` used in `lem:qld-xz-lines`,
-paper `14_analysis_of_the_pauli_basis_test.tex:950-955`. The restriction is
-proof-only; the discarded probability remains in the restoration estimate. -/
-theorem nondegenerateLinePastingDist_collision_bound (P : AdmissibleParams) (bound : ℕ) :
-    HasConditionalCollisionBound (nondegenerateLinePastingDist P.toLdParams)
-      (fun (poly : DegPoly P.toLdParams bound) sample => evalOpt sample.1 sample.2 poly)
-      ((bound : ℝ) / Fintype.card (ScalarQ P.toLdParams)) := by
-  classical
-  let L := P.toLdParams
-  apply collision_bound_of_fiber_averages
-  intro fixed first second hne
-  simp only [nondegenerateLinePastingDist, Distribution.avgOver_map]
-  have hpos := prod_linePointDist_nondegenerate_mass_pos L
-  apply (mul_le_mul_iff_right₀ hpos).mp
-  rw [avgOver_restrict_mul_mass, mul_left_comm _ ((bound : ℝ) /
-    Fintype.card (ScalarQ L)), avgOver_restrict_mul_mass]
-  have h := prod_linePointDist_nondegenerate_weighted_collision_le
-    (fun line sample => if ((line, sample.1), sample) = fixed then 1 else 0)
-    (fun line sample => by split_ifs <;> norm_num) first second hne
-  have hswap (condition other : Prop) [Decidable condition] [Decidable other] (value : ℝ) :
-      (if condition then (if other then value else 0) else 0) =
-        (if other then (if condition then value else 0) else 0) := by
-    split_ifs <;> rfl
-  simpa only [avgOver, Finset.sum_filter, mul_ite, mul_one, mul_zero,
-    ite_mul, one_mul, zero_mul, hswap] using h
-
-/-- Probability retained by the proof-only X-direction restriction for
-`lem:qld-xz-lines`, paper `14_analysis_of_the_pauli_basis_test.tex:950-963`.
-This coefficient is kept when restoring the source consistency defect. -/
-def nondegenerateLinePastingMass (L : LdParams) : ℝ :=
-  ∑ samples ∈ (Distribution.prod (linePointDist L) (linePointDist L)).support.filter
-    (fun samples => samples.1.1.direction ≠ 0),
-    (Distribution.prod (linePointDist L) (linePointDist L)).weight samples
-
-/-- The proof-only pasting question law is normalized, as required by
-`lem:pasting`, paper `06_nonlocal_games_and_mipstar.tex:504-525`. -/
-theorem nondegenerateLinePastingDist_isProbability (L : LdParams) :
-    (nondegenerateLinePastingDist L).IsProbability := by
-  exact (Distribution.restrict_isProbability _ _
-    (prod_linePointDist_nondegenerate_mass_pos L)).map _
 
 /-- For arbitrary complete measurements on opposite placements, conditioning
 and question relabeling inflate the defect by at most the inverse retained mass.
@@ -239,6 +115,8 @@ theorem exists_combinedPoints_conditioned_line_marginal_defect_le :
     simp only [Distribution.avgOver_map] at h ⊢
     exact h
 
+set_option maxHeartbeats 800000 in
+-- Unfolding the conditioned product law creates a large finite-sum normalization goal.
 /-- Restore the unconditioned consistency defect with its retained-mass factor
 and additive cost at most `1/(2q)`. This holds for the supplied measurement
 families on every directed opposite placement, without a defect hypothesis.

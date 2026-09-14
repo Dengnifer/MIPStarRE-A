@@ -2,6 +2,8 @@ import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Lines.PointwiseDefect
+import MIPStarRE.QPBT.Combining.Lines.WeightedCollision
+import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
 import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
@@ -24,42 +26,6 @@ open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 noncomputable section
-
-/-- On a nonzero direction, completed evaluation agrees with polynomial evaluation at
-the unique affine parameter. This proof-only restriction is used in the collision
-step of `lem:qld-xz-lines`, paper `14_analysis_of_the_pauli_basis_test.tex:950-955`. -/
-theorem evalOpt_affine_parameter_of_direction_ne_zero {L : LdParams} {bound : ℕ} (line : LineDesc L)
-    (hdir : line.direction ≠ 0) (poly : DegPoly L bound) (param : ScalarQ L) :
-    evalOpt line (line.base + param • line.direction) poly =
-      some (evalCoefficient poly param) := by
-  apply (evalOpt_eq_some_iff _ _ _ _).mpr
-  refine ⟨⟨param, rfl⟩, ?_⟩
-  intro other heq
-  have hsmul : param • line.direction = other • line.direction := add_left_cancel heq
-  have hsub : (param - other) • line.direction = 0 := by
-    rw [sub_smul, hsmul, sub_self]
-  have hparam : param = other := sub_eq_zero.mp ((smul_eq_zero.mp hsub).resolve_right hdir)
-  rw [hparam]
-
-/-- On a nondegenerate line, completed evaluations of distinct degree-bounded
-polynomials collide with probability at most the degree bound divided by the field
-size under a uniform affine parameter. This is a proof-only restriction of the
-collision step at paper `14_analysis_of_the_pauli_basis_test.tex:950-955`. -/
-theorem evalOpt_uniform_parameter_collision_le {L : LdParams} {bound : ℕ} (line : LineDesc L)
-    (hdir : line.direction ≠ 0) (first second : DegPoly L bound)
-    (hne : first ≠ second) :
-    avgOver (uniformDistribution (ScalarQ L)) (fun param =>
-      if evalOpt line (line.base + param • line.direction) first =
-        evalOpt line (line.base + param • line.direction) second then 1 else 0) ≤
-      (bound : ℝ) / Fintype.card (ScalarQ L) := by
-  classical
-  simp_rw [evalOpt_affine_parameter_of_direction_ne_zero line hdir, Option.some.injEq]
-  have hcard := evalCoefficient_collision_card_le first second hne
-  unfold avgOver
-  simp only [uniformDistribution_support, uniformDistribution_weight_apply,
-    mul_ite, mul_one, mul_zero, ← Finset.sum_filter]
-  rw [Finset.sum_const, nsmul_eq_mul, mul_one_div]
-  exact div_le_div_of_nonneg_right (by exact_mod_cast hcard) (by positivity)
 
 /-- Under the unchanged diagonal line-point law, zero projected directions have
 probability at most the inverse field size: the last sampled direction coordinate must
@@ -106,21 +72,6 @@ theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
   · norm_num
   · exact le_rfl
 
-/-- Axis-line sampling gives zero mass to zero directions, since a coordinate
-direction is nonzero. This is a formalization-only consequence of
-`def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
-theorem aLinePointDist_zero_direction_mass (L : LdParams) :
-    avgOver (aLinePointDist L) (fun sample =>
-      if sample.1.direction = 0 then 1 else 0) = 0 := by
-  classical
-  unfold aLinePointDist
-  rw [Distribution.avgOver_map]
-  have hdir (raw : LdSpace L) : (aLineDescOf L raw).direction ≠ 0 := by
-    intro hzero
-    have hcoord := congrFun hzero (chiIndex L raw.seed)
-    simp [aLineDescOf, LineDesc.direction, coordinateDirection] at hcoord
-  simp [avgOver, hdir]
-
 /-- The equal mixture of axis and diagonal line-point laws gives zero directions
 mass at most `1 / (2q)`. This proof-only estimate preserves the source sampler of
 `def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`,
@@ -155,75 +106,6 @@ theorem avgOver_lineRepMap_resample_parameter {K : Type*} [Field K] [Fintype K] 
     (fun point => value (lineRepMap direction point) point)) hmap
   rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
   simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
-
-/-- Resampling a uniform parameter on the sampled axis line preserves the joint
-line-point law. This formalization-only identity derives the conditional sampling
-used at paper `14_analysis_of_the_pauli_basis_test.tex:955` from
-`def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
-theorem avgOver_aLinePointDist_resample_parameter (L : LdParams)
-    (value : (LineDesc L × (Fin L.m → ScalarQ L)) → ℝ) :
-    avgOver (aLinePointDist L) value =
-    avgOver (aLinePointDist L) (fun sample => avgOver (uniformDistribution (ScalarQ L))
-      (fun param => value (sample.1, sample.1.base + param • sample.1.direction))) := by
-  classical
-  unfold aLinePointDist clDistribution
-  simp only [Distribution.avgOver_map, aLineDescOf_ldALineCL]
-  have hblock := uniformDistribution_map_equiv (ldSpaceBlockEquiv L).symm
-  rw [← hblock]
-  simp only [Distribution.avgOver_map]
-  rw [uniformDistribution_prod]
-  simp only [avgOver_prod]
-  rw [avgOver_comm, avgOver_comm (uniformDistribution (Fin L.m → ScalarQ L))]
-  apply congrArg
-  funext block
-  have hresample := avgOver_lineRepMap_resample_parameter (coordinateDirection (chiIndex L block.1))
-      (fun base point => value (LineDesc.axis
-        (lineRepMap (coordinateDirection (chiIndex L block.1)) base) block.1
-        (lineRepMap_apply_self _ _), point))
-  simp only [lineRepMap_apply_self] at hresample
-  exact hresample
-
-/-- Uniform parameter resampling preserves the mixed line-point law exactly,
-without excluding zero directions. This formalization-only identity justifies
-conditioning on the line in the collision step of `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-955`. -/
-theorem avgOver_linePointDist_resample_parameter (L : LdParams)
-    (value : (LineDesc L × (Fin L.m → ScalarQ L)) → ℝ) :
-    avgOver (linePointDist L) value =
-    avgOver (linePointDist L) (fun sample => avgOver (uniformDistribution (ScalarQ L))
-      (fun param => value (sample.1, sample.1.base + param • sample.1.direction))) := by
-  rw [linePointDist, avgOver_mix, avgOver_mix]
-  rw [avgOver_aLinePointDist_resample_parameter L value,
-    avgOver_dLinePointDist_resample_parameter L value]
-
-/-- The collision bound remains valid with any nonnegative weight depending only
-on the line, after restricting to nonzero directions. This proof-only estimate
-is the conditional form of the root argument in `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-955`; it is not the false
-unrestricted collision claim on zero-direction coefficient presentations. -/
-theorem linePointDist_nondegenerate_weighted_collision_le {L : LdParams} {bound : ℕ}
-    (weight : LineDesc L → ℝ) (hweight : ∀ line, 0 ≤ weight line)
-    (first second : DegPoly L bound) (hne : first ≠ second) :
-    avgOver (linePointDist L) (fun sample =>
-      if sample.1.direction ≠ 0 then weight sample.1 *
-        (if evalOpt sample.1 sample.2 first = evalOpt sample.1 sample.2 second
-          then 1 else 0) else 0) ≤
-      (bound : ℝ) / Fintype.card (ScalarQ L) *
-        avgOver (linePointDist L) (fun sample =>
-          if sample.1.direction ≠ 0 then weight sample.1 else 0) := by
-  classical
-  rw [avgOver_linePointDist_resample_parameter]
-  rw [← avgOver_const_mul]
-  apply avgOver_mono
-  intro sample
-  by_cases hdir : sample.1.direction ≠ 0
-  · simp only [if_pos hdir]
-    rw [avgOver_const_mul]
-    exact (mul_le_mul_of_nonneg_left
-      (evalOpt_uniform_parameter_collision_le sample.1 hdir first second hne)
-      (hweight sample.1)).trans_eq
-      (mul_comm _ _)
-  · simp [hdir, avgOver]
 
 /-- Nondegenerate line fibers have total mass at least three quarters in the
 unchanged line-point law. This follows from the zero-direction mass bound and
