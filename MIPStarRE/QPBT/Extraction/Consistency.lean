@@ -1,4 +1,3 @@
-import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.PointConsistencyPrime
@@ -22,9 +21,9 @@ The marginal estimates formalize blueprint
 `lem:qld-constructing-the-paulis-helper`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1609-1664`.
 The supplied-witness estimates belong to blueprint
-`lem:qld-construct-the-paulis-given-global-pair`. The source-facing composition
-`exists_pulled_apart_consistency` records `lem:qld-construct-the-paulis`, from
-paper lines 1463-1480, as a named proof obligation.
+`lem:qld-construct-the-paulis-given-global-pair`. The joint source obligation
+`exists_pulled_apart_consistency` is stated in `Extraction.Construction` for
+`lem:qld-construct-the-paulis`, paper lines 1463-1480.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -994,49 +993,6 @@ theorem tildeObs_selfConsistent_ofGlobalPairWitness :
               (fun u => S.placeSide .bob (tildeObs w .bob W u j))
               S.psiHat ≤
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-- Source-facing construction for `lem:qld-construct-the-paulis`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1463-1480`, using
-the measurement constructed in `lem:qld-4-7` (lines 1267-1274). One pair of
-global measurements satisfies both point-consistency conclusions and observable
-self-consistency. The witness is an output, and all constants precede the
-strategy quantifiers. Zero error is included, as in the source setting.
-
-**Local fix:** The scale `deltaConstructPaulis` exposes the decoder correction
-and error enlargement documented in `docs/paper-gaps/qpbt_decoding-identity.tex`
-and blueprint `lem:qld-construct-the-paulis`.
-
-**Proof obligation:** The `sorry` introduced in this paper realignment is tracked
-by issue #519 and the cited gap note. Discharge `exists_pulled_apart_consistency`
-by constructing the global measurements as in `exists_globalPairWitness`, including
-the zero-error case missing from its current domain, and proving
-`tildeM_consistent_pointMeas_ofGlobalPairWitness` and
-`tildeObs_selfConsistent_ofGlobalPairWitness`. Apply the proved
-`tildeM_consistent_pointMeas'_ofGlobalPairWitness` to the same constructed witness
-and take a common maximum of the three constants. No witness is an input here. -/
-theorem exists_pulled_apart_consistency :
-    ∃ a b C : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧ 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → ∀ S : ProjectiveSetting P epsilon,
-          ∃ w : GlobalPairWitness S (deltaQld a b epsilon P.m P.d P.q),
-            ∀ W : PauliKind,
-              consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
-                  (fun u r => S.placePlayer .alice ((S.pointMeas .alice W u).effect r))
-                  (fun u r => S.placeSide .bob (tildeM w .bob W (indicatorVec u) r))
-                  S.psiHat ≤ deltaConstructPaulis C epsilon
-                    (deltaQld a b epsilon P.m P.d P.q) P.m P.d P.q ∧
-              consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
-                  (fun u r => S.placeSide .alice (tildeM w .alice W (indicatorVec u) r))
-                  (fun u r => S.placePlayer .bob ((S.pointMeas .bob W u).effect r))
-                  S.psiHat ≤ deltaConstructPaulis C epsilon
-                    (deltaQld a b epsilon P.m P.d P.q) P.m P.d P.q ∧
-              ∀ j : Fin P.model.basisDim,
-                opDistSq (uniformDistribution (PauliRegister P))
-                    (fun u => S.placeSide .alice (tildeObs w .alice W u j))
-                    (fun u => S.placeSide .bob (tildeObs w .bob W u j))
-                    S.psiHat ≤ deltaConstructPaulis C epsilon
-                      (deltaQld a b epsilon P.m P.d P.q) P.m P.d P.q := by
   sorry
 
 end
