@@ -1057,6 +1057,341 @@ assembled by Fourier averaging.
 	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
 
+\begin{lemma}[Formalization support: marginal effects of the joint point measurement]
+	\label{lem:joint-point-marginal-effects}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_fst_effect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_snd_effect}
+	\leanok
+	\uses{lem:qld-4-10, def:povm-conventions}
+	This is not a named statement of \cite{Ji2020MIPStar}; it isolates a step
+	used in the Lean proofs of the marginal comparisons below. For a joint
+	point measurement $\hat{Q}^{x,z}$ and $a, b \in \F_q$,
+	\[
+		\hat{Q}^{x,z}_{a,\bullet} = \sum_{b'} \hat{Q}^{x,z}_{a,b'}\,,
+		\qquad
+		\hat{Q}^{x,z}_{\bullet,b} = \sum_{a'} \hat{Q}^{x,z}_{a',b}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Each marginal effect is by definition the sum of the joint effects over
+	the fibre of the corresponding coordinate projection; exchanging the two
+	outcome sums gives the displayed form.
+\end{proof}
+
+\begin{lemma}[Formalization support: the coordinate marginals against the point measurements]
+	\label{lem:joint-point-marginal-distance}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_distance_le}
+	\leanok
+	% Source: eq:qld-qxz-close-to-point and eq:qld-qxz-close-to-point-2,
+	% lines 917-935 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:qld-4-10, lem:joint-point-marginal-effects, def:povm-distance,
+		def:expanded-point-measurement, def:expanded-state}
+	Let $\hat{Q}$ be a joint point family with self-consistency and
+	cross-consistency error $\delta_Q$ in the sense of
+	Lemma~\ref{lem:qld-4-10}, and let the two placements be opposite. Then,
+	on average over uniformly random $(x,z)$, the family
+	$(\hat{Q}^{x,z}_{a,\bullet})_a$ has squared distance at most
+	$4\delta_Q$ from $(\hat{M}^{(\mathrm{Point},X),x}_{a})_a$, and the
+	family $(\hat{Q}^{x,z}_{\bullet,b})_b$ has squared distance at most
+	$4\delta_Q$ from $(\hat{M}^{(\mathrm{Point},Z),z}_{b})_b$, the second
+	family of each pair being placed on the opposite registers. The supplied
+	witness error $\delta_Q$ is retained; \cite{Ji2020MIPStar} states these
+	comparisons for its constructed point family.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, lem:joint-point-marginal-effects, def:povm-distance,
+		def:povm-conventions}
+	Write each marginal effect as the sum over the omitted coordinate
+	(Lemma~\ref{lem:joint-point-marginal-effects}). The joint effects are
+	projections with orthogonal distinct summands, so the squared norm of the
+	difference between the summed family and the commuting point family is
+	bounded outcome by outcome by four times the corresponding
+	cross-consistency defect of Lemma~\ref{lem:qld-4-10}; averaging over
+	$(x,z)$ gives the stated bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: the point marginal of the line-point law]
+	\label{lem:linepoint-point-marginal-average}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_point}
+	\lean{MIPStarRE.QPBT.avgOver_prod_linePointDist_points}
+	\leanok
+	% Source: the sampling identity used at lines 936-941 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{def:line-point-dist}
+	This is not a named statement of \cite{Ji2020MIPStar}; it records the
+	sampling step used below. The point marginal of $D_{\mathrm{Line}}$ is
+	uniform: for every real function $g$ on $\F_q^m$,
+	$\E_{(\ell,u) \sim D_{\mathrm{Line}}} g(u) = \E_{u} g(u)$. Consequently,
+	for two independent samples and every real function $g$ on
+	$\F_q^m \times \F_q^m$,
+	\[
+		\E_{(\ell_X,x) \sim D_{\mathrm{Line}}}\,
+		\E_{(\ell_Z,z) \sim D_{\mathrm{Line}}} g(x,z)
+		= \E_{(x,z)} g(x,z)\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist}
+	The line-point law is the equal mixture of its axis-parallel and
+	diagonal components, and each component has uniform point marginal, so
+	the average against the mixture is the uniform average. The product
+	statement follows by writing the product average as an iterated average
+	and applying the first identity twice.
+\end{proof}
+
+\begin{lemma}[Formalization support: point self-consistency on line-point samples]
+	\label{lem:point-self-consistency-linepoint}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	% Source: eq:qld-q-self-cons at lines 693-697, used as the second pasting
+	% hypothesis at lines 955-963, of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:qld-4-10, def:consistency, def:line-point-dist}
+	For opposite placements, the joint point family of
+	Lemma~\ref{lem:qld-4-10} has consistency defect at most $\delta_Q$ with
+	itself, both on average over uniformly random $(x,z)$ and on average over
+	the point coordinates of two independent line-point samples.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, lem:linepoint-point-marginal-average, def:consistency,
+		def:povm-distance}
+	The squared-distance estimate of Lemma~\ref{lem:qld-4-10} bounds the
+	consistency defect of a pair of projective families, which gives the
+	first assertion. The second follows from the first because the
+	point coordinates of two independent line-point samples are uniform and
+	independent (Lemma~\ref{lem:linepoint-point-marginal-average}).
+\end{proof}
+
+\begin{lemma}[Formalization support: the marginal comparisons on line-point samples]
+	\label{lem:point-marginal-linepoint-transport}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_linePoint_distance_le}
+	\leanok
+	% Source: the first transport step of the display at lines 936-941 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:joint-point-marginal-distance, def:line-point-dist,
+		def:expanded-point-measurement}
+	The two comparisons of Lemma~\ref{lem:joint-point-marginal-distance} hold,
+	with the same bound $4\delta_Q$, on average over the point coordinates
+	$(x,z)$ of two independent line-point samples
+	$(\ell_X,x), (\ell_Z,z) \sim D_{\mathrm{Line}}$. No comparison with the
+	line measurements is assumed here.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:joint-point-marginal-distance, lem:linepoint-point-marginal-average,
+		lem:joint-point-marginal-effects}
+	Rewrite the marginal effects as sums
+	(Lemma~\ref{lem:joint-point-marginal-effects}) and replace the average
+	over the product line-point law by the uniform average over $(x,z)$
+	using Lemma~\ref{lem:linepoint-point-marginal-average}.
+\end{proof}
+
+\begin{lemma}[Formalization support: completion by an unused outcome]
+	\label{lem:option-completion-distance}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.opFamilyDistSq_postprocess_some}
+	\leanok
+	\uses{def:povm-distance, def:expanded-state, def:povm-conventions}
+	This is not a named statement of \cite{Ji2020MIPStar}. Adjoining an
+	outcome $\bot$ carrying the zero effect to two families of operators,
+	placed on any two registers, leaves their state-dependent squared
+	distance unchanged, for any question law.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance, def:expanded-state}
+	The summand at $\bot$ is the norm of the difference of two zero
+	operators, hence zero, and the remaining summands are unchanged.
+\end{proof}
+
+\begin{lemma}[Formalization support: the completed marginal comparisons]
+	\label{lem:option-point-marginal-linepoint}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_option_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_option_linePoint_distance_le}
+	\leanok
+	% Source: the completion convention between lines 936-941 and the
+	% statement of lem:qld-comm-line-cons in
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:point-marginal-linepoint-transport, lem:option-completion-distance,
+		def:expanded-point-measurement}
+	Lemma~\ref{lem:point-marginal-linepoint-transport} continues to hold, with
+	the same bound $4\delta_Q$, when both the point marginal and the point
+	measurement are completed to the outcome set $\F_q \cup \{\bot\}$ by
+	giving $\bot$ the zero effect.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:point-marginal-linepoint-transport, lem:option-completion-distance}
+	The completed point measurement is the completion of the point
+	measurement by a zero effect at $\bot$, so
+	Lemma~\ref{lem:option-completion-distance} identifies the two squared
+	distances, and Lemma~\ref{lem:point-marginal-linepoint-transport} applies.
+\end{proof}
+
+\begin{lemma}[Formalization support: evaluated lines against points on one placement]
+	\label{lem:expline-point-same-placement}
+	\lean{MIPStarRE.QPBT.exists_expLine_point_same_placement_distance_le}
+	\leanok
+	% Source: the intermediate comparison in the display at lines 936-941 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:qld-comm-line-cons, def:expanded-line-measurement,
+		def:expanded-point-measurement, def:line-point-dist, def:povm-distance}
+	There is a universal constant $C \ge 1$ such that for every projective
+	strategy passing with error $\eps$, every $W \in \{X,Z\}$ and every
+	placement, on average over $(\ell,u) \sim D_{\mathrm{Line}}$ the evaluated
+	expanded line measurement $\hat{M}^{(\mathrm{Line},W),\ell}
+	_{[\mathrm{eval}_u(\cdot) = a]}$ and the completed expanded point
+	measurement $\hat{M}^{(\mathrm{Point},W),u}_a$, both placed on the same
+	registers, have squared distance at most
+	$C(\eps + \delta_{\mathrm{Line}}(\eps))$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-line-cons, lem:qld-reversed-consistency, fact:triangle,
+		def:povm-distance}
+	Pass through the opposite placement: the line-point consistency of
+	item~\ref{eq:qld-comm-line-pt-cons} of
+	Lemma~\ref{lem:qld-comm-line-cons} compares the evaluated line
+	measurement with the point measurement across placements, and the point
+	self-consistency of that lemma compares the point measurement with
+	itself across placements. The squared-distance triangle inequality
+	combines the two, and the two errors are summed into
+	$C(\eps + \delta_{\mathrm{Line}}(\eps))$.
+\end{proof}
+
+\begin{lemma}[Formalization support: the completed point-to-line marginal distances]
+	\label{lem:combined-point-line-marginal-distance}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_distance_le}
+	\leanok
+	% Source: the display at lines 936-941 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:option-point-marginal-linepoint, lem:expline-point-same-placement,
+		lem:qld-4-10, def:expanded-line-measurement, def:line-point-dist}
+	There is a universal constant $C \ge 1$ with the following property. For
+	every projective strategy passing with error $\eps$ and every joint point
+	family with error $\delta_Q$ as in Lemma~\ref{lem:qld-4-10}, and for
+	opposite placements, on average over two independent line-point samples
+	$(\ell_X,x), (\ell_Z,z) \sim D_{\mathrm{Line}}$ the completed first
+	marginal of $\hat{Q}^{x,z}$ has squared distance at most
+	$8\delta_Q + C(\eps + \delta_{\mathrm{Line}}(\eps))$ from
+	$\hat{M}^{(\mathrm{Line},X),\ell_X}_{[\mathrm{eval}_x(\cdot)=a]}$, and
+	the completed second marginal has squared distance at most
+	$8\delta_Q + C(\eps + \delta_{\mathrm{Line}}(\eps))$ from
+	$\hat{M}^{(\mathrm{Line},Z),\ell_Z}_{[\mathrm{eval}_z(\cdot)=b]}$. The
+	point error $\delta_Q$ and the strategy and line errors are kept
+	separate.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:option-point-marginal-linepoint, lem:expline-point-same-placement,
+		fact:triangle, def:povm-distance}
+	Insert the completed point measurement on the placement carrying the line
+	measurement. The comparison between the completed marginal and that point
+	measurement is Lemma~\ref{lem:option-point-marginal-linepoint} with bound
+	$4\delta_Q$, and the comparison between that point measurement and the
+	evaluated line measurement is
+	Lemma~\ref{lem:expline-point-same-placement}. The squared-distance
+	triangle inequality doubles both bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: the completed point-to-line marginal defects]
+	\label{lem:combined-point-line-marginal-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_defect_le}
+	\leanok
+	% Source: the display at lines 936-941 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:combined-point-line-marginal-distance, def:consistency,
+		def:expanded-line-measurement, def:line-point-dist}
+	With the constant, the hypotheses and the two pairs of families of
+	Lemma~\ref{lem:combined-point-line-marginal-distance}, both comparisons
+	also hold in the consistency-defect convention, with the same bound
+	$8\delta_Q + C(\eps + \delta_{\mathrm{Line}}(\eps))$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-point-line-marginal-distance, def:consistency,
+		def:povm-distance}
+	Both families are projective, so their consistency defect is bounded by
+	their squared distance; the completed marginals of the joint point
+	family and the evaluated line measurements are projective by
+	construction.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditioning on a nondegenerate first line]
+	\label{lem:conditioned-pasting-defect}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
+	\leanok
+	% Source: the pasting step at lines 942-963 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{def:line-point-dist, def:consistency, lem:pasting}
+	This is not a named statement of \cite{Ji2020MIPStar}; it records the
+	proof-only question law used for the pasting step. Let $\mu$ denote the
+	probability that the first of two independent line-point samples has
+	nonzero line direction; then $\tfrac12 \le \mu \le 1$. Write
+	$D_{\mathrm{Paste}}$ for the probability law obtained from
+	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ by conditioning on that
+	event and recording the two lines together with the two line-point
+	samples in the order required by the pasting lemma. For any two families
+	of operators placed on opposite registers, the consistency defect under
+	$D_{\mathrm{Paste}}$ is at most the consistency defect under
+	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ divided by $\mu$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, def:consistency}
+	The axis-parallel component of the line-point law has nonzero direction
+	almost surely, which gives $\mu \ge \tfrac12$; normalization gives
+	$\mu \le 1$. The consistency-defect integrand is nonnegative on opposite
+	placements, so restricting the question law to an event of mass $\mu$ and
+	renormalizing multiplies the average by at most $1/\mu$; relabeling the
+	samples is a change of variables.
+\end{proof}
+
+\begin{lemma}[Formalization support: the conditioned point-to-line marginal defects]
+	\label{lem:conditioned-point-line-marginal-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_conditioned_line_marginal_defect_le}
+	\leanok
+	% Source: the two marginal inputs to the pasting step at lines 936-963 of
+	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
+	\uses{lem:combined-point-line-marginal-defect, lem:conditioned-pasting-defect,
+		lem:qld-4-10, def:expanded-line-measurement}
+	There is a universal constant $C \ge 1$ with the following property. For
+	every projective strategy passing with error $\eps$, every joint point
+	family with error $\delta_Q$ as in Lemma~\ref{lem:qld-4-10}, and every
+	pair of opposite placements, the two completed marginals of
+	$\hat{Q}^{x,z}$, taken in the order $Z$ then $X$, have consistency defect
+	at most
+	\[
+		\frac{8\delta_Q + C\big(\eps + \delta_{\mathrm{Line}}(\eps)\big)}{\mu}
+	\]
+	under the conditioned law $D_{\mathrm{Paste}}$ of
+	Lemma~\ref{lem:conditioned-pasting-defect}, against
+	$\hat{M}^{(\mathrm{Line},Z),\ell_Z}_{[\mathrm{eval}_z(\cdot)=b]}$ and
+	$\hat{M}^{(\mathrm{Line},X),\ell_X}_{[\mathrm{eval}_x(\cdot)=a]}$
+	respectively, where $\mu$ is the retained mass of that lemma.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-point-line-marginal-defect, lem:conditioned-pasting-defect}
+	Exchanging the two point outcomes turns each completed marginal into the
+	other, so the two bounds of
+	Lemma~\ref{lem:combined-point-line-marginal-defect} supply the $Z$-then-$X$
+	pair under $D_{\mathrm{Line}} \times D_{\mathrm{Line}}$. Applying the
+	conditioning estimate of Lemma~\ref{lem:conditioned-pasting-defect} to
+	each of them divides both bounds by $\mu$.
+\end{proof}
+
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
 
@@ -2009,6 +2344,32 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	candidate repairs with their open obligations --- is given in
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
+
+\begin{lemma}[Obstruction to absorbing the first combined-line estimate]
+	\label{lem:qld-combining-quarter-power-obstruction}
+	\lean{MIPStarRE.QPBT.not_exists_combining_quarter_power_bound}
+	\leanok
+	\uses{def:admissible}
+	There is no function $f:\mathbb R^2\to\mathbb R$ satisfying
+	$0\leq f(x,y)\leq C(x^r+y^s)$ on the closed nonnegative quadrant,
+	for constants $C\geq 1$ and
+	$r,s>0$, which satisfies
+	\[
+		\min\{1,m\eps^{1/4}\}\leq f(m^2\eps,md/q)
+	\]
+	for every admissible $(q,m,d)$ and every $\eps\geq0$.
+	This is a scalar obstruction to the first proof route in
+	Remark~\ref{rem:qld-4-13-source-defects}, not a counterexample to
+	Lemma~\ref{lem:qld-4-13}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and $\eps_n=m_n^{-4}$.
+	These parameters are admissible: $q_n=2^{6n+3}$ has odd exponent and
+	$m_n\mid q_n$. Both arguments of $f$ equal $m_n^{-2}$, so the assumed
+	polynomial upper bound tends to zero. But
+	$\min\{1,m_n\eps_n^{1/4}\}=1$ for every $n$, a contradiction.
+\end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
