@@ -1040,6 +1040,25 @@ postprocessing, and operator-contraction steps used to formalize
 \end{lemma}
 \begin{proof}
 	\leanok
+	\uses{lem:pasting-forward-comparisons}
+	Apply Lemma~\ref{lem:pasting-forward-comparisons} to the two marginal
+	comparisons~\eqref{eq:pasting-1}. These suffice for the pasted conclusion;
+	the self-consistency comparison~\eqref{eq:pasting-2} is not needed.
+\end{proof}
+
+\begin{lemma}[Pasting from the forward comparisons]
+	\label{lem:pasting-forward-comparisons}
+	\lean{MIPStarRE.QPBT.exists_pasting_error_of_marginal_consistency}
+	\leanok
+	\uses{def:consistency, def:bracket, def:povm-conventions}
+	This formalization-only strengthening of Lemma~\ref{lem:pasting} has the
+	same conclusion under its projectivity and conditional collision hypotheses
+	and the two forward comparisons~\eqref{eq:pasting-1}, for a unit state and
+	$\eta,\delta\geq0$. The self-consistency comparison~\eqref{eq:pasting-2}
+	is not required. The local carrier is common to both players.
+\end{lemma}
+\begin{proof}
+	\leanok
 	\uses{lem:pasting-one-sided-explicit-error, lem:pasting-coarse-commutator,
 		lem:pasting-measurement, lem:pasting-scalar-error, lem:pasting-defect-bound}
 	Use the fixed Schmidt mirror of the second codeword family on Alice's
@@ -1052,6 +1071,75 @@ postprocessing, and operator-contraction steps used to formalize
 	this error is at least $1$, so Lemma~\ref{lem:pasting-defect-bound} applies.
 	Thus the polynomial notation here uses the additive correction documented
 	in \cite{gap:qpbt_pasting-product-error}, not the refuted product contract.
+\end{proof}
+
+\begin{definition}[Adjoining fixed basis vectors]
+	\label{def:pasting-product-state}
+	\lean{MIPStarRE.QPBT.Pasting.productPaddedState}
+	\leanok
+	Let $\mathcal H_A=\mathbb C^{I_A}$ and $\mathcal H_B=\mathbb C^{I_B}$,
+	where $I_A,I_B$ are finite, and fix $a_0\in I_A$, $b_0\in I_B$.
+	For $\psi\in\mathcal H_A\otimes\mathcal H_B$, define a vector on
+	$(\mathcal H_A\otimes\mathcal H_B)^{\otimes2}$ by
+	\[
+		\Psi_{(i,b),(a,j)}
+		=\mathbf 1_{b=b_0}\mathbf 1_{a=a_0}\psi_{i,j}.
+	\]
+	This is a formalization-only common-space realization for
+	Lemma~\ref{lem:pasting}.
+\end{definition}
+
+\begin{lemma}[Preservation under adjoining basis vectors]
+	\label{lem:pasting-product-state-preservation}
+	\lean{MIPStarRE.QPBT.Pasting.productPaddedState_norm}
+	\lean{MIPStarRE.QPBT.Pasting.stateQForm_productPaddedState}
+	\lean{MIPStarRE.QPBT.Pasting.consistencyDefect_productPaddedState}
+	\leanok
+	\uses{def:pasting-product-state, def:consistency}
+	For the preceding construction, $\|\Psi\|=\|\psi\|$. For arbitrary
+	operators $A$ on $\mathcal H_A$ and $B$ on $\mathcal H_B$,
+	\[
+		\operatorname{Re}\langle\Psi,
+		 ((A\otimes\Id)\otimes(\Id\otimes B))\Psi\rangle
+		=\operatorname{Re}\langle\psi,(A\otimes B)\psi\rangle.
+	\]
+	Consequently every averaged off-diagonal consistency defect is preserved
+	by these local placements, for arbitrary operator families and any finite
+	distribution. Positivity and state normalization are not required.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:pasting-product-state}
+	Expand the norm and quadratic form in the standard bases. The fixed
+	coordinates remove two sums. Sum the quadratic-form identity over unequal
+	answers and average over the question distribution.
+\end{proof}
+
+\begin{lemma}[Pasting on independent local spaces]
+	\label{lem:pasting-heterogeneous}
+	\lean{MIPStarRE.QPBT.exists_pasting_error_heterogeneous}
+	\leanok
+	\uses{def:consistency, def:bracket, def:povm-conventions}
+	There is a universal function
+	$\delta_{\mathrm{pasting}}(\eta,\delta)=\poly(\eta,\delta)$ for which
+	Lemma~\ref{lem:pasting-forward-comparisons} holds with independent finite
+	local spaces $\mathcal H_A$ and $\mathcal H_B$. The family $A$ acts on
+	$\mathcal H_A$, the families $G_1,G_2$ act on $\mathcal H_B$, and the
+	unit state belongs to $\mathcal H_A\otimes\mathcal H_B$. All conditional
+	collision, projectivity, and forward comparison hypotheses, and the
+	conclusion~\eqref{eq:pasting-3}, are retained. This is a
+	formalization-only strengthening of Lemma~\ref{lem:pasting}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting-forward-comparisons, lem:pasting-product-state-preservation,
+		lem:pasting-tensor-placement}
+	A unit state implies that both local spaces are nonzero. Choose one basis
+	vector in each and adjoin them as in Definition~\ref{def:pasting-product-state}.
+	The common local space is $\mathcal H_A\otimes\mathcal H_B$.
+	Tensor placement preserves projectivity, postprocessing, and the product
+	$G_2G_1G_2$. Both input defects and the pasted output defect are unchanged.
+	Apply Lemma~\ref{lem:pasting-forward-comparisons} on this common space.
 \end{proof}
 
 \begin{lemma}[Universal bound for placed consistency defects]
