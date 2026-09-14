@@ -2230,6 +2230,130 @@ projective measurement whose outcomes are pairs of global polynomials.
 	the registers swapped yield \eqref{eq:qld-s-point-con-bob}.
 \end{proof}
 
+\begin{lemma}[Projective refinement of an operator comparison]
+\label{lem:qld-projective-refinement-ordered}
+\lean{MIPStarRE.QPBT.projective_refinement_ordered_dist_le}
+\leanok
+This is an auxiliary quantitative form of the insertion calculation in the
+paper equations labelled \texttt{eq:qld-g-42} and \texttt{eq:qld-g-43}
+in \cite{Ji2020MIPStar}. Let $R=\{R_g\}$ be a
+complete projective measurement, let $e_x(g)$ be a finite outcome readout,
+and let $A^x,B^x$ be complete measurements on the same finite-dimensional
+space. Let $T^x_a$ be arbitrary operators. For a finite distribution $\mu$
+and a state $\psi$, suppose that
+\[
+ \operatorname{Cons}_\mu(R^{e_x},B^x)\leq\eta,\qquad
+ \mathbb E_\mu\sum_a\|(B^x_a-A^x_a)\psi\|^2\leq\delta_0,\qquad
+ \mathbb E_\mu\sum_a\|(A^x_a-T^x_a)\psi\|^2\leq\delta_1.
+\]
+Then
+\[
+ \mathbb E_\mu\sum_g\|R_g(I-T^x_{e_x(g)})\psi\|^2
+ \leq 4\eta+4\delta_0+4\delta_1.
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{fact:agreement, fact:add-a-proj2}
+Projectivity gives $R_gR^{e_x}_{e_x(g)}=R_g$. Agreement and projective
+refinement bound the insertion of $B^x_{e_x(g)}$ by $2\eta$.
+The squared-distance triangle inequality bounds the comparison from $B$
+to $T$ by $2\delta_0+2\delta_1$. Left multiplication by $R_g$, with
+the full outcome sum retained, contracts this bound. A second application
+of the triangle inequality gives the displayed constants.
+\end{proof}
+
+\begin{lemma}[Both ordered products on opposite expanded blocks]
+\label{lem:qld-opposite-ordered-products}
+\lean{MIPStarRE.QPBT.CombinedPointsWitness.ordered_dist_le}
+\leanok
+Fix a projective Pauli strategy and a combined-point witness with error
+$\delta_Q$. Let $p_1,p_2$ be any directed opposite pair of expanded register
+placements. Suppose a complete projective measurement $R$ on $p_1$, read
+by $e_{x,z,\alpha,\beta}$, has consistency defect at most $\eta$ against
+$\hat Q^{x,z,\alpha,\beta}$ on $p_2$, on the actual expanded state.
+For either order $XZ$ or $ZX$, define
+\[
+ T^{XZ}_{x,z,\alpha,\beta,c}
+ =\sum_{\alpha r+\beta s=c}\hat M^{(\mathrm{Point},X),x}_r
+                              \hat M^{(\mathrm{Point},Z),z}_s,
+ \qquad
+ T^{ZX}_{x,z,\alpha,\beta,c}
+ =\sum_{\alpha r+\beta s=c}\hat M^{(\mathrm{Point},Z),z}_s
+                              \hat M^{(\mathrm{Point},X),x}_r.
+\]
+Then, for each order $o\in\{XZ,ZX\}$,
+\[
+ \mathbb E_{x,z,\alpha,\beta}\sum_g
+ \|(R_g)_{p_1}(I-(T^o_{x,z,\alpha,\beta,e_{x,z,\alpha,\beta}(g)})_{p_2})
+       \hat\psi\|^2\leq4\eta+8\delta_Q.
+\]
+This auxiliary uses the actual point-comparison error $\eta$, including any
+rounding loss. It does not identify that error with the unrounded
+low-degree soundness error.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:qld-projective-refinement-ordered, lem:qld-4-12}
+Use the opposite-block $Q$ as $B$ and the same-block $Q$ as $A$.
+The two comparison errors in Lemma~\ref{lem:qld-projective-refinement-ordered}
+are both bounded by $\delta_Q$, separately for the two orders.
+\end{proof}
+
+\begin{definition}[Extended-polynomial ordered error]
+\label{def:qld-extended-polynomial-ordered-error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.extendedPolynomialRead}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.extendedPolynomialOrderedError}
+\leanok
+For the directly indexed extended game at $k=1$, its polynomial outcome is
+a singleton tuple $g$. Identify its scalar field with the Pauli scalar
+field and evaluate its single polynomial at $(x,z,\alpha,\beta)$; denote
+the resulting readout by $e_{x,z,\alpha,\beta}(g)$.
+For a measurement $R$, let $E^o_{p_1,p_2}(R)$ be the full averaged
+squared-norm sum in Lemma~\ref{lem:qld-opposite-ordered-products} with
+this readout. In Lean, the Boolean values false and true select $XZ$ and
+$ZX$, respectively. The outcome sum is over every singleton polynomial
+tuple, without a support restriction.
+\end{definition}
+
+\begin{theorem}[Rounded extended-polynomial ordered estimates]
+\label{thm:qld-rounded-polynomial-ordered}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_ordered_estimates}
+\leanok
+There are universal direct-soundness constants $a\geq1$ and $0<b\leq1$
+with the following property. Fix admissible Pauli parameters, a projective
+Pauli strategy, a combined-point witness with error $\delta_Q$, and an
+extended-line witness with error $\delta_L$ on the directly indexed
+completed-answer domain. Set
+\[
+ e=3\bigl(\sqrt{\delta_Q+\delta_L}+md/q\bigr),\qquad
+ \delta=\delta_{\mathrm{ld}}(a,b,e,q,2m+2,d,1),\qquad
+ \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta}.
+\]
+There exist complete projective extended-polynomial measurements $R_A,R_B$
+on the original expanded local spaces such that, for both $o=XZ,ZX$,
+\[
+ E^o_{AA',BA''}(R_A)\leq4\eta+8\delta_Q,\qquad
+ E^o_{BB',AB''}(R_B)\leq4\eta+8\delta_Q.
+\]
+The line witness is an explicit input to this auxiliary theorem. Its
+domain restrictions remain those of
+Remark~\ref{rem:qld-4-13-source-defects}; this theorem does not certify
+Lemma~\ref{lem:qld-4-7} or assert concentration on separated polynomials.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:qld-opposite-ordered-products, def:qld-extended-polynomial-ordered-error}
+Apply the established direct soundness theorem for arbitrary strategies
+at $k=1$. Compression preserves all three conclusions, so the polynomial
+consistency error and both evaluated errors are at most $\delta$.
+Simultaneous projective rounding therefore gives the displayed $\eta$
+for both evaluated comparisons. Read the singleton scalar coordinate,
+transport the joint uniform question law by its coordinate equivalence,
+and transport the bipartite correlations to the two expanded placements.
+Lemma~\ref{lem:qld-opposite-ordered-products} gives both conclusions.
+\end{proof}
+
 \begin{theorem}[Polynomial consistency from point comparisons]
 \label{thm:qld-polynomial-consistency-from-points}
 \lean{MIPStarRE.QPBT.direct_polynomial_consistency_le_point_bounds}
