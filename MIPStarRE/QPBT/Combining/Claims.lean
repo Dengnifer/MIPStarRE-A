@@ -37,7 +37,9 @@ noncomputable section
 
 set_option synthInstance.maxSize 400
 
-private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
+/-- Scalar support for the real-part estimates at paper `claim:17-2` and
+`claim:17-3`. Exported as in PR549; the existing proof is unchanged. -/
+theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
   change 0 ≤ x ^ (1 / 4 : ℝ)
   rcases lt_or_ge x 0 with hx | hx
   · rw [Real.rpow_def_of_neg hx,
@@ -45,7 +47,10 @@ private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) 
     positivity
   · exact Real.rpow_nonneg hx _
 
-private theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
+/-- The square root of the two consistency deficits is bounded by their
+quarter powers, retaining the dimension factor in paper `claim:17-2`.
+Exported as in PR549; the existing proof is unchanged. -/
+theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
     (hQ : 0 ≤ δQ) :
     Real.sqrt (2 * Real.sqrt (4 * m ^ 2 * δP) + 2 * Real.sqrt (4 * δQ)) ≤
       2 * Real.sqrt m * (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
@@ -485,6 +490,40 @@ theorem subline_Z_term_near_one_re_direct :
       have hsm : 0 ≤ 2 * Real.sqrt (P.m : ℝ) :=
         mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
       nlinarith [mul_nonneg hsm hε]
+
+/-- Compatibility name for the proved real-part ordered-product estimate.
+
+**Scope restriction:** This is `subline_replace_by_ordered_product_re_direct`,
+with its unchanged directly indexed law and real-part conclusion. It does not
+certify paper `claim:17-1`; see issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_replace_by_ordered_product := subline_replace_by_ordered_product_re_direct
+
+/-- Compatibility name for the corrected concrete-measurement X-factor obligation.
+
+**Scope restriction:** The domain and complex-modulus conclusion are those of
+`subline_remove_X_factor_direct`, following paper `claim:17-2` at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`.
+The former quantification over arbitrary line witnesses is false, as documented
+in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issue #414).
+
+**Unfaithful:** This alias depends on `subline_remove_X_factor_direct`, whose
+complex Cauchy--Schwarz estimate and source-law transport remain open under
+issues #414 and #474. Discharge the estimate using the complex weighted
+Cauchy--Schwarz inequality and `exists_concreteXPointOverlap_deficit_le`, and
+establish the transport recorded in the same paper-gap note. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_remove_X_factor := subline_remove_X_factor_direct
+
+/-- Compatibility name for the proved real-part Z-correlation estimate.
+
+**Scope restriction:** This is `subline_Z_term_near_one_re_direct`, with its
+unchanged directly indexed law and real-part conclusion. It does not certify
+paper `claim:17-3`; see issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_Z_term_near_one := subline_Z_term_near_one_re_direct
 
 end
 

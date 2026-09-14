@@ -14,6 +14,9 @@ These algebraic constructions do not establish the concentration estimate
 `eq:qld-g-non-separable` or the point consistency required by
 `exists_globalPairWitness`. Issue #513 retains those obligations.
 
+Recovered read-only from PR535 at `1744bd9533055b9b43af9a8d46906cbafb69afdd`.
+This continuation transports the construction; it earns no new algebraic proof credit.
+
 ## References
 
 - Blueprint `lem:qld-4-7`.
