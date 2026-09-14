@@ -326,7 +326,8 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
     leaves the cap where a hand-set cap would have been instead of collapsing it.
     """
     bucket: dict[str, Any] = {"refusals": 0, "deaths": 0, "neutral": 0,
-                              "deaths_by_class": {}, "refusal_times": [], "fivexx_times": []}
+                              "deaths_by_class": {}, "refusal_times": [],
+                              "refusal_records": [], "fivexx_times": []}
     counter_since = now - timedelta(seconds=counter_window_s)
     fivexx_since = now - timedelta(seconds=fivexx_window_s)
     for row in rows:
@@ -344,6 +345,11 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
         if role == "refusal":
             bucket["refusals"] += 1
             bucket["refusal_times"].append(row["_ts"])
+            identity = row.get("name")
+            if not isinstance(identity, str) or not identity:
+                identity = json.dumps({key: value for key, value in row.items() if key != "_ts"},
+                                      sort_keys=True, default=str)
+            bucket["refusal_records"].append((row["_ts"], identity))
         elif role == "death":
             bucket["deaths"] += 1
             bucket["deaths_by_class"][failure_class] = \
@@ -351,6 +357,7 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
         else:
             bucket["neutral"] += 1
     bucket["refusal_times"].sort()
+    bucket["refusal_records"].sort()
     bucket["fivexx_times"].sort()
     return bucket
 
@@ -373,7 +380,8 @@ def _write_json(path: Path, document: dict) -> None:
 def new_account_state(name: str) -> dict:
     return {"cap": 0, "floor": 0, "ceiling": 0, "health": "up", "saved_cap": None,
             "external_reserved": 0, "nominal_limit": 0, "enabled": True, "endpoint": name,
-            "quiet_since": None, "decrease_window_until": None, "refusal_cursor": None,
+            "quiet_since": None, "manual_until": None, "decrease_window_until": None,
+            "refusal_cursor": None, "refusal_seen": [],
             "observed_refusal_floor": None, "measured_limit": None, "measured_since": None,
             "measured_level": None, "last_change": None}
 
@@ -530,37 +538,43 @@ def apply_aimd(account_state: dict, counters: dict, knobs: dict, live: int, now:
     aimd = knobs["aimd"]
     window = timedelta(seconds=aimd["quiet_window_s"])
     cap = int(account_state["cap"])
-    cursor = parse_ts(account_state.get("refusal_cursor"))
-    fresh = [moment for moment in counters["refusal_times"] if cursor is None or moment > cursor]
+    manual_until = parse_ts(account_state.get("manual_until"))
+    if manual_until is not None and now < manual_until:
+        account_state["cap"] = clamp(cap, 0, ceiling)
+        return [f"manual quiet window until {ts(manual_until)}"]
+    account_state["manual_until"] = None
+    legacy = "refusal_seen" not in account_state
+    seen = set(account_state.get("refusal_seen") or [])
+    cursor = parse_ts(account_state.get("refusal_cursor")) if legacy else None
+    fresh = [(moment, identity) for moment, identity in counters["refusal_records"]
+             if identity not in seen and (cursor is None or moment > cursor)]
     if fresh:
         until = parse_ts(account_state.get("decrease_window_until"))
-        if until is None or now > until:
-            # The FIRST refusal of a window: step just under the concurrency that
-            # was refused.  ``live`` is sampled at the tick that observes it,
-            # which is the closest the controller gets to the moment of refusal —
-            # but when the refused sessions have already died it is 0 or 1, and a
-            # raw ``live - 1`` would collapse the cap to the floor and then climb
-            # back one slot per quiet window (an hour from 1 to 30 with the
-            # shipped defaults).  Fall back to what the account is KNOWN to have
-            # sustained before believing an instantaneous zero.
-            evidence = [value for value in
-                        (account_state.get("observed_refusal_floor"),
-                         account_state.get("measured_limit"))
-                        if isinstance(value, int) and not isinstance(value, bool)]
-            basis = live if live > 1 else max([live] + evidence)
-            cap = max(floor, min(cap, basis - 1))
-            account_state["decrease_window_until"] = ts(now + window)
-            notes.append(f"decrease(first) live={live} basis={basis} -> {cap}")
-            observed = basis
-        else:
-            cap = max(floor, math.ceil(cap * float(aimd["decrease"])))
-            notes.append(f"decrease(x{aimd['decrease']}) -> {cap}")
-            observed = live
-        account_state.update(refusal_cursor=ts(max(fresh)), quiet_since=None)
-        if observed >= 1:  # a zero census is not evidence that one slot refused
-            seen = account_state.get("observed_refusal_floor")
-            account_state["observed_refusal_floor"] = (
-                observed if seen is None else min(int(seen), observed))
+        evidence = [value for value in
+                    (account_state.get("observed_refusal_floor"),
+                     account_state.get("measured_limit"))
+                    if isinstance(value, int) and not isinstance(value, bool)]
+        basis = live if live > 1 else max([live] + evidence)
+        for moment, identity in fresh:
+            if until is None or moment > until:
+                cap = max(floor, min(cap, basis - 1))
+                until = moment + window
+                notes.append(f"decrease(first) live={live} basis={basis} -> {cap}")
+                observed = basis
+            else:
+                cap = max(floor, math.ceil(cap * float(aimd["decrease"])))
+                notes.append(f"decrease(x{aimd['decrease']}) -> {cap}")
+                observed = live
+            seen.add(identity)
+            if observed >= 1:
+                prior = account_state.get("observed_refusal_floor")
+                account_state["observed_refusal_floor"] = (
+                    observed if prior is None else min(int(prior), observed))
+        ordered_seen = list(account_state.get("refusal_seen") or [])
+        ordered_seen.extend(identity for _, identity in fresh if identity not in ordered_seen)
+        account_state.update(refusal_cursor=ts(max(moment for moment, _ in fresh)),
+                             refusal_seen=ordered_seen[-256:], quiet_since=None,
+                             decrease_window_until=ts(until))
     # ``live >= cap - 1`` keeps the cap honest: a cap nobody uses is not evidence
     # of headroom.
     if (not counters["refusals"] and not counters["deaths"]
@@ -659,6 +673,10 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
         account_state["health"] = health["state"]
         notes: list[str] = []
         if hold:
+            account_state["quiet_since"] = ts(now)
+            if account_state.get("manual_until") is not None:
+                account_state["manual_until"] = ts(
+                    now + timedelta(seconds=knobs["aimd"]["quiet_window_s"]))
             notes.append("hold: cap frozen")
         elif paused or not entry["enabled"]:
             # BEFORE the recovery branch: a recovering endpoint must not raise
@@ -666,22 +684,24 @@ def tick(now: datetime, *, policy: dict, run_mode: dict, state: dict,
             # this key is off).  Pause outranks health in both directions.
             if int(account_state["cap"]) != 0:  # a note per tick would be noise
                 notes.append("paused: cap 0" if paused else "disabled in the brief: cap 0")
-            account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
+            account_state.update(cap=0, quiet_since=None, manual_until=None,
+                                 decrease_window_until=None)
         elif action == "trip":
-            account_state.update(cap=0, quiet_since=None, decrease_window_until=None)
+            account_state.update(cap=0, quiet_since=None, manual_until=None,
+                                 decrease_window_until=None)
             notes.append("endpoint down: cap 0")
         elif action == "recovered":
             # Never back to the pre-outage cap: the endpoint that just came back
             # is the last thing to hand twenty sessions.
             account_state.update(cap=clamp(1, floor, ceiling), quiet_since=None,
-                                 decrease_window_until=None, refusal_cursor=None)
+                                 manual_until=None, decrease_window_until=None,
+                                 refusal_cursor=None, refusal_seen=[])
             notes.append(f"endpoint recovered: cap {account_state['cap']}, AIMD climbs")
         elif health["state"] == "down":
             account_state["cap"] = 0
         else:
             notes.extend(apply_aimd(account_state, counters, knobs, live[name], now,
                                     floor=floor, ceiling=ceiling))
-            account_state["cap"] = clamp(account_state["cap"], floor, ceiling)
         update_measurement(account_state, counters, live[name], now,
                            measured_hold_s=windows["measured_hold_s"])
         if notes:
@@ -938,8 +958,11 @@ def cmd_set(args: argparse.Namespace) -> int:
                 # supported replacement for ``echo 0 > max-codex-primary``.  The
                 # operator's number owns a full quiet window before AIMD moves
                 # again, and a stale decrease window must not shrink it.
-                account_state.update(cap=clamp(args.cap, 0, ceiling), quiet_since=None,
-                                     decrease_window_until=None, last_change=ts(now))
+                quiet_until = now + timedelta(seconds=knobs_for(policy, name)["aimd"]
+                                              ["quiet_window_s"])
+                account_state.update(cap=clamp(args.cap, 0, ceiling), quiet_since=ts(now),
+                                     manual_until=ts(quiet_until), decrease_window_until=None,
+                                     last_change=ts(now))
             caps[name] = int(account_state["cap"])
         total = _commit(state, caps, now, "set",
                         f"operator set {args.account} cap {caps[args.account]}", args.dry_run)
@@ -968,7 +991,7 @@ def cmd_pause(args: argparse.Namespace) -> int:
             refresh(account_state, entry, knobs_for(policy, name))
             if account_state["saved_cap"] is None:  # a second pause saves nothing
                 account_state["saved_cap"] = int(account_state["cap"])
-            account_state.update(cap=0, quiet_since=None)
+            account_state.update(cap=0, quiet_since=None, manual_until=None)
             caps[name] = 0
         state["paused_at"] = already or ts(now)
         if args.reason:
@@ -1003,7 +1026,8 @@ def cmd_resume(args: argparse.Namespace) -> int:
             if not entry["enabled"] or health["state"] == "down":
                 restored = 0  # health outranks a saved number
             account_state.update(cap=restored, saved_cap=None, quiet_since=None,
-                                 decrease_window_until=None, health=health["state"])
+                                 manual_until=None, decrease_window_until=None,
+                                 health=health["state"])
             caps[name] = restored
             lines.append(f"{name} cap {restored} (health {health['state']})")
         state["paused_at"] = None

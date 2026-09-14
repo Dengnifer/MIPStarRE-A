@@ -76,8 +76,8 @@ class CapacityHarness(unittest.TestCase):
         }
         (self.watchdog / "run-mode.json").write_text(json.dumps(document), encoding="utf-8")
 
-    def session(self, seconds: int, endpoint: str, failure_class: str) -> None:
-        row = {"name": f"prover-{seconds}", "role": "prover", "issue": "1",
+    def session(self, seconds: int, endpoint: str, failure_class: str, *, name=None) -> None:
+        row = {"name": name or f"prover-{seconds}", "role": "prover", "issue": "1",
                "start": at(seconds), "end": at(seconds), "status": "failed", "exit": 4,
                "endpoint": endpoint, "failure_class": failure_class,
                "failure_detail": f"synthetic {failure_class}"}
@@ -231,6 +231,15 @@ class DecreaseTests(CapacityHarness):
         self.assertEqual(self.caps()["second"], 19,
                          "re-reading the same row must not decrease again")
 
+    def test_equal_timestamps_are_distinct_and_processed_in_order(self) -> None:
+        for name in ("prover-a", "prover-b", "prover-c"):
+            self.session(10, "api.finite-dimensional.space", "concurrency_limit", name=name)
+        self.tick(20, live={"primary": 0, "second": 20})
+        self.assertEqual(self.caps()["second"], 12,
+                         "first refusal steps to 19, then both further refusals multiply")
+        self.tick(25, live={"primary": 0, "second": 12})
+        self.assertEqual(self.caps()["second"], 12, "stable row identities prevent replay")
+
     def test_a_refusal_never_cuts_the_other_account(self) -> None:
         self.session(10, "api.finite-dimensional.space", "concurrency_limit")
         self.tick(20, live={"primary": 4, "second": 20})
@@ -293,6 +302,13 @@ class OperatorSetTests(CapacityHarness):
         self.assertEqual(self.caps()["second"], 10)
         self.tick(200, live=busy)
         self.assertEqual(self.caps()["second"], 11)
+
+    def test_zero_stays_zero_until_the_exact_quiet_window_boundary(self) -> None:
+        self.invoke("--now", at(0), "set", "primary", "0")
+        self.tick(119, live={"primary": 0, "second": 0})
+        self.assertEqual(self.caps()["primary"], 0)
+        self.tick(120, live={"primary": 0, "second": 0})
+        self.assertEqual(self.caps()["primary"], 1)
 
 
 class FailureBehaviourTests(CapacityHarness):

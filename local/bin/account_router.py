@@ -129,6 +129,24 @@ def resume_account(thread: str, registry: Path, homes: dict[str, Path]) -> str:
     return matches.pop()
 
 
+def account_homes(root: Path) -> dict[str, Path]:
+    """The two briefed rollout homes, with documented defaults and overrides."""
+    values = {"primary": Path.home() / ".codex",
+              "second": Path.home() / ".cache/mipstarre-dev/codex-home-yxy"}
+    try:
+        mode = json.loads((root / "watchdog" / "run-mode.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        mode = {}
+    for row in mode.get("accounts", []) if isinstance(mode, dict) else []:
+        if isinstance(row, dict) and row.get("name") in ACCOUNTS and row.get("codex_home"):
+            values[row["name"]] = Path(row["codex_home"]).expanduser()
+    for name in ACCOUNTS:
+        override = os.environ.get(f"MIPSTARRE_CODEX_HOME_{name.upper()}")
+        if override:
+            values[name] = Path(override).expanduser()
+    return values
+
+
 def resume_continuation(registry: Path, thread: str) -> dict:
     """Carry the original snapshot and completed segments, deduplicating status appends."""
     history = {}
@@ -248,8 +266,7 @@ def main() -> None:
     parser.add_argument("--resume")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    homes = {"primary": Path.home() / ".codex", "second": Path(os.environ.get(
-        "MIPSTARRE_CODEX_HOME_SECOND") or Path.home() / ".cache/mipstarre-dev/codex-home-yxy")}
+    homes = account_homes(args.root)
     try:
         if args.resume and args.registry is None:
             raise ValueError("resume requires a session registry")

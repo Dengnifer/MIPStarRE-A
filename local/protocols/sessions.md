@@ -296,10 +296,11 @@ Ordinary resumes recover prior provenance,
 skipping malformed/non-object history rows but rejecting invalid relevant metadata.
 Replay reads the private launch-time `.continuation.json`, never a later budget file.
 The shim rejects multi-agent enable flags and whole `features`/`agents` overrides only.
-Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
-lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
-`~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. The published owner policy selects exact Sol for routine jobs
+Both accounts use their briefed `accounts[].codex_home` for execution and
+rollout lookup. `MIPSTARRE_CODEX_HOME_PRIMARY` and
+`MIPSTARRE_CODEX_HOME_SECOND` override those values; the defaults are
+`~/.codex` and `~/.cache/mipstarre-dev/codex-home-yxy`, respectively. Review
+and autofix inherit these variables unchanged. The published owner policy selects exact Sol for routine jobs
 and Astra for hard jobs with a reason; mathfix remains a hard role. Resumes do not
 switch model or reset budgets. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
 `MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than

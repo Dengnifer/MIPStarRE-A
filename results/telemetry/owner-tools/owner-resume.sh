@@ -57,6 +57,18 @@ CRONTAB_BIN="${MIPSTARRE_CRONTAB:-crontab}"
 VERSION="$(sed -n 's/^short=//p' "$OWNER_BIN/tools-version" 2>/dev/null | head -n 1)"
 echo "tool=$PROG version=${VERSION:-unreleased}"
 log() { printf '== %s %s\n' "$(date -u +%FT%TZ)" "$*"; }
+resume_incomplete() {
+  reason="$1"
+  mkdir -p "$D" "$W/capacity"
+  if [ -r "$RUN_MODE" ]; then
+    python3 "$RUN_MODE" pause --reason "owner resume incomplete: $reason" >/dev/null 2>&1 || true
+  fi
+  touch "$D/stop" "$W/goal-keeper.stop" "$W/stack-watch.stop" \
+        "$W/capacity/capacityd.stop" "$W/paused" "$W/drain" "$W/goal-hold"
+  printf '%s %s\n' "$(date -u +%FT%TZ)" "$reason" > "$W/resume-incomplete"
+  echo "$PROG: RESUME INCOMPLETE — $reason; admission pause reasserted" >&2
+  exit 5
+}
 
 [ -r "$STATE" ] || {
   echo "$PROG: no pause record at $STATE." >&2
@@ -148,8 +160,7 @@ git fetch -q github 2>/dev/null || true
 # --- 1. caps and speed, through run-mode --------------------------------------------------
 if [ -r "$RUN_MODE" ]; then
   if ! python3 "$RUN_MODE" resume; then
-    echo "$PROG: run_mode.py resume failed; admission remains paused" >&2
-    exit 5
+    resume_incomplete "run_mode.py resume failed"
   fi
   log "run_mode.py resume: caps and speed restored, AIMD re-enters at the saved value"
 else
@@ -170,16 +181,19 @@ fi
 # astra-poll and heartbeat rows that have been deliberately off since 2026-09-09.
 if [ "$CRON_OK" -eq 1 ]; then
   if [ -x "$CRONS" ]; then
-    bash "$CRONS" --restore "$CRON_BAK" || echo "$PROG: restoring the crontab failed" >&2
+    bash "$CRONS" --restore "$CRON_BAK" || resume_incomplete \
+      "install-crons.sh failed to restore the recorded crontab"
   else
-    "$CRONTAB_BIN" "$CRON_BAK" && log "crontab restored verbatim from $CRON_BAK"
+    "$CRONTAB_BIN" "$CRON_BAK" || resume_incomplete \
+      "crontab failed to restore the recorded backup"
+    log "crontab restored verbatim from $CRON_BAK"
   fi
 fi
 
 # --- 3. clear the pause markers and restart the loops ---------------------------------------
-rm -f "$D/stop" "$W/goal-keeper.stop" "$W/stack-watch.stop" "$W/capacity/capacityd.stop" \
-      "$W/paused" "$W/drain" "$W/goal-hold"
-log "drain, goal-hold and the stop files cleared (capacityd.stop included)"
+rm -f "$D/stop" "$W/goal-keeper.stop" "$W/stack-watch.stop" \
+      "$W/capacity/capacityd.stop" "$W/goal-hold"
+log "loop stop files cleared; admission drain retained through postconditions"
 
 mkdir -p "$L" "$W/capacity"
 # capacityd FIRST: without a running controller nothing writes the cap files again, there
@@ -219,11 +233,6 @@ if [ -z "$ONELINE" ]; then
   ONELINE="$(printf '%s\n' "$CAPS_LINES" | awk '{printf "%s=%s ", $1, $2}')speed=$SPEED"
 fi
 MSG="OWNER (resume): the pause is over; the run mode is $ONELINE. Read local/personas/main.md and the last comments on the progress issue, run status-snapshot.sh --prs, dispatch detached workers through local/bin/dispatch.sh until the live count reaches the occupancy floor, and resume the cycle. Every number you report must be measured by you, not copied from this message."
-if tmux has-session -t "$S" 2>/dev/null; then
-  bash "$SAY" --mode interrupt --timeout 300 "$MSG" || echo "$PROG: the resume message was not delivered" >&2
-else
-  echo "$PROG: no tmux session '$S'; start the main session with local/bin/main-session.sh" >&2
-fi
 
 # --- 5. the post-condition check, loud ---------------------------------------------------------
 RC=0
@@ -281,9 +290,29 @@ if [ "$AM_WANT" != unknown ] && [ "$AM" != "$AM_WANT" ]; then
 else
   printf '  %-10s %s (derived from accounts[].enabled)\n' account-mode "$AM"
 fi
-if [ -e "$W/drain" ]; then echo "$PROG: POST-CONDITION: watchdog/drain still exists" >&2; RC=5; fi
+if [ ! -e "$W/drain" ] || [ ! -e "$W/paused" ]; then
+  echo "$PROG: POST-CONDITION: admission pause cleared before validation completed" >&2; RC=5
+fi
 if [ -e "$W/goal-hold" ]; then echo "$PROG: POST-CONDITION: watchdog/goal-hold still exists" >&2; RC=5; fi
 if [ ! -s "$W/max-codex" ]; then echo "$PROG: POST-CONDITION: $W/max-codex is missing or empty" >&2; RC=5; fi
+
+if [ "$RC" -ne 0 ]; then
+  resume_incomplete "the post-condition check failed; fix the lines above"
+fi
+
+# Success has one commit point: no owner notification or committed telemetry
+# precedes restoration and the complete post-condition check.
+rm -f "$W/paused" "$W/drain"
+if [ -e "$W/paused" ] || [ -e "$W/drain" ]; then
+  resume_incomplete "admission pause markers could not be cleared"
+fi
+if tmux has-session -t "$S" 2>/dev/null; then
+  bash "$SAY" --mode interrupt --timeout 300 "$MSG" || \
+    echo "$PROG: the resume message was not delivered" >&2
+else
+  echo "$PROG: no tmux session '$S'; start the main session with local/bin/main-session.sh" >&2
+fi
+rm -f "$W/resume-incomplete"
 
 python3 - "$ROOT/results/telemetry/stages.jsonl" "$PAUSED_AT" "$ONELINE" <<'PY'
 import datetime, json, sys
@@ -303,11 +332,6 @@ if [ "$BR" = main ]; then
     "$ROOT/local/bin/checked-push.sh" --repo-root "$ROOT" github refs/heads/main:refs/heads/main \
       || echo "$PROG: the resume telemetry stays committed locally" >&2
   fi
-fi
-
-if [ "$RC" -ne 0 ]; then
-  echo "$PROG: RESUME INCOMPLETE — the post-condition check failed; fix the lines above" >&2
-  exit "$RC"
 fi
 log "resumed at $(date -u +%FT%TZ)"
 exit 0

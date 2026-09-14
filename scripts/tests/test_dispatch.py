@@ -148,7 +148,7 @@ class DispatchCommandTests(unittest.TestCase):
                 subprocess.run(dispatch_args, cwd=repo, env=env, check=True, capture_output=True)
             selected = "second" if account == "second" else "primary"
             self.assertEqual((home / "selected-home").read_text(),
-                             str(second) if selected == "second" else "unset")
+                             str(second) if selected == "second" else str(primary))
             self.assertFalse(list((root / "cache" / "accounts").glob("*/[0-9]*")))
             records = (repo / "results" / "telemetry" / "sessions.jsonl").read_text(
                 encoding="utf-8"

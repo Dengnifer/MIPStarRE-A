@@ -41,8 +41,8 @@ the **only** artifact the owner authors for a run.
 
 **Nothing else holds a capacity decision.** `accounts[].enabled` is the only
 statement of which keys a run may use, and `run_mode.py apply`, `pause` and
-`resume` DERIVE `watchdog/account-mode` from it (`both` when more than one
-account is enabled, `primary` otherwise). That file is what the deployed PATH
+`resume` DERIVE `watchdog/account-mode` from it (`both` whenever `second` is
+enabled, `primary` otherwise). That file is what the deployed PATH
 shim reads before it lets a dispatch use a `CODEX_HOME` other than `~/.codex`;
 while it says `primary` every such dispatch exits 4 with `primary-only policy`.
 It was previously written by hand and nothing in the brief path touched it, so a

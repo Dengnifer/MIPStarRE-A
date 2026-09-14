@@ -24,7 +24,7 @@ Subcommands::
 (``owner-tools/owner-resume.sh``) carry, so neither has to name a number.
 
 ``watchdog/account-mode`` is DERIVED from ``accounts[].enabled`` by ``apply``,
-``pause`` and ``resume`` — ``both`` when more than one account is enabled and
+``pause`` and ``resume`` — ``both`` whenever ``second`` is enabled and
 ``primary`` otherwise — because the deployed PATH shim reads it before it lets a
 dispatch use a second ``CODEX_HOME``.  It is not a field anyone briefs.
 
@@ -1137,14 +1137,41 @@ def regenerate_crontab(*, dry_run: bool = False) -> str:
     return f"crontab regenerated for the new estimate cadence through {path}"
 
 
-def call_controller(command: str) -> tuple[bool, str]:
+def call_controller(command: str, *, run_mode: Path | None = None,
+                    dry_run: bool = False) -> tuple[bool, str]:
     path = controller_path()
     if not path.exists():
         return (False, "not installed")
-    proc = subprocess.run([sys.executable, str(path), command],
+    argv = [sys.executable, str(path)]
+    if run_mode is not None:
+        argv.extend(["--run-mode", str(run_mode)])
+    argv.append(command)
+    if dry_run:
+        argv.append("--dry-run")
+    proc = subprocess.run(argv,
                           capture_output=True, text=True)
     detail = (proc.stdout + proc.stderr).strip()[:800]
     return (proc.returncode == 0, detail or f"exit {proc.returncode}")
+
+
+def _apply_outputs() -> list[Path]:
+    root = watchdog_dir()
+    return [mode_path(), *(root / name for name in cap_values({}).keys()),
+            root / "capacity/state.json", root / "capacity/limit-estimate.json",
+            *(root / f"capacity/health-{name}.json" for name in ACCOUNT_NAMES),
+            cache_root() / MODEL_OVERRIDE_REL, cache_root() / ACCOUNT_MODE_REL]
+
+
+def _snapshot(paths: list[Path]) -> dict[Path, bytes | None]:
+    return {path: (path.read_bytes() if path.is_file() else None) for path in paths}
+
+
+def _restore(snapshot: dict[Path, bytes | None]) -> None:
+    for path, content in snapshot.items():
+        if content is None:
+            path.unlink(missing_ok=True)
+        else:
+            atomic_write(path, content.decode("utf-8"))
 
 
 # ---------------------------------------------------------------------------
@@ -1186,15 +1213,35 @@ def cmd_apply(args: argparse.Namespace) -> int:
         previous_paused = bool(load_mode().get("paused"))
     except LayerError:
         pass
-    path = write_mode(mode)
-    ok, detail = call_controller("init")
-    if detail == "not installed":
-        write_caps(caps)
-    elif not ok:
-        raise Refused(f"capacity_controller.py init failed: {detail}\n"
-                      "The installed controller owns the cap files; fix it and re-run apply.")
-    override_note = write_model_override(mode)
-    account_mode_note = write_account_mode(mode)
+    watchdog_dir().mkdir(parents=True, exist_ok=True)
+    candidate = watchdog_dir() / ".run-mode.apply.json"
+    lock = (watchdog_dir() / ".run-mode.apply.lock").open("a")
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    snapshot = _snapshot(_apply_outputs())
+    try:
+        atomic_write(candidate, json.dumps(mode, indent=1, ensure_ascii=False) + "\n")
+        ok, detail = call_controller("init", run_mode=candidate, dry_run=True)
+        controller_installed = detail != "not installed"
+        if controller_installed and not ok:
+            raise Refused(f"capacity_controller.py init failed: {detail}\n"
+                          "The installed controller owns the cap files; fix it and re-run apply.")
+        path = write_mode(mode)
+        override_note = write_model_override(mode)
+        account_mode_note = write_account_mode(mode)
+        if controller_installed:
+            ok, detail = call_controller("init", run_mode=candidate)
+            if not ok:
+                raise Refused(f"capacity_controller.py init failed: {detail}\n"
+                              "The installed controller owns the cap files; fix it and re-run apply.")
+        else:
+            write_caps(caps)
+    except Exception:
+        _restore(snapshot)
+        raise
+    finally:
+        candidate.unlink(missing_ok=True)
+        fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
     # Hand the briefed caps to the capacity controller, which is the sole writer
     # of watchdog/capacity/state.json and therefore the thing `pause` asks to
     # save them and `resume` asks to restore them.  Without this seed the
@@ -1485,6 +1532,9 @@ def main(argv: list[str] | None = None) -> int:
         return 3
     except LayerError as exc:
         sys.stderr.write(f"run_mode.py: {exc}\n")
+        return 2
+    except OSError as exc:
+        sys.stderr.write(f"run_mode.py: runtime write failed ({exc})\n")
         return 2
     except (KeyError, TypeError, ValueError) as exc:
         # A hand-edited run-mode.json is unknown, not zero: say so and stop.

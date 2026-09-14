@@ -7,8 +7,8 @@ change, and the telemetry duties that make the project usable as research data.
 
 1. **Protocols are normative until amended.** An agent that finds a protocol
    wrong, ambiguous, or costly does not silently deviate: it follows the
-   protocol (or stops), records the friction in
-   `results/telemetry/events.md`, and proposes an amendment — a dispatched
+   protocol (or stops), records the friction with `telemetry.py event` in
+   `results/telemetry/events.d/`, and proposes an amendment — a dispatched
    worker proposes it to the operator; the operator amends directly under the
    procedure below, an `events.md` incident being a sufficient trigger.  Owner
    sign-off is needed only for the escalations named in the standing briefing.
@@ -34,7 +34,8 @@ change, and the telemetry duties that make the project usable as research data.
 
 ## Amendment procedure
 
-1. Write the incident/observation in `results/telemetry/events.md` (dated).
+1. Write the dated incident/observation with `telemetry.py event`; new entries
+   belong in `results/telemetry/events.d/`, never the historical `events.md`.
 2. Draft the protocol edit.
 3. Append to `local/protocols/EVOLUTION.md`:
    `## YYYY-MM-DD — <short title>` with fields **Trigger** (cite events.md
@@ -84,7 +85,7 @@ Schemas (all JSONL, one object per line; timestamps ISO-8601 with offset):
   model turn: it is **not** a failed attempt and must not be scored against a
   proof packet's budget. `failure_class` is one of `none`, `refused`,
   `endpoint_down`, `concurrency_limit`, `endpoint_5xx`, `retries_exhausted`,
-  `timeout`, `task_failure`, `unknown` (`sessions.md` §4.1); `unknown` is the
+  `timeout`, `task_failure`, `auth`, `unknown` (`sessions.md` §4.1); `unknown` is the
   safe default and the capacity controller treats it as neutral. `key_label` is
   recorded for **both** accounts and matches `[a-z0-9.-]{1,40}`; `endpoint` is
   on every row, so a key moved between homes keeps the identity failures and

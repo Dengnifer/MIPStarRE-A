@@ -75,8 +75,9 @@
 #   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
 #   LOCAL_REVIEW_ENABLED.
 #   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
-#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home;
-#   overrides the brief's accounts[].codex_home, which is the default source).
+#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_PRIMARY and
+#   MIPSTARRE_CODEX_HOME_SECOND (account-home overrides; the brief's
+#   accounts[].codex_home is the default source).
 #   MIPSTARRE_DISPATCH_ATTEMPTS (default 5), MIPSTARRE_DISPATCH_ATTEMPT (the
 #   attempt this invocation starts at, default 1), MIPSTARRE_DISPATCH_BACKOFF_S
 #   (base, default 30), MIPSTARRE_DISPATCH_BACKOFF_MAX_S (cap, default 600),
@@ -1217,19 +1218,16 @@ while :; do
   export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
   resolve_labels "$ACCOUNT"
   ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
-  if [ "$ACCOUNT" = second ]; then
-    # The BRIEF decides which home the second key uses.  `accounts[].codex_home`
-    # is validated by run_mode.py and exposed as `get codex_home.<account>`;
-    # reading `endpoint` and `label` from the run mode but not this one left the
-    # field inert, the same class the round-2 review fixed for run.main and
-    # models.override.  The environment variable stays as the override, and the
-    # 2026-09-12 path is the last fallback.
-    SECOND_HOME="$(run_mode_field codex_home.second)"
-    [ -n "${MIPSTARRE_CODEX_HOME_SECOND:-}" ] && SECOND_HOME="$MIPSTARRE_CODEX_HOME_SECOND"
-    [ -n "$SECOND_HOME" ] || SECOND_HOME="$HOME/.cache/mipstarre-dev/codex-home-yxy"
-    case "$SECOND_HOME" in "~/"*) SECOND_HOME="$HOME/${SECOND_HOME#\~/}" ;; esac
-    ACCOUNT_ENV+=("CODEX_HOME=$SECOND_HOME")
+  ACCOUNT_HOME="$(run_mode_field codex_home.$ACCOUNT)"
+  if [ "$ACCOUNT" = primary ]; then
+    [ -n "${MIPSTARRE_CODEX_HOME_PRIMARY:-}" ] && ACCOUNT_HOME="$MIPSTARRE_CODEX_HOME_PRIMARY"
+    [ -n "$ACCOUNT_HOME" ] || ACCOUNT_HOME="$HOME/.codex"
+  else
+    [ -n "${MIPSTARRE_CODEX_HOME_SECOND:-}" ] && ACCOUNT_HOME="$MIPSTARRE_CODEX_HOME_SECOND"
+    [ -n "$ACCOUNT_HOME" ] || ACCOUNT_HOME="$HOME/.cache/mipstarre-dev/codex-home-yxy"
   fi
+  case "$ACCOUNT_HOME" in "~/"*) ACCOUNT_HOME="$HOME/${ACCOUNT_HOME#\~/}" ;; esac
+  ACCOUNT_ENV+=("CODEX_HOME=$ACCOUNT_HOME")
 
   CODEX_ARGS=(exec)
   CODEX_ARGS[${#CODEX_ARGS[@]}]="--json"

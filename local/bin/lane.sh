@@ -286,6 +286,8 @@ if [ "$SKIP_DISPATCH" != 1 ]; then
     break
   done
   log "dispatch exit $DRC"
+  [ "$DRC" -eq 0 ] || fail dispatch-failed \
+    "worker exited $DRC; committed output is not eligible for merge, build or publication"
   if [ -n "$(git -C "$W" status --porcelain)" ]; then
     fail uncommitted-worker-changes "worker left uncommitted changes (see $STATE/$N.dispatch.log)"
   fi
@@ -363,10 +365,16 @@ release_build_lock
 # tree and SHA re-verification.
 log "opening PR"
 PRB="$STATE/$N.pr.md"
-{ echo "## Motivation"; echo; echo "Stage 4.3 proof packet for issue #$N (see the issue body for targets, sources and plan)."; echo
-  echo "## Description"; echo; git -C "$W" log --format="- %s" "$BEFORE..$AFTER"; echo
-  echo "## Testing"; echo; echo "Worker checked every changed file with \`lake env lean\`; exact-head CI and review follow."; } > "$PRB"
-PR="$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$ISSUE_TITLE" \
+PR_TITLE_RE='^(feat|fix|refactor|docs|style|ci|chore)\([^)]+\):[[:space:]].+'
+if [[ "$ISSUE_TITLE" =~ $PR_TITLE_RE ]]; then
+  PR_TITLE="$ISSUE_TITLE"
+else
+  PR_TITLE="feat(QPBT): $ISSUE_TITLE"
+fi
+{ echo "### Motivation"; echo; echo "Stage 4.3 proof packet for issue #$N (see the issue body for targets, sources and plan)."; echo
+  echo "### Description"; echo; git -C "$W" log --format="- %s" "$BEFORE..$AFTER"; echo
+  echo "### Testing"; echo; echo "Worker checked every changed file with \`lake env lean\`; exact-head CI and review follow."; } > "$PRB"
+PR="$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$PR_TITLE" \
       --body-file "$PRB" --label formalization)" \
   || fail pr-open-failed "pr_open failed for #$N on $BR (see the lane log); not publishing by any other path"
 [ -n "$PR" ] || fail pr-open-failed "pr_open returned no PR number for #$N"

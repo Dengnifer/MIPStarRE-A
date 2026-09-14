@@ -466,7 +466,8 @@ PY
       # autofix -> review -> autofix cycle — the very cycle the guard exists to
       # refuse — was reachable from here.  The rounds still get a clean child
       # environment, because only this review invocation carries it.
-      MIPSTARRE_AUTOFIX_ACTIVE=1 "$ROOT/local/bin/review.sh" "$PR_ARG" </dev/null ||
+      MIPSTARRE_AUTOFIX_ACTIVE=1 "$ROOT/local/bin/review.sh" "$PR_ARG" --force-review \
+        </dev/null ||
         warn "review.sh exited nonzero for $head; re-reading the verdict anyway"
     else
       die "local/bin/review.sh not found; a loop that cannot review cannot terminate"

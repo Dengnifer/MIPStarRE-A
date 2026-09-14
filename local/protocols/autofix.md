@@ -387,6 +387,12 @@ outcome to `autofix/<pr>/round-result.json` (`fixed`, `no-change`,
 `nothing-to-fix`, `cap`, `failed`, `dirty`, `superseded`, `disabled`,
 `not-open`) and the driver branches on that record, never on log text.
 
+Because every successful round creates a bot-prefixed head, the bounded loop
+uses `review.sh --force-review` for that new head; without the forced path the
+ordinary bot-commit guard would skip the review and leave no verdict. This does
+not authorize an unbounded or stand-alone forced review: the same round cap,
+recursion guard, lock and exact-head verdict checks remain in force.
+
 The verdict is re-read **for the new head SHA** through the per-head marker
 `<!-- mipstarre-review pr=N head=SHA -->`, exactly as §3's review-fix
 precondition does: a verdict written against an older head is not evidence about

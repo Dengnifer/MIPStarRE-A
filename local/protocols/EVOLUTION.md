@@ -1559,3 +1559,18 @@ runtime state changes.
 **Expected effect:** operators can use retained spool data as diagnostic
 evidence without inferring that the janitor will reconstruct or deliver a
 dispatch after the original process exits.
+
+## 2026-09-14 - Control-plane success waits for complete evidence (PR 552 F1-F11)
+
+**Trigger:** `results/telemetry/events.d/2026-09-14-orc-550-20260914-03.md`
+records the eleven original-contract gaps reported by independent review
+5194069399 against issue 550 comment 5645251655.
+
+**Change:** `autofix.md`, `review.md`, `sessions.md`, `full-speed-mode.md` and
+`meta.md` now match the bounded forced-review loop, brief-derived two-account
+homes, second-only account mode, active event shards and the `auth` failure
+class. Coupled scripts make apply and resume transactional and park failed lanes.
+
+**Expected effect:** publication, notification and success telemetry cannot
+outrun their final verdict or postcondition, while failed transitions preserve
+the previous coherent runtime state.

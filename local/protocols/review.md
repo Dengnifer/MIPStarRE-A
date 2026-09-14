@@ -161,8 +161,11 @@ calls `review.sh <id> --force-review` once when the cap is reached — after
 **releasing its own fix lock** (`release_fix_lock` in `autofix.sh`), because
 `review.sh` refuses to run while the branch's fix lock has a live holder and
 that holder would otherwise be the very process asking for the review.
-`--force-review` is the only way past rung 7.  Do not use it to "just get a
-review" of a bot commit; that reopens the cascade one commit at a time.
+`--force-review` is the only way past rung 7. The explicit bounded
+`autofix.sh --loop` driver also uses it after each successful round, because a
+bot-prefixed head otherwise receives no verdict; its recursion guard and shared
+iteration cap keep that exception inside the declared loop. Do not use it to
+"just get a review" outside those bounded paths.
 
 ## 6. What the reviewer must return
 
