@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
+import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.PauliBasisTest
 
 /-!
