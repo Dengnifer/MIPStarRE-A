@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Lines.MixedResampling
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
+import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
 # Nondegenerate pasting parameter resampling
@@ -19,6 +20,11 @@ open MIPStarRE.LDT
 
 noncomputable section
 
+/-- Normalized conditional averages rewrite as the unnormalized restricted
+average divided by the retained mass. This formalization-only identity is the
+division form of `avgOver_restrict_mul_mass`; it supports the proof-only
+conditioning step in `lem:qld-xz-lines`, paper
+`14_analysis_of_the_pauli_basis_test.tex:950-963`. -/
 private theorem avgOver_restrict_eq {α : Type*} [DecidableEq α]
     (μ : Distribution α) (p : α → Prop) [DecidablePred p]
     (hpos : 0 < ∑ a ∈ μ.support.filter p, μ.weight a) (g : α → ℝ) :
@@ -26,21 +32,20 @@ private theorem avgOver_restrict_eq {α : Type*} [DecidableEq α]
       avgOver μ (fun a => if p a then g a else 0) /
         ∑ a ∈ μ.support.filter p, μ.weight a := by
   classical
-  unfold avgOver Distribution.restrict
-  change (∑ a ∈ μ.support.filter p,
-      (if p a then μ.weight a / _ else 0) * g a) =
-    (∑ a ∈ μ.support, μ.weight a * (if p a then g a else 0)) / _
-  rw [Finset.sum_div, Finset.sum_filter]
+  rw [eq_div_iff (ne_of_gt hpos), mul_comm, avgOver_restrict_mul_mass]
+  unfold avgOver
+  rw [Finset.sum_filter]
   refine Finset.sum_congr rfl ?_
   intro a _
-  by_cases hp : p a
-  · simp [hp]
-    ring
-  · simp [hp]
+  by_cases hp : p a <;> simp [hp]
 
 /-- Uniformly resampling the point on the conditioned X line preserves every
 scalar average under the nondegenerate pasting law. The line descriptor is
-unchanged, so the nonzero-direction event is preserved exactly. -/
+unchanged, so the nonzero-direction event is preserved exactly. This
+formalization-only identity supplies the resampling used by the
+Schwartz-Zippel step of `lem:qld-xz-lines`, paper
+`14_analysis_of_the_pauli_basis_test.tex:950-955`; it conditions no game
+distribution and adds no hypothesis. -/
 theorem avgOver_nondegenerateLinePastingDist_resample_parameter (L : LdParams)
     (value : (((LineDesc L × LineDesc L) ×
       (LineDesc L × (Fin L.m → ScalarQ L))) ×
