@@ -2621,7 +2621,7 @@ actual readout in either block and scalar order.
 If the coefficient of $\alpha$ is independent of $z$ and the coefficient
 of $\beta$ is independent of $x$, there is a pair of individual-degree-$d$
 polynomials $(g_X,g_Z)$ such that the field-transported outcome equals
-$\combine_{g_X,g_Z}$ as a formal polynomial.
+$\mathrm{combine}_{g_X,g_Z}$ as a formal polynomial.
 \end{theorem}
 \begin{proof}
 \leanok
@@ -2693,7 +2693,7 @@ $W_p^{XZ}(R)$ be the sum of $\|(R_g)_p\hat\psi\|^2$ over scalar-linear
 outcomes whose beta coefficient depends on $x$. Define $W_p^{ZX}(R)$
 using the alpha coefficient depending on $z$.
 Let $G_p(R)$ be the same mass sum outside the field-transported image of
-the existing bounded combining map $(g_X,g_Z)\mapsto\combine_{g_X,g_Z}$.
+the existing bounded combining map $(g_X,g_Z)\mapsto\mathrm{combine}_{g_X,g_Z}$.
 \end{definition}
 
 \begin{theorem}[Actual wrong-variable and separated masses]
@@ -3215,7 +3215,7 @@ nonnegative domains.
 \lean{MIPStarRE.QPBT.completedPairMeasurement_effect}
 \lean{MIPStarRE.QPBT.completedPairMeasurement_projective}
 \leanok
-For admissible parameters, write $j(g_X,g_Z)=\combine_{g_X,g_Z}$.
+For admissible parameters, write $j(g_X,g_Z)=\mathrm{combine}_{g_X,g_Z}$.
 Substituting the scalar coordinates $(1,0)$ and $(0,1)$ and setting the
 unused base block to zero recovers the two formal polynomials, so $j$ is
 injective without any field-size restriction. Evaluation satisfies
@@ -3250,7 +3250,7 @@ the actual rounded measurement by $e$; its effect at $h$ is exactly
 $R_{e^{-1}(h)}$. Apply Definition~\ref{def:qld-pair-restriction-completion}
 to obtain $C$. This preserves projectivity and every outcome.
 Membership in the range of $j_{\rm dir}$ is precisely equality, after field
-transport, to $\combine_{g_X,g_Z}$ for a bounded pair. The actual direct
+transport, to $\mathrm{combine}_{g_X,g_Z}$ for a bounded pair. The actual direct
 readout of $j_{\rm dir}(g_X,g_Z)$ is
 $\alpha g_X(x)+\beta g_Z(z)$ under the joint question equivalence.
 \end{definition}
