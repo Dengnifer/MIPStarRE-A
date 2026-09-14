@@ -6,8 +6,7 @@ import MIPStarRE.QPBT.Extraction.PullingDefect
 
 The difference-polynomial measurements reduce observable self-consistency to
 point self-consistency and polynomial collision. The global witness remains
-an explicit premise. This module also re-exports the marginal and point
-consistency declarations.
+an explicit premise.
 
 ## References
 

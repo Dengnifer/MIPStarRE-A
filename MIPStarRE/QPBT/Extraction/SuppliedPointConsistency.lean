@@ -5,15 +5,14 @@ import MIPStarRE.QPBT.Extraction.NonencodingSupport
 /-!
 # Supplied-witness point consistency for extraction
 
-The two point estimates are recovered from PR533 and PR539 without invoking
-any of the unfinished source declarations in `Extraction.Consistency`.
+The two point estimates combine the point-consistency relations of a supplied
+global polynomial-pair measurement with encoding support and polynomial
+collision bounds.
 
 ## References
 
 * `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 * `docs/paper-gaps/qpbt_decoding-identity.tex`.
-* PR533 `d2e021ebba69a3c914b52f6b6f7c3165cb56b120`.
-* PR539 `27f4c8110d0ff41fe834a8bb5b12bab72de44a33`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -102,9 +101,7 @@ decoder identity; see `docs/paper-gaps/qpbt_decoding-identity.tex`.
 point-consistency fields; it is not constructed here from `lem:qld-4-7`.
 Issue #518 and `docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
 Elimination: discharge the construction required by `exists_pulled_apart_consistency`
-using `exists_globalPairWitness`, including its missing zero-error case.
-This conditional proof has no `sorry` dependency and does not use the separate
-obligation `nonencodingMarginalMass_le`. -/
+using `exists_globalPairWitness`, including its missing zero-error case. -/
 theorem tildeM_consistent_pointMeas_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -222,8 +219,7 @@ point-consistency fields; it is not constructed here from `lem:qld-4-7`.
 Issue #519 and `docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
 Elimination: discharge the construction required by the source-facing
 `exists_pulled_apart_consistency` using `exists_globalPairWitness`, including its
-missing zero-error case. This conditional proof has no `sorry` dependency
-and does not use the separate obligation `nonencodingMarginalMass_le`. -/
+missing zero-error case. -/
 theorem tildeM_consistent_pointMeas'_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),

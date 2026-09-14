@@ -13,9 +13,8 @@ The resulting point overlaps are the ones supplied by the global witness.
 - Blueprint `lem:qld-construct-the-paulis`, Item 2.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1495-1545`,
   especially `eq:qld-pulling-2b` and `eq:qld-pulling-12`.
-- The placement and convolution lemmas in the imported `PointConsistency`
-  modules are preserved from PR #539, head
-  `ca866da402947c9ee7e1dd5e935a2782fe0d1602`.
+- The point-placement and convolution identities identify these overlaps with
+  the two consistency relations of the supplied global measurement.
 - Issue #520. These identities do not construct the global witness.
 -/
 

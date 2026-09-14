@@ -17,8 +17,8 @@ mass outside the encoding image by evaluated reference inconsistency.
 - Blueprint `eq:qld-nonencoding-mass` and `lem:qld-nonencoding-mass-bound`.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:197-264,383-418`.
 - `docs/paper-gaps/qpbt_decoding-identity.tex`.
-- The reference and comparison constructions reused here are from commits
-  `55ae7487`, `36c07381`, `ff4c92d1`, `84c7ec43`, and `7f916eb8`.
+- The reference measurements and comparison estimates express the convolution
+  with the ideal Pauli point projectors.
 - These are auxiliary estimates for a supplied witness, not its construction.
 -/
 

@@ -75,8 +75,8 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
         S.placeExtractedRegister side (pauliProj W h))
       (S.idealExpState aux) ≤ delta
 
-/-- Construct every extraction-witness field when the allowed squared error is
-at least four. The auxiliary vector is the normalized original state tensored
+/-- Construct a conditional extraction witness when the allowed squared error
+is at least four. The auxiliary vector is the normalized original state tensored
 with EPR on the auxiliary registers. Both distances are bounded independently
 of the dimensions and the number of Pauli answers.
 

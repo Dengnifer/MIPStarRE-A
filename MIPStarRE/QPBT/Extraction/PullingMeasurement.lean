@@ -20,8 +20,8 @@ restriction on the original marginal.
 - `docs/paper-gaps/qpbt_decoding-identity.tex`; only decoder linearity and its
   left-inverse identity are used here.
 - Issue #520; these auxiliary results do not assert `eq:qld-pulling-cons`.
-- The imported collision estimate is preserved from PR #539 at
-  `ca866da402947c9ee7e1dd5e935a2782fe0d1602`.
+- The collision estimate compares unequal difference polynomials under uniform
+  evaluation.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
