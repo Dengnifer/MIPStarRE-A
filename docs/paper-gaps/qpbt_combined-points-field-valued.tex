@@ -223,11 +223,18 @@ The auxiliary permutation is \leanid{eprCrossSwap} in
 
 The combined-point statement in the blueprint and Lean retains the original
 local spaces, both product orders, and all directed opposite comparisons.
-The blueprint presents the source's binary-refinement proof; the formal
-construction uses the replacement above.\footnote{See
+The source presents the binary-refinement proof: it builds the binary
+refinements $\hat R^\omega_{a,b}$ and then invokes the linearity theorem.
+The blueprint and the formal construction both present the field-valued
+replacement above.\footnote{The source proof is the proof of
 \path{lem:qld-4-10} in
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex} and
-\leanid{exists\_combinedPointsWitness} in
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+whose first step constructs the binary refinements and whose later step
+applies \path{thm:linearity}.  The replacement is stated in the proof of
+\path{lem:qld-4-10} in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}
+(``The formal proof works with field-valued outcomes directly'') and
+formalized as \leanid{exists\_combinedPointsWitness} in
 \path{MIPStarRE/QPBT/Combining/Points.lean}.}
 No hypothesis supplying a common ancilla, approximate linearity, or exact
 same-player commutation is added.  Finite field models and finite nonempty
