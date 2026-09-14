@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Extraction.Observables
+import MIPStarRE.QPBT.Extraction.NonencodingSupport
 
 /-!
 # Consistency of the pulled-apart Pauli measurements
@@ -793,7 +794,9 @@ The estimate is intentionally not folded into a decoder identity; its proof
 must use the point-consistency hypotheses and Schwartz--Zippel. See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #47 tracks this support estimate. -/
+The reference-measurement comparison and collision estimate are proved in
+`NonencodingSupport`. This discharges the support obligation of issues #47
+and #517 for a supplied `GlobalPairWitness`; it does not construct that witness. -/
 theorem nonencodingMarginalMass_le :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -803,7 +806,46 @@ theorem nonencodingMarginalMass_le :
             (side : PlayerSide) (W : PauliKind),
             nonencodingMarginalMass w side W ≤
               deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  classical
+  obtain ⟨C, hC, hreference⟩ := global_marginal_encoding_consistency
+  refine ⟨C, hC, ?_⟩
+  intro P epsilon deltaG hepsilon _ hdeltaG S w side W
+  have hscalar : deltaG + C * Real.sqrt epsilon + (P.m * P.d : ℝ) / P.q ≤
+      deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
+    unfold deltaConstructPaulis
+    rw [Nat.cast_mul]
+    have hratio : 0 ≤ (P.m * P.d : ℝ) / P.q := by positivity
+    nlinarith
+  have href := hreference P epsilon deltaG hepsilon S w W
+  cases side with
+  | alice =>
+      have hmass := mass_outside_encoding_le_evaluated_defect
+        (w.marginalPoly .alice W) (S.encodingPauliMeas .bob W)
+        (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+        (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .bob W)
+      have hbound := hmass.trans
+        ((add_le_add href.1 le_rfl).trans hscalar)
+      unfold nonencodingMarginalMass
+      change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+        stateQForm S.psiHat (S.placeSide .alice
+          (heteroKron ((w.marginalPoly .alice W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+      simp_rw [stateQForm_placeSide_alice_tensor_one S _
+        (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .alice W).pos _)).isHermitian]
+      exact hbound
+  | bob =>
+      have hmass := right_mass_outside_encoding_le_evaluated_defect
+        (S.encodingPauliMeas .alice W) (w.marginalPoly .bob W)
+        (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+        (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .alice W)
+      have hbound := hmass.trans
+        ((add_le_add href.2 le_rfl).trans hscalar)
+      unfold nonencodingMarginalMass
+      change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+        stateQForm S.psiHat (S.placeSide .bob
+          (heteroKron ((w.marginalPoly .bob W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+      simp_rw [stateQForm_placeSide_bob_tensor_one S _
+        (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .bob W).pos _)).isHermitian]
+      exact hbound
 
 /-! ## Consistency of the pulled-apart measurements -/
 
