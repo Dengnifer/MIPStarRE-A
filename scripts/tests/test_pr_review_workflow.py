@@ -105,6 +105,22 @@ class PRReviewWorkflowTests(unittest.TestCase):
             fallback.index('name="diff.patch"'),
         )
 
+    def test_current_reviews_cannot_select_the_retired_native_handler(self) -> None:
+        run_agent = self.local_review.split("run_agent() {", 1)[1].split(
+            "# ------------------------------------------------------------------ arguments", 1
+        )[0]
+        self.assertNotIn("native_review.py", run_agent)
+        self.assertNotIn("MIPSTARRE_NATIVE_REVIEW_ROOT", run_agent)
+        self.assertIn('"$DISPATCH"', run_agent)
+        self.assertIn(
+            "legacy native-review variables are retired and ignored",
+            self.local_review,
+        )
+        self.assertIn(
+            "unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS",
+            self.local_review,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

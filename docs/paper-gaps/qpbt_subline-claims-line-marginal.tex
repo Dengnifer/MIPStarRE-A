@@ -1,0 +1,220 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+\input{command}
+\renewcommand{\ghissue}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+\providecommand{\gapnote}[2]{\par\noindent\textbf{Verdict:} #1 (#2).\par}
+
+\title{The Constructed Measurement in Subline Claim 17-2}
+\author{}
+\date{2026-09-09}
+
+\begin{document}
+\maketitle
+\gapnote{formalization-deviation}{open-proof}
+
+\section{At a glance}
+
+\textbf{Difficulty.} The domain correction is elementary; the remaining
+formal estimate requires the project's state-dependent Cauchy--Schwarz and
+restricted-distribution arguments. \textbf{Estimated weight.} The correction
+affects two Lean modules and their blueprint correspondence. It retains the
+unfinished scalar estimate and isolates the existing pasting consistency
+obligation. \textbf{Mathlib/project split.} Finite sums, positivity, and real
+square roots use Mathlib; the measurement construction and subline law use
+the local quantum API. \textbf{Key mathematical inputs.} Completeness of a
+POVM, projectivity, and Cauchy--Schwarz suffice for the counterexample and
+the proposed source proof. The counterexample below is a mathematical
+calculation, not a kernel-certified Lean instance.
+
+\section{Key theorem forms}
+
+Let $\widehat\psi$ be the normalized expanded state of a projective strategy
+winning the Pauli basis test with probability at least $1-\eps$. Write
+$L^W_f(\ell)$ and $M^W_a(u)$ for its expanded line and point effects. For
+the subline law $D$, abbreviate the two correlations by
+\begin{align*}
+ A(T)&=\E_D\E_{(x,z,\alpha,\beta)\in\ell}
+   \sum_{f_X,f_Z}\langle\widehat\psi,
+   (T^{\ell_X,\ell_Z}_{f_X,f_Z}\ot
+     M^Z_{f_Z(z)}(z)M^X_{f_X(x)}(x))\widehat\psi\rangle,\\
+ B(T)&=\E_D\E_{(x,z,\alpha,\beta)\in\ell}
+   \sum_{f_X,f_Z}\langle\widehat\psi,
+   (T^{\ell_X,\ell_Z}_{f_X,f_Z}\ot
+     M^Z_{f_Z(z)}(z))\widehat\psi\rangle.
+\end{align*}
+The paper's Claim 17-2 states
+\[
+ |A(T)-B(T)|\leq O\bigl(m\sqrt{\delta_{\mathrm{Line}}(\eps)}\bigr)
+ \quad\text{for}\quad
+ T^{\ell_X,\ell_Z}_{f_X,f_Z}
+ =L^X_{f_X}(\ell_X)L^Z_{f_Z}(\ell_Z)L^X_{f_X}(\ell_X).
+\]
+The former Lean declaration quantified instead over every paired-line POVM
+with the degree support and evaluated consistency conclusions of the
+combined-lines lemma. Its scalar errors $\delta_P,\delta_Q$ were arbitrary,
+independently of $\eps$. The right-hand side remained the same, with
+$\delta_{\mathrm{Line}}(\eps)=\sqrt\eps$.
+
+\section{The construction used by the source}
+
+The paired-line measurement is defined by the displayed sandwich in the
+proof of the combined-lines lemma. Claim 17-2 uses this definition to sum
+over the Z polynomial:
+\[
+ \sum_{f_Z}T^{\ell_X,\ell_Z}_{f_X,f_Z}
+ =L^X_{f_X}(\ell_X)
+   \Bigl(\sum_{f_Z}L^Z_{f_Z}(\ell_Z)\Bigr)L^X_{f_X}(\ell_X)
+ =L^X_{f_X}(\ell_X).
+\]
+The last equality uses completeness and projectivity. Cauchy--Schwarz
+reduces the scalar difference to the square root of the resulting
+X-line/point consistency deficit. The separate X marginal of the subline
+law is sufficient; no joint conditional law for $(x,z)$ is needed.
+Restriction to a line kind and coordinate costs a factor $2m$, so the
+resulting square-root estimate is bounded by the paper's stated error
+because $m\geq1$.\footnote{The construction is at lines 942--949 and the
+claim and calculation at lines 1168--1201 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+labels \path{lem:qld-xz-lines} and \path{claim:17-2} in
+\cite{Ji2020MIPStar}. The repair is tracked by \ghissue{414}; the earlier
+proof attempt is \ghissue{405}.}
+
+\section{A counterexample to the enlarged domain}
+
+Choose an admissible tuple with $q>1$ and a perfect projective strategy.
+The honest strategy in the completeness lemma supplies one; for example,
+$(q,m,d)=(8,1,1)$ is admissible. Its expanded state has norm one. For
+$a\in\F_q$, let $c_a$ be the constant polynomial with value $a$. For both
+players and every line pair, define a POVM by
+\[
+ T_{c_a,c_b}=q^{-2}I\quad(a,b\in\F_q),\qquad
+ T_{f_X,f_Z}=0\quad\text{for every other pair}.
+\]
+There are $q^2$ nonzero effects, so they sum to $I$. Both axis-degree
+requirements hold. At any incident point a constant polynomial has a
+uniquely determined value, even on a zero-direction line. Thus the optional
+evaluation in Lean returns the ordinary field value, never an undefined
+outcome, for every nonzero effect in this example.
+
+The evaluated POVM is uniform on the $q^2$ point pairs. Against any complete
+joint point measurement $Q$, its agreement is $q^{-2}$ and its consistency
+defect is $1-q^{-2}$. Therefore the line-witness requirements hold with
+$\delta_P=1$ in every opposite placement. A point witness also exists within
+the former public domain: take the projective measurement which always
+answers $(0,0)$. It is exactly self-consistent and has both ordered-product
+distances at most $4$. Indeed, the squared norms of either ordered product
+family sum to one, by projectivity and completeness, and
+\begin{align*}
+ \sum_{a,b}\|(Q_{a,b}-M^X_aM^Z_b)\widehat\psi\|^2
+ &\leq 2\sum_{a,b}\|Q_{a,b}\widehat\psi\|^2\\
+ &\quad+2\sum_{a,b}\|M^X_aM^Z_b\widehat\psi\|^2\\
+ &=4.
+\end{align*}
+The reversed ordering satisfies the same calculation. Hence $\delta_Q=4$
+is allowed by every point-witness field. These constants are permitted by
+the former scalar quantifiers; the argument does not require them to be
+polynomially small functions of $\eps$.
+
+For each supported subline sample, completeness gives
+\[
+ A(T)=q^{-2}\sum_{a,b}\langle\widehat\psi,
+    (I\ot M^Z_bM^X_a)\widehat\psi\rangle=q^{-2},
+ \qquad
+ B(T)=q^{-2}\sum_{a,b}\langle\widehat\psi,
+    (I\ot M^Z_b)\widehat\psi\rangle=q^{-1}.
+\]
+The first equality uses $\sum_bM^Z_b\sum_aM^X_a=I$, without a commutation
+assumption. Probability averaging preserves these constants. The absolute
+difference is therefore $(q-1)/q^2>0$, whereas the claimed bound is zero at
+$\eps=0$. For $q=8$ the difference is $7/64$. The same perfect strategy is
+admissible at arbitrarily small positive $\eps$, so excluding zero or
+enlarging a universal constant cannot repair the claim. No polynomially
+vanishing error depending on $\eps$ alone absorbs this difference.
+
+\section{Blueprint and formal comparison}
+
+The concrete measurement domain is retained. The scalar obligation now
+compares complex expectations with the complex modulus, preserving the
+universal constant, factor $m$, and square-root error. It is named
+\leanid{subline\_remove\_X\_factor\_direct}. Its distribution is still the
+directly indexed law represented by \leanid{SubLineWitness}, not the
+source law $D$. Thus it is a formalization-only obligation, linked from
+\path{lem:claim-17-2-direct}, and is not a formalization of the source
+claim. The source statement remains at \path{lem:claim-17-2}, with neither
+a Lean link nor a completion mark.
+
+The same scalar distinction affects Claim 17-1: an ordered product
+$M^Z_bM^X_a$ need not be Hermitian, so a bound on the real part of its
+correlation does not bound its complex modulus. The proved real-part
+estimate is retained as
+\leanid{subline\_replace\_by\_ordered\_product\_re\_direct}.
+Its constant is $2\sqrt{\delta_Q}$: the squared-distance comparison on
+one placement is $4\delta_Q$ and uses $W^\dagger W$, not $W^2$.
+The source Claim 17-1 remains a separate uncertified blueprint statement.
+Likewise \leanid{subline\_Z\_term\_near\_one\_re\_direct} retains the
+proved real Z-overlap estimate with its directly indexed domain explicit.
+No reality or distribution-transport theorem is asserted by these renamings.
+The three existing source blueprint statements are reused; no duplicate
+source theorem with a new proof hole is introduced.
+
+The distribution discrepancy is documented in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}. Admissibility
+does not supply the divisibility needed to instantiate the source line law
+at dimension $2m+2$. The current correction neither adds that divisibility
+as a hypothesis nor identifies the directly indexed law with the source law.
+Scalar realignment is tracked in \ghissue{474} and review of PR~478.
+The distribution and complex-overlap work under \ghissue{118} remains open;
+its historical budget is unchanged.
+
+The abstract combined-line witness record remains unchanged. Its fields
+faithfully express the existential conclusion of the combined-lines lemma,
+but do not characterize the construction used in its proof. The internal
+consistency obligation now refers to the concrete sandwich. Both witness
+existence proofs construct their records with that measurement. A later
+argument needing the exact construction can use the consistency obligation
+and the same explicit record; merely choosing an unspecified existential
+witness does not recover its defining formula.\footnote{The Lean-only
+obligation is \leanid{combined\_line\_measurement\_consistency} in
+\path{MIPStarRE/QPBT/Combining/Lines.lean}. Its hypotheses explicitly supply
+a polynomially controlled point family. It retains the previously
+unfinished consistency proof, to be discharged by the source's point-to-line
+comparisons and pasting argument. The source-facing
+\leanid{exists\_combinedLinesWitness} has an unchanged statement.}
+
+There are two retained direct proof holes in the affected modules.
+The first is \leanid{subline\_remove\_X\_factor\_direct}: apply complex
+weighted Cauchy--Schwarz to bound $|A(T)-B(T)|$ by the square root of the
+X-overlap deficit, then use the already proved
+\leanid{exists\_concreteXPointOverlap\_deficit\_le}. That estimate already
+uses \leanid{combinedLineMeasurement\_sum\_Z}, expanded line-point
+consistency, and the separate X marginal of the directly indexed law.
+Transport of this argument and of the real-part estimates to the source
+law, including the complex estimate of Claim 17-1, is a separate remaining
+obligation. No additional hole is introduced for that transport.
+
+The second is \leanid{combined\_line\_measurement\_consistency}.
+It must prove consistency of the same unconditioned X-Z-X measurement
+with the supplied polynomially controlled joint point family on the
+original product of line-point distributions, in every opposite placement.
+The target and its discharge by the source point-to-line comparison and
+pasting argument are described in
+\path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}.
+No marginal identity, deficit bound, or producer is added to a paper theorem.
+
+\section{Conclusion}
+
+The discrepancy lies in the formal quantification over arbitrary witnesses,
+not in the paper's constructed-measurement assertion. The counterexample
+forces a domain correction. Using the defined sandwich restores the measurement domain. The complex
+scalar conclusion is restored for the directly indexed auxiliary obligation;
+transport to the source distribution and the consistency construction remain
+open. The source claims themselves retain their complex-modulus statements
+without unsupported formalization marks.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+\end{document}

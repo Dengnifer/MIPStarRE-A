@@ -64,19 +64,6 @@ theorem evalCoefficient_coefficientsOfPolynomial {K : Type*} [Semiring K] {n : �
     ← Fin.sum_univ_eq_sum_range (fun i => p.coeff i * t ^ i) (n + 1)]
   rfl
 
-/-- The polynomial of a bounded coefficient vector has degree at most `n`. -/
-theorem linePolynomialOfCoefficients_natDegree_le {K : Type*} [Semiring K] {n : ℕ}
-    (f : Fin (n + 1) → K) :
-    (linePolynomialOfCoefficients f).natDegree ≤ n := by
-  refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun i _ => ?_
-  refine le_trans (Polynomial.natDegree_C_mul_le _ _) ?_
-  calc (Polynomial.X ^ i.val : Polynomial K).natDegree
-      ≤ i.val * (Polynomial.X : Polynomial K).natDegree :=
-        Polynomial.natDegree_pow_le
-    _ ≤ i.val * 1 := Nat.mul_le_mul_left _ Polynomial.natDegree_X_le
-    _ = i.val := mul_one _
-    _ ≤ n := Nat.lt_succ_iff.mp i.isLt
-
 /-- The affine reparametrization `t ↦ evalCoefficient f (t + s)` of a bounded
 coefficient vector, as a univariate polynomial. -/
 def shiftedLinePolynomial {K : Type*} [CommSemiring K] {n : ℕ}
