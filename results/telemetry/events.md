@@ -8384,3 +8384,8 @@ not actual commit/publication hooks. No productive session was killed.
   main over to cpa (then relay keys) if space-d runs out, and CUTS OFF development (caps 0, keeper stopped, daemons kept) when only one
   OpenAI key is usable (owner rule 13:4xZ). Open: issue #560 (Opus workflow on the meta's side still building; its PR is recorded when
   it lands), lanes 413/463/494 mid-merge repairs handed to the main's Opus subagents, PR 552 ruling conditions, cpa web search.
+- 14:05Z Opus workflow for issue #560 done (rows opus-build-560, opus-review-560-rev-a/rev-b, opus-fix-560 in owner-sessions.jsonl):
+  PR 561 (soft-landing pause: --cutoff word, age-based landing in local/bin/pause_landing.py, pause manifest, owner-resume.sh resuming
+  parked lanes and checkpointed provers, prover milestone commits; 10 budget-sized commits, 1141 tests, CI green at 082b3b3f), stacked
+  on PR 552. Two adversarial reviews (33 findings, 9 blockers) fixed before publication. Merge order amended: 552 → 556 → 561 → 554.
+  The meta stays retired.
