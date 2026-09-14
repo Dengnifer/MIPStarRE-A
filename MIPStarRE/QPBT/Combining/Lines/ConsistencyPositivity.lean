@@ -1,5 +1,5 @@
-import MIPStarRE.QPBT.Combining.Points.PlacementSupport
 import MIPStarRE.QPBT.Combining.Witnesses
+import MIPStarRE.QPBT.Combining.Points.Placement
 
 /-!
 # Positivity of the consistency defect on opposite placements
@@ -11,7 +11,11 @@ opposite registers is a state quadratic form of a positive operator.  Indeed,
 after separating the two placements along the corresponding tensor
 bipartition, the off-diagonal sum is
 `∑_a (place p₁ E_a) (place p₂ (∑_{b ≠ a} F_b))`, a sum of products of
-positive operators supported on complementary registers.
+positive operators supported on complementary registers.  The placement
+algebra itself — additivity, the image of zero, positivity and the
+commutation of opposite placements — is the shared API of
+`MIPStarRE.QPBT.Combining.Points.PlacementSupport` and
+`MIPStarRE.QPBT.Observables.LineMeasurement.LinePointOverlap`.
 
 ## References
 
@@ -46,8 +50,8 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
     {X : Op (S.ExpandedLocalSpace p₁.side)}
     {Y : Op (S.ExpandedLocalSpace p₂.side)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
-    0 ≤ S.place p₁ X * S.place p₂ Y :=
-  Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
+    0 ≤ S.place p₁ X * S.place p₂ Y := by
+  exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
     (S.place_comm p₁ p₂ hopp X Y)
 
 end ProjectiveSetting
@@ -83,7 +87,7 @@ theorem offDiagonalPlacedProduct_nonneg {P : AdmissibleParams} {ε : ℝ}
       S.place p₁ (M₁.effect a) *
         S.place p₂ (∑ b : α, if a = b then 0 else M₂.effect b) := by
     intro a
-    rw [ProjectiveSetting.place_finset_sum, Finset.mul_sum]
+    rw [ProjectiveSetting.place_finsetSum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
     · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero, mul_zero]
