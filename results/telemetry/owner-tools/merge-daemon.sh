@@ -113,6 +113,16 @@ LANE_SH="$(dep_path lane.sh)"
 RESOLVE_SH="$CHECKOUT/local/bin/worktree_resolve.sh"
 JANITOR_PY="$CHECKOUT/local/bin/pr_janitor.py"
 TAB="$(printf '\t')"
+GH_COMMON="$CHECKOUT/local/bin/gh_common.py"
+
+pr_head() {
+  timeout 60 python3 "$GH_COMMON" pr-view "$1" 2>/dev/null | python3 -c '
+import json,sys
+try:
+    row=json.load(sys.stdin)
+    print((row.get("head") or {}).get("sha") if row.get("state") == "OPEN" else "")
+except Exception: print("")'
+}
 
 sha256_of() {
   sha256sum "$1" 2>/dev/null | cut -d' ' -f1 || shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1
@@ -134,14 +144,18 @@ log "tool=$PROG version=$TOOLS_VERSION checkout=$CHECKOUT conf=$CONF"
 
 # --------------------------------------------------------------------- deps
 progress_note() {
-  local body="$1" issue=""
+  local body="$1" issue="" file marker digest
   issue="$(python3 "$CHECKOUT/local/bin/run_mode.py" get progress_issue 2>/dev/null || true)"
   case "$issue" in
     ''|*[!0-9]*) log "progress note (no progress issue configured): $body"; return 0 ;;
   esac
   if [ "$DRY" = 1 ]; then log "would post to #$issue: $body"; return 0; fi
-  printf '%s\n' "$body" | timeout 60 gh api "repos/${repo}/issues/$issue/comments" \
-    -F body=@- --jq .html_url >/dev/null 2>&1 || log "progress note to #$issue failed"
+  file="$D/progress-note.$$"; printf '%s\n' "$body" > "$file"
+  digest="$(printf '%s' "$body" | sha256sum | cut -c1-16)"
+  marker="<!-- mipstarre-daemon-progress $digest -->"
+  timeout 60 python3 "$GH_COMMON" ensure-pr-comment "$issue" "$marker" --body-file "$file" \
+    >/dev/null 2>&1 || log "progress note to #$issue failed"
+  rm -f "$file"
 }
 
 verify_deps() {
@@ -393,7 +407,7 @@ worktree_ready() { # BRANCH — clean and not mid-merge (an absent one is fine:
   gd="$(git -C "$wt" rev-parse --git-dir 2>/dev/null)" || return 1
   case "$gd" in /*) ;; *) gd="$wt/$gd" ;; esac
   [ -e "$gd/MERGE_HEAD" ] && return 1
-  [ -z "$(git -C "$wt" status --porcelain 2>/dev/null | grep -v '^?? ')" ]
+  [ -z "$(git -C "$wt" status --porcelain 2>/dev/null)" ]
 }
 
 launch_refresh() { # PR N BR SLUG MODE HEAD
@@ -482,7 +496,8 @@ try_merge() { # PR N MODE HEAD
     [ -n "$T" ] || { log "no adjudication template for PR $PR"; return 1; }
     if [ "$DRY" = 1 ]; then log "would post the adjudication for PR $PR and merge"; return 0; fi
     sed "s/__HEAD__/$H/" "$T" > "$D/adjudication-$PR.md"
-    timeout 60 gh api "repos/${repo}/issues/$PR/comments" -F body=@"$D/adjudication-$PR.md" --jq .html_url
+    timeout 60 python3 "$GH_COMMON" ensure-pr-comment "$PR" \
+      "<!-- mipstarre-adjudication pr=$PR head=$H -->" --body-file "$D/adjudication-$PR.md"
     ARGS=(--adjudicated)
   fi
   if [ "$DRY" = 1 ]; then log "would merge PR $PR (mode $MODE, head ${H:0:8})"; return 0; fi
@@ -574,7 +589,7 @@ while true; do
     Q="$(cat "$D/refresh-done.queue")"; : > "$D/refresh-done.queue"
     while IFS=: read -r PR N MODE; do
       [ -n "${PR:-}" ] || continue
-      H="$(timeout 60 gh pr view "$PR" --json headRefOid,state --jq 'select(.state=="OPEN") | .headRefOid' 2>/dev/null </dev/null)"
+      H="$(pr_head "$PR")"
       [ -n "$H" ] || continue
       mark_event "$PR" "$H" refresh_end
       if fresh "$H"; then
@@ -644,7 +659,7 @@ while true; do
     [ -e "$D/stop" ] && break
     if [ "$DRY" = 1 ]; then log "would test freshness of PR $PR and merge it when fresh"; continue; fi
     git fetch -q github 2>/dev/null
-    H="$(timeout 60 gh pr view "$PR" --json headRefOid,state --jq 'select(.state=="OPEN") | .headRefOid' 2>/dev/null </dev/null)"
+    H="$(pr_head "$PR")"
     [ -n "$H" ] || continue
     fresh "$H" || continue
     try_merge "$PR" "$N" "$MODE" "$H" && MERGED_ONE=1
@@ -666,7 +681,7 @@ while true; do
     [ "$(in_flight)" -ge "$PAR" ] && break
     busy_on "$PR" "$N" && continue
     if [ "$DRY" != 1 ]; then
-      H="$(timeout 60 gh pr view "$PR" --json headRefOid,state --jq 'select(.state=="OPEN") | .headRefOid' 2>/dev/null </dev/null)"
+      H="$(pr_head "$PR")"
       [ -n "$H" ] || continue
       fresh "$H" && continue
     fi

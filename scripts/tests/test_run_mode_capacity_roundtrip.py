@@ -119,6 +119,9 @@ class CapacityRoundTripTestCase(unittest.TestCase):
         done = self.run_mode("resume")
         self.assertNotEqual(done.returncode, 0)
         self.assertIn("post-condition", done.stdout + done.stderr)
+        mode = json.loads((self.watchdog / "run-mode.json").read_text(encoding="utf-8"))
+        self.assertTrue(mode["paused"])
+        self.assertEqual(self.caps()["max-codex"], "0")
 
     def test_the_controller_is_resolved_under_the_repository_root(self) -> None:
         # The controller resolves its policy under MIPSTARRE_REPO_ROOT, so

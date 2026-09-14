@@ -364,15 +364,17 @@ Before reserving, `dispatch.sh`:
 3. **spools the request** to `watchdog/capacity/spool/<name>.json`: role, issue,
    PR, worktree, branch, persona ref, effort, job class, sandbox, the prompt
    file path, the attempt count and the deadline. The prompt is copied beside
-   it, so the janitor can replay the exact dispatch.
+   it. These files are retained diagnostic data, not an executable command for
+   automatic delivery after `dispatch.sh` exits.
 
 A `refused` / `endpoint_down` / `concurrency_limit` / `endpoint_5xx` /
 `retries_exhausted` outcome is **not** a death: the dispatcher sleeps a jittered
 exponential backoff (base 30 s, cap 10 min) and re-reserves, up to
 `MIPSTARRE_DISPATCH_ATTEMPTS` (default 5) or the run's dispatch cutoff
 (`run.dispatch_cutoff`; the literal `until my word` means none). When those run
-out it exits **7** and leaves the spool entry for the janitor. A router refusal
-is therefore a retryable condition of the day, not a preflight death.
+out it exits **7** and retains the request and prompt until the janitor's
+spool-expiry pass removes them. A router refusal is therefore a retryable
+condition of the day, not a preflight death.
 
 Two rules on that retry are load-bearing:
 
@@ -383,7 +385,9 @@ Two rules on that retry are load-bearing:
   telemetry keeps one episode rather than N unrelated sessions.
 - **A retry is gated on endpoint health**, per (1) above.
 
-A successful dispatch clears its spool entry; anything else leaves it.
+A dispatch that reaches a terminal model outcome clears its spool entry. Exit 7
+after the bounded retry loop retains the entry until janitor expiry; neither
+`dispatch.sh` nor the janitor reconstructs a post-exit command from it.
 
 #### Branch claim — one writer per branch
 
@@ -600,7 +604,7 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 | worktree | `.worktrees/<branch>` | removed at archival |
 | locks | `~/.cache/mipstarre-dev/locks/` | released at exit |
 | branch claim | `~/.cache/mipstarre-dev/locks/branch-<branch>.claim` | released at exit; stale pids broken |
-| spool entry | `~/.cache/mipstarre-dev/watchdog/capacity/spool/<name>.json` | cleared on delivery; left for the janitor otherwise |
+| spool entry | `watchdog/capacity/spool/<name>.json` under the cache root | see section 4.1 |
 
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
@@ -628,7 +632,7 @@ backfilled or externally started sessions.
 | 4 | preflight failure (no codex, no worktree, unreadable persona, hooks not installable, a key label outside the character class, an unreadable dispatch cutoff) |
 | 5 | worktree busy, **or** the branch is claimed by another session (the message names it) |
 | 6 | telemetry append failed — the capture is intact and the message says how to replay it |
-| 7 | not admitted after every attempt (endpoint down, router refusal, or a transient provider class); the spool entry is left for the janitor |
+| 7 | retry bounds exhausted; request and prompt data remain until janitor expiry |
 | other | codex's own exit status, propagated after the registry line is written |
 
 Codes 2–5 are decided before codex starts, so no registry line exists for

@@ -13,7 +13,7 @@ script carries a literal cap, floor, cadence or issue number
 Subcommands::
 
     run_mode.py apply [--brief PATH] [--dry-run]
-    run_mode.py show [--json]
+    run_mode.py show [--json | --oneline]
     run_mode.py get KEY
     run_mode.py set speed fast|default [--dry-run]
     run_mode.py pause [--reason TEXT]
@@ -23,6 +23,15 @@ Subcommands::
 ``get offload`` answers ``yes`` only when the run is ``fast``, lists ``chsh``
 and is not paused — the owner's rule that the second host belongs to full speed
 mode and to nothing else (``local/protocols/full-speed-mode.md``).
+
+``show --oneline`` renders the whole mode on one line; it is what the goal text
+(``owner-tools/goal-keeper.sh``) and the resume message
+(``owner-tools/owner-resume.sh``) carry, so neither has to name a number.
+
+``watchdog/account-mode`` is DERIVED from ``accounts[].enabled`` by ``apply``,
+``pause`` and ``resume`` — ``both`` when more than one account is enabled and
+``primary`` otherwise — because the deployed PATH shim reads it before it lets a
+dispatch use a second ``CODEX_HOME``.  It is not a field anyone briefs.
 
 ``models.override`` is resolved against the speed tier rather than read
 literally: ``null`` means ``astra-all`` whenever ``run.speed`` is ``fast`` — in
@@ -438,7 +447,7 @@ def _validate_accounts(accounts) -> list[dict]:
                              f"{where}.enabled must be true or false, got {enabled!r}")
         out.append({
             "name": name,
-            "label": sanitize(_require_text(raw["label"], f"{where}.label"), 60),
+            "label": _require_text(raw["label"], f"{where}.label", pattern=ENDPOINT_RE),
             "endpoint": endpoint,
             "codex_home": codex_home,
             "codex_home_path": str(Path(codex_home).expanduser()),
@@ -702,6 +711,47 @@ def write_model_override(mode: dict, *, root: Path | None = None,
     return f"model override {override} active ({source}; runtime knob {path})"
 
 
+#: The runtime file the deployed PATH shim reads before it lets a dispatch use
+#: a CODEX_HOME other than ~/.codex (`results/telemetry/owner-tools/owner-bin-codex`).
+ACCOUNT_MODE_REL = Path("watchdog") / "account-mode"
+
+
+def account_mode(mode: dict) -> str:
+    """`both` when the second account is enabled, `primary` otherwise.
+
+    DERIVED, never briefed.  The shim's `primary-only policy` check was a second
+    file holding a capacity decision: with the file absent it defaults to
+    `primary`, and every dispatch whose CODEX_HOME is not ~/.codex exits 4.  So a
+    brief that enabled `second` with a nominal_limit of 30 could dispatch nowhere
+    on that key while the capacity controller kept a cap of 28 and AIMD saw only
+    deaths — the idle-slot failure of 2026-09-12 intervention 2, with no message
+    anywhere saying why.  `accounts[].enabled` is the ONE place that decision
+    lives (full-speed-mode.md section 1: every number the owner states lives in
+    exactly one file), and this function is the only thing that derives the file
+    from it.
+    """
+    second = next((a for a in mode.get("accounts", []) if a.get("name") == "second"), {})
+    return "both" if second.get("enabled") else "primary"
+
+
+def write_account_mode(mode: dict, *, root: Path | None = None,
+                       dry_run: bool = False) -> str:
+    """Make `accounts[].enabled` reach the PATH shim."""
+    path = (root or cache_root()) / ACCOUNT_MODE_REL
+    wanted = account_mode(mode)
+    names = ", ".join(a["name"] for a in mode.get("accounts", []) if a.get("enabled")) or "none"
+    note = f"{path} = {wanted} (enabled accounts: {names})"
+    if dry_run:
+        return note
+    atomic_write(path, f"{wanted}\n")
+    readback = path.read_text(encoding="utf-8").strip()
+    if readback != wanted:
+        raise LayerError(f"{path} did not read back as {wanted!r} (got {readback!r}); "
+                         "the PATH shim refuses every non-default CODEX_HOME while "
+                         "this file says 'primary'")
+    return note
+
+
 def read_live_caps(root: Path | None = None) -> dict[str, int | None]:
     """Cap files as the router sees them; unreadable is None, never zero."""
     base = (root or cache_root()) / "watchdog"
@@ -828,6 +878,9 @@ SCALAR_KEYS = {
     "offload": lambda m: "yes" if offload_enabled(m) else "no",
     "offload_hosts": lambda m: " ".join(offload_hosts(m)) or "none",
     "offload_reason": lambda m: offload_state(m)[1],
+    # Derived from accounts[].enabled and written to watchdog/account-mode by
+    # `apply`, `pause` and `resume`; the PATH shim reads that file.
+    "account_mode": lambda m: account_mode(m),
     "brief_sha256": lambda m: m["brief_sha256"],
     "paused": lambda m: "yes" if m.get("paused") else "no",
     # The MAIN session's launch values.  main-session.sh reads exactly these
@@ -902,6 +955,8 @@ def render_show(mode: dict, root: Path | None = None) -> str:
         f"({mode_override(mode)[1]})",
         f"offload          {'yes' if offload_enabled(mode) else 'no'}  "
         f"({offload_state(mode)[1]})",
+        f"account mode     {account_mode(mode)}  (derived from accounts[].enabled; "
+        f"the PATH shim refuses a non-default CODEX_HOME unless this is 'both')",
         f"main session     {run.get('main', MAIN_DEFAULTS)['model']} effort "
         f"{run.get('main', MAIN_DEFAULTS)['effort']}, CODEX_HOME "
         f"{run.get('main', MAIN_DEFAULTS)['codex_home'] or '(ambient)'}",
@@ -911,6 +966,47 @@ def render_show(mode: dict, root: Path | None = None) -> str:
         lines.append(f"paused at        {mode.get('paused_at')} "
                      f"(saved caps {mode.get('saved_caps')})")
     return "\n".join(lines) + "\n"
+
+
+def render_oneline(mode: dict, root: Path | None = None) -> str:
+    """The whole run mode on ONE line, for a goal text or a resume message.
+
+    Two shipped callers render the owner-visible text from this
+    (`owner-tools/goal-keeper.sh` `mode_oneline`, which produces the `/goal`
+    body, and `owner-tools/owner-resume.sh`, which produces the single resume
+    message), and both headers say so.  Until this existed, `show --oneline`
+    exited 2 with `unrecognized arguments`, both callers silently took their
+    fallback path, and the pause/resume `stages.jsonl` note recorded the
+    degraded string as if it were the mode.  Every field comes from the same
+    accessors `show` uses, so the line cannot drift from the dump.
+    """
+    run = mode["run"]
+    caps = current_caps(mode, root)
+    parts = [
+        f"speed={run['speed']}" + ("(PAUSED)" if mode.get("paused") else ""),
+        " ".join(f"{name}={caps.get(name, 0)}" for name in ACCOUNT_NAMES),
+        f"total={sum(caps.values())}",
+        f"floor={floor_for(caps, run['occupancy_target'])}",
+        f"progress=#{run['progress_issue']}",
+        f"estimate=#{run['estimate_issue']}",
+        f"inbox=#{run['owner_inbox_issue']}",
+        f"model={mode_override(mode)[0] or 'policy'}",
+        f"accounts={account_mode(mode)}",
+        f"cutoff={run['dispatch_cutoff']}",
+    ]
+    extra = oneline_extra(mode)
+    if extra:
+        parts.extend(extra)
+    return " ".join(parts) + "\n"
+
+
+def oneline_extra(mode: dict) -> list[str]:
+    """The build-farm field appended to the parent run-mode one-liner.
+
+    Kept in this hook so the parent-owned rendering body and the child-owned
+    compute field remain independently maintainable.
+    """
+    return [f"offload={'yes' if offload_enabled(mode) else 'no'}"]
 
 
 # ---------------------------------------------------------------------------
@@ -1170,7 +1266,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
                f"inbox #{run['owner_inbox_issue']}, override "
                f"{mode_override(mode)[0] or 'none'}, offload "
                f"{'yes' if offload_enabled(mode) else 'no'} "
-               f"({' '.join(offload_hosts(mode)) or 'no extra host'})")
+               f"({' '.join(offload_hosts(mode)) or 'no extra host'}), account mode "
+               f"{account_mode(mode)}")
 
     if args.dry_run:
         sys.stdout.write(render_show(mode))
@@ -1180,6 +1277,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
             sys.stdout.write(f"  {watchdog_dir() / name} = {value}\n")
         sys.stdout.write(f"  {shim_path()} rendered at {run['speed']} speed\n")
         sys.stdout.write(f"  {write_model_override(mode, dry_run=True)}\n")
+        sys.stdout.write(f"  {write_account_mode(mode, dry_run=True)}\n")
         sys.stdout.write(f"  brief sha256 {digest}\n")
         return 0
 
@@ -1189,23 +1287,22 @@ def cmd_apply(args: argparse.Namespace) -> int:
     except LayerError:
         pass
     path = write_mode(mode)
-    write_caps(caps)
+    ok, detail = call_controller("init")
+    if detail == "not installed":
+        write_caps(caps)
+    elif not ok:
+        raise Refused(f"capacity_controller.py init failed: {detail}\n"
+                      "The installed controller owns the cap files; fix it and re-run apply.")
     override_note = write_model_override(mode)
+    account_mode_note = write_account_mode(mode)
     # Hand the briefed caps to the capacity controller, which is the sole writer
     # of watchdog/capacity/state.json and therefore the thing `pause` asks to
     # save them and `resume` asks to restore them.  Without this seed the
     # controller has no state, `pause` saves zeros, and `resume` restores the
     # floor: a briefed 5/28/33 came back as 1/1/2 while the resume message
     # announced 5/28/33 - the exact defect of the 2026-09-12 resume script.
-    ok, detail = call_controller("init")
-    if not ok and detail != "not installed":
-        sys.stderr.write(
-            "run_mode.py: warning: capacity_controller.py init failed: "
-            f"{detail}\nThe cap files above are correct, but pause/resume will "
-            "not round-trip until the controller has state. Fix it, then run "
-            "'python3 local/bin/capacity_controller.py init'.\n")
-    append_stage(f"run-mode apply: {summary}; {override_note}; brief {source} "
-                 f"sha256 {digest}", "run-mode-apply")
+    append_stage(f"run-mode apply: {summary}; {override_note}; {account_mode_note}; "
+                 f"brief {source} sha256 {digest}", "run-mode-apply")
     append_decision(
         f"Run mode applied: {summary}",
         "owner brief via run_mode.py apply",
@@ -1214,6 +1311,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         f"brief sha256 {digest[:12]}; {path}; stages.jsonl event=run-mode-apply")
     sys.stdout.write(render_show(mode))
     sys.stdout.write(override_note + "\n")
+    sys.stdout.write(account_mode_note + "\n")
     if previous_paused:
         sys.stdout.write("note: the previous run mode was paused; this brief restores "
                          "capacity now.\n")
@@ -1231,9 +1329,13 @@ def cmd_apply(args: argparse.Namespace) -> int:
 
 def cmd_show(args: argparse.Namespace) -> int:
     mode = load_mode()
+    if args.json and args.oneline:
+        raise LayerError("show takes --json or --oneline, not both")
     if args.json:
         json.dump(mode, sys.stdout, indent=1, ensure_ascii=False)
         sys.stdout.write("\n")
+    elif args.oneline:
+        sys.stdout.write(render_oneline(mode))
     else:
         sys.stdout.write(render_show(mode))
     return 0
@@ -1324,9 +1426,11 @@ def cmd_pause(args: argparse.Namespace) -> int:
         source = "run_mode.py (controller refused)"
         problem = f"capacity_controller.py pause failed: {detail}"
 
+    account_mode_note = write_account_mode(mode)
     note = (f"run-mode pause: caps zeroed via {source}; saved caps " +
             ", ".join(f"{name} {saved[name]}" for name in ACCOUNT_NAMES) +
-            (f"; reason {args.reason}" if args.reason else ""))
+            (f"; reason {args.reason}" if args.reason else "") +
+            f"; {account_mode_note}")
     append_stage(note, "run-mode-pause")
     append_decision(
         "Admission paused: every account cap set to 0, pre-pause caps saved in the run mode",
@@ -1363,17 +1467,6 @@ def cmd_resume(args: argparse.Namespace) -> int:
             value = 0
         caps[name] = value
 
-    mode["paused"] = False
-    mode["paused_at"] = None
-    mode["saved_caps"] = None
-    mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
-                       "floor": floor_for(caps, mode["run"]["occupancy_target"])}
-    mode["generated"] = utcnow()
-    write_mode(mode)
-    # Re-assert the briefed override: the knob and the mode must never diverge,
-    # and a resume is exactly when someone would notice that they had.
-    resume_override = write_model_override(mode)
-
     ok, detail = call_controller("resume")
     if ok:
         source = "capacity_controller.py resume"
@@ -1381,34 +1474,51 @@ def cmd_resume(args: argparse.Namespace) -> int:
         write_caps(caps)
         source = "run_mode.py (no capacity controller installed)"
     else:
-        raise Refused(f"capacity_controller.py resume failed: {detail}\n"
-                      "The cap files were left where they are (paused is the safe "
-                      "direction). Fix the controller and re-run 'run_mode.py resume'.")
+        paused, pause_detail = call_controller("pause")
+        suffix = "" if paused else f"; re-pause also failed: {pause_detail}"
+        raise Refused(f"capacity_controller.py resume failed: {detail}{suffix}\n"
+                      "The run-mode record remains paused. Fix the controller and re-run "
+                      "'run_mode.py resume'.")
 
-    live = read_live_caps()
-    for name in ACCOUNT_NAMES:
-        row = next((a for a in mode["accounts"] if a["name"] == name), None)
-        enabled = bool(row and row.get("enabled"))
-        value = live.get(name)
-        if value is None:
-            raise Refused(f"post-condition: {watchdog_dir()}/max-codex-{name} is missing, "
-                          "empty or non-numeric after resume")
-        if enabled and value < 1:
-            raise Refused(f"post-condition: {name} is enabled but resumed at cap {value}")
-        if value != caps[name]:
-            raise Refused(
-                f"post-condition: {name} was resumed at cap {value}, not the "
-                f"restored {caps[name]}. Something else wrote the cap file, or "
-                "the capacity controller has no state for this run (seed it with "
-                "'python3 local/bin/capacity_controller.py init'). Refusing to "
-                "report a number the files do not carry.")
+    try:
+        live = read_live_caps()
+        for name in ACCOUNT_NAMES:
+            row = next((a for a in mode["accounts"] if a["name"] == name), None)
+            enabled = bool(row and row.get("enabled"))
+            value = live.get(name)
+            if value is None:
+                raise Refused(f"post-condition: {watchdog_dir()}/max-codex-{name} is missing, "
+                              "empty or non-numeric after resume")
+            if enabled and value < 1:
+                raise Refused(f"post-condition: {name} is enabled but resumed at cap {value}")
+            if value != caps[name]:
+                raise Refused(f"post-condition: {name} was resumed at cap {value}, not the "
+                              f"restored {caps[name]}. Refusing to report stale caps.")
+    except Refused:
+        if detail == "not installed":
+            write_caps({name: 0 for name in ACCOUNT_NAMES})
+        else:
+            paused, pause_detail = call_controller("pause")
+            if not paused:
+                raise Refused(f"resume post-condition failed and re-pause failed: {pause_detail}")
+        raise
+
+    mode["paused"] = False
+    mode["paused_at"] = None
+    mode["saved_caps"] = None
+    mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
+                       "floor": floor_for(caps, mode["run"]["occupancy_target"])}
+    mode["generated"] = utcnow()
+    write_mode(mode)
+    resume_override = write_model_override(mode)
+    resume_account_mode = write_account_mode(mode)
     # Reported from the files, not from the intent: a resume that announces caps
     # it did not actually write is how the 2026-09-12 run lost an hour.
     live_total = sum(live[name] or 0 for name in ACCOUNT_NAMES)
     note = ("run-mode resume: caps " +
             ", ".join(f"{name} {live[name]}" for name in ACCOUNT_NAMES) +
             f", max-codex {live_total}, floor {mode['derived']['floor']} "
-            f"via {source}; {resume_override}")
+            f"via {source}; {resume_override}; {resume_account_mode}")
     append_stage(note, "run-mode-resume")
     append_decision(
         "Admission resumed from the saved caps in the run mode",
@@ -1439,6 +1549,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("show", help="human-readable dump of the run mode")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--oneline", action="store_true",
+                   help="the whole mode on one line (goal text, resume message)")
 
     p = sub.add_parser("get", help="one value on stdout")
     p.add_argument("key")

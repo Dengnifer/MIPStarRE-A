@@ -146,10 +146,14 @@ fi
 git fetch -q github 2>/dev/null || true
 
 # --- 1. caps and speed, through run-mode --------------------------------------------------
-if [ -r "$RUN_MODE" ] && python3 "$RUN_MODE" resume; then
+if [ -r "$RUN_MODE" ]; then
+  if ! python3 "$RUN_MODE" resume; then
+    echo "$PROG: run_mode.py resume failed; admission remains paused" >&2
+    exit 5
+  fi
   log "run_mode.py resume: caps and speed restored, AIMD re-enters at the saved value"
 else
-  echo "$PROG: run_mode.py resume unavailable or failed; writing the recorded caps into the" >&2
+  echo "$PROG: run_mode.py unavailable; writing the recorded caps into the" >&2
   echo "$PROG: derived cap files directly (they are the router's admission input)." >&2
   total=0
   printf '%s\n' "$CAPS_LINES" | while read -r name value; do
@@ -259,6 +263,23 @@ DAEMON_PID="$(cat "$D/daemon.pid" 2>/dev/null || true)"
 if [ -z "$DAEMON_PID" ] || ! kill -0 "$DAEMON_PID" 2>/dev/null; then
   echo "$PROG: POST-CONDITION: no merge daemon is running (daemon.pid '${DAEMON_PID:-none}')" >&2
   RC=5
+fi
+# The PATH shim refuses every CODEX_HOME other than ~/.codex while
+# watchdog/account-mode says `primary` (or is absent, which reads the same), so
+# an enabled second account plus `primary` is a key with a cap and nowhere to
+# dispatch — the idle-slot failure of 2026-09-12 intervention 2, invisible
+# except as deaths in the AIMD.  run_mode.py derives the file from
+# accounts[].enabled on apply, pause and resume; this checks that it landed.
+AM="$(cat "$W/account-mode" 2>/dev/null || echo absent)"
+AM_WANT="$(python3 "$RUN_MODE" get account_mode 2>/dev/null || echo unknown)"
+if [ "$AM_WANT" != unknown ] && [ "$AM" != "$AM_WANT" ]; then
+  echo "$PROG: POST-CONDITION: $W/account-mode is '$AM', and accounts[].enabled derives '$AM_WANT'" >&2
+  echo "$PROG: with 'primary' the codex shim exits 4 for every non-default CODEX_HOME:" >&2
+  echo "$PROG: an enabled second account would hold a cap and dispatch nowhere." >&2
+  echo "$PROG: fix with: python3 $RUN_MODE resume   (it writes the file)" >&2
+  RC=5
+else
+  printf '  %-10s %s (derived from accounts[].enabled)\n' account-mode "$AM"
 fi
 if [ -e "$W/drain" ]; then echo "$PROG: POST-CONDITION: watchdog/drain still exists" >&2; RC=5; fi
 if [ -e "$W/goal-hold" ]; then echo "$PROG: POST-CONDITION: watchdog/goal-hold still exists" >&2; RC=5; fi

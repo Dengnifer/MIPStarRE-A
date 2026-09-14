@@ -30,6 +30,15 @@
 #                   pre-model death (ended-started < 15 s and tokens 0), so a
 #                   reviewer that dies after twenty minutes at
 #                   "Reconnecting... 5/5" leaves the PR pending forever.
+#                   SCOPE: only a role with a re-dispatch entry point is
+#                   re-dispatched, and today that is `reviewer` alone
+#                   (review.sh, exact head, verdict supersedes).  A dead prover,
+#                   orc or fixer is marked `failed` with a `residue` field in
+#                   $CACHE_ROOT/watchdog/janitor/actions.jsonl and is the owning
+#                   session's to re-plan; `local/bin/ready_report.py` counts
+#                   those rows PER ROLE into the hourly comment on the progress
+#                   issue, so the unrepaired remainder reaches the owner's
+#                   channel instead of a local log.
 #   parked-lanes    every $CACHE_ROOT/watchdog/lanes/*.needs-attention, no digit
 #                   filter and no age filter.  The recorded reason is classified;
 #                   `merge` and `build` go to fix-lane.sh with the committed
@@ -310,7 +319,7 @@ list_lane_markers() {
 # dispatch_cutoff has.  An unparsable entry is NOT expired (it is reported).
 spool_is_expired() {
   JAN_FILE="$1" JAN_CUTOFF="${2:-}" python3 - <<'PY'
-import json, os, sys
+import json, os, sys, time
 from datetime import datetime, timezone
 
 def parse(value):
@@ -329,8 +338,9 @@ except Exception:
     sys.exit(1)
 now = datetime.now(timezone.utc)
 cutoff = parse(os.environ.get("JAN_CUTOFF"))
-deadline = parse(entry.get("deadline") if isinstance(entry, dict) else None)
-sys.exit(0 if ((deadline and deadline <= now) or (cutoff and cutoff <= now)) else 1)
+deadline = entry.get("deadline_epoch") if isinstance(entry, dict) else None
+deadline_passed = isinstance(deadline, (int, float)) and deadline <= time.time()
+sys.exit(0 if (deadline_passed or (cutoff and cutoff <= now)) else 1)
 PY
 }
 
@@ -412,7 +422,10 @@ write_repair_marker() { # write_repair_marker PR LANE JANITOR_CLASS REASON
   scan="$(daemon_scan_cmd)" || {
     report "janitor: no daemon-scan.py; PR $pr is repaired WITHOUT a failure marker"
     return 1; }
-  head="$(timeout 60 gh pr view "$pr" --json headRefOid --jq .headRefOid 2>/dev/null </dev/null || true)"
+  head="$(timeout 60 python3 "$SCRIPT_DIR/gh_common.py" pr-view "$pr" 2>/dev/null \
+    | python3 -c 'import json,sys
+try: print((json.load(sys.stdin).get("head") or {}).get("sha") or "")
+except Exception: print("")')"
   version="$(head -n 1 "${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}/tools-version" 2>/dev/null | tr -d '\n')"
   timeout 60 python3 "$scan" marker-write --path "$D/pr$pr.failed" --pr "$pr" \
     --head "${head:-}" --class "$cls" --reason "${reason:0:200}" \
@@ -664,17 +677,33 @@ pass_dead_sessions() {
       mark_session_failed "$name" "$reason; capture ended $class; not re-dispatched"
       ledger_append "$J/actions.jsonl" ts "$(now)" pass dead-sessions action mark-failed \
         session "$name" role "$role" pr "$pr" issue "$issue" account "$account" \
-        worktree "$worktree" capture_class "$class" reason "$reason" dry_run "$DRY_RUN"
+        worktree "$worktree" capture_class "$class" reason "$reason" \
+        residue capture-ended-cleanly dry_run "$DRY_RUN"
       continue
     fi
     if [ -z "$pr" ]; then
       report "janitor: dead session $name (role ${role:-?}): capture ended '$class' but the row carries no PR -> reported, marked failed"
       mark_session_failed "$name" "$reason; capture ended $class; no PR on the row"
+      ledger_append "$J/actions.jsonl" ts "$(now)" pass dead-sessions action mark-failed \
+        session "$name" role "$role" pr "$pr" issue "$issue" account "$account" \
+        worktree "$worktree" capture_class "$class" reason "$reason" \
+        residue no-pr-on-the-row dry_run "$DRY_RUN"
       continue
     fi
     if ! role_redispatchable "$role"; then
       report "janitor: dead session $name (role ${role:-?}, PR $pr): capture ended '$class' -> reported for the owning session (role not in MIPSTARRE_JANITOR_REDISPATCH_ROLES)"
       mark_session_failed "$name" "$reason; capture ended $class; role $role is not auto-re-dispatched"
+      # The residue the janitor does NOT repair.  Only `reviewer` has an entry
+      # point whose re-run is a pure re-run (review.sh, exact head); a dead
+      # prover, orc or fixer is the owning session's to re-plan.  That is a
+      # deliberate scope, not an omission — but on 2026-09-12 roughly ninety
+      # sessions died across all roles and the residue existed only in a local
+      # report file nothing read, so the meta re-dispatched them by hand.  This
+      # row is what `ready_report.py` counts per role into the hourly comment.
+      ledger_append "$J/actions.jsonl" ts "$(now)" pass dead-sessions action mark-failed \
+        session "$name" role "$role" pr "$pr" issue "$issue" account "$account" \
+        worktree "$worktree" capture_class "$class" reason "$reason" \
+        residue role-not-auto-re-dispatched dry_run "$DRY_RUN"
       continue
     fi
     if [ -z "$head" ]; then
@@ -694,6 +723,10 @@ except Exception:
       seen="$(ledger_count "$J/retries.jsonl" "$key")"
       report "janitor: dead session $name (PR $pr, $role, head ${head:0:12}): re-dispatch cap reached ($seen/$RETRY_CAP) -> stays reported"
       mark_session_failed "$name" "$reason; capture ended $class; retry cap $RETRY_CAP reached"
+      ledger_append "$J/actions.jsonl" ts "$(now)" pass dead-sessions action mark-failed \
+        session "$name" role "$role" pr "$pr" issue "$issue" account "$account" \
+        worktree "$worktree" capture_class "$class" reason "$reason" \
+        residue retry-cap-reached dry_run "$DRY_RUN"
       continue
     fi
     if process_matches "review\.sh $pr( |$)"; then
@@ -894,7 +927,7 @@ pass_spool_expiry() {
       else
         ledger_append "$J/actions.jsonl" ts "$(now)" pass spool-expiry action drop-spool-entry \
           entry "$(basename "$file")" cutoff "${cutoff:-none}"
-        rm -f "$file"
+        rm -f "$file" "${file%.json}.prompt.txt"
         report "janitor: spool entry $(basename "$file") is past the dispatch cutoff ${cutoff:-(entry deadline)} -> dropped"
       fi
       dropped=$((dropped + 1))

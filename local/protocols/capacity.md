@@ -133,7 +133,7 @@ waiter dispatched with `--account auto` is waiting on both accounts at once.
 `run_mode.py apply` seeds the next run's starting cap at `min(brief ceiling, measured_limit)`,
 so a run starts below the cliff instead of above it; the brief's nominal is always the
 ceiling, so a stale low estimate costs a few minutes of ramp and never the run.  One
-`capacity` row per tick goes to `results/telemetry/stages.jsonl`.
+`capacity` row per tick goes to runtime `watchdog/capacity/ticks.jsonl`.
 
 ## 6. Operator controls
 

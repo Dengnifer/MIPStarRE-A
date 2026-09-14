@@ -143,15 +143,15 @@ before sharding; `telemetry.py events --since DATE` reads both.
 # concurrency refusal and a 5xx outage both end in an exhausted reconnect and
 # the root cause is the one the controller must act on.
 DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
-    "concurrency_limit": [
-        "Concurrency limit exceeded for account",
-        "concurrency limit exceeded",
-    ],
     "endpoint_5xx": [
         "503 Service Unavailable",
         "502 Bad Gateway",
         "504 Gateway Timeout",
         "Service Unavailable",
+    ],
+    "concurrency_limit": [
+        "Concurrency limit exceeded for account",
+        "concurrency limit exceeded",
     ],
     "retries_exhausted": [
         "Reconnecting... 5/5",
@@ -181,6 +181,7 @@ KNOWN_FAILURE_CLASSES = (
     "endpoint_down",
     "concurrency_limit",
     "endpoint_5xx",
+    "auth",
     "retries_exhausted",
     "timeout",
     "task_failure",
@@ -428,12 +429,23 @@ def load_failure_patterns(repo_root: Path | None = None) -> dict[str, list[str]]
     except (OSError, ValueError):
         return patterns
     table = raw.get("failure_patterns") if isinstance(raw, dict) else None
+    if isinstance(table, list):
+        ordered: dict[str, list[str]] = {}
+        for index, row in enumerate(table):
+            if not isinstance(row, dict) or not isinstance(row.get("failure_class"), str):
+                warn(f"capacity-policy.json: failure_patterns[{index}] is malformed")
+                continue
+            value = row.get("patterns")
+            if not isinstance(value, list):
+                warn(f"capacity-policy.json: failure_patterns[{index}].patterns is not a list")
+                continue
+            ordered[row["failure_class"]] = [
+                item for item in value if isinstance(item, str) and item.strip()
+            ]
+        return ordered or patterns
     if not isinstance(table, dict):
         return patterns
     for name, value in table.items():
-        if name not in DEFAULT_FAILURE_PATTERNS:
-            warn(f"capacity-policy.json: ignoring unknown failure class {name!r}")
-            continue
         if isinstance(value, str):
             value = [value]
         if not isinstance(value, list):
@@ -517,8 +529,8 @@ def classify_failure(
 
     matched_class = ""
     matched_pattern = ""
-    for name in ("concurrency_limit", "endpoint_5xx", "retries_exhausted", "timeout"):
-        for pattern in table.get(name) or ():
+    for name, class_patterns in table.items():
+        for pattern in class_patterns:
             if pattern.lower() in lowered:
                 matched_class, matched_pattern = name, pattern
                 break

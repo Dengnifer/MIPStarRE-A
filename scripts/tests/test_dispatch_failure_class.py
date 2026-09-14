@@ -128,6 +128,16 @@ class ClassifyFailureTests(unittest.TestCase):
 
 
 class PatternKnobTests(unittest.TestCase):
+    def test_shipped_ordered_schema_controls_precedence_and_auth(self) -> None:
+        patterns = telemetry.load_failure_patterns(REPO_ROOT)
+        self.assertEqual(next(iter(patterns)), "endpoint_5xx")
+        self.assertEqual(telemetry.classify_failure(
+            _stream("500 Internal Server Error and 401 Unauthorized"), patterns=patterns
+        )["failure_class"], "endpoint_5xx")
+        self.assertEqual(telemetry.classify_failure(
+            _stream("401 Unauthorized"), patterns=patterns
+        )["failure_class"], "auth")
+
     def test_patterns_come_from_capacity_policy_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = _repo(Path(tmp))

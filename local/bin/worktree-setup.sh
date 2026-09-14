@@ -246,6 +246,16 @@ MERGE_UNION_PROBES="results/telemetry/events.md
 results/telemetry/sessions.jsonl
 local/protocols/EVOLUTION.md"
 
+# The other half of the assertion, and the reason .gitattributes names every
+# path instead of globbing `results/telemetry/**/*.md`: union merge on PROSE
+# keeps both versions of a replaced line and the merge daemon merges without
+# anyone reading the result.  These files live under the same directory as the
+# append-only records and must NOT carry the driver, so the scope cannot widen
+# again without this check failing.
+MERGE_UNION_NEVER_PROBES="results/telemetry/owner-tools/README.md
+results/telemetry/owner-handoffs/TEMPLATE.md
+results/telemetry/README.md"
+
 check_merge_attributes() { # <worktree>
   local tree="$1" probe attr bad=0
   while IFS= read -r probe; do
@@ -260,6 +270,33 @@ check_merge_attributes() { # <worktree>
   done <<EOF
 $MERGE_UNION_PROBES
 EOF
+  local overreach=0
+  while IFS= read -r probe; do
+    [ -n "$probe" ] || continue
+    attr="$(run_outside_git_env git -C "$tree" check-attr merge -- "$probe" 2>/dev/null \
+      | sed -n 's/.*: merge: //p' || true)"
+    [ "$attr" = "union" ] && overreach=1
+  done <<EOF
+$MERGE_UNION_NEVER_PROBES
+EOF
+  if [ "$overreach" -eq 1 ]; then
+    # Loud, and deliberately NOT part of the exit status: on a host whose
+    # $(git rev-parse --git-common-dir)/info/attributes still carries the
+    # hand-installed 2026-09-12 globs, every lane bootstrap would otherwise go
+    # red for a condition no branch can fix.  The hard gate against the
+    # COMMITTED file widening again is
+    # scripts/tests/test_pr552_review_round2.py, which runs check-attr in a
+    # throwaway repository holding only this repository's .gitattributes.
+    warn "union merge is in effect for PROSE under results/telemetry"
+    warn "  (probed: $(printf '%s' "$MERGE_UNION_NEVER_PROBES" | tr '\n' ' '))"
+    warn "  A union merge of two edits to one line keeps BOTH versions, silently,"
+    warn "  and the merge daemon merges without anyone reading the result."
+    warn "  The committed .gitattributes names each append-only record and has no"
+    warn "  Markdown wildcard, so this comes from a local override:"
+    warn "    \$(git rev-parse --git-common-dir)/info/attributes"
+    warn "  Delete the 'results/telemetry/*.md' and 'results/telemetry/**/*.md'"
+    warn "  lines there; the committed file covers what they were installed for."
+  fi
   if [ "$bad" -eq 0 ]; then
     log "union merge driver in effect for the append-only telemetry records"
     return 0

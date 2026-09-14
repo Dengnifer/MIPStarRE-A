@@ -42,16 +42,31 @@ CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 REAL_CODEX="${MIPSTARRE_REAL_CODEX:-$HOME/.local/bin/codex}"
 [ -x "$REAL_CODEX" ] || { echo "codex shim: no codex binary at $REAL_CODEX" >&2; exit 4; }
 
+# The account mode.  This file is DERIVED, never briefed and never hand-edited:
+# `run_mode.py apply|pause|resume` writes it from `accounts[].enabled`, so the
+# single place the owner states which keys a run may use is the brief, and this
+# check can only ever agree with it.  Before that it was a second file holding a
+# capacity decision: absent (and therefore `primary`) it refused every dispatch
+# whose CODEX_HOME was not ~/.codex, so a brief that enabled `second` could hold
+# a cap of 28 and dispatch nowhere while the AIMD saw only deaths.
 mode_file="$CACHE_ROOT/watchdog/account-mode"
 mode=primary
-if [ -f "$mode_file" ]; then mode="$(cat "$mode_file")"; fi
+if [ -f "$mode_file" ]; then mode="$(tr -d '[:space:]' < "$mode_file")"; fi
 case "$mode" in primary|both) ;; *) echo 'invalid account mode' >&2; exit 4 ;; esac
 if [ "$mode" = primary ] && [ "${CODEX_HOME:-$HOME/.codex}" != "$HOME/.codex" ]; then
-  echo 'primary-only policy: preserve the old thread; use a checkpoint continuation' >&2
+  echo "codex shim: $mode_file says 'primary', so only CODEX_HOME=$HOME/.codex may dispatch." >&2
+  echo "codex shim: that file is derived from accounts[].enabled in the run brief;" >&2
+  echo "codex shim: enable the account there and re-run 'run_mode.py apply'." >&2
   exit 4
 fi
 
-args=(); task=0; effort=ultra; model=gpt-6-astra
+# No model of our own.  full-speed-mode.md section 5: "a hard-coded model
+# anywhere else is a defect" — the shim initialised this to gpt-6-astra and
+# always passed `-m`, which is the same side channel the W9 entry says was
+# removed, just with the other value.  Every caller in the layer (dispatch.sh
+# through model_policy.py, main-session.sh through run.main) names the model;
+# a caller that names none gets codex's own default and nothing here overrides it.
+args=(); task=0; effort=ultra; model=
 while [ "$#" -gt 0 ]; do
   argument="$1"; shift
   if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
@@ -97,7 +112,12 @@ if [ "$task" -eq 1 ] && [ "${#args[@]}" -gt 0 ]; then
 
 ${args[$last]}"
 fi
-[ "$model" != gpt-6-astra ] || effort=xhigh
-exec "$REAL_CODEX" -m "$model" -c "model_reasoning_effort=\"$effort\"" \
+MODEL_ARGS=()
+if [ -n "$model" ]; then
+  MODEL_ARGS=(-m "$model")
+  [ "$model" != gpt-6-astra ] || effort=xhigh
+fi
+exec "$REAL_CODEX" ${MODEL_ARGS[@]+"${MODEL_ARGS[@]}"} \
+  -c "model_reasoning_effort=\"$effort\"" \
   ${SPEED_ARGS[@]+"${SPEED_ARGS[@]}"} \
   -c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1' "${args[@]}"

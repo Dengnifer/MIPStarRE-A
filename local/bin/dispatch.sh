@@ -60,8 +60,9 @@
 #     watchdog/capacity/health-<account>.json says `down` waits for half-open
 #     instead of firing.  Five client-side retries are exactly how 69 refusals
 #     became 69 deaths on 2026-09-12.
-# When the attempts or the cutoff run out, the spool entry is LEFT for the
-# janitor and the exit status is 7.
+# When the attempts or the cutoff run out, the spool entry is retained as
+# diagnostic evidence until janitor expiry and the exit status is 7. Neither
+# component reconstructs a post-exit dispatch from that retained data.
 #
 # Exit codes: 0 ok · 2 usage · 3 disabled by kill switch · 4 preflight failure
 #   · 5 worktree busy or branch claimed by another session · 6 telemetry failure
@@ -74,7 +75,8 @@
 #   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
 #   LOCAL_REVIEW_ENABLED.
 #   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
-#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home).
+#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home;
+#   overrides the brief's accounts[].codex_home, which is the default source).
 #   MIPSTARRE_DISPATCH_ATTEMPTS (default 5), MIPSTARRE_DISPATCH_ATTEMPT (the
 #   attempt this invocation starts at, default 1), MIPSTARRE_DISPATCH_BACKOFF_S
 #   (base, default 30), MIPSTARRE_DISPATCH_BACKOFF_MAX_S (cap, default 600),
@@ -963,8 +965,9 @@ PY
 }
 
 write_spool() {
-  # The whole request, before the first reservation, so a dispatch the provider
-  # refused can be replayed by the janitor instead of being lost.
+  # Retain the request before the first reservation so a deferred dispatch has
+  # diagnostic evidence until janitor expiry. Replay is bounded to this running
+  # dispatch; the spool is not a command for automatic post-exit delivery.
   local state="$1"
   [ -n "$SPOOL_FILE" ] || return 0
   mkdir -p "$SPOOL_DIR"
@@ -1029,16 +1032,17 @@ retry_is_safe() {
   # tree.  Anything else is left to the janitor's dead-session pass, which
   # re-dispatches under a per-(pr, role, head) budget with the state in hand.
   local dirty=""
-  case "$FAILURE_CLASS" in retries_exhausted) ;; *) return 0 ;; esac
+  if [ "${WORKTREE_STATUS_AFTER_CODEX:-}" != "${WORKTREE_STATUS_BEFORE_CODEX:-}" ]; then
+    dirty="${WORKTREE_STATUS_AFTER_CODEX:-}"
+  fi
+  [ "${DISPATCH_STATUS:-}" = refused ] || return 1
+  [ "${DISPATCH_TURNS:-0}" = 0 ] || return 1
   case "${DISPATCH_USAGE_TOTAL:-0}" in
     ''|0) ;;
     *) note "not retrying '$FAILURE_CLASS': the session used ${DISPATCH_USAGE_TOTAL} tokens \
 before dying, so a re-run would repeat work in a tree that holds its partial edits"
        return 1 ;;
   esac
-  if [ -n "${WORKTREE_ABS:-}" ]; then
-    dirty="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null | grep -v '^?? ' || true)"
-  fi
   if [ -n "$dirty" ]; then
     note "not retrying '$FAILURE_CLASS': $WORKTREE_ABS has uncommitted changes from the \
 dead session; the janitor's dead-session pass owns this one"
@@ -1179,7 +1183,13 @@ while :; do
     report_and_exit_refused
   fi
 
-  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+  RESERVATION_WAIT="$ACCOUNT_WAIT"
+  if [ -n "$DISPATCH_CUTOFF_EPOCH" ]; then
+    REMAINING=$((DISPATCH_CUTOFF_EPOCH - $(date +%s)))
+    [ "$REMAINING" -gt 0 ] || report_and_exit_refused
+    [ "$RESERVATION_WAIT" -le "$REMAINING" ] || RESERVATION_WAIT="$REMAINING"
+  fi
+  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$RESERVATION_WAIT" "$REGISTRY")
   if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
   if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
   set +e
@@ -1187,23 +1197,38 @@ while :; do
   ROUTER_RC=$?
   set -e
   if [ "$ROUTER_RC" -ne 0 ]; then
-    # A router refusal is a retryable condition of the day, not `die 4`.
     FAILURE_CLASS="refused"
     if [ "$DRY_RUN" -eq 1 ]; then
       die 4 "account routing refused the dry-run reservation (exit $ROUTER_RC)"
     fi
-    if backoff_or_give_up; then
-      continue
-    fi
-    report_and_exit_refused
+    case "$ROUTER_RC" in
+      3) if backoff_or_give_up; then continue; fi; report_and_exit_refused ;;
+      6) report_and_exit_refused ;;
+      *) clear_spool; die 4 "account routing failed permanently (exit $ROUTER_RC)" ;;
+    esac
   fi
   ACCOUNT="${ROUTING%%$'\n'*}"
+  if cutoff_passed; then
+    rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+    FAILURE_CLASS="refused"
+    report_and_exit_refused
+  fi
   MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
   export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
   resolve_labels "$ACCOUNT"
   ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
   if [ "$ACCOUNT" = second ]; then
-    ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
+    # The BRIEF decides which home the second key uses.  `accounts[].codex_home`
+    # is validated by run_mode.py and exposed as `get codex_home.<account>`;
+    # reading `endpoint` and `label` from the run mode but not this one left the
+    # field inert, the same class the round-2 review fixed for run.main and
+    # models.override.  The environment variable stays as the override, and the
+    # 2026-09-12 path is the last fallback.
+    SECOND_HOME="$(run_mode_field codex_home.second)"
+    [ -n "${MIPSTARRE_CODEX_HOME_SECOND:-}" ] && SECOND_HOME="$MIPSTARRE_CODEX_HOME_SECOND"
+    [ -n "$SECOND_HOME" ] || SECOND_HOME="$HOME/.cache/mipstarre-dev/codex-home-yxy"
+    case "$SECOND_HOME" in "~/"*) SECOND_HOME="$HOME/${SECOND_HOME#\~/}" ;; esac
+    ACCOUNT_ENV+=("CODEX_HOME=$SECOND_HOME")
   fi
 
   CODEX_ARGS=(exec)
@@ -1267,6 +1292,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # stdin is closed: codex exec reads piped stdin as extra prompt input, which
   # would silently splice the caller's stdin into the session.
   CODEX_STARTED=1
+  WORKTREE_STATUS_BEFORE_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
   set +e
   if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
     timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
@@ -1280,6 +1306,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # are NOT released here — they belong to the session, which may still have
   # attempts left, and `cleanup` releases them at exit.
   rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+  WORKTREE_STATUS_AFTER_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
 
   END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
   cp "$CAPTURE" "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl" 2>/dev/null ||
