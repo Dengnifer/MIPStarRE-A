@@ -39,6 +39,23 @@
      "patterns": ["401 Unauthorized", "403 Forbidden", "invalid_api_key"]},
     {"failure_class": "unknown", "counts_as": "neutral", "patterns": []}
   ],
+  "landing": {
+    "consumer": "the soft landing of results/telemetry/owner-tools/owner-pause.sh and the work resume of owner-resume.sh; local/bin/pause_landing.py reads this table and carries the same values as documented fallbacks when this file is missing",
+    "phases": {"landing_lead_s": 180, "last_call_s": 90, "grace_s": 20},
+    "young_max_min": 5,
+    "cutoff_lead_min": 10,
+    "roles": {
+      "default": {"mature": "checkpoint", "resume": "thread"},
+      "reviewer": {"mature": "finish", "resume": "restart"},
+      "scout": {"mature": "finish", "resume": "restart"},
+      "prover": {"mature": "checkpoint", "resume": "thread"},
+      "mathfix": {"mature": "checkpoint", "resume": "thread"},
+      "orc": {"mature": "checkpoint", "resume": "thread"},
+      "simplifier": {"mature": "checkpoint", "resume": "thread"},
+      "blueprint": {"mature": "checkpoint", "resume": "thread"},
+      "splitter": {"mature": "checkpoint", "resume": "thread"}
+    }
+  },
   "priority_classes": {
     "consumer": "deferred — design full-speed-v2 §9 item 2; nothing reads this table yet",
     "classes": [
