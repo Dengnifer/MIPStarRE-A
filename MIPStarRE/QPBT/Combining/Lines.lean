@@ -5,7 +5,6 @@ import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
 import MIPStarRE.QPBT.Combining.Lines.AxisLineResampling
 import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 import MIPStarRE.QPBT.Combining.Lines.MixedResampling
-import MIPStarRE.QPBT.Combining.Lines.PolynomialCollision
 import MIPStarRE.QPBT.Combining.Lines.ProductWeightedCollision
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
