@@ -20,7 +20,10 @@
 # Phases, as offsets from the owner's pause word (T0 = now):
 #   T+0:00  stop admission   run_mode.py pause (caps to 0; the pre-pause caps are saved
 #                            inside capacity/state.json, not in a second file a later phase
-#                            can clobber) and touch watchdog/drain
+#                            can clobber), touch watchdog/drain and watchdog/paused, and
+#                            snapshot the merge daemon's failed markers BEFORE the daemon is
+#                            stopped — afterwards nothing can write one, so a snapshot taken
+#                            later cannot tell a kill-caused marker from a real verdict
 #   T+0:30  release waiters  account_router.reserve sees watchdog/drain and exits cleanly,
 #                            so queued dispatches release THEMSELVES (49 waiters at 06:38Z
 #                            on 2026-09-12 were killed instead).  Stop the keeper, the merge
@@ -35,9 +38,12 @@
 #                            and elapsed time and stops the YOUNG ones only.  Partial work
 #                            stays in the worker's worktree; never `git clean`.
 #   D-last  last call        the mature reviewers that did not finish and the checkpointed
-#                            writers are stopped, SIGTERM then SIGKILL after the recorded
-#                            grace, and the anchored pattern table sweeps the leftovers no
-#                            registry row names.
+#                            writers are stopped: one SIGTERM pass over the phase (the
+#                            dispatcher AND the codex process it owns), ONE grace, then
+#                            SIGKILL to the survivors — the sleep is per phase, not per
+#                            session, so the landing cannot cost grace x sessions and run
+#                            past the deadline.  The anchored pattern table then sweeps the
+#                            leftovers no registry row names.
 #   D-0:01  confirm/record   confirm "Goal paused" in the pane, write pause-state.json,
 #                            append stages.jsonl and an events.d/ entry, commit and publish
 #                            through checked-push.sh.  One minute BEFORE the deadline, so a
@@ -120,13 +126,17 @@ fi
 pl_get() { # pl_get KEY fallback — the same shape as rm_get above.  The home of every
            # value is local/capacity-policy.json ("landing"), read through
            # pause_landing.py; the fallback applies only when that module cannot run at
-           # all, and it is the value the policy file ships with.
+           # all.  The fallbacks below are deliberate and are not a second home for the
+           # numbers: scripts/tests/test_pause_landing.py asserts that each one equals
+           # the matching value in pause_landing.DEFAULTS, so a threshold can still only
+           # be CHANGED in the policy file.  A fallback that silently differed is how the
+           # degraded path would schedule a different plan from the briefed one.
   local out
   out="$(printf '%s\n' "$THRESHOLDS" | sed -n "s/^$1  *//p" | head -n 1)"
   if [ -n "$out" ]; then printf '%s\n' "$out"; else printf '%s\n' "$2"; fi
 }
 LAND_LEAD_S="$(pl_get landing_lead_s 180)"
-LAST_CALL_S="$(pl_get last_call_s 60)"
+LAST_CALL_S="$(pl_get last_call_s 90)"
 GRACE_S="$(pl_get grace_s 20)"
 YOUNG_MIN="$(pl_get young_max_min 5)"
 CUTOFF_LEAD_MIN="$(pl_get cutoff_lead_min 10)"
@@ -230,14 +240,24 @@ state = {
     "paused_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
 }
 # The landing manifest is owned by pause_landing.py and merged into this same file;
-# a rewrite here must never drop it.
+# a rewrite here must never drop it.  Nor may a later write LOWER the recorded caps:
+# after a cutoff the live cap files are 0 by design, and a pause word that recorded
+# those zeros is a resume with no admission at all.
 try:
     with open(out, encoding="utf-8") as handle:
         previous = json.load(handle)
-    if isinstance(previous, dict) and isinstance(previous.get("landing"), dict):
-        state["landing"] = previous["landing"]
 except Exception:
-    pass
+    previous = None
+if isinstance(previous, dict):
+    if isinstance(previous.get("landing"), dict):
+        state["landing"] = previous["landing"]
+    was = previous.get("caps") if isinstance(previous.get("caps"), dict) else {}
+    now = state["caps"] if isinstance(state["caps"], dict) else {}
+    kept = any(isinstance(v, int) and v > 0 for v in was.values())
+    if kept and not any(isinstance(v, int) and v > 0 for v in now.values()):
+        state["caps"] = was
+        state["caps_source"] = previous.get("caps_source") or caps_source.strip()
+        state["caps_kept_from"] = previous.get("paused_at")
 with open(out + ".tmp", "w", encoding="utf-8") as fh:
     fh.write(json.dumps(state, indent=1, sort_keys=True) + "\n")
 import os
@@ -252,9 +272,11 @@ landing_rule() {
   printf '  mature reviewer           runs until the last call, then restarted from scratch\n'
   printf '  mature writer             checkpointed (worktree, thread id and step recorded),\n'
   printf '                            stopped at the last call, resumed on its own thread\n'
-  printf '  every stop                SIGTERM, then SIGKILL after %s s, and only to a pid\n' \
+  printf '  every stop                SIGTERM to the dispatcher AND the codex it owns, one\n'
+  printf '                            %s s grace for the whole phase, then SIGKILL to the\n' \
     "$GRACE_S"
-  printf '                            whose command line still matches the recorded session\n'
+  printf '                            survivors — and only to a pid whose command line still\n'
+  printf '                            names the recorded session (an unreadable one is spared)\n'
   if [ "$LANDING_OK" -eq 0 ]; then
     printf 'NOTE: %s is not readable; nothing can be classified and the landing\n' "$LANDING"
     printf '      degrades to the anchored pattern sweep at the last call.\n'
@@ -264,12 +286,12 @@ landing_rule() {
 plan() {
   printf 'phase plan (deadline %s min = T+%s from the owner word):\n' \
     "$DEADLINE_MIN" "$(hhmm "$DEADLINE_S")"
-  printf '  T+%-6s stop admission   run_mode.py pause; touch watchdog/drain\n' "$(hhmm $P_ADMISSION)"
+  printf '  T+%-6s stop admission   run_mode.py pause; touch watchdog/drain and watchdog/paused; snapshot the daemon failure markers\n' "$(hhmm $P_ADMISSION)"
   printf '  T+%-6s release waiters  drain check releases queued dispatches; stop keeper, merge daemon, stack-watch and capacityd (stop files kept)\n' "$(hhmm $P_RELEASE)"
   printf '  T+%-6s one message      owner-say.sh --mode terminal (no auto-resume, goal-hold written)\n' "$(hhmm $P_MESSAGE)"
   printf '  T+%-6s crontab          backup crontab -l verbatim, install the paused crontab from a file under $W\n' "$(hhmm $P_CRONTAB)"
-  printf '  T+%-6s landing          classify every live session; stop the young only; record the manifest\n' "$(hhmm "$P_LAND")"
-  printf '  T+%-6s last call        stop the mature leftovers, then the anchored pattern sweep\n' "$(hhmm "$P_LAST")"
+  printf '  T+%-6s landing          record the manifest, stop the young only, then read the heads statuses\n' "$(hhmm "$P_LAND")"
+  printf '  T+%-6s last call        stop every session still pending (one TERM pass, one grace, then KILL), then the anchored pattern sweep\n' "$(hhmm "$P_LAST")"
   printf '  T+%-6s confirm/record   confirm the paused goal, write pause-state.json, append telemetry, commit and push\n' "$(hhmm "$P_PUBLISH")"
   printf 'last phase T+%s <= deadline T+%s (the publish is started before the deadline, not on it)\n' \
     "$(hhmm "$P_PUBLISH")" "$(hhmm "$DEADLINE_S")"
@@ -358,13 +380,23 @@ stop_admission() {
   RUN_MODE_OK=1
   CAPS_SRC="run-mode"
   if have_run_mode; then
+    # `show --json` has no top-level `caps`: the live ones are under `derived`,
+    # and once a pause (a cutoff, hours earlier) has zeroed them the ones worth
+    # restoring are in `saved_caps`.  Reading the live files at this point is how
+    # a pause word after a cutoff recorded `primary 0, second 0` as the caps to
+    # restore and made owner-resume.sh's fallback resume the run with no
+    # admission at all.
     CAPS_JSON="$(python3 "$RUN_MODE" show --json 2>/dev/null | python3 -c '
 import json,sys
 try: m = json.load(sys.stdin)
 except Exception: print("{}"); raise SystemExit(0)
-caps = m.get("caps") or {}
-print(json.dumps(caps))' 2>/dev/null)" || CAPS_JSON="{}"
-    if [ "$CAPS_JSON" = "{}" ] || [ -z "$CAPS_JSON" ]; then
+saved = m.get("saved_caps") if isinstance(m.get("saved_caps"), dict) else None
+caps = saved or m.get("caps") or (m.get("derived") or {}).get("caps") or {}
+caps = {k: v for k, v in caps.items() if isinstance(v, int) and not isinstance(v, bool)}
+# All-zero is not a record worth restoring; fall through to the other readers.
+print(json.dumps(caps if any(v > 0 for v in caps.values()) else {}))' 2>/dev/null)" \
+      || CAPS_JSON="{}"
+    if { [ "$CAPS_JSON" = "{}" ] || [ -z "$CAPS_JSON" ]; } && [ ! -r "$CUTOFF_FILE" ]; then
       ACCTS="$(python3 "$RUN_MODE" get accounts 2>/dev/null || true)"
       CAPS_JSON="$(for a in $ACCTS; do printf '%s=%s\n' "$a" "$(rm_get "cap.$a" 0)"; done | python3 -c '
 import sys,json
@@ -379,10 +411,16 @@ print(json.dumps({k: int(v) for k, v in (l.strip().split("=",1) for l in sys.std
     RUN_MODE_OK=0
     echo "$PROG: no run_mode.py at $RUN_MODE; zeroing the derived cap files directly" >&2
   fi
-  if [ "$CAPS_JSON" = "{}" ] || [ -z "$CAPS_JSON" ]; then
+  if { [ "$CAPS_JSON" = "{}" ] || [ -z "$CAPS_JSON" ]; } && [ ! -r "$CUTOFF_FILE" ]; then
     CAPS_JSON="$(caps_from_live)"
     CAPS_SRC="live cap files, read before the zeroing"
     log "caps for the record taken from the live files ($CAPS_JSON)"
+  elif [ "$CAPS_JSON" = "{}" ] || [ -z "$CAPS_JSON" ]; then
+    # A cutoff zeroed the live files hours ago, so reading them now would record
+    # zeros as the caps to restore.  write_state keeps the caps the cutoff's own
+    # record already carries rather than lowering them.
+    CAPS_SRC="the cutoff's own record (the live files are zero by design)"
+    log "a cutoff is in force; the caps already recorded in $STATE are kept"
   fi
   if [ "$RUN_MODE_OK" -eq 0 ]; then
     for f in "$W"/max-codex-* "$W/max-codex"; do
@@ -392,7 +430,13 @@ print(json.dumps({k: int(v) for k, v in (l.strip().split("=",1) for l in sys.std
     log "admission stopped: derived cap files zeroed (run-mode record incomplete)"
   fi
   date -u +%FT%TZ > "$W/drain"
-  log "watchdog/drain written: the router releases queued reservations itself"
+  # Both markers, always together.  owner-resume.sh's post-condition requires
+  # watchdog/paused as the proof that the admission pause it is clearing was a
+  # real one; nothing wrote it, so the check failed on every clean pause/resume
+  # pair, the resume exited 5 before section 6 and the whole work resume was
+  # unreachable in production while its unit tests passed.
+  date -u +%FT%TZ > "$W/paused"
+  log "watchdog/drain and watchdog/paused written: the router releases queued reservations itself"
   SPEED="$(rm_get speed unknown)"
   RUN_MODE_JSON="$(python3 "$RUN_MODE" show --json 2>/dev/null || echo '{}')"
 }
@@ -401,11 +445,32 @@ print(json.dumps({k: int(v) for k, v in (l.strip().split("=",1) for l in sys.std
 # No kill, no crontab change and no stopped daemon.  Everything in flight finishes, the
 # merge daemon still merges what passes, and the pause word can come minutes or hours later
 # to a pipeline with almost nothing left to land.
+cutoff_expired() { # the recorded cutoff is older than the lead the policy asks for
+  local since age
+  since="$(head -n 1 "$CUTOFF_FILE" 2>/dev/null)" || return 1
+  age="$(python3 - "$since" "$CUTOFF_LEAD_MIN" <<'PY' 2>/dev/null || echo 0
+import datetime, sys
+try:
+    then = datetime.datetime.strptime(sys.argv[1].strip(), "%Y-%m-%dT%H:%M:%SZ")
+except Exception:
+    raise SystemExit(0)
+now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+print(1 if (now - then).total_seconds() > int(sys.argv[2]) * 60 else 0)
+PY
+)"
+  [ "${age:-0}" = 1 ]
+}
+
 if [ "$CUTOFF" -eq 1 ]; then
   stop_admission
-  if [ -r "$CUTOFF_FILE" ]; then
+  # A marker that survived a whole cutoff window is not a cutoff still in force:
+  # the pause word never came, the main session has moved on (or been replaced),
+  # and staying silent leaves it dispatching into refused reservations.  The
+  # resume removes the marker, so a fresh cutoff always speaks.
+  if [ -r "$CUTOFF_FILE" ] && ! cutoff_expired; then
     log "a cutoff was already in force since $(head -n 1 "$CUTOFF_FILE" 2>/dev/null); admission re-asserted, no second message"
   else
+    [ -r "$CUTOFF_FILE" ] && log "the recorded cutoff is older than ${CUTOFF_LEAD_MIN} min; re-asserting it with a fresh message"
     date -u +%FT%TZ > "$CUTOFF_FILE"
     MSG="OWNER (cutoff): admission is closed. Start NOTHING new — no lane, no dispatch, no review — and let everything already running finish; the daemons keep running so finished work still merges. Do not post a closing report yet: the pause word has not been given."
     if [ -x "$SAY" ] || [ -r "$SAY" ]; then
@@ -428,6 +493,17 @@ log "pause started (deadline T+$(hhmm "$DEADLINE_S"))${REASON:+ — $REASON}"
 stop_admission
 write_state pausing
 log "provisional pause-state.json written with the pre-pause caps ($CAPS_JSON)"
+# The failed-marker snapshot belongs HERE, before the merge daemon is stopped in
+# the next phase: the daemon is the only writer of watchdog/daemon/pr<N>.failed,
+# so a snapshot taken at the landing phase can never contain a marker the pause
+# caused, and "clear the kill-caused markers" would be dead code on every pause.
+if [ "$LANDING_OK" -eq 1 ]; then
+  if MARKERS_OUT="$(python3 "$LANDING" markers --state "$STATE" 2>&1)"; then
+    log "pre-pause marker snapshot: $MARKERS_OUT"
+  else
+    fail_phase "pause_landing.py markers failed (${MARKERS_OUT:-unknown}); a kill-caused failed marker cannot be told from a verdict"
+  fi
+fi
 
 # --- T+0:30 release waiters, stop the loops ---------------------------------------------------
 wait_until "$P_RELEASE"
@@ -489,15 +565,25 @@ fi
 # that dies between the two phases still leaves the thread ids, worktrees and lane steps
 # behind — the one thing a resume cannot reconstruct from a dead process.
 wait_until "$P_LAND"
+# `|| fail_phase` on a PIPELINE reads the status of its LAST command, so a `| sed`
+# made every landing phase look successful and no failure ever reached
+# pause-state.json.  PIPESTATUS[0] is the one that matters here.
+land_phase() { # land_phase <now|last>
+  python3 "$LANDING" land --phase "$1" | sed 's/^/   /'
+  [ "${PIPESTATUS[0]}" -eq 0 ] || fail_phase "pause_landing.py land --phase $1 failed"
+}
 if [ "$LANDING_OK" -eq 1 ]; then
-  if MANIFEST_OUT="$(python3 "$LANDING" manifest --cutoff-at "$CUTOFF_AT" 2>&1 >/dev/null)"; then
+  # --no-github first: the status reads are bounded but not free, and the young
+  # must be stopped inside the landing window, not after it.  The statuses are
+  # read once the young are down, and the resume re-reads them anyway.
+  if MANIFEST_OUT="$(python3 "$LANDING" manifest --cutoff-at "$CUTOFF_AT" --no-github 2>&1 >/dev/null)"; then
     log "landing manifest written into $STATE"
   else
     fail_phase "pause_landing.py manifest failed: ${MANIFEST_OUT:-unknown}"
   fi
-  python3 "$LANDING" land --phase now | sed 's/^/   /' || \
-    fail_phase "pause_landing.py land --phase now failed"
+  land_phase now
   log "young sessions stopped; mature reviewers and checkpointed writers still running"
+  python3 "$LANDING" statuses 2>&1 | sed 's/^/   /' || true
 else
   fail_phase "no usable $LANDING; nothing could be classified and no manifest was written"
 fi
@@ -505,8 +591,7 @@ fi
 # --- D-last: the last call ---------------------------------------------------------------------------
 wait_until "$P_LAST"
 if [ "$LANDING_OK" -eq 1 ]; then
-  python3 "$LANDING" land --phase last | sed 's/^/   /' || \
-    fail_phase "pause_landing.py land --phase last failed"
+  land_phase last
 fi
 # The anchored sweep is the LEFTOVER pass, not the landing: it stops the lane runners and
 # the helper loops no registry row names.  Every classified codex session has already been

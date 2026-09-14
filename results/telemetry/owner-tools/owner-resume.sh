@@ -25,9 +25,15 @@
 # check passes: each parked lane relaunched at the step it reached (no dispatch, no merge,
 # no build and no push while the head is unchanged; no CI and no review while the head
 # already carries `local-ci/summary` and `local-review/summary` success), each
-# checkpointed writer resumed on its own codex thread with a continue prompt, each stopped
-# reviewer restarted from scratch, and each recorded failed marker removed so the merge
-# daemon stops skipping a PR a kill, not a defect, marked.
+# checkpointed writer the lane does not own resumed on its own codex thread with a continue
+# prompt, each stopped reviewer restarted from scratch, and each recorded failed marker
+# removed so the merge daemon stops skipping a PR a kill, not a defect, marked.
+#
+# The replay is idempotent: pause_landing.py stamps the manifest as it replays it, so a
+# second run of this script (routine after "the resume message was not delivered") puts
+# nothing back twice — two lane.sh for one worktree, or two `codex exec resume` on one
+# thread id, is how a resume turns one outage into two.  `resume-exec --force` is the
+# deliberate way back in.
 #
 # Post-condition check, loud on failure: every cap file exists, is numeric and nonzero for
 # an enabled account, no account is "down", the capacity controller and the merge daemon are
@@ -323,8 +329,14 @@ fi
 
 # Success has one commit point: no owner notification or committed telemetry
 # precedes restoration and the complete post-condition check.
-rm -f "$W/paused" "$W/drain"
-if [ -e "$W/paused" ] || [ -e "$W/drain" ]; then
+# watchdog/cutoff goes too.  It is the marker of the FIRST owner word, and nothing
+# else removes it: a surviving one makes the next `owner-pause.sh --cutoff` log
+# "admission re-asserted, no second message" and send nothing, so the main session
+# is never told to start nothing new and keeps burning turns on refused
+# reservations — and the next manifest records the stale timestamp as the reason
+# its sessions are mature.
+rm -f "$W/paused" "$W/drain" "$W/cutoff"
+if [ -e "$W/paused" ] || [ -e "$W/drain" ] || [ -e "$W/cutoff" ]; then
   resume_incomplete "admission pause markers could not be cleared"
 fi
 # --- 6. the work the landing parked --------------------------------------------------------
@@ -334,13 +346,22 @@ fi
 # through a shell, and each launch is detached like the daemons above.
 WORK_RESUMED=0
 if [ "$WORK" -eq 1 ] && [ -r "$LANDING" ]; then
-  if WORK_OUT="$(python3 "$LANDING" resume-exec --state "$STATE" --log "$L/resume-work.log" 2>&1)"; then
-    printf '%s\n' "$WORK_OUT" | sed 's/^/  /'
-    WORK_RESUMED="$(printf '%s\n' "$WORK_OUT" | grep -c 'launched pid\|marker cleared' || true)"
+  # The manifest is stamped `replayed_at` as it is replayed, so running this
+  # script twice — routine after "the resume message was not delivered" — puts
+  # nothing back a second time.  Exit 4 means the plan RAN and some items failed:
+  # the rest were launched, so the record must still be believed.
+  WORK_OUT="$(python3 "$LANDING" resume-exec --state "$STATE" --log "$L/resume-work.log" 2>&1)"
+  WORK_RC=$?
+  printf '%s\n' "$WORK_OUT" | sed 's/^/  /'
+  WORK_RESUMED="$(printf '%s\n' "$WORK_OUT" | grep -c 'launched pid\|marker cleared' || true)"
+  if [ "$WORK_RC" -eq 0 ]; then
     log "work resumed from the landing manifest: $WORK_RESUMED items (log $L/resume-work.log)"
+  elif [ "$WORK_RC" -eq 4 ]; then
+    log "work resumed PARTIALLY: $WORK_RESUMED items launched; the failures are listed above"
+    echo "$PROG: some items of the landing manifest could not be launched (see above);" >&2
+    echo "$PROG: they are recorded under \"landing\".\"replay\" in $STATE." >&2
   else
-    echo "$PROG: the landing manifest could not be replayed:" >&2
-    printf '%s\n' "$WORK_OUT" | sed 's/^/  /' >&2
+    echo "$PROG: the landing manifest could not be replayed (exit $WORK_RC)." >&2
     echo "$PROG: caps, crontab and daemons ARE restored; the parked work is not." >&2
     echo "$PROG: replay it by hand with: python3 $LANDING resume-plan --state $STATE" >&2
   fi
