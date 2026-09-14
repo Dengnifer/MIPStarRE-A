@@ -1,0 +1,21 @@
+{
+  "schema": "qpbt-sol-first-activation-proof-v1",
+  "recorded_at": "2026-09-07T18:45:05Z",
+  "issue": 301,
+  "pr": 303,
+  "reviewed_head": "0deec4e5f91975ac44426b4b4e0680e76d3314d7",
+  "merge_commit": "a9dda4abc9b0953352eb0e16b417866b7fc170df",
+  "policy_activation_at": "2026-09-07T18:13:07Z",
+  "activation_verified_at": "2026-09-07T18:32:10Z",
+  "policy_sha256": "ffed31e698abd9ef9b1c66e54c1426d6b6073740445a91176e5fbbfee3fd28f9",
+  "published_after_policy": "77786baf7873fc05de5e467947ac100038a2fe7e",
+  "ci": "Both exact-head canonical runs green; latest repair39105exit0/all8success",
+  "independent_review": {"id":5134492795,"round":2,"verdict":"APPROVED","findings_remaining":0,"real_root_proposed_policy_pass":true},
+  "restoration": {"status":"success","restore_at":"2026-09-07T18:14:29Z","parked_bytes_restored":{"builds":438,"sessions":2089,"estimates":203},"concurrent_warmer_bytes_retained":398,"loss_checks_passed":true,"stash_retained":"7ead2274f5e360f1c2d266f1dfaa99e5ac0ebd06","telemetry_commit":"11d1bb51d0d0250d0251484f4e9365fd9933e1f3","published_main":"77786baf7873fc05de5e467947ac100038a2fe7e","sync_session":6509,"sync_exit":0,"clean_and_live_tip_verified":true},
+  "postmerge_acceptance": {"status":"success","verified_at":"2026-09-07T18:18:43.606Z","receipt":"/tmp/qpbt-pr303-postmerge-acceptance-20260907.json","routine_auto":["prover","reviewer","scout","independent_review"],"routine_result":"gpt-5.6-sol/ultra","hard_result":"gpt-6-astra/ultra with explicit reason","missing_reason_rejected":true,"actual_root_lease_verified":true,"proposed_policy_substitution":false,"runtime_restart":false},
+  "root": {"thread_id":"01a076bc-f4ad-7813-805b-c8b4dac71a14","name":"main","pid":2085772,"model":"gpt-6-astra","effort":"ultra","key":"space","total_capacity":5,"native_cap":3,"external_admission":0,"lease_verified":true},
+  "worker": {"task":"/root/space_sol_pr249","thread_id":"01a07d1a-e2d6-7580-a2c4-5970d4bef3ab","parent_thread_id":"01a076bc-f4ad-7813-805b-c8b4dac71a14","predecessor_thread_id":"01a07bd3-560a-7000-924d-d3aabef3ef4e","predecessor_checkpoint":"/tmp/qpbt-space-switch-checkpoint-20260907-cap11_pr288.md","role":"orc","job_class":"routine","requested_model":"gpt-5.6-sol","selected_model":"gpt-5.6-sol","effective_model":"gpt-5.6-sol","requested_effort":"ultra","observed_context_effort":"ultra","model_provenance":"Bound native turn_context; independently validated by committed native_rollout and native-record","provider_effort":null,"fork_turns":"none","context_at":"2026-09-07T18:21:49.233Z","first_actual_tool":"2026-09-07T18:22:05.751Z","first_successful_result":"2026-09-07T18:22:05.836Z","canonical_active_record_exit":0,"canonical_done_record_exit":0,"worktree":"/home/drx/MIPStarRE-qpbt/.worktrees/issue-241-extraction-error-absorption","completed_useful_work":"PR249 preservation-checked publication at1fbc286ef32ec2193cd262c0da0020813ef655aa; canonical CI/review still required","result_receipt":"/tmp/qpbt-sol-pr249-status-20260907.json","normal_hook_tests_passed":604,"incoming_paths_preserved":1958,"append_only_rows_lost":0,"budgets_reset":false},
+  "dispatch_ratio": {"sol":1,"astra":0,"unknown":0,"target":20,"range":[10,50],"window":100,"sampled_dispatches":1,"ratio":null,"status":"not-measurable","note":"One genuine new Sol thread, duplicate active/done observations counted once; no sustained ratio claim"},
+  "budgets": {"reset":false,"original_episode_start_approx":"2026-09-07T13:40:00Z","prior_two_hour_boundary":"2026-09-07T15:40:00Z","continuation":"Express owner continuation of same episode; no fresh budget","changed_line_ceiling":1000,"b8_attempts":13,"b8_working_seconds":26509},
+  "source_or_review_bodies_exported": false
+}

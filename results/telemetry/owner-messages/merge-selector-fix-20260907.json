@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-09-07T13:12:28.035883+00:00",
+  "previous_pid": 1089067,
+  "pid": 1354901,
+  "script": "/home/drx/.cache/mipstarre-dev/owner-tools/merge-service-relay3-cap11-review-fix-20260907.py",
+  "script_sha256": "272d0b514b27482a242791ea11870049ec08bd82faaf0dd8fc9831117f0a1956",
+  "log": "/home/drx/.cache/mipstarre-dev/logs/merge-service-relay3-cap11-review-fix-20260907.log",
+  "shared_lock": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.lock",
+  "shared_journal": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.jsonl",
+  "interval_seconds": 300,
+  "tests": {
+    "tests_run": 17,
+    "failures": 0,
+    "baseline_failed_assertions": 45
+  },
+  "change": "Use canonical CI and newest exact-head review gates for selection",
+  "unchanged": [
+    "canonical pr_merge.py authority",
+    "review independence",
+    "freshness",
+    "clean worktree",
+    "fix locks",
+    "relay-3 cap11",
+    "external0"
+  ]
+}

@@ -88,7 +88,7 @@ instance (D : DirectLdParams) : Nonempty (DirectLdSpace D) :=
 
 /-- Decompose a direct sample into its point and the remaining independent
 coordinates. -/
-private def directLdSpacePointEquiv (D : DirectLdParams) :
+def directLdSpacePointEquiv (D : DirectLdParams) :
     DirectLdSpace D ≃
       (Fin D.m → DirectScalarQ D) ×
         (Fin D.m × (Fin D.m → DirectScalarQ D)) where
@@ -141,6 +141,45 @@ inductive DirectLineDesc (D : DirectLdParams) where
       (baseFixed : lineRepMap direction base = base)
       (prefixZero : ∀ j : Fin D.m, j.val < index.val → direction j = 0)
   deriving DecidableEq
+
+/-! ## Finite direct-line carrier -/
+
+/-- A finite code for directly indexed lines, omitting only proof fields. -/
+private abbrev DirectLineDescCode (D : DirectLdParams) :=
+  ((Fin D.m → DirectScalarQ D) × Fin D.m) ⊕
+    ((Fin D.m → DirectScalarQ D) × Fin D.m ×
+      (Fin D.m → DirectScalarQ D))
+
+/-- Encode a directly indexed line by its tag and mathematical data. -/
+private def directLineDescCode (D : DirectLdParams) :
+    DirectLineDesc D → DirectLineDescCode D
+  | .axis base index _ => .inl (base, index)
+  | .diagonal base index direction _ _ => .inr (base, index, direction)
+
+/-- The direct-line code is injective by proof irrelevance. -/
+private theorem directLineDescCode_injective (D : DirectLdParams) :
+    Function.Injective (directLineDescCode D) := by
+  intro line line' h
+  cases line with
+  | axis base index baseFixed =>
+      cases line' with
+      | axis base' index' baseFixed' =>
+          simp only [directLineDescCode, Sum.inl.injEq, Prod.mk.injEq] at h
+          rcases h with ⟨rfl, rfl⟩
+          rfl
+      | diagonal => simp [directLineDescCode] at h
+  | diagonal base index direction baseFixed prefixZero =>
+      cases line' with
+      | axis => simp [directLineDescCode] at h
+      | diagonal base' index' direction' baseFixed' prefixZero' =>
+          simp only [directLineDescCode, Sum.inr.injEq, Prod.mk.injEq] at h
+          rcases h with ⟨rfl, rfl, rfl⟩
+          rfl
+
+/-- Directly indexed line descriptions form a finite type. -/
+noncomputable instance directLineDescFintype (D : DirectLdParams) :
+    Fintype (DirectLineDesc D) :=
+  Fintype.ofInjective (directLineDescCode D) (directLineDescCode_injective D)
 
 /-- The kind of a directly indexed line. -/
 def DirectLineDesc.kind {D : DirectLdParams} : DirectLineDesc D → LineKind

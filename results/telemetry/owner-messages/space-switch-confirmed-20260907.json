@@ -1,0 +1,29 @@
+{
+  "at": "2026-09-07T15:56:31.618274+00:00",
+  "thread": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "name": "main",
+  "previous_pid": 1101986,
+  "key": "space",
+  "capacity": 5,
+  "native_limit": 3,
+  "root_reservation": 1,
+  "other_reservation": 1,
+  "external_admission": 0,
+  "interruption": "Owner required immediate switch because relay-3 quota was nearly exhausted",
+  "goal_counters_before": {
+    "tokens_used": 24180724,
+    "time_used_seconds": 51791
+  },
+  "budget_reset": false,
+  "future_subagent_policy": "Sol default; Astra only hard/escalated; rolling Sol:Astra 10:1 to 50:1",
+  "pid": 2085772,
+  "native_lease": {
+    "pid": 2085772,
+    "start": "182075393",
+    "slots": 3,
+    "key_label": "space"
+  },
+  "verified_at": "2026-09-07T15:56:32.996836+00:00",
+  "source_sha256": "82457a4ce007a58703b9795c21e000d928c0842763b14dc5e80f617e612a8a49",
+  "private_paths_and_credentials_omitted": true
+}
