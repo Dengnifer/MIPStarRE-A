@@ -1208,9 +1208,11 @@ fix → CI → review `--loop` that lived in `/tmp`, branching on a round record
 rather than on a log grep.
 
 **Expected effect:** a capacity refusal is distinguishable from a failed proof,
-so the controller below can act on it and the janitor can re-run it; a dispatch
-that is refused survives with its prompt instead of dying; and the session
-registry records the model that actually ran.
+so the controller below can act on it and the current dispatcher can retry it
+within its attempt and cutoff bounds; a deferred dispatch retains its prompt as
+diagnostic evidence until janitor expiry; and the session registry records the
+model that actually ran. The 2026-09-14 amendment below corrects the former
+post-exit replay implication.
 
 ## 2026-09-12 - The caps measure themselves and the endpoints have health (W3)
 
@@ -1538,3 +1540,22 @@ that is not the briefed one shows up on the progress issue within the hour, one
 tier switch moves the shim, the models and the cadence together, and the only
 `MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
 `checked-push.sh`.
+
+## 2026-09-14 - Retained requests stop at the dispatch boundary (PR 552 F12)
+
+**Trigger:** `results/telemetry/events.d/2026-09-14-orc-550-20260914-02.md`,
+"PR 552 F12 overstated retained-request replay," records the scope decision
+against issue 550 comment 5645251655, section 4 and W6. The brief bounds retry
+inside the current dispatch and gives the janitor five passes whose spool action
+is expiry; it does not specify automatic post-exit delivery or command replay.
+
+**Change:** `local/protocols/sessions.md` section 4.1 and the coupled comments in
+`local/bin/dispatch.sh` now distinguish three states: bounded retries within the
+running dispatcher, retained request and prompt data after deferred exit 7, and
+janitor expiry after the run cutoff. The earlier W2 expected-effect sentence is
+corrected in place. No executable path, retry bound, gate, credential, cap, or
+runtime state changes.
+
+**Expected effect:** operators can use retained spool data as diagnostic
+evidence without inferring that the janitor will reconstruct or deliver a
+dispatch after the original process exits.

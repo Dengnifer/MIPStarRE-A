@@ -60,8 +60,9 @@
 #     watchdog/capacity/health-<account>.json says `down` waits for half-open
 #     instead of firing.  Five client-side retries are exactly how 69 refusals
 #     became 69 deaths on 2026-09-12.
-# When the attempts or the cutoff run out, the spool entry is LEFT for the
-# janitor and the exit status is 7.
+# When the attempts or the cutoff run out, the spool entry is retained as
+# diagnostic evidence until janitor expiry and the exit status is 7. Neither
+# component reconstructs a post-exit dispatch from that retained data.
 #
 # Exit codes: 0 ok · 2 usage · 3 disabled by kill switch · 4 preflight failure
 #   · 5 worktree busy or branch claimed by another session · 6 telemetry failure
@@ -964,8 +965,9 @@ PY
 }
 
 write_spool() {
-  # The whole request, before the first reservation, so a dispatch the provider
-  # refused can be replayed by the janitor instead of being lost.
+  # Retain the request before the first reservation so a deferred dispatch has
+  # diagnostic evidence until janitor expiry. Replay is bounded to this running
+  # dispatch; the spool is not a command for automatic post-exit delivery.
   local state="$1"
   [ -n "$SPOOL_FILE" ] || return 0
   mkdir -p "$SPOOL_DIR"
