@@ -1,5 +1,7 @@
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.EPRState
+import MIPStarRE.QPBT.Extraction.Bounds
+import MIPStarRE.QPBT.Extraction.StateExtraction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -69,6 +71,72 @@ structure ExtractionWitness {P : AdmissibleParams} {epsilon deltaS : ℝ}
       (fun (_ : Unit) (h : PauliRegister P) =>
         S.placeExtractedRegister side (pauliProj W h))
       (S.idealExpState aux) ≤ delta
+
+/-- Construct every extraction-witness field when the allowed squared error is
+at least four. The auxiliary vector is the normalized original state tensored
+with EPR on the auxiliary registers. Both distances are bounded independently
+of the dimensions and the number of Pauli answers.
+
+**Scope restriction:** This proves the large-error case of blueprint
+`lem:qld-unitary`, paper `14_analysis_of_the_pauli_basis_test.tex:1666-1860`,
+as required by the normalization correction in
+`docs/paper-gaps/qpbt_extraction-transfer.tex`. It does not assert the small-error
+case or construction of the supplied global witness.
+
+**Unfaithful:** The global measurement is supplied as `GlobalPairWitness`,
+rather than constructed from `lem:qld-4-7`. The discrepancy and planned
+composition with `exists_globalPairWitness` are recorded in
+`docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #123. -/
+theorem exists_extractionWitness_ofGlobalPairWitness_of_four_le
+    {P : AdmissibleParams} {epsilon deltaG delta : ℝ}
+    (S : ProjectiveSetting P epsilon) (w : GlobalPairWitness S deltaG)
+    (hdelta : 4 ≤ delta) : Nonempty (ExtractionWitness S w delta) := by
+  refine ⟨{
+    swap_right_unitary := swapUnitary_mul_conjTranspose w
+    swap_left_unitary := conjTranspose_mul_swapUnitary w
+    aux := S.extractionAuxReference
+    aux_norm := S.extractionAuxReference_norm
+    state_close := ?_
+    pauli_close := ?_
+  }⟩
+  · have hnorm := norm_sub_le
+      (S.applyBoth (swapUnitary w .alice) (swapUnitary w .bob) S.psiHat)
+      (S.idealExpState S.extractionAuxReference)
+    rw [S.applyBoth_swap_norm w, S.idealExpState_norm,
+      S.extractionAuxReference_norm] at hnorm
+    nlinarith [norm_nonneg
+      (S.applyBoth (swapUnitary w .alice) (swapUnitary w .bob) S.psiHat -
+        S.idealExpState S.extractionAuxReference)]
+  · intro side W
+    exact (S.extraction_pauli_dist_le_four w S.extractionAuxReference
+      S.extractionAuxReference_norm side W).trans hdelta
+
+/-- At construction error at least one, a universal extraction constant at
+least four suffices for the complete witness. This is the large-error branch
+at the unchanged nested scale of `exists_extractionWitness_ofGlobalPairWitness`.
+
+**Scope restriction:** Only the region where `deltaConstructPaulis` is at least
+one is covered. See the normalization correction in
+`docs/paper-gaps/qpbt_extraction-transfer.tex` for blueprint `lem:qld-unitary`,
+paper `14_analysis_of_the_pauli_basis_test.tex:1743-1783`.
+
+**Unfaithful:** The proof uses the supplied-witness helper
+`exists_extractionWitness_ofGlobalPairWitness_of_four_le`. The global-witness
+construction and its planned composition remain open under issue #123 in
+`docs/paper-gaps/qpbt_extraction-transfer.tex`. -/
+theorem exists_extractionWitness_ofGlobalPairWitness_of_one_le_construct
+    {P : AdmissibleParams} {epsilon deltaG C : ℝ}
+    (S : ProjectiveSetting P epsilon) (w : GlobalPairWitness S deltaG)
+    (hC : 4 ≤ C)
+    (hconstruct : 1 ≤ deltaConstructPaulis C epsilon deltaG P.m P.d P.q) :
+    Nonempty (ExtractionWitness S w
+      (deltaExtract C (deltaConstructPaulis C epsilon deltaG P.m P.d P.q) P.m P.d P.q)) := by
+  apply exists_extractionWitness_ofGlobalPairWitness_of_four_le S w
+  have hroot := Real.one_le_rpow hconstruct (by norm_num : (0 : ℝ) ≤ 1 / 4)
+  have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
+  unfold deltaExtract
+  exact hC.trans (le_mul_of_one_le_right (by linarith)
+    (hroot.trans (le_add_of_nonneg_right hratio)))
 
 /-- Conditional extraction for the concrete swap maps at the explicit scale
 obtained by applying `deltaExtract` to `deltaConstructPaulis`. Given a

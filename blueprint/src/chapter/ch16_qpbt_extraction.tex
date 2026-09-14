@@ -218,11 +218,7 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 Each displayed construction estimate below has its own universal constant $C_E \geq 1$, quantified independently, and its own scale $\delta_P^E=C_EB$. The source uses one enlarged error $\delta_S$ for all of these estimates. The two presentations agree: after the finitely many estimates have been established, take $C_* = \max_E C_E$ and $\delta_P=C_*B$. Since $B\geq0$, every bound remains valid at this common scale. In the proof paragraphs, $\delta_P$ denotes this common enlargement. It has the same asymptotic form as $\delta_G$: after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ for $0 \leq \eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'}
-	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent}
 	\lean{MIPStarRE.QPBT.deltaConstructPaulis}
-	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
@@ -478,6 +474,38 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	original strategy state tensored with one EPR pair supplies a unit
 	reference vector on $R$, and the required distance is at most two.
 \end{proof}
+
+\begin{example}[State extraction from a supplied global witness]
+	\label{lem:qld-state-extraction-given-global-pair}
+	\lean{MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness}
+	\leanok
+	\uses{lem:qld-4-7, def:v-swap-unitary, thm:qld-epr-projection-estimates}
+	Assume the global polynomial-pair measurement and both consistency estimates
+	of Lemma~\ref{lem:qld-4-7} as supplied data at error $\delta_G\geq0$.
+	There is a universal constant $C\geq1$ such that, for every admissible
+	projective setting with $0\leq\eps\leq1$, a normalized auxiliary state satisfies
+	\[
+	  \|V_{\mathrm A}\ot V_{\mathrm B}\ket{\hat\psi}
+	      -\ket{\mathrm{aux}}\ot\ket{\mathrm{EPR}_q}^{\ot M}\|^2
+	  \leq16C(\delta_G+\sqrt\eps+md/q).
+	\]
+	The global measurement is not constructed here. The source-facing joint
+	construction in Lemma~\ref{lem:qld-construct-the-paulis}, and the full
+	extraction conclusion below, remain open in Lean.
+\end{example}
+
+\begin{example}[Extraction with allowed error at least four]
+	\label{lem:qld-large-error-extraction-given-global-pair}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness_of_four_le}
+	\leanok
+	\uses{def:v-swap-unitary, def:EPR, lem:projective-strategy-setup}
+	For any supplied global polynomial-pair witness and any allowed squared
+	error $\delta\geq4$, every field of the conditional extraction witness exists.
+	The auxiliary vector is the original strategy state tensored with EPR on
+	the auxiliary registers. Unitarity bounds the state distance by four;
+	completeness bounds the summed Pauli measurement distance by four, for
+	each player and each basis. No restriction on a projection norm is needed.
+\end{example}
 
 \begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
