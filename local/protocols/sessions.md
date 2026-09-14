@@ -41,7 +41,11 @@ asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
 the `dispatcher` field. External session prompts prohibit further fan-out.
 
-### Native descendants (owner amendments, 2026-09-06 and 2026-09-08)
+### Retired native descendants (historical amendments, 2026-09-06 and 2026-09-08)
+
+Issue #505 retires the lease-based native entrypoints below and the useful-queue
+supervisor. This subsection records historical episodes, not current admission
+instructions. Native telemetry remains readable; new work uses external dispatch.
 
 Main may assign useful native work under the published model policy without
 external admission. Main remains Astra Ultra; existing defaults may stay Astra
@@ -167,19 +171,18 @@ Astra; Lean files, prover/reviewer roles, or missing historical samples alone do
 Exact edit specifications remain appropriate for mechanical cleanup, not a universal
 Sol gate. The historical C01/C02 audit is retained as evidence, not a role ceiling.
 
-For a model change create a NEW explicit-model native child with Ultra and
-`fork_turns="none"`; follow-up to an Astra thread does not switch its model.
-Link predecessor thread, assignment, worktree, checkpoint and cumulative budget.
-No permission, account, root identity, lease or capacity setting changes here.
-All current-turn contexts are checked; observed models are not inferred from a
-requested argument. Independent review still binds identity, fresh assignment,
-head, prompt and actual completed turn. Hard control-policy review remains Astra.
+For a model change, create a new explicit-model external assignment with Ultra;
+`dispatch.sh --resume` does not switch an existing thread's model. Link the
+predecessor thread, assignment, worktree, checkpoint and cumulative budget.
+Observed models are not inferred from a requested argument. Independent review
+still binds a different session to the exact head and trusted prompt. Hard
+control-policy review remains Astra.
 
-At reviewed activation, main records one timestamp and passes `--activation-at`
-to native telemetry (or `MIPSTARRE_MODEL_POLICY_ACTIVATION_AT` to the publisher).
-Use `--dispatch-kind new` only on a verified first native task; resumed tasks
-use `resume`, and pre-activation current tasks use `grandfathered`. Grandfathering
-requires actual pre-activation turn evidence, not a caller label. Main is excluded.
+At reviewed activation, main records one timestamp in
+`MIPSTARRE_MODEL_POLICY_ACTIVATION_AT`. External dispatch records `new` or
+`resume` automatically; historical pre-activation native tasks remain
+`grandfathered`. Grandfathering requires actual pre-activation turn evidence,
+not a caller label. Main is excluded.
 `model_policy.py --ratio-registry results/telemetry/sessions.jsonl --activation-at
 TIMESTAMP` reports the last 100 distinct new dispatches, plus separate cumulative
 counts. Target 20:1 within 10:1..50:1; unknown observations are not invented,
@@ -189,8 +192,9 @@ never add filler or delay necessary hard work to manufacture a ratio.
 
 No live activation until normal CI, independent control-policy review, service
 merge and an explicit new Sol/Ultra runtime observation. Catalog/CLI Ultra is not
-provider-measured reasoning. External admission stays zero; deploy the shim with
-its adjacent checked helper, never as a stale standalone copy. Keep all normal
+provider-measured reasoning. External admission uses the worker caps in section 4.
+Deploy the shim with its adjacent checked helper, never as a stale standalone
+copy. Keep all normal
 caller, declaration, statement-integrity, proof-debt, CI/review and merge gates.
 Escalation preserves all accumulated attempts, time, work and historical evidence.
 
@@ -262,28 +266,25 @@ registry append; and a final report of `name`, `thread_id` and the
 last-message path.
 
 Account routing uses `--account auto|primary|second`, overriding
-`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). Locked admissions read `watchdog/account-mode`
-(absent: `primary`; valid: `primary|both`). Only the owner may authorize `both`, reading
-`max_codex|primary|second` from `watchdog/account-mode-both-preserved.json` when present.
-Neither mode rewrites settings, credentials or history.
-Caps in `watchdog/max-codex-{primary,second}` default to 11 and 9; zero disables
-an account. `watchdog/max-codex` additionally caps total workers. Auto selects
-the smallest live/cap ratio among eligible accounts, with primary winning ties.
-Host `/proc` scans reconcile Codex executables and dispatcher reservations by ancestry,
-without counting Node wrappers twice. Twelve allocated primary slots reserve at least
-one for main; other interactives and unreserved workers reduce capacity. Each admission
-reads optional `watchdog/primary-excluded-interactive-cwds.json`: a duplicate-free list
-drawn only from `/home/drx/FV`, `/home/drx/LDT-Lean-Paper`, `/home/drx`; invalid lists fail.
-Only known-primary interactives qualify, never workers/reservations; absence exempts none.
-`watchdog/primary-external-reserved` reserves non-Codex key use (default zero), not
-already-observed processes. Unknown homes count against primary. Unavailable host
-visibility or unreadable live processes fail before stale cleanup; dead reservations
-are removed and permission-denied PIDs retained. Full accounts poll for
-`MIPSTARRE_ACCOUNT_WAIT` seconds (default 1800), then fail without reserving or spilling
-to second. Dry runs neither wait nor reserve and still require visibility and capacity.
+`MIPSTARRE_CODEX_ACCOUNT` (default `auto`). `account_router.py reserve ROOT ACCOUNT PID WAIT`
+prints the selected account. Under `accounts/router.lock`, it reads only
+`watchdog/max-codex-{primary,second}`: missing means zero, zero disables an
+account, and negative or malformed caps fail. Live `accounts/<account>/<pid>`
+marker files consume slots; dead markers are removed and permission-denied PIDs
+remain occupied. Auto chooses the smallest live/cap ratio among accounts with
+space, with primary winning ties. Explicit accounts never spill to the other.
+Full accounts poll every 10 seconds for at most `MIPSTARRE_ACCOUNT_WAIT` seconds
+(default 1800), rereading caps each time. Dry runs neither wait nor reserve.
+No host census, global cap, account-mode, external-admission, native lease or
+queue ticket participates. Configure worker caps to reflect the operator's allocation;
+this command does not measure provider throughput or account for unmarked processes.
+The installed `qpbt-switch` must be retired or made report-only by the meta session;
+never run it to stop dispatchers, create HOLD/STOP files, or signal routers.
+The repository change does not alter installed home commands or live caps.
+Dispatch also supplies its registry to retain model selection and telemetry.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
-Primary mode rejects secondary-affinity resumes, including `auto`, without relabeling.
+Resumes remain on their original account and model and obey that account's worker cap.
 `--continue-from FILE` starts a fresh primary thread from operator JSON: `previous_session`
 (terminal, same issue), `checkpoint` (ancestor of HEAD), and `budget_file` (shared path).
 The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, and
@@ -330,7 +331,7 @@ bodies — is attached with `--context-file`, never pasted into the task text
 The session works in its worktree under its sandbox. The standing rules
 injected into every prompt are: read `AGENTS.md` first; treat
 `local/protocols/*.md` as normative; start no sub-session except through
-the applicable external/native protocol above; never review your own diff;
+external `dispatch.sh`; never review your own diff;
 keep runtime state out of the
 repository; and put the result, the residual risk and the hand-off in the
 final message, which is captured to

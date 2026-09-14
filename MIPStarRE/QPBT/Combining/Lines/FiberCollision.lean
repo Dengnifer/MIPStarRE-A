@@ -1,16 +1,21 @@
-import MIPStarRE.QPBT.Combining.Lines.WeightedCollision
+import MIPStarRE.QPBT.Games.Sandwich.Defs
 
 /-!
-# Collision bounds on a fixed nondegenerate line fiber
+# Conditional collision bounds from fiber averages
 
-This module specializes the weighted collision estimate for the mixed
-line-point distribution to the indicator of one fixed line.
+This module converts an unnormalized collision estimate on every first-question
+fiber into the positive-mass conditional collision predicate used by the
+pasting theorem.
 
 ## References
 
-The estimate is the Schwartz--Zippel step in `lem:qld-xz-lines`,
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`.
+The conditional collision hypothesis is from `lem:pasting`,
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`. Its use in
+the QPBT combining argument occurs at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.
 -/
+
+open scoped BigOperators
 
 namespace MIPStarRE.QPBT
 
@@ -18,39 +23,36 @@ open MIPStarRE.LDT
 
 noncomputable section
 
-/-- On each nonzero-direction line fiber the collision mass is at most the
-degree-to-field-size ratio times the fiber mass. Thus division by any positive
-fiber mass gives the conditional probability required by `lem:pasting`. This
-proof-only estimate supports paper `14_analysis_of_the_pauli_basis_test.tex:955`;
-transport to the product law and the pasting register presentation is separate. -/
-theorem linePointDist_nondegenerate_fiber_collision_le {L : LdParams} {bound : ℕ}
-    (line : LineDesc L) (hdir : line.direction ≠ 0)
-    (first second : DegPoly L bound) (hne : first ≠ second) :
-    avgOver (linePointDist L) (fun sample =>
-      if sample.1 = line then
-        (if evalOpt sample.1 sample.2 first = evalOpt sample.1 sample.2 second
-          then 1 else 0) else 0) ≤
-      (bound : ℝ) / Fintype.card (ScalarQ L) *
-        avgOver (linePointDist L) (fun sample => if sample.1 = line then 1 else 0) := by
+/-- An unnormalized collision estimate on every first-question fiber implies
+the positive-mass conditional collision predicate of `lem:pasting`. This is a
+formalization-only normalization adapter for paper lines 504--525. -/
+theorem collision_bound_of_fiber_averages {X Y₁ Y₂ R₂ Γ₂ : Type*}
+    [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+    [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]
+    [Fintype Γ₂] (dist : Distribution ((X × Y₁) × Y₂))
+    (eval₂ : Γ₂ → Y₂ → R₂) (eta : ℝ)
+    (hbound : ∀ fixed : X × Y₁, ∀ first second : Γ₂, first ≠ second →
+      avgOver dist (fun sample => if sample.1 = fixed then
+        (if eval₂ first sample.2 = eval₂ second sample.2 then 1 else 0) else 0) ≤
+      eta * avgOver dist (fun sample => if sample.1 = fixed then 1 else 0)) :
+    HasConditionalCollisionBound dist eval₂ eta := by
   classical
-  have hweight (other : LineDesc L) : (0 : ℝ) ≤ if other = line then 1 else 0 := by
-    split_ifs <;> norm_num
-  have hbound := linePointDist_nondegenerate_weighted_collision_le
-    (fun other => if other = line then 1 else 0)
-    hweight first second hne
-  have hleft (sample : LineDesc L × (Fin L.m → ScalarQ L)) :
-      (if sample.1.direction ≠ 0 then (if sample.1 = line then (1 : ℝ) else 0) *
-        (if evalOpt sample.1 sample.2 first = evalOpt sample.1 sample.2 second
-          then 1 else 0) else 0) =
-      (if sample.1 = line then
-        (if evalOpt sample.1 sample.2 first = evalOpt sample.1 sample.2 second
-          then 1 else 0) else 0) := by
-    by_cases heq : sample.1 = line <;> simp [heq, hdir]
-  have hright (sample : LineDesc L × (Fin L.m → ScalarQ L)) :
-      (if sample.1.direction ≠ 0 then (if sample.1 = line then (1 : ℝ) else 0) else 0) =
-        (if sample.1 = line then 1 else 0) := by
-    by_cases heq : sample.1 = line <;> simp [heq, hdir]
-  simpa only [hleft, hright] using hbound
+  intro question point _ first second hne
+  have havg (value : ((X × Y₁) × Y₂) → ℝ) :
+      avgOver dist value = ∑ sample, dist.weight sample * value sample := by
+    exact (dist.sum_univ_eq_sum_support _ (fun sample hout => by
+      rw [dist.outsideSupport sample hout, zero_mul])).symm
+  have hmass : (dist.map Prod.fst).weight (question, point) =
+      avgOver dist (fun sample => if sample.1 = (question, point) then 1 else 0) := by
+    rw [Distribution.map_weight]
+    unfold avgOver
+    rw [Finset.sum_filter]
+    apply Finset.sum_congr rfl
+    intro sample _
+    by_cases hfixed : sample.1 = (question, point) <;> simp [hfixed]
+  rw [hmass]
+  have h := hbound (question, point) first second hne
+  simpa [havg, Fintype.sum_prod_type, mul_ite] using h
 
 end
 

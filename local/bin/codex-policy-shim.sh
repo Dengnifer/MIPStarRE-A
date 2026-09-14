@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-mode_file="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}/watchdog/account-mode"
-mode=primary
-if [ -f "$mode_file" ]; then mode="$(cat "$mode_file")"; fi
-case "$mode" in primary|both) ;; *) echo 'invalid account mode' >&2; exit 4 ;; esac
-if [ "$mode" = primary ] && [ "${CODEX_HOME:-$HOME/.codex}" != "$HOME/.codex" ]; then
-  echo 'primary-only policy: preserve the old thread; use a checkpoint continuation' >&2
-  exit 4
-fi
 args=(); task=0; effort=ultra; model="${MIPSTARRE_CODEX_MODEL:-auto}"
 while [ "$#" -gt 0 ]; do
   argument="$1"; shift
@@ -58,7 +50,7 @@ while [ "$#" -gt 0 ]; do
 done
 script_dir="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
 policy_args=(--role "${MIPSTARRE_DISPATCH_ROLE:-orc}" --job-class "${MIPSTARRE_JOB_CLASS:-general}"
-  --model "$model" --effort "$effort" --field model --external)
+  --model "$model" --effort "$effort" --field model)
 [ -z "${MIPSTARRE_HARDNESS_REASON:-}" ] ||
   policy_args+=(--hardness-reason "$MIPSTARRE_HARDNESS_REASON")
 model="$(python3 "$script_dir/model_policy.py" "${policy_args[@]}")" || exit 4
