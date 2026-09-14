@@ -1,4 +1,20 @@
+---
+title: "Issue 523: supplied-witness state extraction checkpoint"
+date: 2026-09-14
+purpose: >
+  Records the verified state-extraction and large-error witness constructions,
+  their provenance and costs, and the remaining conditional extraction obligation.
+issue: "#523"
+pr: "#544"
+---
+
 # Issue 523: supplied-witness state extraction checkpoint
+
+## Scope
+
+This audit covers `exists_extractionWitness_ofGlobalPairWitness` in
+`MIPStarRE/QPBT/Extraction/Unitary.lean` and the supporting constructions
+identified below.
 
 Admission: 2026-09-14 07:39:35 UTC; original deadline: 08:04:35 UTC.
 The existing worktree was clean at `94a6845ab01a821329d1c9afe1388b9391cdeb6b`.
@@ -8,7 +24,14 @@ No competing claim on issue 523 or PR 544 was found. Input branches were read
 through immutable Git objects. Primary setup ran with `--no-build` and retained
 the populated build directory. No other worker's checkout was modified.
 
-## Result
+## Source of Truth
+
+The source is `lem:qld-unitary`,
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
+The new state proof addresses lines 1715-1783 using the numerical correction
+in `docs/paper-gaps/qpbt_extraction-transfer.tex`.
+
+## Findings
 
 The original `exists_extractionWitness_ofGlobalPairWitness` signature and
 proof hole remain unchanged. No new axiom or proof hole is introduced.
@@ -23,11 +46,6 @@ displacement; the preserved EPR product identity and contraction estimates
 bound projection error. The preserved normalization theorem covers zero
 projection without a nonvanishing assumption.
 
-The source is `lem:qld-unitary`,
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1860`.
-The new state proof addresses lines 1715-1783 using the numerical correction
-in `docs/paper-gaps/qpbt_extraction-transfer.tex`.
-
 `exists_extractionWitness_ofGlobalPairWitness_of_four_le` constructs every
 field of the actual witness at allowed error at least four. Its auxiliary
 vector is the original strategy state tensored with EPR on the auxiliary
@@ -36,6 +54,8 @@ adjoint-square equal to the identity, bounding the complete answer-summed
 distance by four for both players and bases. No dimension factor occurs.
 The `_of_one_le_construct` specialization gives the same full witness at the
 target's nested scale when C is at least four and construction error at least one.
+
+## Required Action
 
 The remaining construction is the small-error total-Pauli comparison on the
 normalized ideal state, paper lines 1785-1858. Combine supplied-witness point
@@ -88,7 +108,7 @@ these restrictions. The source joint consistency entry no longer marks its
 conditional unfinished declarations as matched; the source joint construction
 and unrestricted extraction remain visibly open.
 
-## Verification and cost preservation
+## Validation
 
 Focused Lean checks passed for all recovered/new modules and `Unitary.lean`,
 which retains only its original proof-hole warning. Fresh axiom queries for
@@ -102,9 +122,29 @@ whitespace, and focused line checks passed. Synchronization retains 13 existing
 statement/proof-mark warnings. Every changed Lean module is below 1000 lines.
 No full build, CI, review, publication, worker, or child session was launched.
 
+## Cost Preservation
+
 The preceding audit `2026-09-12_issue-523_epr-projection.md` preserves the known
 historical prerequisite/scouting lower bound: 7,395 wall seconds, 24,256,025
 input tokens (23,113,344 cached), and 139,412 output tokens, plus explicitly
 unknown historical usage. Earlier issue523 sessions and this continuation are
 additional costs, not a reset. MAIN records the native rollout on completion;
 this checkpoint does not invent missing runtime usage measurements.
+
+The owner authorized a separate documentation-only finalization of at most
+three elapsed minutes after the completed proof run. Its first clock check
+was 2026-09-14 08:06:43 UTC, at clean head
+`7969c00f7c9f17c456e4c32c76c6fca98a14357f`. This additional time and usage must
+be included in cumulative telemetry, without resetting the original proof-run
+costs. MAIN records the complete native session once after the final terminal
+receipt. This correction changes only this audit's metadata and organization;
+it adds no proof work or Lean or blueprint edits.
+
+## Review Use
+
+Use this checkpoint to distinguish the verified auxiliary-state construction
+and restricted complete witnesses from the still-open full extraction theorem.
+Check the frozen-input provenance and stated axiom closures when integrating
+the proof content. Resolve the Required Action before treating the conditional
+extraction constructor as complete, and preserve the separate source-witness
+construction obligation and all cumulative costs.
