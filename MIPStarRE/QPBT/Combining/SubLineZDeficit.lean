@@ -19,7 +19,7 @@ exact X marginal of the X-Z-X sandwich and is proved in
 
 ## References
 
-The Z estimates support blueprint `lem:claim-17-3-re-direct`, alongside the
+The Z estimates support blueprint `lem:claim-17-3-direct-real`, alongside the
 source `lem:claim-17-3`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`.
 The separate marginal identities encode the analogue of Property 2 of

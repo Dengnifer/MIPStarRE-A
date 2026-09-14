@@ -324,7 +324,7 @@ conditional law.
 The witness is the sub-line law `subLineDist` of the sampling procedure.  Its
 pointwise fields follow from `subLineTripleOf_incidence`,
 `subLineTripleOf_compatibility`, and `subLineTripleOf_axis_closure`, after
-recovering the auxiliary sample with `exists_raw_of_mem_subLineDist_support`.
+recovering the auxiliary sample with `exists_samplingData_of_mem_subLineDist_support`.
 Its extended-line marginal is `subLineDist_map_fst`, and its two projected
 point marginals are the separate mixtures of `subLineDist_source_mixture`. -/
 theorem exists_subLineWitness (P : AdmissibleParams) :
@@ -338,15 +338,15 @@ theorem exists_subLineWitness (P : AdmissibleParams) :
             axis_closure := ?_ }⟩
   · intro sample hsample u hu
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_incidence P kind k w hx hz hu
   · intro sample hsample
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_compatibility P kind k w hx hz
   · intro sample hsample haxis
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_axis_closure P kind k w haxis
 
 end

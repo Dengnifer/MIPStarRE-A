@@ -1266,7 +1266,10 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 \end{definition}
 
 Thus $\widetilde D_{\mathrm v,i}$ denotes the seed-bearing restriction,
-not the source law $D_{\mathrm v,i+1}$. Identifying its push-forward with
+not the source law $D_{\mathrm v,i}$ of
+Definition~\ref{def:ith-restricted-line}, which carries the same zero-based
+index; that source restriction is the one written $D_{\mathrm v,i+1}$ in the
+one-based notation of \cite{Ji2020MIPStar}. Identifying its push-forward with
 the source restriction requires the corresponding carrier maps; in the axis
 case the map must forget the residual seed. These source-law identities
 remain open, as recorded in \cite{gap:qpbt_ld-dimension-divisibility}.
@@ -1679,7 +1682,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{def:direct-subline-law}
 	\lean{MIPStarRE.QPBT.SubLineWitness}
 	\leanok
-	\uses{def:ith-restricted-line, def:line-representative, def:combine-map}
+	\uses{def:ith-restricted-line-refined, def:line-representative,
+		def:combine-map}
 	Put $n=2m+2$. The directly indexed extended line-point law samples
 	$i\in\{0,\dots,n-1\}$ and $u,v\in\F_q^n$ independently and uniformly,
 	and chooses the axis or diagonal kind with equal probabilities.
@@ -1706,15 +1710,19 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\times\{0,\dots,m-1\}^2$ with the following two mixture properties.
 	Sample a triple from $D_{\mathrm{dir}}$ and an independent uniform
 	parameter $t$ on $\ell$. The law of $(\ell_X,\ell_Z,\pi_X(\ell(t)))$
-	is the mixture obtained by sampling $(\ell_X,x)$ from
-	$D_{\mathrm v,i}$ and independently $\ell_Z$ from the line marginal of
-	$D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,x)$.
+	is the mixture obtained by sampling $(\ell_X,x)$ from the seed-bearing
+	restriction $\widetilde D_{\mathrm v,i}$ of
+	Definition~\ref{def:ith-restricted-line-refined} and independently
+	$\ell_Z$ from the line marginal of $\widetilde D_{\mathrm v,j}$, and
+	retaining $(\ell_X,\ell_Z,x)$.
 	The law of $(\ell_X,\ell_Z,\pi_Z(\ell(t)))$ is the mixture obtained
 	by retaining $(\ell_X,\ell_Z,z)$ from the corresponding independent
 	samples of $\ell_X$ and $(\ell_Z,z)$. These are separate one-point
-	marginal identities, with the same mixture weights; they impose no
+	marginal identities over the seed-bearing restrictions, with the same
+	mixture weights for both projected marginals; they impose no
 	joint conditional independence of the two projected points.
-	Identification with the source law $D$ is a separate obligation;
+	Identification with the source restrictions $D_{\mathrm v,i}$, and with
+	the source law $D$, is a separate obligation;
 	see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{definition}
 
@@ -1743,33 +1751,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	identification are bijections.
 \end{proof}
 
-\begin{lemma}[Formalization support: real-part replacement under the directly indexed law]
-	\label{lem:claim-17-1-re-direct}
-	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
-	\leanok
-	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
-		lem:qld-sublines-uniform-point, lem:qld-xz-lines}
-	There is a universal $C>0$ such that the following holds.
-	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law},
-	and let $Q,T$ satisfy the joint point and line measurement properties of
-	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
-	$\delta_Q,\delta_P$. Write
-	$A_{\mathrm{dir}},B_{\mathrm{dir}}$ for the two expectations displayed in
-	Lemma~\ref{lem:claim-17-1}, using $D_{\mathrm{dir}}$ and zero-completed
-	optional evaluations. Then
-	$|\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le C\sqrt{\delta_Q}$.
-	This formalization-only estimate asserts neither a complex-modulus bound
-	nor transport to the source distribution.
-\end{lemma}
-\begin{proof}
-	\leanok
-	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
-		lem:qld-sublines-uniform-point}
-	The real overlap estimate and the same-placement squared-distance bound
-	$4\delta_Q$ give $2\sqrt{\delta_Q}$. Use the uniform-point identity to
-	rewrite the point average, and take $C=2$.
-\end{proof}
-
 \begin{lemma}[Formalization support: the concrete X marginal]
 	\label{lem:concrete-line-X-marginal}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
@@ -1790,7 +1771,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.concreteXPointOverlap}
 	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
 	\leanok
-	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
+	\uses{lem:concrete-line-X-marginal,
+		lem:restricted-line-refined-mixture-bounds,
 		lem:qld-comm-line-cons, def:direct-subline-law}
 	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law}.
 	For the concrete X-Z-X measurement, let
@@ -1803,11 +1785,13 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
+	\uses{lem:concrete-line-X-marginal,
+		lem:restricted-line-refined-mixture-bounds,
 		lem:qld-comm-line-cons, def:direct-subline-law}
 	The concrete marginal identity reduces the overlap to X-line/point
 	consistency. The separate X marginal of the directly indexed subline law
-	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
+	is a mixture of seed-bearing restricted laws. Error inflation and
+	$m\ge1$ give the bound.
 \end{proof}
 
 \begin{lemma}[Formalization obligation: complex X-factor removal under the directly indexed law]
@@ -1822,32 +1806,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Transport to the source law is separate; see
 	\cite{gap:qpbt_subline-claims-line-marginal,gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
-
-\begin{lemma}[Formalization support: the real Z overlap under the directly indexed law]
-	\label{lem:claim-17-3-re-direct}
-	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
-	\leanok
-	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement,
-		lem:overlap-gap-distance, def:direct-subline-law}
-	There is a universal $C>0$ such that the following holds.
-	Let $Q,T$ satisfy the joint point and line measurement properties of
-	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
-	$\delta_Q,\delta_P$, and let $D_{\mathrm{dir}}$ be a directly indexed
-	subline law as in Definition~\ref{def:direct-subline-law}. If $B_Z$ is the
-	expectation in Lemma~\ref{lem:claim-17-3} under that law with
-	zero-completed optional evaluations, then
-	$|\Re B_Z-1|\le
-	C\sqrt m(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})$.
-\end{lemma}
-\begin{proof}
-	\leanok
-	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10,
-		lem:qld-4-10-same-placement, lem:overlap-gap-distance, def:direct-subline-law,
-		def:expanded-point-measurement}
-	The separate Z marginal and restricted consistency estimates bound the
-	nonnegative overlap deficit; taking a square root gives the displayed
-	bound with $C=2$.
-\end{proof}
 
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
@@ -2043,8 +2001,12 @@ Let $D_{\rm dir}$ be any auxiliary subline distribution of mass one whose
 extended-line marginal is the line marginal of the line-point law with
 coordinate indices sampled uniformly and directly. Require incidence and affine
 compatibility with its two source lines, separate X and Z point marginal
-mixtures as in Property~2, and axis-line closure. No equality with the
-seed-indexed law $D$ is assumed or established.
+mixtures over the seed-bearing restrictions $\widetilde D_{\mathrm v,i}$ of
+Definition~\ref{def:ith-restricted-line-refined}, with the same mixture
+weights for both projected marginals, as in Property~2 of
+Definition~\ref{def:direct-subline-law}, and axis-line closure. No equality
+with the source restrictions $D_{\mathrm v,i}$, or with the seed-indexed law
+$D$, is assumed or established.
 Write $A_Q$, $A_{ZX}$ and $A_Z$ for the three overlap averages displayed in
 Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}, using $D_{\rm dir}$ and
 a uniform affine parameter on each extended line. Here all line answers are

@@ -199,7 +199,7 @@ uniform point of its extended line is the law of the two source lines decoded
 from two independent restricted blocks together with their two point blocks.
 Blueprint `lem:qld-sublines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem subLineBranchRaw_map_joint (P : AdmissibleParams) (kind : LineKind)
+theorem subLineBranchSampling_map_joint (P : AdmissibleParams) (kind : LineKind)
     (k : Fin (2 * P.m + 2)) :
     (Distribution.prod
         (Distribution.prod (uniformDistribution (SubLinePointDir P))
@@ -497,7 +497,7 @@ two source lines of a sampled triple together with the source `X` block of a
 uniform point of its extended line is the `X` component law of the two indices
 of that branch.  Blueprint `lem:qld-sublines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem subLineBranchRaw_map_projX (P : AdmissibleParams) (kind : LineKind)
+theorem subLineBranchSampling_map_projX (P : AdmissibleParams) (kind : LineKind)
     (k : Fin (2 * P.m + 2)) :
     (Distribution.prod
         (Distribution.prod (uniformDistribution (SubLinePointDir P))
@@ -515,7 +515,7 @@ theorem subLineBranchRaw_map_projX (P : AdmissibleParams) (kind : LineKind)
     (fun D : Distribution ((LineDesc P.toLdParams × LineDesc P.toLdParams) ×
         ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P))) =>
       Distribution.map D (fun z => (z.1, z.2.1)))
-    (subLineBranchRaw_map_joint P kind k)
+    (subLineBranchSampling_map_joint P kind k)
   simp only [Distribution.map_map] at h
   refine Eq.trans h ?_
   exact (subLineXComponentDist_eq_map_prod P kind (subLineXIndex P k)
@@ -526,7 +526,7 @@ two source lines of a sampled triple together with the source `Z` block of a
 uniform point of its extended line is the `Z` component law of the two indices
 of that branch.  Blueprint `lem:qld-sublines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
-theorem subLineBranchRaw_map_projZ (P : AdmissibleParams) (kind : LineKind)
+theorem subLineBranchSampling_map_projZ (P : AdmissibleParams) (kind : LineKind)
     (k : Fin (2 * P.m + 2)) :
     (Distribution.prod
         (Distribution.prod (uniformDistribution (SubLinePointDir P))
@@ -544,7 +544,7 @@ theorem subLineBranchRaw_map_projZ (P : AdmissibleParams) (kind : LineKind)
     (fun D : Distribution ((LineDesc P.toLdParams × LineDesc P.toLdParams) ×
         ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P))) =>
       Distribution.map D (fun z => (z.1, z.2.2)))
-    (subLineBranchRaw_map_joint P kind k)
+    (subLineBranchSampling_map_joint P kind k)
   simp only [Distribution.map_map] at h
   refine Eq.trans h ?_
   exact (subLineZComponentDist_eq_map_prod P kind (subLineXIndex P k)
