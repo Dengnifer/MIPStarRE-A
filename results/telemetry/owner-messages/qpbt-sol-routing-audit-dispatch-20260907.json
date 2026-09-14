@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-09-07T13:43:54Z",
+  "status": "audit_complete_implementation_in_progress",
+  "task": "/root/cap11_pr256",
+  "thread_id": "01a07bd1-9344-7d93-b71e-fd5881bd8ac9",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "root_pid": 1101986,
+  "role": "Astra historical Sol capability auditor",
+  "model_requested": "gpt-6-astra",
+  "model_effective_observed": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "effective_cli_effort_observed": "ultra",
+  "provider_effort": null,
+  "activity_evidence": "Worker reported actual printenv identity read, committed session search, and runtime ps showing inherited Astra/Ultra; prior PR249/256 turns and all tools were terminal before assignment.",
+  "credential": "relay-3",
+  "space_credential_authorized": false,
+  "total_allocation": 11,
+  "native_cap": 9,
+  "external_admission": 0,
+  "target_useful": 9,
+  "floor_useful": 8,
+  "audit_report_path": "/tmp/qpbt-sol-routing-audit-20260907.md",
+  "routing_matrix_path": "/tmp/qpbt-sol-routing-matrix-20260907.json",
+  "audit_complete": true,
+  "scope": "Completed historical Sol artifacts across roles; exact-head CI, independent reviews and actual rework attribution; demonstrated capability/failure/insufficient-evidence classification, bounded job qualifications and escalation.",
+  "activation": {
+    "sol_classes_active": false,
+    "gate": "Same PR301 is intended to activate only the narrow audited class after normal CI/independent Astra review/service merge and exact native Sol/Ultra runtime verification.",
+    "default_pending_audit": "gpt-6-astra",
+    "main_model": "gpt-6-astra",
+    "effort_policy": "Preserve current effort; supported alternatives require recorded runtime evidence and rationale, no silent downgrade",
+    "owner_reapproval_required": false
+  },
+  "ownership": {
+    "audit_outputs": "/root/cap11_pr256 only",
+    "enforcement_inspection": "meta",
+    "ghz_implementation": "/root/cap11_pr281 owns issue-301-audited-model-policy; no primary, Mac, or meta-selector-worktree edits",
+    "meta_merge_selector_worktree": "Meta-owned .worktrees/meta-merge-selector-fix-20260907, untouched",
+    "mac_meta_checkout": "No changes authorized here",
+    "meta_enforcement_inspection": "Meta inspecting enforcement points, not duplicated author edits; use this assigned author/path list for coordination."
+  },
+  "coordination": "Audit and independent validation completed; report paths and hashes below are final. Meta inspection was consumed. The sole ghz author is implementing issue301 in its isolated worktree; no live model-policy activation has occurred.",
+  "budgets_reset": false,
+  "current_running_workers_interrupted": false,
+  "official_effort_reference": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+  "implementation_author": {
+    "task": "/root/cap11_pr281",
+    "thread_id": "01a07bd2-c062-7ba2-9f35-0b6ea34d0621",
+    "model": "gpt-6-astra",
+    "effort": "ultra",
+    "scope": "Isolated ghz implementation; no live primary or Mac edits; no Sol activation before final audit and normal gates",
+    "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-301-audited-model-policy",
+    "ownership_status": "Assigned by main; meta enforcement inspection remains read-only, report any existing author-path conflict before edits",
+    "planned_paths": [
+      "local/bin/model_policy.py (minimal new helper/data if justified)",
+      "local/bin/account_router.py",
+      "local/bin/codex-policy-shim.sh",
+      "local/bin/dispatch.sh",
+      "local/bin/telemetry.py",
+      "local/bin/native_review.py and review.sh only as required",
+      "scripts/tests/test_dispatch.py",
+      "scripts/tests/test_native_workflow.py",
+      "focused policy tests",
+      "directly affected ghz owner/main instructions and normative protocol ledger"
+    ],
+    "issue": 301
+  },
+  "runtime_effort_evidence": {
+    "source": "/home/drx/.cache/mipstarre-dev/qpbt-ultra/codex-models.json",
+    "sol_catalog_supports_ultra": true,
+    "sol_catalog_default": "ultra",
+    "actual_new_sol_launch_verified": false,
+    "decision": "Preserve authorized Ultra; no downgrade based on historical labels or API documentation alone."
+  },
+  "qualified_native_launch": {
+    "transport": "collaboration.spawn_agent",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "ultra",
+    "fork_turns": "none",
+    "fresh_identity_required_for_model_change": true,
+    "followup_task_is_not_model_switch_evidence": true,
+    "predecessor_thread_and_shared_budget_links_required": true,
+    "live_launch_performed": false,
+    "root_defaults_and_cap_checks_unchanged": true,
+    "authorization": "Owner clarification 2026-09-07; launch only after audited-class policy passes normal gates."
+  },
+  "audit_report_sha256": "9a5c4e89bd4e61245ef7df716762deaa3071980fe0c2e3702ea8a248b307d516",
+  "routing_matrix_sha256": "69fd336f92be6b6308c4a65c3ab566a5ad4a818e6d9c0ba5261ba0e5f3bdc05b",
+  "independent_validation": {
+    "task": "/root/relay3_honest_recovery",
+    "thread_id": "01a07aef-fef3-7a10-ba1c-55acdfa4f1ff",
+    "path": "/tmp/qpbt-sol-routing-audit-validation-20260907.md",
+    "sha256": "6983ffaeb0b8902d9c8edba56673f8919f20cd68993cd31685d30e2375b5b11a",
+    "result": "Supports only the two narrow C01/C02 components; broader claims excluded/insufficient."
+  },
+  "audit_decision": {
+    "accepted_by_main": true,
+    "cases": 22,
+    "job_classes": 10,
+    "qualified_proposed": [
+      {
+        "role": "prover",
+        "job_class": "review_directed_nonsemantic_cleanup",
+        "model": "gpt-5.6-sol",
+        "evidence": [
+          "C01",
+          "C02"
+        ],
+        "boundary": "Dispatcher-prescribed exact nonsemantic substitutions in at most two existing Lean files, at most 12 added+removed lines, fixed caller/name list; no self-classification or semantic/control edits."
+      }
+    ],
+    "default_for_all_other_classes": "gpt-6-astra",
+    "no_long_run_reliability_claim": true
+  },
+  "meta_inspection_path": "/tmp/qpbt-sol-routing-enforcement-20260907.md",
+  "golden_cases": {
+    "path": "/tmp/qpbt-sol-policy-cases-20260907.json",
+    "sha256": "244f99d2b485c26755f3aa19637d042efe150aa8147f7cfb97d44bf613b54d98",
+    "scope": "Two artifact-exact positive recipes and eight negative descriptors; not executed implementation tests."
+  },
+  "design_check": {
+    "path": "/tmp/qpbt-sol-policy-adversarial-check-20260907.md",
+    "scope": "Read-only prepublication design assistance, not formal PR approval or CI. Author received bound-turn model-observation and trusted-recipe checks."
+  },
+  "meta_draft_advisory": {
+    "path": "/tmp/qpbt-model-policy-review-notes-20260907.md",
+    "sha256": "1d67dc1cccbae5b23788d6dfb3c66ff8025f3205a7c74db4fbd7fabbc4a804da",
+    "root_read_utc": "2026-09-07T15:10:42Z",
+    "delivered_via": "Native collaboration.send_message to author /root/cap11_pr281 and coordinator /root/relay3_integration for future independent reviewer attachment",
+    "scope": "Advisory only: exact coordinator-owned file/substitution allowlist and honest requested/configured/observed model distinction. Not canonical review, approval, scope expansion, or activation.",
+    "prior_direct_queue_delivered": false,
+    "test_assistance_task": "/root/cap11_pr288"
+  },
+  "episode_budget": {
+    "audit_start_approximate_utc": "2026-09-07T13:40:00Z",
+    "dispatch_receipt_utc": "2026-09-07T13:43:54Z",
+    "implementation_subphase_start_utc": "2026-09-07T14:06:27Z",
+    "conservative_two_hour_boundary_utc": "2026-09-07T15:40:00Z",
+    "changed_line_ceiling": 1000,
+    "reset": false,
+    "note": "Implementation elapsed time is a subphase measurement, not a new workflow episode budget. Normal stop/escalation applies at either ceiling."
+  }
+}

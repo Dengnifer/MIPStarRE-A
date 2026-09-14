@@ -1,0 +1,51 @@
+{
+  "schema": "qpbt-pr371-budget-disposition-v1",
+  "recorded_at": "2026-09-08T13:57:30Z",
+  "owner": "/root",
+  "pr": 371,
+  "head": "50ac5b73e4f0c893da2dec9c6de9170352a6010b",
+  "original_budget": {
+    "source": "local/protocols/EVOLUTION.md:277 and local/personas/main.md:150",
+    "origin": "2026-09-01 scope-control amendment, present in commit cd9ded6440efa1f5901e5125728d1a89cee15d73",
+    "scope": "Default workflow episode wall time, not only edit time; the issue366 brief defines implementation and normal gates but no independent merge deadline",
+    "wall_seconds": 7200,
+    "anchor": "2026-09-08T11:34:28Z",
+    "boundary": "2026-09-08T13:34:28Z",
+    "main_selected_line_ceiling": 500,
+    "actual_changed_lines": 487
+  },
+  "superseding_decision_authority": {
+    "url": "https://github.com/Dengnifer/MIPStarRE-A/issues/26#issuecomment-5557148036",
+    "recorded_at": "2026-09-06T05:18:13Z",
+    "owner_decision_at": "2026-09-06T05:05Z",
+    "rule": "Only actual access/permission blockers require owner escalation; mathematical and internal workflow decisions, explicitly including B7/B8, belong to main with bounded extensions and preserved cumulative history",
+    "later_operator_request_is_not_revocation": "Issue301 scope-budget request comment5572932276 contains an operator request, not a new owner policy withdrawing this grant"
+  },
+  "evidence": {
+    "canonical_ci": "success, 347s, finished2026-09-08T13:23:13Z",
+    "independent_review_checks_finished": "2026-09-08T13:34:04Z",
+    "canonical_review_published": "2026-09-08T13:35:08Z",
+    "review_id": 5142410305,
+    "review_summary": "success, APPROVED, zero unresolved findings",
+    "native_request": "1f17f78e512443e6b0dd31515ff45eb7",
+    "publisher_exit": 0,
+    "actual_access_permission_blocker": false
+  },
+  "disposition": {
+    "main_authorizes_bounded_completion": true,
+    "new_window_start": "2026-09-08T13:57:30Z",
+    "new_window_end": "2026-09-08T14:27:30Z",
+    "additional_completion_seconds": 1800,
+    "scope": "Normal fresh-pin/service merge and guarded deployment verification of the already-reviewed result, including resume of preserved358/359 responses after the workflow is merged",
+    "budget_reset": false,
+    "prior_elapsed_and_failed_attempts_retained": true,
+    "new_features_or_source_growth_authorized": false,
+    "infra_override_used": false,
+    "ci_review_merge_gates_weakened": false,
+    "new_owner_request_required": false,
+    "new_issue26_request_posted": false
+  },
+  "correction": "The temporary post-boundary merge hold was main's overly restrictive escalation interpretation; it is released using the later explicit owner delegation, not by pretending the original wall limit or overrun did not exist",
+  "normal_telemetry_owner": "/root/space_sol_publication_finish",
+  "meta_watch_remains_active": true
+}

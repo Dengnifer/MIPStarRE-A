@@ -1,0 +1,15 @@
+**CI Evidence Audit**
+
+Observed September 9, 2026 at approximately 22:17 +08:00. PR 506, which fixes failure propagation, merged at 22:05:32 +08:00. All successful manifests below predate that merge and were therefore checked against raw logs.
+
+| PR | Published exact head | CI evidence | Current review | Concrete next gate |
+|---|---|---|---|---|
+| 470 | `d59cda08367e9376e03e32330a541e29d8aabafb` | **Invalid.** Published summary is `failure` (`conclusion=error`): build-lock acquisition failed. Worse, `blueprint-sync` is recorded successful although its raw log says `Ran 616 tests` and `FAILED (failures=4)`, demonstrating the masked-failure bug. | No exact-head review. Latest review is stale approval on `8a46bbf7...`. | Run complete exact-head CI with the repaired runner and isolated metadata after the build lock is available; review only after genuine green CI. |
+| 481 | `c738dfbc8fb7740fb9c77e1559fd560b62ef80c3` | **Genuine from raw logs.** Full non-partial green manifest; build and axiom audit completed, PDF/bbl/web succeeded, `616 tests ... OK`, and blocking audits passed. | Exact-head `CHANGES_REQUESTED`, 2 unresolved; review status `failure`. | Resolve both findings, publish the repaired head, then full repaired-runner CI and exact-head review. |
+| 491 | `5ff7dc43c9549f189a6e3cac96a6e215d30c01cc` | **Genuine from raw logs.** Full green manifest; successful build, PDF/bbl/web, `616 tests ... OK`, and blocking audits. | Exact-head `CHANGES_REQUESTED`, 1 unresolved; status `failure`. | Resolve the finding, then full CI and exact-head review on the resulting head. |
+| 492 | `854f237403dd32d6797bdddb09514cd60fcf27c7` | **Genuine from raw logs.** Full green manifest; successful build, legitimately skipped blueprint render, `616 tests ... OK`, and blocking audits. | Exact-head `CHANGES_REQUESTED`, 1 unresolved; status `failure`. | Resolve the finding, then full CI and exact-head review on the resulting head. |
+| 453 | `b94fe8dbf3cf197cc4833ccebd657dc855ba6eb7` | **Genuine from raw logs.** Full green manifest; successful build, PDF/bbl/web, `616 tests ... OK`, and blocking audits. | Exact-head `CHANGES_REQUESTED`, 1 unresolved; status `failure`. | Resolve the finding, then full CI and exact-head review on the resulting head. |
+| 213 | `e127e8b7a50634d834cd3685c9b78a00d60334d1` | **Unknown.** No exact-head CI statuses and no same-head manifest. | No exact-head review. Latest review is stale `CHANGES_REQUESTED` on `a4c4f8e7...`. | Complete repaired-runner CI on the current head, followed by an exact-head review. |
+| 508 | `c375efc02e4f76d165a4e57923695c7486d4eda2` | **Genuine from raw logs.** Full green manifest; successful build, PDF/bbl/web, `611 tests ... OK (skipped=9)`, and blocking audits. | Exact-head `CHANGES_REQUESTED`, 1 unresolved; status `failure`. | Resolve the finding, then full CI and exact-head review on the resulting head. |
+
+“Genuine” here is a read-only retrospective raw-log determination, not canonical post-PR-506 CI evidence or permission to merge. No records, files, statuses, reviews, or runtime state were changed.

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import errno
 import json
 import fcntl
 import importlib.util
@@ -25,21 +24,17 @@ TELEMETRY = REPO_ROOT / "local" / "bin" / "telemetry.py"
 PRE_COMMIT = REPO_ROOT / ".githooks" / "pre-commit"
 THREAD_ID = "019e93a5-e370-7aa1-ba77-6373dbdd6a61"
 ROUTER = DISPATCH.with_name("account_router.py")
+sys.path.insert(0, str(DISPATCH.parent))
+import model_policy
 SPEC = importlib.util.spec_from_file_location("account_router", ROUTER)
 router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
-HOST_PROCESS_SCAN = router.host_processes
 
 
-def isolate_host(binary_dir: Path) -> None:
-    interpreter = binary_dir / 'python3'
-    interpreter.write_text(f'#!{sys.executable}\nimport os, runpy, sys\n'
-        'if sys.argv[1].endswith("/account_router.py"):\n'
-        '    loaded = runpy.run_path(sys.argv.pop(1))\n'
-        '    loaded["reserve"].__globals__["host_processes"] = lambda *args: ({}, {})\n'
-        '    loaded["main"]()\n'
-        'else: os.execv(sys.executable, [sys.executable, *sys.argv[1:]])\n')
-    interpreter.chmod(0o755)
+def copy_model_policy(local_bin: Path) -> None:
+    shutil.copy2(DISPATCH.with_name('model_policy.py'), local_bin / 'model_policy.py')
+    shutil.copy2(REPO_ROOT / 'local/model-policy.json', local_bin.parent / 'model-policy.json')
+
 
 
 class DispatchCommandTests(unittest.TestCase):
@@ -55,12 +50,15 @@ class DispatchCommandTests(unittest.TestCase):
             shutil.copy2(DISPATCH, local_bin / "dispatch.sh")
             shutil.copy2(TELEMETRY, local_bin / "telemetry.py")
             shutil.copy2(ROUTER, local_bin / "account_router.py")
+            copy_model_policy(local_bin)
             (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
-            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "init", "-q", '-b', 'main'], cwd=repo, check=True)
+            subprocess.run(['git', 'add', 'AGENTS.md'], cwd=repo, check=True)
+            subprocess.run(['git', '-c', 'user.name=Test', '-c', 'user.email=test@test',
+                            'commit', '-qm', 'initial fixture'], cwd=repo, check=True)
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
-            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text(
                 "#!/bin/sh\n"
@@ -95,6 +93,7 @@ class DispatchCommandTests(unittest.TestCase):
                     "MIPSTARRE_CODEX_HOME_SECOND": "" if empty_second_home else str(second),
                     "MIPSTARRE_ACCOUNT_WAIT": "0",
                     "MIPSTARRE_CACHE_ROOT": str(root / "cache"),
+                    "MIPSTARRE_KEY_LABEL": "unknown",
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
@@ -103,7 +102,8 @@ class DispatchCommandTests(unittest.TestCase):
                 env["MIPSTARRE_CODEX_MODEL"] = model
             watchdog = root / 'cache/watchdog'
             watchdog.mkdir(parents=True)
-            (watchdog / 'account-mode').write_text('both' if account == 'second' else 'primary')
+            for account_name in router.ACCOUNTS:
+                (watchdog / f'max-codex-{account_name}').write_text('8')
 
             dispatch_args = [str(local_bin / 'dispatch.sh'), '--role', 'scout',
                              '--issue', 'model-record', '--worktree', str(repo),
@@ -163,19 +163,18 @@ class DispatchCommandTests(unittest.TestCase):
 
     def dispatch_command(
         self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
-        include_persona: bool = False, registry_rows: str = "",
+        include_persona: bool = False, registry_rows: str = "", policy_data: dict | None = None,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
-            isolate_host(fake_bin)
             fake_codex = fake_bin / "codex"
             fake_codex.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
             fake_codex.chmod(0o755)
             home = Path(cache_root) / "home"
             rollout = home / ".codex/sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             env = os.environ.copy()
             env.update(
                 {
@@ -188,26 +187,40 @@ class DispatchCommandTests(unittest.TestCase):
                 }
             )
             (Path(cache_root) / 'watchdog').mkdir()
-            (Path(cache_root) / 'watchdog/account-mode').write_text('both')
+            for account in router.ACCOUNTS:
+                (Path(cache_root) / 'watchdog' / f'max-codex-{account}').write_text('8')
             worktree = REPO_ROOT
             dispatch = DISPATCH
-            if registry_rows:
+            if registry_rows or policy_data is not None:
                 worktree = Path(cache_root) / 'repo'
                 registry = worktree / 'results/telemetry/sessions.jsonl'
                 registry.parent.mkdir(parents=True)
                 registry.write_text(registry_rows)
                 (worktree / 'AGENTS.md').write_text('# Test repository\n')
-                subprocess.run(['git', 'init', '-q', str(worktree)], check=True)
+                subprocess.run(['git', 'init', '-q', '-b', 'main', str(worktree)], check=True)
+                subprocess.run(['git', '-C', str(worktree), 'add', 'AGENTS.md'], check=True)
+                subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                    'user.email=test@test', 'commit', '-qm', 'initial fixture'], check=True)
                 dispatch = worktree / 'local/bin/dispatch.sh'
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
                     shutil.copy2(source, dispatch.parent / source.name)
+                copy_model_policy(dispatch.parent)
+                if policy_data is not None:
+                    (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
+                    subprocess.run(['git', '-C', str(worktree), 'add', 'local'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
+                        'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+                    subprocess.run(['git', '-C', str(worktree), 'branch', '-M', 'main'], check=True)
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
                              *([] if include_persona else ['--no-persona']),
                              '--skip-hook-check', '--dry-run', *extra]
             if effort is not None:
                 dispatch_args.extend(["--effort", effort])
+            if '--job-class' not in extra:
+                dispatch_args.extend(['--job-class', 'control_policy', '--hardness-reason',
+                                      'Routing-control test fixture'])
             dispatch_args.extend(["--", "test prompt"])
             result = subprocess.run(
                 dispatch_args,
@@ -258,7 +271,7 @@ class DispatchCommandTests(unittest.TestCase):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
                         self.assertIn('model_reasoning_effort=ultra', argv)
 
-    def test_sol_is_rejected_for_every_role(self) -> None:
+    def test_sol_is_rejected_for_control_policy_jobs(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             with self.assertRaises(subprocess.CalledProcessError):
@@ -278,7 +291,7 @@ class DispatchCommandTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
                 self.assertEqual(failure.exception.returncode, 4)
-                self.assertIn("owner policy requires gpt-6-astra", failure.exception.stderr)
+                self.assertIn("model policy", failure.exception.stderr)
 
     def test_telemetry_accepts_mathfix_role(self) -> None:
         result = subprocess.run(
@@ -548,162 +561,41 @@ class AccountRouterTests(unittest.TestCase):
                     router.continuation(handoff, registry, REPO_ROOT, 'scope')
 
     def setUp(self) -> None:
-        patcher = mock.patch.object(router, 'host_processes', return_value=({}, {}))
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        policy_context = mock.patch.dict(os.environ, MIPSTARRE_JOB_CLASS='control_policy',
+                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture')
+        policy_context.start()
+        self.addCleanup(policy_context.stop)
 
-    def test_host_scan_handles_global_options_without_reading_prompt_as_command(self) -> None:
+    def test_missing_caps_disable_accounts_and_retired_settings_are_ignored(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ('1', 'self', '100', '200'):
-                (root / name).mkdir()
-            (root / '1/comm').write_text('systemd')
-            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
-            for pid, arguments in ((100, ['codex', '-m', 'gpt-6-astra', '-c',
-                                          'model_reasoning_effort=ultra', 'exec', '--', 'prompt']),
-                                   (200, ['codex', '-m', 'gpt-6-astra', '--', 'exec'])):
-                process = root / str(pid)
-                (process / 'status').write_text(f'Name:\tcodex\nPPid:\t{200 if pid == 100 else 1}')
-                (process / 'cmdline').write_bytes(b'\0'.join(arg.encode() for arg in arguments))
-                (process / 'environ').write_bytes(b'HOME=/home/drx')
-                (process / 'cwd').symlink_to('/home/drx/FV')
-            def mapped_path(path):
-                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
-                    '/proc') else Path(path)
-            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
-                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
-                paths.home.return_value = Path('/home/drx')
-                self.assertEqual(HOST_PROCESS_SCAN()[1],
-                                 {100: ('primary', False), 200: ('primary', True)})
-                self.assertEqual(HOST_PROCESS_SCAN(['/home/drx/FV'])[1], {100: ('primary', False)})
-                self.assertEqual(len(HOST_PROCESS_SCAN(['/home/drx'])[1]), 2)
-
-    def test_host_scan_skips_only_vanished_pids(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            for name in ('1', 'self', '100', '200'):
-                (root / name).mkdir()
-            (root / '1/comm').write_text('systemd')
-            (root / 'self/status').write_text(f'NSpid:\t{os.getpid()}')
-            (root / '200/status').write_text('Name:\tcodex\nPPid:\t1')
-            (root / '200/cmdline').write_bytes(b'codex\0exec\0task')
-            (root / '200/environ').write_bytes(b'HOME=/home/drx')
-
-            def mapped_path(path):
-                return root / str(path).removeprefix('/proc').lstrip('/') if str(path).startswith(
-                    '/proc') else Path(path)
-
-            original_read_text = Path.read_text
-
-            def read_text(path, *args, **kwargs):
-                if path == root / '100/status':
-                    raise error
-                return original_read_text(path, *args, **kwargs)
-
-            errors = (ProcessLookupError(errno.ESRCH, 'vanished PID'),
-                      FileNotFoundError(errno.ENOENT, 'vanished PID'),
-                      PermissionError(errno.EACCES, 'denied PID'),
-                      OSError(errno.EIO, 'unreadable PID'))
-            with mock.patch.object(router, 'Path', side_effect=mapped_path) as paths, \
-                 mock.patch.object(Path, 'read_text', new=read_text), \
-                 mock.patch.dict(os.environ, {'MIPSTARRE_CODEX_HOME_SECOND': '/second'}):
-                paths.home.return_value = Path('/home/drx')
-                for error in errors:
-                    with self.subTest(error=type(error).__name__):
-                        if isinstance(error, (FileNotFoundError, ProcessLookupError)):
-                            self.assertEqual(HOST_PROCESS_SCAN(),
-                                             ({200: 1}, {200: ('primary', False)}))
-                        else:
-                            with self.assertRaises(type(error)) as failure:
-                                HOST_PROCESS_SCAN()
-                            self.assertIs(failure.exception, error)
-
-    def test_mode_changes_disabled_caps_and_preserved_both_settings(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            with self.assertRaisesRegex(ValueError, 'capacity exhausted'):
+                router.reserve(root, 'auto', 123, 0, True)
             watchdog = root / 'watchdog'
             watchdog.mkdir()
-            mode = watchdog / 'account-mode'
-            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'primary')
-            with self.assertRaisesRegex(ValueError, 'disabled'):
-                router.reserve(root, 'second', 123, 0, True)
-            (watchdog / 'max-codex-primary').write_text('0')
-            with self.assertRaises(ValueError):
-                router.reserve(root, 'auto', 123, 0, True)
-            mode.write_text('both')
+            for name in ('account-mode', 'account-mode-both-preserved.json',
+                         'primary-key-capacity', 'primary-external-admission', 'max-codex'):
+                (watchdog / name).write_text('0')
+            (watchdog / 'max-codex-second').write_text('2')
             self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'second')
-            preserved = watchdog / 'account-mode-both-preserved.json'
-            settings = '{"max_codex":19,"primary":10,"second":9}'
-            preserved.write_text(settings)
-            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'primary')
-            mode.write_text('primary')
-            with self.assertRaises(ValueError):
-                router.reserve(root, 'auto', 123, 0, True)
-            self.assertEqual(preserved.read_text(), settings)
-            self.assertEqual((watchdog / 'max-codex-primary').read_text(), '0')
-            mode.write_text('invalid')
-            with self.assertRaises(ValueError):
-                router.reserve(root, 'auto', 123, 0, True)
-            mode.write_text('primary')
-            for exclusions in ('null', '{}', '["/tmp"]', '["/home/drx", "/home/drx"]', '{'):
-                (watchdog / 'primary-excluded-interactive-cwds.json').write_text(exclusions)
-                with self.assertRaises(ValueError):
-                    router.reserve(root, 'auto', 123, 0, True)
+            with self.assertRaisesRegex(ValueError, 'capacity exhausted'):
+                router.reserve(root, 'primary', 123, 0, True)
 
-    def test_secondary_resume_cannot_override_primary_mode(self) -> None:
+    def test_reserve_command_prints_only_account_and_creates_marker(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            registry = root / 'registry'
-            registry.write_text(json.dumps(dict(thread_id=THREAD_ID, account='second')))
-            with mock.patch.dict(os.environ, {'HOME': directory,
-                                              'MIPSTARRE_CODEX_MODEL': 'gpt-6-astra'}):
-                for account in ('auto', 'primary', 'second'):
-                    with mock.patch('sys.argv', [str(ROUTER), directory, account, '123', '0',
-                         str(registry), '--resume', THREAD_ID]), mock.patch('sys.stderr'), \
-                         self.assertRaises(SystemExit) as failure:
-                        router.main()
-                    self.assertEqual(failure.exception.code, 4)
-            self.assertFalse(list(root.glob('accounts/*/[0-9]*')))
-
-    def test_host_visibility_failure_does_not_delete_reservations(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            marker = root / 'accounts/primary/123'
-            marker.parent.mkdir(parents=True)
-            marker.touch()
-            with mock.patch.object(router, 'host_processes', side_effect=PermissionError), \
-                 mock.patch.object(router.os, 'kill', side_effect=ProcessLookupError), \
-                 self.assertRaises(PermissionError):
-                router.reserve(root, 'auto', 456, 0, False)
-            self.assertTrue(marker.exists())
-
-    def test_main_additional_uses_orphans_and_reservation_reconciliation(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            marker = root / 'accounts/primary/100'
-            marker.parent.mkdir(parents=True)
-            marker.touch()
-            parents = {101: 100, 100: 1, 200: 1, 300: 1, 400: 1, 500: 1, 600: 1}
-            processes = {101: ('primary', False), 600: ('primary', False),
-                         **{pid: ('primary', True) for pid in (200, 300, 400, 500)}}
-            with mock.patch.object(router, 'host_processes', return_value=(parents, processes)), \
-                 mock.patch.object(router.os, 'kill'):
-                self.assertEqual(router.occupancy(root), ([2, 0], [4, 0]))
-            with mock.patch.object(router, 'occupancy', return_value=([8, 0], [4, 0])), \
-                 self.assertRaises(ValueError):
-                router.reserve(root, 'auto', 123, 0, False)
             (root / 'watchdog').mkdir()
-            (root / 'watchdog/primary-external-reserved').write_text('1')
-            with mock.patch.object(router, 'occupancy', return_value=([7, 0], [4, 0])), \
-                 self.assertRaises(ValueError):
-                router.reserve(root, 'auto', 123, 0, False)
+            (root / 'watchdog/max-codex-second').write_text('1')
+            result = subprocess.run([sys.executable, str(ROUTER), 'reserve', directory,
+                'auto', str(os.getpid()), '0'], text=True, capture_output=True, check=True)
+            self.assertEqual(result.stdout, 'second\n')
+            self.assertTrue((root / 'accounts/second' / str(os.getpid())).is_file())
 
     def test_last_primary_slot_is_atomic_under_contention(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'watchdog').mkdir()
             (root / 'watchdog/max-codex-primary').write_text('11')
-            (root / 'watchdog/primary-excluded-interactive-cwds.json').write_text('["/home/drx"]')
             def attempt(pid):
                 try:
                     return router.reserve(root, 'auto', pid, 0, False)
@@ -711,8 +603,8 @@ class AccountRouterTests(unittest.TestCase):
                     return 'full'
             with mock.patch.object(router.os, 'kill'), ThreadPoolExecutor(18) as pool:
                 results = list(pool.map(attempt, range(100, 118)))
-            self.assertEqual(results.count('primary'), 10)
-            self.assertEqual(results.count('full'), 8)
+            self.assertEqual(results.count('primary'), 11)
+            self.assertEqual(results.count('full'), 7)
 
     def test_runtime_shim_preserves_selected_effort_and_prompt(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -752,8 +644,8 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertEqual(subprocess.run(['bash', shim, *arguments], env=environment,
                     capture_output=True).returncode, 4)
             environment['CODEX_HOME'] = str(home / 'second')
-            self.assertEqual(subprocess.run(['bash', shim, 'exec'], env=environment,
-                capture_output=True).returncode, 4)
+            self.assertEqual(subprocess.run(['bash', shim, 'exec', '-m', 'gpt-6-astra'], env=environment,
+                capture_output=True).returncode, 0)
 
     def test_empty_secondary_home_resume_uses_default_rollout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -761,15 +653,15 @@ class AccountRouterTests(unittest.TestCase):
             second = root / ".cache/mipstarre-dev/codex-home-yxy"
             rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.touch()
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             (root / 'cache/watchdog').mkdir(parents=True)
-            (root / 'cache/watchdog/account-mode').write_text('both')
+            (root / 'cache/watchdog/max-codex-second').write_text('8')
             with mock.patch.dict(os.environ, {
                 "HOME": str(root), "MIPSTARRE_CODEX_HOME_SECOND": "",
                 "MIPSTARRE_CODEX_MODEL": "",
             }), mock.patch("sys.argv", [
-                str(ROUTER), str(root / "cache"), "auto", "123", "0",
+                str(ROUTER), "reserve", str(root / "cache"), "auto", "123", "0",
                 str(root / "registry.jsonl"), "--resume", THREAD_ID, "--dry-run",
             ]), mock.patch("builtins.print") as output:
                 router.main()
@@ -821,7 +713,6 @@ class AccountRouterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "watchdog").mkdir()
-            (root / 'watchdog/account-mode').write_text('both')
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("8")
             def attempt(pid):
@@ -832,8 +723,8 @@ class AccountRouterTests(unittest.TestCase):
             with mock.patch.object(router.os, "kill"), ThreadPoolExecutor(16) as pool:
                 selected = list(pool.map(attempt, range(100, 116)))
             self.assertEqual(selected.count("primary"), 8)
-            self.assertEqual(selected.count("second"), 7)
-            self.assertEqual(selected.count("full"), 1)
+            self.assertEqual(selected.count("second"), 8)
+            self.assertEqual(selected.count("full"), 0)
 
     def test_model_comparison_prefers_registry_and_keeps_rollout_fallback(self) -> None:
         spec = importlib.util.spec_from_file_location(
@@ -848,14 +739,20 @@ class AccountRouterTests(unittest.TestCase):
             self.assertEqual(compare.derive_model({"rollout": "/legacy"}, {}),
                              ("gpt-legacy", "rollout"))
 
-    def test_chooser_uses_ratios_and_primary_ties(self) -> None:
-        for live, caps, expected in (
-            ([0, 0], [9, 10], "primary"), ([1, 1], [9, 10], "second"),
-            ([9, 10], [9, 10], "primary"), ([10, 10], [9, 10], "second"),
-            ([2, 3], [4, 6], "primary"), ([0, 1], [1, 10], "primary"),
-        ):
-            with self.subTest(live=live, caps=caps):
-                self.assertEqual(router.choose_account(live, caps), expected)
+    def test_reservation_uses_caps_ratios_and_primary_ties(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'watchdog').mkdir()
+            for live, caps, expected in (
+                ([0, 0], [2, 8], 'primary'), ([1, 2], [2, 8], 'second'),
+                ([1, 4], [2, 8], 'primary'), ([2, 7], [2, 8], 'second'),
+                ([0, 0], [0, 8], 'second'), ([1, 8], [2, 8], 'primary'),
+            ):
+                for account, cap in zip(router.ACCOUNTS, caps):
+                    (root / 'watchdog' / f'max-codex-{account}').write_text(str(cap))
+                with self.subTest(live=live, caps=caps), mock.patch.object(
+                        router, 'live_pids', side_effect=[set(range(n)) for n in live]):
+                    self.assertEqual(router.reserve(root, 'auto', 123, 0, True), expected)
 
     def test_stale_cleanup_preserves_live_and_permission_denied_pids(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -874,16 +771,16 @@ class AccountRouterTests(unittest.TestCase):
             (root / "watchdog").mkdir()
             for account in router.ACCOUNTS:
                 (root / "watchdog" / f"max-codex-{account}").write_text("1")
-            with mock.patch.object(router, 'occupancy', return_value=([1, 0], [1, 0])), \
-                 mock.patch.object(router.time, "monotonic", side_effect=[0, 0, 0, 21]), \
-                 mock.patch.object(router.time, "sleep") as sleep:
-                for account in router.ACCOUNTS:
-                    (root / "accounts" / account).mkdir(parents=True)
+            clock = mock.Mock(return_value=0)
+            def advance(seconds):
+                clock.return_value += seconds
+            with mock.patch.object(router, 'live_pids', return_value={1}), \
+                 mock.patch.object(router.time, 'monotonic', clock), \
+                 mock.patch.object(router.time, 'sleep', side_effect=advance) as sleep:
                 with self.assertRaisesRegex(ValueError, 'capacity exhausted'):
-                    router.reserve(root, "auto", 123, 20, False)
-                sleep.assert_called_once_with(20)
-                self.assertFalse((root / "accounts/primary/123").exists())
-            (root / 'watchdog/account-mode').write_text('both')
+                    router.reserve(root, 'auto', 123, 25, False)
+                self.assertEqual(sleep.call_args_list, [mock.call(10), mock.call(10), mock.call(5)])
+                self.assertFalse(list((root / 'accounts').glob('*/[0-9]*')))
             self.assertEqual(router.reserve(root, "second", os.getpid(), 0, False), "second")
 
     def test_resume_registry_and_legacy_rollout_affinity(self) -> None:
@@ -904,15 +801,29 @@ class AccountRouterTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 router.resume_account(THREAD_ID, registry, homes)
 
+    def test_wait_rereads_caps_without_sleeping_past_deadline(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'watchdog').mkdir()
+            cap = root / 'watchdog/max-codex-second'
+            with mock.patch.object(router.time, 'sleep', side_effect=lambda _: cap.write_text('1')) \
+                    as sleep:
+                self.assertEqual(router.reserve(root, 'auto', os.getpid(), 5), 'second')
+            self.assertEqual(sleep.call_count, 1)
+            self.assertLessEqual(sleep.call_args.args[0], 5)
+
     def test_invalid_caps_fail_and_dry_run_does_not_reserve(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.assertEqual(router.reserve(root, "auto", 123, 0, True), "primary")
-            self.assertFalse(list((root / "accounts").glob("*/[0-9]*")))
-            (root / "watchdog").mkdir()
-            (root / "watchdog/max-codex-primary").write_text("0")
-            with self.assertRaises(ValueError):
-                router.reserve(root, "auto", 123, 0, False)
+            (root / 'watchdog').mkdir()
+            cap = root / 'watchdog/max-codex-primary'
+            for value in ('-1', 'invalid', '0'):
+                cap.write_text(value)
+                with self.subTest(value=value), self.assertRaises(ValueError):
+                    router.reserve(root, 'auto', 123, 0, False)
+            cap.write_text('1')
+            self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'primary')
+            self.assertFalse(list((root / 'accounts').glob('*/[0-9]*')))
 
 
 class PreCommitBudgetTests(unittest.TestCase):

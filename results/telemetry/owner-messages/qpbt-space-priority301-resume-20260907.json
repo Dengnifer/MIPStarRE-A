@@ -1,0 +1,119 @@
+{
+  "recorded_at": "2026-09-07T16:25:29.483252+00:00",
+  "scope": "Resume required issue301 integration only",
+  "authority": "Latest owner explicit Space-switch completion and instruction to finish revised301, as delivered by root; supersedes checkpoint-only hold for this bounded task",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "root_pid": 2085772,
+  "native_cap": 3,
+  "capacity_total": 5,
+  "key_label": "space",
+  "main_model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "external_admission": 0,
+  "occupancy_receipt": "/tmp/qpbt-space-cap5-live-occupancy-20260907.json",
+  "primary_head": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+  "primary_pending_paths": [
+    "results/telemetry/estimates.jsonl"
+  ],
+  "pending_estimate_timestamp": "2026-09-07T16:02:31Z",
+  "previous_sync": {
+    "handle": 57101,
+    "terminal_exit": 0,
+    "published_snapshot": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+    "verified_committed_telemetry": "9447184d56cf5e85869b211414d868f4faa58df7"
+  },
+  "previous_restore_receipt": "/home/drx/.cache/mipstarre-dev/pr298-quiet-cap11-20260907/restored.json",
+  "previous_restore_loss_checks_verified": true,
+  "service_receipt": {
+    "timestamp": "2026-09-07T16:02:26.635946+00:00",
+    "previous_pid": 1354901,
+    "pid": 2104266,
+    "script": "/home/drx/.cache/mipstarre-dev/owner-tools/merge-service-space-cap5-review-fix-20260907.py",
+    "script_sha256": "c31105c736bc985fb5c682a196e06f242e79bb0ea057d0e39d626a5693c0e8a1",
+    "log": "/home/drx/.cache/mipstarre-dev/logs/merge-service-space-cap5-review-fix-20260907.log",
+    "shared_lock": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.lock",
+    "shared_journal": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5.jsonl",
+    "interval_seconds": 300,
+    "tests": {
+      "tests_run": 17,
+      "failures": 0,
+      "baseline_failed_assertions": 45
+    },
+    "change": "Adapt the existing canonical merge selector to owner-confirmed Space cap5/native3",
+    "unchanged": [
+      "canonical pr_merge.py authority",
+      "review independence",
+      "freshness",
+      "clean worktree",
+      "fix locks",
+      "external0"
+    ]
+  },
+  "latest_service_tick": {
+    "action": "hold",
+    "cadence_sleep_s": 259.862,
+    "clean": false,
+    "duration_s": 40.138,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 40.138,
+    "eligible_age_s": null,
+    "eligible_count": 0,
+    "external_admission": 0,
+    "fresh_count": 0,
+    "hold_reasons": [
+      "primary worktree is dirty",
+      "no fresh exact-head CI/review-eligible PR"
+    ],
+    "local_main": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+    "native_descendant_limit": 3,
+    "oldest_eligible": null,
+    "oldest_fresh_against_remote": false,
+    "oldest_stale": [],
+    "owner_total_limit": 5,
+    "read_failure": null,
+    "remote_main": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+    "runtime": "Space cap5/external0 verified",
+    "ts": "2026-09-07T16:23:06.243029+00:00"
+  },
+  "service_restarted_by_coordinator": false,
+  "current_goal_status": "active, observed by root get_goal after this resume",
+  "root_reported_counters": {
+    "tokens_used": 24916563,
+    "time_used_seconds": 52244
+  },
+  "issue301_budget": {
+    "episode_start_approx": "2026-09-07T13:40:00Z",
+    "prior_normal_boundary": "2026-09-07T15:40:00Z",
+    "line_ceiling": 1000,
+    "historical_extension_request_comment": 5572932276,
+    "historical_extension_requested_through": "2026-09-07T17:00:00Z",
+    "latest_authority": "Express owner continuation of this same episode; no fresh two-hour budget or counter reset"
+  },
+  "future_model_policy": {
+    "routine": "gpt-5.6-sol",
+    "hard_or_escalated": "gpt-6-astra",
+    "ratio_target": 20,
+    "ratio_range": [
+      10,
+      50
+    ],
+    "scope": "New dispatches after reviewed activation",
+    "current_resumes_excluded": true,
+    "activation_verified": false
+  },
+  "remaining_gates": [
+    "Author revised-scope tests and checked exact-head publication",
+    "Canonical CI",
+    "Fresh independent Astra control-policy review",
+    "Service merge with exact pins and quiet telemetry preservation",
+    "Restore and publish all rows",
+    "Root-owned fresh native Sol/Ultra runtime observation"
+  ],
+  "old_math_worktrees_preserved": true,
+  "old_math_refills_authorized": false,
+  "budgets_reset": false,
+  "b8": {
+    "attempts": 13,
+    "working_seconds": 26509
+  }
+}

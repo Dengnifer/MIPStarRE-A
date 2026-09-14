@@ -1,0 +1,232 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\setlength{\emergencystretch}{2em}
+
+\input{command}
+
+\renewcommand{\ghpr}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/pull/#1}{PR \##1}}
+
+\title{A Direct Construction of the Combined Point Measurements}
+\author{}
+\date{2026-09-09}
+
+\begin{document}
+\maketitle
+
+\section{At a glance}
+
+\begin{itemize}
+  \item \textbf{Difficulty: moderate.}  The Pauli basis analysis combines
+  binary refinements of the expanded point measurements, then uses quantum
+  linearity to recover field-valued outcomes.  We instead combine the
+  field-valued measurements directly.  A finite Parseval identity transfers
+  the commutation estimate without a field-size loss, and an exact sandwich
+  identity supplies the consistency needed for orthonormalization.
+  \item \textbf{Estimated weight:} the completed construction comprises
+  roughly two thousand lines of supporting formal proofs.
+  \item \textbf{Mathlib/project split:} approximately \textbf{20\% Mathlib}
+  and \textbf{80\% project-local}.  The project-local portion consists of the
+  finite Fourier identities, register placements, and state-dependent distance
+  estimates.
+  \item \textbf{Key Mathlib inputs:} finite sums, complex inner products,
+  matrix adjoints, and real powers, together with the existing projective
+  rounding theorem.  No new stability theorem is assumed.
+\end{itemize}
+
+This proves the combined-point conclusion on the original expanded local
+spaces; it does not discharge the separate common-extension problem for
+quantum linearity.\footnote{The construction is in
+\path{MIPStarRE/QPBT/Combining/Points.lean} and its supporting modules, reviewed
+in \ghpr{424}.  The distinct common-extension problem is documented in
+\path{docs/paper-gaps/qpbt_linearity-theorem-quotation.tex}.}
+
+\section{Key theorem forms}
+
+Fix admissible Pauli basis parameters, with $q=2^t$ and $M=2^m$, and let a
+projective strategy pass the test with probability at least $1-\eps$.
+Write $V=(\C^q)^{\ot M}$ for one Pauli register and
+$\hat\psi=\psi_{AB}\ot\mathrm{EPR}_{A'A''}\ot\mathrm{EPR}_{B'B''}$
+for its normalized expanded state.  For points $x,z\in\F_q^m$, write
+$X_a^x=\hat M^{(\mathrm{Point},X),x}_a$ and
+$Z_b^z=\hat M^{(\mathrm{Point},Z),z}_b$ for the projective point effects
+on either player's space $H\ot V$.  A subscript $p$ places an operator on
+one of $AA',BA'',BB',AB''$.  For operator families $F,G$ with outcomes $(a,b)$,
+define
+\[
+ d^2(F,G)=\E_{x,z}\sum_{a,b}
+   \bigl\|(F^{x,z}_{a,b}-G^{x,z}_{a,b})\hat\psi\bigr\|^2,
+\]
+where $x,z$ are uniform.  The combined-point lemma asserts that there are
+projective measurements $Q^{x,z}$ on each original space $H\ot V$ such that
+\[
+ \begin{aligned}
+ d^2(Q_p,Q_{p'})&\leq\delta_Q(\eps),\\
+ d^2(Q_p,(XZ)_{p'})&\leq\delta_Q(\eps),\\
+ d^2(Q_p,(ZX)_{p'})&\leq\delta_Q(\eps)
+ \end{aligned}
+ \qquad\text{for every directed opposite pair }(p,p').
+\]
+Here $(XZ)_{a,b}=X_a^xZ_b^z$, $(ZX)_{a,b}=Z_b^zX_a^x$, and the opposite
+pairs are $AA',BA''$ and $BB',AB''$, in both directions.  We prove these
+bounds with $\delta_Q(\eps)=K\eps^{1/8}$ for one universal constant $K$.
+The hypotheses and the three conclusions are unchanged; the replacement is
+in the proof, not in the statement.
+
+\section{The source argument}
+
+The combined-point lemma in the subsection ``Combining the $X$ and $Z$
+measurements'' of \cite{Ji2020MIPStar} asserts the three conclusions above
+with polynomially small error.\footnote{See
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~689--709, label \path{lem:qld-4-10}.}
+Its proof first constructs binary-outcome sandwiches, proves consistency by
+a Cauchy--Schwarz calculation, and orthonormalizes them.  Approximate
+linearity then permits a second construction with outcomes in
+$\F_q^2$.\footnote{The binary construction and its consistency argument are
+at lines~711--790 of the same source, including \path{eq:qld-r-2} and
+\path{eq:qld-rw-self-cons-1} through \path{eq:qld-rw-self-cons-4}.
+Lines~825--832 apply \path{thm:linearity} and invoke zero-state ancillas.}
+
+The linearity theorem returns an auxiliary space for each point pair.  To
+follow this argument literally, one must realize all those spaces inside
+one common ancillary extension and account for the zero-state padding.
+That construction is not supplied by the fixed expanded-state setting.
+The direct proof below avoids this requirement; it makes no assertion that
+the common-extension reduction has been proved.
+
+\section{Parseval and the sandwich defect}
+
+Fix $x,z$ and one placement, suppressing these indices for the moment.
+For the trace character $\chi(u)=(-1)^{\tr(u)}$, the expanded observables
+$U_X^r,U_Z^s$ give the Fourier expressions
+$X_a=q^{-1}\sum_r\chi(ar)U_X^r$ and
+$Z_b=q^{-1}\sum_s\chi(bs)U_Z^s$.
+With $[T,U]=TU-UT$, character orthogonality therefore gives
+\[
+ \sum_{a,b}\|[X_a,Z_b]\hat\psi\|^2
+   =\frac1{q^2}\sum_{r,s}\|[U_X^r,U_Z^s]\hat\psi\|^2.
+\]
+Indeed, the coefficient matrix with rows $(a,b)$ and columns $(r,s)$ is
+$c_{(a,b),(r,s)}=\chi(ar)\chi(bs)$, and its columns satisfy
+\[
+ \sum_{a,b}\overline{c_{(a,b),(r,s)}}c_{(a,b),(r',s')}
+   =q^2\mathbf{1}_{(r,s)=(r',s')}.
+\]
+Expanding the squared norms as inner products cancels all unequal column
+indices.  The squared Fourier prefactor $q^{-4}$ leaves $q^{-2}$, precisely
+the uniform average above.  Thus the expanded-observable commutation bound
+underlying the source's binary-refinement estimate yields a field-valued
+bound $O(\sqrt\eps)$, with no dependence on $q$.\footnote{The Fourier
+definition is at lines~384--418 of the source; the commutation estimate is
+in \path{lem:qld-comm-cons}, lines~466--505.  The formal identities are
+\path{sum_norm_sum_smul_sq_of_orthogonal} and
+\path{ProjectiveSetting.sum_norm_place_expPointOp_commutator_sq};
+\path{ProjectiveSetting.expPoint_comm} derives the bound in
+\path{MIPStarRE/QPBT/Combining/Points/Commutation.lean}.}
+
+Define the field-valued sandwich by $R_{a,b}=Z_bX_aZ_b$.
+It is positive, since $R_{a,b}=(X_aZ_b)^\dagger(X_aZ_b)$, and its effects
+sum to the identity by projectivity and completeness.  Moreover,
+$R_{a,b}-Z_bX_a=Z_b[X_a,Z_b]$.  Since $Z_b$ is a contraction, the same
+commutation bound controls $d^2(R,ZX)$.
+
+Next fix opposite placements $1,2$.  Operators on distinct placements
+commute, even when the players' local spaces differ.  Put
+$W_b=Z_{1,b}Z_{2,b}$, $D_a=X_{1,a}-X_{2,a}$, and
+$K_{j,a,b}=[X_{j,a},Z_{j,b}]$.  Define the nonnegative scalar errors
+\[
+ \begin{aligned}
+ e_X&=\sum_a\|D_a\hat\psi\|^2,&
+ e_Z&=\sum_b\|(Z_{1,b}-Z_{2,b})\hat\psi\|^2,\\
+ k_j&=\sum_{a,b}\|K_{j,a,b}\hat\psi\|^2.&
+ \end{aligned}
+\]
+For any two complete projective measurements $P,Q$ and any vector $w$,
+expanding the square gives
+\[
+ \sum_c\operatorname{Re}\langle w,P_cQ_cw\rangle
+   =\|w\|^2-\tfrac12\sum_c\|(P_c-Q_c)w\|^2.
+\]
+Cross-placement commutation gives
+$R_{1,a,b}R_{2,a,b}=W_b^\dagger X_{1,a}X_{2,a}W_b$.
+Applying the preceding identity first to the $X$ measurements in $W_b\hat\psi$
+and then to the $Z$ measurements in $\hat\psi$ proves the exact defect formula
+\[
+ 1-\sum_{a,b}\langle\hat\psi,R_{1,a,b}R_{2,a,b}\hat\psi\rangle
+   =\tfrac12 e_Z+\tfrac12\sum_{a,b}\|D_aW_b\hat\psi\|^2.
+\]
+The overlap is real because the two placed sandwich effects commute.
+To bound the last sum, use the algebraic identity
+\[
+ D_aW_b=W_bD_a+Z_{2,b}K_{1,a,b}-Z_{1,b}K_{2,a,b}.
+\]
+The squared norm of a sum of three vectors is at most three times the sum
+of their squared norms.  Projector contraction and
+$\sum_b\|W_bv\|^2\leq\sum_b\|Z_{2,b}v\|^2=\|v\|^2$ then bound the defect by
+$c_{x,z}=\tfrac12 e_Z+\tfrac32(e_X+k_1+k_2)$.
+Self-consistency of the point measurements gives
+$\E e_X,\E e_Z=O(\eps)$; Parseval gives $\E k_j=O(\sqrt\eps)$.
+Consequently $\E c_{x,z}\leq C(\eps+\sqrt\eps)$ for a universal $C$.\footnote{
+The exact identity and estimate are \path{sandwich_overlap_identity} and
+\path{sandwich_defect_pointwise_le} in
+\path{MIPStarRE/QPBT/Combining/Points/Consistency.lean}.
+They replace the cited Cauchy--Schwarz chain, not its conclusion.}
+
+\section{Rounding and register transfer}
+
+The orthonormalization lemma for two consistent bipartite POVMs returns a
+projective measurement on the same local space as the first POVM.
+Its explicit version bounds squared distance to that POVM by $220c^{1/4}$
+when the consistency defect is at most $c$.  Apply it to the two sandwiches
+for each $(x,z)$, separately for Alice and Bob.  Concavity of the fourth root
+gives an averaged squared distance at most
+$220(\E c_{x,z})^{1/4}$.\footnote{This uses
+\path{projective_rounding_with_explicit_constant} in
+\path{MIPStarRE/QPBT/Games/DistanceTheorems/ProjectiveRounding.lean}, the
+explicit form of \path{lem:ortho}.  The fiberwise application and averaging
+are in \path{MIPStarRE/QPBT/Combining/Points/Orthonormalization.lean}.}
+
+The involution $\tau=(A'\ B'')(A''\ B')$ fixes $A,B$ and preserves
+$\hat\psi$: it exchanges the two identical EPR pairs and reverses each pair.
+It carries $AA'$ to $AB''$ and $BA''$ to $BB'$, so the same locally chosen
+measurements have the same rounding errors on the second placement scheme.
+No symmetry of the original strategy is needed.  This is not the blueprint's
+permutation product $\sigma\theta$: that product sends $B'$ to $A'$, whereas
+$\tau$ sends $B'$ to $A''$.\footnote{Compare
+\path{lem:symmetric-equivalents-transfer} in
+\path{blueprint/src/chapter/ch14_qpbt_observables.tex} with
+\path{ProjectiveSetting.eprCrossSwap} in
+\path{MIPStarRE/QPBT/Combining/Points/Placement.lean}.}
+
+For each directed opposite pair, transport the projective factors one at a
+time to obtain $d^2((ZX)_p,(XZ)_{p'})=O(\eps)$.
+Combining this estimate with rounding, $d^2(R,ZX)=O(\sqrt\eps)$,
+and commutation proves all three target inequalities by the squared-distance
+triangle bound.  For $0\leq\eps\leq1$, their errors are bounded by
+$K\eps^{1/8}$.  For $\eps>1$, all the operator families involved satisfy
+$\sum_{a,b}F_{a,b}^\dagger F_{a,b}\leq I$, so their squared distances on a
+unit state are at most $4$; enlarging $K$ covers this case as well.
+
+\section{Conclusion}
+
+The blueprint retains the source's combined-point statement and its
+binary-refinement proof.  The formal construction proves that statement by
+the direct argument above, with both ordered products, all directed opposite
+placements, and the original expanded local spaces.\footnote{The blueprint
+entry is \path{lem:qld-4-10} in
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}; its construction theorem
+is \leanid{MIPStarRE.QPBT.exists\_combinedPointsWitness}.}
+There is no discrepancy in the combined-point conclusion under the existing
+parameter and polynomial-error conventions, and no additional construction
+is assumed.  The finite common-extension problem for the quoted quantum
+linearity theorem remains a separate open formalization task; this proof
+neither uses nor resolves it.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}

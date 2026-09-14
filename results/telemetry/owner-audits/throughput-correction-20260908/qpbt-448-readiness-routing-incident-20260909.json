@@ -1,0 +1,31 @@
+{
+  "schema": "qpbt.operational_incident.v1",
+  "recorded_at": "2026-09-08T19:00:47.293133296Z",
+  "owner": "/root/astra_refill_coordinator",
+  "incidents": [
+    {
+      "kind": "wrong_pr_dependency_readiness",
+      "claimed_input": "PR448 f0da3b1db2eec0b0328c00a2642e17dc541da363 was described as the published mixed zero-direction mass bound.",
+      "actual_input": "Git identifies f0da3b1db2eec0b0328c00a2642e17dc541da363 as diagonal line parameter resampling, in Lines/DiagonalResampling.lean.",
+      "actual_mixed_bound_present": false,
+      "effect": "The product zero-direction probability payload was not dependency-ready as claimed.",
+      "correction": "Immediately prohibited the dependent bound, any conclusion-shaped extra hypothesis, and duplicate work on ROOT446. Wrong readiness is not retroactively marked true."
+    },
+    {
+      "kind": "wrong_actor_active_turn_steering",
+      "target": "/root/sol_fix299_prose_round2",
+      "actual_existing_turn_id": "01a08258-7669-7522-816d-453ed2d2ed28",
+      "actual_existing_task_started": "2026-09-08T18:47:10.704Z",
+      "actual_existing_scope": "ROOT's mixed446 finite-support repair",
+      "wrong_followup_effect": "Delivered steering to an occupied ROOT446 actor rather than activating a new task on the completed diagonal-resampling actor.",
+      "new_task_started_from_wrong_message": false,
+      "new_budget_authorized_by_wrong_message": false,
+      "original_source_deadline": "2026-09-08T18:57:10.704Z",
+      "correction": "Restored only original ROOT446 scope/clock, required freeze of new proof edits at the original bound, and preserved owned compiler drain and dirty draft. Source effects remain to be reported by the actor.",
+      "count_correction": "The accepted message is not a new admission or an additional useful worker."
+    }
+  ],
+  "source_statement_or_guard_weakening_authorized": false,
+  "budget_reset": false,
+  "primary_publication": "Sole primary incorporates these failures and the independent365-to422 sample in the next normal batch."
+}

@@ -85,30 +85,70 @@ noncomputable def tildeM {P : AdmissibleParams} {epsilon delta : ℝ}
       (tauDotProj W u (dotProduct (decodeFq g) u - a))
 
 /-- Each pulled-apart effect is a projector, as asserted in
-blueprint `def:tilde-m-measurement`, paper
+blueprint `lem:tilde-m-projective`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
-**Proof obligation:** issue #47 tracks the orthogonal-sum calculation using
-`marginalPoly_isProjective` and `tauDotProj_isProj`. -/
+Each tensor summand is projective. Distinct polynomial marginals are
+orthogonal, so their tensor summands are orthogonal as well. -/
 theorem tildeM_isProj {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) (u : PauliRegister P)
     (a : PauliScalar P) :
     IsProj (tildeM w side W u a) := by
-  sorry
+  classical
+  have hproj (g : Poly P) : IsProj
+      (heteroKron ((w.marginalPoly side W).effect g)
+        (tauDotProj W u (dotProduct (decodeFq g) u - a))) :=
+    MakingMeasurementsProjective.isProj_kronecker
+      (w.marginalPoly_isProjective side W g) (tauDotProj_isProj W u _)
+  unfold tildeM
+  constructor
+  · change (∑ g : Poly P, _) * (∑ g : Poly P, _) = _
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [Matrix.mul_sum, Finset.sum_eq_single g]
+    · exact (hproj g).isIdempotentElem
+    · intro g' _ hg'
+      rw [heteroKron_mul, MagicSquareRigidity.mul_eq_zero_of_isProj_family
+        (w.marginalPoly_isProjective side W) (w.marginalPoly side W).sum_le_one
+        hg'.symm]
+      simp [heteroKron]
+    · intro hg
+      exact (hg (Finset.mem_univ g)).elim
+  · change (∑ g : Poly P, _)ᴴ = _
+    rw [Matrix.conjTranspose_sum]
+    exact Finset.sum_congr rfl fun g _ => (hproj g).isSelfAdjoint
 
 /-- The pulled-apart effects are complete for each fixed basis and Pauli
 register vector. This is the completeness assertion in
-blueprint `def:tilde-m-measurement`, paper
+blueprint `lem:tilde-m-projective`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1425-1435`.
 
-**Proof obligation:** issue #47 tracks summing the orthogonal dot-product
-projectors and the polynomial marginal effects. -/
+For each polynomial, subtracting the scalar outcome from its decoded dot
+product permutes the field. Completeness then follows by summing the
+dot-product projectors and the polynomial marginal effects. -/
 theorem sum_tildeM_eq_one {P : AdmissibleParams} {epsilon delta : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S delta)
     (side : PlayerSide) (W : PauliKind) (u : PauliRegister P) :
     ∑ a : PauliScalar P, tildeM w side W u a = 1 := by
-  sorry
+  classical
+  simp only [tildeM]
+  rw [Finset.sum_comm]
+  calc
+    _ = ∑ g : Poly P, heteroKron ((w.marginalPoly side W).effect g)
+        (∑ a : PauliScalar P, tauDotProj W u (dotProduct (decodeFq g) u - a)) := by
+      exact Finset.sum_congr rfl fun g _ =>
+        (DistanceCalculus.heteroKron_finset_sum_right _ _ _).symm
+    _ = ∑ g : Poly P, heteroKron ((w.marginalPoly side W).effect g) 1 := by
+      refine Finset.sum_congr rfl fun g _ => ?_
+      congr 1
+      calc
+        _ = ∑ a : PauliScalar P, tauDotProj W u a :=
+          (Equiv.subLeft (dotProduct (decodeFq g) u)).sum_comp (tauDotProj W u)
+        _ = 1 := sum_tauDotProj_eq_one W u
+    _ = heteroKron (∑ g : Poly P, (w.marginalPoly side W).effect g) 1 :=
+      (DistanceCalculus.heteroKron_finset_sum_left _ _ _).symm
+    _ = 1 := by rw [(w.marginalPoly side W).sum_eq_one, heteroKron_one_one]
 
 /-- The binary observable obtained from the trace coarse-graining of `tildeM`.
 This is Equation `eq:def-tildewj` in blueprint
@@ -312,6 +352,18 @@ theorem tildeObs_twisted_commutation {P : AdmissibleParams}
 
 /-! ## Swap conjugation -/
 
+/-- Each crossed Pauli product is unitary, by the two involution identities
+used at paper `14_analysis_of_the_pauli_basis_test.tex:1687-1699`. -/
+private theorem swapPauli_mul_conjTranspose {P : AdmissibleParams}
+    (pair : PolyPair P) :
+    (tauObservable .X (decodeFq pair.2) * tauObservable .Z (decodeFq pair.1)) *
+        (tauObservable .X (decodeFq pair.2) *
+          tauObservable .Z (decodeFq pair.1))ᴴ = 1 := by
+  rw [Matrix.conjTranspose_mul, tauObservable_conjTranspose,
+    tauObservable_conjTranspose, ← Matrix.mul_assoc,
+    Matrix.mul_assoc (tauObservable .X (decodeFq pair.2)), tauObservable_sq,
+    Matrix.mul_one, tauObservable_sq]
+
 /-- The swap map built from the global polynomial-pair measurement, with the
 crossed decoded arguments required by `def:v-swap-unitary`. Blueprint
 `def:v-swap-unitary`; paper
@@ -329,28 +381,49 @@ calculation of blueprint
 `lem:v-swap-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
-**Proof obligation:** issue #47 tracks the finite projector calculation.
-Discharge: use projectivity and completeness of `w.Smeas side` together with
-self-inverseness of both generalized Pauli observables. -/
+Projectivity and completeness of `w.Smeas side` reduce the product to its
+diagonal outcomes. The two Pauli involutions then cancel in reverse order. -/
 theorem swapUnitary_mul_conjTranspose {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide) :
     swapUnitary w side * (swapUnitary w side)ᴴ = 1 := by
-  sorry
+  classical
+  have hself (pair : PolyPair P) :
+      ((w.Smeas side).effect pair)ᴴ = (w.Smeas side).effect pair :=
+    (w.projective side pair).isSelfAdjoint
+  unfold swapUnitary
+  rw [Matrix.conjTranspose_sum]
+  simp_rw [MagicSquareRigidity.heteroKron_conjTranspose, hself]
+  rw [Finset.sum_mul]
+  calc
+    _ = ∑ pair : PolyPair P,
+        heteroKron ((w.Smeas side).effect pair) 1 := by
+      refine Finset.sum_congr rfl fun pair _ => ?_
+      rw [Matrix.mul_sum, Finset.sum_eq_single pair]
+      · rw [heteroKron_mul, (w.projective side pair).isIdempotentElem.eq,
+          swapPauli_mul_conjTranspose]
+      · intro other _ hother
+        rw [heteroKron_mul, MagicSquareRigidity.mul_eq_zero_of_isProj_family
+          (w.projective side) (w.Smeas side).sum_le_one hother.symm]
+        exact Matrix.zero_kronecker _
+      · intro hpair
+        exact (hpair (Finset.mem_univ pair)).elim
+    _ = heteroKron (∑ pair : PolyPair P, (w.Smeas side).effect pair) 1 :=
+      (DistanceCalculus.heteroKron_finset_sum_left _ _ _).symm
+    _ = 1 := by rw [(w.Smeas side).sum_eq_one, heteroKron_one_one]
 
 /-- The swap map is a left unitary. This is the reverse exact unitarity
 calculation implicit in blueprint
 `lem:v-swap-conjugation`, paper
 `14_analysis_of_the_pauli_basis_test.tex:1687-1699`.
 
-**Proof obligation:** issue #47 tracks the reverse projector calculation.
-Discharge: use the same orthogonality and Pauli involution identities as in
-`swapUnitary_mul_conjTranspose`. -/
+For finite square matrices, the right inverse identity also gives the left
+inverse identity. -/
 theorem conjTranspose_mul_swapUnitary {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide) :
     (swapUnitary w side)ᴴ * swapUnitary w side = 1 := by
-  sorry
+  exact mul_eq_one_comm.mp (swapUnitary_mul_conjTranspose w side)
 
 /-- Exact conjugation of a pulled-apart observable by the swap map. This is
 Equation `eq:v-swap-obs-conjugation` in `lem:v-swap-conjugation`, blueprint
