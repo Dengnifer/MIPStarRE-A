@@ -26,14 +26,6 @@ open MIPStarRE.Quantum
 
 namespace DistanceCalculus
 
-/-- The adjoint squares of a complete measurement sum to at most the identity.
-This is the existing public measurement bound, used here for the uniform
-distance estimate. -/
-theorem measurement_sum_adjoint_mul_le_one {α ι : Type*} [Fintype α]
-    [Fintype ι] [DecidableEq ι] (M : MIPStarRE.Quantum.Measurement α ι) :
-    ∑ a : α, (M.effect a)ᴴ * M.effect a ≤ 1 :=
-  MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one M
-
 /-- A left-placed complete measurement is square-summable on the product
 space, by the public measurement bound applied to its tensor placement. -/
 theorem leftPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
@@ -53,42 +45,6 @@ theorem rightPlaced_sum_adjoint_mul_le_one {α ιA ιB : Type*} [Fintype α]
       heteroKron (1 : Op ιA) (M.effect a) ≤ 1 :=
   MIPStarRE.QPBT.measurement_sum_adjoint_mul_le_one
     (rightPlacedMeasurement (ιA := ιA) M)
-
-/-- The squared distance between two square-summable operator families is at
-most four on a unit vector. Formalization-only auxiliary bounding the
-state-dependent distance of `def:povm-distance` trivially. -/
-theorem sum_norm_sub_apply_sq_le_four {α ι : Type*} [Fintype α]
-    [Fintype ι] [DecidableEq ι] (A B : α → Op ι) (ψ : EuclideanSpace ℂ ι)
-    (hψ : ‖ψ‖ = 1) (hA : ∑ a : α, (A a)ᴴ * A a ≤ 1)
-    (hB : ∑ a : α, (B a)ᴴ * B a ≤ 1) :
-    ∑ a : α, ‖applyOperatorToState (A a - B a) ψ‖ ^ 2 ≤ 4 := by
-  have hAsum : ∑ a : α, ‖applyOperatorToState (A a) ψ‖ ^ 2 ≤ 1 := by
-    have h := sum_norm_mul_apply_le A 1 ψ hA
-    simpa [WinImplications.applyOperatorToState_one, hψ] using h
-  have hBsum : ∑ a : α, ‖applyOperatorToState (B a) ψ‖ ^ 2 ≤ 1 := by
-    have h := sum_norm_mul_apply_le B 1 ψ hB
-    simpa [WinImplications.applyOperatorToState_one, hψ] using h
-  have hpoint (a : α) :
-      ‖applyOperatorToState (A a - B a) ψ‖ ^ 2 ≤
-        2 * ‖applyOperatorToState (A a) ψ‖ ^ 2 +
-          2 * ‖applyOperatorToState (B a) ψ‖ ^ 2 := by
-    have hdecomp : applyOperatorToState (A a - B a) ψ =
-        applyOperatorToState (A a) ψ - applyOperatorToState (B a) ψ := by
-      simp [applyOperatorToState]
-    rw [hdecomp]
-    have hpar := parallelogram_law_with_norm ℂ
-      (applyOperatorToState (A a) ψ) (applyOperatorToState (B a) ψ)
-    nlinarith [sq_nonneg ‖applyOperatorToState (A a) ψ +
-      applyOperatorToState (B a) ψ‖]
-  calc
-    ∑ a : α, ‖applyOperatorToState (A a - B a) ψ‖ ^ 2 ≤
-        ∑ a : α, (2 * ‖applyOperatorToState (A a) ψ‖ ^ 2 +
-          2 * ‖applyOperatorToState (B a) ψ‖ ^ 2) :=
-      Finset.sum_le_sum fun a _ => hpoint a
-    _ = 2 * ∑ a : α, ‖applyOperatorToState (A a) ψ‖ ^ 2 +
-        2 * ∑ a : α, ‖applyOperatorToState (B a) ψ‖ ^ 2 := by
-      rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
-    _ ≤ 4 := by linarith
 
 /-- The state-dependent distance between two complete measurements placed on
 opposite tensor factors is at most four. Formalization-only auxiliary: this is

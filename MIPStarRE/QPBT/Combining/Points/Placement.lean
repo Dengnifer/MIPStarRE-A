@@ -16,10 +16,16 @@ state-dependent distance between the two bipartition schemes of
 
 The placements are those of `def:symmetric-equivalents`, blueprint
 `blueprint/src/chapter/ch14_qpbt_observables.tex`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.
-The EPR-exchange invariance is proved directly for the involution
-`(A' B'')(A'' B')`, which fixes the strategy registers.  Its use for
-`lem:qld-4-10` is explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.  The
+EPR exchange is a separate ancillary permutation, not the product of the
+permutations in blueprint `lem:symmetric-equivalents-transfer`: it is an
+involution, whereas that product is a four-cycle on the ancillary registers.
+Its invariance needs no symmetry of the strategy and does not establish
+that blueprint lemma. Its use for `lem:qld-4-10` is explained in
+`docs/paper-gaps/qpbt_combined-points-direct.tex`.
+The common-ancilla obligation of the source's linearity
+route to `lem:qld-4-10` is recorded in
+`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -38,8 +44,10 @@ variable {P : AdmissibleParams} {ε : ℝ}
 /-! ## The crosswise exchange of the two EPR pairs -/
 
 /-- The permutation of the six registers exchanging `A'` with `B''` and `A''`
-with `B'`, while fixing `A` and `B`.  This involution exchanges the two EPR
-pairs and reverses the order within each pair. -/
+with `B'`, while fixing the strategy registers. This ancillary involution
+differs from the four-cycle `U_σ U_θ` of blueprint
+`lem:symmetric-equivalents-transfer`; its state invariance is proved separately
+and does not require a symmetric strategy. -/
 def eprCrossSwap (P : AdmissibleParams) (ιA ιB : Type*) :
     SixReg P ιA ιB ≃ SixReg P ιA ιB where
   toFun := fun ⟨⟨a, a', a''⟩, b, b', b''⟩ => ((a, (b'', b')), (b, (a'', a')))
@@ -57,9 +65,10 @@ theorem eprState_ofLp_swap {V : Type*} [Fintype V] [DecidableEq V]
   · simp [h]
   · simp [h, Ne.symm h]
 
-/-- The crosswise EPR exchange fixes the expanded state: the two EPR factors
-are identical and each is symmetric under exchange of its registers.  No
-symmetry of the strategy state is required. -/
+/-- The crosswise EPR exchange fixes the expanded state because the two EPR
+factors are identical and each is symmetric in its two registers. This is
+invariance under `eprCrossSwap`, not the permutations of blueprint
+`lem:symmetric-equivalents-transfer`. -/
 theorem reindexState_eprCrossSwap_psiHat (S : ProjectiveSetting P ε) :
     reindexState (eprCrossSwap P S.toStrategy.ιA S.toStrategy.ιB) S.psiHat =
       S.psiHat := by
@@ -99,8 +108,9 @@ theorem reindexOp_eprCrossSwap_place_BB' (S : ProjectiveSetting P ε)
   ring!
 
 /-- An operator placed on `AB''` has, on the expanded state, the same norm as
-the same operator placed on `AA'`, by invariance under the crosswise EPR
-exchange. -/
+the same operator placed on `AA'`, by invariance under `eprCrossSwap` and
+unitary invariance of the norm. This does not use blueprint
+`lem:symmetric-equivalents-transfer`. -/
 theorem norm_place_AB''_eq_norm_place_AA' (S : ProjectiveSetting P ε)
     (O : Op (S.ExpandedLocalSpace .alice)) :
     ‖applyOperatorToState (S.place .AB'' O) S.psiHat‖ =
@@ -110,8 +120,9 @@ theorem norm_place_AB''_eq_norm_place_AA' (S : ProjectiveSetting P ε)
     reindexOp_eprCrossSwap_place_AB'']
 
 /-- An operator placed on `BB'` has, on the expanded state, the same norm as
-the same operator placed on `BA''`, by invariance under the crosswise EPR
-exchange. -/
+the same operator placed on `BA''`, by invariance under `eprCrossSwap` and
+unitary invariance of the norm. This does not use blueprint
+`lem:symmetric-equivalents-transfer`. -/
 theorem norm_place_BB'_eq_norm_place_BA'' (S : ProjectiveSetting P ε)
     (O : Op (S.ExpandedLocalSpace .bob)) :
     ‖applyOperatorToState (S.place .BB' O) S.psiHat‖ =

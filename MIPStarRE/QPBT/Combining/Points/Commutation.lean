@@ -323,7 +323,7 @@ theorem sum_norm_place_expPointOp_commutator_sq (S : ProjectiveSetting P ε)
           (phaseSign (fixedBinTrace P.model (ab.1 * rs.1)) *
               phaseSign (fixedBinTrace P.model (ab.2 * rs.2))) • v rs := by
     intro ab
-    rw [expPointOp_commutator_eq, place_smul, place_finsetSum,
+    rw [expPointOp_commutator_eq, place_smul, place_finset_sum,
       WinImplications.applyOperatorToState_smul_op, applyOperatorToState_finsetSum]
     congr 1
     refine Finset.sum_congr rfl fun rs _ => ?_
