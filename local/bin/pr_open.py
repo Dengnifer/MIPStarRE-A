@@ -110,6 +110,35 @@ def pr_create(title: str, head: str, base: str, body: str) -> int:
         raise
 
 
+# Descriptive labels only: never inherit scheduling, approval or owner state.
+# GitHub remains authoritative for existence; see issues-prs.md section 1.
+DESCRIPTIVE_LABELS = frozenset({
+    "formalization", "documentation", "infrastructure", "cleanup", "refactor",
+    "ci", "proof", "proof-infra", "sorry-elimination", "statement-fix", "mismatch",
+    "blueprint", "blueprint-sync", "blueprint-only", "2009.12982",
+    "paper-1904.05870", "paper-2001.04383", "qpbt-analysis", "qpbt-test",
+    "bug", "enhancement",
+})
+
+
+def publication_labels(issue: int | None, explicit: list[str], existing: dict | None) -> list[str]:
+    """Resolve additive labels and reject an unclassified PR before publication."""
+    labels = set(explicit)
+    if issue:
+        labels.update(row["name"] for row in gh_common.issue_view(issue).get("labels", [])
+                      if row["name"] in DESCRIPTIVE_LABELS)
+    known = set(gh_common.list_labels())
+    missing = sorted(labels - known)
+    if missing:
+        raise LayerError(f"labels not in the repository: {missing} — create them "
+                         "on GitHub first or drop them")
+    retained = {row["name"] for row in (existing or {}).get("labels", [])}
+    if not (labels | retained) & DESCRIPTIVE_LABELS & known:
+        raise LayerError("PR needs a descriptive label before publication; pass --label "
+                         "with an existing descriptive repository label, or label its --issue")
+    return sorted(labels)
+
+
 def open_pr(args: argparse.Namespace) -> int:
     repo_root = args.repo_root.resolve()
     lint_branch(repo_root, args.branch)
@@ -123,11 +152,8 @@ def open_pr(args: argparse.Namespace) -> int:
     if args.issue and not any(int(n) == args.issue for n in CLOSES_RE.findall(body)):
         body = f"{body.rstrip()}\n\n---\nCloses #{args.issue}\n".lstrip()
 
-    labels = [n.strip() for chunk in args.label for n in chunk.split(",") if n.strip()]
-    missing = sorted(set(labels) - set(gh_common.list_labels())) if labels else []
-    if missing:
-        raise LayerError(f"labels not in the repository: {missing} — create them "
-                         "on GitHub first or drop them")
+    explicit = [n.strip() for chunk in args.label for n in chunk.split(",") if n.strip()]
+    labels = publication_labels(args.issue, explicit, gh_common.pr_for_branch(args.branch))
     if args.dry_run:
         sys.stdout.write(f"[dry-run] would push refs/heads/{args.branch} ({ahead} "
                          f"ahead of {args.base}) and open {title!r} {labels}\n")
@@ -174,7 +200,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     add("--title", help="conventional-commit title; required to open a new PR")
     add("--body-file", type=Path, metavar="PATH", help="file holding the PR body")
     add("--label", action="append", default=[], metavar="NAME",
-        help="repository label; repeatable, comma lists accepted")
+        help="repository label; repeatable, comma lists accepted; descriptive "
+             "issue labels are inherited, and one descriptive label is required")
     add("--issue", type=int, metavar="N", help="append a 'Closes #N' body footer")
     add("--repo-root", type=Path, default=default_repo_root(), help="repository root")
     add("--dry-run", action="store_true", help="print the plan, write nothing")

@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "incorporated_on": "2026-09-07",
+  "status": "historical completed diagnostics; no new requests made during incorporation",
+  "source_task": "01a07665-bc91-7390-bde3-a93c7d29a9be",
+  "cli_version": "codex-cli 0.153.4",
+  "catalog": {
+    "sha256": "c359d097526ac08e0470cd430408bcd07d520398169ee3682f2697c7a26a44c3",
+    "mtime_utc": "2026-09-06T11:06:05.649350+00:00",
+    "explicit_per_invocation_selection_for_both_accounts": true
+  },
+  "method": {
+    "fresh_cli_invocations": true,
+    "production_effort_rewriting_wrapper_bypassed": true,
+    "observer_preserved_model_and_reasoning_fields": true,
+    "tools_and_delegation_disabled": true,
+    "observer_output_caps": {"initial": 64, "retest": 2048},
+    "source_of_ultra_to_max_translation": "native CLI before endpoint transmission",
+    "credential_material_headers_raw_streams_and_private_configurations_included": false
+  },
+  "initial": {
+    "source": "/tmp/qpbt-meta-ultra-catalog-20260906T111001Z/cli-ultra-results.json",
+    "source_sha256": "b9e8b276f1cdd0d25eeae52902bf355defa8e0b25d2391c50124b58c5308b635",
+    "started_at": "2026-09-06T11:31:34.824476+00:00",
+    "finished_at": "2026-09-06T11:32:09.274827+00:00",
+    "accounts": [
+      {
+        "account": "relay",
+        "configured_effort_for_invocation": "ultra",
+        "requested_effort": "ultra",
+        "outgoing_model": "gpt-6-astra",
+        "outgoing_effort": "max",
+        "completed_response_effort": null,
+        "upstream_requests": 1,
+        "http_status": 503,
+        "cli_exit_code": 1,
+        "sanitized_error": "Service temporarily unavailable",
+        "usage": null,
+        "wall_s": 1.761
+      },
+      {
+        "account": "space",
+        "configured_effort_for_invocation": "ultra",
+        "requested_effort": "ultra",
+        "outgoing_model": "gpt-6-astra",
+        "outgoing_effort": "max",
+        "completed_response_effort": null,
+        "upstream_requests": 1,
+        "http_status": 200,
+        "terminal_event": "response.failed",
+        "cli_exit_code": 1,
+        "sanitized_error_code": "server_error",
+        "sanitized_error": "Our servers are currently overloaded. Please try again later.",
+        "usage": null,
+        "wall_s": 32.62
+      }
+    ]
+  },
+  "owner_authorized_retest": {
+    "source": "/tmp/qpbt-meta-ultra-retest-20260906T114315Z/cli-ultra-results.json",
+    "source_sha256": "1a03006efa7e7556f9c798f7226b06d6f0fc667ba20a291dd8ac49eb2a6949c0",
+    "started_at": "2026-09-06T11:44:15.739257+00:00",
+    "finished_at": "2026-09-06T11:44:29.935295+00:00",
+    "accounts": [
+      {
+        "account": "relay",
+        "configured_effort_for_invocation": "ultra",
+        "requested_effort": "ultra",
+        "outgoing_model": "gpt-6-astra",
+        "outgoing_effort": "max",
+        "completed_response_effort": null,
+        "upstream_requests": 1,
+        "http_status": 503,
+        "cli_exit_code": 1,
+        "sanitized_error": "Service temporarily unavailable",
+        "usage": null,
+        "wall_s": 1.594
+      },
+      {
+        "account": "space",
+        "configured_effort_for_invocation": "ultra",
+        "requested_effort": "ultra",
+        "outgoing_model": "gpt-6-astra",
+        "outgoing_effort": "max",
+        "completed_response_effort": "max",
+        "upstream_requests": 1,
+        "http_status": 200,
+        "terminal_event": "response.completed",
+        "cli_exit_code": 0,
+        "reply_exact_ok": true,
+        "usage": {"input_tokens": 11997, "output_tokens": 5, "total_tokens": 12002},
+        "wall_s": 12.536
+      }
+    ]
+  },
+  "account_catalog_followup": {
+    "space_pointer_added_at": "2026-09-06T11:37:57Z",
+    "reported_parsed_config_change": "model_catalog_json pointer only",
+    "request_free_cli_check_passed": true,
+    "source": "/tmp/qpbt-meta-ultra-catalog-20260906T111001Z/findings.md",
+    "edit_repeated_during_incorporation": false
+  },
+  "interpretation": {
+    "literal_raw_api_ultra_400_is_a_different_test": true,
+    "medium_downgrade_observed": false,
+    "backend_compute_equivalence": "not measured",
+    "throughput_or_concurrency_capacity": "not measured",
+    "native_delegation_tested_by_these_single_request_probes": false,
+    "production_policy": "Governed separately by current owner instructions, not these historical probes"
+  }
+}

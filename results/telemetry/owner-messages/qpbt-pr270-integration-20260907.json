@@ -1,0 +1,143 @@
+{
+  "observed_at": "2026-09-07T13:23:16.803716+00:00",
+  "pr": 270,
+  "issue": 268,
+  "frozen_main": "a4b2a792a888027ff457ca2d0bca347e4df28892",
+  "head": "bd3d88eae98bd2e93172b51badc318da151b4b2f",
+  "ci": {
+    "started": "2026-09-07T20:23:11+0800",
+    "finished": "2026-09-07T20:36:42+0800",
+    "seconds": 811,
+    "conclusion": "success",
+    "partial": false
+  },
+  "review": {
+    "id": 5132260906,
+    "code": "APPROVED",
+    "unresolved": 0,
+    "prose": "not applicable: no blueprint diff",
+    "request": "30b62eb492d14994a3378911bc9de1da",
+    "complete_accepted_once": true
+  },
+  "merged_at": "2026-09-07T13:11:26Z",
+  "merge_commit": "a2f52f6d15a1af57740ee73eab913e3747b47792",
+  "service_tick": {
+    "action": "delegate-pr_merge",
+    "cadence_sleep_s": 244.312,
+    "clean": true,
+    "duration_s": 55.688,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 55.688,
+    "eligible_age_s": null,
+    "eligible_count": 1,
+    "external_admission": 0,
+    "fresh_count": 1,
+    "hold_reasons": [],
+    "local_main": "a4b2a792a888027ff457ca2d0bca347e4df28892",
+    "merge_exit": 0,
+    "native_descendant_limit": 9,
+    "oldest_eligible": {
+      "branch": "issue-268-baseline-routing-entrypoint",
+      "created": "2026-09-06T06:25:39Z",
+      "eligibility_age_s": null,
+      "fresh_against_remote": true,
+      "head": "bd3d88eae98bd2e93172b51badc318da151b4b2f",
+      "marker": true,
+      "number": 270,
+      "pr_age_s": 110687
+    },
+    "oldest_fresh_against_remote": true,
+    "oldest_stale": [],
+    "owner_total_limit": 11,
+    "post_merge_remote_main": "a2f52f6d15a1af57740ee73eab913e3747b47792",
+    "post_merge_remote_verified": true,
+    "read_failure": null,
+    "remote_main": "a4b2a792a888027ff457ca2d0bca347e4df28892",
+    "runtime": "relay-3 cap11/external0 verified",
+    "ts": "2026-09-07T13:11:15.419871+00:00"
+  },
+  "current_service": {
+    "pid": 1354901,
+    "source": "/home/drx/.cache/mipstarre-dev/owner-tools/merge-service-relay3-cap11-review-fix-20260907.py",
+    "sha256": "272d0b514b27482a242791ea11870049ec08bd82faaf0dd8fc9831117f0a1956",
+    "owner_replacement_reported_by_root": true,
+    "new_owner_receipt_path": null,
+    "root_read_only_comparison": "The selector calls canonical pr_merge.check_ci/check_review and rejects unknown draft state and current-head CHANGES_REQUESTED; no merge-gate weakening was observed. No unseen tests or approval are claimed.",
+    "previous_pid": 1089067,
+    "previous_pid_observed_absent": true,
+    "blind_restart_performed": false,
+    "source_change_provenance_review": "Normal owner/service followup; old receipt is historical"
+  },
+  "launcher": {
+    "source": "/tmp/qpbt-resume-relay3-cap11-20260907.sh",
+    "sha256": "1f3ca1914c494a46af54e97e42834f93d592d5b487f5c07bdd34ee68f78dc0e1",
+    "credential_home_omitted": true
+  },
+  "preservation": {
+    "pr": 270,
+    "merge_commit": "a2f52f6d15a1af57740ee73eab913e3747b47792",
+    "merged_at": "2026-09-07T13:11:26Z",
+    "restored_at": "2026-09-07T13:17:26.735696+00:00",
+    "stash": "e56be8b2a9468b09c41e525f3bf116f04280b1b6",
+    "stash_retained": true,
+    "files": {
+      "results/telemetry/builds.jsonl": {
+        "before_bytes": 200405,
+        "restored_bytes": 227,
+        "restored_rows": 1,
+        "after_bytes": 200632,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "5f35fbaf2aa0cf19e90d953b733abc5610dbddb123e0913eef11b2f2a4ca4d40"
+      },
+      "results/telemetry/sessions.jsonl": {
+        "before_bytes": 666439,
+        "restored_bytes": 1044,
+        "restored_rows": 1,
+        "after_bytes": 667483,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "727f28def644bfc157bc7049d1eee4838cbc5fe43297d44356df650053e1eb67"
+      },
+      "results/telemetry/estimates.jsonl": {
+        "before_bytes": 2293,
+        "restored_bytes": 0,
+        "restored_rows": 0,
+        "after_bytes": 2293,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "8311610d7593e9d798d7faa638d812017cc1c72d36e3018728cde27cd4806abe"
+      }
+    }
+  },
+  "concurrent_warmer_bytes_retained": 397,
+  "actual_relay3_observation_rows_appended": 1,
+  "canonical_space_rows_preserved": true,
+  "owner_sources": {
+    "qpbt-relay3-cap11-owner-update-20260907.md": "01dd2f5d366f5d9ccac482c7756c11898f4a1c64bfc8dc0d1608353eeac03896",
+    "qpbt-cap11-release-20260907.md": "d177441efca180f5bf23c9b9dee8200cbeb3cc48be923cc6ee8cc614eb0e5d6e",
+    "qpbt-relay3-cap11-receipt-20260907.json": "db7a7d092539c76026d8f251da234102aabe09d4e51e6c1b3f0e3a987b471160",
+    "qpbt-cap11-live-occupancy-20260907.json": "8946ba1175e6b6c6df775093a711fb4ae5404f56185188284408d800e521d599"
+  },
+  "actual_credential_label": "relay-3",
+  "legacy_router_bucket": "space",
+  "root_pid": 1101986,
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "native_descendant_cap": 9,
+  "useful_target": 9,
+  "useful_floor": 8,
+  "total_allocation": 11,
+  "external_admission": 0,
+  "usage": null,
+  "usage_scope": "unknown; native cumulative observations not additive",
+  "budgets_reset": false,
+  "b8": {
+    "attempts": 13,
+    "working_seconds": 26509
+  },
+  "next": "Publish complete telemetry batch and give final pin; retain every worker packet and dependency hold. Continue normal mathematical CI/review/integration, no owner resume needed."
+}

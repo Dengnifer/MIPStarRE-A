@@ -1,0 +1,21 @@
+{
+  "event": "native_space_cap5_runtime_precondition",
+  "recorded_at": "2026-09-06T15:01:52Z",
+  "owner_receipt": "space-cap5-switch-20260906.json",
+  "thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "pid": 1064752,
+  "process_start": "172784739",
+  "account": "space",
+  "key_label": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "owner_total_limit": 5,
+  "native_descendant_limit": 4,
+  "external_admission": 0,
+  "root_command_verified": true,
+  "scoped_route_verified": true,
+  "lease_registered": true,
+  "usage": null,
+  "usage_provenance": "unknown; runtime precondition carries no model billing",
+  "note": "Owner allocation and gate were created only when absent and validated under the router lock. No credentials, homes, backups, external tickets or provider-throughput claims are recorded."
+}

@@ -1,0 +1,140 @@
+{
+  "event": "pr250_adjudicated_service_integration",
+  "pr": 250,
+  "frozen_main": "1c223a5f5b2f5c0af9483cc99b6d3771a3385bdc",
+  "initial_head": "863de2b03537c11029dbeaa46123d15893caa711",
+  "final_head": "ba4681ed99ad75ec35fc93e7464bd1f443a7aef2",
+  "ci_runs": [
+    {
+      "head": "863de2b03537c11029dbeaa46123d15893caa711",
+      "seconds": 219,
+      "build_seconds": 73,
+      "conclusion": "success",
+      "partial": false
+    },
+    {
+      "head": "ba4681ed99ad75ec35fc93e7464bd1f443a7aef2",
+      "seconds": 190,
+      "build_seconds": 46,
+      "conclusion": "success",
+      "partial": false
+    }
+  ],
+  "reviews": {
+    "full_rounds": 4,
+    "last_full_review": 5126499570,
+    "last_full_verdict": "CHANGES_REQUESTED",
+    "last_full_unresolved": 1,
+    "repair_commit": "ba4681ed99ad75ec35fc93e7464bd1f443a7aef2",
+    "terminal_checks": 1,
+    "canonical_terminal_round": 5,
+    "terminal_review": 5126565962,
+    "terminal_scope": "Limited F1 discharge and related prose verification, not a fifth full review",
+    "code_raw_verdict": "COMMENTED",
+    "code_raw_f1_resolved": true,
+    "prose_raw_verdict": "COMMENTED",
+    "prose_raw_findings": 0,
+    "canonical_verdict": "COMMENTED",
+    "canonical_unchecked_findings": [
+      "F1",
+      "F2"
+    ],
+    "canonical_review_summary": "failure",
+    "status_fabricated": false,
+    "reviewer_rows_both_epochs_verified": true,
+    "backfill_needed": false
+  },
+  "adjudication": {
+    "comment": 5562076934,
+    "url": "https://github.com/Dengnifer/MIPStarRE-A/issues/250#issuecomment-5562076934",
+    "owner": "root operator",
+    "head": "ba4681ed99ad75ec35fc93e7464bd1f443a7aef2",
+    "dispositions": {
+      "F1": "fixed in ba4681ed: reuse the existing projective measurement API",
+      "F2": "moot: canonical COMMENTED/empty-findings normalization artifact"
+    },
+    "file_sha256": "8a99dbf1e090b0fdaaaf4f669494430093516c6fd051aa6d57ce218b0abca6b7"
+  },
+  "daemon": {
+    "launcher": "/tmp/qpbt-pr250-adjudicated-daemon-20260907.py",
+    "launcher_sha256": "577acccc96f0df4cb6f37f8feb527a82114a8178aa883e2016c7613470462dde",
+    "independently_checked": true,
+    "shared_lock": "watchdog/daemon/space-cap5.lock",
+    "check_only_exit": 0,
+    "actual_gate_exit": 0,
+    "actual_invocations": 1,
+    "canonical_gate": "local/bin/pr_merge.py --adjudicated",
+    "check_log": "/tmp/qpbt-pr250-adjudicated-check-20260907.log",
+    "merge_log": "/tmp/qpbt-pr250-adjudicated-merge-20260907.log"
+  },
+  "merged_at": "2026-09-06T21:02:16Z",
+  "merge_commit": "98350244e0d3af7e9afb2e1e583acfef327cf03e",
+  "post_merge_remote_verified": true,
+  "preservation": {
+    "stash": "80892d2542a489d27c660a94c0acc398e55ad5a1",
+    "stash_dropped": false,
+    "files": {
+      "builds.jsonl": {
+        "saved_bytes": 198105,
+        "pre_restore_bytes": 198053,
+        "restored_bytes": 450,
+        "restored_rows": 2,
+        "post_restore_bytes": 198503,
+        "all_saved_raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "file_mode_retained": true,
+        "post_restore_sha256": "f7c82d0af17ecf244a846e786ca3da44691a8fba7386810c2f4c9f6328178656"
+      },
+      "sessions.jsonl": {
+        "saved_bytes": 653980,
+        "pre_restore_bytes": 648752,
+        "restored_bytes": 5228,
+        "restored_rows": 5,
+        "post_restore_bytes": 653980,
+        "all_saved_raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "file_mode_retained": true,
+        "post_restore_sha256": "9227337cfc5bac212520fe8e69356b06f163497431508f828ab2350688336dc6"
+      }
+    },
+    "backup_directory": "pr250-quiet-2ld9Yp",
+    "concurrent_warmer_bytes_retained": 398
+  },
+  "periodic_service": {
+    "old_pid": 1664171,
+    "stopped_after_idle_no_children": true,
+    "old_pid_gone": true,
+    "last_old_tick": "2026-09-06T20:59:13.216746+00:00",
+    "pid": 2178864,
+    "started_at": "2026-09-06T21:07:03.076897+00:00",
+    "interval_seconds": 300,
+    "log": "/home/drx/.cache/mipstarre-dev/watchdog/daemon/space-cap5-restarted-20260907.log",
+    "shared_lock_held": true,
+    "first_completed_tick": "2026-09-06T21:07:33.086080+00:00",
+    "first_tick_action": "hold",
+    "first_tick_runtime": "space cap5/external0 verified",
+    "observed_tick_gap_seconds": 499.869334,
+    "gap_reason": "Authorized serialized adjudicated handoff, check-only and one merge, row restoration, and coordinator restart delay; not a steady-state cadence claim"
+  },
+  "warmer": {
+    "sha": "98350244e0d3af7e9afb2e1e583acfef327cf03e",
+    "seconds": 39,
+    "outcome": "success",
+    "row_preserved": true
+  },
+  "canonical_cleanup": {
+    "completed_clean_worktree_removed": "issue-239-independent-dot-projectors",
+    "local_branch_removed": true,
+    "source_reachable_in_merge": true,
+    "other_worktrees_not_changed": true
+  },
+  "account": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "owner_total_limit": 5,
+  "native_descendant_limit": 4,
+  "external_admission": 0,
+  "usage": null,
+  "usage_scope": "unknown; cumulative native observations are not additive",
+  "next": "Publish restored rows and this receipt through deployed github-sync.sh main, verify exact remote equality, and refresh remaining candidate heads before full CI."
+}

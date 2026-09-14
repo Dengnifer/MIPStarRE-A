@@ -1,0 +1,7 @@
+{
+  "ts": "2026-09-06T18:21:19.398432+00:00",
+  "stash": "5188e5e47bf64cdb5eb863c490044ddb39e1d54b",
+  "restored_rows": 2,
+  "preserved_current_rows": 746,
+  "note": "git stash apply refused because the post-merge warmer added a row; appended only the two verified stash deltas, preserving all current raw rows and the original stash."
+}

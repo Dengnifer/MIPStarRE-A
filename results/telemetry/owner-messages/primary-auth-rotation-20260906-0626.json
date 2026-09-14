@@ -1,0 +1,29 @@
+{
+  "recorded_utc": "2026-09-06T06:37:56.468478+00:00",
+  "owner_decision_utc": "2026-09-06T06:26Z",
+  "auth_path": "/home/drx/.codex/auth.json",
+  "auth_mtime_utc": "2026-09-06T06:25:50.728251+00:00",
+  "credential_contents_read": false,
+  "credential_hash_or_copy_created": false,
+  "routing": "primary only; unchanged allocation, Astra policy and fan-out-off",
+  "new_post_rotation_workers": [
+    {
+      "session": "orc-247-20260906-07",
+      "thread_id": "01a0756a-6aaa-71d2-86bf-6caf68069a1c",
+      "completed_items_observed": 78,
+      "capture_mtime_utc": "2026-09-06T06:37:21.943814+00:00",
+      "structured_errors": [],
+      "evidence": "/home/drx/.cache/mipstarre-dev/sessions/orc-247-20260906-07.jsonl"
+    },
+    {
+      "session": "prover-273-20260906-01",
+      "thread_id": "01a0756a-d639-7801-b67f-c345cf2e9b64",
+      "completed_items_observed": 55,
+      "capture_mtime_utc": "2026-09-06T06:37:52.296118+00:00",
+      "structured_errors": [],
+      "evidence": "/home/drx/.cache/mipstarre-dev/sessions/prover-273-20260906-01.jsonl"
+    }
+  ],
+  "existing_clients": "Existing productive mathfix118/prover266/prover267 were preserved; captured transport-timeout retries were followed by useful events. No observed authentication-specific failure justified stopping/restarting them. Existing credential reload is not assumed or server-verified.",
+  "verification_scope": "New project workers launched after the recorded mtime and emitted successful model/tool events using the primary default authentication location. This demonstrates useful post-rotation admissions, not token identity or automatic reload by preexisting processes."
+}

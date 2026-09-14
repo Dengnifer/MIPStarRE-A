@@ -1,0 +1,167 @@
+{
+  "observed_at": "2026-09-07T10:52:58.548555+00:00",
+  "pr": 207,
+  "issue": 115,
+  "frozen_main": "c830b4893539eeee0ab2c56c6afee662f6d5a433",
+  "head": "6e2edbbd1c3e12190a5dbc07f7abe598c49335b8",
+  "ci": [
+    {
+      "head_sha": "f06df8faa254a6918ebcc67044a7906865ed1d6f",
+      "started": "2026-09-07T17:03:13+0800",
+      "finished": "2026-09-07T17:09:35+0800",
+      "seconds": 382,
+      "conclusion": "success",
+      "partial": false
+    },
+    {
+      "head_sha": "6e2edbbd1c3e12190a5dbc07f7abe598c49335b8",
+      "started": "2026-09-07T18:02:05+0800",
+      "finished": "2026-09-07T18:09:46+0800",
+      "seconds": 461,
+      "conclusion": "success",
+      "partial": false
+    }
+  ],
+  "round3": {
+    "review": 5130375359,
+    "verdict": "CHANGES_REQUESTED",
+    "unresolved": 1,
+    "prose_failed": "ProcessLookupError reading a vanished PID status; no prose model turn"
+  },
+  "repair": {
+    "commit": "6e2edbbd1c3e12190a5dbc07f7abe598c49335b8",
+    "files": 3,
+    "additions": 10,
+    "deletions": 36,
+    "description": "Remove two duplicate helpers and qualify eight existing API callers"
+  },
+  "round4": {
+    "review": 5130951353,
+    "code": "APPROVED",
+    "prose": "APPROVED",
+    "unresolved": 0,
+    "code_request": "077dc5fb45b1429cb3c7eef22d394c3d",
+    "prose_request": "82a8a3c8cddf4cdca6ff11989de89ff7",
+    "each_complete_accepted_once": true,
+    "publisher_exit": 0
+  },
+  "merged_at": "2026-09-07T10:38:40Z",
+  "merge_commit": "6b87636d741e676c6e5bd8f0db35c20f99db068a",
+  "service": {
+    "action": "delegate-pr_merge",
+    "cadence_sleep_s": 261.399,
+    "clean": true,
+    "duration_s": 38.601,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 38.601,
+    "eligible_age_s": null,
+    "eligible_count": 1,
+    "external_admission": 0,
+    "fresh_count": 1,
+    "hold_reasons": [],
+    "local_main": "c830b4893539eeee0ab2c56c6afee662f6d5a433",
+    "merge_exit": 0,
+    "native_descendant_limit": 4,
+    "oldest_eligible": {
+      "branch": "issue-115-derived-point-consistency-and-commutatio",
+      "created": "2026-09-04T22:07:52Z",
+      "eligibility_age_s": null,
+      "fresh_against_remote": true,
+      "head": "6e2edbbd1c3e12190a5dbc07f7abe598c49335b8",
+      "marker": true,
+      "number": 207,
+      "pr_age_s": 217803
+    },
+    "oldest_fresh_against_remote": true,
+    "oldest_stale": [],
+    "owner_total_limit": 5,
+    "post_merge_remote_main": "6b87636d741e676c6e5bd8f0db35c20f99db068a",
+    "post_merge_remote_verified": true,
+    "read_failure": null,
+    "remote_main": "c830b4893539eeee0ab2c56c6afee662f6d5a433",
+    "runtime": "space cap5/external0 verified",
+    "ts": "2026-09-07T10:38:29.910321+00:00"
+  },
+  "issue115": {
+    "state": "closed",
+    "state_reason": "completed",
+    "closed_at": "2026-09-07T10:38:41Z",
+    "source": "Fresh gh_common issue_view API, not inferred from PR merge"
+  },
+  "preservation": {
+    "pr": 207,
+    "merged_at": "2026-09-07T10:38:40Z",
+    "merge_commit": "6b87636d741e676c6e5bd8f0db35c20f99db068a",
+    "restored_at": "2026-09-07T10:42:49.128455+00:00",
+    "stash": "38bdc5cbfdd73c0bbe3040deaaf130b565c99bef",
+    "stash_retained": true,
+    "files": {
+      "results/telemetry/builds.jsonl": {
+        "pre_restore_bytes": 199130,
+        "restored_bytes": 479,
+        "restored_rows": 2,
+        "post_restore_bytes": 199609,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "f22916df5a6e6eae3860bc82e5b81a3b58c86b72ed7029b46a2fb362ef9881a1"
+      },
+      "results/telemetry/sessions.jsonl": {
+        "pre_restore_bytes": 656962,
+        "restored_bytes": 7343,
+        "restored_rows": 7,
+        "post_restore_bytes": 664305,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "9dd6fea203f30b822c8066cd4506acf95e952f07e0849dd28496eae135054e07"
+      },
+      "results/telemetry/estimates.jsonl": {
+        "pre_restore_bytes": 2091,
+        "restored_bytes": 202,
+        "restored_rows": 1,
+        "post_restore_bytes": 2293,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "8311610d7593e9d798d7faa638d812017cc1c72d36e3018728cde27cd4806abe"
+      }
+    }
+  },
+  "canonical_space_rows_preserved": true,
+  "actual_credential_observation_rows_appended": 2,
+  "actual_credential_label": "relay-3",
+  "legacy_router_bucket": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "native_descendant_cap": 3,
+  "total_allocation": 5,
+  "external_admission": 0,
+  "handoffs": {
+    "first_task_gap_s": 60.908,
+    "first_end_to_tool_s": 72.517,
+    "delayed_task_gap_s": 635.495,
+    "delayed_end_to_tool_s": 670.118,
+    "delayed_reason": "Operational failure including coordinator processing and main decision latency.",
+    "final_author_to_reviewer_task_gap_s": 44.601,
+    "final_author_to_tool_s": 78.176,
+    "code_to_prose_task_gap_s": 130.032,
+    "code_to_prose_tool_s": 160.957,
+    "occupancy_percent": null
+  },
+  "estimate": {
+    "ts": "2026-09-07T10:02:09Z",
+    "main": "c830b48",
+    "denominator": 197,
+    "open_sites": 56,
+    "closed_sites": 141,
+    "percent": 71,
+    "rate_per_day": 7,
+    "days_to_go": "8.0",
+    "github_comment": 5568931401,
+    "duplicate_run": false
+  },
+  "warmer": "Asynchronous; any row already generated is retained, and later rows remain owned telemetry.",
+  "budgets": "B8/#118 remains13 attempts and26509 working seconds; no reset.",
+  "next": "Publish this complete batch, resume PR296 at the final pin, then ordinary conflict-free PR270 refresh and canonical CI/independent review; no source edits or self-review."
+}

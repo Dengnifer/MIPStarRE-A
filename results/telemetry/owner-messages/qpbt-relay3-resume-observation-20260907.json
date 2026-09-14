@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "observed_at": "2026-09-07T08:24:34.335928+00:00",
+  "base": "0efa4ecb7abc50343705e2fd245df71c6e12c59d",
+  "owner_sources": {
+    "qpbt-relay3-owner-update-20260907.md": {
+      "sha256": "e8e432fcba0708725070fc1e1016e71e6d43c86748bf9812cea9c31d1f39890e",
+      "bytes": 2355
+    },
+    "qpbt-relay3-resume-receipt-20260907.json": {
+      "sha256": "4e5bf80ec2dd3ff9ab8e7ce1580f4c18902f982b4da85851bc6d135ca120519d",
+      "bytes": 1179
+    }
+  },
+  "actual_credential_label": "relay-3",
+  "legacy_router_bucket": "space",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "root_pid": 3789161,
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "native_descendant_cap": 3,
+  "total_allocation": 5,
+  "other_primary_process": "VS Code app-server",
+  "external_admission": 0,
+  "active_native_observations": [
+    {
+      "thread_id": "01a07aef-32df-75b2-a189-9b66fe88bac7",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_integration",
+      "start": "2026-09-07T08:14:51.780Z",
+      "end": null,
+      "assigned": "2026-09-07T08:24:19.005Z",
+      "turn_start": "2026-09-07T08:14:51.830Z",
+      "observed_usage": {
+        "input_tokens": 2303901,
+        "cached_input_tokens": 2239104,
+        "output_tokens": 7213,
+        "reasoning_output_tokens": 694,
+        "total_tokens": 2311114
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "role": "orc",
+      "issue": null,
+      "pr": null,
+      "worktree": "/home/drx/MIPStarRE-qpbt",
+      "assignment": "Single primary telemetry/CI/integration coordinator",
+      "first_actual_tool": "2026-09-07T08:14:57.293Z",
+      "last_actual_tool": "2026-09-07T08:24:34.193Z",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false,
+      "wire_effort": null,
+      "returned_effort": null
+    },
+    {
+      "thread_id": "01a07aef-88d5-7b50-b2c6-8353de367f35",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_pr248",
+      "start": "2026-09-07T08:15:13.760Z",
+      "end": null,
+      "assigned": "2026-09-07T08:23:37.319Z",
+      "turn_start": "2026-09-07T08:15:13.786Z",
+      "observed_usage": {
+        "input_tokens": 2569635,
+        "cached_input_tokens": 2487296,
+        "output_tokens": 8961,
+        "reasoning_output_tokens": 2317,
+        "total_tokens": 2578596
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "role": "prover",
+      "issue": 240,
+      "pr": 248,
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-240-independent-extraction-algebra",
+      "assignment": "Preserved PR248 refresh/publication, then disjoint PR207 publication recovery",
+      "first_actual_tool": "2026-09-07T08:15:22.625Z",
+      "last_actual_tool": "2026-09-07T08:24:09.538Z",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false,
+      "wire_effort": null,
+      "returned_effort": null
+    },
+    {
+      "thread_id": "01a07aef-fef3-7a10-ba1c-55acdfa4f1ff",
+      "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+      "agent_path": "/root/relay3_honest_recovery",
+      "start": "2026-09-07T08:15:43.959Z",
+      "end": null,
+      "assigned": "2026-09-07T08:21:02.244Z",
+      "turn_start": "2026-09-07T08:15:43.994Z",
+      "observed_usage": {
+        "input_tokens": 1511782,
+        "cached_input_tokens": 1441408,
+        "output_tokens": 10286,
+        "reasoning_output_tokens": 1170,
+        "total_tokens": 1522068
+      },
+      "model": "gpt-6-astra",
+      "requested_effort": "ultra",
+      "role": "prover",
+      "issue": 297,
+      "pr": null,
+      "worktree": null,
+      "assignment": "Source-faithful restriction prerequisite for issue116 and honest strategy156",
+      "first_actual_tool": "2026-09-07T08:15:49.481Z",
+      "last_actual_tool": "2026-09-07T08:24:30.625Z",
+      "actual_credential_label": "relay-3",
+      "legacy_router_bucket": "space",
+      "usage": null,
+      "usage_scope": "unknown",
+      "observed_usage_additive": false,
+      "wire_effort": null,
+      "returned_effort": null
+    }
+  ],
+  "old_native_terminal_observations": [
+    {
+      "thread_id": "01a077fc-169c-7700-9900-01e54d3f418b",
+      "agent_path": "/root/math_tau_dot_projector",
+      "start": "2026-09-06T18:30:04.725Z",
+      "end": "2026-09-06T21:17:54.853Z",
+      "observed_usage": {
+        "input_tokens": 82119250,
+        "cached_input_tokens": 80984192,
+        "output_tokens": 136825,
+        "reasoning_output_tokens": 69316,
+        "total_tokens": 82256075
+      }
+    },
+    {
+      "thread_id": "01a0780e-14fe-7952-8013-e618528c5d37",
+      "agent_path": "/root/review_pr292_native",
+      "start": "2026-09-06T18:49:43.959Z",
+      "end": "2026-09-06T21:17:59.794Z",
+      "observed_usage": {
+        "input_tokens": 55508039,
+        "cached_input_tokens": 53625984,
+        "output_tokens": 104966,
+        "reasoning_output_tokens": 52410,
+        "total_tokens": 55613005
+      }
+    },
+    {
+      "thread_id": "01a077fc-64cf-7eb1-b746-d92c51bd70b6",
+      "agent_path": "/root/math_issue119_global_pair",
+      "start": "2026-09-06T18:30:24.749Z",
+      "end": "2026-09-06T21:18:42.321Z",
+      "observed_usage": {
+        "input_tokens": 76509460,
+        "cached_input_tokens": 74438912,
+        "output_tokens": 112253,
+        "reasoning_output_tokens": 54343,
+        "total_tokens": 76621713
+      }
+    },
+    {
+      "thread_id": "01a077fc-aa88-77d2-84bc-3afa2a64eaae",
+      "agent_path": "/root/audit_pr264_transaction",
+      "start": "2026-09-06T18:30:42.595Z",
+      "end": "2026-09-06T21:18:32.006Z",
+      "observed_usage": {
+        "input_tokens": 69577527,
+        "cached_input_tokens": 67865344,
+        "output_tokens": 151356,
+        "reasoning_output_tokens": 71935,
+        "total_tokens": 69728883
+      }
+    }
+  ],
+  "prior_failure": "Root reported prior HTTP429 failures; no duration or count inferred.",
+  "overnight_useful_occupancy": null,
+  "occupancy_percent": null,
+  "occupancy_note": "Three useful native tasks verified by actual current tool events. No surviving former child in resumed root registry. Unknown overnight occupancy and task-observation gaps are not counted as zero or vacancy.",
+  "metadata_hold": "native-record CLI accepts only relay-1/space. True relay-3 observations are preserved here pending a narrow reviewed metadata amendment; no Space credential row or guard/script change was made. The live service hardcodes Space/native4 diagnostic fields; this owner policy supersedes those labels without changing total-five/external-zero gates.",
+  "preserved_existing_files": {
+    "results/telemetry/estimates.jsonl": {
+      "sha256": "046ca76b62b2e8b78259eb311c13b4ee338df223cb8f4d851d1cd434d8300e3f",
+      "bytes": 2091,
+      "mode": "0o664"
+    },
+    "results/telemetry/model-comparison/updated-catalog-ultra-probes-20260906.json": {
+      "sha256": "d17d905567b5b8a44509e919be3d49e1d3f4a1a75137e496a2efde7dc048959b",
+      "bytes": 4321,
+      "mode": "0o664"
+    },
+    "results/telemetry/owner-messages/owner-full-access-authorization-20260906T103356Z.json": {
+      "sha256": "b55529fcf767700b5d22238155fd930c1158dc24df492f9c25f0d1b6fef64e0b",
+      "bytes": 1753,
+      "mode": "0o664"
+    },
+    "results/telemetry/owner-messages/owner-sustained-occupancy-20260906T110839Z.json": {
+      "sha256": "4972fe6c06cffe19509936fb2caa7a3188d16c13deb9b196219426ed4749f8d5",
+      "bytes": 2110,
+      "mode": "0o664"
+    },
+    "results/telemetry/owner-messages/qpbt-goal-permission-rollback-20260907.md": {
+      "sha256": "0c6414f15bac16632b465dc6c118cf8f9335f4cc4b86575454ef649a85665501",
+      "bytes": 2740,
+      "mode": "0o664"
+    }
+  },
+  "backup_directory": "/home/drx/.cache/mipstarre-dev/relay3-resume-20260907",
+  "budgets": "B8/#118 remains 13 attempts and 26509 working seconds; no budget reset.",
+  "publication_status": "Prepared for normal checked telemetry publication; not yet pushed."
+}

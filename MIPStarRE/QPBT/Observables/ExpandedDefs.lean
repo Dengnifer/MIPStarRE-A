@@ -163,6 +163,48 @@ noncomputable def tauPointProj (W : PauliKind)
       dotProduct h (indicatorVec u) = a),
     pauliProj W h
 
+/-- The point coarse-graining of the generalized Pauli projectors is symmetric.
+This is the EPR-transport identity used for the perfect ancilla consistency in
+item 1 of `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem tauPointProj_transpose (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
+    (tauPointProj W u a)ᵀ = tauPointProj W u a := by
+  classical
+  simp only [tauPointProj, Matrix.transpose_sum, pauliProj_transpose]
+
+/-- Pauli point projectors belonging to distinct values are orthogonal, while
+each projector is idempotent. This is the ancillary product calculation in
+item 1 of `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:455-465`. -/
+theorem tauPointProj_mul_tauPointProj (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (a b : PauliScalar P) :
+    tauPointProj W u a * tauPointProj W u b =
+      if a = b then tauPointProj W u a else 0 := by
+  classical
+  unfold tauPointProj
+  rw [Finset.sum_mul]
+  simp_rw [Finset.mul_sum]
+  by_cases hab : a = b
+  · subst b
+    rw [if_pos rfl]
+    apply Finset.sum_congr rfl
+    intro e he
+    rw [Finset.sum_eq_single e]
+    · rw [pauliProj_mul_pauliProj, if_pos rfl]
+    · intro f hf hfe
+      rw [pauliProj_mul_pauliProj, if_neg hfe.symm]
+    · exact fun h => (h he).elim
+  · rw [if_neg hab]
+    apply Finset.sum_eq_zero
+    intro e he
+    apply Finset.sum_eq_zero
+    intro f hf
+    rw [pauliProj_mul_pauliProj, if_neg]
+    intro hef
+    apply hab
+    rw [← (Finset.mem_filter.mp he).2, ← (Finset.mem_filter.mp hf).2, hef]
+
 /-- The phase induced by the fixed binary trace is an additive character. -/
 private theorem phaseSign_fixedBinTrace_mul (x y : PauliScalar P) :
     phaseSign (fixedBinTrace P.model x) * phaseSign (fixedBinTrace P.model y) =
@@ -378,6 +420,59 @@ private theorem sum_tauPointProj_eq_one (W : PauliKind)
       (fun e => pauliProj W e)]
   exact sum_pauliProj_eq_one W
 
+/-- The projective point measurement on one Pauli register obtained by
+coarse-graining the generalized Pauli basis according to its value at `u`.
+This is the ancillary measurement used in item 1 of `lem:qld-comm-cons`, paper
+`eq:qld-point-obs-def` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:385-411`,
+blueprint `def:ancillary-point-measurement`. -/
+noncomputable def tauPointMeas (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) :
+    Measurement (PauliScalar P) (PauliRegister P) :=
+  Measurement.ofSumEqOne (tauPointProj W u) (tauPointProj_nonneg W u)
+    (sum_tauPointProj_eq_one W u)
+
+/-- The effects of the Pauli point measurement are the point projectors. -/
+@[simp] theorem tauPointMeas_effect (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
+    (tauPointMeas W u).effect a = tauPointProj W u a := rfl
+
+/-- The fine product measurement underlying the convolution definition of an
+expanded point measurement. Its outcome records the strategy and Pauli point
+values separately. Paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:390-411`,
+blueprint `def:point-tau-measurement`. -/
+noncomputable def pointTauMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
+    (W : PauliKind) (u : Fin P.m → PauliScalar P) :
+    Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=
+  Measurement.ofSumEqOne
+    (fun p => heteroKron ((S.pointMeas side W u).effect p.1)
+      ((tauPointMeas W u).effect p.2))
+    (fun p => Quantum.kronecker_nonneg
+      ((S.pointMeas side W u).pos p.1) ((tauPointMeas W u).pos p.2))
+    (by
+      change ∑ p : PauliScalar P × PauliScalar P,
+          heteroKron ((S.pointMeas side W u).effect p.1)
+            (tauPointProj W u p.2) = 1
+      rw [Fintype.sum_prod_type]
+      calc
+        (∑ x, ∑ y, heteroKron ((S.pointMeas side W u).effect x)
+            (tauPointProj W u y)) =
+            heteroKron (∑ x, (S.pointMeas side W u).effect x)
+              (∑ y, tauPointProj W u y) := (heteroKron_sum_sum _ _).symm
+        _ = 1 := by
+          rw [(S.pointMeas side W u).sum_eq_one, sum_tauPointProj_eq_one]
+          exact Matrix.one_kronecker_one)
+
+/-- Effects of the fine product measurement are the corresponding Kronecker
+products of strategy and Pauli point effects. -/
+@[simp] theorem pointTauMeas_effect (S : ProjectiveSetting P ε)
+    (side : PlayerSide) (W : PauliKind) (u : Fin P.m → PauliScalar P)
+    (p : PauliScalar P × PauliScalar P) :
+    (S.pointTauMeas side W u).effect p =
+      heteroKron ((S.pointMeas side W u).effect p.1)
+        (tauPointProj W u p.2) := rfl
+
 /-- Expanded point effects are positive semidefinite. This is the positivity
 obligation in `def:expanded-point-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:384-418`. -/
@@ -430,6 +525,20 @@ noncomputable def pointMeasExp (S : ProjectiveSetting P ε) (side : PlayerSide)
     Measurement (PauliScalar P) (S.ExpandedLocalSpace side) :=
   Measurement.ofSumEqOne (S.expPointOp side W u)
     (S.expPointOp_nonneg side W u) (S.expPointOp_sum_eq_one side W u)
+
+/-- The expanded point measurement is the addition postprocessing of its fine
+strategy--Pauli product measurement. This is the data-processing presentation
+used in item 1 of `lem:qld-comm-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:390-411`,
+blueprint `lem:expanded-point-measurement-properties`. -/
+theorem pointMeasExp_effect_eq_pointTauMeas_postprocess
+    (S : ProjectiveSetting P ε) (side : PlayerSide) (W : PauliKind)
+    (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
+    (S.pointMeasExp side W u).effect a =
+      ((S.pointTauMeas side W u).postprocess (fun p => p.1 + p.2)).effect a := by
+  change S.expPointOp side W u a = _
+  rw [MIPStarRE.Quantum.Measurement.postprocess_effect]
+  exact expPointOp_eq_convolution S side W u a
 
 /-- Expanded observables inherit the additive representation law. -/
 private theorem expObs_mul (S : ProjectiveSetting P ε) (side : PlayerSide)

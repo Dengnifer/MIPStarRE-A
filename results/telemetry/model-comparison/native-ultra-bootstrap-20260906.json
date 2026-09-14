@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "source_task": "01a07665-bc91-7390-bde3-a93c7d29a9be",
+  "credential_label": "relay-1",
+  "diagnostic": {
+    "completed_at": "2026-09-06T12:20:54.710268Z",
+    "parent_model": "gpt-6-astra",
+    "child_model": "gpt-6-astra",
+    "parent_requested_effort": "ultra",
+    "child_requested_effort": "ultra",
+    "outgoing_effort": "max",
+    "child_returned_effort": "max",
+    "parent_final_returned_effort": "max",
+    "native_workflow_completed": true,
+    "evidence_basis": "Existing sanitized native-relay1 verdict; distinct child client metadata and completed child/parent responses",
+    "historical_failure_note": "One intermediate observer wait stream had BrokenPipeError. Earlier legacy collaboration flags missed native-v2 identity. Original reports retained."
+  },
+  "main": {
+    "thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+    "observed_at": "2026-09-06T12:49:43.202Z",
+    "role": "orc",
+    "model": "gpt-6-astra",
+    "requested_effort": "ultra",
+    "approval_policy": "on-request",
+    "sandbox": "danger-full-access",
+    "approvals_reviewer": "auto_review",
+    "worktree": "/home/drx/MIPStarRE-qpbt",
+    "usage": null
+  },
+  "first_native_child": {
+    "thread_id": "01a076c5-d9ef-74f1-98a7-fa6badb81fae",
+    "parent_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+    "task_name": "/root/ultra_integration_audit",
+    "role": "scout",
+    "start": "2026-09-06T12:51:13.063Z",
+    "model": "gpt-6-astra",
+    "requested_effort": "ultra",
+    "worktree": "/home/drx/MIPStarRE-qpbt",
+    "write_authority": "none",
+    "usage": null,
+    "usage_provenance": "Not aggregated; parent/child counter inclusion must be established before summing"
+  },
+  "bootstrap_limits": {
+    "configured_native_children": 1,
+    "external_admission_limit": 0,
+    "useful_queue_hold_preserved": true,
+    "grandchild_attempts": 1,
+    "grandchild_refusal": "collab spawn failed: agent thread limit reached",
+    "grandchildren_started": 0,
+    "meaning": "Descendant attempt refused while main and first child were live; provider throughput not measured",
+    "parent_count_semantics": "Pending installed-source verification"
+  },
+  "production_wire_effort": null,
+  "production_returned_effort": null,
+  "backend_compute_equivalence": "not measured",
+  "admission_broadened": false
+}

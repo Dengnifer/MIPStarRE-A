@@ -574,37 +574,38 @@ private theorem conjIsometry_piLpCongrLeft_symm
       simp [h]
     simp [piLpCongrLeft_matrix_apply, hyi]
 
-/-- The label equivalence obtained by expanding each field element in the fixed
-self-dual binary basis. -/
-private noncomputable def quditQubitLabelEquiv {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) :
-    (Fin L → F.K) ≃ (Fin L × Fin F.basisDim → ZMod 2) :=
-  (Equiv.piCongrRight (fun _ : Fin L => F.binaryCoordinates.toEquiv)).trans
-    (Equiv.curry (Fin L) (Fin F.basisDim) (ZMod 2)).symm
+/-- Expand every register label in the fixed self-dual binary basis. This
+arbitrary-index construction is the computational-basis identification in the
+proof of `lem:pauli-binary`, shared by the algebra and soundness modules. -/
+noncomputable def quditQubitLabelEquiv {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) :
+    (ι → F.K) ≃ (ι × Fin F.basisDim → ZMod 2) :=
+  (Equiv.piCongrRight (fun _ : ι => F.binaryCoordinates.toEquiv)).trans
+    (Equiv.curry ι (Fin F.basisDim) (ZMod 2)).symm
 
 /-- The label equivalence is the uncurried form of `kappaVec`. -/
-private theorem quditQubitLabelEquiv_eq_kappaVec {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) (u : Fin L → F.K) :
-    quditQubitLabelEquiv F L u = kappaVec F u := by
+private theorem quditQubitLabelEquiv_eq_kappaVec {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) (u : ι → F.K) :
+    quditQubitLabelEquiv F u = kappaVec F u := by
   rfl
 
 /-- Self-duality identifies the field trace pairing with the binary coordinate
 pairing after relabeling. -/
 private theorem binTrace_dotProduct_eq_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ) (a u : Fin L → F.K) :
+    {q : ℕ} {ι : Type*} [Fintype ι] (F : FixedFieldModel q) (a u : ι → F.K) :
     binTrace F.K (dotProduct a u) =
       binTrace (ZMod 2)
-        (dotProduct (quditQubitLabelEquiv F L a) (kappaVec F u)) := by
+        (dotProduct (quditQubitLabelEquiv F a) (kappaVec F u)) := by
   simp only [dotProduct, map_sum, binTrace_mul_eq_dotProduct F,
     Algebra.trace_self_apply, Fintype.sum_prod_type, quditQubitLabelEquiv,
     Equiv.trans_apply, Equiv.curry_symm_apply, kappaVec, basisCoordVec]
   rfl
 
 /-- The coordinate label equivalence preserves addition. -/
-private theorem quditQubitLabelEquiv_add {q : ℕ}
-    (F : FixedFieldModel q) (L : ℕ) (a b : Fin L → F.K) :
-    quditQubitLabelEquiv F L (a + b) =
-      quditQubitLabelEquiv F L a + quditQubitLabelEquiv F L b := by
+private theorem quditQubitLabelEquiv_add {q : ℕ} {ι : Type*}
+    (F : FixedFieldModel q) (a b : ι → F.K) :
+    quditQubitLabelEquiv F (a + b) =
+      quditQubitLabelEquiv F a + quditQubitLabelEquiv F b := by
   ext p
   rcases p with ⟨i, j⟩
   change F.binaryCoordinates (a i + b i) j =
@@ -641,60 +642,62 @@ private theorem tauObservable_Z_apply
 
 /-- Binary-coordinate relabeling transports both generalized Pauli observables. -/
 private theorem tauObservable_reindex_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ)
-    (W : PauliKind) (a : Fin L → F.K) :
+    {q : ℕ} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
+    (W : PauliKind) (a : ι → F.K) :
     tauObservable W a =
-      Matrix.reindex (quditQubitLabelEquiv F L).symm
-        (quditQubitLabelEquiv F L).symm
-        (tauObservable W (quditQubitLabelEquiv F L a)) := by
+      Matrix.reindex (quditQubitLabelEquiv F).symm
+        (quditQubitLabelEquiv F).symm
+        (tauObservable W (quditQubitLabelEquiv F a)) := by
   classical
   ext x y
   simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
   cases W with
   | X =>
       rw [tauObservable_X_apply, tauObservable_X_apply]
-      have hadd := quditQubitLabelEquiv_add F L y a
+      have hadd := quditQubitLabelEquiv_add F y a
       rw [← hadd]
       by_cases hshift : x = y + a
       · rw [if_pos hshift, if_pos]
-        exact congrArg (quditQubitLabelEquiv F L) hshift
+        exact congrArg (quditQubitLabelEquiv F) hshift
       · rw [if_neg hshift, if_neg]
-        exact fun h => hshift ((quditQubitLabelEquiv F L).injective h)
+        exact fun h => hshift ((quditQubitLabelEquiv F).injective h)
   | Z =>
       rw [tauObservable_Z_apply, tauObservable_Z_apply]
       by_cases hxy : x = y
       · subst y
         rw [if_pos rfl, if_pos rfl,
           binTrace_dotProduct_eq_quditQubitLabelEquiv,
-          quditQubitLabelEquiv_eq_kappaVec F L a,
-          quditQubitLabelEquiv_eq_kappaVec F L x]
-      · have hlabels : quditQubitLabelEquiv F L x ≠
-            quditQubitLabelEquiv F L y := fun h =>
-          hxy ((quditQubitLabelEquiv F L).injective h)
+          quditQubitLabelEquiv_eq_kappaVec F a,
+          quditQubitLabelEquiv_eq_kappaVec F x]
+      · have hlabels : quditQubitLabelEquiv F x ≠
+            quditQubitLabelEquiv F y := fun h =>
+          hxy ((quditQubitLabelEquiv F).injective h)
         rw [if_neg hxy, if_neg hlabels]
 
 /-- Fourier inversion transports the Pauli projectors along the binary label
-equivalence. -/
-private theorem pauliProj_reindex_quditQubitLabelEquiv
-    {q : ℕ} (F : FixedFieldModel q) (L : ℕ)
-    (W : PauliKind) (u : Fin L → F.K) :
+equivalence for any finite register index. This is the shared algebraic
+calculation in `lem:pauli-binary`, `eq:qudit-to-qubit-pauli-1`, independent of
+the soundness existence assertion in `cor:pauli-binary`. -/
+theorem pauliProj_reindex_quditQubitLabelEquiv
+    {q : ℕ} {ι : Type*} [Fintype ι] [DecidableEq ι] (F : FixedFieldModel q)
+    (W : PauliKind) (u : ι → F.K) :
     pauliProj W u =
-      Matrix.reindex (quditQubitLabelEquiv F L).symm
-        (quditQubitLabelEquiv F L).symm
+      Matrix.reindex (quditQubitLabelEquiv F).symm
+        (quditQubitLabelEquiv F).symm
         (pauliProj W (kappaVec F u)) := by
   classical
   rw [pauliProj_eq_avg_tauObservable, pauliProj_eq_avg_tauObservable]
   ext x y
   simp only [Matrix.smul_apply, Matrix.sum_apply, smul_eq_mul,
     Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm]
-  rw [Fintype.card_congr (quditQubitLabelEquiv F L)]
+  rw [Fintype.card_congr (quditQubitLabelEquiv (ι := ι) F)]
   congr 1
-  apply Fintype.sum_equiv (quditQubitLabelEquiv F L)
+  apply Fintype.sum_equiv (quditQubitLabelEquiv F)
   intro a
   have hphase := congrArg phaseSign
-    (binTrace_dotProduct_eq_quditQubitLabelEquiv F L a u)
+    (binTrace_dotProduct_eq_quditQubitLabelEquiv F a u)
   have hentry := congrFun
-    (congrFun (tauObservable_reindex_quditQubitLabelEquiv F L W a) x) y
+    (congrFun (tauObservable_reindex_quditQubitLabelEquiv F W a) x) y
   simp only [Matrix.reindex_apply, Matrix.submatrix_apply, Equiv.symm_symm] at hentry
   rw [hphase, hentry]
 
@@ -725,11 +728,11 @@ theorem exists_qubitIsometry (q : ℕ) (F : FixedFieldModel q) (L : ℕ) :
           pauliProj W u =
             conjIsometry φ.symm.toLinearIsometry
               (qubitPauliProj W (kappaVec F u)) := by
-  let e := quditQubitLabelEquiv F L
+  let e := quditQubitLabelEquiv (ι := Fin L) F
   let φ := LinearIsometryEquiv.piLpCongrLeft 2 ℂ ℂ e
   refine ⟨φ, isometryTensor_piLpCongrLeft_epr e, ?_⟩
   intro W u
   rw [conjIsometry_piLpCongrLeft_symm]
-  exact pauliProj_reindex_quditQubitLabelEquiv F L W u
+  exact pauliProj_reindex_quditQubitLabelEquiv F W u
 
 end MIPStarRE.QPBT

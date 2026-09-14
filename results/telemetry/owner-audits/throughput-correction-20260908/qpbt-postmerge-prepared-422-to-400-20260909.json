@@ -1,0 +1,52 @@
+{
+  "schema": "qpbt.prepared_successor.v1",
+  "ready_at": "2026-09-08T19:23:01.896Z",
+  "ready": true,
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "predecessor": {
+    "task": "/root/space_sol_pr249",
+    "thread_id": "01a07d1a-e2d6-7580-a2c4-5970d4bef3ab",
+    "turn_id": "01a0826a-d929-7512-8405-daf338e238c8",
+    "state": "running",
+    "last_output_at": "2026-09-08T19:22:25.912000+00:00",
+    "task_started_at": "2026-09-08T19:07:15.645Z",
+    "assignment": "issue422 preserved PSD proof finishing and normal publication",
+    "observed_model": "gpt-5.6-sol",
+    "observed_effort": "ultra",
+    "nonterminal_verified_at": "2026-09-08T19:23:01.896Z"
+  },
+  "successor": {
+    "target": "/root/space_sol_pr249",
+    "operation": "collaboration.followup_task",
+    "requested_model": "gpt-5.6-sol",
+    "requested_effort": "ultra",
+    "budget_seconds": 480,
+    "head": "37a2e268bc1ef7434e13c9b8b3daf3c02d18b94e",
+    "message": "Main authorizes this already-prevalidated useful successor only after your exact current issue422 turn naturally completes. Prepare ONE ordinary canonical HARD review request for PR400 at published head37a2e268bc1ef7434e13c9b8b3daf3c02d18b94e, worktree /home/drx/MIPStarRE-qpbt/.worktrees/issue-387-recover-subline-z-term. All nine exact-head CI statuses are green (325s); coordinator verified live PR open/head, clean source worktree, one merge base, no current400 request or publisher, and reserved this request-preparation ownership with soleprimary. New bounded8min ACTIVE preparation from actual task_started, all prior issue422/PR365 proof, failed hooks, stalls and publication costs retained without reset. First revalidate exact head and unique request/process/status; adopt any intervening genuine request instead of duplicating it. Use only PRIMARY local/bin/review.sh and normal native root/head/prompt/author/model/effort guards. This is a coupled C1/C3, current API and source-domain diff: prepare hard_review with a concrete full-scope reason, never force a routine ratio. Correct known source exclusions include ROOT01a076bc-f4ad-7813-805b-c8b4dac71a14, originalClaims author01a08101-a7eb-7891-bd8e-2f96cc325389 and C3 finisher01a08135-8ad7-7de1-808b-091ee156c60a; include any additional actual preserved diff contributors from the canonical provenance, never invent UUIDs or hand-edit trusted JSON. You are request operator, not reviewer. No new source edits, CI rerun, response alteration, publication override, primary telemetry write, ref alias change or service merge. Once the real request exists, send exact nonce/head/promptSHA/author exclusions/model policy and owned publisher handle to ROOT and primary, hand sole passive publication/collection to primary, then FINAL promptly rather than waiting for a reviewer. ROOT alone binds the independent reviewer at an actual vacancy. Record /tmp/qpbt-pr400-review-request-prep-status-20260909.json after actual activation, with absolute8min deadline and predecessor history. A missing readiness gate must be reported honestly; no filler or new budget merely for occupancy. Verify actual fresh SolUltra context; do not claim a requested model as observed. This is the second post-merge latency sample, independent from the finalized63.076s failed first sample."
+  },
+  "prevalidation": {
+    "live_pr_head_checked": true,
+    "source_worktree_clean": true,
+    "ci": "all9green325s",
+    "ci_checked_at": "2026-09-08T19:09:00Z",
+    "single_merge_base": "628e3b533ceed0d061c96d610465852bc4ad4610",
+    "no_existing_request_or_publisher": true,
+    "primary_exclusive_claim_notified": true,
+    "review_identity_requires_direct_root": true,
+    "task_is_request_preparation_not_review": true,
+    "published_dependencies": true,
+    "no_source_mutation": true
+  },
+  "activation": {
+    "owner": "/root/astra_refill_coordinator",
+    "condition": "Only after exact predecessor task_complete and actual capacity below9; dispatch message verbatim before long receipt adoption.",
+    "first_sample_unchanged": "/tmp/qpbt-postmerge-handoff-acceptance-20260909.json",
+    "result": "/tmp/qpbt-postmerge-handoff-second-acceptance-20260909.json"
+  },
+  "acceptance": {
+    "ready_before_complete": true,
+    "target_completion_to_start_seconds": 60,
+    "no_backdating": true,
+    "first_model_and_useful_tool_separate": true
+  }
+}

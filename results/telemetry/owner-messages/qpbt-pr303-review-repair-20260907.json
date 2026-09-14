@@ -1,0 +1,37 @@
+{
+  "issue": 301,
+  "pr": 303,
+  "url": "https://github.com/Dengnifer/MIPStarRE-A/pull/303",
+  "author_thread_id": "01a07bd2-c062-7ba2-9f35-0b6ea34d0621",
+  "author_task": "/root/cap11_pr281",
+  "role": "existing Astra Ultra author, hard control-policy review repair",
+  "started_at": "2026-09-07T17:39:33Z",
+  "published_verified_at": "2026-09-07T17:48:54Z",
+  "review": 5134345720,
+  "reviewed_head": "7bf12dde5a6c446552877dc0f675e5049a9f5518",
+  "head": "0deec4e5f91975ac44426b4b4e0680e76d3314d7",
+  "base": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+  "branch": "issue-301-audited-model-policy",
+  "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-301-audited-model-policy",
+  "worktree_clean": true,
+  "repairs": {
+    "F1": "Require contexts for every attributable child turn and compare all of them. Parent-assignment/turn-ID attribution retains bound contexts before assignment and excludes inherited parent turns.",
+    "F2": "Remove unbound-context fallback for both models. Missing current or required initial/intervening child context fails closed.",
+    "F3": "Known selected/observed model contradictions become permanent conflicts in either row order, excluded from rolling and cumulative counts. Missing observations can still resolve."
+  },
+  "repair_diff": {"files": 4, "added": 59, "removed": 10},
+  "total_pr_diff": {"files": 20, "added": 895, "removed": 56, "total_changed_lines": 951},
+  "tests": {
+    "focused": "25 policy/native tests passed in1.371s",
+    "counterfactual": "New targeted assertions generated seven expected failures against reviewed7bf12dde, covering F1/F2/F3; no harness errors; fixed code passes",
+    "normal_commit_hook": "604 tests passed in54.274s; commit67217 completed exit0",
+    "checked_push": "Primary checked-push session58654 completed exit0; preflight tuple confirmed",
+    "live": "Primary gh_common pr-view303 and git ls-remote verified open/nondraft/unmerged head0deec4e; main09deaab unchanged"
+  },
+  "preserved": "Routing policy table, native review binding implementation and account/root/default/cap/effort code unchanged from reviewed head. No main refresh, runtime or credential edit, self-review, CI, merge or activation by author.",
+  "budget": "Same approximately13:40Z owner episode, recorded15:40Z boundary and extension request5572932276 preserved. Required repair continues renewed completion authorization; no fresh budget or ratio entry.",
+  "b8": {"attempts": 13, "working_seconds": 26509, "changed": false},
+  "runtime": {"key": "space", "main_model": "gpt-6-astra", "effort": "ultra", "native_slots": 3, "total_slots": 5, "external_admission": 0},
+  "remaining_gate": "Coordinator-owned fresh exact-head CI, fresh independent control-policy review, service merge and separate owner activation observation",
+  "author_processes": "all terminal; head frozen"
+}

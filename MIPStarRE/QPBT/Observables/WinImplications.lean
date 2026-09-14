@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Observables.WinImplications.Approx
+import MIPStarRE.QPBT.Observables.WinImplications.InterchangedCommutation
 
 /-!
 # Winning implications for strategy observables
@@ -283,8 +283,8 @@ theorem pointObs_self_consistent :
       opDistSq (uniformDistribution (Fin P.m → PauliScalar P))
         (fun u => heteroKron 1 (S.pointObs .bob W r u))
         (fun u => heteroKron (S.pointObs .alice W r u) 1)
-        S.toStrategy.ψ ≤ C * ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * ε :=
+  WinImplications.pointObs_self_consistent_proof
 
 /-- The strategy observables satisfy the phase-signed commutation relation on
 Alice's factor. This is Equation `eq:pts-obs-commutation`, paper
@@ -302,8 +302,8 @@ theorem pointObs_twisted_commutation :
           heteroKron
             (S.pointObs .alice .Z ω.2.2.2 ω.2.1 *
               S.pointObs .alice .X ω.2.2.1 ω.1) 1)
-        S.toStrategy.ψ ≤ C * Real.sqrt ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * Real.sqrt ε :=
+  WinImplications.pointObs_twisted_commutation_proof
 
 /-- The factor-interchanged phase-signed commutation relation on Bob's factor.
 This is the trailing clause of `lem:qld-win-implications-obs`, paper
@@ -321,8 +321,8 @@ theorem pointObs_twisted_commutation_interchanged :
           heteroKron 1
             (S.pointObs .bob .Z ω.2.2.2 ω.2.1 *
               S.pointObs .bob .X ω.2.2.1 ω.1))
-        S.toStrategy.ψ ≤ C * Real.sqrt ε := by
-  sorry
+        S.toStrategy.ψ ≤ C * Real.sqrt ε :=
+  WinImplications.pointObs_twisted_commutation_interchanged_proof
 
 end
 
