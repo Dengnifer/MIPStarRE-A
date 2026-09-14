@@ -2665,6 +2665,35 @@ of the paper.
 		commutes with each fiber sum.
 	\end{proof}
 
+	\begin{lemma}[Formalization support for quadratic forms of padded states]
+		\label{lem:padded-state-quadratic-form}
+		\lean{MIPStarRE.QPBT.stateQForm_padState}
+		\leanok
+		\uses{def:distance-state-quadratic-form}
+		This is not a named statement of the source article; it isolates the
+		coordinate calculation used in the two Naimark steps of the proof of
+		Lemma~\ref{lem:qld-4-7}. Let $I,J,K,L$ be finite coordinate sets, fix
+		$k_0\in K$ and $l_0\in L$, and let $\ket\psi\in\C^{I\times J}$. Form
+		$\ket{\psi_{k_0,l_0}}\in\C^{(I\times K)\times(J\times L)}$ by placing
+		$\ket\psi$ at the two distinguished ancilla coordinates and setting every
+		other coordinate to zero. If operators $A,A',B,B'$ satisfy
+		\[
+			A'_{(i,k_0),(i',k_0)}=A_{i,i'},\qquad
+			B'_{(j,l_0),(j',l_0)}=B_{j,j'},
+		\]
+		then
+		\[
+			q_{\psi_{k_0,l_0}}(A'\ot B')=q_\psi(A\ot B).
+		\]
+		No normalization of $\ket\psi$ is required.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Expand the two quadratic forms in coordinates. Every term involving an
+		ancilla coordinate other than $k_0$ or $l_0$ vanishes, and the remaining
+		entries agree by the two hypotheses.
+	\end{proof}
+
 	\begin{lemma}[Compression preserves bipartite correlations on a padded state]
 		\label{lem:ground-compress-correlation}
 		\lean{MIPStarRE.QPBT.vector_qform_ground_compress_measurement}
@@ -2679,11 +2708,10 @@ of the paper.
 	\end{lemma}
 	\begin{proof}
 		\leanok
-		\uses{lem:ground-compress-effect}
-		Only the entries of the two effects at the coordinates $k_0$ and $l_0$
-		contribute to the quadratic form in the padded vector, and by
-		Lemma~\ref{lem:ground-compress-effect} those entries are exactly the
-		entries of the compressed effects.
+		\uses{lem:padded-state-quadratic-form}
+		Apply Lemma~\ref{lem:padded-state-quadratic-form} to the two effects and
+		their principal submatrices. The required coordinate identities hold by
+		the definition of ground-coordinate compression.
 	\end{proof}
 
 	\begin{lemma}[Compression preserves the consistency defect exactly]

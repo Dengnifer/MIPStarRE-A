@@ -366,6 +366,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\end{lemma}
 	\begin{proof}
 		\leanok
+		\uses{lem:qld-decoder-linearity}
 		Decoding the encoding of a register value returns that value.
 	\end{proof}
 
@@ -436,6 +437,60 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		pairs of Pauli answers whose sum encodes the given polynomial. By
 		Lemma~\ref{lem:qld-is-encoding-encoding-poly} every such polynomial lies in
 		the encoding image, so outside that image the index set is empty.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-point-mass}
+		\lean{MIPStarRE.QPBT.mass_outside_support_le_point_defect}
+		\leanok
+		\uses{def:povm-conventions, def:distance-state-quadratic-form}
+		This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+		support comparison used in Equation~\eqref{eq:qld-nonencoding-mass}. Let
+		$M=\{M_a\}_{a\in\mathcal A}$ and $R=\{R_a\}_{a\in\mathcal A}$ be
+		complete measurements on two finite-dimensional spaces, let
+		$E\subseteq\mathcal A$, and suppose $R_a=0$ for every $a\notin E$.
+		For every vector $\ket\psi$ in the tensor product, without a normalization
+		assumption,
+		\[
+			\sum_{a\notin E}q_\psi(M_a\ot\Id)
+			\leq \sum_{a\ne b}q_\psi(M_a\ot R_b).
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Use completeness of $R$ to expand each term on the left as a sum over its
+		outcomes. When $a\notin E$, the diagonal term vanishes by the support
+		hypothesis. Every remaining quadratic form is nonnegative, so restricting
+		the first outcome to $a\notin E$ can only decrease the full off-diagonal
+		sum.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for averaged mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-average-mass}
+		\lean{MIPStarRE.QPBT.avg_mass_outside_support_le_consistency_defect}
+		\leanok
+		\uses{def:consistency, def:distance-state-quadratic-form}
+		Let $\mu$ be any finite-support nonnegative weighting on a finite question
+		set, not necessarily of total mass one. For each question $x$, let $M^x$
+		and $R^x$ be complete measurements with common finite outcome set
+		$\mathcal A$, and suppose $(R^x)_a=0$ for every $a\notin E$. Then, for
+		every vector $\ket\psi$ and without a normalization assumption,
+		\[
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\notin E}q_\psi(M^x_a\ot\Id)\right)
+			\leq
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\ne b}q_\psi(M^x_a\ot R^x_b)\right).
+		\]
+		The right-hand side is the bipartite consistency defect of the two
+		measurement families.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-supported-reference-point-mass}
+		Apply Lemma~\ref{lem:qld-supported-reference-point-mass} at each question
+		and average the resulting inequalities with the nonnegative weights of
+		$\mu$.
 	\end{proof}
 
 	\begin{lemma}[Evaluation splits over the two Pauli answers]
