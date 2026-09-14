@@ -1642,7 +1642,7 @@ variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
-	\lean{MIPStarRE.QPBT.tauLineMeas, MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.tauLineMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1686,6 +1686,34 @@ variants.
 	In all cases
 	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$ is a
 	projective measurement.
+\end{definition}
+
+\begin{definition}[The strategy--Pauli product measurement on a line]
+	\label{def:line-tau-product-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_effect_eq_lineTauMeas_postprocess}
+	\leanok
+	\uses{def:expanded-line-measurement, def:ideg-deg-polynomials, fact:data-processing}
+	For $W \in \{X,Z\}$ and a line $\ell$, the product measurement
+	\[
+		\hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}
+		\,=\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \tau^{W,\ell}_{f''}\,,
+		\qquad (f',f'') \in \deg_{md}(\ell) \times \deg_{md}(\ell),
+	\]
+	has outcome set $\deg_{md}(\ell) \times \deg_{md}(\ell)$ and retains the
+	strategy polynomial and the Pauli line polynomial as separate outcomes;
+	completeness follows from completeness of the two factors.
+	Its image under the addition map $(f',f'') \mapsto f'+f''$ is the
+	measurement of Definition~\ref{def:expanded-line-measurement}:
+	\[
+		\hat{M}^{(\mathrm{Line},W),\ell}_f
+		\,=\, \sum_{f'+f''=f} \hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}\,.
+	\]
+	The two measurements have different outcome sets and are related by this
+	coarse-graining, which is the data-processing presentation
+	(Fact~\ref{fact:data-processing}) used in the first item of
+	Lemma~\ref{lem:qld-comm-line-cons}.
 \end{definition}
 
 \begin{lemma}[Consistency of the expanded line measurements]

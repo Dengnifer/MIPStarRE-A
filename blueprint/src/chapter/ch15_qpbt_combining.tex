@@ -1557,6 +1557,46 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	completeness bounds the squared norm of the left factor by one.
 \end{proof}
 
+\begin{lemma}[Formalization support: axis lines have nonzero direction]
+	\label{lem:axis-line-zero-direction-mass}
+	\lean{MIPStarRE.QPBT.aLinePointDist_zero_direction_mass}
+	\leanok
+	\uses{def:line-point-dist, def:line}
+	Under the axis-parallel line-point distribution of
+	Definition~\ref{def:line-point-dist}, the indicator of the event that the
+	sampled line has direction $0$ has expectation $0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, def:line}
+	An axis-parallel sample has direction $e_i$ for the sampled coordinate
+	$i$, and the $i$-th entry of $e_i$ is $1 \ne 0$. The indicator therefore
+	vanishes at every sample, hence so does its expectation.
+\end{proof}
+
+\begin{lemma}[Formalization support: the pointwise consistency defect is at most one]
+	\label{lem:consistency-defect-integrand-le-one}
+	\lean{MIPStarRE.QPBT.consistencyDefect_integrand_le_one}
+	\leanok
+	\uses{lem:distance-point-defect, def:expanded-state, def:consistency}
+	Let $\{A_a\}_{a \in \mathcal{O}}$ and $\{B_a\}_{a \in \mathcal{O}}$ be
+	complete measurements with the same finite outcome set, placed on two
+	opposite registers of the expanded state $\ket{\hat\psi}$ of
+	Definition~\ref{def:expanded-state}. Then
+	\[
+		\sum_{a \ne b} \bra{\hat\psi} A_a B_b \ket{\hat\psi} \,\le\, 1\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-point-defect, def:expanded-state}
+	By Lemma~\ref{lem:distance-point-defect} the left-hand side equals
+	$\|\hat\psi\|^2-\sum_a \bra{\hat\psi} A_a B_a \ket{\hat\psi}$, and
+	$\|\hat\psi\|=1$. On opposite placements the two effects commute and are
+	positive semidefinite, so each diagonal term is nonnegative and the
+	subtracted sum is nonnegative.
+\end{proof}
+
 \begin{definition}[Directly indexed sub-line laws]
 	\label{def:direct-subline-law}
 	\lean{MIPStarRE.QPBT.SubLineWitness}
@@ -1635,8 +1675,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
 	$\delta_Q,\delta_P$. Write
 	$A_{\mathrm{dir}},B_{\mathrm{dir}}$ for the two expectations displayed in
-	Lemma~\ref{lem:claim-17-1}, using $D_{\mathrm{dir}}$ and zero-completed
-	optional evaluations. Then
+	Lemma~\ref{lem:claim-17-1}, using $D_{\mathrm{dir}}$ and partial
+	evaluation in $\F_q \cup \{\bot\}$, with zero point effects for undefined
+	outcomes. Then
 	$|\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le C\sqrt{\delta_Q}$.
 	This formalization-only estimate asserts neither a complex-modulus bound
 	nor transport to the source distribution.
@@ -1676,8 +1717,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	For the concrete X-Z-X measurement, let
 	$A_X(\ell_X,\ell_Z,x)$ be the real overlap obtained by summing
 	$T_{f_X,f_Z}^{\ell_X,\ell_Z}\ot
-	\hat M^{(\mathrm{Point},X),x}_{f_X(x)}$ over both outcomes, with
-	zero-completed optional evaluation. There is a universal $C>0$ such that
+	\hat M^{(\mathrm{Point},X),x}_{f_X(x)}$ over both outcomes, using
+	partial evaluation in $\F_q \cup \{\bot\}$, with zero point effects for
+	undefined outcomes. There is a universal $C>0$ such that
 	$1-\E_{D_{\mathrm{dir}}}\E_{(x,z,\alpha,\beta)\in\ell} A_X
 	\le C m^2\delta_{\mathrm{Line}}(\eps)$.
 \end{lemma}
@@ -1695,7 +1737,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor_direct}
 	\uses{lem:concrete-X-deficit-direct}
 	For the concrete X-Z-X measurement and the directly indexed law
-	$D_{\mathrm{dir}}$ with zero-completed optional evaluations, the complex
+	$D_{\mathrm{dir}}$, with partial evaluation in $\F_q \cup \{\bot\}$ and
+	zero point effects for undefined outcomes, the complex
 	modulus of the difference in Lemma~\ref{lem:claim-17-2} is at most
 	$C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$ for a universal $C>0$.
 	The remaining obligation is the complex weighted Cauchy--Schwarz step.
@@ -1714,8 +1757,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
 	$\delta_Q,\delta_P$, and let $D_{\mathrm{dir}}$ be a directly indexed
 	subline law as in Definition~\ref{def:direct-subline-law}. If $B_Z$ is the
-	expectation in Lemma~\ref{lem:claim-17-3} under that law with
-	zero-completed optional evaluations, then
+	expectation in Lemma~\ref{lem:claim-17-3} under that law, with partial
+	evaluation in $\F_q \cup \{\bot\}$ and zero point effects for undefined
+	outcomes, then
 	$|\Re B_Z-1|\le
 	C\sqrt m(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})$.
 \end{lemma}
