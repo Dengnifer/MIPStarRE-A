@@ -2398,6 +2398,74 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\cite{gap:qpbt_ld-dimension-divisibility}.
 \end{remark}
 
+% The lemma below is not a statement of the source. It records the polynomial
+% measurements that supplied combined point and extended-line measurements
+% determine, which is the first paragraph of the proof of
+% Lemma~\ref{lem:qld-4-7} and not that lemma.
+\begin{lemma}[Formalization support: polynomial measurements from supplied combined measurements]
+	\label{lem:qld-4-7-supplied-witness-polynomials}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_direct_polynomial_measurements_of_supplied_witnesses}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.point_values_measurement_eq_suppliedQ}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_native_scalar_polynomial_measurements_of_supplied_witnesses}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-12, lem:qld-4-13,
+		lem:direct-ld-soundness-k-one-any-strategy, def:consistency,
+		def:ld-meas}
+	This is not a named statement of \cite{Ji2020MIPStar}. It records what the
+	combined point and extended-line measurements of
+	Lemmas~\ref{lem:qld-4-12} and~\ref{lem:qld-4-13} yield when the quantum
+	soundness of the low individual degree test is applied to them in the
+	directly indexed coordinates of Remark~\ref{rem:qld-4-7-divisibility}. Both
+	families are hypotheses here: the lemma constructs neither of them, asserts
+	no projectivity of the polynomial measurements it produces, and does not
+	carry out the polynomial-shape analysis that Lemma~\ref{lem:qld-4-7}
+	requires.
+
+	There exist universal constants $a\ge1$ and $0<b\le1$ such that the
+	following holds for every admissible parameter tuple $(q,m,d)$, every
+	$\eps$, every combined point measurement with error $\delta_Q$ and every
+	extended-line measurement over it with error $\delta_L$. Write
+	$\delta_{\mathrm{combine}}=3\big(\sqrt{\delta_Q+\delta_L}+md/q\big)$, and
+	let $\delta_{\mathrm{ld}}$ be the error function of
+	Theorem~\ref{lem:direct-ld-soundness-k-one-any-strategy} evaluated at
+	$\delta_{\mathrm{combine}}$ and at the extended directly indexed parameters.
+	\begin{enumerate}
+		\item There are polynomial-tuple POVMs on the two original expanded
+		      player spaces whose point/polynomial, polynomial/point and
+		      polynomial/polynomial defects are all at most
+		      $\delta_{\mathrm{ld}}$, the first two averaged over a uniformly
+		      random extended point question.
+		\item For either player, reading the unique polynomial coordinate of
+		      that player's point answer in the extended-line data gives
+		      exactly the combined point measurement of
+		      Lemma~\ref{lem:qld-4-10} coarse-grained by
+		      $(a_X,a_Z)\mapsto\alpha a_X+\beta a_Z$, which is the extended
+		      combined point measurement of Lemma~\ref{lem:qld-4-12}.
+		\item Taking the unique coordinate of the polynomial-tuple POVMs of
+		      the first item gives ordinary polynomial measurements
+		      $G^{\mathrm A},G^{\mathrm B}$ on the same two spaces. Their
+		      evaluation defects against the extended combined point
+		      measurement of Lemma~\ref{lem:qld-4-12}, and their mutual
+		      defect, are again at most $\delta_{\mathrm{ld}}$.
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-soundness-k-one-any-strategy, lem:qld-4-10,
+		lem:qld-4-12}
+	The two supplied families determine a strategy for the directly indexed
+	game whose value is at least $1-\delta_{\mathrm{combine}}$; positivity of
+	the second summand of $\delta_{\mathrm{combine}}$ follows from
+	admissibility, so no further hypothesis is needed. Applying
+	Theorem~\ref{lem:direct-ld-soundness-k-one-any-strategy} to that strategy
+	gives the first item. The second item is a computation: after unfolding the
+	point answer, both sides are the same coarse-graining of the supplied joint
+	point measurement. For the third, post-process each polynomial-tuple POVM
+	at its unique coordinate; post-processing both families of a consistency
+	defect does not increase it, and rewriting the point family by the second
+	item puts the first two bounds in the stated form.
+\end{proof}
+
 % The results below are not statements of the source. They record the
 % coordinatewise application of Theorem~\ref{thm:main-formal} to the directly
 % indexed game and the one-coordinate polynomial-tuple conclusion discussed in

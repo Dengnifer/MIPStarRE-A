@@ -920,6 +920,36 @@ $C_0=1$, $a=2.5\cdot10^9$, and $b=1/80000$.
 Theorem~\ref{lem:ld-transport-absorption} applies to each defect.
 \end{proof}
 
+\begin{theorem}[Formalization support: directly indexed soundness for $k=1$ without projectivity]
+\label{lem:direct-ld-soundness-k-one-any-strategy}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, thm:naimark, def:ld-meas, def:consistency}
+This is not a named statement of \cite{Ji2020MIPStar}; it removes the
+projectivity hypothesis from Theorem~\ref{lem:direct-ld-soundness-k-one}.
+There exist universal constants $a\ge1$ and $0<b\le1$ such that for every
+directly indexed parameter tuple $D=(q,m,d,k)$ with $k=1$, every $\eps>0$,
+and every strategy of value at least $1-\eps$ for the directly indexed game,
+with no projectivity assumption on that strategy, there are polynomial-tuple
+POVMs $G^{\mathrm A},G^{\mathrm B}$ on the two original player spaces
+satisfying the same three conclusions as
+Theorem~\ref{lem:direct-ld-soundness-k-one}, with the same error
+$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$ and the same universal constants. The
+returned polynomial POVMs are not asserted to be projective.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, thm:naimark}
+Dilate every question measurement of both players by the Naimark construction
+(Theorem~\ref{thm:naimark}) and pad the bipartite state at the two
+distinguished ancillary outcomes. The dilated strategy is projective and has
+the same value, so Theorem~\ref{lem:direct-ld-soundness-k-one} applies to it.
+Compressing the polynomial-tuple POVMs it returns to the original player
+carriers at the distinguished ancillary coordinate preserves each of the three
+consistency defects exactly, so the error function and its constants are
+unchanged.
+\end{proof}
+
 \begin{theorem}[Formalization support: point agreement and residue compression]
 \label{lem:ld-point-agreement}
 \lean{MIPStarRE.QPBT.directLdPointPair_consistencyDefect_le}
