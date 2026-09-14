@@ -298,7 +298,7 @@ class TestSpoolExpiry(JanitorShellTestCase):
         self.assertEqual(self.status(f'spool_is_expired "{path}" "2099-01-01T00:00:00Z"'), 1)
 
     def test_own_deadline_expires_without_a_cutoff(self) -> None:
-        path = self.entry("prover-3.json", {"role": "prover", "deadline": "2026-09-12T08:00:00Z"})
+        path = self.entry("prover-3.json", {"role": "prover", "deadline_epoch": 1})
         self.assertEqual(self.status(f'spool_is_expired "{path}" ""'), 0)
 
     def test_unparsable_entry_is_kept_not_dropped(self) -> None:

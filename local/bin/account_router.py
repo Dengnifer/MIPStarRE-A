@@ -1,11 +1,12 @@
 """Atomic dispatcher account reservations and resume affinity.
 
-Three admission inputs are additive and fail open to the historical behaviour:
+Three admission inputs are additive around the historical behaviour:
 ``watchdog/accounts.json`` (the owner's live list of keys and their ceilings),
 ``watchdog/capacity/health-<account>.json`` (a ``down`` endpoint is cap 0) and
 ``watchdog/drain`` (a pause releases queued dispatches with `DRAIN_EXIT`).
-Absent files reproduce the previous behaviour exactly, and none of them can
-widen capacity — they only turn a waiting reservation into a clean refusal.
+Absent files reproduce the previous behaviour exactly.  An existing malformed
+accounts file fails admission closed: routing a last-good cap through a guessed
+historical home can spend the wrong key.
 
 **Any number of named accounts.**  The account set is read per call from the
 live accounts file, and otherwise from the two historical names plus whatever
@@ -45,11 +46,24 @@ ACCOUNTS = DEFAULT_ACCOUNTS
 #: the exit 4 every other routing failure uses, so a caller can tell "the run is
 #: pausing, come back later" from "this request is wrong".
 DRAIN_EXIT = 6
+CAPACITY_EXIT = 3
 
 
 def _cache_root() -> Path:
     return Path(os.environ.get("MIPSTARRE_CACHE_ROOT",
                                "~/.cache/mipstarre-dev")).expanduser()
+
+
+def _live_accounts(base: Path) -> list[dict] | None:
+    """Parse an existing live file; do not require its parser when absent."""
+    path = base / "watchdog" / "accounts.json"
+    if not path.exists():
+        return None
+    import accounts_file  # noqa: PLC0415 - same directory, optional
+    try:
+        return accounts_file.load(base)
+    except accounts_file.AccountsError as exc:
+        raise ValueError(f"invalid live accounts file: {exc}") from exc
 
 
 def account_names(root: Path | None = None) -> tuple[str, ...]:
@@ -63,18 +77,13 @@ def account_names(root: Path | None = None) -> tuple[str, ...]:
        routes exactly as it did before, including the invariant that a
        historical name with no cap file is cap 0 rather than absent.
 
-    An unreadable or invalid accounts file falls through to (2): admission must
-    never stop because the owner mistyped a field, and the capacity controller
-    is the component that reports that error loudly.
+    An unreadable or invalid accounts file is a named failure.  Falling through
+    would retain old caps without retaining the homes those caps belonged to.
     """
     base = root or _cache_root()
-    try:
-        import accounts_file  # noqa: PLC0415 - same directory, optional
-        names = tuple(entry["name"] for entry in accounts_file.load(base) or ())
-        if names:
-            return names
-    except Exception:  # noqa: BLE001 - a bad file must not stop every dispatch
-        pass
+    entries = _live_accounts(base)
+    if entries is not None:
+        return tuple(entry["name"] for entry in entries)
     watchdog = base / "watchdog"
     found = sorted(
         path.name[len("max-codex-"):] for path in watchdog.glob("max-codex-*")
@@ -84,23 +93,22 @@ def account_names(root: Path | None = None) -> tuple[str, ...]:
 
 
 def account_homes(root: Path | None = None) -> dict[str, Path]:
-    """``name -> CODEX_HOME`` from the live file, with the historical defaults.
+    """``name -> CODEX_HOME`` from the live file or historical defaults.
 
     The homes are resume affinity's evidence (a rollout file lives under the home
     that produced it), so an account the file names must contribute its home even
     when the two historical entries are also present.
     """
     base = root or _cache_root()
-    homes: dict[str, Path] = {}
-    try:
-        import accounts_file  # noqa: PLC0415 - same directory, optional
-        for entry in accounts_file.load(base) or ():
-            homes[entry["name"]] = Path(entry["codex_home"]).expanduser()
-    except Exception:  # noqa: BLE001 - fall back to the historical pair
-        homes = {}
-    homes.setdefault("primary", Path.home() / ".codex")
-    homes.setdefault("second", Path(os.environ.get("MIPSTARRE_CODEX_HOME_SECOND")
-                                    or Path.home() / ".cache/mipstarre-dev/codex-home-yxy"))
+    entries = _live_accounts(base)
+    if entries is not None:
+        return {entry["name"]: Path(entry["codex_home"]).expanduser()
+                for entry in entries}
+    homes = {
+        "primary": Path.home() / ".codex",
+        "second": Path(os.environ.get("MIPSTARRE_CODEX_HOME_SECOND")
+                       or Path.home() / ".cache/mipstarre-dev/codex-home-yxy"),
+    }
     if os.environ.get("MIPSTARRE_CODEX_HOME_SECOND"):
         homes["second"] = Path(os.environ["MIPSTARRE_CODEX_HOME_SECOND"]).expanduser()
     return homes
@@ -114,6 +122,10 @@ class DrainRequested(Exception):
     pause could only clear them by killing the processes, which threw away the
     dispatch requests with them.
     """
+
+
+class CapacityExhausted(ValueError):
+    """No requested account acquired a slot before the reservation deadline."""
 
 
 def choose_account(live: list[int], caps: list[int],
@@ -136,8 +148,6 @@ def choose_account(live: list[int], caps: list[int],
         if best_key is None or key < best_key:
             best, best_key = name, key
     return best
-
-
 def health_state(root: Path, account: str) -> str:
     """Endpoint health as ``capacity_controller.py`` last recorded it.
 
@@ -387,7 +397,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool = Fal
                 return selected
             remaining = deadline - time.monotonic()
             if dry_run or remaining <= 0:
-                raise ValueError('account capacity exhausted; no reservation made')
+                raise CapacityExhausted('account capacity exhausted; no reservation made')
         time.sleep(min(10, remaining))
 
 
@@ -432,6 +442,8 @@ def main() -> None:
         print(model)
     except DrainRequested as error:
         parser.exit(DRAIN_EXIT, f"account routing: {error}\n")
+    except CapacityExhausted as error:
+        parser.exit(CAPACITY_EXIT, f"account routing: {error}\n")
     except (OSError, ValueError) as error:
         parser.exit(4, f"account routing: {error}\n")
 

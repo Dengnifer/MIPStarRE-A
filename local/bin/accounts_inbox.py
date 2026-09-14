@@ -130,18 +130,17 @@ def reply_marker(comment_id: int) -> str:
     return f"<!-- {MARKER} comment={comment_id} -->"
 
 
-def already_answered(comments: list[dict], comment_id: int) -> bool:
+def already_answered(comments: list[dict], comment_id: int,
+                     trusted_login: str) -> bool:
     marker = reply_marker(comment_id)
-    return any(marker in (row.get("body") or "") for row in comments)
+    return any(marker in (row.get("body") or "")
+               and str((row.get("user") or {}).get("login") or "") == trusted_login
+               for row in comments)
 
 
 #: The local half of "applying is once".  The reply marker lives on GitHub and is
-#: written AFTER the accounts file; if that POST fails (rate limit, network, a
-#: `LayerError`) the edit is on disk with nothing recording it, and the next
-#: sweep re-applies the same directive — reverting any `accounts.sh set` the
-#: owner made in between.  This file is written BEFORE the edit, so the failure
-#: mode is "applied once, unanswered" (the owner repeats it) instead of "applied
-#: again and again".
+#: written after a successful accounts-file write and before the GitHub reply.
+#: Thus persistence failures retry, while reply failures cannot re-apply an edit.
 LEDGER_REL = Path("watchdog") / "capacity" / "inbox-applied.json"
 LEDGER_KEEP = 500
 
@@ -160,7 +159,7 @@ def applied_ids(root: Path | None = None) -> list[int]:
 
 
 def record_applied(comment_id: int, root: Path | None = None) -> None:
-    """Note the id before the file is written; never fatal, never a duplicate."""
+    """Note a successfully persisted directive; never fatal, never a duplicate."""
     path = ledger_path(root)
     ids = applied_ids(root)
     if comment_id in ids:
@@ -213,7 +212,7 @@ def sweep(issue: int, *, dry_run: bool = False, limit: int = DEFAULT_LIMIT,
         if not directives:
             continue
         comment_id = int(row.get("id") or 0)
-        if not comment_id or already_answered(comments, comment_id):
+        if not comment_id or already_answered(comments, comment_id, login):
             continue
         if comment_id in applied:
             report.append(f"accounts-inbox: #{issue} comment {comment_id} was already "
@@ -244,9 +243,10 @@ def sweep(issue: int, *, dry_run: bool = False, limit: int = DEFAULT_LIMIT,
             report.append(f"accounts-inbox: comment {comment_id} by @{author}: "
                           f"{len(directives)} directive(s) would be applied (dry run)")
             continue
-        record_applied(comment_id)
         results = accounts_file.apply_directives(
             body, actor=f"github:{author}", origin=f"#{issue} comment {comment_id}")
+        if any(line.startswith("applied:") for line in results):
+            record_applied(comment_id)
         gh_common.ensure_pr_comment(issue, reply_marker(comment_id),
                                     render_reply(comment_id, author, results))
         for line in results:
@@ -275,9 +275,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         issue = args.issue
         if issue is None:
-            # Not strict about the accounts file: this channel is the owner's
-            # REMOTE repair path for that very file, and it must not be dead
-            # exactly when a mistyped field needs repairing from a phone.
+            # The issue number is a run scalar, so a malformed accounts file
+            # must not hide the channel. Directives still require a valid live
+            # file; structural repair remains an explicit shell operation.
             issue = int(run_mode.value_for(
                 run_mode.load_mode(strict_accounts=False), "owner_inbox_issue"))
         report = sweep(issue, dry_run=args.dry_run, limit=max(1, args.limit),

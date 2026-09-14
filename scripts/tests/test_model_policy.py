@@ -251,7 +251,7 @@ class ModelPolicyTests(unittest.TestCase):
                  mock.patch('sys.argv', ['account_router.py', 'reserve', directory, 'auto', '123', '0',
                                         str(root / 'registry')]), self.assertRaises(SystemExit) as error:
                 account_router.main()
-            self.assertEqual(error.exception.code, 4)
+            self.assertEqual(error.exception.code, account_router.CAPACITY_EXIT)
 
     def test_routine_shim_keeps_model_selection_and_ignores_retired_gate(self):
         with tempfile.TemporaryDirectory() as directory:

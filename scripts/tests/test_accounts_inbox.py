@@ -62,7 +62,7 @@ class FakeGitHub:
         if path.startswith(f"issues/{ISSUE}/comments") and method is None:
             return list(self.comments)
         if path.startswith(f"issues/{ISSUE}/comments") and method == "POST":
-            number = self.comment(payload["body"], "github-actions")
+            number = self.comment(payload["body"], OWNER)
             self.posted.append(payload)
             return {"id": number}
         if path.startswith("issues/comments/") and method == "PATCH":
@@ -176,6 +176,12 @@ class TestOwnerChannel(InboxHarness):
         self.sweep()
         report = self.sweep()
         self.assertIn("no new ACCOUNTS: directive", report[0])
+
+    def test_a_stranger_cannot_forge_the_answer_marker(self) -> None:
+        comment = self.github.comment("ACCOUNTS: second ceiling=20\n", OWNER)
+        self.github.comment(inbox.reply_marker(comment), "a-stranger")
+        self.sweep()
+        self.assertEqual(self.ceiling("second"), 20)
 
 
 class TestStaleness(InboxHarness):

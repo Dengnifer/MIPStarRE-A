@@ -88,18 +88,17 @@ class TestAccountNames(RouterHarness):
     def test_the_two_historical_names_are_the_last_fallback(self) -> None:
         self.assertEqual(ar.account_names(self.root), ar.DEFAULT_ACCOUNTS)
 
-    def test_an_invalid_file_falls_through_instead_of_stopping_dispatch(self) -> None:
-        # The capacity controller reports that error loudly; admission must not
-        # stop because the owner mistyped a field.
+    def test_an_invalid_file_stops_dispatch_instead_of_guessing_homes(self) -> None:
         (self.watchdog / "accounts.json").write_text("{oops", encoding="utf-8")
         self.caps(primary=5, second=28)
-        self.assertEqual(ar.account_names(self.root), ("primary", "second"))
+        with self.assertRaises(ValueError):
+            ar.account_names(self.root)
 
     def test_homes_come_from_the_file_with_the_historical_defaults(self) -> None:
         self.accounts(self.entry("primary", 5), self.entry("third", 8))
         homes = ar.account_homes(self.root)
         self.assertEqual(homes["third"], self.root / "codex-third")
-        self.assertIn("second", homes)  # the historical default survives
+        self.assertNotIn("second", homes)
 
 
 class TestEffectiveCaps(RouterHarness):
@@ -129,9 +128,8 @@ class TestEffectiveCaps(RouterHarness):
         # cap(third) sessions on the owner's 5-slot primary key.
         (self.watchdog / "accounts.json").write_text('{"cieling": 5}', encoding="utf-8")
         self.caps(primary=5, second=30, third=8)
-        names = ar.account_names(self.root)
-        self.assertEqual(names, ("primary", "second", "third"))
-        self.assertEqual(ar.effective_caps(self.root, names), [5, 30, 0])
+        with self.assertRaises(ValueError):
+            ar.effective_caps(self.root)
 
     def test_a_homeless_name_is_never_reserved_on(self) -> None:
         (self.watchdog / "accounts.json").write_text("{oops", encoding="utf-8")

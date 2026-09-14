@@ -417,7 +417,7 @@ def _validate_accounts(accounts) -> list[dict]:
                              f"{where}.enabled must be true or false, got {enabled!r}")
         out.append({
             "name": name,
-            "label": sanitize(_require_text(raw["label"], f"{where}.label"), 60),
+            "label": _require_text(raw["label"], f"{where}.label", pattern=ENDPOINT_RE),
             "endpoint": endpoint,
             "codex_home": codex_home,
             "codex_home_path": str(Path(codex_home).expanduser()),
@@ -659,7 +659,7 @@ ACCOUNT_MODE_REL = Path("watchdog") / "account-mode"
 
 
 def account_mode(mode: dict) -> str:
-    """`both` when more than one account is enabled, `primary` otherwise.
+    """`both` when an enabled account needs a non-default CODEX_HOME.
 
     DERIVED, never briefed.  The shim's `primary-only policy` check was a second
     file holding a capacity decision: with the file absent it defaults to
@@ -672,8 +672,7 @@ def account_mode(mode: dict) -> str:
     exactly one file), and this function is the only thing that derives the file
     from it.
     """
-    enabled = [a for a in mode.get("accounts", []) if a.get("enabled")]
-    return "both" if len(enabled) > 1 else "primary"
+    return accounts_file.dispatch_account_mode(mode.get("accounts", []))
 
 
 def write_account_mode(mode: dict, *, root: Path | None = None,
@@ -1334,7 +1333,12 @@ def cmd_apply(args: argparse.Namespace) -> int:
     except LayerError:
         pass
     path = write_mode(mode)
-    write_caps(caps)
+    ok, detail = call_controller("init")
+    if detail == "not installed":
+        write_caps(caps)
+    elif not ok:
+        raise Refused(f"capacity_controller.py init failed: {detail}\n"
+                      "The installed controller owns the cap files; fix it and re-run apply.")
     override_note = write_model_override(mode)
     account_mode_note = write_account_mode(mode)
     # Hand the briefed caps to the capacity controller, which is the sole writer
@@ -1343,13 +1347,6 @@ def cmd_apply(args: argparse.Namespace) -> int:
     # controller has no state, `pause` saves zeros, and `resume` restores the
     # floor: a briefed 5/28/33 came back as 1/1/2 while the resume message
     # announced 5/28/33 - the exact defect of the 2026-09-12 resume script.
-    ok, detail = call_controller("init")
-    if not ok and detail != "not installed":
-        sys.stderr.write(
-            "run_mode.py: warning: capacity_controller.py init failed: "
-            f"{detail}\nThe cap files above are correct, but pause/resume will "
-            "not round-trip until the controller has state. Fix it, then run "
-            "'python3 local/bin/capacity_controller.py init'.\n")
     append_stage(f"run-mode apply: {summary}; {override_note}; {account_mode_note}; "
                  f"{accounts_note}; brief {source} sha256 {digest}", "run-mode-apply")
     append_decision(
@@ -1530,18 +1527,6 @@ def cmd_resume(args: argparse.Namespace) -> int:
             value = 0
         caps[name] = value
 
-    mode["paused"] = False
-    mode["paused_at"] = None
-    mode["saved_caps"] = None
-    mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
-                       "floor": floor_for(caps, mode["run"]["occupancy_target"])}
-    mode["generated"] = utcnow()
-    write_mode(mode)
-    # Re-assert the briefed override: the knob and the mode must never diverge,
-    # and a resume is exactly when someone would notice that they had.
-    resume_override = write_model_override(mode)
-    resume_account_mode = write_account_mode(mode)
-
     ok, detail = call_controller("resume")
     if ok:
         source = "capacity_controller.py resume"
@@ -1549,9 +1534,20 @@ def cmd_resume(args: argparse.Namespace) -> int:
         write_caps(caps)
         source = "run_mode.py (no capacity controller installed)"
     else:
-        raise Refused(f"capacity_controller.py resume failed: {detail}\n"
-                      "The cap files were left where they are (paused is the safe "
-                      "direction). Fix the controller and re-run 'run_mode.py resume'.")
+        paused, pause_detail = call_controller("pause")
+        suffix = "" if paused else f"; re-pause also failed: {pause_detail}"
+        raise Refused(f"capacity_controller.py resume failed: {detail}{suffix}\n"
+                      "The run-mode record remains paused. Fix the controller and re-run "
+                      "'run_mode.py resume'.")
+
+    def refuse_postcondition(message: str) -> None:
+        if detail == "not installed":
+            write_caps({name: 0 for name in names})
+        else:
+            paused, pause_detail = call_controller("pause")
+            if not paused:
+                raise Refused(f"resume post-condition failed and re-pause failed: {pause_detail}")
+        raise Refused(message)
 
     live = read_live_caps(names=names)
     for name in names:
@@ -1559,36 +1555,34 @@ def cmd_resume(args: argparse.Namespace) -> int:
         enabled = bool(row and row.get("enabled"))
         value = live.get(name)
         if value is None:
-            raise Refused(f"post-condition: {watchdog_dir()}/max-codex-{name} is missing, "
-                          "empty or non-numeric after resume")
+            refuse_postcondition(
+                f"post-condition: {watchdog_dir()}/max-codex-{name} is missing, "
+                "empty or non-numeric after resume")
         if enabled and value < 1:
-            raise Refused(f"post-condition: {name} is enabled but resumed at cap {value}")
+            refuse_postcondition(f"post-condition: {name} is enabled but resumed at cap {value}")
         if value != caps[name]:
             if name in substituted and 1 <= value <= max(1, briefed[name]):
-                # The one legitimate difference: this command replaced a saved
-                # cap below 1 (an account that was disabled or `down` when the
-                # pause ran and is enabled now) with the briefed one, and the
-                # controller restored its own clamp of the saved value instead.
-                # Both are safe and neither widens capacity.  Adopt the number
-                # the FILES carry and say so, rather than announcing one they do
-                # not — that is the 2026-09-12 failure this guard exists for.
                 sys.stderr.write(
                     f"run_mode.py: warning: {name} was resumed at cap {value}; this "
                     f"command had substituted the briefed {caps[name]} for a saved "
                     "cap below 1. Reporting the value the cap file carries.\n")
                 caps[name] = value
             else:
-                raise Refused(
+                refuse_postcondition(
                     f"post-condition: {name} was resumed at cap {value}, not the "
-                    f"restored {caps[name]}. Something else wrote the cap file, or "
-                    "the capacity controller has no state for this run (seed it with "
-                    "'python3 local/bin/capacity_controller.py init'). Refusing to "
-                    "report a number the files do not carry.")
-    # Reported from the files, not from the intent: a resume that announces caps
-    # it did not actually write is how the 2026-09-12 run lost an hour.
+                    f"restored {caps[name]}. Refusing to report stale caps.")
+
+    mode["paused"] = False
+    mode["paused_at"] = None
+    mode["saved_caps"] = None
     mode["derived"] = {"caps": dict(caps), "max_codex": sum(caps.values()),
                        "floor": floor_for(caps, mode["run"]["occupancy_target"])}
+    mode["generated"] = utcnow()
     write_mode(mode)
+    resume_override = write_model_override(mode)
+    resume_account_mode = write_account_mode(mode)
+    # Reported from the files, not from the intent: a resume that announces caps
+    # it did not actually write is how the 2026-09-12 run lost an hour.
     live_total = sum(live[name] or 0 for name in names)
     note = ("run-mode resume: caps " +
             ", ".join(f"{name} {live[name]}" for name in names) +

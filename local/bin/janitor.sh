@@ -330,7 +330,7 @@ list_lane_markers() {
 # dispatch_cutoff has.  An unparsable entry is NOT expired (it is reported).
 spool_is_expired() {
   JAN_FILE="$1" JAN_CUTOFF="${2:-}" python3 - <<'PY'
-import json, os, sys
+import json, os, sys, time
 from datetime import datetime, timezone
 
 def parse(value):
@@ -349,8 +349,9 @@ except Exception:
     sys.exit(1)
 now = datetime.now(timezone.utc)
 cutoff = parse(os.environ.get("JAN_CUTOFF"))
-deadline = parse(entry.get("deadline") if isinstance(entry, dict) else None)
-sys.exit(0 if ((deadline and deadline <= now) or (cutoff and cutoff <= now)) else 1)
+deadline = entry.get("deadline_epoch") if isinstance(entry, dict) else None
+deadline_passed = isinstance(deadline, (int, float)) and deadline <= time.time()
+sys.exit(0 if (deadline_passed or (cutoff and cutoff <= now)) else 1)
 PY
 }
 
@@ -432,7 +433,10 @@ write_repair_marker() { # write_repair_marker PR LANE JANITOR_CLASS REASON
   scan="$(daemon_scan_cmd)" || {
     report "janitor: no daemon-scan.py; PR $pr is repaired WITHOUT a failure marker"
     return 1; }
-  head="$(timeout 60 gh pr view "$pr" --json headRefOid --jq .headRefOid 2>/dev/null </dev/null || true)"
+  head="$(timeout 60 python3 "$SCRIPT_DIR/gh_common.py" pr-view "$pr" 2>/dev/null \
+    | python3 -c 'import json,sys
+try: print((json.load(sys.stdin).get("head") or {}).get("sha") or "")
+except Exception: print("")')"
   version="$(head -n 1 "${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}/tools-version" 2>/dev/null | tr -d '\n')"
   timeout 60 python3 "$scan" marker-write --path "$D/pr$pr.failed" --pr "$pr" \
     --head "${head:-}" --class "$cls" --reason "${reason:0:200}" \
@@ -934,7 +938,7 @@ pass_spool_expiry() {
       else
         ledger_append "$J/actions.jsonl" ts "$(now)" pass spool-expiry action drop-spool-entry \
           entry "$(basename "$file")" cutoff "${cutoff:-none}"
-        rm -f "$file"
+        rm -f "$file" "${file%.json}.prompt.txt"
         report "janitor: spool entry $(basename "$file") is past the dispatch cutoff ${cutoff:-(entry deadline)} -> dropped"
       fi
       dropped=$((dropped + 1))

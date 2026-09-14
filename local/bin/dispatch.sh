@@ -61,8 +61,9 @@
 #     watchdog/capacity/health-<account>.json says `down` waits for half-open
 #     instead of firing.  Five client-side retries are exactly how 69 refusals
 #     became 69 deaths on 2026-09-12.
-# When the attempts or the cutoff run out, the spool entry is LEFT for the
-# janitor and the exit status is 7.
+# When the attempts or the cutoff run out, the spool entry is retained as
+# diagnostic evidence until janitor expiry and the exit status is 7. Neither
+# component reconstructs a post-exit dispatch from that retained data.
 #
 # Exit codes: 0 ok · 2 usage · 3 disabled by kill switch · 4 preflight failure
 #   · 5 worktree busy or branch claimed by another session · 6 telemetry failure
@@ -901,10 +902,12 @@ PY
 
 account_labels() {
   # account_labels <account> — two lines: the key label, then the endpoint.
-  # These are the owner's brief as run-mode recorded it, so a key moved between
-  # homes keeps the identity failures and health are attributed to.
-  [ -f "$RUN_MODE_JSON" ] || return 0
-  python3 - "$RUN_MODE_JSON" "$1" <<'PY' 2>/dev/null || true
+  # The live accounts file is the routing source, so telemetry must read the
+  # same row. The run-mode snapshot is used only when no live file exists.
+  local source="$CACHE_ROOT/watchdog/accounts.json"
+  [ -f "$source" ] || source="$RUN_MODE_JSON"
+  [ -f "$source" ] || return 0
+  python3 - "$source" "$1" <<'PY' 2>/dev/null || true
 import json, sys
 
 try:
@@ -946,10 +949,12 @@ resolve_labels() {
   fi
   [ -n "$ENDPOINT_LABEL" ] || ENDPOINT_LABEL="$KEY_LABEL"
   valid_label "$KEY_LABEL" || die 4 "key label '$KEY_LABEL' for account '$account' is outside
-  [a-z0-9.-]{1,40}. Fix the account's 'label' in $RUN_MODE_JSON (or
+  [a-z0-9.-]{1,40}. Fix the account's live 'label' in
+  $CACHE_ROOT/watchdog/accounts.json (or
   MIPSTARRE_KEY_LABEL); dispatch refuses rather than recording the wrong key."
   valid_label "$ENDPOINT_LABEL" || die 4 "endpoint label '$ENDPOINT_LABEL' for account
-  '$account' is outside [a-z0-9.-]{1,40}. Fix the account's 'endpoint' in $RUN_MODE_JSON."
+  '$account' is outside [a-z0-9.-]{1,40}. Fix the account's live 'endpoint' in
+  $CACHE_ROOT/watchdog/accounts.json."
 }
 
 endpoint_health() {
@@ -1031,8 +1036,9 @@ PY
 }
 
 write_spool() {
-  # The whole request, before the first reservation, so a dispatch the provider
-  # refused can be replayed by the janitor instead of being lost.
+  # Retain the request before the first reservation so a deferred dispatch has
+  # diagnostic evidence until janitor expiry. Replay is bounded to this running
+  # dispatch; the spool is not a command for automatic post-exit delivery.
   local state="$1"
   [ -n "$SPOOL_FILE" ] || return 0
   mkdir -p "$SPOOL_DIR"
@@ -1097,16 +1103,17 @@ retry_is_safe() {
   # tree.  Anything else is left to the janitor's dead-session pass, which
   # re-dispatches under a per-(pr, role, head) budget with the state in hand.
   local dirty=""
-  case "$FAILURE_CLASS" in retries_exhausted) ;; *) return 0 ;; esac
+  if [ "${WORKTREE_STATUS_AFTER_CODEX:-}" != "${WORKTREE_STATUS_BEFORE_CODEX:-}" ]; then
+    dirty="${WORKTREE_STATUS_AFTER_CODEX:-}"
+  fi
+  [ "${DISPATCH_STATUS:-}" = refused ] || return 1
+  [ "${DISPATCH_TURNS:-0}" = 0 ] || return 1
   case "${DISPATCH_USAGE_TOTAL:-0}" in
     ''|0) ;;
     *) note "not retrying '$FAILURE_CLASS': the session used ${DISPATCH_USAGE_TOTAL} tokens \
 before dying, so a re-run would repeat work in a tree that holds its partial edits"
        return 1 ;;
   esac
-  if [ -n "${WORKTREE_ABS:-}" ]; then
-    dirty="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null | grep -v '^?? ' || true)"
-  fi
   if [ -n "$dirty" ]; then
     note "not retrying '$FAILURE_CLASS': $WORKTREE_ABS has uncommitted changes from the \
 dead session; the janitor's dead-session pass owns this one"
@@ -1257,7 +1264,13 @@ while :; do
     report_and_exit_refused
   fi
 
-  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+  RESERVATION_WAIT="$ACCOUNT_WAIT"
+  if [ -n "$DISPATCH_CUTOFF_EPOCH" ]; then
+    REMAINING=$((DISPATCH_CUTOFF_EPOCH - $(date +%s)))
+    [ "$REMAINING" -gt 0 ] || report_and_exit_refused
+    [ "$RESERVATION_WAIT" -le "$REMAINING" ] || RESERVATION_WAIT="$REMAINING"
+  fi
+  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$RESERVATION_WAIT" "$REGISTRY")
   if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
   if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
   set +e
@@ -1265,17 +1278,22 @@ while :; do
   ROUTER_RC=$?
   set -e
   if [ "$ROUTER_RC" -ne 0 ]; then
-    # A router refusal is a retryable condition of the day, not `die 4`.
     FAILURE_CLASS="refused"
     if [ "$DRY_RUN" -eq 1 ]; then
       die 4 "account routing refused the dry-run reservation (exit $ROUTER_RC)"
     fi
-    if backoff_or_give_up; then
-      continue
-    fi
-    report_and_exit_refused
+    case "$ROUTER_RC" in
+      3) if backoff_or_give_up; then continue; fi; report_and_exit_refused ;;
+      6) report_and_exit_refused ;;
+      *) clear_spool; die 4 "account routing failed permanently (exit $ROUTER_RC)" ;;
+    esac
   fi
   ACCOUNT="${ROUTING%%$'\n'*}"
+  if cutoff_passed; then
+    rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+    FAILURE_CLASS="refused"
+    report_and_exit_refused
+  fi
   MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
   export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
   resolve_labels "$ACCOUNT"
@@ -1362,6 +1380,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # stdin is closed: codex exec reads piped stdin as extra prompt input, which
   # would silently splice the caller's stdin into the session.
   CODEX_STARTED=1
+  WORKTREE_STATUS_BEFORE_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
   set +e
   if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
     timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
@@ -1375,6 +1394,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # are NOT released here — they belong to the session, which may still have
   # attempts left, and `cleanup` releases them at exit.
   rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+  WORKTREE_STATUS_AFTER_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
 
   END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
   cp "$CAPTURE" "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl" 2>/dev/null ||

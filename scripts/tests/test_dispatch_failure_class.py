@@ -128,6 +128,16 @@ class ClassifyFailureTests(unittest.TestCase):
 
 
 class PatternKnobTests(unittest.TestCase):
+    def test_shipped_ordered_schema_controls_precedence_and_auth(self) -> None:
+        patterns = telemetry.load_failure_patterns(REPO_ROOT)
+        self.assertEqual(next(iter(patterns)), "endpoint_5xx")
+        self.assertEqual(telemetry.classify_failure(
+            _stream("500 Internal Server Error and 401 Unauthorized"), patterns=patterns
+        )["failure_class"], "endpoint_5xx")
+        self.assertEqual(telemetry.classify_failure(
+            _stream("401 Unauthorized"), patterns=patterns
+        )["failure_class"], "auth")
+
     def test_patterns_come_from_capacity_policy_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = _repo(Path(tmp))
@@ -289,14 +299,12 @@ class TestKeyInvalidatingClasses(unittest.TestCase):
             self.assertTrue(self.patterns[name], name)
 
     def test_an_exhausted_quota_classifies_as_insufficient_balance(self) -> None:
-        events = _stream("stream error: INSUFFICIENT_BALANCE; retrying",
-                         "Reconnecting... 5/5")
+        events = _stream("stream error: INSUFFICIENT_BALANCE; retrying")
         result = telemetry.classify_failure(events, 1, self.patterns)
         self.assertEqual(result["failure_class"], "insufficient_balance")
 
     def test_an_invalid_key_classifies_as_auth(self) -> None:
-        events = _stream("stream error: 401 Unauthorized from the endpoint",
-                         "Reconnecting... 5/5")
+        events = _stream("stream error: 401 Unauthorized from the endpoint")
         result = telemetry.classify_failure(events, 1, self.patterns)
         self.assertEqual(result["failure_class"], "auth")
 

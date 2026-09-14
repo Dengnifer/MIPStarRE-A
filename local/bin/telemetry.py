@@ -142,15 +142,22 @@ before sharding; `telemetry.py events --since DATE` reads both.
 # Order is precedence: the first class whose pattern appears wins, because a
 # concurrency refusal and a 5xx outage both end in an exhausted reconnect and
 # the root cause is the one the controller must act on.
-# `auth` and `insufficient_balance` come FIRST: they say the KEY is unusable,
-# not that it is busy, and a key that is out of quota answers 429 with
-# `insufficient_quota` — read as `concurrency_limit` it would lower the cap by a
-# quarter forever instead of taking the dead key out of service.  They also
-# precede `retries_exhausted` so a 401 that ends in an exhausted reconnect is
-# classified by its cause.  `local/capacity-policy.json` marks both
-# `"disables": true`; the two tables must name the same classes or the policy's
-# disable rule can never fire (see `load_failure_patterns`).
+# The built-in order mirrors the shipped policy.  A loaded policy keeps its own
+# order exactly; changing the JSON row order is an intentional precedence edit.
 DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
+    "endpoint_5xx": [
+        "503 Service Unavailable",
+        "502 Bad Gateway",
+        "504 Gateway Timeout",
+        "Service Unavailable",
+    ],
+    "concurrency_limit": [
+        "Concurrency limit exceeded for account",
+        "concurrency limit exceeded",
+    ],
+    "retries_exhausted": [
+        "Reconnecting... 5/5",
+    ],
     "auth": [
         "401 Unauthorized",
         "403 Forbidden",
@@ -164,19 +171,6 @@ DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
         "insufficient_quota",
         "You exceeded your current quota",
         "billing_hard_limit_reached",
-    ],
-    "concurrency_limit": [
-        "Concurrency limit exceeded for account",
-        "concurrency limit exceeded",
-    ],
-    "endpoint_5xx": [
-        "503 Service Unavailable",
-        "502 Bad Gateway",
-        "504 Gateway Timeout",
-        "Service Unavailable",
-    ],
-    "retries_exhausted": [
-        "Reconnecting... 5/5",
     ],
     "timeout": [
         "deadline exceeded",
@@ -222,6 +216,7 @@ KNOWN_FAILURE_CLASSES = (
     "endpoint_down",
     "concurrency_limit",
     "endpoint_5xx",
+    "auth",
     "retries_exhausted",
     "timeout",
     "task_failure",
@@ -494,9 +489,30 @@ def load_failure_patterns(repo_root: Path | None = None) -> dict[str, list[str]]
         raw = json.loads(knob.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return patterns
-    table = _policy_pattern_table(raw.get("failure_patterns") if isinstance(raw, dict)
-                                 else None)
-    if table is None:
+    table = raw.get("failure_patterns") if isinstance(raw, dict) else None
+    if isinstance(table, list):
+        ordered: dict[str, list[str]] = {}
+        for index, row in enumerate(table):
+            if not isinstance(row, dict) or not isinstance(row.get("failure_class"), str):
+                warn(f"capacity-policy.json: failure_patterns[{index}] is malformed")
+                continue
+            value = row.get("patterns")
+            if not isinstance(value, list):
+                warn(f"capacity-policy.json: failure_patterns[{index}].patterns is not a list")
+                continue
+            name = row["failure_class"]
+            if name in POLICY_ONLY_FAILURE_CLASSES:
+                continue
+            if name not in DEFAULT_FAILURE_PATTERNS:
+                warn(f"capacity-policy.json: ignoring unknown failure class {name!r}")
+                continue
+            cleaned = [
+                item for item in value if isinstance(item, str) and item.strip()
+            ]
+            if cleaned:
+                ordered[name] = cleaned
+        return ordered or patterns
+    if not isinstance(table, dict):
         return patterns
     for name, value in table.items():
         if name in POLICY_ONLY_FAILURE_CLASSES:
@@ -587,8 +603,8 @@ def classify_failure(
 
     matched_class = ""
     matched_pattern = ""
-    for name in FAILURE_CLASS_ORDER:
-        for pattern in table.get(name) or ():
+    for name, class_patterns in table.items():
+        for pattern in class_patterns:
             if pattern.lower() in lowered:
                 matched_class, matched_pattern = name, pattern
                 break

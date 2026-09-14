@@ -70,13 +70,14 @@ except ModuleNotFoundError as exc:  # pragma: no cover - defensive
     sys.stderr.write(f"ready_report.py: cannot import gh_common.py ({exc}).\n")
     raise SystemExit(2)
 
+import accounts_file  # noqa: E402
 import run_mode  # noqa: E402
+from pr_open import BRANCH_RE  # noqa: E402
 from wf_util import LayerError, atomic_write  # noqa: E402
 
 #: Unchecked findings in the review ledger (review.md section 12).
 UNCHECKED_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.M)
 REVIEW_MARKER = "mipstarre-review"
-BRANCH_RE = re.compile(r"^(?:codex/)?issue-0*([0-9]+)-")
 REPORT_MARKER = "mipstarre-ready-report"
 
 #: Forced post cadence, independent of change.
@@ -89,7 +90,7 @@ FORCE_AFTER_H = 6
 
 def issue_of(branch: str) -> int | None:
     match = BRANCH_RE.match(branch or "")
-    return int(match.group(1)) if match else None
+    return int(match.group(2)) if match else None
 
 
 def readiness(pull: dict, statuses: dict, reviews: list[dict]) -> dict:
@@ -251,7 +252,7 @@ def occupancy(cache: Path) -> dict | None:
     here means occupancy is never unreported.
     """
     try:
-        mode = run_mode.load_mode()
+        mode = run_mode.load_mode(strict_accounts=False)
         caps = run_mode.current_caps(mode, cache)
         floor = run_mode.floor_for(caps, mode["run"]["occupancy_target"])
     except (LayerError, KeyError, TypeError, ValueError):
@@ -259,7 +260,7 @@ def occupancy(cache: Path) -> dict | None:
     try:
         import account_router  # noqa: PLC0415 - same directory, optional
         live = {name: len(account_router.live_pids(cache / "accounts" / name))
-                for name in account_router.account_names(cache)}
+                for name in run_mode.names_of(mode)}
     except Exception:  # pragma: no cover - a census failure must not lose the report
         return None
     total = sum(live.values())
@@ -298,7 +299,7 @@ def key_census(repo_root: Path, cache: Path, now: datetime,
         entries = None
     if entries is None:
         try:
-            mode = run_mode.load_mode()
+            mode = run_mode.load_mode(strict_accounts=False)
             entries = [{"name": row["name"], "label": row.get("label") or row["name"],
                         "endpoint": row.get("endpoint") or row["name"],
                         "ceiling": row.get("nominal_limit", 0),
@@ -386,9 +387,14 @@ def refusals_by_account(repo_root: Path, entries: list[dict],
     for row in _rows_in_window(path, since, ("end", "start", "ts")):
         if row.get("failure_class") not in refusal_classes:
             continue
-        name = next((owner[row[field]] for field in
-                     ("account", "endpoint", "failure_endpoint", "key_label")
-                     if isinstance(row.get(field), str) and row[field] in owner), None)
+        recorded_account = row.get("account")
+        if (isinstance(recorded_account, str)
+                and accounts_file.NAME_RE.match(recorded_account)):
+            name = recorded_account if recorded_account in counts else None
+        else:
+            name = next((owner[row[field]] for field in
+                         ("endpoint", "failure_endpoint", "key_label")
+                         if isinstance(row.get(field), str) and row[field] in owner), None)
         if name is not None:
             counts[name] = counts.get(name, 0) + 1
     return counts
@@ -449,7 +455,8 @@ def model_census(repo_root: Path, since: datetime) -> dict | None:
     """
     path = repo_root / "results" / "telemetry" / "sessions.jsonl"
     try:
-        override = str(run_mode.value_for(run_mode.load_mode(), "model_override"))
+        override = str(run_mode.value_for(
+            run_mode.load_mode(strict_accounts=False), "model_override"))
     except (LayerError, KeyError, TypeError, ValueError):
         override = "unknown"
     try:
@@ -575,7 +582,8 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
 
 
 def signature(rows: list[dict], occ: dict | None = None,
-              keys: list[dict] | None = None) -> str:
+              keys: list[dict] | None = None, models: dict | None = None,
+              dead: dict | None = None) -> str:
     """Stable digest of the ready set and its reasons (no elapsed timers).
 
     The occupancy ALARM state joins it — not the live count, which changes every
@@ -593,6 +601,11 @@ def signature(rows: list[dict], occ: dict | None = None,
     for key in keys or []:
         payload += (f"\nkey={key['name']}:{key['ceiling']}:{key['reserved']}:"
                     f"{key['cap']}:{key['health']}:{int(bool(key['enabled']))}")
+    if models is not None:
+        payload += f"\noff_policy_models={int(models.get('off_policy', 0))}"
+    if dead is not None:
+        payload += "\ndead=" + ",".join(
+            f"{role}:{count}" for role, count in sorted(dead.get("by_role", {}).items()))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -790,7 +803,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         issue = args.issue
         if issue is None:
-            issue = int(run_mode.value_for(run_mode.load_mode(), "progress_issue"))
+            issue = int(run_mode.value_for(
+                run_mode.load_mode(strict_accounts=False), "progress_issue"))
         rows = collect(repo_root, cache, now)
         merged = merged_in_window(now - timedelta(minutes=args.window_min))
     except LayerError as exc:
@@ -807,7 +821,7 @@ def main(argv: list[str] | None = None) -> int:
     body = render(rows, merged, window_min=args.window_min, ts=ts,
                   unexplained=unexplained, occ=occ, models=models, dead=dead,
                   keys=keys)
-    digest = signature(rows, occ, keys)
+    digest = signature(rows, occ, keys=keys, models=models, dead=dead)
     state_file = state_path(cache)
     state = read_state(state_file)
     post, why = should_post(state, digest, merged, now, force=args.force)

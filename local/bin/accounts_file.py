@@ -322,18 +322,31 @@ def save(entries: list[dict], *, root: Path | None = None, actor: str,
 ACCOUNT_MODE_REL = Path("watchdog") / "account-mode"
 
 
+def dispatch_account_mode(entries: list[dict]) -> str:
+    """The PATH-shim gate required by the enabled accounts' actual homes."""
+
+    default_home = Path.home() / ".codex"
+    nondefault = any(
+        entry.get("enabled", True)
+        and Path(str(entry.get("codex_home") or "")).expanduser() != default_home
+        for entry in entries
+    )
+    return "both" if nondefault else "primary"
+
+
 def write_account_mode(entries: list[dict], root: Path | None = None) -> str:
     """Derive ``watchdog/account-mode`` from ``enabled``; never fatal.
 
-    ``both`` when more than one entry is enabled, ``primary`` otherwise — the
-    rule ``run_mode.account_mode`` states, applied to the live file.  It used to
+    ``both`` when any enabled entry uses a non-default home, ``primary``
+    otherwise — the rule ``run_mode.account_mode`` states, applied to the live
+    file.  It used to
     be written only by ``run_mode.py apply|pause|resume``, so ``accounts.sh add``
     or an ``ACCOUNTS: second enabled=true`` comment left it saying ``primary``
     and the PATH shim refused every dispatch whose CODEX_HOME was not ~/.codex
     with exit 4 — while the router admitted to the new key and the inbox replied
     "applied:".  Deriving it here makes that reply true without a re-brief.
     """
-    wanted = "both" if sum(1 for entry in entries if entry["enabled"]) > 1 else "primary"
+    wanted = dispatch_account_mode(entries)
     path = (root or cache_root()) / ACCOUNT_MODE_REL
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -448,13 +461,16 @@ def apply_fields(entries: list[dict], name: str, fields: dict) -> list[str]:
     """
     entry = find(entries, name)
     typed = [coerce(field, value) for field, value in fields.items()]
+    candidate = dict(entry)
     changes: list[str] = []
     for canonical, value in typed:
-        before = entry.get(canonical)
-        entry[canonical] = value
+        before = candidate.get(canonical)
+        candidate[canonical] = value
         if before != value:
             changes.append(f"{canonical} {before!r} -> {value!r}")
-    validate_entry(entry, f"account {name}")
+    checked = validate_entry(candidate, f"account {name}")
+    entry.clear()
+    entry.update(checked)
     return changes
 
 

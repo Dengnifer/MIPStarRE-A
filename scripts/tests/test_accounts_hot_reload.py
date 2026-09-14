@@ -362,7 +362,7 @@ class TestSharedEndpoint(HotReloadHarness):
             self.assertEqual(counters["refusals"], 1, name)
 
     def test_a_row_naming_only_the_shared_endpoint_charges_neither_key(self) -> None:
-        rows = [{"endpoint": "api.shared.example",
+        rows = [{"account": "retired", "endpoint": "api.shared.example",
                  "failure_class": "concurrency_limit", "_ts": T0}]
         accounts = cc.load_run_mode()["accounts"]
         endpoints, _ = cc.attribution_map(accounts)
@@ -401,9 +401,9 @@ class TestDerivedFiles(HotReloadHarness):
             {"name": "primary", "label": "relay-us7", "endpoint": "relay-us7",
              "codex_home": str(self.cache / "codex-primary"), "ceiling": 5,
              "external_reserved": 0, "enabled": True, "note": ""}])
-        self.assertEqual(self.gate(), "primary")
+        self.assertEqual(self.gate(), "both")
         self.tick(60)
-        self.assertEqual(self.gate(), "primary")
+        self.assertEqual(self.gate(), "both")
         self.write_accounts([
             {"name": "primary", "label": "relay-us7", "endpoint": "relay-us7",
              "codex_home": str(self.cache / "codex-primary"), "ceiling": 5,
@@ -420,7 +420,7 @@ class TestDerivedFiles(HotReloadHarness):
         self.tick(60)
         self.assertEqual(self.gate(), "both")
         self.edit("second", enabled="false")
-        self.assertEqual(self.gate(), "primary")
+        self.assertEqual(self.gate(), "both")
 
     def test_a_removed_account_does_not_keep_a_live_cap_file(self) -> None:
         # That stale file is what account_router's fallback glob picks up when

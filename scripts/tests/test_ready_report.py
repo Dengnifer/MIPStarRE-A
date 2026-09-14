@@ -216,6 +216,14 @@ class RenderAndSuppressionTestCase(unittest.TestCase):
         self.assertNotEqual(ready_report.signature(self.rows(key="stale")),
                             ready_report.signature(self.rows(key="failed:build:x")))
 
+    def test_signature_changes_with_model_and_dead_session_alarms(self) -> None:
+        base = ready_report.signature(self.rows(), models={"off_policy": 0},
+                                      dead={"by_role": {}})
+        self.assertNotEqual(base, ready_report.signature(
+            self.rows(), models={"off_policy": 1}, dead={"by_role": {}}))
+        self.assertNotEqual(base, ready_report.signature(
+            self.rows(), models={"off_policy": 0}, dead={"by_role": {"prover": 1}}))
+
     def test_suppressed_only_when_identical_and_nothing_merged(self) -> None:
         digest = ready_report.signature(self.rows())
         state = {"signature": digest, "posted_at": "2026-09-13T05:00:00Z"}

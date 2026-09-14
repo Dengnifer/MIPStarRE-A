@@ -31,11 +31,9 @@
 #   git check-attr merge -- results/telemetry/events.md              # -> union
 #   git check-attr merge -- results/telemetry/owner-tools/README.md  # -> unspecified
 
-# Every .jsonl under results/telemetry is a record of appended rows by
-# construction (sessions, builds, stages, estimates, per-run merge latency, the
-# per-session captures under sessions/).
+# Top-level JSONL files are shared append logs. Per-session and audit captures
+# below subdirectories are immutable snapshots and keep ordinary merging.
 results/telemetry/*.jsonl       merge=union
-results/telemetry/**/*.jsonl    merge=union
 
 # The append-only Markdown records, named one by one.
 results/telemetry/events.md            merge=union

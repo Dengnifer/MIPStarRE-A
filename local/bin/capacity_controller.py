@@ -452,9 +452,14 @@ def observe(rows: list[dict], name: str, endpoints: dict[str, str], roles: dict[
         # first attributed a refusal to whichever key happened to be written into
         # the endpoint map last, so AIMD cut the innocent key while the refusing
         # one crept up, and one `auth` row disabled the wrong key at threshold 1.
-        owner = next((endpoints[row[field]] for field in
-                      ("account", "endpoint", "failure_endpoint", "key_label")
-                      if isinstance(row.get(field), str) and row[field] in endpoints), None)
+        recorded_account = row.get("account")
+        if isinstance(recorded_account, str) and accounts_file.NAME_RE.match(recorded_account):
+            owner = (recorded_account
+                     if endpoints.get(recorded_account) == recorded_account else None)
+        else:
+            owner = next((endpoints[row[field]] for field in
+                          ("endpoint", "failure_endpoint", "key_label")
+                          if isinstance(row.get(field), str) and row[field] in endpoints), None)
         failure_class = row.get("failure_class")
         if owner != name or not isinstance(failure_class, str) or not failure_class:
             continue
@@ -943,8 +948,7 @@ def write_account_mode(accounts: dict[str, dict]) -> str:
     ``run_mode.py apply`` — the very re-brief the live file exists to remove —
     is gone.  Never fatal: a tick must not fail over a derived file.
     """
-    wanted = "both" if sum(1 for entry in accounts.values()
-                           if entry.get("enabled")) > 1 else "primary"
+    wanted = accounts_file.dispatch_account_mode(list(accounts.values()))
     path = cache_root() / ACCOUNT_MODE_REL
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -1080,36 +1084,40 @@ def cmd_init(args: argparse.Namespace) -> int:
     """
     policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
     now = args.now or utcnow()
-    previous = load_state()
-    state = new_state(run_mode["brief_ref"])
-    if previous and not args.force:
-        # A new brief is a new run: only the measurement is carried, because it
-        # is what starts the next run below the cliff instead of above it.
-        for name, old in previous["accounts"].items():
-            state["accounts"][name] = dict(
-                new_account_state(name), measured_limit=old.get("measured_limit"),
-                observed_refusal_floor=old.get("observed_refusal_floor"))
-    caps, lines = {}, []
-    for name, entry in run_mode["accounts"].items():
-        knobs = knobs_for(policy, name)
-        account_state = state["accounts"].setdefault(name, new_account_state(name))
-        floor, ceiling = refresh(account_state, entry, knobs)
-        health = load_health(name, entry["endpoint"], now,
-                             health_knobs(policy, name)["probe_backoff_s"])
-        # A fresh brief is not evidence that a dead endpoint came back.
-        account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
-                             decrease_window_until=None, refusal_cursor=None,
-                             cap=0 if health["state"] == "down"
-                             else seed_cap(account_state, floor, ceiling, entry))
-        caps[name] = int(account_state["cap"])
-        lines.append(f"{name} cap {caps[name]} (floor {floor}, ceiling {ceiling}, health "
-                     f"{health['state']}, measured {account_state['measured_limit']})")
-        if not args.dry_run:
-            _write_json(health_path(name), health)
-    for stale in [name for name in state["accounts"] if name not in run_mode["accounts"]]:
-        state["accounts"].pop(stale)
-    total = _commit(state, caps, now, "init", "seeded from the brief: " + "; ".join(lines),
-                    args.dry_run)
+    lock = _require_lock(blocking=True)
+    try:
+        previous = load_state()
+        state = new_state(run_mode["brief_ref"])
+        if previous and not args.force:
+            # A new brief is a new run: only the measurement is carried, because it
+            # is what starts the next run below the cliff instead of above it.
+            for name, old in previous["accounts"].items():
+                state["accounts"][name] = dict(
+                    new_account_state(name), measured_limit=old.get("measured_limit"),
+                    observed_refusal_floor=old.get("observed_refusal_floor"))
+        caps, lines = {}, []
+        for name, entry in run_mode["accounts"].items():
+            knobs = knobs_for(policy, name)
+            account_state = state["accounts"].setdefault(name, new_account_state(name))
+            floor, ceiling = refresh(account_state, entry, knobs)
+            health = load_health(name, entry["endpoint"], now,
+                                 health_knobs(policy, name)["probe_backoff_s"])
+            # A fresh brief is not evidence that a dead endpoint came back.
+            account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
+                                 decrease_window_until=None, refusal_cursor=None,
+                                 cap=0 if health["state"] == "down"
+                                 else seed_cap(account_state, floor, ceiling, entry))
+            caps[name] = int(account_state["cap"])
+            lines.append(f"{name} cap {caps[name]} (floor {floor}, ceiling {ceiling}, health "
+                         f"{health['state']}, measured {account_state['measured_limit']})")
+            if not args.dry_run:
+                _write_json(health_path(name), health)
+        for stale in [name for name in state["accounts"] if name not in run_mode["accounts"]]:
+            state["accounts"].pop(stale)
+        total = _commit(state, caps, now, "init", "seeded from the brief: " + "; ".join(lines),
+                        args.dry_run)
+    finally:
+        lock.close()
     print("\n".join(lines))
     print(f"max-codex {total}" + (" (dry run; nothing written)" if args.dry_run else ""))
     return 0
@@ -1250,7 +1258,7 @@ def cmd_resume(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_probe(args: argparse.Namespace) -> int:
+def _cmd_probe_locked(args: argparse.Namespace) -> int:
     """Run the health probe now, for one account or for every one.
 
     The owner's "is that key working yet?", answered in a bounded read-only
@@ -1330,6 +1338,16 @@ def cmd_probe(args: argparse.Namespace) -> int:
         if not args.dry_run:
             _write_json(health_path(name), health)
     return 0 if not failures else EXIT_FAIL
+
+
+def cmd_probe(args: argparse.Namespace) -> int:
+    """Serialize the manual health read/modify/write with controller ticks."""
+
+    lock = _require_lock(blocking=True)
+    try:
+        return _cmd_probe_locked(args)
+    finally:
+        lock.close()
 
 
 def cmd_status(args: argparse.Namespace) -> int:

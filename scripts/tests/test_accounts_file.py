@@ -315,9 +315,11 @@ class TestDirectives(AccountsHarness):
     def test_one_bad_field_of_a_directive_changes_nothing_in_that_entry(self) -> None:
         self.seed()
         results = af.apply_directives(
-            "ACCOUNTS: second ceiling=20 enabled=perhaps\n", actor="github:owner")
+            "ACCOUNTS: second ceiling=20 enabled=perhaps\n"
+            "ACCOUNTS: second reserved=4\n", actor="github:owner")
         self.assertTrue(results[0].startswith("rejected:"))
         self.assertEqual(af.load_map()["second"]["ceiling"], 30)
+        self.assertEqual(af.load_map()["second"]["external_reserved"], 4)
 
 
 if __name__ == "__main__":

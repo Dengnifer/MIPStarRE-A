@@ -109,13 +109,11 @@ Without that, `choose_account` *prefers* the dead account — it picks the lower
 ratio, and a dying endpoint keeps freeing slots — so an outage accelerates itself.  That is
 how one hour of 503s cost 69 sessions.
 
-**An invalid accounts file stops the CONTROLLER, not admission.** The controller
-raises with the offending field named and leaves every cap file untouched; the
-router, `ready_report.py` and `run_mode.py pause|resume` keep working from the
-last good derived files, because a mistyped ceiling must never stop every
-dispatch. That fail-open can only narrow: an account the file no longer
-describes has no resolvable `codex_home`, and a key the dispatcher cannot place
-is cap 0 rather than a session on the default `~/.codex`.
+**An invalid accounts file stops the controller and admission.** Both name the
+invalid file; neither substitutes historical homes or the brief. Cap files stay
+untouched. Read-only reports may use the last-good run-mode snapshot, and pause
+may use that snapshot only to zero known caps. Structural repair is an explicit
+shell operation, not an `ACCOUNTS:` field directive.
 
 ## 4. The files, and which of them means anything
 
@@ -124,7 +122,7 @@ is cap 0 rather than a session on the default `~/.codex`.
 | `watchdog/capacity/state.json` | the controller, **solely** | the record: per account `cap`, `floor`, `ceiling`, `health`, `saved_cap`, `external_reserved`; plus `paused_at`, `brief_ref` |
 | `watchdog/capacity/health-<account>.json` | the controller | §3; the per-account file admission reads |
 | `watchdog/capacity/health.json` | the controller | §3; ONE document for every key — state, reason, `disabled_by`, next probe — quoted by the hourly per-key line and by `accounts.sh list` (which renders the effective cap, the state and the reason beside the owner's own ceiling). A view, never an admission input |
-| `watchdog/account-mode` | the controller (every tick) and `accounts_file.py` (every write), to the rule `run_mode.account_mode` states | `both` when more than one entry is enabled, else `primary`; the deployed PATH shim refuses a non-default `CODEX_HOME` while it says `primary`. Derived, never briefed — a key enabled with `accounts.sh` or from a phone must not need a re-brief to be dispatchable |
+| `watchdog/account-mode` | the controller (every tick) and `accounts_file.py` (every write), to the rule `run_mode.account_mode` states | `both` when any enabled entry uses a non-default `CODEX_HOME`, else `primary`; derived, never briefed |
 | `watchdog/accounts.json` | **the owner** (`owner-tools/accounts.sh`, the `ACCOUNTS:` inbox channel, `run_mode.py apply` when absent) | the live keys and their ceilings; `full-speed-mode.md` §1.1. The controller never writes it |
 | `watchdog/capacity/accounts.log` | `accounts_file.py` | one line per edit: timestamp, actor, action, field, old → new |
 | `watchdog/capacity/limit-estimate.json` | the controller | §5 |
@@ -163,7 +161,7 @@ waiter dispatched with `--account auto` is waiting on both accounts at once.
 `run_mode.py apply` seeds the next run's starting cap at `min(brief ceiling, measured_limit)`,
 so a run starts below the cliff instead of above it; the brief's nominal is always the
 ceiling, so a stale low estimate costs a few minutes of ramp and never the run.  One
-`capacity` row per tick goes to `results/telemetry/stages.jsonl`.
+`capacity` row per tick goes to runtime `watchdog/capacity/ticks.jsonl`.
 
 ## 6. Operator controls
 

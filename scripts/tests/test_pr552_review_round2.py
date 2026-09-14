@@ -82,7 +82,6 @@ class MergeAttributeScopeTestCase(unittest.TestCase):
         "results/telemetry/owner-log.md",
         "results/telemetry/design-decisions.md",
         "results/telemetry/sessions.jsonl",
-        "results/telemetry/sessions/prover-1.jsonl",
         "results/telemetry/merge-latency-2026-09-13.jsonl",
         "local/protocols/EVOLUTION.md",
     )
@@ -94,6 +93,7 @@ class MergeAttributeScopeTestCase(unittest.TestCase):
         "results/telemetry/README.md",
         "results/telemetry/usage-summary.md",
         "results/telemetry/github-migration-map.md",
+        "results/telemetry/sessions/prover-1.jsonl",
     )
 
     def setUp(self) -> None:
@@ -192,6 +192,16 @@ class AccountModeTestCase(RunModeCase):
         self.write_brief(lambda doc: doc["accounts"][1].update(enabled=False))
         self.assertEqual(self.run_cli(["apply"])[0], 0)
         self.assertEqual(text(self.account_mode_file).strip(), "primary")
+
+    def test_second_only_still_permits_the_second_codex_home(self) -> None:
+        self.write_brief(lambda doc: (doc["accounts"][0].update(enabled=False),
+                                      doc["accounts"][1].update(enabled=True)))
+        self.assertEqual(self.run_cli(["apply"])[0], 0)
+        self.assertEqual(text(self.account_mode_file).strip(), "both")
+
+    def test_invalid_dispatch_label_is_rejected_by_the_brief(self) -> None:
+        self.write_brief(lambda doc: doc["accounts"][0].update(label="Primary Relay Key"))
+        self.assertNotEqual(self.run_cli(["apply"])[0], 0)
 
     def test_the_file_is_queryable_and_shown(self) -> None:
         self.write_brief(lambda doc: [a.update(enabled=True) for a in doc["accounts"]])
