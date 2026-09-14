@@ -333,7 +333,7 @@ through `local/bin/offload-build.sh`, which calls
 worktree's sources (never `.lake`, `.git`, `.worktrees` or `results/telemetry`),
 seeds the lane's `.lake/build` from the shared seed with `cp -al`, points
 `.lake/packages` at the shared Mathlib cache, builds, and returns only the
-artifacts that build wrote. **The pre-push per-file `lake env lean` gate stays
+whole `.lake/build` closure. **The pre-push per-file `lake env lean` gate stays
 on ghz**, as does everything else that decides whether a branch may be
 published: only the compilation moves.
 
@@ -344,7 +344,14 @@ fails because chsh is unreachable, and a run needs no intervention when it
 happens; the lane log says which host built. A build that *failed* is a
 different thing and is passed through unchanged: a proof that does not compile
 on chsh does not compile here either, and a silent local retry would only spend
-the machine's single full-build lease twice.
+the machine's single full-build lease twice. A completed remote exit 124 remains
+that build's verdict; only expiry of the outer transport deadline falls back.
+
+Remote package, seed and retained lane reuse is identity-gated. The package key
+comes from `lake-manifest.json` and `lean-toolchain`; the build key also includes
+`lakefile.toml`. Seed and lane identity is published only after a successful
+build. Missing or incompatible identity exits 64 and uses the existing local
+fallback; it never provisions dependencies remotely.
 
 **How to verify that it was used.**
 
@@ -360,8 +367,8 @@ the fallback working, not an incident. A run at `fast` speed whose log has no
 `host=chsh` row at all is the thing to look at: check `get offload_reason`
 first, then the known-hosts file below.
 
-**The seed.** chsh's checkout and its hardlink seed go stale as `main` moves,
-and a lane seeded from an old seed rebuilds the difference — slow, never wrong.
+**The seed.** chsh's checkout and its hardlink seed go stale as `main` moves.
+Lanes refuse a seed whose successful-build identity does not match the worktree.
 The merge daemon fires `build-on-chsh.sh --seed-refresh` after every merge; the
 refresh is detached, takes its own lock, runs at most once an hour and returns
 immediately while the offload is disabled. Its log is
@@ -375,23 +382,16 @@ merge: chsh's checkout is at whatever the last run left it. It is a no-op while
 the offload is disabled.
 
 The seed is replaced **in place** (`rsync -a --delete` into the seed directory)
-under `seed-refresh.lock`, while lanes `cp -al` out of that same directory under
-their own per-lane locks. The two locks are disjoint, so a lane can be seeded
-from a half-replaced seed. That is slow, never wrong: rsync unlinks and recreates
-rather than writing in place, so hardlinks a lane has already taken keep their
-old contents, and a lane seeded mid-refresh simply rebuilds more than it needed
-to. It is written down here rather than fixed because the cost is build minutes
-on 192 idle cores; a shared seed lock taken by the lane skeleton step is the fix
-if that ever stops being true.
+under `seed-refresh.lock`. Lanes take that lock shared while validating identity
+and taking the hardlink skeleton, so they cannot reuse a half-replaced seed.
 
 **Installation.** `results/telemetry/owner-tools/install.sh` deploys
 `build-on-chsh.sh` under the hash manifest like every other operator tool, and
 copies the host keys to `watchdog/chsh/known_hosts` (from
 `$MIPSTARRE_CHSH_KNOWN_HOSTS`, then its own durable copy at
-`watchdog/chsh/known_hosts.source`, then `/tmp/chsh-setup/known_hosts` — where
-the 2026-09-12 side session left them, and which a reboot or a `/tmp` sweep
-removes). The first install keeps that durable copy so the keys outlive `/tmp`,
-and `install.sh --verify` reports a missing or empty `known_hosts` rather than
+`watchdog/chsh/known_hosts.source`). Shared temporary files are ignored. The
+first explicit install keeps that durable copy, and `install.sh --verify`
+reports a missing or empty `known_hosts` rather than
 leaving the *absence* of `host=chsh` rows as the only signal. The keys
 are runtime state, never committed, and the connection is
 `StrictHostKeyChecking=yes` against that file: a missing file makes the offload

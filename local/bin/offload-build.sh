@@ -39,8 +39,6 @@
 
 OFFLOAD_UNUSABLE=64
 OFFLOAD_NO_ARTIFACTS=65
-#: `timeout`'s own code for "the command was killed at the deadline".
-OFFLOAD_TIMED_OUT=124
 #: Wall clock for ONE offload, a little above build-on-chsh.sh's own remote
 #: `timeout 2700 lake build`.  The offload runs while the caller holds the
 #: machine-wide full-build lease, so an offload that never returns stops every
@@ -109,7 +107,7 @@ offload_enabled_for_run() { # 0 = the run mode enables the offload
 
 offload_lake_build() { # <worktree> <label> [targets ...]
   local wt="$1" label="$2"; shift 2
-  local script rc started elapsed
+  local script rc started elapsed completion_dir completion_file completed_rc
   OFFLOAD_WORKTREE="$wt"
 
   if offload_enabled_for_run && script="$(offload_script)"; then
@@ -117,13 +115,32 @@ offload_lake_build() { # <worktree> <label> [targets ...]
     # `|| rc=$?`, never a bare call: ci.sh runs its step bodies under `set -e`,
     # where a failing build would kill the step before the fallback could run.
     rc=0
-    timeout "${MIPSTARRE_OFFLOAD_TIMEOUT_S:-3300}" bash "$script" "$wt" "$@" || rc=$?
+    completion_dir=""; completion_file=""
+    completion_dir="$(mktemp -d "${TMPDIR:-/tmp}/mipstarre-offload.XXXXXX")" || rc=$?
+    [ -z "$completion_dir" ] || completion_file="$completion_dir/completed"
+    if [ "$rc" = 0 ]; then
+      timeout "${MIPSTARRE_OFFLOAD_TIMEOUT_S:-3300}" bash -c '
+        completion=$1; script=$2; shift 2
+        rc=0
+        bash "$script" "$@" || rc=$?
+        printf "%s\n" "$rc" > "$completion"
+        exit "$rc"
+      ' _ "$completion_file" "$script" "$wt" "$@" || rc=$?
+    fi
     elapsed=$(( $(date +%s) - started ))
-    if [ "$rc" = "$OFFLOAD_TIMED_OUT" ]; then
-      # A stalled offload is "chsh is unusable", never a verdict on the proof.
+    if [ -n "$completion_file" ] && [ -s "$completion_file" ]; then
+      completed_rc="$(tr -d '[:space:]' < "$completion_file")"
+      case "$completed_rc" in
+        ''|*[!0-9]*) rc="$OFFLOAD_UNUSABLE" ;;
+        *) rc="$completed_rc" ;;
+      esac
+    else
+      # A missing marker means the wrapper did not observe remote completion;
+      # a completed remote exit 124 is recorded and remains a build verdict.
       offload_note "$label: the offload passed its wall clock; treating it as unusable"
       rc="$OFFLOAD_UNUSABLE"
     fi
+    [ -z "$completion_dir" ] || rm -rf "$completion_dir"
     if [ "$rc" != "$OFFLOAD_UNUSABLE" ] && [ "$rc" != "$OFFLOAD_NO_ARTIFACTS" ]; then
       offload_note "$label built on chsh in ${elapsed}s (lake exit $rc) host=chsh"
       return "$rc"

@@ -46,11 +46,10 @@
 #   repo-root           the checkout this release was installed from
 #
 # Outside owner-bin/ this installer also places the chsh build farm's host keys at
-# $MIPSTARRE_CACHE_ROOT/watchdog/chsh/known_hosts, copied from $MIPSTARRE_CHSH_KNOWN_HOSTS,
-# then the durable copy under the cache root, then /tmp/chsh-setup/known_hosts (where the
-# 2026-09-12 side session left them, and which a reboot or a /tmp sweep removes).  The
-# first install keeps its own copy at watchdog/chsh/known_hosts.source so the keys outlive
-# /tmp, and `--verify` says so when the file is missing or empty instead of leaving the
+# $MIPSTARRE_CACHE_ROOT/watchdog/chsh/known_hosts, copied only from the explicitly
+# trusted $MIPSTARRE_CHSH_KNOWN_HOSTS or the durable copy under the cache root.  The
+# first install keeps its own copy at watchdog/chsh/known_hosts.source, and `--verify`
+# says so when the file is missing or empty instead of leaving the
 # absence of `host=chsh` rows as the only signal.  They are runtime
 # state, not a committed file, and build-on-chsh.sh uses them with
 # StrictHostKeyChecking=yes.  Without them the offload exits 64 and every lane simply
@@ -95,21 +94,16 @@ DEST="${DEST:-$CACHE_ROOT/owner-bin}"
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
 
 CHSH_STATE="$CACHE_ROOT/watchdog/chsh"
-CHSH_KNOWN_HOSTS_SRC="${MIPSTARRE_CHSH_KNOWN_HOSTS:-/tmp/chsh-setup/known_hosts}"
+CHSH_KNOWN_HOSTS_SRC="${MIPSTARRE_CHSH_KNOWN_HOSTS:-}"
 
-# The keys survive a reboot.  The default source is /tmp/chsh-setup/known_hosts,
-# which is where the 2026-09-12 side session left them and which /tmp cleaning
-# or a reboot removes; after that the offload exits 64 forever and every lane
-# silently builds here, with the only signal being the ABSENCE of `host=chsh`
-# rows in watchdog/chsh/offload.log.  So the first copy is kept under the cache
-# root as the durable source, and it is preferred over /tmp on every later run.
+# A predictable shared /tmp path is never a trust source: another user could
+# pre-create it before the first install.  The first explicitly trusted copy is
+# retained under the cache root for later installs.
 CHSH_KNOWN_HOSTS_KEEP="$CHSH_STATE/known_hosts.source"
 
 chsh_known_hosts_source() { # the file to install from, or nothing
   local candidate
-  for candidate in "${MIPSTARRE_CHSH_KNOWN_HOSTS:-}" \
-                   "$CHSH_KNOWN_HOSTS_KEEP" \
-                   "$CHSH_KNOWN_HOSTS_SRC"; do
+  for candidate in "$CHSH_KNOWN_HOSTS_SRC" "$CHSH_KNOWN_HOSTS_KEEP"; do
     [ -n "$candidate" ] && [ -s "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
   done
   return 1
@@ -118,8 +112,8 @@ chsh_known_hosts_source() { # the file to install from, or nothing
 install_chsh_known_hosts() {
   local src
   if ! src="$(chsh_known_hosts_source)"; then
-    echo "$PROG: no chsh known-hosts at $CHSH_KNOWN_HOSTS_SRC or $CHSH_KNOWN_HOSTS_KEEP;" \
-         "the build farm stays unusable and lanes build on this host"
+    echo "$PROG: no explicitly trusted chsh known-hosts and no durable copy at" \
+         "$CHSH_KNOWN_HOSTS_KEEP; the build farm stays unusable"
     return 0
   fi
   mkdir -p "$CHSH_STATE"
@@ -391,7 +385,7 @@ if [ "$DRY" -eq 1 ]; then
     echo "$PROG: [dry-run] would install $khsrc as $CHSH_STATE/known_hosts"
     echo "$PROG: [dry-run] would keep a durable copy at $CHSH_KNOWN_HOSTS_KEEP"
   else
-    echo "$PROG: [dry-run] no chsh known-hosts at $CHSH_KNOWN_HOSTS_SRC or $CHSH_KNOWN_HOSTS_KEEP; the build farm stays unusable"
+    echo "$PROG: [dry-run] no explicitly trusted chsh known-hosts or durable copy; the build farm stays unusable"
   fi
   if [ "$CRONS" -eq 1 ]; then
     "$SRC/install-crons.sh" --dry-run || exit $?

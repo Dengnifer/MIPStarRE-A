@@ -98,6 +98,7 @@ class CapacityRoundTripTestCase(unittest.TestCase):
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertEqual(self.caps(), briefed,
                          "the round trip must return the briefed caps, never the floor")
+        self.assertEqual(self.run_mode("get", "offload").stdout.strip(), "yes")
         # And the message must carry the numbers the files carry.
         self.assertIn("caps primary 5, second 28, max-codex 33", done.stdout)
 
@@ -122,6 +123,7 @@ class CapacityRoundTripTestCase(unittest.TestCase):
         mode = json.loads((self.watchdog / "run-mode.json").read_text(encoding="utf-8"))
         self.assertTrue(mode["paused"])
         self.assertEqual(self.caps()["max-codex"], "0")
+        self.assertEqual(self.run_mode("get", "offload").stdout.strip(), "no")
 
     def test_the_controller_is_resolved_under_the_repository_root(self) -> None:
         # The controller resolves its policy under MIPSTARRE_REPO_ROOT, so

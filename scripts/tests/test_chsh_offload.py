@@ -25,6 +25,7 @@ invocation and exit nonzero.
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import os
 import shutil
@@ -34,6 +35,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BIN_DIR = REPO_ROOT / "local" / "bin"
@@ -146,6 +148,15 @@ class OffloadGateTest(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertEqual(self.get("offload"), "yes")
 
+    def test_controller_refusal_keeps_the_offload_disabled(self) -> None:
+        self.apply()
+        self.assertEqual(run_mode_main(["pause"])[0], 0)
+        with mock.patch.object(run_mode, "call_controller",
+                               side_effect=[(False, "refused"), (True, "paused")]):
+            code, _, err = run_mode_main(["resume"])
+        self.assertEqual(code, 3, err)
+        self.assertEqual(self.get("offload"), "no")
+
     def test_speed_switch_moves_the_offload_with_it(self) -> None:
         self.apply()
         code, _, err = run_mode_main(["set", "speed", "default"])
@@ -198,6 +209,8 @@ class ShellTestCase(unittest.TestCase):
         self.worktree.mkdir()
         (self.worktree / "lakefile.toml").write_text("name = \"MIPStarRE\"\n", encoding="utf-8")
         (self.worktree / "lean-toolchain").write_text("leanprover/lean4:v4.32.0\n", encoding="utf-8")
+        (self.worktree / "lake-manifest.json").write_text('{"version": "1"}\n',
+                                                           encoding="utf-8")
 
     def tearDown(self) -> None:
         self._tmp.cleanup()
@@ -249,7 +262,8 @@ class DryRunTest(ShellTestCase):
     def test_dry_run_of_the_seed_refresh(self) -> None:
         checkout = self.root / "MIPStarRE-qpbt"
         checkout.mkdir()
-        (checkout / "lakefile.toml").write_text("name = \"MIPStarRE\"\n", encoding="utf-8")
+        for name in ("lakefile.toml", "lean-toolchain", "lake-manifest.json"):
+            shutil.copy(self.worktree / name, checkout / name)
         done = subprocess.run(
             ["bash", str(OFFLOAD_SH), "--dry-run", "--seed-refresh"],
             capture_output=True, text=True,
@@ -322,15 +336,24 @@ printf 'OFFLOAD %s\\n' "$*" >> "{ran}"
 exit {rc}
 """
 
+SLOW_OFFLOAD = """#!/usr/bin/env bash
+if [ "${{1:-}}" = --check ]; then exit 0; fi
+printf 'OFFLOAD %s\\n' "$*" >> "{ran}"
+sleep 2
+exit 0
+"""
+
 
 class FallbackTest(ShellTestCase):
     """A lane never fails because chsh is unreachable — and never builds twice."""
 
-    def drive(self, *, offload_rc: int, check_rc: int = 0, local_rc: int = 0) -> str:
+    def drive(self, *, offload_rc: int = 0, check_rc: int = 0, local_rc: int = 0,
+              script_body: str | None = None, timeout_s: str | None = None) -> str:
         ran = self.root / "offload-ran.txt"
         built = self.root / "local-built.txt"
-        script = self.stub("fake-offload.sh",
-                           FAKE_OFFLOAD.format(rc=offload_rc, check_rc=check_rc, ran=ran))
+        body = script_body or FAKE_OFFLOAD.format(
+            rc=offload_rc, check_rc=check_rc, ran=ran)
+        script = self.stub("fake-offload.sh", body)
         driver = self.stub("driver.sh", DRIVER.format(
             helper=HELPER_SH, built=built, worktree=self.worktree, local_rc=local_rc))
         done = subprocess.run(
@@ -338,9 +361,10 @@ class FallbackTest(ShellTestCase):
             # The run mode is asked independently of MIPSTARRE_OFFLOAD_SCRIPT, so
             # these tests state it: without it the helper answers "not a full
             # speed run" and never reaches the script at all.
-            env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
-                         MIPSTARRE_OFFLOAD="1",
-                         MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes"))))
+            env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script), MIPSTARRE_OFFLOAD="1",
+                         MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes")),
+                         **({"MIPSTARRE_OFFLOAD_TIMEOUT_S": timeout_s}
+                            if timeout_s else {})))
         self.ran = ran
         self.built = built
         return done.stdout + done.stderr
@@ -368,6 +392,19 @@ class FallbackTest(ShellTestCase):
         self.assertFalse(self.built.exists(),
                          "a failed proof must not be rebuilt locally in the hope of "
                          "a different answer")
+
+    def test_a_completed_remote_exit_124_is_not_a_transport_expiry(self) -> None:
+        out = self.drive(offload_rc=124)
+        self.assertIn("RC=124", out)
+        self.assertIn("host=chsh", out)
+        self.assertFalse(self.built.exists())
+
+    def test_outer_transport_expiry_runs_exactly_one_local_fallback(self) -> None:
+        out = self.drive(script_body=SLOW_OFFLOAD.format(ran=self.root / "offload-ran.txt"),
+                         timeout_s="0.05")
+        self.assertIn("RC=0", out)
+        self.assertIn("passed its wall clock", out)
+        self.assertEqual(self.built.read_text(encoding="utf-8").count("LOCAL"), 1)
 
     def test_a_successful_offload_skips_the_local_build(self) -> None:
         out = self.drive(offload_rc=0)
@@ -411,6 +448,127 @@ class FallbackTest(ShellTestCase):
                          "a run whose mode says no must not run the offload script, "
                          "however friendly that script's --check is")
         self.assertTrue(built.exists())
+
+
+FAKE_IDENTITY_SSH = """#!/usr/bin/env bash
+cmd="${!#}"
+printf '%s\\n' "$cmd" >> "$FAKE_SSH_LOG"
+case "$cmd" in
+  *'/lean-toolchain'*) printf '%s\\n' "$FAKE_TOOLCHAIN" ;;
+  *"$CHSH_LANE/.lake/build/.mipstarre-artifact-identity"*)
+    printf '%s\\n' "$FAKE_LANE_ID" ;;
+  *"$CHSH_SEED_PATH/.mipstarre-artifact-identity"*)
+    [ "$FAKE_SEED_ID" != __missing__ ] || exit 1
+    printf '%s\\n' "$FAKE_SEED_ID" ;;
+esac
+"""
+
+FAKE_RSYNC = """#!/usr/bin/env bash
+printf '%s\\n' "$*" >> "$FAKE_RSYNC_LOG"
+exit 1
+"""
+
+
+class ArtifactIdentityTest(ShellTestCase):
+    """Only compatible package, seed and retained-lane artifacts are reused."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        (self.cache / "watchdog/chsh/known_hosts").write_text("key\n", encoding="utf-8")
+        self.ssh_log, self.rsync_log = self.root / "ssh.log", self.root / "rsync.log"
+        self.ssh = self.stub("fake-ssh", FAKE_IDENTITY_SSH)
+        self.rsync = self.stub("fake-rsync", FAKE_RSYNC)
+        self.package_key, self.identity = self.identities()
+
+    def identities(self) -> tuple[str, str]:
+        toolchain = (self.worktree / "lean-toolchain").read_bytes()
+        manifest = (self.worktree / "lake-manifest.json").read_bytes()
+        lakefile = (self.worktree / "lakefile.toml").read_bytes()
+        package = hashlib.sha256(manifest + toolchain).hexdigest()[:16]
+        build = hashlib.sha256(toolchain + manifest + lakefile).hexdigest()
+        return package, f"package={package} build={build}"
+
+    def run_identity(self, *, seed: str | None = None, lane: str | None = None):
+        return subprocess.run(
+            ["bash", str(OFFLOAD_SH), str(self.worktree)], capture_output=True, text=True,
+            env=self.env(MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes")),
+                         CHSH_SSH_BIN=str(self.ssh), CHSH_RSYNC_BIN=str(self.rsync),
+                         CHSH_PACKAGES=f"/remote/packages/{self.package_key}",
+                         CHSH_SEED="/remote/seed/build", CHSH_BUILDS="/remote/builds",
+                         FAKE_TOOLCHAIN="leanprover/lean4:v4.32.0",
+                         FAKE_SEED_ID=seed or self.identity,
+                         FAKE_LANE_ID=lane or self.identity,
+                         FAKE_SSH_LOG=str(self.ssh_log), FAKE_RSYNC_LOG=str(self.rsync_log),
+                         CHSH_SEED_PATH="/remote/seed/build",
+                         CHSH_LANE=f"/remote/builds/{self.worktree.name}"))
+
+    def test_matching_identities_reach_the_source_transfer(self) -> None:
+        done = self.run_identity()
+        self.assertEqual(done.returncode, 64, done.stdout + done.stderr)
+        self.assertTrue(self.rsync_log.exists(), "matching identities must pass reuse checks")
+
+    def test_manifest_change_rejects_the_old_package_identity(self) -> None:
+        (self.worktree / "lake-manifest.json").write_text('{"version": "2"}\n')
+        done = self.run_identity()
+        self.assertEqual(done.returncode, 64)
+        self.assertIn("package identity mismatch", done.stderr)
+        self.assertFalse(self.rsync_log.exists())
+
+    def test_lakefile_change_rejects_the_old_seed_identity(self) -> None:
+        (self.worktree / "lakefile.toml").write_text("name = \"changed\"\n")
+        done = self.run_identity()
+        self.assertEqual(done.returncode, 64)
+        self.assertIn("seed identity mismatch", done.stderr)
+        self.assertFalse(self.rsync_log.exists())
+
+    def test_absent_seed_metadata_is_infrastructure_fallback(self) -> None:
+        done = self.run_identity(seed="__missing__")
+        self.assertEqual(done.returncode, 64)
+        self.assertIn("metadata is missing", done.stderr)
+
+    def test_stale_retained_lane_metadata_is_cleared_and_falls_back(self) -> None:
+        done = self.run_identity(lane="package=stale build=stale")
+        self.assertEqual(done.returncode, 64)
+        self.assertIn("retained lane artifact identity", done.stderr)
+        self.assertFalse(self.rsync_log.exists())
+
+
+class InstallerTrustTest(ShellTestCase):
+    def install(self, source: Path | None = None):
+        env = self.env(MIPSTARRE_REPO_ROOT=str(REPO_ROOT), TMPDIR=str(self.root / "tmp"))
+        env.pop("MIPSTARRE_CHSH_KNOWN_HOSTS", None)
+        if source is not None:
+            env["MIPSTARRE_CHSH_KNOWN_HOSTS"] = str(source)
+        return subprocess.run(
+            ["bash", str(REPO_ROOT / "results/telemetry/owner-tools/install.sh"),
+             "--dest", str(self.root / "owner-bin"), "--speed", "default"],
+            capture_output=True, text=True, env=env)
+
+    def test_absent_trusted_input_leaves_the_offload_unavailable(self) -> None:
+        done = self.install()
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertFalse((self.cache / "watchdog/chsh/known_hosts").exists())
+
+    def test_explicit_source_is_promoted_to_the_durable_copy(self) -> None:
+        source = self.root / "trusted-host-key"
+        source.write_text("trusted\n", encoding="utf-8")
+        self.assertEqual(self.install(source).returncode, 0)
+        self.assertEqual((self.cache / "watchdog/chsh/known_hosts.source").read_text(),
+                         "trusted\n")
+
+    def test_existing_durable_copy_is_reused(self) -> None:
+        keep = self.cache / "watchdog/chsh/known_hosts.source"
+        keep.parent.mkdir(parents=True, exist_ok=True)
+        keep.write_text("durable\n", encoding="utf-8")
+        self.assertEqual(self.install().returncode, 0)
+        self.assertEqual((self.cache / "watchdog/chsh/known_hosts").read_text(), "durable\n")
+
+    def test_predictable_shared_temp_input_is_ignored(self) -> None:
+        shared = self.root / "tmp/chsh-setup/known_hosts"
+        shared.parent.mkdir(parents=True)
+        shared.write_text("untrusted\n", encoding="utf-8")
+        self.assertEqual(self.install().returncode, 0)
+        self.assertFalse((self.cache / "watchdog/chsh/known_hosts").exists())
 
 
 class ShellSyntaxTest(unittest.TestCase):
@@ -495,7 +653,8 @@ class ShellSyntaxTest(unittest.TestCase):
     def test_the_offload_has_a_wall_clock(self) -> None:
         helper = HELPER_SH.read_text("utf-8")
         self.assertIn("MIPSTARRE_OFFLOAD_TIMEOUT_S", helper)
-        self.assertIn("OFFLOAD_TIMED_OUT=124", helper)
+        self.assertIn("mipstarre-offload", helper)
+        self.assertIn("completion", helper)
         self.assertIn('rc="$OFFLOAD_UNUSABLE"', helper,
                       "a stalled offload is 'chsh is unusable', never a verdict "
                       "on the proof")

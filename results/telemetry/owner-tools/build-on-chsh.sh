@@ -19,9 +19,8 @@
 # What a build does:
 #   1. rsync the worktree's sources to chsh builds/<lane>/ (excluding .lake,
 #      .git, .worktrees and results/telemetry)
-#   2. seed <lane>/.lake/build from the DATA seed with `cp -al` (hardlinks, one
-#      filesystem, no data copied) and point <lane>/.lake/packages at the
-#      shared Mathlib cache
+#   2. require the canonical package/build identities on the package store,
+#      seed and any retained lane artifacts, then seed with `cp -al` when needed
 #   3. run `lake build [targets]` in the lane on chsh
 #   4. rsync the WHOLE of .lake/build back into the worktree (Mathlib lives in
 #      .lake/packages and is never touched)
@@ -46,7 +45,8 @@
 # the second must not:
 #   0        the build succeeded on chsh and its artifacts are in the worktree
 #   64       chsh is UNUSABLE (offload disabled, missing known-hosts, ssh or
-#            rsync failure, lane busy, toolchain mismatch).  Build locally.
+#            rsync failure, lane busy, toolchain or artifact identity mismatch).
+#            Build locally.
 #   65       the build ran but its artifacts could not be returned.  Build
 #            locally; the worktree may hold a partial set.
 #   2        usage error
@@ -60,7 +60,8 @@
 #
 # Environment: MIPSTARRE_CACHE_ROOT MIPSTARRE_CHECKOUT MIPSTARRE_RUN_MODE
 #              CHSH_HOST CHSH_ADDR CHSH_PORT CHSH_KNOWN_HOSTS CHSH_SSH_BIN
-#              CHSH_SSH_OPTS CHSH_BUILDS CHSH_SEED CHSH_PACKAGES CHSH_CHECKOUT
+#              CHSH_SSH_OPTS CHSH_BUILDS CHSH_SEED CHSH_PACKAGES[_ROOT]
+#              CHSH_CHECKOUT
 #              CHSH_SEED_MIN_INTERVAL_S CHSH_BUILD_TIMEOUT_S
 #              CHSH_RSYNC_TIMEOUT_S
 set -uo pipefail
@@ -85,8 +86,11 @@ CHSH_SSH_BIN="${CHSH_SSH_BIN:-ssh}"
 CHSH_SSH_OPTS="${CHSH_SSH_OPTS:--o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=6 -o HostName=$CHSH_ADDR -p $CHSH_PORT -o UserKnownHostsFile=$CHSH_KNOWN_HOSTS}"
 CHSH_BUILDS="${CHSH_BUILDS:-/data/users/drx/mipstarre-cache/builds}"
 CHSH_SEED="${CHSH_SEED:-/data/users/drx/mipstarre-cache/seed/build}"
-CHSH_PACKAGES="${CHSH_PACKAGES:-/home/drx/.cache/mipstarre-dev/packages/185353eebe93a5ab}"
+CHSH_PACKAGES_CONFIG="${CHSH_PACKAGES:-}"
+CHSH_PACKAGES_ROOT="${CHSH_PACKAGES_ROOT:-/home/drx/.cache/mipstarre-dev/packages}"
+CHSH_PACKAGES=""
 CHSH_CHECKOUT="${CHSH_CHECKOUT:-/home/drx/MIPStarRE-qpbt}"
+IDENTITY_FILE=".mipstarre-artifact-identity"
 SEED_MIN_INTERVAL_S="${CHSH_SEED_MIN_INTERVAL_S:-3600}"
 BUILD_TIMEOUT_S="${CHSH_BUILD_TIMEOUT_S:-2700}"
 RSYNC_BIN="${CHSH_RSYNC_BIN:-rsync}"
@@ -118,6 +122,32 @@ log() { printf '[%s %s] %s\n' "$PROG" "$(now)" "$*" >&2; }
 say() { printf '+ %s\n' "$*"; }          # --dry-run transcript, on stdout
 unusable() { log "chsh unusable: $*"; exit "$EXIT_UNUSABLE"; }
 usage_error() { printf '%s: %s\n' "$PROG" "$*" >&2; exit 2; }
+
+sha256_concat() {
+  if command -v sha256sum >/dev/null 2>&1; then cat "$@" | sha256sum | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then cat "$@" | shasum -a 256 | awk '{print $1}'
+  else python3 -c 'import hashlib,sys
+h=hashlib.sha256()
+for p in sys.argv[1:]: h.update(open(p,"rb").read())
+print(h.hexdigest())' "$@"
+  fi
+}
+
+resolve_identities() { # <checkout>
+  local root="$1" package_path
+  for name in lean-toolchain lake-manifest.json lakefile.toml; do
+    [ -f "$root/$name" ] || unusable "$root has no $name; cannot identify build artifacts"
+  done
+  PACKAGE_KEY="$(sha256_concat "$root/lake-manifest.json" "$root/lean-toolchain")"
+  PACKAGE_KEY="${PACKAGE_KEY:0:16}"
+  BUILD_KEY="$(sha256_concat "$root/lean-toolchain" "$root/lake-manifest.json" \
+                            "$root/lakefile.toml")"
+  package_path="${CHSH_PACKAGES_CONFIG:-$CHSH_PACKAGES_ROOT/$PACKAGE_KEY}"
+  [ "$(basename "${package_path%/}")" = "$PACKAGE_KEY" ] || unusable \
+    "package identity mismatch: this checkout needs $PACKAGE_KEY, configured path is $package_path"
+  CHSH_PACKAGES="$package_path"
+  ARTIFACT_ID="package=$PACKAGE_KEY build=$BUILD_KEY"
+}
 
 offload_log() { # <line>
   mkdir -p "$(dirname "$OFFLOAD_LOG")" 2>/dev/null || return 0
@@ -185,13 +215,13 @@ require_enabled() {
 }
 
 # --- seed refresh -----------------------------------------------------------
-# chsh's checkout and its hardlink seed go stale as main moves; a lane seeded
-# from an old seed rebuilds the difference — slow, never wrong.  This is the
-# report's step 4: push the primary checkout, rebuild, replace the seed.
+# This is the report's step 4: push the primary checkout, rebuild, replace the
+# seed, and publish its identity only after the build succeeds.
 seed_refresh() {
   local checkout stamp age
   checkout="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
   [ -f "$checkout/lakefile.toml" ] || unusable "no checkout at $checkout"
+  resolve_identities "$checkout"
   require_enabled
   require_known_hosts
 
@@ -225,9 +255,13 @@ seed_refresh() {
       || unusable "seed refresh: source rsync failed (or timed out after ${RSYNC_TIMEOUT_S}s)"
   fi
 
-  rsh "set -e; export PATH=\$HOME/.elan/bin:\$PATH; cd '$CHSH_CHECKOUT'; \
+  rsh "set -e; [ -d '$CHSH_PACKAGES' ]; export PATH=\$HOME/.elan/bin:\$PATH; \
+       cd '$CHSH_CHECKOUT'; mkdir -p .lake; \
+       { [ ! -e .lake/packages ] || [ -L .lake/packages ]; }; \
+       rm -f .lake/packages; ln -s '$CHSH_PACKAGES' .lake/packages; \
        lake build MIPStarRE.QPBT; mkdir -p '$CHSH_SEED'; \
-       rsync -a --delete .lake/build/ '$CHSH_SEED/'" \
+       rsync -a --delete .lake/build/ '$CHSH_SEED/'; \
+       printf '%s\n' '$ARTIFACT_ID' > '$CHSH_SEED/$IDENTITY_FILE'" \
     || unusable "seed refresh: the rebuild on $CHSH_HOST failed"
   if [ "$DRY" = 0 ]; then
     : > "$stamp"
@@ -248,6 +282,7 @@ TARGETS=("$@")
 SRC="$(cd "$SRC" && pwd -P)"
 [ -f "$SRC/lakefile.toml" ] || unusable "$SRC has no lakefile.toml"
 [ -f "$SRC/lean-toolchain" ] || unusable "$SRC has no lean-toolchain"
+resolve_identities "$SRC"
 NAME="$(basename "$SRC")"
 case "$NAME" in
   ''|.|..) unusable "unusable lane name: $NAME" ;;
@@ -272,6 +307,8 @@ if [ "$DRY" = 0 ]; then
   mkdir -p "$LOCKDIR"
   exec 9>"$LOCKDIR/$NAME.lock"
   flock -n 9 || unusable "another $PROG already runs for $NAME"
+  exec 8>"$LOCKDIR/seed-refresh.lock"
+  flock -s -n 8 || unusable "the shared seed is being refreshed"
 fi
 
 STARTED="$(date +%s)"
@@ -287,14 +324,37 @@ else
     || unusable "toolchain mismatch: the worktree wants $WANT_TOOLCHAIN, $CHSH_HOST has $HAVE_TOOLCHAIN (run --seed-refresh)"
 fi
 
+# The package directory name is the canonical package-store identity.  Seed
+# and retained-lane metadata are written only after a successful build.
+if [ "$DRY" = 1 ]; then
+  say "$CHSH_SSH_BIN ... $CHSH_HOST 'require package $PACKAGE_KEY and seed identity $BUILD_KEY'"
+  LANE_ID="__absent__"
+else
+  SEED_ID="$(rsh "set -e; [ -d '$CHSH_PACKAGES' ]; cat '$CHSH_SEED/$IDENTITY_FILE'")" \
+    || unusable "package store or seed identity metadata is missing on $CHSH_HOST"
+  [ "$SEED_ID" = "$ARTIFACT_ID" ] || unusable \
+    "seed identity mismatch: need $ARTIFACT_ID, found ${SEED_ID:-empty}"
+  LANE_ID="$(rsh "if [ -e '$LANE/.lake/build/lib' ] || [ -e '$LANE/.lake/build/ir' ]; then \
+    if [ -r '$LANE/.lake/build/$IDENTITY_FILE' ]; then \
+      cat '$LANE/.lake/build/$IDENTITY_FILE'; else printf '__missing__'; fi; \
+    else printf '__absent__'; fi")" || unusable "cannot inspect retained lane artifacts"
+  case "$LANE_ID" in
+    __absent__|"$ARTIFACT_ID") ;;
+    *) rsh "rm -rf '$LANE/.lake/build'" >/dev/null 2>&1 || true
+       unusable "retained lane artifact identity is missing or stale; cleared it" ;;
+  esac
+fi
+
 # ---- 1. lane skeleton + hardlink seed --------------------------------------
 rsh "set -e; \
   [ -d '$CHSH_SEED' ] || { echo 'seed missing: $CHSH_SEED' >&2; exit 1; }; \
+  [ \"\$(cat '$CHSH_SEED/$IDENTITY_FILE')\" = '$ARTIFACT_ID' ]; \
   mkdir -p '$LANE/.lake/build'; \
   if [ ! -e '$LANE/.lake/build/lib' ]; then cp -al '$CHSH_SEED/.' '$LANE/.lake/build/'; fi; \
   ln -sfn '$CHSH_PACKAGES' '$LANE/.lake/packages'; \
   rm -f '$LANE/.lake/.offload-stamp'; touch '$LANE/.lake/.offload-stamp'" \
   || unusable "lane preparation failed on $CHSH_HOST"
+[ "$DRY" = 1 ] || flock -u 8
 
 # ---- 2. push sources -------------------------------------------------------
 log "pushing sources"
@@ -317,7 +377,10 @@ RC=0
 if [ "$DRY" = 1 ]; then
   say "$CHSH_SSH_BIN ... $CHSH_HOST 'cd $LANE && timeout $BUILD_TIMEOUT_S lake build ${TARGETS[*]:-}'"
 else
-  BUILD_OUT="$(rsh "cd '$LANE' && PATH=\$HOME/.elan/bin:\$PATH timeout $BUILD_TIMEOUT_S lake build ${TARGETS[*]:-}; printf '\n__chsh_rc=%s\n' \"\$?\"" 2>&1)"
+  BUILD_OUT="$(rsh "cd '$LANE' && rm -f '.lake/build/$IDENTITY_FILE' || exit 70; \
+    PATH=\$HOME/.elan/bin:\$PATH timeout $BUILD_TIMEOUT_S lake build ${TARGETS[*]:-}; \
+    rc=\$?; if [ \"\$rc\" = 0 ]; then printf '%s\n' '$ARTIFACT_ID' > \
+    '.lake/build/$IDENTITY_FILE' || exit 70; fi; printf '\n__chsh_rc=%s\n' \"\$rc\"" 2>&1)"
   printf '%s\n' "$BUILD_OUT"
   SENTINEL="$(printf '%s\n' "$BUILD_OUT" | grep -o '__chsh_rc=[0-9]*' | tail -n 1)"
   if [ -z "$SENTINEL" ]; then

@@ -1613,3 +1613,20 @@ runtime state changes.
 **Expected effect:** operators can use retained spool data as diagnostic
 evidence without inferring that the janitor will reconstruct or deliver a
 dispatch after the original process exits.
+
+## 2026-09-14 - Chsh reuse is bound to successful artifact identity (PR 554 review)
+
+**Trigger:** `results/telemetry/events.d/2026-09-14-orc-553-20260914-02.md`
+records review findings F1-F4: exit 124 ambiguity, mutable-checkout identity,
+nontransactional resume inherited from the parent, and predictable `/tmp`
+host-key bootstrap.
+
+**Change:** completed build exit codes are separated from outer transport expiry;
+package, seed and retained-lane reuse validates canonical identities written only
+after successful builds; lanes share the seed-refresh lock; the CI-green parent
+resume transaction is integrated; and only explicit or durable trusted host-key
+sources are accepted. Existing exit-64 local fallback remains the failure path.
+
+**Expected effect:** remote reuse cannot cross dependency or build identities,
+transport fallback cannot hide a real build verdict, failed resume stays paused,
+and absent trusted host keys leave offload unavailable.
