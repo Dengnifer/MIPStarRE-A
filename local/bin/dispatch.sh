@@ -650,14 +650,7 @@ if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
   WT_BASE="$(printf '%s' "$(basename "$WORKTREE_ABS")" | tr -c 'A-Za-z0-9._-' '-')"
   acquire_lock "worktree-$WT_BASE-$WT_KEY" "$LOCK_WAIT" "worktree $WORKTREE_ABS"
 fi
-if [ -n "${MIPSTARRE_QUEUE_TICKET:-}" ]; then
-  [ "$(git -C "$WORKTREE_ABS" rev-parse HEAD)" = "${MIPSTARRE_QUEUE_EXPECTED_HEAD:-}" ] ||
-    die 4 "queued worktree head moved; adoption required"
-  [ -z "$RESUME_ID" ] && [ -z "$CONTINUATION_FILE" ] ||
-    die 4 "queued dispatch must be a fresh one-shot session"
-fi
-export MIPSTARRE_DISPATCH_WORKTREE="$WORKTREE_ABS"
-ROUTER_ARGS=("$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
 if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
 if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
 ACCOUNT_ROUTING=1
