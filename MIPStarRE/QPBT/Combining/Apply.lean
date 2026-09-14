@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.PointErrorObstruction
+import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -43,6 +45,15 @@ Their conversion to the source's verifier game remains open. This declaration ta
 an already constructed point witness; the companion obligation below supplies that
 witness existentially.
 
+**Unfaithful:** This auxiliary quantifies over an unrestricted scalar `δQ` but
+omits it from the line error. That domain is not supplied by `lem:qld-4-10` and
+admits deterministic quadratic point answers even at zero strategy error; their
+axis-line defect stays positive as `q` grows. See issue #509 and the extended-line
+supplied-point obstruction in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Elimination requires a separately authorized realignment to the polynomial point
+error supplied by `exists_combinedPointsWitness`, followed by a proof of the
+printed error bound. The present signature and open proof are retained.
+
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
 `f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
@@ -70,6 +81,13 @@ printed in `lem:qld-4-13`, paper lines 1020--1034.
 The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
 law, and completed answer alphabet, so neither is the source-facing paper statement.
+
+The first proof route's term `m * epsilon ^ (1 / 4)` cannot be absorbed into
+the printed error arguments, even after capping it by one and restricting to
+admissible parameters; `not_exists_combining_quarter_power_bound` proves this
+scalar obstruction. It does not refute this existence assertion, which requires
+a different estimate. See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`
+and issue #510.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
