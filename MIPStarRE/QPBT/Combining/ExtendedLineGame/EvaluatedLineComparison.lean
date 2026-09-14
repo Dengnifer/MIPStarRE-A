@@ -35,17 +35,6 @@ variable {P : AdmissibleParams} {epsilon deltaQ deltaL : ℝ}
 variable {setting : ProjectiveSetting P epsilon}
 variable {points : CombinedPointsWitness setting deltaQ}
 
-/-- Decompose a direct sample with its point first, retaining the jointly
-uniform index and direction as the second coordinate. -/
-private def directSamplePointEquiv (D : DirectLdParams) :
-    DirectLdSpace D ≃
-      (Fin D.m → DirectScalarQ D) ×
-        (Fin D.m × (Fin D.m → DirectScalarQ D)) where
-  toFun sample := (sample.point, sample.index, sample.direction)
-  invFun sample := ⟨sample.1, sample.2.1, sample.2.2⟩
-  left_inv sample := by cases sample; rfl
-  right_inv sample := by cases sample; rfl
-
 /-- A uniform consistency defect whose integrand uses only the first
 coordinate of a product equivalence has the corresponding uniform marginal. -/
 private theorem consistencyDefect_uniform_equiv_fst
@@ -166,7 +155,7 @@ private theorem point_read_defect_on_direct_samples_eq_rejection
           (Fin P.extendedDirectLd.m → DirectScalarQ P.extendedDirectLd))
         (Alpha := Option (PauliScalar P))
         (I := setting.ExpandedLocalSpace .alice × setting.ExpandedLocalSpace .bob)
-        (directSamplePointEquiv P.extendedDirectLd)
+        (directLdSpacePointEquiv P.extendedDirectLd)
         (fun point answer => heteroKron
           (((points.Q .alice
             (projX (directPointToPauli P point))

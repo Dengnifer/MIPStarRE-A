@@ -1,5 +1,8 @@
 # Main-selected useful-work admissions
 
+Retired by #505: the supervisor entrypoints are disabled. Use `dispatch.sh` with
+the worker caps in `sessions.md`; the material below describes historical operation.
+
 Normative supplement to sessions/review protocols (#257 and #418). Only main selects
 useful packets and binds prerequisites to closed issues, actual merged PRs and ancestry.
 No discovery, filler, merges, adjudication, budget resumes, inbox actions or shell tasks.

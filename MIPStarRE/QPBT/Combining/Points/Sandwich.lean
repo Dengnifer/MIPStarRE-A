@@ -167,22 +167,6 @@ theorem sandwichPoint_ordered_dist_le :
       (S.place_conjTranspose_mul_self_le_one p
         (S.pointMeasExp_isProjective p.side .Z xz.2 ab.2)) _) 2
 
-/-- Formalization-only auxiliary: the placed effects of an expanded point
-measurement are square-summable to the identity. -/
-theorem sum_place_pointMeasExp_conjTranspose_mul_self (S : ProjectiveSetting P ε)
-    (p : Placement) (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    ∑ a : PauliScalar P, (S.place p ((S.pointMeasExp p.side W u).effect a))ᴴ *
-        S.place p ((S.pointMeasExp p.side W u).effect a) ≤ 1 := by
-  refine le_of_eq ?_
-  calc ∑ a : PauliScalar P, (S.place p ((S.pointMeasExp p.side W u).effect a))ᴴ *
-        S.place p ((S.pointMeasExp p.side W u).effect a)
-      = ∑ a : PauliScalar P, S.place p ((S.pointMeasExp p.side W u).effect a) := by
-        refine Finset.sum_congr rfl fun a _ => ?_
-        rw [← place_conjTranspose, ← place_mul, pointMeasExp_effect_conjTranspose,
-          pointMeasExp_effect_mul_self]
-    _ = 1 := by
-        rw [← place_finsetSum, (S.pointMeasExp p.side W u).sum_eq_one, place_one]
-
 /-- The ordered product `M^Z_b M^X_a` on one placement is close to the
 reversed ordered product `M^X_a M^Z_b` on the opposite placement, on average
 over the point pair, with the self-consistency error of `lem:qld-comm-cons`.
@@ -241,7 +225,8 @@ theorem ordered_cross_dist_le :
       (fun b => S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b))
       (S.place p₁ ((S.pointMeasExp p₁.side .X xz.1).effect a) -
         S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₁ .Z xz.2)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₁ (S.pointMeasExp p₁.side .Z xz.2)))
   have h₂ : opFamilyDistSq (uniformDistribution (PointPair P))
       (fun xz (ab : PauliScalar P × PauliScalar P) =>
         S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect ab.2) *
@@ -276,7 +261,8 @@ theorem ordered_cross_dist_le :
       (fun a => S.place p₂ ((S.pointMeasExp p₂.side .X xz.1).effect a))
       (S.place p₁ ((S.pointMeasExp p₁.side .Z xz.2).effect b) -
         S.place p₂ ((S.pointMeasExp p₂.side .Z xz.2).effect b)) S.psiHat
-      (S.sum_place_pointMeasExp_conjTranspose_mul_self p₂ .X xz.1)
+      (measurement_sum_adjoint_mul_le_one
+        (S.placedMeasurement p₂ (S.pointMeasExp p₂.side .X xz.1)))
   have htri := opFamilyDistSq_le_of_le_of_le (uniformDistribution (PointPair P))
     _ _ _ S.psiHat (C * ε) (C * ε) h₁ h₂
   linarith
