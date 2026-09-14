@@ -7,10 +7,10 @@ import MIPStarRE.QPBT.Observables.WinImplications.Averages
 
 This module identifies the diagonal coefficient defect used in the same-line
 rejection bound with the diagonal parameter-evaluation defect used in the
-supplied-line comparison. The proof composes the measurement postprocessings
-and identifies the two coefficient readers definitionally.
+supplied-line comparison. The proof composes the measurement postprocessings,
+and the two rules for extracting coefficients coincide.
 
-The equality is a formalization-only bridge supporting the classical-game
+The equality is an auxiliary identity supporting the classical-game
 construction in the proof of `lem:qld-4-7`. It retains the original diagonal
 line marginal, including zero directions, and introduces no new hypotheses.
 

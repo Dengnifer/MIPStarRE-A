@@ -32,12 +32,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The state quadratic form of the zero operator vanishes. -/
-private theorem stateQForm_zero_local {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) :
-    DistanceCalculus.stateQForm ψ (0 : Op ι) = 0 := by
-  simp [DistanceCalculus.stateQForm, applyOperatorToState]
-
 /-- Reindexing an operator along an equivalence preserves positivity.
 Formalization-only auxiliary for the placement bipartitions of blueprint
 `def:expanded-state`, paper
@@ -50,20 +44,6 @@ theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
-
-/-- A register placement respects finite sums of operators. -/
-private theorem place_finset_sum_local (S : ProjectiveSetting P ε)
-    (p : Placement) {γ : Type*} (s : Finset γ)
-    (O : γ → Op (S.ExpandedLocalSpace p.side)) :
-    S.place p (∑ g ∈ s, O g) = ∑ g ∈ s, S.place p (O g) := by
-  ext i j
-  cases p <;> simp only [place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
-
-/-- A register placement maps the zero operator to zero. -/
-private theorem place_zero_local (S : ProjectiveSetting P ε) (p : Placement) :
-    S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-  ext i j
-  cases p <;> simp [place]
 
 set_option synthInstance.maxSize 400 in
 /-- Operators placed on `AA'` and `BA''` commute. -/
@@ -208,10 +188,10 @@ theorem offDiagonalPlacedProduct_nonneg {P : AdmissibleParams} {ε : ℝ}
       S.place p₁ (M₁.effect a) *
         S.place p₂ (∑ b : α, if a = b then 0 else M₂.effect b) := by
     intro a
-    rw [ProjectiveSetting.place_finset_sum_local, Finset.mul_sum]
+    rw [ProjectiveSetting.place_finset_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
-    · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero_local, mul_zero]
+    · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero, mul_zero]
     · rw [if_neg h, if_neg h]
   rw [Finset.sum_congr rfl fun a _ => hrow a]
   refine Finset.sum_nonneg fun a _ => ?_
@@ -250,7 +230,7 @@ theorem consistencyDefect_integrand_nonneg {P : AdmissibleParams} {ε : ℝ}
     rw [DistanceCalculus.stateQForm_finset_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
-    · rw [if_pos h, if_pos h, stateQForm_zero_local]
+    · rw [if_pos h, if_pos h, DistanceCalculus.stateQForm_zero]
     · rw [if_neg h, if_neg h]
       rfl
   rw [hform]
