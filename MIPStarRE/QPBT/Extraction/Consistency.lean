@@ -1,5 +1,7 @@
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
 import MIPStarRE.QPBT.Extraction.Observables
+import MIPStarRE.QPBT.Extraction.PointConsistencyPrime
+import MIPStarRE.QPBT.Extraction.NonencodingSupport
 
 /-!
 # Consistency of the pulled-apart Pauli measurements
@@ -18,8 +20,10 @@ transports are developed from the given global polynomial-pair witness.
 The marginal estimates formalize blueprint
 `lem:qld-constructing-the-paulis-helper`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1609-1664`.
-The remaining declarations formalize blueprint `lem:qld-construct-the-paulis`,
-from paper lines 1458-1608.
+The supplied-witness estimates belong to blueprint
+`lem:qld-construct-the-paulis-given-global-pair`. The joint source obligation
+`exists_pulled_apart_consistency` is stated in `Extraction.Construction` for
+`lem:qld-construct-the-paulis`, paper lines 1463-1480.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -807,20 +811,26 @@ theorem nonencodingMarginalMass_le :
 
 /-! ## Consistency of the pulled-apart measurements -/
 
-/-- Alice's original point measurement is consistent with Bob's pulled-apart
-measurement on average over uniformly random points. This is the first display
-of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
+/-- Conditional consistency of Alice's original point measurement with Bob's
+pulled-apart measurement, averaged over uniformly random points. This is the
+supplied-witness form of the first display of Item 1 in paper
 `14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 
 The source reuses `deltaS` after absorbing the non-encoding and game-error
 terms. The bound keeps the global polynomial-pair witness error `deltaG`
 separate in `deltaConstructPaulis`.
 
-**Proof obligation:** issue #47 tracks the non-encoding-mass estimate required
-by the restricted decoder identity; see
-`docs/paper-gaps/qpbt_decoding-identity.tex`. -/
-theorem tildeM_consistent_pointMeas :
+**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` is not constructed
+here from the hypotheses of `lem:qld-4-7`. Issue #519 and
+`docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
+Elimination: discharge the construction required by `exists_pulled_apart_consistency`
+using `exists_globalPairWitness`, including its missing zero-error case.
+
+**Proof obligation:** The retained `sorry` is the first point-consistency
+calculation, tracked by issue #47. Discharge this conditional theorem using the
+Bob marginal instance of `global_marginal_encoding_consistency`, its support-mass
+comparison, and the restricted decoder identity from the cited gap note. -/
+theorem tildeM_consistent_pointMeas_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
         0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
@@ -836,18 +846,85 @@ theorem tildeM_consistent_pointMeas :
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
   sorry
 
-/-- Alice's pulled-apart measurement is consistent with Bob's original point
-measurement on average over uniformly random points. This is the
-register-interchanged display of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
+/-- For a supplied global polynomial-pair witness, the Alice-pulled/Bob-point
+defect is bounded by its point-consistency error plus Alice's non-encoding
+mass. This is the register-interchanged, support-restricted calculation in
+paper `14_analysis_of_the_pauli_basis_test.tex:1483-1492`, supporting blueprint
+`lem:qld-construct-the-paulis`. The estimate uses no bound for that mass; see
+`docs/paper-gaps/qpbt_decoding-identity.tex` for the decoder restriction. -/
+theorem tildeM_consistencyDefect_le_deltaG_add_nonencoding'
+    {P : AdmissibleParams} {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
+    (w : GlobalPairWitness S deltaG) (W : PauliKind) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun u a => S.placeSide .alice (tildeM w .alice W (indicatorVec u) a))
+      (fun u a => S.placePlayer .bob ((S.pointMeas .bob W u).effect a)) S.psiHat ≤
+      deltaG + nonencodingMarginalMass w .alice W := by
+  classical
+  let mu := uniformDistribution (Fin P.m → PauliScalar P)
+  let evaluated := fun u : Fin P.m → PauliScalar P =>
+    S.placedMeasurement .AA' ((w.marginalPoly .alice W).postprocess
+      (fun g => MvPolynomial.eval u g.1))
+  let expanded := fun u : Fin P.m → PauliScalar P =>
+    S.placedMeasurement .BA'' (S.pointMeasExp .bob W u)
+  have hdefect := consistencyDefect_eq_one_sub_overlap mu evaluated expanded S.psiHat
+    (uniformDistribution_isProbability _) S.psiHat_norm
+  have hw := marginalPoly_pointMeas_consistent_alice w W
+  change consistencyDefect mu (fun u a => (evaluated u).effect a)
+    (fun u a => (expanded u).effect a) S.psiHat ≤ deltaG at hw
+  rw [hdefect] at hw
+  have hregroup (u : Fin P.m → PauliScalar P) :
+      (∑ a : PauliScalar P, stateQForm S.psiHat
+        ((evaluated u).effect a * (expanded u).effect a)) =
+      ∑ g : Poly P, stateQForm S.psiHat
+        (S.place .AA' ((w.marginalPoly .alice W).effect g) *
+          S.place .BA'' ((S.pointMeasExp .bob W u).effect
+            (MvPolynomial.eval u g.1))) := by
+    rw [← stateQForm_finset_sum]
+    change stateQForm S.psiHat
+      (∑ a : PauliScalar P, S.place .AA'
+        (((w.marginalPoly .alice W).postprocess
+          (fun g => MvPolynomial.eval u g.1)).effect a) *
+            S.place .BA'' ((S.pointMeasExp .bob W u).effect a)) = _
+    exact (congrArg (stateQForm S.psiHat)
+      (sum_marginalPoly_eval_mul w .AA' W u
+        (fun a => S.place .BA'' ((S.pointMeasExp .bob W u).effect a)))).trans
+      (stateQForm_finset_sum _ _ _)
+  simp only [hregroup] at hw
+  have hcompare := avgOver_mono mu _ _
+    (fun u => marginal_eval_overlap_le_decoded_add_nonencoding' w W u)
+  rw [avgOver_add, avgOver_const_of_isProbability mu
+    (uniformDistribution_isProbability _)] at hcompare
+  have hmass_eq : nonencodingMarginalMass w .alice W =
+      ∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+        stateQForm S.psiHat (S.place .AA' ((w.marginalPoly .alice W).effect g)) := by
+    unfold nonencodingMarginalMass
+    simp only [S.placeSide_alice_tensor_one]
+    rfl
+  rw [← hmass_eq] at hcompare
+  rw [tildeM_consistencyDefect_eq_one_sub_decoded_overlap']
+  dsimp only [mu] at hw hcompare
+  linarith
+
+/-- Conditional consistency of Alice's pulled-apart measurement with Bob's
+original point measurement, averaged over uniformly random points. This is the
+supplied-witness form of the register-interchanged display of Item 1 in paper
 `14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
 
 The conclusion uses the same explicit construction scale as the first player
 ordering.
 
-**Proof obligation:** issue #47 tracks the player-interchanged
-non-encoding-mass argument. -/
-theorem tildeM_consistent_pointMeas' :
+The non-encoding mass is controlled by the encoding-supported reference and
+Schwartz--Zippel estimates of `NonencodingSupport`. Thus the restricted decoder
+identity suffices, as explained in `docs/paper-gaps/qpbt_decoding-identity.tex`.
+
+**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
+point-consistency fields; it is not constructed here from `lem:qld-4-7`.
+Issue #519 and `docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
+Elimination: discharge the construction required by the source-facing
+`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including its
+missing zero-error case. This conditional proof has no `sorry` dependency
+and does not use the separate obligation `nonencodingMarginalMass_le`. -/
+theorem tildeM_consistent_pointMeas'_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
         0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
@@ -861,20 +938,50 @@ theorem tildeM_consistent_pointMeas' :
                 S.placePlayer .bob ((S.pointMeas .bob W u).effect a))
               S.psiHat ≤
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  classical
+  obtain ⟨C, hC, hreference⟩ := global_marginal_encoding_consistency
+  refine ⟨C + 1, by linarith, ?_⟩
+  intro P epsilon deltaG hepsilon _ hdeltaG S w W
+  have hdefect := tildeM_consistencyDefect_le_deltaG_add_nonencoding' w W
+  have href := (hreference P epsilon deltaG hepsilon S w W).1
+  have hmass := mass_outside_encoding_le_evaluated_defect
+    (w.marginalPoly .alice W) (S.encodingPauliMeas .bob W)
+    (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+    (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .bob W)
+  have hm : nonencodingMarginalMass w .alice W ≤
+      deltaG + C * Real.sqrt epsilon + (P.m * P.d : ℝ) / P.q := by
+    unfold nonencodingMarginalMass
+    change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+      stateQForm S.psiHat (S.placeSide .alice
+        (heteroKron ((w.marginalPoly .alice W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+    simp_rw [stateQForm_placeSide_alice_tensor_one S _
+      (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .alice W).pos _)).isHermitian]
+    exact hmass.trans (add_le_add href le_rfl)
+  unfold deltaConstructPaulis
+  rw [Nat.cast_mul]
+  have hratio : 0 ≤ (P.m * P.d : ℝ) / P.q := by positivity
+  have hsqrt : 0 ≤ Real.sqrt epsilon := Real.sqrt_nonneg epsilon
+  nlinarith
 
-/-- The pulled-apart observables on Alice's and Bob's extraction blocks are
-self-consistent on average over the uniformly random Pauli register. This is
-Item 2 of blueprint
-`lem:qld-construct-the-paulis`, paper
+/-- Conditional self-consistency of the pulled-apart observables on Alice's and
+Bob's extraction blocks, averaged over the uniformly random Pauli register.
+This is the supplied-witness form of Item 2 in paper
 `14_analysis_of_the_pauli_basis_test.tex:1476-1605`.
 
 The construction scale exposes the square-root game error and
 Schwartz--Zippel loss that the source absorbs into `deltaS`.
 
-**Proof obligation:** issue #47 tracks the pulling-consistency calculation and
-the final trace postprocessing from measurements to observables. -/
-theorem tildeObs_selfConsistent :
+**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` is not constructed
+here from `lem:qld-4-7`. Issue #519 and
+`docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
+Elimination: discharge the construction required by `exists_pulled_apart_consistency`
+using `exists_globalPairWitness`, including its missing zero-error case.
+
+**Proof obligation:** The retained `sorry` is the pulling-consistency calculation
+and final trace postprocessing from measurements to observables, tracked by
+issue #47. Discharge this conditional theorem by the argument at paper
+lines 1495-1605, including `marginalPoly_sub_pointMeas_approx_zero`. -/
+theorem tildeObs_selfConsistent_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
         0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →

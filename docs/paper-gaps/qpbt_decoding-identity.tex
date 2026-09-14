@@ -96,8 +96,10 @@ justifies the substitution.  On the complement, the proof must bound
 The blueprint derives an $O(\delta_S)+md/q$ bound from point consistency and
 the combined point measurement.  A non-encoding polynomial differs from every
 encoded polynomial, so Schwartz--Zippel bounds the probability that their
-evaluations coincide.  This estimate is the open reduction; it must be proved
-from the paper hypotheses rather than inserted as an extraction hypothesis.
+evaluations coincide. This estimate must be derived from the paper hypotheses
+rather than inserted as an extraction hypothesis. The conditional estimate for
+a supplied global measurement is now available, but constructing that
+measurement remains open.
 
 The printed reindexing at lines~1805--1822 replaces
 $g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
@@ -138,19 +140,75 @@ The decoder calculations are proved.  \path{lowDegreeEncoding_mem_poly},
 and \path{decodeFq_dotProduct_indicatorVec} carry complete proofs: the degree
 side-condition on $g_h$, the two linearity laws, the inversion
 $\operatorname{Dec}_{\mathbb F_q}(g_h)=h$, and the evaluation identity under the
-explicit \path{IsEncoding} hypothesis.  The complementary estimate
-\path{nonencodingMarginalMass_le} is the remaining open proof of this note.
+explicit \path{IsEncoding} hypothesis. The named complementary estimate
+\path{nonencodingMarginalMass_le} still has an unfinished proof. The conditional
+point-consistency proof described below obtains the needed mass bound directly
+from the encoding-supported reference instead of invoking this declaration.
 Issue~\#19 owns the Stage~4.2 statements and this discrepancy record;
 \ghissue{47} owns the Stage~4.3 decoder calculations, now discharged, and the
 non-encoding support estimate.  No unrestricted theorem, residual assumption, or
 additional witness field was introduced.
 
+\section{Supplied measurements and the source construction}
+
+Fix the expanded state $\widehat\psi$ of a projective strategy passing the
+Pauli basis test with error $0\leq\epsilon\leq1$. Let
+$\widehat S^{\mathrm A}$ and $\widehat S^{\mathrm B}$ be projective
+polynomial-pair measurements whose evaluated marginals are consistent with
+the opposite expanded point measurements at error $\delta_G$.
+Lemma~\texttt{qld-4-7} asserts the existence of such measurements with
+$\delta_G=a(md)^a(\epsilon^b+q^{-b}+2^{-bmd})$, where the constants
+$a>1$ and $0<b<1$ are universal
+\cite[lines~1267--1274]{Ji2020MIPStar}. The measurements used in
+Lemma~\texttt{qld-construct-the-paulis} are constructed from this pair,
+rather than assumed independently of the strategy.
+
+For a supplied pair, the Pauli-basis checks and exact ancillary convolution
+give evaluated consistency with an encoding-supported reference at error
+$\delta_G+C\sqrt\epsilon$. Schwartz--Zippel and positivity bound the
+non-encoding mass by $\delta_G+C\sqrt\epsilon+md/q$. The
+register-interchanged calculation at source lines~1483--1492 therefore gives
+\[
+ \operatorname{Defect}(\widetilde M_{\mathrm A},M_{\mathrm B})
+ \leq 2\delta_G+C\sqrt\epsilon+md/q
+ \leq (C+1)(\delta_G+\sqrt\epsilon+md/q),
+\]
+where $C\geq1$. This is a proved conditional result. It does not construct
+the supplied pair.\footnote{The reference estimate is
+\path{global_marginal_encoding_consistency} in
+\path{MIPStarRE/QPBT/Extraction/NonencodingSupport.lean}. The conditional
+conclusion is \path{tildeM_consistent_pointMeas'_ofGlobalPairWitness} in
+\path{MIPStarRE/QPBT/Extraction/Consistency.lean}. Neither proof depends on
+the unfinished \path{nonencodingMarginalMass_le}.}
+
+The source-facing obligation now quantifies the universal constants first,
+then the strategy, and finally the global measurements; both point estimates
+and observable self-consistency must hold for this same pair.\footnote{
+\path{exists_pulled_apart_consistency} in
+\path{MIPStarRE/QPBT/Extraction/Construction.lean}.}
+Its new proof hole records the source realignment in \ghissue{519}.
+Discharge requires the construction of
+\path{exists_globalPairWitness} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean}, including zero error: that
+declaration is unfinished and currently assumes strictly positive error,
+whereas the source setting at lines~197--199 includes zero.
+The opposite point-consistency estimate and observable self-consistency also
+remain unfinished conditional obligations. Once these estimates are proved,
+the maximum of their constants gives the common error bound without changing
+the measurements. The source blueprint node has no completion marker, and
+the three supplied-witness statements are linked only from a separate
+conditional entry.
+
 \section{Conclusion}
 
 The decoding identity is false for a general polynomial outcome.  Restricting
 it to the encoding image is a necessary local correction.  Recovering the
-source's measurement-consistency conclusion then requires the separate
-non-encoding-mass estimate, which remains an open proof obligation.
+source's measurement-consistency conclusion requires both the mass estimate
+and the construction of the global measurements. The estimate needed for
+Alice's pulled-apart measurement is proved for supplied measurements; the
+source construction and the other components of the source lemma remain
+open. The discrepancy repaired in \ghissue{519} is an additional formal
+proof hypothesis, not a claim that the paper assumes such a hypothesis.
 
 \bibliographystyle{alpha}
 \bibliography{references}
