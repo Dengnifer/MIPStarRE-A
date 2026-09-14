@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Games.DistanceTheorems.Support
 import MIPStarRE.LDT.Preliminaries.SwitchSandwichPrep.InnerProduct
+import MIPStarRE.QPBT.Combining.QuadraticForm
 
 /-!
 # Replacing one factor of a measurement-weighted overlap
@@ -277,17 +278,6 @@ theorem stateQForm_conjTranspose {ι : Type*} [Fintype ι] [DecidableEq ι]
     (inner ℂ ψ (Matrix.toEuclideanLin M ψ)).re
   rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint, LinearMap.adjoint_inner_right,
     ← inner_conj_symm, Complex.conj_re]
-
-/-- Conjugating an operator transfers the outer operator to the state vector. -/
-theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
-    stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
-  unfold stateQForm
-  rw [applyOperatorToState_mul, applyOperatorToState_mul]
-  congr 1
-  change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
-    inner ℂ (Matrix.toEuclideanLin W ψ) _
-  rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint, LinearMap.adjoint_inner_right]
 
 /-- For a projection `B` commuting with `A`, the quadratic form of `A` in
 `B ψ` is the quadratic form of `A B` in `ψ`. -/
