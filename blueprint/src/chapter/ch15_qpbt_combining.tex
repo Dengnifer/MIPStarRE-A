@@ -1035,9 +1035,10 @@ assembled by Fourier averaging.
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
+	\leanok
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
 		def:concrete-paired-line-measurement, def:consistency}
-	This is a Lean-only construction obligation. Fix a polynomially small
+	This is a formalization-only construction theorem. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
 	such that for every projective strategy passing with error $\eps$ and
@@ -1056,6 +1057,14 @@ assembled by Fourier averaging.
 	part of the preceding construction while retaining its defining
 	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
+\begin{proof}
+\leanok
+Condition on the first line having nonzero direction. The two completed
+point-to-line marginal comparisons and heterogeneous pasting bound the
+actual sandwich measurement on that law. Restore the discarded probability,
+at most $1/(2q)$, and multiply the conditioned error by its retained mass.
+Polynomial absorption and the independent unit defect bound give the result.
+\end{proof}
 
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
@@ -1068,9 +1077,9 @@ the quantum soundness of the classical low individual degree test
 (Theorem~\ref{lem:ld-soundness}). The classical game, its question
 distribution, and the line-point distribution are defined at dimension $2m+2$
 only when $2m+2$ divides $q$ (Definition~\ref{def:ld-game}), a condition that
-admissibility of $(q,m,d)$ does not supply; the statements below are the
-source statements, without that condition, and their proofs are blocked at
-the instantiation step for admissible parameters with $m \ge 2$. The
+admissibility of $(q,m,d)$ does not supply. The seed-bearing source route is
+blocked at the instantiation step for admissible parameters with $m \ge 2$.
+The global-pair conclusion also has the directly indexed proof below. The
 obstruction is recorded in Remark~\ref{rem:qld-4-7-divisibility} and
 analyzed, together with candidate repairs, in
 \cite{gap:qpbt_ld-dimension-divisibility}.
@@ -2039,6 +2048,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
+	\leanok
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
@@ -2062,26 +2072,25 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
 	polynomials that admit no evaluation at the sampled point, rather than
 	under the answer summation over $a \in \F_q$ used above. Thus the auxiliary
-	construction does not establish this formulation until the question carrier
+	construction does not establish the source formulation until the question carrier
 	and law are related by the transport obligation of
 	\cite{gap:qpbt_ld-dimension-divisibility} and the completed answer comparison
 	is related to the source sum by
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
-		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
-	Chaining the three claims gives the numerical estimate
-	\eqref{eq:qld-combined-lines-consistency} by
-	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
-	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
-	$m \cdot \poly(\eps, md/q)$. This calculation is the only established part
-	of the comparison. Applying it to the source statement remains conditional
-	on transporting the question space and distribution and on converting the
-	completed answer comparison, including zero-direction singleton lines, to
-	the source sum over $a \in \F_q$; these obligations are recorded in
-	\cite{gap:qpbt_ld-dimension-divisibility} and
-	\cite{gap:qpbt_combined-lines-error-term}.
+\leanok
+\uses{lem:combined-line-measurement-consistency, def:direct-subline-law,
+  thm:qld-direct-line-real-overlap}
+Condition the directly indexed subline law on its extended line and average
+the combined polynomial outcomes of the constructed $X$-$Z$-$X$ POVM.
+The real-part overlap estimates on both opposite placements give the bound
+$m\cdot\poly(\eps,md/q)$, with the unit consistency bound handling large
+errors. Axis degree support follows from the affine combination formula.
+This proves the stated directly indexed auxiliary. Its comparison with the
+printed source formulation remains subject to the separate question-law and
+completed-answer issues in \cite{gap:qpbt_ld-dimension-divisibility} and
+\cite{gap:qpbt_combined-lines-error-term}.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
@@ -2094,7 +2103,7 @@ projective measurement whose outcomes are pairs of global polynomials.
 	\lean{MIPStarRE.QPBT.Poly, MIPStarRE.QPBT.PolyPair, MIPStarRE.QPBT.evalAt}
 	\lean{MIPStarRE.QPBT.GlobalPairWitness}
 	\lean{MIPStarRE.QPBT.exists_globalPairWitness}
-	\notready
+	\leanok
 	\uses{def:polyfunc, def:expanded-state, def:expanded-point-measurement,
 		def:consistency, def:bracket, def:ideg-deg-polynomials}
 	% Statement as in the source (references/qpbt-paper/
@@ -2132,102 +2141,33 @@ projective measurement whose outcomes are pairs of global polynomials.
 	if $W = Z$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-13-established, lem:qld-4-12, thm:naimark,
-		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
-		fact:data-processing, lem:schwartz-zippel-total-degree,
-		def:combine-map}
-	Lemma~\ref{lem:qld-4-13-established} supplies measurements on the directly
-	indexed line carrier: an axis line records its base point and directly sampled
-	coordinate index, while a diagonal line also records a direction whose earlier
-	coordinates vanish. Its averages use the corresponding
-	directly indexed line-point law, and its consistency relations use the completed
-	answer alphabet $\F_q \cup \{\bot\}$. These data are not yet a strategy for the
-	classical low individual degree game of Definition~\ref{def:ld-game}, whose line
-	questions retain a field-valued seed. Such a strategy requires a transport from
-	the directly indexed carrier and law to the seed-indexed question distribution,
-	and a conversion from the completed-answer relations, including degenerate
-	zero-direction lines, to the game's field-valued answer checks. These open
-	transports are recorded in \cite{gap:qpbt_ld-dimension-divisibility} and
-	\cite{gap:qpbt_combined-lines-error-term}.
-	Conditional on these transports, Lemmas~\ref{lem:qld-4-12}
-	and~\ref{lem:qld-4-13-established} give a strategy with parameters
-	$(q,2m+2,d,1)$ and success probability $1-\delta_{\mathrm{combine}}$; the
-	axis-parallel clause supplies the required degree-$d$ answer format. The
-	numerical estimate available for $\delta_{\mathrm{combine}}$ is
-	$C \cdot m \cdot \poly(\eps,md/q)$, not the unproved form
-	$\poly(m^2\eps,md/q)$ printed in Lemma~\ref{lem:qld-4-13}
-	(Remark~\ref{rem:qld-4-13-source-defects}). The error function $\delta_S$
-	absorbs the prefactor $m$ into $(md)^a$.
-	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
-	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
-	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for
-	admissible parameters with $m \ge 2$ the divisibility fails, so this
-	instantiation is an unresolved obligation of the source argument,
-	recorded in Remark~\ref{rem:qld-4-7-divisibility} and analyzed in
-	\cite{gap:qpbt_ld-dimension-divisibility}.) Since $\{\hat{Q}^{\ell}_{f}\}$ is
-	only a POVM, it is first made projective by Naimark dilation
-	(Theorem~\ref{thm:naimark}), which preserves the $\simeq$ conclusions of
-	Lemma~\ref{lem:qld-4-13}. The quantum soundness of the classical test
-	(Theorem~\ref{lem:ld-soundness}, applied with $m$ replaced by $2m+2$ and
-	$\eps$ by $\delta_{\mathrm{combine}}$) then yields a POVM
-	$\{\hat{S}_g\}$ with outcomes $g \in \mathrm{ideg}_{d,2m+2}(\F_q)$ that
-	is $\delta_{\mathrm{ld}}$-self-consistent and
-	$\delta_{\mathrm{ld}}$-consistent with the points measurements
-	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$, where
-	$\delta_{\mathrm{ld}}
-	= a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$
-	for universal constants $a, b$; a second application of Naimark dilation
-	makes $\{\hat{S}_g\}$ projective with the same guarantees. Let
-	$\mathcal{G}$ be the set of polynomials of the form
-	$g(x,z,\alpha,\beta) = \alpha g_X(x) + \beta g_Z(z)$ with
-	$g_X, g_Z \in \mathrm{ideg}_{d,m}(\F_q)$. A chain of approximations
-	built from the consistency of $\{\hat{S}_g\}$ with the points
-	measurements and the relations
-	\eqref{eq:qld-4-12-cons-m-hat}--\eqref{eq:qld-4-12-cons-m-hat2} of
-	Lemma~\ref{lem:qld-4-12} (using Lemma~\ref{fact:agreement} to convert
-	$\simeq$ into $\approx$ and Lemma~\ref{fact:add-a-proj2}) correlates
-	$\hat{S}_g$ with the indicator-weighted products of the $X$ and $Z$
-	point measurements in both orders. Combining this with Schwartz--Zippel
-	case analyses (Lemma~\ref{lem:schwartz-zippel-total-degree}, applied to
-	polynomials of total degree at most $(2m+2)d$) --- first ruling out the
-	$g$ that are not linear in $(\alpha, \beta)$, then, among the linear
-	ones $g = \alpha g_1(x,z) + \beta g_2(x,z)$, ruling out those whose
-	coefficient polynomials $g_1$ or $g_2$ depend on the wrong block of
-	variables --- yields
-	$\sum_{g \notin \mathcal{G}}
-	\| (\hat{S}_g)_{\mathsf{A}\mathsf{A}'} \ket{\hat\psi} \|^2
-	\le O(\delta_{\mathrm{ld}} + \delta_Q + md/q)
-	=: \delta_{\mathcal{G}}$.
-	Define the projective sub-measurement
-	$\hat{S}_{g_X,g_Z} = \hat{S}_{\mathrm{combine}_{g_X,g_Z}}$
-	(Definition~\ref{def:combine-map}); its incompleteness is at most
-	$\delta_{\mathcal{G}}$, and a further approximation chain with
-	successive errors $\delta_{\mathcal{G}}$, $\delta_Q^{1/2}$,
-	$\delta_Q^{1/2}$, $1/q$, $1/q$ gives
-	\[
-		\big(\hat{S}_{[\mathrm{eval}_x(\cdot) = a,\
-			\mathrm{eval}_z(\cdot) = b]}
-		\big)_{\mathsf{A}\mathsf{A}'}
-		\simeq_{O(\delta_{\mathcal{G}} + \delta_Q^{1/2} + 1/q)}
-		\big(\hat{M}^{(\mathrm{Point},X),x}_{a}\,
-		\hat{M}^{(\mathrm{Point},Z),z}_{b}\,
-		\hat{M}^{(\mathrm{Point},X),x}_{a}
-		\big)_{\mathsf{B}\mathsf{A}''}\,.
-	\]
-	Completing the sub-measurement by adding
-	$\Id - \sum_{g_X,g_Z} \hat{S}_{g_X,g_Z}$ to an arbitrary element costs a
-	further $\delta_{\mathcal{G}}$, and the resulting error
-	$\delta_S = O(\delta_{\mathrm{ld}} + \delta_Q^{1/2} + md/q)$ has the
-	stated form for suitable universal constants (here
-	$\delta_{\mathrm{combine}}$ may be taken to be the bound
-	$m \cdot \poly(\eps, md/q)$ established in the proof of
-	Lemma~\ref{lem:qld-4-13}, whose prefactor $m$ is absorbed
-	into $(md)^a$ after enlarging $a$ and shrinking $b$); an application of
-	Lemma~\ref{fact:data-processing} then gives
-	\eqref{eq:qld-s-point-con-alice} for $W = X$. For $W = Z$ the same
-	steps are performed with $X$ and $Z$ interchanged, starting from the
-	opposite-order correlation, and entirely analogous calculations with
-	the registers swapped yield \eqref{eq:qld-s-point-con-bob}.
+\leanok
+\uses{lem:qld-4-13-established, thm:qld-completed-pair-actual-error,
+  thm:qld-actual-rounded-error-bound}
+Lemma~\ref{lem:qld-4-13-established} supplies the actual point and directly
+indexed line witnesses with errors $\delta_Q=p(\eps)$ and
+$\delta_L=Cm\,g(\eps,md/q)$, for polynomially small $p,g$ and universal $C>0$.
+Theorem~\ref{thm:qld-completed-pair-actual-error} constructs both projective
+polynomial-pair measurements, with all four point-consistency defects at most
+\[
+ D=8(4\eta+8\delta_Q)+\frac{12md+4d+14}{q},\qquad
+ \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta},
+\]
+where
+\[
+ \delta=\delta_{\rm ld}\left(a,b,
+ 3\left(\sqrt{\delta_Q+\delta_L}+md/q\right),q,2m+2,d,1\right).
+\]
+Each defect is also at most one, since both measurements are complete and
+the state is normalized. Theorem~\ref{thm:qld-actual-rounded-error-bound}
+bounds $\min\{1,D\}$ by the required universal error function for every
+nonnegative error. The same two measurements therefore satisfy both
+displayed relations for both bases.
+
+This proof uses soundness for the directly indexed game. The separate
+comparison with the source's seed-bearing auxiliary game, and the
+discrepancies documented in \cite{gap:qpbt_ld-dimension-divisibility} and
+\cite{gap:qpbt_combined-lines-error-term}, remain unchanged.
 \end{proof}
 
 \begin{lemma}[Projective refinement of an operator comparison]
@@ -3327,9 +3267,9 @@ player placement, are all at most
 \]
 More generally, completion has defect at most $G+K_W$, hence at most
 $G+2E^W+4/q$, on each opposite placement.
-This auxiliary explicitly assumes the two displayed witnesses. The source
-Lemma~\ref{lem:qld-4-7} remains open pending their construction from its
-original hypotheses and absorption of this actual error into $\delta_{\rm qld}$.
+This auxiliary explicitly assumes the two displayed witnesses.
+Lemma~\ref{lem:qld-4-13-established} supplies them from the original strategy,
+and Theorem~\ref{thm:qld-actual-rounded-error-bound} absorbs their actual error.
 \end{theorem}
 \begin{proof}
 \leanok
@@ -3384,4 +3324,106 @@ one completed measurement on each player side supplies both conclusions.
 	$\eps^{b'}+q^{-b'}+2^{-b'md}$. Enlarging $a'$ absorbs both the
 	constant and the power of $md$. For $\eps>1$, this final expression
 	is at least one and hence bounds the capped error.
+\end{proof}
+
+\begin{theorem}[Direct-line real-part overlap]
+\label{thm:qld-direct-line-real-overlap}
+\lean{MIPStarRE.QPBT.subline_joint_overlap_near_one_at}
+\leanok
+This auxiliary concerns the actual directly indexed subline law. Let the
+combined point and paired-line witnesses have errors $Q$ and $L$, and let
+$I$ be their paired overlap, averaged over the subline law and a uniform
+affine parameter, using completed evaluations of both line polynomials.
+For every directed opposite placement there is a universal $C>0$ such that
+\[
+ |I-1|\leq C\left(Q^{1/2}+\sqrt m
+   (L^{1/4}+Q^{1/4}+\eps^{1/4})\right).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+Replace the joint points by the ordered product, remove the X factor by
+Cauchy--Schwarz, and bound the remaining Z deficit. The one-point mixture
+laws suffice; no joint conditional product law is assumed.
+\end{proof}
+
+\begin{theorem}[Direct passing-error absorption]
+\label{thm:qld-direct-passing-error-bound}
+\lean{MIPStarRE.QPBT.exists_direct_passing_polynomial_bound}
+\lean{MIPStarRE.QPBT.exists_direct_global_pair_error_bound}
+\leanok
+Let $p(x)=\poly(x)$ and $g(x,y)=\poly(x,y)$, with the corrected sum
+convention, and fix $C,s\geq0$, $a\geq1$, $0<b\leq1$.
+For $x,y\geq0$ and $n\geq1$, the capped quantity
+$3(\sqrt{p(x)+Cn g(x,y)}+y)$ is at most $n h(x,y)$ for a
+polynomially small function $h$. For admissible parameters, put
+$\rho=md/q$ and $v=3(\sqrt{p(\eps)+Cm g(\eps,\rho)}+\rho)$.
+There exist universal $A_0>1$ and $0<B_0<1$ such that, for every $\eps\geq0$,
+\[
+ \min\{1,s(\delta_{\rm ld}(a,b,v+\eps,q,2m+2,d,1)
+     +\sqrt{p(\eps)}+\rho)\}
+ \leq\delta_{\rm qld}(A_0,B_0,\eps,m,d,q).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-global-pair-error-bound}
+Bound the capped passing error by $m h(\eps,\rho)$ and apply the existing
+polynomial absorption. When $v\geq1$, the capped low-degree error is at
+least one, which justifies replacing the capped passing error by the full v.
+\end{proof}
+
+\begin{theorem}[Square roots and coefficients of the global error]
+\label{thm:pauli-error-square-root-support}
+\lean{MIPStarRE.QPBT.sqrt_deltaQld_le}
+\lean{MIPStarRE.QPBT.scale_deltaQld_le}
+\leanok
+For admissible parameters, $a\geq1$, $\eps\geq0$, $b\in\mathbb R$ and
+$K\geq1$, the global error satisfies
+\[
+ \sqrt{\delta_{\rm qld}(a,b,\eps,m,d,q)}
+ \leq\delta_{\rm qld}(a,b/2,\eps,m,d,q),\qquad
+ K\delta_{\rm qld}(a,b,\eps,m,d,q)
+ \leq\delta_{\rm qld}(Ka,b,\eps,m,d,q).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+The square root is subadditive on the three nonnegative error terms,
+and the prefactor is at least one. Increasing the prefactor exponent
+preserves order because $md\geq1$. Neither argument restricts $\eps$ to one.
+\end{proof}
+
+\begin{theorem}[Absorption of the actual rounded error]
+\label{thm:qld-actual-rounded-error-bound}
+\lean{MIPStarRE.QPBT.actual_rounding_error_le_root}
+\lean{MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound}
+\leanok
+Fix polynomially small $p,g$, $C\geq0$, $a\geq1$ and $0<b\leq1$.
+For admissible parameters and $\eps\geq0$, put $Q=p(\eps)$,
+$L=Cm g(\eps,md/q)$ and define $\delta,\eta,D$ as in the proof of
+Lemma~\ref{lem:qld-4-7}. There are universal $A>1$, $0<B<1$, chosen
+before these parameters, such that
+\[
+ \min\{1,D\}\leq\delta_{\rm qld}(A,B,\eps,m,d,q).
+\]
+More generally, if $\delta,Q\geq0$, $\delta\leq t$, $\sqrt Q\leq t$ and
+$\rho\leq t$, then
+\[
+ \min\{1,32\delta+32\sqrt{220\delta^{1/4}}+
+ 64\sqrt{2\delta}+64Q+30\rho\}
+ \leq1024\sqrt{\sqrt{\sqrt{\min\{1,t\}}}}.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-direct-passing-error-bound, thm:pauli-error-square-root-support}
+Take $t=\delta_{\rm ld}(a,b,v+\eps,q,2m+2,d,1)+\sqrt Q+md/q$,
+with the actual passing error $v=3(\sqrt{Q+L}+md/q)$.
+Monotonicity gives $\delta\leq t$. If $t\leq1$, all rounding terms
+are bounded by their coefficients times $t^{1/8}$, and $Q\leq t$.
+Also $(12md+4d+14)/q\leq30md/q$. Their coefficient sum is at most 1024.
+If $t\geq1$, use the unit cap. Apply the square-root bound three times
+to the direct absorption constants $A_0,B_0$ and choose
+$A=1024A_0$, $B=B_0/8$.
 \end{proof}
