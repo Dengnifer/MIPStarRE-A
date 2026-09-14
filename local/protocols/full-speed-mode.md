@@ -27,6 +27,7 @@ the **only** artifact the owner authors for a run.
 | `run.pause_deadline_min` | the deadline budget for the pause procedure (section 6) |
 | `run.speed` | `fast` or `default` (section 5) |
 | `run.occupancy_target` | a fraction in `(0, 1]` of the effective cap; the integer floor everything quotes is `run_mode.py get floor` |
+| `run.compute.offload_hosts` | the extra build hosts this run may use, today `["chsh"]` or nothing (section 5.1). Optional; absent means this host only |
 | `run.progress_issue` | prose progress and the hourly readiness report |
 | `run.estimate_issue` | the two-line estimate, and nothing else, ever |
 | `run.owner_inbox_issue` | permission, credential, access and scope grants only |
@@ -68,7 +69,7 @@ list — nothing else has to be remembered, and nothing here is optional:
 
 ```bash
 local/bin/run_mode.py apply                                   # 1. the brief
-results/telemetry/owner-tools/install.sh --crons --start-loops # 2. tools, crontab, capacityd
+results/telemetry/owner-tools/install.sh --crons --start-loops # 2. tools, crontab, capacityd, chsh seed
 setsid nohup ~/.cache/mipstarre-dev/owner-bin/merge-daemon.sh \
     >> ~/.cache/mipstarre-dev/watchdog/lanes/daemon.log 2>&1 < /dev/null &   # 3. the merge queue
 setsid nohup ~/.cache/mipstarre-dev/owner-bin/goal-keeper.sh > /dev/null 2>&1 < /dev/null &
@@ -85,6 +86,12 @@ remove — and on a fresh host `lane.sh`'s `wait_for_slot` fails closed with
 `no-capacity-record`. The five-minute crontab row installed in the same step
 brings the loop back if it is killed; `capacityd.sh` takes a lock, so a start
 that is already running is a no-op.
+
+Step 2 also fires one detached `build-on-chsh.sh --seed-refresh`. It returns
+immediately unless the brief put the run in full speed mode and listed `chsh`, so
+it costs a default-speed run nothing; without it the first offloaded lanes of a
+run rebuild on chsh everything `main` moved since the last one, because the merge
+daemon only refreshes the seed *after* a merge (section 5.1).
 
 After a pause, `owner-resume.sh` performs steps 1-3 from the pause record and
 checks afterwards that the controller and the daemon are actually running
@@ -161,6 +168,8 @@ run_mode.py get endpoint.second
 run_mode.py get codex_home.second
 run_mode.py get progress_issue | estimate_issue | owner_inbox_issue
 run_mode.py get dispatch_cutoff | pause_deadline_min | turn_max
+run_mode.py get offload          # yes only in full speed mode (section 5.1)
+run_mode.py get offload_hosts | offload_reason
 ```
 
 `show --oneline` is what `owner-tools/goal-keeper.sh` puts in the `/goal` text
@@ -284,6 +293,111 @@ Nothing in the layer carries a model of its own: `lane.sh` requests `auto`,
 defect — the 2026-09-12 `gpt-5.6-sol` lane default and the `watchdog/model.txt`
 side channel each pinned a model behind the policy's back.
 
+### 5.1 The chsh build farm
+
+**What chsh is.** A second host, prepared on 2026-09-12: 192 aarch64 cores,
+2 TB RAM, 10 TB free, Lean 4.32.0, a byte-identical copy of the Mathlib package
+cache, a hardlink build seed and a checkout mirroring this one. ghz reaches it
+at 86.7 MB/s over the internal address. A cold lane offload measured 14.9 s and
+a one-file rebuild 17.2 s round trip, against 19 minutes for a full warm build
+and a 61 s median CI build on a ghz loaded to 90-150 by other users.
+
+**The owner's rule.** *In full speed mode the compute and the storage of chsh
+are used alongside ghz; outside full speed mode chsh is never used.* So the
+offload is a property of the run mode and of nothing else:
+
+```
+run_mode.py get offload  ==  yes   iff  run.speed is fast
+                                   and  run.compute.offload_hosts lists chsh
+                                   and  the run is not paused
+```
+
+Every other case — a default-speed run, a brief that does not list the host, a
+paused run, an unreadable run mode, a run-mode document written before the
+field existed — is `no`. There is no operator switch, no environment variable
+that turns it *on*, and no file an agent can touch to enable it;
+`MIPSTARRE_OFFLOAD=0` can only turn it further off. `run_mode.py get
+offload_reason` prints the sentence that decided it. `local/bin/offload-build.sh`
+asks the run mode itself **before** it honours `MIPSTARRE_OFFLOAD_SCRIPT`, so
+that variable can only ever point the offload at a different script — a script
+whose `--check` exits 0 still offloads nothing outside full speed mode.
+
+**And no codex on chsh.** chsh's own internet is about 16 KB/s. It is a pure
+build node fed from ghz by rsync: no worker session, no dispatch, no review, no
+`codex` installation, ever. Nothing in this layer starts one there.
+
+**What uses it.** `local/bin/lane.sh` (the pre-push build and the changed-module
+build) and `local/bin/ci.sh` (the `local-ci/build` step) take their `lake build`
+through `local/bin/offload-build.sh`, which calls
+`results/telemetry/owner-tools/build-on-chsh.sh`. That script pushes the
+worktree's sources (never `.lake`, `.git`, `.worktrees` or `results/telemetry`),
+seeds the lane's `.lake/build` from the shared seed with `cp -al`, points
+`.lake/packages` at the shared Mathlib cache, builds, and returns only the
+whole `.lake/build` closure. **The pre-push per-file `lake env lean` gate stays
+on ghz**, as does everything else that decides whether a branch may be
+published: only the compilation moves.
+
+**chsh is down: there is nothing to do.** Any ssh or rsync failure — an
+unreachable host, missing host keys, a busy lane, a toolchain mismatch, a failed
+artifact return — exits 64 or 65, and the caller then builds here. A lane never
+fails because chsh is unreachable, and a run needs no intervention when it
+happens; the lane log says which host built. A build that *failed* is a
+different thing and is passed through unchanged: a proof that does not compile
+on chsh does not compile here either, and a silent local retry would only spend
+the machine's single full-build lease twice. A completed remote exit 124 remains
+that build's verdict; only expiry of the outer transport deadline falls back.
+
+Remote package, seed and retained lane reuse is identity-gated. The package key
+comes from `lake-manifest.json` and `lean-toolchain`; the build key also includes
+`lakefile.toml`. Seed and lane identity is published only after a successful
+build. Missing or incompatible identity exits 64 and uses the existing local
+fallback; it never provisions dependencies remotely.
+
+**How to verify that it was used.**
+
+```bash
+tail ~/.cache/mipstarre-dev/watchdog/chsh/offload.log   # one row per build, naming the host
+grep '^offload: ' ~/.cache/mipstarre-dev/watchdog/lanes/<N>.build.log
+local/bin/run_mode.py get offload_reason
+results/telemetry/owner-tools/build-on-chsh.sh --dry-run <worktree>   # the plan, contacting nothing
+```
+
+A row reading `host=ghz reason=fallback-64` is the farm being unreachable and
+the fallback working, not an incident. A run at `fast` speed whose log has no
+`host=chsh` row at all is the thing to look at: check `get offload_reason`
+first, then the known-hosts file below.
+
+**The seed.** chsh's checkout and its hardlink seed go stale as `main` moves.
+Lanes refuse a seed whose successful-build identity does not match the worktree.
+The merge daemon fires `build-on-chsh.sh --seed-refresh` after every merge; the
+refresh is detached, takes its own lock, runs at most once an hour and returns
+immediately while the offload is disabled. Its log is
+`watchdog/chsh/seed-refresh.log`. The rate-limit stamp is written **after** the
+rebuild succeeds, so a refresh that fails does not rate-limit its own retries for
+an hour.
+
+`install.sh --start-loops` (run-start step 2) fires one detached
+`--seed-refresh` of its own, because the merge daemon only refreshes *after* a
+merge: chsh's checkout is at whatever the last run left it. It is a no-op while
+the offload is disabled.
+
+The seed is replaced **in place** (`rsync -a --delete` into the seed directory)
+under `seed-refresh.lock`. Lanes take that lock shared while validating identity
+and taking the hardlink skeleton, so they cannot reuse a half-replaced seed.
+
+**Installation.** `results/telemetry/owner-tools/install.sh` deploys
+`build-on-chsh.sh` under the hash manifest like every other operator tool, and
+copies the host keys to `watchdog/chsh/known_hosts` (from
+`$MIPSTARRE_CHSH_KNOWN_HOSTS`, then its own durable copy at
+`watchdog/chsh/known_hosts.source`). Shared temporary files are ignored. The
+first explicit install keeps that durable copy, and `install.sh --verify`
+reports a missing or empty `known_hosts` rather than
+leaving the *absence* of `host=chsh` rows as the only signal. The keys
+are runtime state, never committed, and the connection is
+`StrictHostKeyChecking=yes` against that file: a missing file makes the offload
+unusable — which costs a little build time and nothing else — and is never a
+reason to accept an unknown host key. Nothing is installed on chsh.
+
 ## 6. Pause and resume
 
 The owner's word starts the deadline in `run.pause_deadline_min`. The procedure
@@ -323,6 +437,9 @@ Resume is run only on the owner's explicit word
 | `capacity_controller.py` fails during pause | the caps are zeroed directly and the failure is reported (stopping admission is the safe direction) |
 | `capacity_controller.py` fails during resume | the command refuses; the caps stay where they are (paused is the safe direction) |
 | GitHub failure in `ready_report.py` / `estimate_post.py` | nonzero exit and **no partial comment**; at most one mutation per publishing step, adopting the stable marker comment when it already exists |
+| chsh unreachable, or its host keys missing | the offload exits 64, the lane or CI step builds on ghz and says so; no lane fails and nothing is to be done (section 5.1) |
+| an unknown host in `run.compute.offload_hosts` | `apply` exits 2 naming the key and the known hosts; nothing is written |
+| the run is paused, or the speed is `default` | `get offload` is `no` and chsh is not contacted at all |
 
 ## 8. Records
 

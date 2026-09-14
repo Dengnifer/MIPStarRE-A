@@ -9,7 +9,12 @@
     "Write \"policy\" to keep the published policy during a fast run, or",
     "\"astra-all\" to force the hard model at default speed. run_mode.py set speed",
     "re-resolves the field, so the tier and the models never disagree, and",
-    "run_mode.py get model_override answers with what is actually in force."
+    "run_mode.py get model_override answers with what is actually in force.",
+    "run.compute.offload_hosts names the extra build hosts this run may use.",
+    "  chsh is the aarch64 build farm; the owner's rule is that it is used in",
+    "  full speed mode and NEVER otherwise, so run_mode.py get offload is yes",
+    "  only when run.speed is fast, the host is listed and the run is not",
+    "  paused. Remove the key (or the host) for a run that must stay on ghz."
   ],
   "schema": "mipstarre-run-brief/1",
   "run": {
@@ -22,6 +27,9 @@
     "progress_issue": 27,
     "estimate_issue": 168,
     "owner_inbox_issue": 500,
+    "compute": {
+      "offload_hosts": ["chsh"]
+    },
     "main": {
       "model": "gpt-6-astra",
       "effort": "xhigh",

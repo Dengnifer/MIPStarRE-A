@@ -1541,6 +1541,60 @@ tier switch moves the shim, the models and the cadence together, and the only
 `MIPSTARRE_SKIP_HOOKS` push in the tree is the documented one inside
 `checked-push.sh`.
 
+## 2026-09-12 - The chsh build farm is a mode of the run, not an operator action (W8, PR 554)
+
+**Trigger:** the 2026-09-12 full speed run was CPU-bound on a host shared with other
+users — load 90-150 for four hours, a 61 s median CI build, lanes queueing behind the
+machine-wide full-build lease — while a second machine sat idle. The owner's rule for it
+is narrow: *in full speed mode the compute and the storage of chsh are used alongside ghz,
+and outside full speed mode chsh is never used*, with no codex session there ever.
+
+**Change.** `run.compute.offload_hosts` in the run brief, validated against the known
+hosts at briefing time. `run_mode.py get offload` answers `yes` only when the run is
+`fast`, lists the host and is not paused; a default-speed run, a brief without the field,
+a paused run and a run-mode document written before the field all answer `no`, and
+`get offload_reason` prints the sentence that decided it. That is the whole gate: there is
+no environment variable that turns the farm on, and `MIPSTARRE_OFFLOAD=0` can only turn it
+further off. `results/telemetry/owner-tools/build-on-chsh.sh` is the draft of the side
+session hardened into a tracked tool — `BatchMode` ssh with `StrictHostKeyChecking=yes`
+against a known-hosts file the installer deploys, one `flock` per lane, a toolchain
+equality check, validated lane names and lake targets, a `--dry-run` that prints every
+command and contacts nothing, and one row per build in `watchdog/chsh/offload.log`.
+
+**The part that matters is the fallback.** `local/bin/offload-build.sh` is the single copy
+of the rule that `lane.sh` and `ci.sh` share: exit 64 (chsh unusable) and 65 (artifacts not
+returned) fall back to the local build and the lane continues, while **every other exit
+code is the build's own verdict and is passed through**. A proof that does not compile on
+chsh does not compile here either, and a silent local retry would spend the machine's
+single full-build lease twice to learn the same thing. The exit code of the build that
+actually ran is the step's exit code, and the log names the host either way.
+
+**And the offload returns the whole closure, not the delta.** The first draft rsynced
+back only `find lib ir -newer .offload-stamp` — what chsh rebuilt relative to ITS seed.
+The two hosts do not start from the same object: chsh's seed is refreshed after every
+merge and tracks `main`, while a ghz worktree is warmed from the hot-main snapshot, which
+lags it by hours. Every module that moved on `main` inside that gap has an olean in chsh's
+seed — not rebuilt, not newer than the stamp, not returned — and none on ghz, so the
+offload reports `host=chsh` success, nothing falls back, and the lane dies later at the
+pre-push per-file `lake env lean` gate or triggers an unbounded local rebuild outside the
+build lease it has already released. Step 4 rsyncs the whole of `.lake/build`; rsync's own
+size/mtime delta still transfers only what is missing, and the stamp survives as the
+`artifacts=N` field in the log. Both rsyncs carry `--timeout`, and `offload-build.sh`
+bounds the whole offload with a wall clock mapped to exit 64, because ssh's `ServerAlive`
+notices a link that is dead and not one that is merely slow — and a stalled offload holds
+this machine's single full-build lease.
+
+**What did not move.** The pre-push per-file `lake env lean` gate, `checked-push.sh`, the
+hooks, the seven `pr_merge.py` gates and the eight `local-ci/<step>` contexts: only the
+compilation is offloaded, and the build step gained no ninth status context. The
+machine-wide build lease is still held across an offloaded build, because the artifacts
+land in the local worktree and a local build racing the offload on the same tree is the one
+concurrency the farm must not have.
+
+**Expected effect:** a full speed run compiles on 192 idle cores instead of queueing for
+128 contended ones, the owner turns it on by writing `fast` and nothing else, a pause turns
+it off with everything else, and a chsh outage costs build minutes rather than a lane.
+
 ## 2026-09-14 - Retained requests stop at the dispatch boundary (PR 552 F12)
 
 **Trigger:** `results/telemetry/events.d/2026-09-14-orc-550-20260914-02.md`,
@@ -1559,3 +1613,20 @@ runtime state changes.
 **Expected effect:** operators can use retained spool data as diagnostic
 evidence without inferring that the janitor will reconstruct or deliver a
 dispatch after the original process exits.
+
+## 2026-09-14 - Chsh reuse is bound to successful artifact identity (PR 554 review)
+
+**Trigger:** `results/telemetry/events.d/2026-09-14-orc-553-20260914-02.md`
+records review findings F1-F4: exit 124 ambiguity, mutable-checkout identity,
+nontransactional resume inherited from the parent, and predictable `/tmp`
+host-key bootstrap.
+
+**Change:** completed build exit codes are separated from outer transport expiry;
+package, seed and retained-lane reuse validates canonical identities written only
+after successful builds; lanes share the seed-refresh lock; the CI-green parent
+resume transaction is integrated; and only explicit or durable trusted host-key
+sources are accepted. Existing exit-64 local fallback remains the failure path.
+
+**Expected effect:** remote reuse cannot cross dependency or build identities,
+transport fallback cannot hide a real build verdict, failed resume stays paused,
+and absent trusted host keys leave offload unavailable.

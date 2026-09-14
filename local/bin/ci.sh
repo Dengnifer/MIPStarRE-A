@@ -61,6 +61,8 @@
 #                                   missing instead of doing a cold build
 #   MIPSTARRE_CI_ALLOW_COLD_FETCH=1 let the build step materialise .lake/packages
 #                                   itself instead of demanding worktree-setup.sh
+#   MIPSTARRE_OFFLOAD=0             never use the chsh build farm, whatever the
+#                                   run mode says (the mode decides otherwise)
 #
 # There is deliberately no LOCAL_CI_ENABLED kill switch: a disabled CI would
 # hand the merge gate a green light it never earned.  See local/protocols/ci.md.
@@ -77,6 +79,19 @@ SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SO
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 
 STEP_NAMES="build blueprint-render paper-gaps blueprint-sync file-length proof-debt proof-evasion statement-origin"
+
+# The chsh offload and its fallback rule, shared with lane.sh.  In full speed
+# mode, and only then, the build step compiles on the build farm; ANY ssh or
+# rsync failure falls back to a local build, so CI can never turn red because a
+# second host is unreachable.  No new step and no new status context: the eight
+# canonical local-ci/<step> contexts are a merge-gate contract.
+if [ -r "$SCRIPT_DIR/offload-build.sh" ]; then
+  . "$SCRIPT_DIR/offload-build.sh"
+else
+  offload_lake_build() { local label="$2"; shift 2
+    printf 'offload: %s built on ghz (no offload-build.sh in this checkout) host=ghz\n' "$label"
+    offload_local_build "$@"; }
+fi
 
 # Step exit codes with a meaning beyond "the command failed".
 EXIT_TOOL_MISSING=91
@@ -869,12 +884,16 @@ unreachable-module guard did not run for this branch"
     exit "$EXIT_TOOL_MISSING"
   fi
 
-  echo "+ lake build"
-  run_outside_git_env lake build
+  # The local build, used directly at default speed and as the fallback of an
+  # offloaded one.  Unchanged from what this step always ran.
+  offload_local_build() { run_outside_git_env lake build "$@"; }
+
+  echo "+ lake build   (on chsh when the run mode enables the offload)"
+  offload_lake_build "$WORKTREE" "ci-pr$PR_ID" || exit $?
 
   # pr-ci.yml:155-156
   echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit"
-  run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit
+  offload_lake_build "$WORKTREE" "ci-pr$PR_ID-axiom-audit" MIPStarRE.LDT.Test.AxiomAudit || exit $?
 
   # pr-ci.yml:158-159
   echo "+ scripts/comparator/check_challenge_drift.py"

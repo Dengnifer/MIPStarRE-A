@@ -17,6 +17,8 @@
 #   --force        overwrite a deployed copy whose hash matches no released version.
 #                  The previous copy is MOVED to owner-bin/attic/<ts>/, never deleted.
 #   --start-loops  start capacityd.sh (the 60 s capacity controller loop) if it is not
+#                  running, and fire one detached build-on-chsh.sh --seed-refresh (which
+#                  returns immediately unless the run is fast and lists chsh)
 #                  already running and no stop file holds it.  Without a running
 #                  controller nothing writes watchdog/max-codex-*, the caps stay frozen
 #                  at whatever seeded them, there is no AIMD, no 5xx trip and no
@@ -28,6 +30,7 @@
 #                  a historical /tmp path runs versioned code.  Nothing is ever written or
 #                  edited in /tmp; an existing regular file there is refused, not clobbered.
 #   --crons        run install-crons.sh afterwards (crontab regenerated from run-mode).
+#                  Also installs the chsh build farm's known-hosts file (below).
 #   --dry-run      print the plan and touch nothing (implies --dry-run for --crons too).
 #   --dest DIR     install into DIR instead of $MIPSTARRE_CACHE_ROOT/owner-bin (tests).
 #   --compat-dir D create the compat symlinks in D instead of /tmp (tests).
@@ -41,6 +44,16 @@
 #                       (the fast and the default rendering), because run_mode.py set speed
 #                       regenerates it in place
 #   repo-root           the checkout this release was installed from
+#
+# Outside owner-bin/ this installer also places the chsh build farm's host keys at
+# $MIPSTARRE_CACHE_ROOT/watchdog/chsh/known_hosts, copied only from the explicitly
+# trusted $MIPSTARRE_CHSH_KNOWN_HOSTS or the durable copy under the cache root.  The
+# first install keeps its own copy at watchdog/chsh/known_hosts.source, and `--verify`
+# says so when the file is missing or empty instead of leaving the
+# absence of `host=chsh` rows as the only signal.  They are runtime
+# state, not a committed file, and build-on-chsh.sh uses them with
+# StrictHostKeyChecking=yes.  Without them the offload exits 64 and every lane simply
+# builds on ghz — a missing file is a warning here, never a failed install.
 #   attic/<ts>/         the previous copy of every file this run replaced, plus its manifest
 #
 # Refusal rule (the point of the installer): a deployed file whose hash is neither the
@@ -54,7 +67,7 @@ set -euo pipefail
 
 PROG="install.sh"
 
-usage() { sed -n '2,52p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,60p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 FORCE=0; COMPAT=0; CRONS=0; DRY=0; VERIFY=0; RECORD=""; START_LOOPS=0
 DEST=""; SPEED=""; COMPAT_DIR="${MIPSTARRE_COMPAT_DIR:-/tmp}"
@@ -79,6 +92,62 @@ done
 CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-$HOME/.cache/mipstarre-dev}"
 DEST="${DEST:-$CACHE_ROOT/owner-bin}"
 TS="$(date -u +%Y%m%dT%H%M%SZ)"
+
+CHSH_STATE="$CACHE_ROOT/watchdog/chsh"
+CHSH_KNOWN_HOSTS_SRC="${MIPSTARRE_CHSH_KNOWN_HOSTS:-}"
+
+# A predictable shared /tmp path is never a trust source: another user could
+# pre-create it before the first install.  The first explicitly trusted copy is
+# retained under the cache root for later installs.
+CHSH_KNOWN_HOSTS_KEEP="$CHSH_STATE/known_hosts.source"
+
+chsh_known_hosts_source() { # the file to install from, or nothing
+  local candidate
+  for candidate in "$CHSH_KNOWN_HOSTS_SRC" "$CHSH_KNOWN_HOSTS_KEEP"; do
+    [ -n "$candidate" ] && [ -s "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+  done
+  return 1
+}
+
+install_chsh_known_hosts() {
+  local src
+  if ! src="$(chsh_known_hosts_source)"; then
+    echo "$PROG: no explicitly trusted chsh known-hosts and no durable copy at" \
+         "$CHSH_KNOWN_HOSTS_KEEP; the build farm stays unusable"
+    return 0
+  fi
+  mkdir -p "$CHSH_STATE"
+  if [ ! -r "$CHSH_KNOWN_HOSTS_KEEP" ] || ! cmp -s "$src" "$CHSH_KNOWN_HOSTS_KEEP"; then
+    cp "$src" "$CHSH_STATE/.known_hosts.keep.new"
+    chmod 600 "$CHSH_STATE/.known_hosts.keep.new"
+    mv "$CHSH_STATE/.known_hosts.keep.new" "$CHSH_KNOWN_HOSTS_KEEP"
+    echo "$PROG: chsh host keys kept at $CHSH_KNOWN_HOSTS_KEEP (from $src)"
+  fi
+  if [ -r "$CHSH_STATE/known_hosts" ] && cmp -s "$src" "$CHSH_STATE/known_hosts"; then
+    echo "$PROG: chsh known_hosts unchanged ($CHSH_STATE/known_hosts)"
+    return 0
+  fi
+  cp "$src" "$CHSH_STATE/.known_hosts.new"
+  chmod 644 "$CHSH_STATE/.known_hosts.new"
+  mv "$CHSH_STATE/.known_hosts.new" "$CHSH_STATE/known_hosts"
+  echo "$PROG: chsh known_hosts installed at $CHSH_STATE/known_hosts (from $src)"
+}
+
+# --verify reports the keys.  Never an exit-3 failure: a run that does not list
+# chsh does not need them, and a missing file costs build minutes and nothing
+# else.  What it must never be is invisible.
+verify_chsh_known_hosts() {
+  if [ -s "$CHSH_STATE/known_hosts" ]; then
+    printf '%s: chsh known_hosts present (%s bytes)\n' "$PROG" \
+      "$(wc -c < "$CHSH_STATE/known_hosts" | tr -d ' ')"
+    return 0
+  fi
+  echo "$PROG: WARNING: $CHSH_STATE/known_hosts is missing or empty." >&2
+  echo "$PROG: the chsh build farm is UNUSABLE (every offload exits 64 and lanes" >&2
+  echo "$PROG: build on this host).  If the brief lists chsh, re-run install.sh;" >&2
+  echo "$PROG: the durable copy is $CHSH_KNOWN_HOSTS_KEEP." >&2
+  return 0
+}
 
 # --- the checkout this installer belongs to --------------------------------------------
 # When install.sh is run from owner-bin (--verify / --record on the host) it cannot derive
@@ -122,6 +191,7 @@ codex|owner-bin-codex|755|required
 stack-watch.sh|stack-watch.sh|755|optional
 capacityd.sh|capacityd.sh|755|optional
 merge-daemon.sh|merge-daemon.sh|755|optional
+build-on-chsh.sh|build-on-chsh.sh|755|optional
 merge.sh|merge.sh|755|optional
 daemon-scan.py|daemon-scan.py|755|optional
 daemon.conf|daemon.conf|644|optional
@@ -221,6 +291,7 @@ if [ "$VERIFY" -eq 1 ]; then
   done <<EOF
 $(tool_table)
 EOF
+  verify_chsh_known_hosts
   if [ "$rc" -eq 0 ]; then echo "$PROG: $DEST verified against the manifest"; fi
   exit "$rc"
 fi
@@ -310,11 +381,18 @@ done
 
 if [ "$DRY" -eq 1 ]; then
   echo "$PROG: [dry-run] no file written, no symlink created, no crontab touched"
+  if khsrc="$(chsh_known_hosts_source)"; then
+    echo "$PROG: [dry-run] would install $khsrc as $CHSH_STATE/known_hosts"
+    echo "$PROG: [dry-run] would keep a durable copy at $CHSH_KNOWN_HOSTS_KEEP"
+  else
+    echo "$PROG: [dry-run] no explicitly trusted chsh known-hosts or durable copy; the build farm stays unusable"
+  fi
   if [ "$CRONS" -eq 1 ]; then
     "$SRC/install-crons.sh" --dry-run || exit $?
   fi
   if [ "$START_LOOPS" -eq 1 ]; then
     echo "$PROG: [dry-run] would start capacityd.sh (the 60 s capacity controller loop)"
+    echo "$PROG: [dry-run] would start build-on-chsh.sh --seed-refresh detached (a no-op unless the run is fast and lists chsh)"
   fi
   exit 0
 fi
@@ -380,6 +458,9 @@ printf '%s\n' "$ROOT" > "$DEST/repo-root"
 echo "$PROG: installed $(wc -l < "$DEST/manifest.sha256" | tr -d ' ') files, release $SHORT ($DESCRIBE)"
 if [ -d "$ATTIC" ]; then echo "$PROG: previous copies kept in $ATTIC"; fi
 
+# --- the chsh build farm's host keys -------------------------------------------------------
+install_chsh_known_hosts
+
 # --- compat symlinks ----------------------------------------------------------------------
 if [ "$COMPAT" -eq 1 ]; then
   mkdir -p "$COMPAT_DIR"
@@ -426,6 +507,20 @@ if [ "$START_LOOPS" -eq 1 ]; then
     else
       echo "$PROG: capacityd.sh did not come up; see $CAP_STATE/capacityd.log" >&2
     fi
+  fi
+
+  # --- the build farm's seed, once, at run start --------------------------------------
+  # The merge daemon refreshes chsh's seed AFTER a merge, so at the start of a run the
+  # seed is at whatever the last run left and the first offloaded lanes rebuild hours of
+  # `main` on chsh before any merge lands.  This is a no-op while the offload is disabled
+  # (the script's own gate returns immediately without contacting anything), so it costs a
+  # default-speed run nothing and needs no condition here.
+  CHSH_SH="$DEST/build-on-chsh.sh"
+  if [ -r "$CHSH_SH" ]; then
+    mkdir -p "$CHSH_STATE"
+    setsid nohup bash "$CHSH_SH" --seed-refresh \
+      >> "$CHSH_STATE/seed-refresh.log" 2>&1 < /dev/null &
+    echo "$PROG: chsh seed refresh started detached (a no-op unless the run is fast and lists chsh); log $CHSH_STATE/seed-refresh.log"
   fi
 fi
 exit 0
