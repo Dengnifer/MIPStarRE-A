@@ -886,7 +886,11 @@ def main(argv: list[str] | None = None) -> int:
         statuses = (lambda sha: {}) if args.no_github else None
         manifest = build_manifest(statuses=statuses, now=args.now,
                                   limits=limits, cutoff_at=args.cutoff_at)
-        manifest["markers_before"] = sorted(failed_markers())
+        # The mtimes, not only the names: `new_failed_markers` decides by
+        # difference, and a snapshot of bare paths would make every marker that
+        # already existed look like one the landing caused — and the resume
+        # would then clear a real failure verdict.
+        manifest["markers_before"] = failed_markers()
         write_manifest(state, manifest)
         print(json.dumps(manifest, indent=1, sort_keys=True))
         return 0
@@ -896,7 +900,9 @@ def main(argv: list[str] | None = None) -> int:
         if not manifest:
             print(f"pause_landing.py: no landing manifest in {state}", file=sys.stderr)
             return 3
-        before = {path: 0.0 for path in manifest.get("markers_before") or []}
+        before = manifest.get("markers_before") or {}
+        if not isinstance(before, dict):
+            before = {}
         manifest["sessions"] = land(manifest.get("sessions") or [], args.phase,
                                     limits, dry_run=args.dry_run)
         if args.phase == "last" and not args.dry_run:

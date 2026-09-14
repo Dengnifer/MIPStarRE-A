@@ -295,6 +295,19 @@ class ManifestTestCase(LandingTestCase):
         self.assertEqual(new[0]["first_line"], "exited 143")
         self.assertTrue(new[0]["created_by_landing"])
 
+    def test_the_marker_snapshot_survives_the_json_round_trip(self) -> None:
+        # `manifest` writes the snapshot into pause-state.json and `land --phase
+        # last` reads it back, so it must carry the mtimes: a snapshot of bare
+        # paths would make every pre-existing marker look landing-caused, and
+        # the resume would clear a real failure verdict.
+        daemon = self.cache / "watchdog" / "daemon"
+        (daemon / "pr11.failed").write_text("a real failure\n", encoding="utf-8")
+        snapshot = pl.failed_markers(self.cache)
+        self.assertTrue(all(isinstance(value, float) for value in snapshot.values()))
+        restored = json.loads(json.dumps(snapshot))
+        self.assertEqual(pl.new_failed_markers(restored, self.cache), [],
+                         "nothing changed, so the landing caused no marker")
+
     def test_the_lane_step_is_read_from_the_markers_lane_sh_leaves(self) -> None:
         lanes = self.cache / "watchdog" / "lanes"
         self.assertEqual(pl.lane_step(lanes, "5"), "warm")
