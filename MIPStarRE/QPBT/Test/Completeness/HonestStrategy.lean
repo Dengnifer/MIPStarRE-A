@@ -46,36 +46,24 @@ variable {K ι : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) 
 
 /-! ### The generalized Pauli basis measurement -/
 
-/-- Every generalized Pauli projector is positive semidefinite: it is the
-rank-one projector onto the corresponding basis vector of
-blueprint `def:generalized-pauli`, paper origin
+/-- Every generalized Pauli projector is a nonnegative operator.  The
+positive semidefiniteness it repackages is `posSemidef_pauliProj`, blueprint
+`def:generalized-pauli`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1101-1122`. -/
-theorem pauliProj_posSemidef (W : PauliKind) (e : ι → K) :
-    (pauliProj W e).PosSemidef :=
-  posSemidef_pauliProj W e
-
-/-- Every generalized Pauli projector is a nonnegative operator. -/
 theorem pauliProj_nonneg (W : PauliKind) (e : ι → K) : 0 ≤ pauliProj W e :=
-  Matrix.nonneg_iff_posSemidef.mpr (pauliProj_posSemidef W e)
+  Matrix.nonneg_iff_posSemidef.mpr (posSemidef_pauliProj W e)
 
 /-- Every generalized Pauli projector is Hermitian. -/
 theorem pauliProj_conjTranspose (W : PauliKind) (e : ι → K) :
     (pauliProj W e)ᴴ = pauliProj W e :=
-  (pauliProj_posSemidef W e).isHermitian.eq
-
-/-- The generalized Pauli projectors in a fixed basis form a resolution of the
-identity. This is the completeness half of blueprint `def:generalized-pauli`, paper origin
-`references/qpbt-paper/04_preliminaries.tex:1101-1122`. -/
-theorem sum_pauliProj (W : PauliKind) :
-    ∑ e : ι → K, pauliProj W e = 1 :=
-  sum_pauliProj_eq_one W
+  (posSemidef_pauliProj W e).isHermitian.eq
 
 /-- The generalized Pauli basis measurement in basis `W`: the projective
 measurement whose outcomes are the labels of blueprint `def:generalized-pauli`, paper origin
 `references/qpbt-paper/04_preliminaries.tex:1101-1122`. -/
 noncomputable def pauliBasisMeasurement (W : PauliKind) :
     Measurement (ι → K) (ι → K) :=
-  Measurement.ofSumEqOne (pauliProj W) (pauliProj_nonneg W) (sum_pauliProj W)
+  Measurement.ofSumEqOne (pauliProj W) (pauliProj_nonneg W) (sum_pauliProj_eq_one W)
 
 @[simp] theorem pauliBasisMeasurement_effect (W : PauliKind) (e : ι → K) :
     (pauliBasisMeasurement W).effect e = pauliProj W e := rfl
@@ -399,41 +387,9 @@ theorem pauliPointMeasurement_postprocess_trace_effect (P : AdmissibleParams)
     ((pauliPointMeasurement P W u).postprocess
         (fun a => fixedBinTrace P.model (a * r))).effect b =
       (pauliTraceMeasurement P W u r).effect b := by
-  have hmaps : ∀ h ∈ Finset.univ.filter
-      (fun h : PauliRegister P => pauliTraceBit P u r h = b),
-      lowDegreeEnc h u ∈ Finset.univ.filter
-        (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b) := fun h hh =>
-    Finset.mem_filter.mpr ⟨Finset.mem_univ _, (Finset.mem_filter.mp hh).2⟩
-  have hinner : ∀ a ∈ Finset.univ.filter
-      (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
-      (Finset.univ.filter fun h : PauliRegister P => lowDegreeEnc h u = a) =
-        (Finset.univ.filter fun h : PauliRegister P =>
-          pauliTraceBit P u r h = b).filter fun h => lowDegreeEnc h u = a := by
-    intro a ha
-    ext h
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
-    constructor
-    · intro hh
-      refine ⟨?_, hh⟩
-      change fixedBinTrace P.model (lowDegreeEnc h u * r) = b
-      rw [hh]
-      exact (Finset.mem_filter.mp ha).2
-    · exact fun hh => hh.2
-  calc ((pauliPointMeasurement P W u).postprocess
-        (fun a => fixedBinTrace P.model (a * r))).effect b
-      = ∑ a ∈ Finset.univ.filter
-          (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
-          ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P => lowDegreeEnc h u = a),
-            pauliProj W h := rfl
-    _ = ∑ a ∈ Finset.univ.filter
-          (fun a : PauliScalar P => fixedBinTrace P.model (a * r) = b),
-          ∑ h ∈ (Finset.univ.filter fun h : PauliRegister P =>
-              pauliTraceBit P u r h = b).filter (fun h => lowDegreeEnc h u = a),
-            pauliProj W h :=
-        Finset.sum_congr rfl fun a ha => by rw [hinner a ha]
-    _ = ∑ h ∈ Finset.univ.filter (fun h : PauliRegister P => pauliTraceBit P u r h = b),
-          pauliProj W h := Finset.sum_fiberwise_of_maps_to hmaps _
-    _ = (pauliTraceMeasurement P W u r).effect b := rfl
+  unfold pauliPointMeasurement pauliTraceMeasurement
+  rw [Measurement.postprocess_comp]
+  rfl
 
 /-! ### The commutation law of the honest pair -/
 
