@@ -882,7 +882,7 @@ assembled by Fourier averaging.
 	Let $K$ be a finite integral domain, let $c\in\N$, and let
 	$f,g\in K^{c+1}$ be distinct coefficient vectors. Their polynomials
 	$p_f(T)=\sum_{i=0}^{c}f_iT^i$ and $p_g(T)=\sum_{i=0}^{c}g_iT^i$
-	agree at at most $c$ elements of $K$.
+	agree at most $c$ elements of $K$.
 	The coefficient representation is injective, preserves evaluation,
 	and has natural degree at most $c$.
 	This is a formalization-only auxiliary for the Schwartz--Zippel step
@@ -896,6 +896,103 @@ assembled by Fourier averaging.
 	and gives polynomials of degree at most $c$. If the polynomials agreed
 	at more than $c$ elements, the univariate root bound applied to their
 	difference would force them to be equal, contradicting $f\ne g$.
+\end{proof}
+
+\begin{definition}[Formalization support: retained nondegenerate mass]
+	\label{def:nondegenerate-line-pasting-mass}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+	\leanok
+	\uses{def:line-point-dist}
+	Fix low-degree parameters $L=(q,m,d,k)$, and write
+	$D_{\mathsf{Line}}^L$ for the line-point distribution of
+	Definition~\ref{def:line-point-dist}. For two independent samples
+	$(\ell_1,x),(\ell_2,z)\sim D_{\mathsf{Line}}^L$, define the retained mass
+	\[
+		\mu_{\mathrm{nd}}(L)
+		:= \sum_{\substack{(\ell_1,x),(\ell_2,z)\\
+			\operatorname{dir}(\ell_1)\ne 0}}
+		D_{\mathsf{Line}}^L(\ell_1,x)D_{\mathsf{Line}}^L(\ell_2,z).
+	\]
+	Thus $\mu_{\mathrm{nd}}(L)$ is the probability that the first sampled line
+	has nonzero direction; the second line-point sample is unrestricted. This is
+	a formalization-only quantity for the conditioning step in the proof of
+	Lemma~\ref{lem:qld-xz-lines}. It does not replace the independent,
+	unconditioned product law in that lemma's statement.
+\end{definition}
+
+\begin{theorem}[Formalization support: bounds for the retained mass]
+	\label{thm:nondegenerate-line-pasting-mass-bounds}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass, def:line-point-dist}
+	For every low-degree parameter tuple $L$,
+	\[
+		\frac12\le \mu_{\mathrm{nd}}(L)\le 1.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass, def:line-point-dist}
+	The axis-parallel component has weight one half and always has nonzero
+	direction, while the diagonal component contributes nonnegative mass. This
+	gives the lower bound. The upper bound follows because the retained samples
+	form an event in the product of two probability distributions.
+\end{proof}
+
+\begin{theorem}[Formalization support: positivity of the retained mass]
+	\label{thm:nondegenerate-line-pasting-mass-positive}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass,
+		thm:nondegenerate-line-pasting-mass-bounds}
+	For every low-degree parameter tuple $L$, the event
+	$\operatorname{dir}(\ell_1)\ne0$ has positive mass under
+	$D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$; equivalently,
+	$0<\mu_{\mathrm{nd}}(L)$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:nondegenerate-line-pasting-mass-bounds}
+	The lower bound $\mu_{\mathrm{nd}}(L)\ge\frac12$ is strictly positive.
+\end{proof}
+
+\begin{definition}[Formalization support: conditioned pasting distribution]
+	\label{def:nondegenerate-line-pasting-dist}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+	\leanok
+	\uses{def:line-point-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Condition $D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$ on
+	$\operatorname{dir}(\ell_1)\ne0$, using the positive mass from
+	Theorem~\ref{thm:nondegenerate-line-pasting-mass-positive}, and push the
+	result forward along
+	\[
+		\big((\ell_1,x),(\ell_2,z)\big)
+		\longmapsto
+		\big(((\ell_1,\ell_2),(\ell_2,z)),(\ell_1,x)\big).
+	\]
+	Denote the resulting distribution by $D_{\mathrm{nd}}^L$. This auxiliary
+	law has the tuple order required by the pasting argument and imposes only
+	the displayed nonzero-direction condition on the first sampled line. The
+	source conclusion of Lemma~\ref{lem:qld-xz-lines} remains an average over
+	two independent, unconditioned samples from $D_{\mathsf{Line}}^L$.
+\end{definition}
+
+\begin{theorem}[Formalization support: normalization of the conditioned law]
+	\label{thm:nondegenerate-line-pasting-dist-probability}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	For every low-degree parameter tuple $L$, $D_{\mathrm{nd}}^L$ is a
+	probability distribution.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Normalization by the positive retained mass gives a probability
+	distribution on the restricted event, and push-forward preserves total mass.
 \end{proof}
 
 \begin{lemma}[Combined line measurements]
@@ -1037,7 +1134,8 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
 		def:concrete-paired-line-measurement, def:consistency}
-	This is a Lean-only construction obligation. Fix a polynomially small
+	This is a formalization-only construction obligation. Fix a
+	polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
 	such that for every projective strategy passing with error $\eps$ and
