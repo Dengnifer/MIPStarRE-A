@@ -7630,7 +7630,6 @@ not actual commit/publication hooks. No productive session was killed.
   cleared. The prover reruns exact-head CI with this expanded environment
   scrub; no workflow source or account policy is modified.
 
-## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 ## 2026-09-12 - Inherited hardness reason in PR 531 CI
 
 - Session `prover-509-20260912-01` ran canonical CI on published head

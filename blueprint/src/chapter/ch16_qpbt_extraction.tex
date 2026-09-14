@@ -218,16 +218,19 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 Each displayed construction estimate below has its own universal constant $C_E \geq 1$, quantified independently, and its own scale $\delta_P^E=C_EB$. The source uses one enlarged error $\delta_S$ for all of these estimates. The two presentations agree: after the finitely many estimates have been established, take $C_* = \max_E C_E$ and $\delta_P=C_*B$. Since $B\geq0$, every bound remains valid at this common scale. In the proof paragraphs, $\delta_P$ denotes this common enlargement. It has the same asymptotic form as $\delta_G$: after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ for $0 \leq \eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'}
-	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent}
+	\lean{MIPStarRE.QPBT.exists_pulled_apart_consistency}
 	\lean{MIPStarRE.QPBT.deltaConstructPaulis}
-	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
 		def:indicator-vector}
-	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables $\tilde{W}^j(\tilde{u})$ satisfy the following properties.
+	There are universal constants $a>1$, $0<b<1$, and $C_*\geq1$ such that,
+	for every admissible parameter tuple and projective strategy in the setting
+	above with $0\leq\eps\leq1$, there is a pair of global projective measurements
+	satisfying Lemma~\ref{lem:qld-4-7} at error $\delta_G(\eps,m,d,q)$.
+	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables
+	$\tilde{W}^j(\tilde{u})$ constructed from this same pair satisfy the following
+	properties, with all three constants taken to be $C_*$.
 	% The paper's statement also quantifies item 1 over j, but j does not occur
 	% in item 1; the vacuous quantifier is dropped here.
 	\begin{enumerate}
@@ -245,6 +248,11 @@ Each displayed construction estimate below has its own universal constant $C_E \
 			\tilde{W}^j(\tilde{u}) \ot \Id_{\mathrm{B}\mathrm{B}'\mathrm{B}''} \approx_{\delta_P^{\mathrm{obs}}} \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \ot \tilde{W}^j(\tilde{u})\;.
 		\]
 	\end{enumerate}
+	The Lean declaration is an open source-facing construction obligation. The
+	separate estimates for a supplied global measurement do not establish it.
+	In particular, the current global-witness constructor is unfinished and has
+	only a positive-error domain; the zero-error case of this statement must also
+	be obtained. This distinction is recorded in \cite{gap:qpbt_decoding-identity}.
 \end{lemma}
 \begin{proof}
 	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, def:tilde-m-measurement, def:tau-dot-product-projector, lem:qld-decoder-evaluation, lem:qld-decoder-linearity, def:indicator-vector, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:triangle, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
@@ -286,6 +294,29 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	\]
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
+
+\begin{example}[Conditional estimates given a global polynomial-pair witness]
+	\label{lem:qld-construct-the-paulis-given-global-pair}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent_ofGlobalPairWitness}
+	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:qld-4-7,
+		lem:projective-strategy-setup, def:expanded-state, def:consistency,
+		def:approx-question-indexed-operators, def:indicator-vector}
+	For each of the three estimates in Lemma~\ref{lem:qld-construct-the-paulis},
+	there is a universal constant $C_E\geq1$ such that the estimate holds for
+	every admissible tuple, every $0\leq\eps\leq1$, every projective strategy at
+	error $\eps$, every $\delta_G\geq0$, and every supplied pair of projective
+	polynomial-pair measurements satisfying both point-consistency estimates of
+	Lemma~\ref{lem:qld-4-7} at error $\delta_G$.
+	Here the measurements and their consistency estimates are explicit
+	hypotheses. They are not constructed from the strategy. The estimate for
+	Alice's pulled-apart measurement and Bob's point measurement is proved under
+	these hypotheses; the other point orientation and observable self-consistency
+	remain conditional proof obligations. Thus this auxiliary entry certifies
+	neither the paired source statement nor the witness constructor; see
+	\cite{gap:qpbt_decoding-identity}.
+\end{example}
 
 \begin{lemma}[Non-encoding support estimate]
 \label{lem:qld-nonencoding-mass-bound}
