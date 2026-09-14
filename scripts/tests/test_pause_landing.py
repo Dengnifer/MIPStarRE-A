@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import signal
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -33,10 +35,16 @@ class FakeProcesses(pl.Processes):
     """A process table a test owns: fake pids, recorded signals, no sleeping."""
 
     def __init__(self, table: dict[int, str], *, ignores_term: tuple[int, ...] = (),
-                 started: dict[int, float] | None = None) -> None:
+                 started: dict[int, float] | None = None,
+                 parents: dict[int, int] | None = None,
+                 environs: dict[int, dict[str, str]] | None = None,
+                 uids: dict[int, int] | None = None) -> None:
         self.table = dict(table)
         self.ignores_term = set(ignores_term)
         self.started = dict(started or {})
+        self.parents = dict(parents or {})
+        self.environs = dict(environs or {})
+        self.uids = dict(uids or {})
         self.signals: list[tuple[int, int]] = []
         self.slept: list[float] = []
 
@@ -48,6 +56,16 @@ class FakeProcesses(pl.Processes):
 
     def started_at(self, pid: int):
         return self.started.get(pid)
+
+    def ppid(self, pid: int):
+        return self.parents.get(pid)
+
+    def environ(self, pid: int) -> dict[str, str]:
+        return dict(self.environs.get(pid, {}))
+
+    def owner_uid(self, pid: int):
+        # Ours unless a test says otherwise: /proc is not consulted for a fake pid.
+        return self.uids.get(pid, os.getuid())
 
     def pids(self) -> list[int]:
         return sorted(self.table)
@@ -232,6 +250,131 @@ class StopTestCase(LandingTestCase):
         self.assertEqual(processes.signals, [])
         self.assertEqual(landed[0]["signal"], "not-ours")
 
+    def test_an_unreadable_command_line_is_spared_not_signalled(self) -> None:
+        # /proc/<pid>/cmdline reads back empty for a zombie, for another user's
+        # process under hidepid, and in a plain race.  The old guard treated that
+        # as permission to signal: `cmd` was falsy, so the whole check was skipped.
+        processes = FakeProcesses({999999: ""})
+        sessions = [pl.classify({"name": "prover-old", "role": "prover", "pid": 999999,
+                                 "elapsed_min": 45, "thread_id": "t"}, self.limits)]
+        landed = pl.land(sessions, "last", self.limits, processes)
+        self.assertEqual(processes.signals, [], "an unverified pid is never signalled")
+        self.assertEqual(landed[0]["signal"], "not-ours")
+
+    def test_a_different_dispatch_on_a_recycled_pid_is_not_ours(self) -> None:
+        # `"dispatch.sh" in cmd` says the pid is *a* dispatcher, never that it is
+        # THIS session's: ghz runs codex for at least seven other users.
+        processes = FakeProcesses({
+            77: "bash /home/other/local/bin/dispatch.sh --role reviewer --issue pr544 "
+                "--worktree /home/other/.worktrees/issue-544-x"})
+        sessions = [pl.classify({"name": "prover-7-a", "role": "prover", "issue": "7",
+                                 "worktree": "/w/issue-7-slug", "pid": 77,
+                                 "elapsed_min": 45, "thread_id": "t"}, self.limits)]
+        landed = pl.land(sessions, "last", self.limits, processes)
+        self.assertEqual(processes.signals, [])
+        self.assertEqual(landed[0]["signal"], "not-ours")
+
+    def test_the_recorded_worktree_identifies_a_real_dispatcher(self) -> None:
+        # dispatch.sh mints the session name itself, so the command line does not
+        # carry it; the worktree and the role/issue pair are what it does carry.
+        cmd = ("bash /p/local/bin/dispatch.sh --role prover --issue 7 "
+               "--worktree /w/issue-7-slug --sandbox workspace-write")
+        processes = FakeProcesses({101: cmd})
+        sessions = [pl.classify({"name": "prover-7-a", "role": "prover", "issue": "7",
+                                 "worktree": "/w/issue-7-slug", "pid": 101,
+                                 "elapsed_min": 45, "thread_id": "t"}, self.limits)]
+        landed = pl.land(sessions, "last", self.limits, processes)
+        self.assertEqual(landed[0]["signal"], "TERM")
+
+    def test_the_codex_child_is_signalled_with_its_dispatcher(self) -> None:
+        # The spool records dispatch.sh's pid, and its `trap 'exit 143' TERM` is
+        # deferred while `codex … | tee` is the foreground job: a TERM to the
+        # wrapper alone does nothing and codex keeps spending quota.
+        processes = FakeProcesses(
+            {101: "bash /p/local/bin/dispatch.sh --role prover --issue 7 --worktree /w",
+             501: "codex exec --json -C /w", 502: "tee /c/sessions/prover-7-a.jsonl"},
+            parents={501: 101, 502: 101})
+        sessions = [pl.classify({"name": "prover-7-a", "role": "prover", "issue": "7",
+                                 "worktree": "/w", "pid": 101, "elapsed_min": 45,
+                                 "thread_id": "t"}, self.limits)]
+        pl.land(sessions, "last", self.limits, processes)
+        self.assertIn((501, signal.SIGTERM), processes.signals,
+                      "the codex process must be stopped, not only its wrapper")
+        self.assertIn((101, signal.SIGTERM), processes.signals)
+
+    def test_the_grace_is_slept_once_for_the_phase_not_once_per_session(self) -> None:
+        # grace_s x sessions is what made the landing run past the owner's
+        # deadline: 17 sessions x 20 s is 340 s inside a 90 s window.
+        table = {}
+        sessions = []
+        for index in range(17):
+            pid = 200 + index
+            table[pid] = (f"bash /p/local/bin/dispatch.sh --role prover --issue {index} "
+                          f"--worktree /w/issue-{index}-x")
+            sessions.append(pl.classify(
+                {"name": f"prover-{index}-a", "role": "prover", "issue": str(index),
+                 "worktree": f"/w/issue-{index}-x", "pid": pid, "elapsed_min": 45,
+                 "thread_id": "t"}, self.limits))
+        processes = FakeProcesses(table, ignores_term=tuple(table))
+        landed = pl.land(sessions, "last", self.limits, processes)
+        self.assertEqual(processes.slept, [self.limits["phases"]["grace_s"]],
+                         "one grace for the whole phase, whatever the session count")
+        self.assertEqual(len([row for row in landed if row["signal"] == "KILL"]), 17)
+
+    def test_the_last_call_also_stops_a_row_an_earlier_phase_missed(self) -> None:
+        # `land --phase now` can die (a corrupt record, a /proc permission error)
+        # with young rows still `pending`.  If the last call only looked at
+        # `stop-at-last-call`, those rows would never be stopped OR recorded, and
+        # the anchored sweep would hard-kill them behind the manifest's back.
+        processes = FakeProcesses(
+            {101: "bash /p/local/bin/dispatch.sh --role prover --issue 7 --worktree /w"})
+        sessions = [pl.classify({"name": "prover-young", "role": "prover", "issue": "7",
+                                 "worktree": "/w", "pid": 101, "elapsed_min": 0},
+                                self.limits)]
+        self.assertEqual(sessions[0]["action"], "stop-now")
+        landed = pl.land(sessions, "last", self.limits, processes)
+        self.assertEqual(landed[0]["signal"], "TERM")
+
+    def test_a_killed_wrapper_has_its_slot_claim_and_spool_row_freed(self) -> None:
+        # A SIGKILL skips dispatch.sh's EXIT cleanup, and the leaked account slot
+        # is counted by account_router.reserve: the resumed run would admit fewer
+        # workers than its restored cap until the janitor expired it.
+        slot = self.cache / "accounts" / "second" / "101"
+        slot.parent.mkdir(parents=True)
+        slot.write_text("x", encoding="utf-8")
+        claim = self.cache / "locks" / "branch-issue-7-slug.claim"
+        claim.mkdir(parents=True)
+        (claim / "pid").write_text("101\n", encoding="utf-8")
+        (claim / "session").write_text("prover-7-a\n", encoding="utf-8")
+        spool = self.cache / "watchdog" / "capacity" / "spool" / "prover-7-a.json"
+        spool.write_text("{}", encoding="utf-8")
+        processes = FakeProcesses(
+            {101: "bash /p/local/bin/dispatch.sh --role prover --issue 7 --worktree /w"},
+            ignores_term=(101,))
+        sessions = [pl.classify({"name": "prover-7-a", "role": "prover", "issue": "7",
+                                 "worktree": "/w", "pid": 101, "elapsed_min": 45,
+                                 "thread_id": "t", "spool": str(spool)}, self.limits)]
+        landed = pl.land(sessions, "last", self.limits, processes, root=self.cache)
+        self.assertEqual(landed[0]["signal"], "KILL")
+        self.assertFalse(slot.exists(), "the account slot is freed")
+        self.assertFalse(claim.exists(), "the branch claim is released")
+        self.assertFalse(spool.exists(), "the spool row cannot outlive the session")
+
+    def test_a_session_that_stops_on_term_keeps_its_locks(self) -> None:
+        # A wrapper that took the TERM runs its own cleanup; taking its locks
+        # apart from the outside would race with it.
+        slot = self.cache / "accounts" / "second" / "101"
+        slot.parent.mkdir(parents=True)
+        slot.write_text("x", encoding="utf-8")
+        processes = FakeProcesses(
+            {101: "bash /p/local/bin/dispatch.sh --role prover --issue 7 --worktree /w"})
+        sessions = [pl.classify({"name": "prover-7-a", "role": "prover", "issue": "7",
+                                 "worktree": "/w", "pid": 101, "elapsed_min": 45,
+                                 "thread_id": "t"}, self.limits)]
+        landed = pl.land(sessions, "last", self.limits, processes, root=self.cache)
+        self.assertEqual(landed[0]["signal"], "TERM")
+        self.assertTrue(slot.exists(), "cleanup belongs to the process that can run it")
+
     def test_a_dry_run_signals_nothing(self) -> None:
         processes = FakeProcesses({101: "bash dispatch.sh prover-young"})
         sessions = [pl.classify({"name": "prover-young", "role": "prover", "pid": 101,
@@ -269,6 +412,31 @@ class ManifestTestCase(LandingTestCase):
         self.assertEqual(session["thread_id"], "t-7")
         self.assertTrue(session["resumable"])
         self.assertEqual(session["elapsed_min"], 30)
+
+    def test_another_users_lane_is_not_this_runs_work(self) -> None:
+        # `pids()` walks all of /proc and ghz hosts at least seven other users.
+        # A stranger's lane.sh recorded here would be relaunched by the resume.
+        processes = FakeProcesses({202: "bash /home/other/lane.sh 7 slug prover"},
+                                  uids={202: os.getuid() + 1})
+        self.assertEqual(pl.live_lanes(self.cache, processes, lambda sha: {},
+                                       self.checkout), [])
+
+    def test_a_lanes_own_environment_is_recorded_with_it(self) -> None:
+        # The merge daemon starts refresh lanes with LANE_BRANCH and stacked-PR
+        # lanes with SKIP_REVIEW=1.  Neither appears in /proc/<pid>/cmdline, so a
+        # relaunch that dropped them would resolve the wrong branch, or pay for a
+        # review that must be skipped.
+        processes = FakeProcesses(
+            {202: "bash /p/local/bin/lane.sh 7 slug prover"},
+            environs={202: {"LANE_BRANCH": "codex/issue-7-slug", "SKIP_REVIEW": "1",
+                            "HOME": "/home/drx"}})
+        lane, = pl.live_lanes(self.cache, processes, lambda sha: {}, self.checkout)
+        self.assertEqual(lane["env"], {"LANE_BRANCH": "codex/issue-7-slug",
+                                       "SKIP_REVIEW": "1"})
+        self.assertEqual(lane["branch"], "codex/issue-7-slug",
+                         "LANE_BRANCH is the branch lane.sh itself would use")
+        self.assertEqual(lane["worktree"],
+                         str(self.checkout / ".worktrees" / "codex/issue-7-slug"))
 
     def test_writing_the_manifest_keeps_the_rest_of_the_pause_record(self) -> None:
         self.state.write_text(json.dumps({"caps": {"primary": 5}, "speed": "fast"}),
@@ -308,6 +476,37 @@ class ManifestTestCase(LandingTestCase):
         self.assertEqual(pl.new_failed_markers(restored, self.cache), [],
                          "nothing changed, so the landing caused no marker")
 
+    def test_a_second_manifest_keeps_the_first_landings_record(self) -> None:
+        # The lock only blocks a CONCURRENT pause; a second owner-pause.sh after
+        # the first finished reaches `manifest` again.
+        first = {"schema": pl.SCHEMA, "lanes": [], "failed_markers": [{"pr": "12"}],
+                 "markers_before": {"/a/pr11.failed": 1.0},
+                 "sessions": [{"name": "prover-7-a", "signal": "KILL",
+                               "thread_id": "t-7", "stopped_at": "then"}]}
+        fresh = {"schema": pl.SCHEMA, "lanes": [], "failed_markers": [],
+                 "markers_before": {"/a/pr11.failed": 2.0, "/a/pr12.failed": 3.0},
+                 "sessions": [{"name": "prover-9-a", "signal": "pending"}]}
+        merged = pl.merge_manifest(first, fresh)
+        self.assertEqual([row["name"] for row in merged["sessions"]],
+                         ["prover-7-a", "prover-9-a"])
+        self.assertEqual(merged["sessions"][0]["signal"], "KILL",
+                         "the first landing's signals and thread ids survive")
+        self.assertEqual(merged["markers_before"], {"/a/pr11.failed": 1.0},
+                         "the EARLIEST snapshot decides what is pre-existing")
+        self.assertEqual(merged["failed_markers"], [{"pr": "12"}])
+
+    def test_the_marker_snapshot_is_taken_before_the_daemon_is_stopped(self) -> None:
+        # owner-pause.sh stops the merge daemon at T+0:30 and the daemon is the
+        # only writer of daemon/pr<N>.failed, so the snapshot must be taken at
+        # T+0:00 — at the landing phase the difference is empty by construction.
+        body = text(TOOLS / "owner-pause.sh")
+        snapshot = body.index('"$LANDING" markers')
+        daemon_stop = body.index('kill_recorded "$D/daemon.pid"')
+        landing = body.index('"$LANDING" manifest')
+        self.assertLess(snapshot, daemon_stop,
+                        "the markers are snapshotted before the daemon is stopped")
+        self.assertLess(snapshot, landing)
+
     def test_the_lane_step_is_read_from_the_markers_lane_sh_leaves(self) -> None:
         lanes = self.cache / "watchdog" / "lanes"
         self.assertEqual(pl.lane_step(lanes, "5"), "warm")
@@ -338,9 +537,13 @@ class StepSkippingTestCase(unittest.TestCase):
         self.assertEqual(pl.lane_resume_step(self.lane(statuses={
             pl.CI_STATUS: "success"})), "review")
 
-    def test_a_pending_ci_resumes_at_ci_not_at_the_review(self) -> None:
-        self.assertEqual(pl.lane_resume_step(self.lane(statuses={
-            pl.CI_STATUS: "pending", pl.REVIEW_STATUS: "success"})), "ci")
+    def test_a_pending_ci_resumes_at_ci_and_skips_the_finished_review(self) -> None:
+        lane = self.lane(statuses={pl.CI_STATUS: "pending", pl.REVIEW_STATUS: "success"})
+        self.assertEqual(pl.lane_resume_step(lane), "ci")
+        # LANE_RESUME_STEP=ci skips only the merge and the build; the review block
+        # runs unconditionally, so the most expensive step of the lane would be
+        # paid a second time on a head that already carries a finished review.
+        self.assertEqual(pl.lane_env(lane, "ci")["SKIP_REVIEW"], "1")
 
     def test_a_head_that_moved_resumes_the_whole_lane(self) -> None:
         self.assertEqual(pl.lane_resume_step(self.lane(head_now="def", statuses={
@@ -350,8 +553,17 @@ class StepSkippingTestCase(unittest.TestCase):
         self.assertEqual(pl.lane_resume_step(self.lane(head=None, head_now=None)),
                          "dispatch")
 
-    def test_a_lane_parked_before_ci_publishes_first(self) -> None:
-        self.assertEqual(pl.lane_resume_step(self.lane(step="dispatch")), "publish")
+    def test_a_lane_stopped_before_publication_resumes_at_dispatch(self) -> None:
+        # Its head is unchanged because its worker had not finished, not because
+        # the work is done.  `publish` sets SKIP_DISPATCH=1, which skips lane.sh's
+        # `dispatch exit 0` and uncommitted-worker-changes gates and spends a full
+        # CI run and a full review on an unfinished proof.
+        for step in ("warm", "dispatch"):
+            self.assertEqual(pl.lane_resume_step(self.lane(step=step)), "dispatch")
+
+    def test_a_lane_that_reached_publication_resumes_at_publish(self) -> None:
+        # `publish` is exactly the lane that left a <issue>.pr.md behind.
+        self.assertEqual(pl.lane_resume_step(self.lane(step="publish")), "publish")
 
     def test_a_finished_lane_is_left_alone(self) -> None:
         self.assertEqual(pl.lane_resume_step(self.lane(step="done")), "done")
@@ -361,6 +573,19 @@ class StepSkippingTestCase(unittest.TestCase):
         block = body.split("case \"$LANE_RESUME_STEP\" in", 1)[1].split("esac", 1)[0]
         for step in ("dispatch", "publish", "ci", "review"):
             self.assertIn(step, block, f"lane.sh must accept LANE_RESUME_STEP={step}")
+
+    def test_the_relaunch_argv_is_one_the_next_pause_can_still_see(self) -> None:
+        # `env LANE_RESUME_STEP=… lane.sh …` has `env` as argv[0], which matches
+        # neither LANE_RE nor owner-pause.sh's anchored sweep: after one cycle the
+        # lane would run through the next pause unseen, still pushing and opening
+        # PRs after the owner was told the run was paused.
+        argv = pl.lane_command(self.lane(), "ci", Path("/p"))
+        self.assertEqual(argv, ["bash", "/p/local/bin/lane.sh", "7", "slug", "prover"])
+        self.assertTrue(pl.LANE_RE.match(" ".join(argv)), "the next pause must see it")
+        sweep = text(TOOLS / "owner-pause.sh").split("PATTERNS='", 1)[1].split("'", 1)[0]
+        self.assertTrue(any(re.search(pattern, " ".join(argv))
+                            for pattern in sweep.splitlines() if pattern.strip()),
+                        "the anchored sweep must see it too")
 
 
 class ResumePlanTestCase(LandingTestCase):
@@ -378,7 +603,8 @@ class ResumePlanTestCase(LandingTestCase):
             ],
             "sessions": [
                 {"name": "prover-7-a", "role": "prover", "issue": "7", "pr": None,
-                 "worktree": "/w/issue-7-slug", "thread_id": "t-7", "resume": "thread",
+                 "worktree": "/w/issue-7-slug", "branch": "issue-7-slug",
+                 "thread_id": "t-7", "resume": "thread",
                  "resumable": True, "signal": "TERM"},
                 {"name": "reviewer-pr9-a", "role": "reviewer", "issue": "pr9", "pr": "9",
                  "worktree": "/w/issue-9-z", "thread_id": "t-9", "resume": "restart",
@@ -386,6 +612,19 @@ class ResumePlanTestCase(LandingTestCase):
                 {"name": "prover-8-a", "role": "prover", "issue": "8", "pr": None,
                  "worktree": "/w/issue-8-other", "thread_id": "t-8", "resume": "thread",
                  "resumable": True, "signal": "pending"},
+                # a checkpointed writer with no lane of its own: the meta layer
+                # dispatches these directly, and they are the plan's own items
+                {"name": "prover-31-a", "role": "prover", "issue": "31", "pr": None,
+                 "worktree": "/w/issue-31-solo", "branch": "issue-31-solo",
+                 "thread_id": "t-31", "resume": "thread", "resumable": True,
+                 "signal": "KILL", "sandbox": "read-only", "account": "second",
+                 "job_class": "hard", "effort": "ultra",
+                 "hardness_reason": "stage-4.3 proof", "persona": "main:local/personas/prover.md",
+                 "persona_ref": "main"},
+                # and one whose thread id was never captured
+                {"name": "prover-32-a", "role": "prover", "issue": "32", "pr": None,
+                 "worktree": "/w/issue-32-lost", "thread_id": None, "resume": "restart",
+                 "resumable": False, "signal": "KILL"},
             ],
             "failed_markers": [
                 {"path": str(self.cache / "watchdog/daemon/pr12.failed"), "pr": "12",
@@ -400,7 +639,27 @@ class ResumePlanTestCase(LandingTestCase):
         kinds = [(entry["kind"], entry.get("issue") or entry.get("name") or entry.get("pr"))
                  for entry in plan]
         self.assertEqual(kinds, [("clear-marker", "12"), ("lane", "7"), ("lane", "8"),
-                                 ("session", "prover-7-a"), ("session", "reviewer-pr9-a")])
+                                 ("session", "prover-7-a"), ("session", "reviewer-pr9-a"),
+                                 ("session", "prover-31-a"), ("session", "prover-32-a")])
+
+    def test_a_lane_and_its_own_worker_are_never_both_launched(self) -> None:
+        # lane.sh dispatches into the lane's worktree, so its prover is BOTH a
+        # lane and a session.  Launching both put two writers into one worktree:
+        # a `git merge` and a `lake build` in a tree a codex session is editing, a
+        # PR opened on a moving head, and a branch claim the loser dies 5 on.
+        plan = pl.resume_plan(self.manifest(), self.checkout)
+        launched = [entry for entry in plan if entry.get("argv")]
+        worktrees = [entry.get("worktree") for entry in launched
+                     if entry["kind"] == "session"]
+        self.assertNotIn("/w/issue-7-slug", worktrees)
+        owned, = [entry for entry in plan if entry.get("name") == "prover-7-a"]
+        self.assertIsNone(owned["argv"])
+        self.assertEqual(owned["owned_by_lane"], "7")
+        self.assertIn("lane 7 owns this worktree", owned["why"])
+        # and the lane itself IS relaunched, at the step the pause recorded
+        lane, = [entry for entry in plan
+                 if entry["kind"] == "lane" and entry.get("issue") == "7"]
+        self.assertTrue(lane["argv"])
 
     def test_a_marker_the_landing_did_not_create_is_left_alone(self) -> None:
         plan = pl.resume_plan(self.manifest(), self.checkout)
@@ -413,19 +672,54 @@ class ResumePlanTestCase(LandingTestCase):
                 for entry in pl.resume_plan(self.manifest(), self.checkout)
                 if entry["kind"] == "lane"}
         self.assertEqual(plan["7"]["argv"], [
-            "env", "LANE_RESUME_STEP=review",
-            str(self.checkout / "local" / "bin" / "lane.sh"), "7", "slug", "prover"])
+            "bash", str(self.checkout / "local" / "bin" / "lane.sh"),
+            "7", "slug", "prover"])
+        self.assertEqual(plan["7"]["env"], {"LANE_RESUME_STEP": "review"})
         self.assertIsNone(plan["8"]["argv"])
         self.assertIn("both summary statuses", plan["8"]["why"])
 
     def test_a_checkpointed_prover_is_resumed_on_its_own_thread(self) -> None:
+        # Every field the spool recorded travels back: account_router refuses a
+        # resume whose model differs from the thread's observed model, and the
+        # model is selected from the role, job class, effort and hardness reason.
         entry, = [row for row in pl.resume_plan(self.manifest(), self.checkout)
-                  if row.get("name") == "prover-7-a"]
+                  if row.get("name") == "prover-31-a"]
         self.assertEqual(entry["argv"], [
             str(self.checkout / "local" / "bin" / "dispatch.sh"),
-            "--role", "prover", "--issue", "7", "--sandbox", "workspace-write",
-            "--worktree", "/w/issue-7-slug", "--resume", "t-7", "--",
-            pl.CONTINUE_PROMPT])
+            "--role", "prover", "--issue", "31", "--sandbox", "read-only",
+            "--worktree", "/w/issue-31-solo", "--job-class", "hard",
+            "--effort", "ultra", "--hardness-reason", "stage-4.3 proof",
+            "--account", "second", "--persona", "local/personas/prover.md",
+            "--persona-ref", "main", "--resume", "t-31", "--", pl.CONTINUE_PROMPT])
+
+    def test_the_sandbox_is_the_one_the_session_was_dispatched_with(self) -> None:
+        entry, = [row for row in pl.resume_plan(self.manifest(), self.checkout)
+                  if row.get("name") == "prover-31-a"]
+        self.assertIn("read-only", entry["argv"],
+                      "a read-only role must not be resumed with write access")
+
+    def test_a_writer_without_a_thread_id_gets_a_fresh_session_not_silence(self) -> None:
+        # It was stopped mid-work and its worktree still holds that work; the old
+        # plan returned None for it, so nothing was ever put back and no line said so.
+        entry, = [row for row in pl.resume_plan(self.manifest(), self.checkout)
+                  if row.get("name") == "prover-32-a"]
+        self.assertEqual(entry["argv"][:8], [
+            str(self.checkout / "local" / "bin" / "dispatch.sh"),
+            "--role", "prover", "--issue", "32", "--sandbox", "workspace-write",
+            "--worktree"])
+        self.assertNotIn("--resume", entry["argv"])
+        self.assertEqual(entry["argv"][-1], pl.RESTART_PROMPT)
+        self.assertIn("worktree", pl.RESTART_PROMPT)
+
+    def test_a_session_that_cannot_be_rebuilt_is_named_loudly(self) -> None:
+        manifest = self.manifest()
+        manifest["sessions"] = [{"name": "prover-none", "role": "prover", "issue": "",
+                                 "worktree": "/w/x", "signal": "KILL",
+                                 "resume": "restart"}]
+        entry, = [row for row in pl.resume_plan(manifest, self.checkout)
+                  if row["kind"] == "session"]
+        self.assertIsNone(entry["argv"], "dispatch.sh exits 2 on an empty --issue")
+        self.assertIn("STOPPED AND NOT PUT BACK", entry["why"])
 
     def test_the_continue_prompt_says_worktree_and_milestone_commits(self) -> None:
         self.assertIn("worktree", pl.CONTINUE_PROMPT)
@@ -448,25 +742,64 @@ class ResumePlanTestCase(LandingTestCase):
     def test_resume_exec_runs_the_planned_commands_and_nothing_else(self) -> None:
         marker = self.cache / "watchdog" / "daemon" / "pr12.failed"
         marker.write_text("exited 143\n", encoding="utf-8")
-        launched: list[list[str]] = []
+        launched: list[tuple[list[str], dict]] = []
 
-        def runner(argv):
-            launched.append(argv)
+        def runner(argv, env=None):
+            launched.append((argv, env or {}))
             return 4242
 
         plan = pl.resume_plan(self.manifest(), self.checkout)
         done = pl.resume_exec(plan, runner=runner)
         self.assertFalse(marker.exists(), "the recorded marker is cleared")
-        self.assertEqual(launched, [entry["argv"] for entry in plan if entry["argv"]
-                                    and entry["kind"] != "clear-marker"])
-        self.assertEqual(sum(1 for row in done if row["done"].startswith("launched")), 3)
+        self.assertEqual([argv for argv, _ in launched],
+                         [entry["argv"] for entry in plan if entry["argv"]
+                          and entry["kind"] != "clear-marker"])
+        self.assertEqual(sum(1 for row in done if row["done"].startswith("launched")), 4)
+        lane_env = [env for argv, env in launched if argv[0] == "bash"][0]
+        self.assertEqual(lane_env["LANE_RESUME_STEP"], "review",
+                         "the step travels in the environment, not in argv[0]")
+
+    def test_one_failed_launch_does_not_cost_the_rest_of_the_plan(self) -> None:
+        # A missing review.sh, or a lane.sh that lost its executable bit, used to
+        # raise out of the loop: every later item was skipped and the ones already
+        # launched were invisible, so a hand replay would double-launch them.
+        seen: list[list[str]] = []
+
+        def runner(argv, env=None):
+            seen.append(argv)
+            if argv[0].endswith("review.sh"):
+                raise FileNotFoundError(argv[0])
+            return 4242
+
+        plan = pl.resume_plan(self.manifest(), self.checkout)
+        done = pl.resume_exec(plan, runner=runner)
+        failed = [row for row in done if row["done"].startswith("FAILED")]
+        self.assertEqual(len(failed), 1)
+        self.assertIn("review.sh", failed[0]["done"])
+        self.assertEqual(sum(1 for row in done if row["done"].startswith("launched")), 3,
+                         "the items after the failure are still launched")
+
+    def test_a_replayed_manifest_launches_nothing_a_second_time(self) -> None:
+        # owner-resume.sh is re-run routinely ("the resume message was not
+        # delivered"); a second replay means two lane.sh for one worktree and two
+        # `codex exec resume` on one thread id.
+        manifest = self.manifest()
+        done = pl.resume_exec(pl.resume_plan(manifest, self.checkout),
+                              runner=lambda argv, env=None: 4242)
+        pl.stamp_replay(manifest, done)
+        self.assertTrue(manifest["replayed_at"])
+        self.assertEqual(pl.resume_plan(manifest, self.checkout), [],
+                         "a replayed manifest is not a plan any more")
+        self.assertTrue(pl.resume_plan(manifest, self.checkout, force=True),
+                        "--force is the deliberate way back in")
 
     def test_resume_exec_dry_run_touches_nothing(self) -> None:
         marker = self.cache / "watchdog" / "daemon" / "pr12.failed"
         marker.write_text("exited 143\n", encoding="utf-8")
         launched: list[list[str]] = []
         done = pl.resume_exec(pl.resume_plan(self.manifest(), self.checkout),
-                              runner=lambda argv: launched.append(argv), dry_run=True)
+                              runner=lambda argv, env=None: launched.append(argv),
+                              dry_run=True)
         self.assertTrue(marker.exists())
         self.assertEqual(launched, [])
         self.assertEqual({row["done"] for row in done},
@@ -475,7 +808,7 @@ class ResumePlanTestCase(LandingTestCase):
     def test_the_plan_renders_as_commands_a_human_can_read(self) -> None:
         rendered = pl.format_plan(pl.resume_plan(self.manifest(), self.checkout))
         self.assertIn("LANE_RESUME_STEP=review", rendered)
-        self.assertIn("--resume t-7", rendered)
+        self.assertIn("--resume t-31", rendered)
         self.assertIn("# session reviewer-pr9-a (reviewer)", rendered)
 
 
@@ -496,11 +829,69 @@ class OwnerWordsTestCase(unittest.TestCase):
 
     def test_the_pause_classifies_before_it_sweeps(self) -> None:
         body = text(TOOLS / "owner-pause.sh")
-        land = body.index('land --phase now')
-        last = body.index('land --phase last')
+        land = body.index('land_phase now')
+        last = body.index('land_phase last')
         sweep = body.index("PATTERNS='")
         self.assertLess(land, last, "the young are stopped before the last call")
         self.assertLess(last, sweep, "the anchored sweep is the leftover pass")
+
+    def test_a_failed_landing_phase_is_not_swallowed_by_the_pipe(self) -> None:
+        # `python3 … | sed 's/^/   /' || fail_phase …` reads the status of `sed`,
+        # which is always 0, so no landing failure ever reached pause-state.json.
+        body = text(TOOLS / "owner-pause.sh")
+        block = body.split("land_phase() {", 1)[1].split("\n}", 1)[0]
+        self.assertIn("PIPESTATUS[0]", block)
+        self.assertIn("fail_phase", block)
+        self.assertNotIn('land --phase now | sed', body)
+        self.assertNotIn('land --phase last | sed', body)
+
+    def test_the_statuses_are_read_after_the_young_are_stopped(self) -> None:
+        # The GitHub reads are bounded by STATUS_BUDGET_S, which is most of the
+        # landing window; the young must be stopped inside it.
+        body = text(TOOLS / "owner-pause.sh")
+        self.assertLess(body.index('"$LANDING" manifest'), body.index("land_phase now"))
+        self.assertIn("--no-github", body.split('"$LANDING" manifest', 1)[1][:200])
+        self.assertLess(body.index("land_phase now"), body.index('"$LANDING" statuses'))
+
+    def test_every_shell_fallback_equals_the_modules_default(self) -> None:
+        # The fallbacks are deliberate, but they are not a second home for the
+        # numbers: last_call_s stood at 60 here while the policy and the module
+        # said 90, so the degraded path scheduled a different plan.
+        body = text(TOOLS / "owner-pause.sh")
+        flat = dict(pl.DEFAULTS["phases"])
+        flat.update({key: pl.DEFAULTS[key] for key in ("young_max_min", "cutoff_lead_min")})
+        found = dict(re.findall(r"pl_get ([a-z_]+) (\d+)", body))
+        self.assertTrue(found, "the pause script must read every threshold with pl_get")
+        for key, value in found.items():
+            self.assertIn(key, flat, f"pl_get {key} is not a landing threshold")
+            self.assertEqual(int(value), flat[key],
+                             f"the {key} fallback must equal pause_landing.DEFAULTS")
+
+    def test_the_pause_writes_every_marker_the_resume_requires(self) -> None:
+        # owner-resume.sh's post-condition requires watchdog/paused as the proof
+        # that the pause it is clearing was real.  Nothing wrote it, so a clean
+        # owner-pause.sh -> owner-resume.sh pair exited 5 at the post-condition
+        # and the whole work-resume section was unreachable in production.
+        pause = text(TOOLS / "owner-pause.sh")
+        resume = text(TOOLS / "owner-resume.sh")
+        required = set(re.findall(r'\[ ! -e "\$W/([a-z-]+)" \]', resume))
+        self.assertIn("paused", required)
+        for marker in required:
+            self.assertTrue(re.search(rf'> "\$W/{marker}"', pause),
+                            f"owner-pause.sh must write $W/{marker}")
+
+    def test_the_resume_clears_the_cutoff_marker(self) -> None:
+        # Nothing else removes it, and a surviving one makes the next --cutoff
+        # re-assert admission silently: the main session is never told.
+        resume = text(TOOLS / "owner-resume.sh")
+        block = resume.split('rm -f "$W/paused"', 1)[1].split("\n", 1)[0]
+        self.assertIn("cutoff", block)
+
+    def test_the_work_resume_is_replayed_at_most_once(self) -> None:
+        resume = text(TOOLS / "owner-resume.sh")
+        self.assertIn("resume-exec", resume)
+        self.assertIn("WORK_RC", resume)
+        self.assertIn("-eq 4", resume, "a partial replay is not a total failure")
 
     def test_the_kill_table_is_still_anchored(self) -> None:
         table = text(TOOLS / "owner-pause.sh").split("PATTERNS='", 1)[1].split("'", 1)[0]
@@ -523,7 +914,7 @@ class OwnerWordsTestCase(unittest.TestCase):
     def test_the_resume_puts_the_work_back_after_the_postconditions(self) -> None:
         body = text(TOOLS / "owner-resume.sh")
         gate = body.index('if [ "$RC" -ne 0 ]; then')
-        work = body.index("resume-exec")
+        work = body.index('"$LANDING" resume-exec')
         self.assertLess(gate, work, "no lane is relaunched into an unhealthy run")
         self.assertLess(work, body.index("tmux has-session", gate))
         self.assertIn("--no-work) WORK=0", body)
@@ -535,6 +926,38 @@ class OwnerWordsTestCase(unittest.TestCase):
         self.assertIn("BEFORE you start the next one", block)
         persona = text(REPO_ROOT / "local" / "personas" / "prover.md")
         self.assertIn("Commit at every milestone", persona)
+
+    def test_the_cutoff_word_really_writes_the_markers_the_resume_reads(self) -> None:
+        # The one end-to-end run: owner-pause.sh --cutoff against a scratch cache
+        # root, with no run-mode and no owner-say, touching no live state.  It is
+        # the path that proves watchdog/paused and watchdog/drain are written.
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory) / "cache"
+            env = dict(os.environ)
+            env.update({"MIPSTARRE_CACHE_ROOT": str(cache),
+                        "MIPSTARRE_REPO_ROOT": str(REPO_ROOT),
+                        "MIPSTARRE_OWNER_BIN": str(cache / "owner-bin"),
+                        "MIPSTARRE_RUN_MODE": str(cache / "no-run-mode.py"),
+                        "MIPSTARRE_OWNER_SAY": str(cache / "no-say.sh")})
+            done = subprocess.run(["bash", str(TOOLS / "owner-pause.sh"), "--cutoff",
+                                   "--reason", "test"], env=env, capture_output=True,
+                                  text=True, timeout=120)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            watchdog = cache / "watchdog"
+            for marker in ("drain", "paused", "cutoff"):
+                self.assertTrue((watchdog / marker).exists(),
+                                f"the cutoff must write watchdog/{marker}: {done.stderr}")
+            record = json.loads(text(watchdog / "pause-state.json"))
+            self.assertEqual(record["status"], "cutoff")
+
+    def test_a_recorded_cap_is_never_lowered_to_zero_by_a_later_write(self) -> None:
+        # After a cutoff the live cap files are 0 BY DESIGN, so a pause word that
+        # read them recorded `primary 0` as the cap to restore and the documented
+        # fallback resumed the run with no admission at all.
+        body = text(TOOLS / "owner-pause.sh")
+        self.assertIn("saved_caps", body, "the caps come from the run mode's saved_caps")
+        self.assertIn("caps_kept_from", body,
+                      "a later write_state must not lower a recorded nonzero cap")
 
     def test_the_protocol_and_the_readme_describe_both_words(self) -> None:
         protocol = text(REPO_ROOT / "local" / "protocols" / "full-speed-mode.md")

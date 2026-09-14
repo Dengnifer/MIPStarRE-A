@@ -301,7 +301,7 @@ it closes admission itself and degrades to the landing rule below.
 
 | T | Phase |
 |---|---|
-| +0:00 | `run_mode.py pause` — caps to 0, the pre-pause caps saved **inside the run mode**, `watchdog/drain` touched |
+| +0:00 | `run_mode.py pause` — caps to 0, the pre-pause caps saved **inside the run mode** (and read back from `saved_caps` when a cutoff already zeroed the live ones), `watchdog/drain` **and** `watchdog/paused` touched, the daemon's failed markers snapshotted before the daemon is stopped |
 | +0:30 | queued dispatches release themselves on `watchdog/drain`; keeper, merge daemon, stack-watch and capacityd stopped by their stop files |
 | +1:00 | one terminal message to the main session (`owner-say.sh --mode terminal`); the *content* of the closing report is a standing duty, not a dictation |
 | +2:00 | crontab backed up verbatim, then installed from a file; never an in-place `sed` |
@@ -324,9 +324,18 @@ heads that already carried a green CI and a finished review.
 | mature reviewer or scout | usually finishes inside the window, and a resumed review re-reads its whole context anyway: runs to the last call, then **restarted from scratch** |
 | mature writer (prover, mathfix, orc, …) | **checkpointed**: worktree untouched, codex thread id, worktree, step and elapsed time recorded, stopped at the last call, resumed on its own thread |
 
-Every stop is SIGTERM and then SIGKILL after `grace_s`, and only to a pid whose
-command line still matches the session the record names — a recycled pid on a
-128-core shared host is a real possibility. Every threshold lives in
+Every stop is one SIGTERM pass over the phase — the recorded `dispatch.sh` **and
+the codex process it owns**, because a dispatcher's `trap … TERM` cannot run
+while its `codex | tee` pipeline is the foreground job, so a TERM to the wrapper
+alone leaves codex spending quota — then **one** `grace_s` sleep for the whole
+phase, then SIGKILL to the survivors. Sleeping the grace per session made the
+landing cost `grace_s x sessions`: with the 17 sessions of 2026-09-12 the last
+call alone would have run four minutes past the owner's deadline. A pid is
+signalled only while its command line still names the session the record names —
+an unreadable command line is spared, not killed, because a recycled pid on a
+128-core shared host is a real possibility — and whatever a SIGKILLed wrapper
+could no longer release (its account slot, its branch claim, its spool row) is
+released explicitly, so the resumed run admits its full cap. Every threshold lives in
 `local/capacity-policy.json` under `landing`; no number is written into any
 shell script, and `pause_landing.py` carries the same values as documented
 fallbacks for the case where the policy file cannot be read.
@@ -337,21 +346,42 @@ fallbacks for the case where the policy file cannot be read.
 lanes with their issue, branch, head, the step each reached and the statuses
 already on that head, the stopped sessions with thread id, role, worktree,
 elapsed time and whether each is resumable, and the `daemon/pr<N>.failed`
-markers that appeared **during** the landing — recorded by difference, so a
-marker that records a real failure is never confused with one a kill caused.
+markers that appeared **during the pause** — recorded by difference against a
+snapshot taken at T+0:00, before the merge daemon is stopped, so a marker that
+records a real failure is never confused with one a kill caused. Snapshotting at
+the landing phase instead made that list empty on every pause: by then the only
+process that writes such a marker had been dead for ten minutes.
 
 `owner-resume.sh` restores the caps, the crontab and the daemons as before, and
 then — only after its post-condition check passes — replays that manifest:
 
-* each parked lane is relaunched with `LANE_RESUME_STEP`: the merge, the build
-  and the push are skipped while the head is unchanged, CI is skipped when the
-  head already carries `local-ci/summary` success, and a head carrying both
-  `local-ci/summary` and `local-review/summary` success is not relaunched at all;
-* each checkpointed writer is resumed with `dispatch.sh --resume <thread>` and a
-  continue prompt that points it at its own worktree;
+* each parked lane is relaunched with `LANE_RESUME_STEP` and the environment it
+  carried (`LANE_BRANCH`, `SKIP_REVIEW`, `MIPSTARRE_REVIEW_CMD`): the merge, the
+  build and the push are skipped while the head is unchanged, CI is skipped when
+  the head already carries `local-ci/summary` success, the review is skipped when
+  it already carries `local-review/summary` success, and a head carrying both is
+  not relaunched at all. `publish` is only for a lane that reached publication;
+  one stopped at `warm` or `dispatch` resumes at `dispatch`, where `lane.sh`
+  rebuilds `--resume` from its own thread record — resuming it at `publish` would
+  skip lane.sh's completion gates and spend a CI run and a review on an
+  unfinished proof;
+* each checkpointed writer **the lane does not own** is resumed with
+  `dispatch.sh --resume <thread>`, a continue prompt that points it at its own
+  worktree, and the job class, effort, hardness reason, persona, sandbox and
+  account the spool recorded, because `account_router` refuses a resume whose
+  model differs from the thread's and the model is selected from those fields. A
+  lane owns the sessions in its worktree: emitting both would put two writers
+  into one worktree, so only the lane is relaunched;
+* a stopped writer whose thread id was never captured gets a fresh dispatch with
+  a continue-from-the-worktree prompt, and is named in the output — never
+  silently dropped;
 * each stopped reviewer is restarted from scratch;
 * each recorded failed marker is removed, so the merge daemon stops skipping a
   PR that a kill, not a defect, marked.
+
+The replay is stamped into the manifest, so a second `owner-resume.sh` launches
+nothing again (`resume-exec --force` is the deliberate way back in), and one
+launch that fails does not abort the rest of the plan.
 
 `--no-work` restores the caps and the daemons only. Provers are told, in the
 dispatch prompt and in `local/personas/prover.md`, to commit each proved lemma
