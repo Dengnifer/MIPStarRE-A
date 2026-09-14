@@ -4,6 +4,7 @@ import MIPStarRE.QPBT.Extraction.Bounds
 import MIPStarRE.QPBT.Extraction.StateExtraction
 import MIPStarRE.QPBT.Extraction.PauliComparison
 import MIPStarRE.QPBT.Extraction.EvaluatedPauliConsistency
+import MIPStarRE.QPBT.Extraction.ConcretePauliComparison
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -157,21 +158,15 @@ The discrepancy is documented in
 repair the two numerical defects at paper lines 1743-1783 without changing the
 conclusion; see `docs/paper-gaps/qpbt_extraction-transfer.tex`.
 
-**Proof obligation:** issue #47 tracks the EPR projection argument and the
-Schwartz-Zippel comparison at paper lines 1715-1858. Discharge: construct
-`aux` from the EPR projection of the swapped state, use the corrected
-small-error case split, and combine the point-measurement consistency with the
-exact swap conjugation identities. The algebraic projection identity and
-corrected projection estimate are proved in `Extraction.EPRProjection`;
-`ProjectiveSetting.exists_unit_aux_near_eprProjection` supplies normalization.
-The swapped correlation bounds and normalized state are proved in
-`exists_extraction_aux_ofGlobalPairWitness`. The evaluated comparison is
-`evaluated_pauli_tilde_consistency_ofGlobalPairWitness`; the dimension-independent
-ideal-state estimate is `pauli_distance_on_ideal_le`. Issue #523 still requires
-transporting the evaluated comparison by both concrete swaps, identifying the
-result with the overlap in that estimate for each player, and assembling the
-fields with one common constant. `extraction_small_error_absorption` supplies
-the final scalar inequality. See `audits/2026-09-14_issue-523-continuation.md`. -/
+The auxiliary state is supplied by `exists_extraction_aux_ofGlobalPairWitness`.
+The two evaluated consistency bounds are transported by the concrete swaps in
+`ProjectiveSetting.extraction_pauli_dist_le`. Choose one universal constant
+above both construction coefficients and eighteen, and use
+`extraction_small_error_absorption` when the construction error is at most one.
+The complete large-error witness covers the other case. This discharges the
+conditional construction tracked by issue #523; the source global-witness
+construction and the later isometry transfer remain separate obligations.
+See `audits/2026-09-14_issue-523-extraction-completion.md`. -/
 theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -183,7 +178,57 @@ theorem exists_extractionWitness_ofGlobalPairWitness :
                 (deltaExtract C
                   (deltaConstructPaulis C epsilon deltaG P.m P.d P.q)
                   P.m P.d P.q)) := by
-  sorry
+  obtain ⟨CS, hCS, hstate⟩ := exists_extraction_aux_ofGlobalPairWitness
+  obtain ⟨CE, -, heval⟩ := evaluated_pauli_tilde_consistency_ofGlobalPairWitness
+  let C : ℝ := max (max CS CE) 18
+  have hCS_C : CS ≤ C := (le_max_left CS CE).trans (le_max_left _ _)
+  have hCE_C : CE ≤ C := (le_max_right CS CE).trans (le_max_left _ _)
+  have hC18 : 18 ≤ C := le_max_right _ _
+  have hC : 1 ≤ C := hCS.trans hCS_C
+  refine ⟨C, hC, ?_⟩
+  intro P epsilon deltaG hepsilon hepsilon_one hdeltaG S w
+  let delta := deltaConstructPaulis C epsilon deltaG P.m P.d P.q
+  have hmono (K : ℝ) (hK : K ≤ C) :
+      deltaConstructPaulis K epsilon deltaG P.m P.d P.q ≤ delta :=
+    mul_le_mul_of_nonneg_right hK (by positivity)
+  have hdelta : 0 ≤ delta := by
+    dsimp [delta, deltaConstructPaulis]
+    positivity
+  by_cases hdelta_one : delta ≤ 1
+  · obtain ⟨aux, haux, hclose⟩ :=
+      hstate P epsilon deltaG hepsilon hepsilon_one hdeltaG S w
+    have hstate_delta :
+        ‖S.applyBoth (swapUnitary w .alice) (swapUnitary w .bob) S.psiHat -
+          S.idealExpState aux‖ ^ 2 ≤ 16 * delta :=
+      hclose.trans (mul_le_mul_of_nonneg_left (hmono CS hCS_C) (by norm_num))
+    have hnorm :
+        ‖S.applyBoth (swapUnitary w .alice) (swapUnitary w .bob) S.psiHat -
+          S.idealExpState aux‖ ≤ 4 * Real.sqrt delta := by
+      nlinarith [Real.sq_sqrt hdelta, Real.sqrt_nonneg delta, norm_nonneg
+        (S.applyBoth (swapUnitary w .alice) (swapUnitary w .bob) S.psiHat -
+          S.idealExpState aux)]
+    have habsorb := extraction_small_error_absorption C delta P.m P.d P.q
+      hC18 hdelta hdelta_one
+    refine ⟨{
+      swap_right_unitary := swapUnitary_mul_conjTranspose w
+      swap_left_unitary := conjTranspose_mul_swapUnitary w
+      aux := aux
+      aux_norm := haux
+      state_close := hstate_delta.trans habsorb.1
+      pauli_close := ?_
+    }⟩
+    intro side W
+    have he := heval P epsilon deltaG hepsilon hepsilon_one hdeltaG S w W
+    have hdefect : S.evaluatedPauliDefect w side W ≤ delta := by
+      cases side
+      · exact he.1.trans (hmono CE hCE_C)
+      · exact he.2.trans (hmono CE hCE_C)
+    apply (S.extraction_pauli_dist_le w aux haux side W).trans
+    apply le_trans _ habsorb.2
+    push_cast
+    linarith
+  · exact exists_extractionWitness_ofGlobalPairWitness_of_one_le_construct S w
+      (by linarith) (le_of_lt (lt_of_not_ge hdelta_one))
 
 /-- The composed construction and extraction errors preserve the error family
 of `thm:pauli`: when `deltaG` has the form

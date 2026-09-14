@@ -387,6 +387,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
+	\notready
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There is a universal constant $C_{\mathrm{ext}}\geq1$. Set
 	\[
@@ -490,8 +491,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	  \leq16C(\delta_G+\sqrt\eps+md/q).
 	\]
 	The global measurement is not constructed here. The source-facing joint
-	construction in Lemma~\ref{lem:qld-construct-the-paulis}, and the full
-	extraction conclusion below, remain open in Lean.
+	construction in Lemma~\ref{lem:qld-construct-the-paulis}, and the
+	source-facing extraction conclusion, remain open in Lean.
 \end{example}
 
 \begin{example}[Evaluated Pauli consistency from a supplied global witness]
@@ -568,6 +569,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
+	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state,
 		lem:projective-strategy-setup, def:generalized-pauli, def:EPR,
 		def:povm-distance}
@@ -592,10 +594,30 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	Lemma~\ref{lem:qld-4-7} before constructing the swap unitaries. Eliminating
 	the assumption requires carrying out that construction first; this missing
 	composition is recorded in \cite{gap:qpbt_extraction-transfer}.
-	The corresponding proof obligation repeats the argument of
-	Lemma~\ref{lem:qld-unitary} above, using the assumed
-	measurement in place of the appeal to Lemma~\ref{lem:qld-4-7}.
 \end{example}
+\begin{proof}
+	\uses{lem:qld-state-extraction-given-global-pair,
+		lem:qld-evaluated-pauli-given-global-pair, lem:v-swap-conjugation,
+		lem:qld-pauli-overlap-state-transfer,
+		lem:qld-large-error-extraction-given-global-pair}
+	Let $C_S,C_E$ be the universal constants in the auxiliary-state and
+	evaluated-consistency estimates. Choose
+	$C_{\mathrm{ext}}=\max\{C_S,C_E,18\}$ before fixing any parameters or
+	strategy, and put $\delta=C_{\mathrm{ext}}(\delta_G+\sqrt\eps+md/q)$.
+	The normalized auxiliary state has squared extraction error at most
+	$16\delta$. For each player and either Pauli basis, simultaneous swap
+	conjugation and \eqref{eq:qld-unitary-6} identify the evaluated overlap
+	on the swapped state with one minus the corresponding consistency defect
+	on $\ket{\hat\psi}$. That defect is at most $\delta$.
+	Lemma~\ref{lem:qld-pauli-overlap-state-transfer} therefore bounds the
+	full Pauli distance on the ideal state by
+	$2\delta+2md/q+16\sqrt\delta$.
+	When $\delta\leq1$, both errors are at most
+	$C_{\mathrm{ext}}(\delta^{1/4}+md/q)$ by the scalar estimate in that lemma.
+	When $\delta>1$, the allowed error is at least four, so the complete
+	large-error construction applies. The exact swap identities give both
+	unitarity equations in either case.
+\end{proof}
 
 \begin{lemma}[Preservation of the robustness error family]\label{lem:qld-extraction-error-form}
 	\lean{MIPStarRE.QPBT.deltaExtract_le_deltaQld}
