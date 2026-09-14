@@ -53,6 +53,7 @@ import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.OrderedPolynomialEstimates
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.RoundedPolynomialEstimates
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.ScalarNonlinearMass
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport

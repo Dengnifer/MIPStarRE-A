@@ -2354,6 +2354,171 @@ and transport the bipartite correlations to the two expanded placements.
 Lemma~\ref{lem:qld-opposite-ordered-products} gives both conclusions.
 \end{proof}
 
+\begin{definition}[Scalar coefficient expansion]
+\label{def:qld-scalar-coefficient-expansion}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.baseCoordinateEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarBaseCoordinateEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarBaseQuestionEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarNonlinearMass}
+\leanok
+Identify the first $2m$ coordinates with the ordered blocks $(x,z)$ and
+the last two with $(\alpha,\beta)$. Identify the direct scalar field with
+the Pauli scalar field $F=\mathbb F_q$. For a singleton polynomial outcome
+$g$, write its transported polynomial as
+\[
+ p_g(\alpha,\beta)=\sum_{i,j}c_{g,i,j}(x,z)\alpha^i\beta^j
+ \in F[x,z][\alpha,\beta].
+\]
+For an expanded placement $p$ and a complete measurement $R$, define
+\[
+ N_p(R)=\sum_{g:\,p_g\ne\alpha r+\beta t\ \text{for all }r,t\in F[x,z]}
+   \|(R_g)_p\hat\psi\|^2.
+\]
+The coefficient polynomials $r,t$ in this definition may depend on both
+base blocks. These are auxiliary definitions for the scalar-linearity
+argument in the proof of Lemma~\ref{lem:qld-4-7}.
+\end{definition}
+
+\begin{theorem}[Faithful scalar expansion and degree bounds]
+\label{thm:qld-scalar-expansion-degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_injective}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_eval}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_degree_term_le}
+\leanok
+For admissible parameters, the map $g\mapsto p_g$ is injective and
+evaluating $p_g$ after specializing its coefficients at $(x,z)$ gives
+exactly $e_{x,z,\alpha,\beta}(g)$. The coordinate splitting is an
+equivalence of the full joint sample spaces. Moreover,
+\[
+ \deg c_{g,i,j}\leq2md,\qquad \deg_{\alpha,\beta}p_g\leq2d.
+\]
+Writing
+$D(p)=\max_{e\in\operatorname{supp}p}\deg(\operatorname{coeff}_e p)
++\max\{1,\deg p\}+1$, with the empty maximum equal to zero, gives
+$D(p_g)\leq(2m+2)d+1$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-scalar-coefficient-expansion}
+Field transport, variable renaming, and the coefficient expansion are
+injective ring maps. The singleton tuple adds no information. Evaluation
+commutes with each map. A nonzero coefficient of a coefficient polynomial
+is the coefficient of the corresponding combined monomial of $g$.
+Every exponent is at most $d$; summing over the $2m$ base coordinates
+or the two scalar coordinates gives the degree bounds. Use $d\geq1$
+for the maximum in $D$.
+\end{proof}
+
+\begin{definition}[Ordered and diagonal indicators]
+\label{def:qld-polynomial-indicators}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.orderedIndicator}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.diagonalIndicator}
+\leanok
+For complete measurements $X,Z$ with outcomes in a finite field $F$, set
+\[
+ T_{\alpha,\beta,a}=\sum_{\alpha b+\beta c=a}X_bZ_c,
+ \qquad H_{\alpha,\beta,a}=\sum_{\alpha b+\beta c=a}Z_cX_bZ_c.
+\]
+These operators are the ordered indicator and diagonal sandwich in the
+scalar-linearity argument of Lemma~\ref{lem:qld-4-7}.
+\end{definition}
+
+\begin{theorem}[Projective outcome mass]
+\label{thm:qld-projective-outcome-mass}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.sum_projective_state_norm_sq}
+\leanok
+For a complete projective measurement $R$ on any finite-dimensional
+space and any vector $\psi$, one has $\sum_g\|R_g\psi\|^2=\|\psi\|^2$.
+\end{theorem}
+\begin{proof}
+\leanok
+Expand each squared norm, use $R_g^*R_g=R_g$, and sum the effects.
+\end{proof}
+
+\begin{theorem}[Scalar-nonlinear mass and ordered error]
+\label{thm:qld-nonlinear-mass-ordered-error}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.nonlinear_mass_le_ordered_error}
+\leanok
+Let $F$ be a finite field, let $s$ be a finite set of labels, and let
+$p_g\in F[u_1,\ldots,u_n][\alpha,\beta]$ for $g\in s$, with
+$p_g\ne\alpha r+\beta t$ for all coefficient polynomials $r,t$.
+Let $X(u),Z(u)$ be complete projective measurements on a common finite
+space, and let $\psi_g$ be arbitrary vectors on that space. With
+$T_{u,v,g}=T_{v_0,v_1,p_g(u,v)}$ and $D$ as above,
+\[
+ \sum_{g\in s}\|\psi_g\|^2\leq
+ 2\mathbb E_{u\in F^n}\mathbb E_{v\in F^2}
+   \sum_{g\in s}\|\psi_g-T_{u,v,g}\psi_g\|^2
+ +2\sum_{g\in s}\frac{D(p_g)}{|F|}\|\psi_g\|^2.
+\]
+Both expectations are uniform. The vectors need not be normalized, and
+no commutation assumption between $X$ and $Z$ is imposed.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-polynomial-indicators}
+For each $g$, choose a nonzero coefficient outside the two scalar-linear
+monomials. Its zero set is a common exceptional set of base points for
+all measurement outcomes. Apply Schwartz--Zippel to that coefficient,
+then to the specialized scalar polynomial minus each linear answer.
+Positivity and completeness of the diagonal sandwich preserve the weight
+$\|\psi_g\|^2$. The event $\beta=0$ contributes at most
+$|F|^{-1}\|\psi_g\|^2$. Finally apply the squared-norm triangle inequality
+and sum over the labels.
+\end{proof}
+
+\begin{theorem}[Actual scalar-nonlinear mass]
+\label{thm:qld-actual-scalar-nonlinear-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarNonlinearMass_le_ordered_error}
+\leanok
+For a projective Pauli setting with admissible parameters, any opposite
+placements $p_1,p_2$, and any complete projective extended-polynomial
+measurement $R$ on $p_1$,
+\[
+ N_{p_1}(R)\leq2E^{XZ}_{p_1,p_2}(R)+\frac{2((2m+2)d+1)}q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-nonlinear-mass-ordered-error, thm:qld-scalar-expansion-degrees,
+thm:qld-projective-outcome-mass, def:qld-extended-polynomial-ordered-error}
+Use $\psi_g=(R_g)_{p_1}\hat\psi$ and the point projectors on $p_2$.
+Opposite placements commute, so the residual in the preceding theorem
+equals the residual defining the ordered error. Transport the full joint
+uniform distribution through the coordinate equivalence. Enlarge the
+nonnegative restricted sums to all polynomial outcomes and use
+$\sum_g\|\psi_g\|^2=1$, together with the proved degree bound.
+\end{proof}
+
+\begin{theorem}[Rounded scalar-linearity concentration]
+\label{thm:qld-rounded-scalar-linearity}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_scalar_mass}
+\leanok
+There are universal constants $a\geq1$ and $0<b\leq1$ with the following
+property. Under the explicit point and directly indexed completed-answer
+line-witness hypotheses of Theorem~\ref{thm:qld-rounded-polynomial-ordered},
+with exactly its definitions of $\delta$ and $\eta$, there exist complete
+projective measurements $R_A,R_B$ satisfying both ordered estimates of
+that theorem and, simultaneously,
+\[
+ N_{AA'}(R_A),\ N_{BB'}(R_B)
+ \leq 2(4\eta+8\delta_Q)+\frac{2((2m+2)d+1)}q.
+\]
+The line witness remains an input on its stated restricted domain.
+Neither an ordered-error bound nor a mass bound is an input.
+Dependence of the coefficient of $\alpha$ on $z$, dependence of the
+coefficient of $\beta$ on $x$, and the retained point overlaps are not
+conclusions of this auxiliary theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-polynomial-ordered, thm:qld-actual-scalar-nonlinear-mass}
+Choose both measurements by the rounded ordered-estimate theorem.
+Apply the actual mass bound to $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{proof}
+
 \begin{theorem}[Polynomial consistency from point comparisons]
 \label{thm:qld-polynomial-consistency-from-points}
 \lean{MIPStarRE.QPBT.direct_polynomial_consistency_le_point_bounds}
