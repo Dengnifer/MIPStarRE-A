@@ -13,9 +13,10 @@ pr: "#544"
 ## Scope
 
 This continuation starts from clean commit
-`69a0dc0b092c37076dc8ec45a95ddc23ba3608be`. Its first clock check was
-08:13:10 UTC; the authorization limits total elapsed work to 25 minutes,
-including validation, audit, and commit. Only the existing issue523 worktree
+`69a0dc0b092c37076dc8ec45a95ddc23ba3608be`. MAIN identifies the original launch
+as 08:12:57 UTC, with deadline 08:37:57 UTC. The first local clock check was
+08:13:10 UTC. The 25-minute authorization includes validation, audit, and commit;
+the timing reminder does not reset that budget. Only the existing issue523 worktree
 is writable. No child, full build, CI, review, publication, or claim change
 is part of this continuation.
 
@@ -131,9 +132,13 @@ The target was queried separately and still includes `sorryAx`.
 Blueprint web rendering, declaration synchronization, and whitespace checks
 passed. The declaration checker resolved all 1,453 blueprint declarations.
 Synchronization retains the thirteen existing statement/proof-mark
-warnings. The hook installation check passed; the commit runs the normal hooks.
+warnings. The hook installation check and the proof commit's normal hooks passed.
 No independent review is claimed; the review-drain hold leaves the independent
 gates to MAIN.
+
+The proof commit is `9042eabbb01d680e76682b9c1464f0b44cc155e9`.
+This final audit update records the exact launch/deadline reminder and completed
+hook evidence, without adding proof work or extending the authorized duration.
 
 ## Cost Preservation
 
