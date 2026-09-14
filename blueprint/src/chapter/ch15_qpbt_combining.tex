@@ -2413,6 +2413,51 @@ projective measurement whose outcomes are pairs of global polynomials.
 	sums proves the measurement identity for either player.
 \end{proof}
 
+\begin{lemma}[Formalization support for the supplied-witness direct polynomial
+	measurements]
+	\label{lem:qld-supplied-direct-polynomial-measurements}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_direct_polynomial_measurements_of_supplied_witnesses}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-13, lem:qld-4-12,
+		lem:direct-ld-soundness-k-one-any-strategy, def:consistency,
+		def:ld-meas}
+	This is not a named statement of \cite{Ji2020MIPStar}; it records what
+	supplied point and extended-line measurements give along the directly
+	indexed low-degree soundness route used in the first paragraph of the
+	proof of Lemma~\ref{lem:qld-4-7}.
+	There are universal constants $a\ge1$ and $0<b\le1$ with the following
+	property. Fix an admissible tuple $(q,m,d)$ and a projective setting as
+	above, and suppose joint point measurements $\hat{Q}^{x,z}$ and extended
+	line measurements $\hat{Q}^{\ell}$ satisfying the respective conclusions
+	of Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-4-13} are given, with error
+	parameters $\delta_Q,\delta_L$. Then the strategy they determine at the
+	directly indexed parameters $(q,2m+2,d,1)$ admits polynomial-tuple POVMs
+	$G^{\mathrm A},G^{\mathrm B}$ on the two original expanded local spaces
+	$\hilb_s\ot(\C^q)^{\ot M}$ whose three consistency defects --- the two
+	point versus polynomial defects averaged over uniform
+	$u\in\F_q^{2m+2}$ and the polynomial self-consistency defect --- are each
+	at most $\delta_{\mathrm{ld}}(\eps_0,q,2m+2,d,1)$, where
+	\[
+		\eps_0=3\Bigl(\sqrt{\delta_Q+\delta_L}+\frac{md}{q}\Bigr).
+	\]
+	The POVMs are not asserted to be projective, the supplied measurements
+	are not constructed, and no global paired measurement is claimed; this
+	does not complete Lemma~\ref{lem:qld-4-7}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-ld-soundness-k-one-any-strategy, lem:qld-4-12,
+		lem:qld-4-13}
+	The supplied witnesses determine a strategy for the directly indexed game
+	at parameters $(q,2m+2,d,1)$ whose value is at least $1-\eps_0$. The
+	second summand of $\eps_0$ is positive because admissibility gives
+	$m,d\ge1$ and $q>0$, so $\eps_0>0$ and no separate game-passing premise
+	is needed. Apply
+	Theorem~\ref{lem:direct-ld-soundness-k-one-any-strategy} to that
+	strategy; its three conclusions are exactly the stated bounds, with the
+	POVMs already on the original expanded local spaces.
+\end{proof}
+
 % The two lemmas below are not statements of the source; they record the
 % coordinate change for the LDT consistency conclusions and the compression of
 % the correlated residue register discussed in the preceding remark.
