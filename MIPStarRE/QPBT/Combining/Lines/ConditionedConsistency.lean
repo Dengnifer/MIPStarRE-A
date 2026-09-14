@@ -14,7 +14,6 @@ sandwich. No conditioning changes the measurement itself.
 
 The pasting step is `eq:qld-4-13-1`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.
-The proof from commit `f6a340c8` uses the current two-marginal pasting API.
 -/
 
 namespace MIPStarRE.QPBT
@@ -54,7 +53,8 @@ family and both marginal errors are retained. Answers are ordered Z then X,
 as required by the X-outer sandwich. Source: `eq:qld-4-13-1`, paper
 `14_analysis_of_the_pauli_basis_test.tex:950-963`; the proof-only conditioning
 and point-error dependence are explained in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. Blueprint
+`lem:combined-line-conditioned-defect`. -/
 theorem exists_combinedLine_conditioned_defect_le :
     ∃ constant : ℝ, 1 ≤ constant ∧
       ∃ pastingError : ℝ → ℝ → ℝ, IsPolyErr₂ pastingError ∧

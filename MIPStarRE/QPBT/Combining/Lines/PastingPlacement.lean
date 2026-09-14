@@ -13,7 +13,6 @@ opposite placement. The unused registers remain on the second side.
 
 These finite-coordinate identities support `lem:qld-xz-lines`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.
-The proofs are recovered from commit `f6a340c8`.
 -/
 
 namespace MIPStarRE.QPBT

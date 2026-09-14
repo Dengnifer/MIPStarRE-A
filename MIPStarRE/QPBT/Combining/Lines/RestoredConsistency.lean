@@ -14,8 +14,6 @@ the discarded zero-direction contribution is at most `1/(2q)`.
 
 This completes the distributional step in `eq:qld-4-13-1`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.
-The measurement and answer-permutation arguments are recovered from
-commit `f6a340c8`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -102,7 +100,8 @@ source-law bound. Only zero X directions are discarded during the proof;
 their contribution is restored as `1/(2q)`, and the retained mass multiplies
 the pasting error. Source: `lem:qld-xz-lines`, paper
 `14_analysis_of_the_pauli_basis_test.tex:950-963`; see
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. Blueprint
+`lem:combined-line-restored-defect`. -/
 theorem exists_combinedLine_restored_defect_le :
     ∃ constant : ℝ, 1 ≤ constant ∧
       ∃ pastingError : ℝ → ℝ → ℝ, IsPolyErr₂ pastingError ∧

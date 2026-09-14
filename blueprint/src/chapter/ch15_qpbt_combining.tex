@@ -983,6 +983,80 @@ assembled by Fourier averaging.
 	It is a factor of the defining sandwich, so the sandwich vanishes.
 \end{proof}
 
+\begin{lemma}[Formalization support for the same-placement line-point distance]
+	\label{lem:line-point-same-placement-distance}
+	\lean{MIPStarRE.QPBT.exists_expLine_point_same_placement_distance_le}
+	\leanok
+	\uses{lem:qld-comm-line-cons, def:expanded-line-measurement,
+		def:line-point-dist, def:consistency}
+	There is a universal constant $C\ge1$ with the following property. Let a
+	projective strategy pass the low individual degree test with error $\eps$,
+	let $(p_1,p_2)$ be a directed pair of opposite placements, and let
+	$W\in\{X,Z\}$. Averaged over the line-point distribution, the squared
+	distance between the evaluated expanded line measurement
+	$\hat M^{(\mathrm{Line},W),\ell}_{[\mathrm{eval}_x(\cdot)=a]}$ and the
+	completed expanded point measurement $\hat M^{(\mathrm{Point},W),x}_{a}$,
+	both placed on $p_2$, is at most $C(\eps+\sqrt{\eps})$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-line-cons, def:line-point-dist}
+	Item 3 of Lemma~\ref{lem:qld-comm-line-cons} compares the evaluated line
+	measurement on $p_2$ with the point measurement on $p_1$, and item 1
+	compares the two point measurements on the opposite placements $p_1$ and
+	$p_2$. Completing an answer to an optional answer is a postprocessing and
+	does not change the distance, and the point marginal of the line-point
+	distribution is uniform, so the second comparison may be averaged over the
+	line-point distribution as well. The triangle inequality for the averaged
+	squared distance combines the two bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support for the conditioned pasting defect]
+	\label{lem:combined-line-conditioned-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_conditioned_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, lem:pasting-heterogeneous,
+		lem:line-point-same-placement-distance,
+		def:concrete-paired-line-measurement, def:consistency}
+	There are a universal constant $C\ge1$ and a function
+	$\delta_{\mathrm{pasting}}(x,y)=\poly(x,y)$ with the following property.
+	Let $\eps\ge0$ and let $\eps_P\ge0$ be an arbitrary point-error
+	parameter. Let a projective strategy pass with error $\eps$, let a joint
+	point family satisfy the conclusions of Lemma~\ref{lem:qld-4-10} with
+	error $\eps_P$, and let $(p_1,p_2)$ be a directed pair of opposite
+	placements. Write $r$ for the mass retained when the product line-point
+	law is conditioned on the $X$ line having nonzero direction. Then, over
+	the conditioned law and with answers ordered $Z$ then $X$, the consistency
+	defect between the completed point family on $p_1$ and the $X$-$Z$-$X$
+	POVM of Definition~\ref{def:concrete-paired-line-measurement} on $p_2$ is
+	at most
+	\[
+		\delta_{\mathrm{pasting}}\!\left(\frac{md}{q},
+			\frac{8\eps_P+C(\eps+\sqrt{\eps})}{r}\right).
+	\]
+	The conditioning and the dependence on $\eps_P$ are discussed in
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{lemma}
+
+\begin{lemma}[Formalization support for the restored pasting defect]
+	\label{lem:combined-line-restored-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
+	\leanok
+	\uses{lem:combined-line-conditioned-defect, def:line-point-dist,
+		def:concrete-paired-line-measurement, def:consistency}
+	With the constant $C$, the function $\delta_{\mathrm{pasting}}$, the
+	retained mass $r$, and the hypotheses of
+	Lemma~\ref{lem:combined-line-conditioned-defect}, the consistency defect
+	between the same two families, taken over the unconditioned product
+	line-point law and with answers ordered $X$ then $Z$, is at most
+	\[
+		r\,\delta_{\mathrm{pasting}}\!\left(\frac{md}{q},
+			\frac{8\eps_P+C(\eps+\sqrt{\eps})}{r}\right)+\frac1{2q}.
+	\]
+	Only lines with zero $X$ direction are discarded, and their contribution
+	is restored as the additive term $1/(2q)$.
+\end{lemma}
+
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
@@ -1013,36 +1087,45 @@ assembled by Fourier averaging.
 	\uses{lem:qld-comm-line-cons, lem:pasting-heterogeneous,
 		fact:agreement, fact:add-a-proj, lem:cool-closeness-fact,
 		lem:schwartz-zippel-total-degree, def:line-point-dist,
-		def:concrete-paired-line-measurement}
+		def:concrete-paired-line-measurement,
+		lem:line-point-same-placement-distance,
+		lem:coefficient-polynomial-agreement,
+		lem:combined-line-conditioned-defect,
+		lem:combined-line-restored-defect,
+		thm:qld-conditioned-polynomial-bound}
 	The two ordered-product comparisons imply the X and Z point-marginal
 	bounds. Combining these with line-point consistency and line
-	self-consistency bounds each completed point-to-line marginal defect by
+	self-consistency, Lemma~\ref{lem:line-point-same-placement-distance},
+	bounds each completed point-to-line marginal defect by
 	$\Delta=8\delta_Q(\eps)+C(\eps+\sqrt{\eps})$, for a universal $C\ge1$.
 
 	Condition the product line-point law on the X line having nonzero
 	direction. Its retained mass $r$ is at least $1/2$, since every axis
 	direction is nonzero. Resampling an independent uniform affine
 	parameter preserves the line-point law. On each nondegenerate X line,
-	the root bound therefore gives conditional collision probability at
-	most $md/q$. Both marginal defects under the restricted law are at
-	most $\Delta/r$.
+	the root bound of Lemma~\ref{lem:coefficient-polynomial-agreement}
+	therefore gives conditional collision probability at most $md/q$.
+	Both marginal defects under the restricted law are at most $\Delta/r$.
 
 	Reindex the expanded state according to the chosen opposite placements,
 	keeping the unused registers on the line-measurement side. Apply
 	Lemma~\ref{lem:pasting-heterogeneous} with answer order Z then X:
 	its sandwich is precisely the X-Z-X POVM in the statement.
 	Reversing both answer coordinates preserves the consistency defect.
+	This is Lemma~\ref{lem:combined-line-conditioned-defect}.
 
 	The discarded zero-direction mass is at most $1/(2q)$: it is zero
 	for axis lines, and at most $1/q$ for diagonal lines, since their
 	last direction coordinate is uniform. Every pointwise consistency
 	defect lies in $[0,1]$. Restoring the original law gives the bound
 	\[
-		r\,\delta_{\mathrm{pasting}}(md/q,\Delta/r)+\frac1{2q}.
+		r\,\delta_{\mathrm{pasting}}(md/q,\Delta/r)+\frac1{2q},
 	\]
-	Take the minimum with the independent unit bound. Since
-	$1/2\le r\le1$, $md\ge1$, and $\delta_Q$ is polynomially small,
-	the result has a uniform bound of the required corrected sum form.
+	which is Lemma~\ref{lem:combined-line-restored-defect}. Take the
+	minimum with the independent unit bound. Since $1/2\le r\le1$,
+	$md\ge1$, and $\delta_Q$ is polynomially small,
+	Theorem~\ref{thm:qld-conditioned-polynomial-bound} turns this into a
+	uniform bound of the required corrected sum form.
 	The same argument applies to every directed opposite placement.
 \end{proof}
 
