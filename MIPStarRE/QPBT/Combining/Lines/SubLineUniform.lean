@@ -124,26 +124,27 @@ theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
         exact (directLineRepParameter_spec v x).symm
     rw [himg, Finset.card_image_of_injective _ hinj, Finset.card_univ]
 
-/-- Averaged form of the previous identity: on the uniform coordinate space a
-quantity of the canonical representative of the point and of the point itself
-has the same average as the quantity of the representative and of the point at
-an independent uniform affine parameter on the line through it.  This is the
-direction-agnostic resampling step shared by the axis and diagonal line-point
-samplers; it uses no property of the direction, and in particular holds for the
-zero direction.  Blueprint `lem:qld-sublines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`, used
-at `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`. -/
-theorem avgOver_uniformDistribution_lineRepMap_resample {K : Type*} [Field K]
+/-! ## Resampling a uniform point along its canonical line -/
+
+/-- Finite-average form of the parameterization above: a uniformly random
+point may be replaced by a fresh uniform affine parameter on the line through
+its canonical representative, while the representative itself is kept in the
+sampled value.  The zero direction is included, since the parameterization
+has constant fibers there too.  This formalization-only identity is the
+common core of the axis and diagonal line-point resampling identities used at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`;
+the canonical representative map is blueprint `def:line-representative`. -/
+theorem avgOver_uniform_lineRepMap_resample_parameter {K : Type*} [Field K]
     [Fintype K] [DecidableEq K] {m : ℕ} (v : Fin m → K)
-    (quantity : (Fin m → K) → (Fin m → K) → ℝ) :
+    (value : (Fin m → K) → (Fin m → K) → ℝ) :
     avgOver (uniformDistribution (Fin m → K))
-        (fun point => quantity (lineRepMap v point) point) =
+        (fun point => value (lineRepMap v point) point) =
       avgOver (uniformDistribution (Fin m → K)) (fun point =>
         avgOver (uniformDistribution K) (fun param =>
-          quantity (lineRepMap v point) (lineRepMap v point + param • v))) := by
+          value (lineRepMap v point) (lineRepMap v point + param • v))) := by
   have hmap := uniformDistribution_map_lineRepMap_add_smul v
   have havg := congrArg (fun dist => avgOver dist
-    (fun point => quantity (lineRepMap v point) point)) hmap
+    (fun point => value (lineRepMap v point) point)) hmap
   rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
   simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
 

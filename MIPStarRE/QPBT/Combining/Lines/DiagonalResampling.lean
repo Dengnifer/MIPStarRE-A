@@ -57,7 +57,7 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
         value (LineDesc.diagonal (lineRepMap direction point) block.1 direction
           (lineRepMap_apply_self direction point) hprefix,
           lineRepMap direction point + param • direction)))
-  have h := avgOver_uniformDistribution_lineRepMap_resample direction
+  have h := avgOver_uniform_lineRepMap_resample_parameter direction
     (fun base point => value (LineDesc.diagonal
       (lineRepMap direction base) block.1 direction
       (lineRepMap_apply_self direction base) hprefix, point))
