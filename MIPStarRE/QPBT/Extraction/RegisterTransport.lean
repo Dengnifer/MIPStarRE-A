@@ -91,14 +91,11 @@ theorem reindexState_applyOperatorToState (equiv : dom ≃ cod) (operator : Op c
       applyOperatorToState operator (reindexState equiv state) := by
   rw [applyOperatorToState_reindexOp, reindexState_apply_symm]
 
-/-- Quadratic forms are unchanged by simultaneous state and operator transport. -/
-theorem stateQForm_reindexState (equiv : dom ≃ cod) (operator : Op cod)
-    (state : EuclideanSpace ℂ dom) :
-    DistanceCalculus.stateQForm (reindexState equiv state) operator =
-      DistanceCalculus.stateQForm state (reindexOp equiv operator) := by
-  unfold DistanceCalculus.stateQForm
-  rw [← reindexState_applyOperatorToState]
-  simp only [reindexState_eq_piLpCongrLeft, LinearIsometryEquiv.inner_map_map]
+-- The quadratic-form transport identity under simultaneous state and operator
+-- reindexing is already available as
+-- `MIPStarRE.QPBT.WinImplications.stateQForm_reindexState`
+-- (`MIPStarRE/QPBT/Observables/WinImplications/FactorTransport.lean`); it is
+-- reused here rather than restated.
 
 /-- Reindexing the Hilbert-space carrier preserves the averaged squared
 distance of arbitrary operator families, with no answer-cardinality factor. -/

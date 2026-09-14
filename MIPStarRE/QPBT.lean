@@ -75,6 +75,7 @@ import MIPStarRE.QPBT.Extraction.EncodingSupport
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.Unitary
+import MIPStarRE.QPBT.Extraction.RegisterTransport
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
