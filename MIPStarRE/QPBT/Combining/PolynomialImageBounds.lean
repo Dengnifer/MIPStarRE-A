@@ -17,13 +17,11 @@ These are auxiliary estimates, not the global polynomial-pair construction.
 The remaining block-separation and construction obligations are recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and issue #513.
 
-All proof content, including the private supporting lemmas, is recovered from
-the immutable PR296 head cited below. Only the required dependency chain is
-retained, with internal lemmas private. Recovery earns no new-proof attribution.
+Only the dependency chain needed for these estimates is exposed; supporting
+lemmas remain private.
 
 ## References
 
-* Recovered from PR296, immutable head `2c8f147643d151d8616864cf49817dc6422a9a86`.
 * `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1289-1326`,
   especially `eq:qld-g-42`, `eq:qld-g-43`, and `eq:qld-g-prime`.
 -/
@@ -228,8 +226,7 @@ private theorem specialization_ne_linear_of_coeff {n : ℕ}
     Ne.symm he0, Ne.symm he1] using hc
 
 /-- Schwartz--Zippel in the uniform-average notation used by the coefficient
-and fiber calculations in `eq:qld-g-prime-bound` and `eq:qld-g-2`.
-Proof recovered from PR296, as recorded in the module provenance. -/
+and fiber calculations in `eq:qld-g-prime-bound` and `eq:qld-g-2`. -/
 theorem avg_eval_eq_le {n D : ℕ} (p r : MvPolynomial (Fin n) F)
     (hne : p ≠ r) (hp : p.totalDegree ≤ D) (hr : r.totalDegree ≤ D) :
     avgOver (uniformDistribution (Fin n → F))
@@ -415,7 +412,7 @@ private theorem avg_sum_orderedIndicator_norm_sq_le_of_not_linear {n : ℕ} {Γ 
 
 omit [DecidableEq ι] in
 /-- The squared-norm triangle inequality retains each outcome's state vector.
-This is the norm-to-residual step recovered from PR296, now shared with the
+This norm-to-residual step is shared with the
 wrong-variable argument in `eq:qld-g-prime-xpt-bound`; support for blueprint
 `lem:qld-4-7`. No normalization is assumed. -/
 theorem sum_mass_le_residual_add_image {Γ : Type*} (s : Finset Γ)

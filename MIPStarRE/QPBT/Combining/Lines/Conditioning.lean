@@ -14,13 +14,9 @@ bounds apply there, and the discarded probability is restored explicitly.
 
 ## References
 
-Recovered for issue #513 from PR549 at immutable commit
-`aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d`; prior proof attribution is retained.
-
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The construction is recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512; the
-source and completed-answer distinctions remain as documented in
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions remain
+as documented in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 

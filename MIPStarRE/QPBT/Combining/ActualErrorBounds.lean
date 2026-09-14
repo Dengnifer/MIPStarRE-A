@@ -11,8 +11,8 @@ to the final consistency defect.
 
 Paper `lem:qld-4-7`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1404`.
-The direct passing estimate is recovered from PR545; square-root closure is
-recovered from issue #529. This module proves their quantitative composition.
+This module composes the direct passing estimate with square-root closure for
+the global error function.
 -/
 
 namespace MIPStarRE.QPBT

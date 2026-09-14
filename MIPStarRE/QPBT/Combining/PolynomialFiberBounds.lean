@@ -5,7 +5,7 @@ import MIPStarRE.QPBT.Combining.PointsDataProcessing
 # Common exceptional fibers for polynomial coefficients
 
 A nonconstant polynomial in one block, with polynomial coefficients in a
-second block, has one nonzero nonconstant coefficient. Its zero set controls
+second block, has a nonzero coefficient at a nonconstant monomial. Its zero set controls
 all exceptional specializations simultaneously, independently of the outcome
 of a measurement. The weights may depend on the fixed block but not on the
 block being averaged.

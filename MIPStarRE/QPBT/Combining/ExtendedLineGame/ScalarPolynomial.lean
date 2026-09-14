@@ -110,8 +110,8 @@ theorem scalarPolynomial_degrees (P : AdmissibleParams)
   exact sumRingEquiv_degrees _ (scalarPolynomial_renamed_exponents P g)
 
 /-- Split a base coefficient into a polynomial in either varying block with
-coefficients in the fixed block. The value `false` selects `x` as varying and
-`true` selects `z`. This supports the two applications of `eq:qld-g-2` in
+coefficients in the fixed block. The order parameter selects either `x` or `z`
+as the varying block. This supports the two applications of `eq:qld-g-2` in
 paper lines 1341--1358 and blueprint `lem:qld-4-7`. -/
 def blockCoefficientPolynomial (P : AdmissibleParams)
     (g : DirectPolyTuple P.extendedDirectLd) (a : Fin 2 →₀ ℕ) (reverse : Bool) :
@@ -167,7 +167,7 @@ theorem scalarPolynomial_injective (P : AdmissibleParams) :
   subst j
   exact Subtype.ext hc
 
-/-- The combined degree term in the recovered concentration estimate. -/
+/-- The combined degree term in the concentration estimate. -/
 theorem scalarPolynomial_degree_term_le (P : AdmissibleParams)
     (g : DirectPolyTuple P.extendedDirectLd) :
     ((scalarPolynomial P g).support.sup fun e =>

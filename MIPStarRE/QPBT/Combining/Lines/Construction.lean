@@ -9,13 +9,9 @@ Polynomial absorption produces a line error for each polynomial point family.
 
 ## References
 
-Recovered for issue #513 from PR549 at immutable commit
-`aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d`; prior proof attribution is retained.
-
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The construction is recovered from commit
-`6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa` for issue #512; the
-source and completed-answer distinctions remain as documented in
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions remain
+as documented in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
@@ -400,8 +396,7 @@ Claim 17-2 retain the source construction.
 
 The point-to-line comparisons and pasting argument at paper lines 900--961
 prove this estimate. Conditioning excludes only zero X directions; their
-probability is bounded and restored in the original law. This construction
-was recovered for issue #512 from the saved proof of issue #118. See
+probability is bounded and restored in the original law. See
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`; no equality or marginal
 assumption is added to a paper-facing theorem. -/
 theorem combined_line_measurement_consistency (deltaQ : ℝ → ℝ)

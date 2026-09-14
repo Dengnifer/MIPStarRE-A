@@ -1037,7 +1037,8 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
 	\leanok
 	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
-		def:concrete-paired-line-measurement, def:consistency}
+		def:concrete-paired-line-measurement, def:consistency,
+		thm:qld-conditioned-polynomial-bound}
 	This is a formalization-only construction theorem. Fix a polynomially small
 	function $\delta_Q(\eps)$. There is a function
 	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
@@ -2081,7 +2082,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}
 \leanok
 \uses{lem:combined-line-measurement-consistency, def:direct-subline-law,
-  thm:qld-direct-line-real-overlap}
+	  lem:qld-4-10, lem:qld-sublines, thm:qld-direct-line-real-overlap,
+	  thm:qld-combining-polynomial-bound}
 Condition the directly indexed subline law on its extended line and average
 the combined polynomial outcomes of the constructed $X$-$Z$-$X$ POVM.
 The real-part overlap estimates on both opposite placements give the bound
@@ -2098,45 +2100,51 @@ constitute a strategy for the classical low individual degree game in $2m+2$
 variables. Applying the quantum soundness of that game yields a single
 projective measurement whose outcomes are pairs of global polynomials.
 
-\begin{lemma}[Restriction and completion of combined polynomial outcomes]
-	\label{lem:qld-combined-pair-completion}
+\begin{definition}[Restriction and completion of combined polynomial outcomes]
+	\label{def:qld-pair-restriction-completion}
 	\lean{MIPStarRE.QPBT.recoverCombinedPair}
+	\lean{MIPStarRE.QPBT.combinedPolyEmbedding}
+	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement}
+	\lean{MIPStarRE.QPBT.completedPairLabel}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement}
+	\leanok
+	\uses{def:combine-map, def:polyfunc, def:povm-conventions}
+	For admissible $(q,m,d)$, write
+	$j(g_X,g_Z)=\mathrm{combine}_{g_X,g_Z}$. Given a complete measurement
+	$T$ on bounded polynomials in $2m+2$ variables, define the restricted
+	sub-measurement $R_{g_X,g_Z}=T_{j(g_X,g_Z)}$. For a specified pair $p_0$,
+	complete it by relabeling every outcome outside the range of $j$ by $p_0$.
+	The resulting measurement is denoted by $C$.
+\end{definition}
+
+\begin{lemma}[Properties of polynomial-pair restriction and completion]
+	\label{lem:qld-combined-pair-completion}
 	\lean{MIPStarRE.QPBT.recoverCombinedPair_combinePoly}
 	\lean{MIPStarRE.QPBT.combinePoly_injective}
-	\lean{MIPStarRE.QPBT.combinedPolyEmbedding}
 	\lean{MIPStarRE.QPBT.combinedPolyEmbedding_eval}
-	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement}
 	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_projective}
 	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_missing}
-	\lean{MIPStarRE.QPBT.completedPairLabel}
 	\lean{MIPStarRE.QPBT.completedPairLabel_combinedPolyEmbedding}
 	\lean{MIPStarRE.QPBT.completedPairLabel_of_not_mem_range}
-	\lean{MIPStarRE.QPBT.completedPairMeasurement}
 	\lean{MIPStarRE.QPBT.completedPairMeasurement_effect}
 	\lean{MIPStarRE.QPBT.completedPairMeasurement_projective}
 	\leanok
-	\uses{def:combine-map, def:polyfunc, def:povm-conventions}
-	This is formalization support for the restriction and completion in the
-	proof of Lemma~\ref{lem:qld-4-7}, not its quantitative conclusion.
-	For admissible $(q,m,d)$, the map
-	$(g_X,g_Z)\mapsto\mathrm{combine}_{g_X,g_Z}$ is injective on bounded
-	individual-degree polynomials, and its evaluation is
-	$\alpha g_X(x)+\beta g_Z(z)$. Given a projective measurement
-	$\{T_g\}$ on polynomials in $2m+2$ variables, define
-	$R_{g_X,g_Z}=T_{\mathrm{combine}_{g_X,g_Z}}$, and let $\mathcal G$
-	be the image of the combining map. Then $R$ is a projective
-	sub-measurement, with the exact operator identity
+	\uses{def:qld-pair-restriction-completion}
+	The combining map $j$ is injective and satisfies
+	$j(g_X,g_Z)(x,z,\alpha,\beta)=\alpha g_X(x)+\beta g_Z(z)$.
+	If $T$ is projective, then the restricted sub-measurement $R$ is projective,
+	and its missing operator is
 	\[
-		\Id-\sum_{g_X,g_Z}R_{g_X,g_Z}=\sum_{g\notin\mathcal G}T_g.
+		\Id-\sum_{g_X,g_Z}R_{g_X,g_Z}=\sum_{g\notin\operatorname{range}j}T_g.
 	\]
-	For any specified pair $p_0$, adding this missing operator to $R_{p_0}$
-	and leaving all other effects unchanged gives a projective measurement.
-	No bound on the state mass of the missing operator, or on consistency
-	with point measurements, is asserted here.
+	The completion satisfies $C_p=R_p+1_{p=p_0}(\Id-\sum R)$ and is projective.
+	No bound on the state mass of the missing operator, or on consistency with
+	point measurements, is asserted here.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:combine-map, lem:sandwich-postprocess-projective}
+	\uses{def:qld-pair-restriction-completion,
+		lem:sandwich-postprocess-projective}
 	Substitute $(\alpha,\beta)=(1,0)$ and set the $Z$ variables to zero
 	to recover $g_X$ as a formal polynomial; the opposite substitution
 	recovers $g_Z$. Thus distinct pairs label distinct effects, proving
@@ -2145,6 +2153,44 @@ projective measurement whose outcomes are pairs of global polynomials.
 	Relabel each outcome in $\mathcal G$ by its unique pair, and all
 	remaining outcomes by $p_0$. This is precisely the stated completion,
 	and projectivity follows from projective postprocessing.
+\end{proof}
+
+\begin{definition}[Completion of the actual singleton outcomes]
+	\label{def:qld-direct-pair-completion}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPolynomialEquiv}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement}
+	\leanok
+	\uses{def:qld-pair-restriction-completion}
+	Taking the unique component of a singleton polynomial tuple and applying the
+	canonical field isomorphism gives an equivalence $e$ with bounded extended
+	polynomials over $\F_q$. Put $j_{\rm dir}=e^{-1}\circ j$, relabel the actual
+	rounded measurement by $e$, and apply
+	Definition~\ref{def:qld-pair-restriction-completion}.
+\end{definition}
+
+\begin{theorem}[Properties of the actual polynomial-pair completion]
+	\label{thm:qld-direct-pair-completion-properties}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement_effect}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_projective}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.mem_range_directCombinedEmbedding}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding_read}
+	\leanok
+	\uses{def:qld-direct-pair-completion, lem:qld-combined-pair-completion}
+	The canonical relabeling has effect $R_{e^{-1}(h)}$ at $h$, and the completed
+	measurement is projective whenever the rounded measurement is projective.
+	Membership in the range of $j_{\rm dir}$ is precisely equality, after field
+	transport, to $\mathrm{combine}_{g_X,g_Z}$ for a bounded pair. Moreover, the
+	direct readout of $j_{\rm dir}(g_X,g_Z)$ is
+	$\alpha g_X(x)+\beta g_Z(z)$ under the joint question equivalence.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Support inclusion transports the individual-degree certificate in both
+	directions. The field equivalence and the combining-map evaluation identity
+	give the effect, range, and readout formulas. Projectivity follows from
+	projective postprocessing and completion.
 \end{proof}
 
 \begin{lemma}[Agreement after completing the polynomial-pair measurement]
@@ -2335,9 +2381,8 @@ field and evaluate its single polynomial at $(x,z,\alpha,\beta)$; denote
 the resulting readout by $e_{x,z,\alpha,\beta}(g)$.
 For a measurement $R$, let $E^o_{p_1,p_2}(R)$ be the full averaged
 squared-norm sum in Lemma~\ref{lem:qld-opposite-ordered-products} with
-this readout. In Lean, the Boolean values false and true select $XZ$ and
-$ZX$, respectively. The outcome sum is over every singleton polynomial
-tuple, without a support restriction.
+this readout, for an order parameter $o\in\{XZ,ZX\}$. The outcome sum is over
+every singleton polynomial tuple, without a support restriction.
 \end{definition}
 
 \begin{theorem}[Rounded extended-polynomial ordered estimates]
@@ -2590,7 +2635,7 @@ For nonzero $\beta$, orthogonality gives the diagonal Gram identity.
 For zero $\beta$, both quadratic forms are between zero and $\|\psi\|^2$.
 The second assertion is the squared-norm triangle inequality.
 The final identity follows from commutation of opposite placements.
-The first two calculations are shared with the recovered polynomial-image proof.
+The first two calculations are also used in the polynomial-image estimate.
 \end{proof}
 
 \begin{definition}[Partial coefficient polynomials]
@@ -2600,7 +2645,7 @@ The first two calculations are shared with the recovered polynomial-image proof.
 \leanok
 For a scalar coefficient $c_{g,a}(x,z)$, view it as a polynomial in $x$
 with coefficients in $F[z]$, or in $z$ with coefficients in $F[x]$.
-The Boolean parameter false selects the first order and true the second.
+An order parameter $o\in\{x\mid z,z\mid x\}$ selects the varying block.
 The associated joint question equivalence takes a fixed block, a varying
 block, and two scalars to the actual extended question. Reversal exchanges
 both the point blocks and the scalars.
@@ -2642,8 +2687,8 @@ combining map.
 \leanok
 Let $p\in F[z_1,\ldots,z_k][x_1,\ldots,x_n]$ be nonconstant in $x$,
 with coefficient degrees at most $C$ and degree in $x$ at most $D$.
-There is a nonzero nonconstant coefficient $c(z)$ whose zero set has
-probability at most $C/|F|$. For every $z$ outside this one set and every
+There is a nonzero coefficient $c(z)$ of a nonconstant $x$-monomial whose
+zero set has probability at most $C/|F|$. For every $z$ outside this one set and every
 $b\in F$, $\Pr_x[p(x,z)=b]\leq D/|F|$.
 Consequently, if $w(z,b)\geq0$ and $\sum_b w(z,b)=M$ for every $z$, then
 \[
@@ -2721,23 +2766,37 @@ comparison retains the full outcome sum. The complement of the combining
 image lies in the union of the three excluded classes; sum their bounds.
 \end{proof}
 
-\begin{theorem}[Rounded concentration on polynomial pairs]
-\label{thm:qld-rounded-separated-mass}
+\begin{theorem}[Rounded wrong-variable concentration]
+\label{thm:qld-rounded-wrong-variable-mass}
 \lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_wrong_variable_mass}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_separated_mass}
 \leanok
 Under exactly the hypotheses and definitions of $\delta,\eta$ in
-Theorem~\ref{thm:qld-rounded-polynomial-ordered}, the actual rounded
-measurements satisfy both ordered estimates with $E=4\eta+8\delta_Q$.
-They also satisfy both wrong-variable bounds $2E+2(2md+2)/q$ and the
-scalar-nonlinear bound of Theorem~\ref{thm:qld-rounded-scalar-linearity}.
-For the same measurements on both heterogeneous placements,
+Theorem~\ref{thm:qld-rounded-polynomial-ordered}, there exist actual rounded
+measurements satisfying both ordered estimates with $E=4\eta+8\delta_Q$,
+both wrong-variable bounds $2E+2(2md+2)/q$, and the scalar-nonlinear bound
+of Theorem~\ref{thm:qld-rounded-scalar-linearity}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-scalar-linearity, thm:qld-actual-separated-mass}
+Apply the wrong-variable mass inequality to each of the two measurements
+supplied by rounded scalar-linearity concentration.
+\end{proof}
+
+\begin{theorem}[Rounded concentration on polynomial pairs]
+\label{thm:qld-rounded-separated-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_separated_mass}
+\leanok
+Under the same hypotheses, there exist actual rounded measurements satisfying
+both ordered estimates with $E=4\eta+8\delta_Q$ and, on both heterogeneous
+placements,
 \[
  G_{AA'}(R_A),\ G_{BB'}(R_B)\leq6E+\frac{12md+4d+10}q.
 \]
 The directly indexed completed-answer line-witness restriction remains
 explicit. This proves concentration, not the subsequent retained overlaps,
 completion consistency, or the source global-pair theorem.
+This existential choice is separate from the measurements in the preceding theorem.
 \end{theorem}
 \begin{proof}
 \leanok
@@ -3118,7 +3177,7 @@ POVMs with $n=2m+2$ and $k=1$.
 
 \section{Scalar error estimates}
 
-The following three formalization-only auxiliary statements concern real
+The following formalization-only auxiliary statements concern real
 functions and numerical parameters, independently of the standing strategy
 assumptions of this chapter. They isolate calculations supporting
 Lemmas~\ref{lem:qld-xz-lines}, \ref{lem:qld-4-13}, and \ref{lem:qld-4-7}
@@ -3131,6 +3190,27 @@ $s,t>0$. These are the corrected error conventions of
 \cite{gap:qpbt_polynomial-error-square-root,gap:qpbt_pasting-product-error}.
 The functions are defined on all real arguments; these bounds concern their
 nonnegative domains.
+
+\begin{theorem}[Quarter powers and square-root deficits]
+	\label{thm:qld-quarter-power-deficit-bound}
+	\lean{MIPStarRE.QPBT.rpow_quarter_nonneg}
+	\lean{MIPStarRE.QPBT.sqrt_deficit_bound_le}
+	\leanok
+	For every $x\in\R$, the real quarter power $x^{1/4}$ is nonnegative.
+	If $m\geq1$ and $\delta_P,\delta_Q\geq0$, then
+	\[
+	 \sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
+	 \leq2\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr).
+	\]
+	These are formalization-only scalar estimates used in the real-part bounds
+	of Claims 17-2 and 17-3.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Separate the two nonnegative summands under the outer square root, simplify
+	the square roots of $4m^2\delta_P$ and $4\delta_Q$, and compare the remaining
+	factor $2$ with $2\sqrt m$.
+\end{proof}
 
 \begin{theorem}[Polynomial error after conditioning]
 	\label{thm:qld-conditioned-polynomial-bound}
@@ -3197,63 +3277,6 @@ nonnegative domains.
 	with $g(\eps,\rho)=K(\eps^\alpha+\rho^{t/4})$. For $\eps>1$,
 	$Dg(\eps,\rho)\ge1$, so the cap proves the same bound.
 \end{proof}
-
-\begin{definition}[Restriction and completion on polynomial pairs]
-\label{def:qld-pair-restriction-completion}
-\lean{MIPStarRE.QPBT.recoverCombinedPair}
-\lean{MIPStarRE.QPBT.recoverCombinedPair_combinePoly}
-\lean{MIPStarRE.QPBT.combinePoly_injective}
-\lean{MIPStarRE.QPBT.combinedPolyEmbedding}
-\lean{MIPStarRE.QPBT.combinedPolyEmbedding_eval}
-\lean{MIPStarRE.QPBT.combinedPairSubmeasurement}
-\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_projective}
-\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_missing}
-\lean{MIPStarRE.QPBT.completedPairLabel}
-\lean{MIPStarRE.QPBT.completedPairLabel_combinedPolyEmbedding}
-\lean{MIPStarRE.QPBT.completedPairLabel_of_not_mem_range}
-\lean{MIPStarRE.QPBT.completedPairMeasurement}
-\lean{MIPStarRE.QPBT.completedPairMeasurement_effect}
-\lean{MIPStarRE.QPBT.completedPairMeasurement_projective}
-\leanok
-For admissible parameters, write $j(g_X,g_Z)=\mathrm{combine}_{g_X,g_Z}$.
-Substituting the scalar coordinates $(1,0)$ and $(0,1)$ and setting the
-unused base block to zero recovers the two formal polynomials, so $j$ is
-injective without any field-size restriction. Evaluation satisfies
-$j(g_X,g_Z)(x,z,\alpha,\beta)=\alpha g_X(x)+\beta g_Z(z)$.
-Given a complete measurement $R$ on bounded extended polynomials, define
-$U_{g_X,g_Z}=R_{j(g_X,g_Z)}$. Its missing operator is
-$D=I-\sum U=\sum_{g\notin\operatorname{range}j}R_g$.
-For a fixed pair $p_0$, relabel each combined outcome by its pair and each
-remaining outcome by $p_0$. The resulting complete measurement has effects
-$C_p=U_p+1_{p=p_0}D$. If $R$ is projective, both $U$ and $C$ are projective.
-These are the algebraic constructions in the completion paragraph of the
-proof of Lemma~\ref{lem:qld-4-7} in \cite{Ji2020MIPStar}.
-\end{definition}
-
-\begin{definition}[Completion of the actual singleton outcomes]
-\label{def:qld-direct-pair-completion}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directPolynomialEquiv}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement_effect}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_projective}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.mem_range_directCombinedEmbedding}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding_read}
-\leanok
-\uses{def:qld-pair-restriction-completion}
-Taking the unique component of a singleton polynomial tuple and applying the
-canonical field isomorphism gives an equivalence $e$ with bounded extended
-polynomials over $\F_q$. Support inclusion transports the individual-degree
-certificate in both directions. Put $j_{\rm dir}=e^{-1}\circ j$ and relabel
-the actual rounded measurement by $e$; its effect at $h$ is exactly
-$R_{e^{-1}(h)}$. Apply Definition~\ref{def:qld-pair-restriction-completion}
-to obtain $C$. This preserves projectivity and every outcome.
-Membership in the range of $j_{\rm dir}$ is precisely equality, after field
-transport, to $\mathrm{combine}_{g_X,g_Z}$ for a bounded pair. The actual direct
-readout of $j_{\rm dir}(g_X,g_Z)$ is
-$\alpha g_X(x)+\beta g_Z(z)$ under the joint question equivalence.
-\end{definition}
 
 \begin{theorem}[Incorrect outer projection of the ordered product]
 \label{thm:qld-retained-local-mismatch}
@@ -3332,7 +3355,8 @@ placements commute, yielding the exact identity for $K_W$.
 \lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le_ordered_error}
 \lean{MIPStarRE.QPBT.ExtendedLineGame.exists_pairWitness_of_points_lines}
 \leanok
-\uses{thm:qld-retained-point-overlap, def:qld-pair-restriction-completion}
+\uses{thm:qld-retained-point-overlap, def:qld-pair-restriction-completion,
+  thm:qld-rounded-separated-mass}
 There are universal $a\geq1$ and $0<b\leq1$ with the following property.
 Given an admissible projective setting, a combined-point witness of error
 $\delta_Q$, and a directly indexed completed-answer extended-line witness
@@ -3439,7 +3463,7 @@ laws suffice; no joint conditional product law is assumed.
 Let $p(x)=\poly(x)$ and $g(x,y)=\poly(x,y)$, with the corrected sum
 convention, and fix $C,s\geq0$, $a\geq1$, $0<b\leq1$.
 For $x,y\geq0$ and $n\geq1$, the capped quantity
-$3(\sqrt{p(x)+Cn g(x,y)}+y)$ is at most $n h(x,y)$ for a
+$\min\{1,3(\sqrt{p(x)+Cn g(x,y)}+y)\}$ is at most $n h(x,y)$ for a
 polynomially small function $h$. For admissible parameters, put
 $\rho=md/q$ and $v=3(\sqrt{p(\eps)+Cm g(\eps,\rho)}+\rho)$.
 There exist universal $A_0>1$ and $0<B_0<1$ such that, for every $\eps\geq0$,

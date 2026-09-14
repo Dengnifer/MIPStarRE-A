@@ -67,8 +67,7 @@ theorem CombinedPointsWitness.orderedZX_dist_le {P : AdmissibleParams}
 /-- On a single placement, the joint point measurement is close to the ordered
 `X`-then-`Z` point product, with the inflation factor four.  This is the
 same-placement form of the other ordered display of `lem:qld-4-10`, obtained
-from the self-consistency display in the same way. Recovered from PR549 at
-`aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d`; no new proof attribution. -/
+from the self-consistency display in the same way. -/
 theorem CombinedPointsWitness.orderedXZ_dist_le {P : AdmissibleParams}
     {ε δ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δ) (p : Placement) :

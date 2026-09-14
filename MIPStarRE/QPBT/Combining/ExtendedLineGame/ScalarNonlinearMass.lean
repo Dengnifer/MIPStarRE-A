@@ -5,16 +5,15 @@ import MIPStarRE.QPBT.Combining.PolynomialImageBounds
 # Scalar-nonlinear mass of the actual rounded measurements
 
 The full polynomial-outcome ordered estimate is composed with the concentration
-proof recovered from PR296. Opposite placements commute; no symmetry of the
+bound for scalar-nonlinear outcomes. Opposite placements commute; no symmetry of the
 player spaces is required. Projectivity retains the actual outcome masses.
 
 ## References
 
 `eq:qld-g-42`, `eq:qld-g-prime`, and `eq:qld-g-prime-bound`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1283-1326`.
-PR296 proof provenance: `2c8f147643d151d8616864cf49817dc6422a9a86`.
-This is only scalar-linearity concentration; issue #513 still requires both
-variable-separation estimates and retained overlaps.
+This is only scalar-linearity concentration; the variable-separation estimates
+and retained overlaps are separate results.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder

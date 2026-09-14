@@ -48,7 +48,7 @@ private theorem extendedPolynomialRead_equiv (P : AdmissibleParams)
   rw [Equiv.symm_apply_apply]
 
 /-- The full polynomial-outcome squared-norm sum in `eq:qld-g-42/43`.
-`reverse = false` uses `M_X M_Z`; `reverse = true` uses `M_Z M_X`.
+The order parameter selects either `M_X M_Z` or `M_Z M_X`.
 The polynomial effect acts on `p1` and both point effects on `p2`. -/
 def extendedPolynomialOrderedError {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (p1 p2 : Placement)

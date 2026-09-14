@@ -37,8 +37,8 @@ noncomputable section
 
 set_option synthInstance.maxSize 400
 
-/-- Scalar support for the real-part estimates at paper `claim:17-2` and
-`claim:17-3`. Exported as in PR549; the existing proof is unchanged. -/
+/-- Nonnegativity of the quarter power used in the real-part estimates at
+paper `claim:17-2` and `claim:17-3`. -/
 theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
   change 0 ≤ x ^ (1 / 4 : ℝ)
   rcases lt_or_ge x 0 with hx | hx
@@ -49,7 +49,7 @@ theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
 
 /-- The square root of the two consistency deficits is bounded by their
 quarter powers, retaining the dimension factor in paper `claim:17-2`.
-Exported as in PR549; the existing proof is unchanged. -/
+Formalization-only scalar support for the estimates in that claim. -/
 theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
     (hQ : 0 ≤ δQ) :
     Real.sqrt (2 * Real.sqrt (4 * m ^ 2 * δP) + 2 * Real.sqrt (4 * δQ)) ≤

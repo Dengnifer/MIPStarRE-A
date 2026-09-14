@@ -13,12 +13,8 @@ These scalar estimates do not construct either measurement witness.
 
 ## References
 
-Recovered from PR545 at `2f8f5cc4631db2db23f76513a2f7f56dffc8fa4f`.
-The proved full passing-error absorption is reused for issue #513.
-
 * `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1279-1288,1402`
 * Blueprint `lem:qld-4-7`
-* Issue #513
 -/
 
 namespace MIPStarRE.QPBT
@@ -135,7 +131,7 @@ error occurs both in the passing error and in the subsequent square-root loss.
 
 This auxiliary proves only the numerical substitution at paper `lem:qld-4-7`,
 lines 1279--1288 and 1402. Constructing the strategy and the projective pair
-measurement remains the obligation `exists_globalPairWitness`. -/
+measurement is handled separately by `exists_globalPairWitness`. -/
 private theorem exists_capped_direct_global_pair_error_bound (pointError : ℝ → ℝ)
     (hpoint : IsPolyErr pointError) (lineError : ℝ → ℝ → ℝ)
     (hline : IsPolyErr₂ lineError)

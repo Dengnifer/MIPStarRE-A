@@ -166,9 +166,8 @@ the two-dimensional strategy that refutes the product form are recorded in
 `docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
 Here `poly(epsilon, md / q)` is read in that sense.
 
-The proof is recovered from PR549 at
-`aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d`, with its point, line, and
-subline constructions and both opposite-placement comparisons. -/
+The proof uses the point, line, and subline constructions together with both
+opposite-placement comparisons. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧
@@ -254,9 +253,8 @@ does not require an identification with the source's seed-bearing auxiliary game
 -/
 theorem exists_globalPairWitness :
     ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ), 0 < ε →
-        ∀ S : ProjectiveSetting P ε,
-          Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+        Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
   obtain ⟨pointError, hpoint, C, hC, lineError, hline, hlines⟩ :=
     exists_extendedLinesWitness_established
   obtain ⟨a, b, ha, hb, hb1, hpairs⟩ :=
@@ -265,11 +263,11 @@ theorem exists_globalPairWitness :
     exists_actual_rounded_global_pair_error_bound pointError hpoint lineError hline
       C a b hC.le ha hb hb1
   refine ⟨A, B, hA, hB, hB1, ?_⟩
-  intro P ε hε S
+  intro P ε S
   obtain ⟨points, ⟨lines⟩⟩ := hlines P ε S
   obtain ⟨pair⟩ := hpairs P ε (pointError ε)
     (C * (P.m : ℝ) * lineError ε ((P.m * P.d : ℕ) / (P.q : ℝ))) S points lines
-  have hbound := hscalar P ε hε.le
+  have hbound := hscalar P ε S.eps_nonneg
   simp only [Nat.cast_mul] at hbound
   refine ⟨{ pair with point_consistent_alice := ?_, point_consistent_bob := ?_ }⟩
   · intro W

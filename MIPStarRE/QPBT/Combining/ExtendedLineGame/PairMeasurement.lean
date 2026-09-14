@@ -5,14 +5,13 @@ import MIPStarRE.QPBT.Combining.PairCompletion
 # Transport of the polynomial-pair completion
 
 The actual singleton outcomes are transported by the canonical field
-equivalence before applying the algebraic completion preserved in PR535.
+equivalence before applying the algebraic completion.
 Every original outcome is retained, including those outside the combining image.
 
 ## References
 
 Paper `eq:qld-sgg-completeness` and the completion paragraph of `lem:qld-4-7`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1375-1404`.
-Completion provenance: PR535, `1744bd9533055b9b43af9a8d46906cbafb69afdd`.
 -/
 
 open scoped BigOperators MatrixOrder
@@ -72,14 +71,14 @@ def canonicalPolynomialMeasurement {P : AdmissibleParams} {ι : Type*}
     (directPolynomialEquiv P).injective ((directPolynomialEquiv P).symm p)
   simpa only [canonicalPolynomialMeasurement, Equiv.apply_symm_apply] using h
 
-/-- PR535's complete projective pair construction applied to the actual
+/-- The complete projective pair construction applied to the actual
 rounded measurement, including all excluded outcomes at one chosen pair. -/
 def directPairMeasurement {P : AdmissibleParams} {ι : Type*}
     [Fintype ι] [DecidableEq ι] (R : DirectPolyMeasTuple P.extendedDirectLd ι)
     (pair₀ : PolyPair P) : Quantum.Measurement (PolyPair P) ι :=
   completedPairMeasurement P (canonicalPolynomialMeasurement R) pair₀
 
-/-- Projectivity follows from the saved completion and injective field transport. -/
+/-- Projectivity follows from completion and injective field transport. -/
 theorem directPairMeasurement_projective {P : AdmissibleParams} {ι : Type*}
     [Fintype ι] [DecidableEq ι] (R : DirectPolyMeasTuple P.extendedDirectLd ι)
     (hR : Measurement.IsProjective R) (pair₀ : PolyPair P) :

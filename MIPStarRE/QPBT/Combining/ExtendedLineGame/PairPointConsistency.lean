@@ -4,15 +4,14 @@ import MIPStarRE.QPBT.Combining.OverlapGap
 /-!
 # Point consistency of the completed polynomial-pair measurements
 
-PR535's completion is applied to the actual rounded outcomes. Its missing
+The polynomial-pair completion is applied to the actual rounded outcomes. Its missing
 mass and retained point mismatch are kept separate until the final bound.
 
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1375-1404`,
 `eq:qld-sgg-completeness` and `eq:qld-sgg-mhat-sandwich`;
-blueprint `lem:qld-4-7`. Algebraic completion is recovered from PR535 at
-`1744bd9533055b9b43af9a8d46906cbafb69afdd`.
+blueprint `lem:qld-4-7`.
 -/
 
 open scoped BigOperators MatrixOrder
@@ -123,7 +122,7 @@ theorem retainedPointOverlap_ge_ordered_error {P : AdmissibleParams} {ε : ℝ}
   linarith
 
 /-- Completion increases the retained diagonal overlap on any opposite
-placement. This transports PR535's completion estimate to all four directed
+placement. This transports the completion estimate to all four directed
 expanded placements, without identifying the player spaces. -/
 theorem directPairMeasurement_consistency_le {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (p1 p2 : Placement) (hopposite : p1.IsOpposite p2)
@@ -218,9 +217,8 @@ theorem directPairMeasurement_consistency_le_ordered_error
 /-- Construct complete projective polynomial-pair measurements with all four
 point-consistency conclusions at the actual explicit error. The point and
 directly indexed completed-answer line witnesses are exactly the inputs of
-the established rounded constructor. They are not assumptions of the unchanged
-source theorem. Issue #513 still requires their source-level composition and
-absorption of this error, including its eighth-root rounding term.
+the established rounded constructor. They are not assumptions of the source
+theorem; its proof supplies them internally and absorbs the eighth-root rounding term.
 The direct-domain and line-error discrepancies remain documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.

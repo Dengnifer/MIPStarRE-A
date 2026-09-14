@@ -28,8 +28,8 @@ noncomputable section
 namespace ExtendedLineGame
 
 /-- Actual mass of scalar-linear outcomes whose second coefficient in the
-chosen order depends on the varying block. For `false` this is the coefficient
-of beta depending on x; for `true` it is the coefficient of alpha depending
+chosen order depends on the varying block. In order `XZ` this is the coefficient
+of beta depending on x; in order `ZX` it is the coefficient of alpha depending
 on z. These are the two classes in `eq:qld-g-prime-xpt-bound` and
 `eq:qld-g-prime-zpt-bound`, supporting blueprint `lem:qld-4-7`. -/
 def scalarWrongVariableMass {P : AdmissibleParams} {ε : ℝ}

@@ -12,18 +12,13 @@ preserves projectivity.
 
 These algebraic constructions do not establish the concentration estimate
 `eq:qld-g-non-separable` or the point consistency required by
-`exists_globalPairWitness`. Issue #513 retains those obligations.
-
-Recovered read-only from PR535 at `1744bd9533055b9b43af9a8d46906cbafb69afdd`.
-This continuation transports the construction; it earns no new algebraic proof credit.
+`exists_globalPairWitness`; those are separate quantitative obligations.
 
 ## References
 
 - Blueprint `lem:qld-4-7`.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1375-1404`,
   `eq:qld-sgg-completeness` and the final completion paragraph.
-- Restriction and completion proofs recovered from commit `cb6d86d8`;
-  the evaluation identity is from `3de03d0a`, as preserved at `aaa5cb48`.
 -/
 
 namespace MIPStarRE.QPBT

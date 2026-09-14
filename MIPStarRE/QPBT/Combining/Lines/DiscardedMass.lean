@@ -5,8 +5,7 @@ import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
 
 ## References
 
-Paper `lem:qld-xz-lines`, lines 950--963. Recovered from PR549
-`aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d`, `Lines/Sampling.lean`.
+Paper `lem:qld-xz-lines`, lines 950--963.
 -/
 
 namespace MIPStarRE.QPBT
@@ -17,7 +16,7 @@ noncomputable section
 probability at most the inverse field size: the last raw direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. This proof-only bound
-supports the collision restriction in issue #118. -/
+supports the collision restriction used in the paired-line construction. -/
 theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
     avgOver (dLinePointDist L) (fun sample =>
       if sample.1.direction = 0 then 1 else 0) ≤
