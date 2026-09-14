@@ -23,6 +23,7 @@ ACCOUNTS = ("primary", "second")
 #: the exit 4 every other routing failure uses, so a caller can tell "the run is
 #: pausing, come back later" from "this request is wrong".
 DRAIN_EXIT = 6
+CAPACITY_EXIT = 3
 
 
 class DrainRequested(Exception):
@@ -33,6 +34,10 @@ class DrainRequested(Exception):
     pause could only clear them by killing the processes, which threw away the
     dispatch requests with them.
     """
+
+
+class CapacityExhausted(ValueError):
+    """No requested account acquired a slot before the reservation deadline."""
 
 
 def choose_account(live: list[int], caps: list[int]) -> str:
@@ -227,7 +232,7 @@ def reserve(root: Path, requested: str, pid: int, wait: int, dry_run: bool = Fal
                 return selected
             remaining = deadline - time.monotonic()
             if dry_run or remaining <= 0:
-                raise ValueError('account capacity exhausted; no reservation made')
+                raise CapacityExhausted('account capacity exhausted; no reservation made')
         time.sleep(min(10, remaining))
 
 
@@ -270,6 +275,8 @@ def main() -> None:
         print(model)
     except DrainRequested as error:
         parser.exit(DRAIN_EXIT, f"account routing: {error}\n")
+    except CapacityExhausted as error:
+        parser.exit(CAPACITY_EXIT, f"account routing: {error}\n")
     except (OSError, ValueError) as error:
         parser.exit(4, f"account routing: {error}\n")
 

@@ -49,6 +49,13 @@ esac
 exit 1
 """
 
+GH_COMMON_STUB = """import json, os, sys
+if len(sys.argv) > 2 and sys.argv[1] == "issue-view" and os.environ.get("STUB_ISSUE_OK"):
+    print(json.dumps({"number": int(sys.argv[2]), "title": "Prove the Pauli lemma", "body": ""}))
+    raise SystemExit(0)
+raise SystemExit(1)
+"""
+
 
 def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess:
     return subprocess.run(
@@ -173,6 +180,8 @@ class LaneIdentityFailClosedTests(unittest.TestCase):
         self.lanes = self.tmp / "cache" / "watchdog" / "lanes"
         self.lanes.mkdir(parents=True)
         shutil.copy(LANE, self.tmp / "checkout" / "local" / "bin" / "lane.sh")
+        (self.tmp / "checkout" / "local" / "bin" / "gh_common.py").write_text(
+            GH_COMMON_STUB, encoding="utf-8")
         for name, body in (("git", GIT_STUB), ("gh", GH_STUB)):
             path = self.tmp / "bin" / name
             path.write_text(body, encoding="utf-8")

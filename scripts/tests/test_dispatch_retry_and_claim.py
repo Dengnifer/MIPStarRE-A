@@ -39,6 +39,16 @@ case "${MIPSTARRE_TEST_CODEX_MODE:-ok}" in
     printf '{"type":"item.completed","item":{"item_type":"assistant_message"}}\n'
     exit 1
     ;;
+  output-then-500)
+    printf '{"type":"turn.completed","usage":{"input_tokens":3,"output_tokens":1}}\n'
+    printf '{"type":"error","message":"500 Internal Server Error"}\n'
+    exit 1
+    ;;
+  dirty-refusal)
+    printf 'partial\n' > partial-worker-output.txt
+    printf '{"type":"error","message":"Concurrency limit exceeded for account"}\n'
+    exit 1
+    ;;
   *)
     printf '{"type":"turn.completed","usage":{"input_tokens":3,"output_tokens":1}}\n'
     printf '{"type":"item.completed","item":{"item_type":"assistant_message"}}\n'
@@ -118,6 +128,7 @@ class DispatchFixture:
             "MIPSTARRE_DISPATCH_BACKOFF_S": "1",
             "MIPSTARRE_DISPATCH_BACKOFF_MAX_S": "1",
             "MIPSTARRE_DISPATCH_ATTEMPTS": "1",
+            "PYTHONDONTWRITEBYTECODE": "1",
             "HOME": str(self.root / "home"),
         })
         for key in ("MIPSTARRE_KEY_LABEL", "MIPSTARRE_CODEX_MODEL", "MIPSTARRE_JOB_CLASS",
@@ -275,6 +286,17 @@ class SpoolAndRetryTests(_Base):
         rows = self.fx.registry_rows()
         self.assertEqual(len(rows), 1, "a real failure is one attempt, not three")
         self.assertEqual(rows[0]["status"], "failed")
+
+    def test_provider_errors_after_output_or_edits_are_not_retried(self) -> None:
+        for mode in ("output-then-500", "dirty-refusal"):
+            with self.subTest(mode=mode):
+                result = self.fx.run("--role", "prover", "--issue", "42",
+                                     "--worktree", str(self.fx.repo), "--skip-hook-check",
+                                     "--", "close the goal", MIPSTARRE_TEST_CODEX_MODE=mode,
+                                     MIPSTARRE_DISPATCH_ATTEMPTS="3")
+                self.assertEqual(self.fx.marker.read_text().count("ran"), 1)
+                self.fx.marker.unlink()
+                (self.fx.repo / "partial-worker-output.txt").unlink(missing_ok=True)
 
     def test_a_clean_run_clears_the_spool_and_labels_both_accounts(self) -> None:
         (self.fx.cache / "watchdog" / "run-mode.json").write_text(json.dumps({

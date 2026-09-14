@@ -1030,16 +1030,17 @@ retry_is_safe() {
   # tree.  Anything else is left to the janitor's dead-session pass, which
   # re-dispatches under a per-(pr, role, head) budget with the state in hand.
   local dirty=""
-  case "$FAILURE_CLASS" in retries_exhausted) ;; *) return 0 ;; esac
+  if [ "${WORKTREE_STATUS_AFTER_CODEX:-}" != "${WORKTREE_STATUS_BEFORE_CODEX:-}" ]; then
+    dirty="${WORKTREE_STATUS_AFTER_CODEX:-}"
+  fi
+  [ "${DISPATCH_STATUS:-}" = refused ] || return 1
+  [ "${DISPATCH_TURNS:-0}" = 0 ] || return 1
   case "${DISPATCH_USAGE_TOTAL:-0}" in
     ''|0) ;;
     *) note "not retrying '$FAILURE_CLASS': the session used ${DISPATCH_USAGE_TOTAL} tokens \
 before dying, so a re-run would repeat work in a tree that holds its partial edits"
        return 1 ;;
   esac
-  if [ -n "${WORKTREE_ABS:-}" ]; then
-    dirty="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null | grep -v '^?? ' || true)"
-  fi
   if [ -n "$dirty" ]; then
     note "not retrying '$FAILURE_CLASS': $WORKTREE_ABS has uncommitted changes from the \
 dead session; the janitor's dead-session pass owns this one"
@@ -1180,7 +1181,13 @@ while :; do
     report_and_exit_refused
   fi
 
-  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$ACCOUNT_WAIT" "$REGISTRY")
+  RESERVATION_WAIT="$ACCOUNT_WAIT"
+  if [ -n "$DISPATCH_CUTOFF_EPOCH" ]; then
+    REMAINING=$((DISPATCH_CUTOFF_EPOCH - $(date +%s)))
+    [ "$REMAINING" -gt 0 ] || report_and_exit_refused
+    [ "$RESERVATION_WAIT" -le "$REMAINING" ] || RESERVATION_WAIT="$REMAINING"
+  fi
+  ROUTER_ARGS=(reserve "$CACHE_ROOT" "$ACCOUNT_REQUESTED" "$$" "$RESERVATION_WAIT" "$REGISTRY")
   if [ -n "$RESUME_ID" ]; then ROUTER_ARGS+=(--resume "$RESUME_ID"); fi
   if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
   set +e
@@ -1188,17 +1195,22 @@ while :; do
   ROUTER_RC=$?
   set -e
   if [ "$ROUTER_RC" -ne 0 ]; then
-    # A router refusal is a retryable condition of the day, not `die 4`.
     FAILURE_CLASS="refused"
     if [ "$DRY_RUN" -eq 1 ]; then
       die 4 "account routing refused the dry-run reservation (exit $ROUTER_RC)"
     fi
-    if backoff_or_give_up; then
-      continue
-    fi
-    report_and_exit_refused
+    case "$ROUTER_RC" in
+      3) if backoff_or_give_up; then continue; fi; report_and_exit_refused ;;
+      6) report_and_exit_refused ;;
+      *) clear_spool; die 4 "account routing failed permanently (exit $ROUTER_RC)" ;;
+    esac
   fi
   ACCOUNT="${ROUTING%%$'\n'*}"
+  if cutoff_passed; then
+    rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+    FAILURE_CLASS="refused"
+    report_and_exit_refused
+  fi
   MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
   export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
   resolve_labels "$ACCOUNT"
@@ -1278,6 +1290,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # stdin is closed: codex exec reads piped stdin as extra prompt input, which
   # would silently splice the caller's stdin into the session.
   CODEX_STARTED=1
+  WORKTREE_STATUS_BEFORE_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
   set +e
   if [ -n "${MIPSTARRE_SESSION_TIMEOUT:-}" ]; then
     timeout --signal=TERM --kill-after=30s "$MIPSTARRE_SESSION_TIMEOUT" \
@@ -1291,6 +1304,7 @@ attempt=$ATTEMPT/$MAX_ATTEMPTS worktree=$WORKTREE_ABS)"
   # are NOT released here — they belong to the session, which may still have
   # attempts left, and `cleanup` releases them at exit.
   rm -f "$CACHE_ROOT/accounts/$ACCOUNT/$$"
+  WORKTREE_STATUS_AFTER_CODEX="$(git -C "$WORKTREE_ABS" status --porcelain 2>/dev/null || true)"
 
   END_TS="$(date +%Y-%m-%dT%H:%M:%S%z)"
   cp "$CAPTURE" "$PUBLISHED_CAPTURE_DIR/$NAME.jsonl" 2>/dev/null ||

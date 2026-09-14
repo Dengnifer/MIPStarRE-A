@@ -844,35 +844,40 @@ def cmd_init(args: argparse.Namespace) -> int:
     """
     policy, run_mode = load_policy(args.policy), load_run_mode(args.run_mode)
     now = args.now or utcnow()
-    previous = load_state()
-    state = new_state(run_mode["brief_ref"])
-    if previous and not args.force:
-        # A new brief is a new run: only the measurement is carried, because it
-        # is what starts the next run below the cliff instead of above it.
-        for name, old in previous["accounts"].items():
-            state["accounts"][name] = dict(
-                new_account_state(name), measured_limit=old.get("measured_limit"),
-                observed_refusal_floor=old.get("observed_refusal_floor"))
-    caps, lines = {}, []
-    for name, entry in run_mode["accounts"].items():
-        knobs = knobs_for(policy, name)
-        account_state = state["accounts"].setdefault(name, new_account_state(name))
-        floor, ceiling = refresh(account_state, entry, knobs)
-        health = load_health(name, entry["endpoint"], now, knobs["health"]["probe_backoff_s"])
-        # A fresh brief is not evidence that a dead endpoint came back.
-        account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
-                             decrease_window_until=None, refusal_cursor=None,
-                             cap=0 if health["state"] == "down"
-                             else seed_cap(account_state, floor, ceiling, entry))
-        caps[name] = int(account_state["cap"])
-        lines.append(f"{name} cap {caps[name]} (floor {floor}, ceiling {ceiling}, health "
-                     f"{health['state']}, measured {account_state['measured_limit']})")
-        if not args.dry_run:
-            _write_json(health_path(name), health)
-    for stale in [name for name in state["accounts"] if name not in run_mode["accounts"]]:
-        state["accounts"].pop(stale)
-    total = _commit(state, caps, now, "init", "seeded from the brief: " + "; ".join(lines),
-                    args.dry_run)
+    lock = _require_lock(blocking=True)
+    try:
+        previous = load_state()
+        state = new_state(run_mode["brief_ref"])
+        if previous and not args.force:
+            # A new brief is a new run: only the measurement is carried, because it
+            # is what starts the next run below the cliff instead of above it.
+            for name, old in previous["accounts"].items():
+                state["accounts"][name] = dict(
+                    new_account_state(name), measured_limit=old.get("measured_limit"),
+                    observed_refusal_floor=old.get("observed_refusal_floor"))
+        caps, lines = {}, []
+        for name, entry in run_mode["accounts"].items():
+            knobs = knobs_for(policy, name)
+            account_state = state["accounts"].setdefault(name, new_account_state(name))
+            floor, ceiling = refresh(account_state, entry, knobs)
+            health = load_health(name, entry["endpoint"], now,
+                                 knobs["health"]["probe_backoff_s"])
+            # A fresh brief is not evidence that a dead endpoint came back.
+            account_state.update(health=health["state"], saved_cap=None, quiet_since=None,
+                                 decrease_window_until=None, refusal_cursor=None,
+                                 cap=0 if health["state"] == "down"
+                                 else seed_cap(account_state, floor, ceiling, entry))
+            caps[name] = int(account_state["cap"])
+            lines.append(f"{name} cap {caps[name]} (floor {floor}, ceiling {ceiling}, health "
+                         f"{health['state']}, measured {account_state['measured_limit']})")
+            if not args.dry_run:
+                _write_json(health_path(name), health)
+        for stale in [name for name in state["accounts"] if name not in run_mode["accounts"]]:
+            state["accounts"].pop(stale)
+        total = _commit(state, caps, now, "init", "seeded from the brief: " + "; ".join(lines),
+                        args.dry_run)
+    finally:
+        lock.close()
     print("\n".join(lines))
     print(f"max-codex {total}" + (" (dry run; nothing written)" if args.dry_run else ""))
     return 0

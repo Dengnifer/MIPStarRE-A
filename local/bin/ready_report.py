@@ -67,12 +67,12 @@ except ModuleNotFoundError as exc:  # pragma: no cover - defensive
     raise SystemExit(2)
 
 import run_mode  # noqa: E402
+from pr_open import BRANCH_RE  # noqa: E402
 from wf_util import LayerError, atomic_write  # noqa: E402
 
 #: Unchecked findings in the review ledger (review.md section 12).
 UNCHECKED_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.M)
 REVIEW_MARKER = "mipstarre-review"
-BRANCH_RE = re.compile(r"^(?:codex/)?issue-0*([0-9]+)-")
 REPORT_MARKER = "mipstarre-ready-report"
 
 #: Forced post cadence, independent of change.
@@ -85,7 +85,7 @@ FORCE_AFTER_H = 6
 
 def issue_of(branch: str) -> int | None:
     match = BRANCH_RE.match(branch or "")
-    return int(match.group(1)) if match else None
+    return int(match.group(2)) if match else None
 
 
 def readiness(pull: dict, statuses: dict, reviews: list[dict]) -> dict:
@@ -407,7 +407,8 @@ def render(rows: list[dict], merged: int, *, window_min: int, ts: str,
     return "\n".join(lines) + "\n"
 
 
-def signature(rows: list[dict], occ: dict | None = None) -> str:
+def signature(rows: list[dict], occ: dict | None = None, models: dict | None = None,
+              dead: dict | None = None) -> str:
     """Stable digest of the ready set and its reasons (no elapsed timers).
 
     The occupancy ALARM state joins it — not the live count, which changes every
@@ -419,6 +420,11 @@ def signature(rows: list[dict], occ: dict | None = None) -> str:
     payload = f"ready={len(keys)}\n" + "\n".join(keys)
     if occ is not None:
         payload += f"\noccupancy_below={int(bool(occ['below']))}"
+    if models is not None:
+        payload += f"\noff_policy_models={int(models.get('off_policy', 0))}"
+    if dead is not None:
+        payload += "\ndead=" + ",".join(
+            f"{role}:{count}" for role, count in sorted(dead.get("by_role", {}).items()))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -621,7 +627,7 @@ def main(argv: list[str] | None = None) -> int:
     dead = dead_session_residue(cache, since)
     body = render(rows, merged, window_min=args.window_min, ts=ts,
                   unexplained=unexplained, occ=occ, models=models, dead=dead)
-    digest = signature(rows, occ)
+    digest = signature(rows, occ, models, dead)
     state_file = state_path(cache)
     state = read_state(state_file)
     post, why = should_post(state, digest, merged, now, force=args.force)

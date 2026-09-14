@@ -73,6 +73,7 @@ BUILD_LOCK_WAIT_S="${MIPSTARRE_LANE_BUILD_LOCK_WAIT_S:-14400}"
 BUILD_LOCK_STALE_S="${MIPSTARRE_FULL_BUILD_LOCK_STALE_S:-10800}"
 DATA="${MIPSTARRE_LAKE_DATA:-/data/users/drx/mipstarre-cache}"
 REVIEW_CMD="${MIPSTARRE_REVIEW_CMD:-local/bin/review.sh}"
+GH_COMMON="$P/local/bin/gh_common.py"
 
 #: pr_open.py:37 — the one branch convention a lane may exist for.
 BRANCH_RE='^(codex/|claude/)?issue-([0-9]+)-([a-z0-9][a-z0-9-]*)$'
@@ -83,6 +84,15 @@ BR="${LANE_BRANCH:-issue-$N_ARG-$SLUG}"
 
 now() { date -u +%FT%TZ; }
 log() { printf '== %s %s\n' "$(now)" "$*"; }
+pr_head() {
+  timeout 60 python3 "$GH_COMMON" pr-view "$1" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    row = json.load(sys.stdin)
+    print((row.get("head") or {}).get("sha") if row.get("state") == "OPEN" else "")
+except Exception:
+    print("")'
+}
 HELD_LOCK=""
 cleanup() { [ -n "$HELD_LOCK" ] && rm -rf "$HELD_LOCK"; return 0; }
 trap cleanup EXIT
@@ -120,8 +130,11 @@ if [ "$((10#$BR_N))" -ne "$((10#$N_ARG))" ]; then
   fail lane-id-mismatch "lane id '$N_ARG' does not match branch '$BR' (issue $BR_N); meta lanes numbered 1000+PR have no issue"
 fi
 N="$((10#$BR_N))"
-ISSUE_TITLE="$(gh issue view "$N" --json number,title --jq 'select(.number) | .title' 2>/dev/null || true)"
-[ -n "$ISSUE_TITLE" ] || fail issue-missing "gh issue view $N returned nothing; lane $N has no issue"
+ISSUE_JSON="$(timeout 60 python3 "$GH_COMMON" issue-view "$N" 2>/dev/null || true)"
+ISSUE_TITLE="$(printf '%s' "$ISSUE_JSON" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("title") or "")
+except Exception: print("")')"
+[ -n "$ISSUE_TITLE" ] || fail issue-missing "gh_common.py issue-view $N returned nothing; lane $N has no issue"
 MARKER_ID="$N"
 [ "$BR_SLUG" = "$SLUG" ] || log "note: branch slug '$BR_SLUG' differs from the argument '$SLUG'; the branch wins"
 log "identity ok N=$N branch=$BR issue=$N role=$ROLE"
@@ -162,7 +175,8 @@ TASK="$STATE/$N.task.md"
   echo "if the worktree already contains partial work for this issue, continue from it rather than restarting;"
   echo "when done, or if blocked, end with a short report: what is proved, what remains and why."
   echo; echo "----- ISSUE #$N -----"
-  gh issue view "$N" --json title,body --jq '"# "+.title+"\n\n"+.body'
+  printf '%s' "$ISSUE_JSON" | python3 -c 'import json,sys
+row=json.load(sys.stdin); print("# "+row["title"]+"\n\n"+(row.get("body") or ""))'
   if [ -f "$STATE/$N.repair.md" ]; then
     echo; echo "----- REPAIR REQUEST FROM THE OPERATOR (do this first) -----"; cat "$STATE/$N.repair.md"
   fi
@@ -272,7 +286,7 @@ if [ "$SKIP_DISPATCH" != 1 ]; then
     break
   done
   log "dispatch exit $DRC"
-  if [ -n "$(git -C "$W" status --porcelain | grep -v '^?? ')" ]; then
+  if [ -n "$(git -C "$W" status --porcelain)" ]; then
     fail uncommitted-worker-changes "worker left uncommitted changes (see $STATE/$N.dispatch.log)"
   fi
 fi
@@ -357,9 +371,18 @@ PR="$(local/bin/pr_open.py --branch "$BR" --issue "$N" --title "$ISSUE_TITLE" \
   || fail pr-open-failed "pr_open failed for #$N on $BR (see the lane log); not publishing by any other path"
 [ -n "$PR" ] || fail pr-open-failed "pr_open returned no PR number for #$N"
 echo "PR=$PR"
-for _ in $(seq 1 30); do [ "$(gh pr view "$PR" --json headRefOid --jq .headRefOid)" = "$AFTER" ] && break; sleep 10; done
+PUBLISHED_HEAD=""
+for _ in $(seq 1 30); do
+  PUBLISHED_HEAD="$(pr_head "$PR")"
+  [ "$PUBLISHED_HEAD" = "$AFTER" ] && break
+  sleep 10
+done
+[ "$PUBLISHED_HEAD" = "$AFTER" ] || fail head-not-published \
+  "PR $PR head is ${PUBLISHED_HEAD:-unreadable}, expected $AFTER"
 
-log "ci.sh $PR"; local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1; echo "CI_EXIT=$?"
+log "ci.sh $PR"
+local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1 || \
+  fail ci-failed "ci.sh $PR failed on exact head $AFTER"
 
 # --------------------------------------------------------------- review
 if [ "${SKIP_REVIEW:-0}" = 1 ]; then
@@ -375,10 +398,10 @@ else
   RPID=$!
   sleep $(( 2 + RANDOM % 6 ))
   flock -u 9
-  wait "$RPID"; echo "REVIEW_EXIT=$?"
+  wait "$RPID" || fail review-failed "review failed for PR $PR on exact head $AFTER"
 fi
 
-gh api "repos/${MIPSTARRE_GITHUB_REPO:-Dengnifer/MIPStarRE-A}/commits/$AFTER/status" \
-  --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
+timeout 60 python3 "$GH_COMMON" latest-statuses "$AFTER" >/dev/null || \
+  fail status-read-failed "could not read exact-head statuses for $AFTER"
 printf 'PR=%s HEAD=%s TOOL=lane.sh VERSION=%s\n' "$PR" "$AFTER" "$TOOL_VERSION" > "$STATE/$N.done"
 log "lane done"

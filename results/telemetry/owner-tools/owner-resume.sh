@@ -146,10 +146,14 @@ fi
 git fetch -q github 2>/dev/null || true
 
 # --- 1. caps and speed, through run-mode --------------------------------------------------
-if [ -r "$RUN_MODE" ] && python3 "$RUN_MODE" resume; then
+if [ -r "$RUN_MODE" ]; then
+  if ! python3 "$RUN_MODE" resume; then
+    echo "$PROG: run_mode.py resume failed; admission remains paused" >&2
+    exit 5
+  fi
   log "run_mode.py resume: caps and speed restored, AIMD re-enters at the saved value"
 else
-  echo "$PROG: run_mode.py resume unavailable or failed; writing the recorded caps into the" >&2
+  echo "$PROG: run_mode.py unavailable; writing the recorded caps into the" >&2
   echo "$PROG: derived cap files directly (they are the router's admission input)." >&2
   total=0
   printf '%s\n' "$CAPS_LINES" | while read -r name value; do
