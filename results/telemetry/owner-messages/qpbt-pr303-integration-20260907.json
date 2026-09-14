@@ -1,0 +1,150 @@
+{
+  "recorded_at": "2026-09-07T18:16:36.590143+00:00",
+  "issue": 301,
+  "pr": 303,
+  "reviewed_head": "0deec4e5f91975ac44426b4b4e0680e76d3314d7",
+  "frozen_main": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+  "merged_at": "2026-09-07T18:13:07Z",
+  "merge_commit": "a9dda4abc9b0953352eb0e16b417866b7fc170df",
+  "ci": {
+    "started": "2026-09-08T01:49:47+0800",
+    "finished": "2026-09-08T01:52:53+0800",
+    "seconds": 186,
+    "conclusion": "success",
+    "partial": false
+  },
+  "first_review": {
+    "id": 5134345720,
+    "head": "7bf12dde5a6c446552877dc0f675e5049a9f5518",
+    "verdict": "CHANGES_REQUESTED",
+    "unresolved": 3,
+    "findings": [
+      "all-turn native model affinity",
+      "current-turn observation binding",
+      "permanent exclusion of known contradictory ratio observations"
+    ]
+  },
+  "final_review": {
+    "id": 5134492795,
+    "verdict": "APPROVED",
+    "unresolved": 0,
+    "prose": "not applicable: no blueprint changes"
+  },
+  "preservation": {
+    "pr": 303,
+    "merge_commit": "a9dda4abc9b0953352eb0e16b417866b7fc170df",
+    "merged_at": "2026-09-07T18:13:07Z",
+    "restored_at": "2026-09-07T18:14:29.253095+00:00",
+    "stash": "7ead2274f5e360f1c2d266f1dfaa99e5ac0ebd06",
+    "stash_retained": true,
+    "files": {
+      "results/telemetry/builds.jsonl": {
+        "before_bytes": 201653,
+        "restored_bytes": 438,
+        "restored_rows": 2,
+        "after_bytes": 202091,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "8609abd1bb78d804d330155956414bc00e04745b149f4b5b622da13dc7cb467d"
+      },
+      "results/telemetry/sessions.jsonl": {
+        "before_bytes": 672721,
+        "restored_bytes": 2089,
+        "restored_rows": 2,
+        "after_bytes": 674810,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "12dc7a9dbaab4e430f24978c07be7ef628483576f044ca88190e537c53d545ce"
+      },
+      "results/telemetry/estimates.jsonl": {
+        "before_bytes": 2293,
+        "restored_bytes": 203,
+        "restored_rows": 1,
+        "after_bytes": 2496,
+        "raw_multiplicities_verified": true,
+        "concurrent_prefix_retained": true,
+        "mode_retained": true,
+        "sha256": "1e68fcf88543198bf54264e3d0ed5b7c1da50bdbbb0ca4e736882ba5d324dda1"
+      }
+    }
+  },
+  "service_tick": {
+    "action": "delegate-pr_merge",
+    "cadence_sleep_s": 269.757,
+    "clean": true,
+    "duration_s": 30.243,
+    "eligibility_budget_s": 240,
+    "eligibility_duration_s": 30.243,
+    "eligible_age_s": null,
+    "eligible_count": 1,
+    "external_admission": 0,
+    "fresh_count": 1,
+    "hold_reasons": [],
+    "local_main": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+    "merge_exit": 0,
+    "native_descendant_limit": 3,
+    "oldest_eligible": {
+      "branch": "issue-301-audited-model-policy",
+      "created": "2026-09-07T17:05:08Z",
+      "eligibility_age_s": null,
+      "fresh_against_remote": true,
+      "head": "0deec4e5f91975ac44426b4b4e0680e76d3314d7",
+      "marker": true,
+      "number": 303,
+      "pr_age_s": 4043
+    },
+    "oldest_fresh_against_remote": true,
+    "oldest_stale": [],
+    "owner_total_limit": 5,
+    "post_merge_remote_main": "a9dda4abc9b0953352eb0e16b417866b7fc170df",
+    "post_merge_remote_verified": true,
+    "read_failure": null,
+    "remote_main": "09deaab66ab7b39d9634eb17fb6ac5742a3bb0ab",
+    "runtime": "Space cap5/external0 verified",
+    "ts": "2026-09-07T18:12:58.658194+00:00"
+  },
+  "actual_postmerge_acceptance": null,
+  "actual_postmerge_acceptance_pending": true,
+  "source_receipts": {
+    "qpbt-301-owner-routing-scope-20260907.md": "762608d34dd249ec32c8b83ac46a33231f4d1f6dac1f86b7254e48ba5f3527c0",
+    "qpbt-pr301-sol-first-author-receipt-20260907.json": "e4bc69add547dbb4c9dea7d90f3795fd16f075f21ddf8dc19b4b1f340e1d05b7",
+    "qpbt-pr303-review-repair-20260907.json": "09f7d7ce0faabe6c07ad5925e0aed6c87cf6a33187ba4ca3907b7c7bd13cd6fc",
+    "qpbt-301-post-activation-review-checks-20260907.md": "a89db35a3426a09bb3a7074f282d7406b8249f3a9a20f2579ef2d11c2552174a",
+    "qpbt-space-priority301-resume-20260907.json": "fd9663eb6e49f9b382938cb60a9cd87c3fa5a13da607baae17e63f63887da465",
+    "qpbt-space-cap5-live-occupancy-20260907.json": "a4dbb75be4258391d066119297d73ab6bddd04251e9a26ef9c6f936ad7058e35",
+    "merge-selector-space-cap5-20260907.json": "19bb26527786dad746d97720759e9f876aaa84c889f4d40bce59550c2cd24ac6"
+  },
+  "grandfathered_native_observations": [
+    "01a07aef-32df-75b2-a189-9b66fe88bac7",
+    "01a07bd2-c062-7ba2-9f35-0b6ea34d0621"
+  ],
+  "key_label": "space",
+  "root_pid": 2085772,
+  "native_cap": 3,
+  "capacity_total": 5,
+  "main_model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "external_admission": 0,
+  "policy_selectors_verified": false,
+  "fresh_sol_child_started": false,
+  "fresh_sol_child_observed": false,
+  "ratio_measured": null,
+  "policy_activation_at": "2026-09-07T18:13:07Z",
+  "activation_boundary_owner": "root; exact GitHub merge timestamp, excluding grandfathered identities",
+  "budget": {
+    "episode_anchor_approx": "2026-09-07T13:40:00Z",
+    "historical_boundary": "2026-09-07T15:40:00Z",
+    "line_ceiling": 1000,
+    "extension_request_comment": 5572932276,
+    "current_changed_lines": 951,
+    "renewed_authorization": "Express owner completion steering, same cumulative episode",
+    "reset": false
+  },
+  "b8": {
+    "attempts": 13,
+    "working_seconds": 26509
+  },
+  "next": "Publish this complete telemetry batch, verify clean live equality, run read-only committed-policy selectors and actual root/lease checks, then root starts the useful fresh explicit Sol/Ultra PR249 successor with predecessor/budget links."
+}

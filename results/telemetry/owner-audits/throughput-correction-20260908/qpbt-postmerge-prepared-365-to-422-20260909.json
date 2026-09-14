@@ -1,0 +1,78 @@
+{
+  "schema": "qpbt.prepared_successor.v1",
+  "ready_at": "2026-09-08T18:53:41.259Z",
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "ready": true,
+  "predecessor": {
+    "task": "/root/space_sol_pr249",
+    "thread_id": "01a07d1a-e2d6-7580-a2c4-5970d4bef3ab",
+    "turn_id": "01a08257-f39d-7ce0-b67a-059256d1d497",
+    "task_started_at": "2026-09-08T18:46:37.217Z",
+    "assignment": "PR365 ordered dependency repair and checked publication",
+    "last_verified_running_at": "2026-09-08T18:51:02.139Z",
+    "model": "gpt-5.6-sol",
+    "effort": "ultra",
+    "model_evidence": "Coordinator verified the predecessor's own turn_context at 18:46:37.254Z and 18:51:02.139Z."
+  },
+  "successor": {
+    "target": "/root/space_sol_pr249",
+    "operation": "collaboration.followup_task",
+    "issue": 422,
+    "job_class": "routine",
+    "requested_model": "gpt-5.6-sol",
+    "requested_effort": "ultra",
+    "rationale": "Bounded completion of an existing local PSD product proof; published dependencies and preserved draft are available.",
+    "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-422-pointwise-consistency-unit-bound",
+    "head": "2cc44385ac07b34bd0e3b023c35afd6c95ba4a87",
+    "file": "MIPStarRE/QPBT/Combining/Lines/PointwiseDefect.lean",
+    "file_sha256": "5ffc6cb1142734aa68d5fe3e539b31424d851d0cd74c005c739a7747deab190a",
+    "source_budget_seconds": 600,
+    "validation_budget_seconds": 600,
+    "budget_rule": "Absolute source deadline is actual successor task_started plus600s, never first output. Validation tail is allowed only if the whole target kernel-types before that deadline. Preserve all previous issue422 and PR365 costs and overruns.",
+    "message": "Main preauthorizes this useful successor after your CURRENT PR365 turn actually completes. Work only on issue422's preserved PointwiseDefect.lean in /home/drx/MIPStarRE-qpbt/.worktrees/issue-422-pointwise-consistency-unit-bound, based on published392 head2cc44385ac07b34bd0e3b023c35afd6c95ba4a87. The draft SHA256 is5ffc6cb1142734aa68d5fe3e539b31424d851d0cd74c005c739a7747deab190a. The old author released it; coordinator verified no competing claim. Read the paper and current declaration before proving. Preserve the exact consistencyDefect_integrand_le_one statement: complete measurements on opposite expanded registers, defect at most one. The existing proof reduces by point_defect_eq; only the Commute.mul_nonneg raw-matrix order inference remains. Use an explicitly typed Matrix.PosSemidef product or existing project-local PSD product API; search first. Do not add assumptions, redefine objects, introduce holes/axioms/bypasses, weaken the bound, or duplicate other proof lanes. Preserve the untracked draft and all earlier costs. New source allowance10min from actual native task_started, not first tool; if the whole target kernel-types within10min, allow at most10min validation/normal checked publication. Otherwise stop new edits and checkpoint exact errors and owned processes. No automatic extension, B8 reset, full-pasting attempt, CI, review, service action, or primary telemetry write. Space total10/native9/external0 and observed SolUltra remain; verify fresh actual model/effort and report a mismatch before source work. Normal AGENTS/worktree/hooks/cache/gh_common rules apply; no lakeupdate, hot-cache write, force, ref-alias change or skipped gate. First report actual new turn identity/start/model and perform a relevant source/API read. Record the first attributable useful output without manufacturing a probe. Update the existing issue422 receipt with all budgets and results, after actual activation; coordinator owns transition telemetry. Do not write model or status claims you did not observe."
+  },
+  "prevalidation": {
+    "checked_worktree_head": true,
+    "checked_draft_hash": true,
+    "published_dependencies_available": true,
+    "conflicting_writer": false,
+    "actor_model_verified": true,
+    "actor_is_currently_nonterminal": true,
+    "review_consumer_hold": false,
+    "ownership_verified_at": "2026-09-08T18:51:02.139Z",
+    "source_and_hash_verified_by": "root exec receipts, 2026-09-08T18:49:34Z and18:51:14Z",
+    "new_budget_authorized": true
+  },
+  "activation": {
+    "owner": "/root/astra_refill_coordinator",
+    "condition": "Only after the exact predecessor turn has an actual terminal completion. Verify native occupancy below9; do not interrupt its useful work. This is not a canonical reviewer assignment.",
+    "order": [
+      "Observe exact predecessor completion",
+      "Check only safety/admission prerequisites",
+      "Execute the prepared native followup",
+      "Verify actual successor task_started and first useful output",
+      "Adopt detailed receipts and publish telemetry"
+    ],
+    "concurrent_main_dispatch": "Root will not dispatch this prepared successor; coordinator has sole activation ownership."
+  },
+  "acceptance": {
+    "require_ready_at_strictly_before_predecessor_completion": true,
+    "no_backdating": true,
+    "completion_to_task_started_target_seconds": 60,
+    "first_useful_output_measured_separately": true,
+    "record_fields": [
+      "predecessor_task_complete",
+      "ready_at",
+      "native_call_started",
+      "native_call_accepted",
+      "successor_task_started",
+      "first_attributable_model_output",
+      "first_attributable_useful_tool_output",
+      "observed_model",
+      "observed_effort",
+      "absolute_source_deadline",
+      "blocker_intervals"
+    ],
+    "miss_policy": "Record any missed bound or prerequisite exactly. If readiness is later than predecessor completion, this transition cannot establish prior readiness. No snapshot or acknowledgment establishes sustained recovery."
+  }
+}

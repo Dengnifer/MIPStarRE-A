@@ -51,45 +51,6 @@ def directPointToPauli (P : AdmissibleParams)
     Fin (2 * P.m + 2) -> PauliScalar P :=
   fun i => extendedDirectScalarEquiv P (u i)
 
-/-! ## Finite direct-line carrier -/
-
-/-- A finite code for directly indexed lines, omitting only proof fields. -/
-private abbrev DirectLineDescCode (D : DirectLdParams) :=
-  ((Fin D.m -> DirectScalarQ D) × Fin D.m) ⊕
-    ((Fin D.m -> DirectScalarQ D) × Fin D.m ×
-      (Fin D.m -> DirectScalarQ D))
-
-/-- Encode a directly indexed line by its tag and mathematical data. -/
-private def directLineDescCode (D : DirectLdParams) :
-    DirectLineDesc D -> DirectLineDescCode D
-  | .axis base index _ => .inl (base, index)
-  | .diagonal base index direction _ _ => .inr (base, index, direction)
-
-/-- The direct-line code is injective by proof irrelevance. -/
-private theorem directLineDescCode_injective (D : DirectLdParams) :
-    Function.Injective (directLineDescCode D) := by
-  intro line line' h
-  cases line with
-  | axis base index baseFixed =>
-      cases line' with
-      | axis base' index' baseFixed' =>
-          simp only [directLineDescCode, Sum.inl.injEq, Prod.mk.injEq] at h
-          rcases h with ⟨rfl, rfl⟩
-          rfl
-      | diagonal => simp [directLineDescCode] at h
-  | diagonal base index direction baseFixed prefixZero =>
-      cases line' with
-      | axis => simp [directLineDescCode] at h
-      | diagonal base' index' direction' baseFixed' prefixZero' =>
-          simp only [directLineDescCode, Sum.inr.injEq, Prod.mk.injEq] at h
-          rcases h with ⟨rfl, rfl, rfl⟩
-          rfl
-
-/-- Directly indexed line descriptions form a finite type. -/
-noncomputable instance directLineDescFintype (D : DirectLdParams) :
-    Fintype (DirectLineDesc D) :=
-  Fintype.ofInjective (directLineDescCode D) (directLineDescCode_injective D)
-
 /-! ## Combined point and line measurements -/
 
 /-- Projective joint point measurements and their ordered consistency
