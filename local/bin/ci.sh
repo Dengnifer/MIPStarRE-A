@@ -1079,7 +1079,9 @@ for STEP in $STEP_NAMES; do
     _rc="$EXIT_TOOL_MISSING"
   else
     set +e
-    ( run_step_body "$STEP" ) >> "$LOG" 2>&1
+    # Required commands must stop the step; the parent still collects its exit
+    # code, releases the build lock, and continues with independent steps.
+    ( set -e; run_step_body "$STEP" ) >> "$LOG" 2>&1
     _rc=$?
     set -e
     if [ "$STEP" = build ]; then
