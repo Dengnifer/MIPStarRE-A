@@ -61,45 +61,6 @@ theorem evalOpt_uniform_parameter_collision_le {L : LdParams} {bound : ℕ} (lin
   rw [Finset.sum_const, nsmul_eq_mul, mul_one_div]
   exact div_le_div_of_nonneg_right (by exact_mod_cast hcard) (by positivity)
 
-/-- Multiplying a normalized restricted average by its retained mass gives the
-unnormalized restricted sum. This formalization-only identity supports proof-only
-conditioning in `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-963`; it changes no game distribution. -/
-theorem avgOver_restrict_mul_mass {Sample : Type*} [DecidableEq Sample]
-    (dist : Distribution Sample) (good : Sample → Prop) [DecidablePred good]
-    (hpos : 0 < ∑ sample ∈ dist.support.filter good, dist.weight sample)
-    (value : Sample → ℝ) :
-    (∑ sample ∈ dist.support.filter good, dist.weight sample) *
-      avgOver (Distribution.restrict dist good hpos) value =
-      ∑ sample ∈ dist.support.filter good, dist.weight sample * value sample := by
-  unfold avgOver Distribution.restrict
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro sample hsample
-  simp only [if_pos (Finset.mem_filter.mp hsample).2]
-  field_simp
-
-/-- An average of a function bounded above by one is at most the retained mass
-times its conditional average, plus the discarded probability mass. This
-formalization-only estimate restores the original distribution after proof-only
-conditioning in `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-963`. No discarded mass is omitted. -/
-theorem avgOver_le_restrict_add_discarded_mass {Sample : Type*} [DecidableEq Sample]
-    (dist : Distribution Sample) (good : Sample → Prop) [DecidablePred good]
-    (hpos : 0 < ∑ sample ∈ dist.support.filter good, dist.weight sample)
-    (defect : Sample → ℝ) (hunit : ∀ sample, defect sample ≤ 1) :
-    avgOver dist defect ≤
-      (∑ sample ∈ dist.support.filter good, dist.weight sample) *
-        avgOver (Distribution.restrict dist good hpos) defect +
-      ∑ sample ∈ dist.support.filter (fun sample => ¬ good sample), dist.weight sample := by
-  classical
-  rw [avgOver_restrict_mul_mass]
-  unfold avgOver
-  rw [← Finset.sum_filter_add_sum_filter_not dist.support good
-    (fun sample => dist.weight sample * defect sample)]
-  exact add_le_add_right (Finset.sum_le_sum fun sample _ =>
-    mul_le_of_le_one_right (dist.nonnegative sample) (hunit sample)) _
-
 /-- Under the unchanged diagonal line-point law, zero projected directions have
 probability at most the inverse field size: the last sampled direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
