@@ -7609,9 +7609,7 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
-
 ## 2026-09-12 - Inherited hardness reason in PR 531 CI
-
 - Session `prover-509-20260912-01` ran canonical CI on published head
   `506aa56a06188948a53b7ecc3bbd5cfbc851eae5`. The full 9218-job build and
   LDT axiom audit passed. Blueprint-sync stopped in the 629-test workflow
@@ -7630,7 +7628,6 @@ not actual commit/publication hooks. No productive session was killed.
 - The mathematical result remains the two obstruction-support lemmas and the
   preserved target hole. The original B8 count and 26,509-second history are
   retained; this bounded successor session is additional time, not a reset.
-
 ## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 - Session `prover-528-20260912-01`, issue #528: the first exact-head CI run for
   `f5dd9de98cdad7a87643798e8e9a1555cd723380` took 260 seconds and failed the
@@ -7914,9 +7911,7 @@ not actual commit/publication hooks. No productive session was killed.
 - At07:56:50Z,13 project workers and8 admission waiters remained. Future
   queued admission and follow-on reviews must respect the cutoff unless a
   subsequent owner extension changes it. No new broad proof scope was added.
-
 ## 2026-09-12T08:23:11Z - Final owner quota stop
-
 - The owner extended work at08:08Z until08:55Z; main began an ownership-checked
   current-head review batch. The subsequent FINAL quota-stop order superseded
   that extension. Main immediately stopped dispatch coordination, cancelled
@@ -7936,22 +7931,15 @@ not actual commit/publication hooks. No productive session was killed.
 - No168 closing post. Main issues /goal pause and remains idle until explicit
   owner resumption. The formalization remains incomplete; no complete/blocked
   goal status is substituted for the owner's scheduling pause.
-
 ## 2026-09-12 — Pause of track A on the owner's instruction (2026-09-12T08:33:00Z)
-
-- Owner (13:35Z): work about two more hours, update #168, then pause; the meta session resumes the main session days later on the
   owner's explicit word. At 08:33:00Z: main at bc7d69bd, 30 merges today through the daemon. Stopped: goal keeper, merge daemon
-  (stop file kept), stack-watch; watchdog, heartbeat and astra-poll crons commented out (estimate.sh kept); the main session paused its
-  goal after posting on #168 and #27. Running lanes and fix loops finish on their own. Resume procedure: /tmp/owner-resume.sh.
 - 08:33Z PAUSE (owner 08:18Z: the unlimited quota period ended; finalize within 15 minutes). Run summary 04:17Z-08:33Z: 8 PRs merged
   (525 530 532 263 280 281 282 251), direct holes 20 -> 19, workers peaked at 39 (04:55Z) and ran 13-14 on the yxy key after its real
   limit (20, shared with the owner's local session) was found; about 90 sessions lost to the relay-us7 503 outage and the limit.
   Structural fixes that stay in place: lane runner v20, union merge driver for telemetry logs, fix-lane/autofix-loop tools, daemon
   PAR=8. Caps recorded for the resume: second 27 (the owner limited the local session to 2 of the 30 slots). Leftover workers were
   stopped at the deadline; the main session's goal is paused; resume only on the owner's word (/tmp/owner-resume.sh, PAR=8).
-
 ## 2026-09-12/13 — Workflow refinement after the full speed run (meta session, Opus subagents)
-
 - Owner instruction (2026-09-12, after the 08:33Z pause): spend the rest of the day removing from the workflow every
   intervention the owner had to make during the full speed run. The target state is that the next run needs ONE owner
   briefing (keys and their limits, duration or "until my word", speed tier, pause deadline) and afterwards delivers only
@@ -8074,9 +8062,7 @@ not actual commit/publication hooks. No productive session was killed.
   PR would have been faster in wall clock and cheaper in rework: the four cross-item defects, the 13 round-1 blocking
   findings and the 9,427-line merge refusal that now blocks the stack all follow from integrating seven work items into
   one episode. The refinement produced no proof progress; it is workflow cost, recorded as such.
-
 ## 2026-09-14T02:19:16Z - Resume under SLOW MODE
-
 - Read the new owner SLOW MODE section first and completed the requested
   status snapshot. Verified current caps: primary0, second1, total1 worker.
   The three-worker ceiling applies only after the owner enables two primary
@@ -8102,9 +8088,7 @@ not actual commit/publication hooks. No productive session was killed.
   Latest SLOW MODE rules override the goal's historical eight-worker wording.
  487 full CI succeeded and daemon reviewer-pr487-20260914-01 was admitted on
   second; the companion prose lane queues behind the same one-worker cap.
-
 ### 2026-09-14T02:25:38Z - Verify the single-slot review handoff
-
 - Current caps remain primary0/second1. Verified live model PID2225016 is
   reviewer-pr487-20260914-01 on gpt-5.6-sol. Its prose companion stays queued;
   no second model, duplicate writer, bulk lane or speculative proof was started.
@@ -8115,9 +8099,7 @@ not actual commit/publication hooks. No productive session was killed.
 - This cycle is a verified wait on the existing reviewer and daemon refresh
   handles.552/554/556 stay behind ready merge work. No new stage boundary or
   merge occurred, so no extra27 report or168 post was made.
-
 ### 2026-09-14T02:30:40Z - Retire mismatched487 automatic disposition
-
 - Code reviewer-pr487-20260914-01 completed with a required blueprint-coverage
   finding on head5c3296da: product-law and conditioned inverse-mass estimates
   need their own formalization-only entries. The old placement duplication was
@@ -8134,9 +8116,7 @@ not actual commit/publication hooks. No productive session was killed.
   before choosing a bounded correction or tracked disposition. Other ready
   main-based merges remain ahead of the tooling stack. No new competing worker,
   source edits, chsh use, manual merge, or extra stage report was introduced.
-
 ### 2026-09-14T02:34:31Z - Prepare bounded487 coverage correction
-
 - Revalidated primary0/second1 and live Sol prose reviewer2355171. No result
   was inferred from elapsed time; the canonical combined review remains pending.
 - Read the actual completed/conditioned theorem signatures and paper
@@ -8147,18 +8127,14 @@ not actual commit/publication hooks. No productive session was killed.
   main's priority selection, not a new worker or proof change.
 - Main-based ready candidates keep priority, then552/554/556, then one
   critical-path prover. No stage boundary occurred; no additional27/168 post.
-
 ### 2026-09-14T02:38:38Z - Verified wait on487 prose review
-
 - Caps remain primary0/second1. Reviewer2355171 is live on Sol and its capture
   shows completed source/blueprint searches at02:37:35Z, including distribution
   and answer-order checks. This is ongoing review work, not a failed dispatch.
 - Preserve the worker and its pending canonical result. The prepared487
   correction brief is not dispatched, and no historical eight-worker target or
   speculative lane is applied in SLOW MODE. No stage-boundary post is due.
-
 ### 2026-09-14T02:42:20Z - Prepare552 canonical CI without a competing worker
-
 - Verified552 is open and its clean registered worktree matches published
   head600cabec05c27591e3780be6474da05b3ef580c5. No existing552 CI/review/fix
   owner was active. Started ordinary local/bin/ci.sh552 as detached PID2610441,
@@ -8172,9 +8148,7 @@ not actual commit/publication hooks. No productive session was killed.
   daemon merges.552 then554/556 will receive normal independent Sol review
   once the current evidence and capacity permit. No runtime deployment or
   oversized-commit override was inferred from the validation request.
-
 ### 2026-09-14T02:48:47Z - Adopt487 review and552 green CI
-
 - Canonical review5193488642 on487 head5c3296da reports four findings: two
   overlapping coverage requirements, an (X,Z) versus (Z,X) pasting-premise
   mismatch, and mathematical prose corrections. Confirmed the actual
@@ -8189,9 +8163,7 @@ not actual commit/publication hooks. No productive session was killed.
   with build/render and required audits green. Its independent Sol review
   waits behind ready merge work; no installation, chsh use or tooling deployment
   occurred. Current caps remain primary0/second1.
-
 ### 2026-09-14T02:53:39Z - Verify385 refresh progression
-
 - Caps remain primary0/second1. Verified daemon refresh2793946 is live;
   published/local385 head896c5727 matches. Build and blueprint-sync passed;
   raw workflow output is629 tests OK,9 skipped. Remaining audits are running.
@@ -8199,9 +8171,7 @@ not actual commit/publication hooks. No productive session was killed.
 -552's full non-partial CI manifest is confirmed successful on600cabec.
   Its independent review remains the next tooling gate after ready merge work.
   No competing model, bulk lane, chsh invocation or additional stage post.
-
 ## 2026-09-14 — Resume in SLOW MODE (owner instruction 02:10Z)
-
 - Owner: resume development in slow mode: yxy key limit 2 + auth-3 key limit 2 = 4 slots, one main session (astra) and at most three
   subagents, astra:sol about 1:20-50 for subagents (astra only where it pays), default speed. Meta: caps primary 0 / second 1 / total 1
   until the auth-3 key appears on ghz (it is not in ~/.codex yet; the owner was asked for the file and its endpoint), then primary 2;
@@ -8217,9 +8187,7 @@ not actual commit/publication hooks. No productive session was killed.
   codex fell back to the model default, medium). "ultra" = max reasoning plus automatic delegation to sub-agents whose effort is
   `multi_agent_reasoning_effort` (default xhigh); delegation stays OFF here (features.multi_agent=false) because the slot budget is 5.
   The shim's astra ultra->xhigh mapping was removed.
-
 ### 2026-09-14T02:58:24Z - Merge385 and start tooling review
-
 - GitHub confirms385 merged02:56:22Z as
   18018d6bb66775d076d3570d4d1300c4d0e5732a from896c5727. Full current-head CI
   passed, and review5193521354 carried forward the original approval with an
@@ -8241,9 +8209,7 @@ not actual commit/publication hooks. No productive session was killed.
   the reason in watchdog/key-disabled/<account>; if the main session's own key (space-1) fails, the main is relaunched on space-d with
   the second cap reduced to 1; each retirement is posted on #27; nothing is re-enabled automatically. The main session was relaunched at
   03:03Z on codex-home-space-1 at effort ultra (request body effort = max), briefed with the slow-mode section.
-
 ## 2026-09-14
-
 - PR554 normal CI failed at c4106bbb in three test_chsh_offload.FallbackTest cases; build and blueprint rendering passed. The fixture invokes a fake offload script but inherits the real SLOW MODE MIPSTARRE_OFFLOAD=0 setting, so the helper selects the local stub and defeats the expected simulated offload path. The detached review tail correctly refused the red exact-head CI without publishing a review. Main is assigning one bounded Sol fixture-isolation repair; real offload stays disabled and audit gates remain binding. Lesson: simulated offload fixtures must state their environment while explicit kill-switch tests retain coverage.
 - PR531 completed canonical CI successfully at 3fd948073d530041915abf6941e7a723e649a795, but lane PID2967322 was verified sleeping in the legacy pre-review census. That census counts literal -C examples from reviewer prompts as worktrees; one actual Sol worker produced several counted entries. Main transfers the completed CI handoff to canonical review.sh through dispatch.sh account reservations after stopping only the waiting lane. No cap, runtime script or merge gate is changed; the daemon retains merge ownership. Lesson: legacy command-substring counts are not provider occupancy, and canonical account admission must govern this review.
 - PR556 CI at f2180406 failed 19 policy-fixture assertions after main unnecessarily supplied MIPSTARRE_REVIEW_MODEL and MIPSTARRE_PROSE_MODEL to the CI process. The inherited Sol choices conflict with hard-class fixture cases; these settings belong on actual review dispatches, not deterministic CI. Main reruns normal CI with invoking/review model, classification and hardness overrides removed from that invocation, retaining MIPSTARRE_OFFLOAD=0 and every gate. No branch or model allocation change is made. Correction to the preceding milestone: seven of the eight PR556 CI gates passed, with blueprint-sync failing. Preserve the failure manifest and lesson: keep CI fixture environments independent of the actual worker model selection.
@@ -8308,3 +8274,17 @@ not actual commit/publication hooks. No productive session was killed.
   DistanceTheorems/RoundingTransport, unreachable from the umbrella); an Opus engineer is landing the #551 import fix as a PR.
   Merge-title feature: issue #557 / PR 558 (lane running). Codex review slots (3) are now the bottleneck: about 20 lanes in flight.
 - Owner Opus round3 claims400,432,433,434,487,534 are verified in watchdog/meta-dispatched.txt, alongside rounds1-2. Merge-repair note5659418054 identifies three overlap groups: stateQForm_conjTranspose_mul_mul in411/415/460; the shared resampling helper in441/447/497; and ConsistencyPositivity.lean edits in460/492. After Opus handoff and actual merge eligibility, later members must adopt the first merged placement/interface and remove only the duplicate, updating caller imports without losing proofs. No competing repair is started while a claim is active. Interrupted-turn reconciliation confirms the PR539 prover continued with fresh events; its draft source repair is committed but is receiving a focused file-length fix within the original budget. PR556 finished all eleven fixes at48641733, with green CI, and canonical reviewer-pr556-20260914-03 is admitted. PR541 was merged by the daemon at05:15:29Z; its failure marker is already absent. A forced-remove-style cleanup attempt was rejected by tool policy before execution, and readback confirmed the daemon had already completed the cleanup.
+- Owner review-drain priority is active. The verified router census contains19 waiters, all reviewers, and no mathfix/prover/orc or PR552/554/556 waiter; no review process was killed to satisfy an obsolete queue description. Main will submit no new router workers until the lane review queue drains. Started only native proof continuations: issue517 01a09e8f-4538-7c70-96b4-e882ceb56634 on the nonencoding mass bound, and issue520 01a09e8f-4578-7681-89b5-755afffa1331 from the preserved c2176cc3 character-consistency checkpoint. Both use xhigh,25-minute continuation bounds, retain prior costs, and prohibit router jobs, CI, reviews and publication. Prior native sessions were already completed, recorded and closed.
+- 06:15Z: issue #551 landed as PR 559 (five umbrella import lines; checkdecls resolves all 1445 declarations; lane in CI); PR 400's
+  merge conflict was resolved by an Opus repairer (main's superset alias block taken) and its lane is in CI; PR 434's and PR 465's lanes
+  wait for PR 559 (orphan modules). The main session withdrew its queued math-fix dispatches at 05:58Z so the codex reviewers work the
+  Opus-fixed lanes first (reviews of 411, 415, 447, 492 running). Round 4 at 06:20Z: eight Opus agents modernize the idle unreviewed
+  proof PRs 288 289 293 294 325 365 382 397 (superseded check, merge of main, de-duplication, blueprint entries, then a lane).
+- Review-drain cycle: the full snapshot completed at maincebf210d with86 open PR rows. The process census found18 account-router waiters, all reviewers, and no waiting mathfix/prover/orc or tooling repair. Native issue517 and520 rollouts have fresh attributable tool events and remain within their continuation assignments. GitHub verifies approval/CI success on PR447 head37385d04 and the pre-refresh PR492 headd4ae8d99. The live daemon selected492 first; refresh supervisor1313143 is running and its lane has reached fresh CI. PR447 waits behind that serialized refresh. Old-head approval is not claimed as approval of the refreshed head. No new router dispatch, competing Opus repair, manual merge or stage-boundary comment was added; the owner review-drain hold remains active.
+- Issue517 continuation completed at4a57da3448af20d867dde95782c589283a5ecc01: the target was already proved in e36fd1aa and was freshly verified with standard axioms; this is recovered proof/checkpoint work, not a new proof. Its scope annotations and audit preserve prior costs. The actual native completion is recorded and the thread closed. The freed slot now owns PR533 source-alignment continuation 01a09e9c-2a96-7393-80c4-91ddc0de9997 at xhigh, reusing the shared PR539 Construction/conditional interfaces while preserving its proved Alice component. Issue520 continues its actual self-consistency obligation. Both native jobs prohibit router/CI/review/publication while the owner review-drain hold remains.
+- Issue520 native continuation completed at a337bb42991f67a88c2df4db356cb7d0ead9f493 with a clean unpublished worktree. New difference-polynomial collision, exact overlap and opposite-player consistency bounds have standard axiom closures; the observable self-consistency target still contains sorryAx. Remaining work is the point-self-consistency/triangle assembly and constant absorption, with source construction still separate. Recorded the actual terminal rollout once through the owner-authorized xhigh fallback and closed the thread; prior2722 seconds and the earlier checkpoint costs remain preserved. No proof-hole closure, full build, CI, review or publication is claimed. The router review-drain hold remains active.
+- Continued issue520 from newly proved checkpointa337bb42 in native xhigh prover 01a09ea5-9138-7b01-8679-ad0fd7d30634 after recording and closing its predecessor. The assignment targets completion of the remaining self-consistency obligation, preserves the established collision/overlap/consistency and Parseval proofs, and retains prior costs (including measured predecessor wall time1229.33 seconds). The continuation is bounded to25 minutes and cannot launch router work, CI, review or publication while the owner review-drain hold remains.
+- 06:45Z Opus round 4 result: modernized and handed to lanes 288 289 294 365 397 (merge of main, blueprint entries, umbrella imports;
+  rows opus-modernize-prN-20260914-04); 293, 325 and 382 found fully superseded by main (their content already there byte-for-byte or
+  under other names): the main session is asked to close them. Round 5 at 06:50Z: the stale-review CHANGES_REQUESTED PRs 253 349 363 442
+  472 483 and the idle unreviewed 423 438 493.
