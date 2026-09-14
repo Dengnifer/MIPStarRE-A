@@ -799,6 +799,53 @@ assembled by Fourier averaging.
 	$\mathcal{O}^u$ is used. The hypothesis then bounds the average by $\eta$.
 \end{proof}
 
+\begin{lemma}[Field-valued approximate commutation of the expanded point
+	measurements]
+	\label{lem:expanded-point-field-commutation}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPoint_comm}
+	\leanok
+	\uses{lem:qld-comm-cons, def:expanded-state,
+		def:expanded-point-measurement, def:povm-distance,
+		def:symmetric-equivalents}
+	There is a constant $C \geq 1$ such that the following holds for every
+	admissible parameter set, every $\eps$, every projective strategy of value
+	at least $1-\eps$, and each of the four register placements of
+	Definition~\ref{def:symmetric-equivalents}. Writing $(\cdot)_p$ for the
+	chosen placement, on average over uniformly random $x, z \in \F_q^m$,
+	\[
+		\E_{x,z} \sum_{a, b \in \F_q}
+		\bigl\lVert
+		\bigl(\hat{M}^{(\mathrm{Point},X),x}_{a}\,
+		\hat{M}^{(\mathrm{Point},Z),z}_{b}
+		- \hat{M}^{(\mathrm{Point},Z),z}_{b}\,
+		\hat{M}^{(\mathrm{Point},X),x}_{a}\bigr)_{p}
+		\ket{\hat{\psi}}
+		\bigr\rVert^2
+		\;\leq\; C\sqrt{\eps}\,.
+	\]
+	The outcomes $a, b$ range over $\F_q$, whereas the commutation conclusion
+	of item~2 of Lemma~\ref{lem:qld-comm-cons} is stated for the binary
+	refinements in $\F_2$. The error is the same $\sqrt{\eps}$: the transfer
+	to field-valued outcomes loses no factor depending on the field size.
+	This is the estimate actually used by the formal proof of
+	Lemma~\ref{lem:qld-4-10}; paper
+	\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:466--505}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-cons, lem:twisted-commutation,
+		def:expanded-observables, def:expanded-point-measurement}
+	Each field-valued effect is the character average of the expanded point
+	observables over the dual scalar, so the commutator of the two effects is
+	the corresponding average of the commutators of the observables. The
+	characters of $\F_q$ are orthogonal, so Parseval's identity rewrites the
+	average of the squared norms of these combinations as the average of the
+	squared norms of the individual observable commutators, with no factor
+	depending on $q$. That average is the twisted-commutator average
+	(Lemma~\ref{lem:twisted-commutation}) already bounded by $C\sqrt{\eps}$ in
+	the proof of item~2 of Lemma~\ref{lem:qld-comm-cons}.
+\end{proof}
+
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
@@ -845,7 +892,8 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-comm-cons, lem:ortho, fact:triangle,
+	\uses{lem:qld-comm-cons, lem:expanded-point-field-commutation,
+		lem:ortho, fact:triangle,
 		def:expanded-point-measurement, def:symmetric-equivalents,
 		def:povm-distance}
 	The formal proof works with field-valued outcomes directly. On each
@@ -896,6 +944,31 @@ assembled by Fourier averaging.
 	and gives polynomials of degree at most $c$. If the polynomials agreed
 	at more than $c$ elements, the univariate root bound applied to their
 	difference would force them to be equal, contradicting $f\ne g$.
+\end{proof}
+
+\begin{lemma}[Evaluation at the parameter of a nondegenerate affine line]
+	\label{lem:affine-line-evaluation}
+	\lean{MIPStarRE.QPBT.evalOpt_affine_parameter_of_direction_ne_zero}
+	\leanok
+	\uses{def:ld-line-description, def:ideg-deg-polynomials, def:line}
+	Let $\ell$ be a line description with base point $u_0$ and direction
+	$v \neq 0$, let $c \in \N$, let $f \in \deg_{c}(\ell)$ be given by its
+	coefficient list, and let $t \in \F_q$. Then the completed evaluation of
+	$f$ at the point $u_0 + t v$ is defined and equals the value of the
+	coefficient polynomial of $f$ at $t$.
+	This is the geometric step of the collision argument in the proof of
+	Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}): on a
+	line with nonzero direction a point determines its affine parameter, so
+	completed evaluation is unambiguous there.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The point $u_0 + t v$ lies on $\ell$ with parameter $t$. If
+	$u_0 + t v = u_0 + t' v$ for some $t'$, then $(t - t')v = 0$, and
+	$v \neq 0$ forces $t = t'$. The parameter witnessing membership is
+	therefore unique, so completed evaluation is defined at $u_0 + t v$ and
+	returns the value of the coefficient polynomial at $t$.
 \end{proof}
 
 \begin{lemma}[Combined line measurements]

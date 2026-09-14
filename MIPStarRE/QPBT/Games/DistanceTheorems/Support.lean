@@ -246,6 +246,20 @@ noncomputable def stateQForm {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (M : Op ι) : ℝ :=
   (inner ℂ ψ (applyOperatorToState M ψ)).re
 
+/-- Conjugating an operator transfers the outer operator to the state vector:
+the quadratic form of `Wᴴ M W` in `ψ` is the quadratic form of `M` in `W ψ`.
+Formalization-only identity, shared by the overlap-gap estimate and the
+sandwich self-consistency argument. -/
+theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
+    stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
+  unfold stateQForm
+  rw [applyOperatorToState_mul, applyOperatorToState_mul]
+  congr 1
+  change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
+    inner ℂ (Matrix.toEuclideanLin W ψ) _
+  rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint, LinearMap.adjoint_inner_right]
+
 /-- Tensor placement is additive over finite sums in the left factor. This is
 the formalization-only identity `lem:distance-tensor-sum-left`, used to expand
 the relabeled overlaps in `lem:ld-sandwich`; detailed source proof
