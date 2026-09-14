@@ -24,7 +24,12 @@ noncomputable section
 
 /-- Consistency is symmetric for measurements on opposite registers. The
 operator commutation, rather than symmetry of the state or equality of local
-dimensions, justifies exchanging the placements in `lem:qld-xz-lines`. -/
+dimensions, justifies exchanging the placements in `lem:qld-xz-lines`. This is
+a formalization-only auxiliary lemma: it is not a named statement of the paper,
+it isolates the exchange step behind the symmetric equivalents of
+`lem:qld-xz-lines` and is recorded in the blueprint as
+`lem:opposite-placement-consistency-symmetry`. Paper source
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`. -/
 theorem consistencyDefect_opposite_symm {params : AdmissibleParams} {error : ℝ}
     {Question Outcome : Type*} [Fintype Question] [DecidableEq Question]
     [Fintype Outcome] [DecidableEq Outcome]

@@ -898,6 +898,28 @@ assembled by Fourier averaging.
 	difference would force them to be equal, contradicting $f\ne g$.
 \end{proof}
 
+\begin{lemma}[Formalization support for symmetric placements]
+	\label{lem:opposite-placement-consistency-symmetry}
+	\lean{MIPStarRE.QPBT.consistencyDefect_opposite_symm}
+	\leanok
+	\uses{def:consistency, def:symmetric-equivalents}
+	This is not a named statement of the paper; it isolates a step used in the
+	Lean proof of the symmetric equivalents in
+	Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:882-894}).
+	Let two families of measurements be indexed by a common question set and a
+	common answer set and act on opposite registers of the expanded state. The
+	consistency defect of the ordered pair is unchanged when the two families
+	are exchanged.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Operators placed on opposite registers commute, so every cross term of the
+	defect is unchanged when the two placements are exchanged. Summing those
+	terms in the opposite order and using that the disagreement condition is
+	symmetric gives the claim.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
@@ -935,7 +957,8 @@ assembled by Fourier averaging.
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
 		def:symmetric-equivalents, def:concrete-paired-line-measurement,
-		lem:concrete-paired-line-degree-support}
+		lem:concrete-paired-line-degree-support,
+		lem:opposite-placement-consistency-symmetry}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
 	operator
