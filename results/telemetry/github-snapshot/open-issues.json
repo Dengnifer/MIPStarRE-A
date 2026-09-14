@@ -486,93 +486,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/537",
-  "id": 5431449347,
-  "node_id": "I_kwDOUJyJf88AAAABQ71XAw",
-  "number": 537,
-  "title": "fix(QPBT): include public point helpers in canonical build",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-12T05:36:12Z",
-  "updated_at": "2026-09-12T05:36:12Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-canonical-point-imports-20260912 -->\n### Problem\n\nMeta05:15Z traced repeated branch publication failures to existing QPBT modules outside the main umbrella import closure. A successful default build does not produce `MIPStarRE.QPBT.Combining.Points.Absorption` and `MIPStarRE.QPBT.Combining.Points.MarginalContraction` artifacts. Lane-v18 works around this by building changed modules, but main needs the intended import graph repaired.\n\n### Scope\n\nInspect the current QPBT umbrella and submodule re-exports and the actual dependency graph. Add the two existing reusable modules to the appropriate canonical import surface without cycles or duplicate declarations. Check whether the same immediate ownership surface has another missing public helper; include it only if required by the actual build contract. Do not sweep unrelated internal or experimental modules into the public API. Do not rewrite proofs, change theorem signatures, or modify workflow gates/locks. Preserve the repository's re-export style and source citations.\n\nThis is an explicitly requested repository fix, not permission to weaken missing-artifact checks. Read relevant module documentation and mathematical source before any mathematical changes; none should be necessary. Keep the patch minimal. Demonstrate that the default canonical build now produces the affected artifacts, using the shared machine-wide build lock and an isolated worktree. Do not delete the main or hot cache, run lake update, write to the hot cache, or start a second full build. Focused import/type checks first, then required build/CI. No test-only mechanism that bypasses the real import graph.\n\n### Workflow\n\nOwner2026-09-12 all-Astra xhigh priority mode applies; use local/bin tools and preserve telemetry. Work only in the supplied isolated branch. Commit, publish through pr_open.py, run exact-head CI and hand off independent review without launching descendants. No main push/commit or PR merge, no force/reset/rebase, no native agents, no HOLD/STOP or qpbt-switch. Scrub invoking-model and review-model fields before CI fixture processes. Limit to45 active minutes, checkpoint if blocked, stop new work at08:00Z. Main/meta existing PR lanes are not yours to alter.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/537/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/529",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/529/labels{/name}",
@@ -9671,7 +9584,7 @@
   "milestone": null,
   "comments": 50,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-14T04:06:47Z",
+  "updated_at": "2026-09-14T04:55:55Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -9687,7 +9600,7 @@
    "blocking": 0,
    "total_blocking": 0
   },
-  "body": "Owner-facing estimate of track A progress, posted automatically every 6 hours by results/telemetry/owner-tools/estimate.sh (cron on ghz):\n\n1. roughly how many percent of the QPBT project is implemented (stage-4.3 obligations closed on main out of the 197 at the start of stage 4.3; plus sites proved in open PRs);\n2. how many days to go at the trailing-24-hour merged rate (count-based lower bound), with the open long-pole issues.\n\nMachine-readable record: results/telemetry/estimates.jsonl. Judgement-based revisions by the operator appear as replies when the mechanical numbers mislead (for example when only hard sites remain).",
+  "body": "Owner-facing estimate of track A progress, posted automatically every 90 minutes by results/telemetry/owner-tools/estimate.sh (cron on ghz):\n\n1. roughly how many percent of the QPBT project is implemented (stage-4.3 obligations closed on main out of the 197 at the start of stage 4.3; plus sites proved in open PRs);\n2. how many days to go at the trailing-24-hour merged rate (count-based lower bound), with the open long-pole issues.\n\nMachine-readable record: results/telemetry/estimates.jsonl. Judgement-based revisions by the operator appear as replies when the mechanical numbers mislead (for example when only hard sites remain).\n",
   "closed_by": null,
   "reactions": {
    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/168/reactions",
@@ -9895,8 +9808,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 31,
-   "completed": 20,
-   "percent_completed": 64
+   "completed": 21,
+   "percent_completed": 67
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -11938,9 +11851,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 295,
+  "comments": 301,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-14T04:08:01Z",
+  "updated_at": "2026-09-14T05:06:12Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
