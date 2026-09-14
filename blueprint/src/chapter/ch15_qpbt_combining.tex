@@ -1589,7 +1589,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:distance-point-defect, def:expanded-state}
+	\uses{lem:distance-point-defect, lem:distance-qform-nonnegative,
+		def:expanded-state}
 	By Lemma~\ref{lem:distance-point-defect} the left-hand side equals
 	$\|\hat\psi\|^2-\sum_a \bra{\hat\psi} A_a B_a \ket{\hat\psi}$, and
 	$\|\hat\psi\|=1$. On opposite placements the two effects commute and are
