@@ -20,33 +20,46 @@ This module is the part of the pause that knows *what is running*.  It:
     usually finishes, so it runs until the last minute) and `checkpoint` (a
     mature writer, whose worktree, thread id and step are recorded and which is
     stopped only at the last minute);
-  * stops what the rule says to stop, SIGTERM first and SIGKILL after the
-    recorded grace, and never signals a pid whose command line does not match
-    the session it is recorded as;
+  * stops what the rule says to stop — SIGTERM to the recorded dispatcher AND
+    to the codex process it owns, one shared grace for the whole phase, then
+    SIGKILL to the survivors — and never signals a pid whose command line does
+    not name the session it is recorded as;
   * builds the pause manifest — the lanes with the step they reached and the
     statuses already on their head, the stopped sessions with thread id, role,
     worktree, elapsed time and whether they are resumable, and the
     `daemon/pr<N>.failed` markers that appeared *during* the landing;
   * and turns that manifest back into a resume plan: each parked lane relaunched
-    at the step it reached, each checkpointed prover resumed through
+    at the step it reached and with the environment it carried, each
+    checkpointed writer the lane does NOT own resumed through
     `dispatch.sh --resume <thread>` with a continue prompt, each stopped
     reviewer restarted from scratch, and each recorded failed marker cleared.
 
-The plan is data.  `resume-plan` prints commands; it runs none of them.
+A lane owns its worker: `lane.sh` dispatches into the lane's worktree and keeps
+the thread id in `<state>/<issue>.thread`, so relaunching the lane resumes that
+thread.  Emitting the lane AND its session would put two writers into one
+worktree, so a session whose worktree belongs to a recorded lane is never an
+item of its own.
+
+The plan is data.  `resume-plan` prints commands; it runs none of them.  A
+manifest that has been replayed is stamped, and neither subcommand emits
+anything for it again unless `--force` is given.
 
 Usage:
   pause_landing.py thresholds [--json]
   pause_landing.py classify   [--json] [--now EPOCH]
+  pause_landing.py markers    [--state FILE]
   pause_landing.py manifest   [--cutoff-at TS] [--no-github] [--now EPOCH]
+  pause_landing.py statuses   [--state FILE]
   pause_landing.py land --phase now|last [--state FILE] [--dry-run]
-  pause_landing.py resume-plan [--state FILE] [--json]
-  pause_landing.py resume-exec [--state FILE] [--log FILE] [--dry-run]
+  pause_landing.py resume-plan [--state FILE] [--json] [--force]
+  pause_landing.py resume-exec [--state FILE] [--log FILE] [--dry-run] [--force]
 
 Environment: MIPSTARRE_CACHE_ROOT (runtime state root), MIPSTARRE_REPO_ROOT
   (the checkout whose `local/` tools the plan names), MIPSTARRE_CHECKOUT
   (the primary checkout a lane runs in; defaults to the repo root).
 
-Exit codes: 0 ok · 2 usage · 3 no usable pause record.
+Exit codes: 0 ok · 2 usage · 3 no usable pause record · 4 the plan ran but at
+  least one item could not be launched (the rest were).
 """
 
 from __future__ import annotations
@@ -103,7 +116,41 @@ CONTINUE_PROMPT = (
     "most the work since your last commit. Do not push."
 )
 
-LANE_RE = re.compile(r"^bash\s+\S*lane(-v\d+)?\.sh\s+(\d+)(?:\s+(\S+))?(?:\s+(\S+))?")
+#: The prompt for a stopped writer whose thread id was never captured.  It gets
+#: a FRESH session rather than nothing at all: the paid reasoning is gone either
+#: way, but the committed and uncommitted work in the worktree is not, and a
+#: session that is silently never put back is the worst of the three outcomes.
+RESTART_PROMPT = (
+    "The run was paused by the owner and this session was stopped mid-work. Its codex "
+    "thread could not be resumed, so this is a fresh session on the same task and the "
+    "same worktree. The worktree is exactly as the stopped session left it, including "
+    "any uncommitted edits and any commits it made: read it first (git status, git "
+    "diff, git log) and continue from that state rather than restarting the task. "
+    "Commit each proved lemma in the worktree, with the hooks running, before starting "
+    "the next one. Do not push."
+)
+
+#: A lane carries its variations in the environment, not in argv: the merge
+#: daemon starts refresh lanes with `LANE_BRANCH=codex/…`, and a stacked-PR lane
+#: with `SKIP_REVIEW=1`.  /proc/<pid>/cmdline cannot show them, so the manifest
+#: records them from /proc/<pid>/environ and the relaunch passes them back.
+LANE_ENV_KEYS = ("LANE_BRANCH", "SKIP_REVIEW", "MIPSTARRE_REVIEW_CMD")
+
+#: The dispatch flags a resumed session must carry back, spool field -> flag.
+#: account_router refuses a resume whose model differs from the thread's
+#: (`resume cannot switch model`), and the model is selected from the role, the
+#: job class, the effort and the hardness reason — so dropping them does not
+#: degrade the resume, it kills it with exit 4.
+RESUME_FIELD_FLAGS = (("job_class", "--job-class"), ("effort", "--effort"),
+                      ("hardness_reason", "--hardness-reason"),
+                      ("account", "--account"))
+
+#: `bash /…/lane.sh 7 slug prover`, with an optional `env K=V …` prefix so a
+#: lane someone relaunched by hand is still recognised.  Anchored: the script
+#: name must be the whole basename, and the issue must be the first argument.
+LANE_RE = re.compile(
+    r"^(?:env(?:\s+[A-Za-z_][A-Za-z0-9_]*=\S*)+\s+)?(?:bash\s+)?"
+    r"(\S*lane(?:-v\d+)?\.sh)\s+(\d+)(?:\s+(\S+))?(?:\s+(\S+))?")
 FAILED_MARKER_RE = re.compile(r"^pr(\d+)\.failed$")
 
 
@@ -215,6 +262,38 @@ class Processes:
         except OSError:
             return ""
         return raw.replace(b"\0", b" ").decode("utf-8", "replace").strip()
+
+    def environ(self, pid: int) -> dict[str, str]:
+        """The process environment, which /proc/<pid>/cmdline cannot show."""
+        try:
+            raw = Path(f"/proc/{pid}/environ").read_bytes()
+        except OSError:
+            return {}
+        out: dict[str, str] = {}
+        for chunk in raw.split(b"\0"):
+            if not chunk or b"=" not in chunk:
+                continue
+            key, _, value = chunk.partition(b"=")
+            out[key.decode("utf-8", "replace")] = value.decode("utf-8", "replace")
+        return out
+
+    def ppid(self, pid: int) -> int | None:
+        """The parent of *pid*, for walking a dispatcher's own process tree."""
+        try:
+            raw = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return None
+        try:  # the comm field is parenthesised and may itself contain spaces
+            fields = raw[raw.rindex(")") + 1:].split()
+            return int(fields[1])
+        except (ValueError, IndexError):
+            return None
+
+    def owner_uid(self, pid: int) -> int | None:
+        try:
+            return Path(f"/proc/{pid}").stat().st_uid
+        except OSError:
+            return None
 
     def started_at(self, pid: int) -> float | None:
         """Process start time as an epoch.  On Linux the /proc entry's ctime is
@@ -491,13 +570,29 @@ def live_lanes(root: Path | None = None, processes: Processes | None = None,
                 return {}
             return head_statuses(sha, checkout)
     state_dir = watchdog_dir(root) / "lanes"
+    # ghz runs the jobs of at least seven users, and `pids()` walks all of /proc.
+    # Another user's lane.sh is not this run's work: recording it would make the
+    # resume launch a genuine lane.sh for an issue this pause never touched.
+    try:
+        mine = os.getuid()
+    except AttributeError:  # pragma: no cover — POSIX only
+        mine = None
     out = []
     for pid in processes.pids():
         match = LANE_RE.match(processes.cmdline(pid))
         if not match:
             continue
+        if mine is not None:
+            owner = processes.owner_uid(pid)
+            if owner is not None and owner != mine:
+                continue
         issue, slug = match.group(2), match.group(3) or ""
-        branch = f"issue-{issue}-{slug}" if slug else ""
+        env = processes.environ(pid)
+        lane_env = {key: env[key] for key in LANE_ENV_KEYS if env.get(key)}
+        # LANE_BRANCH is what lane.sh itself uses (`BR="${LANE_BRANCH:-…}"`), so
+        # a refresh lane on `codex/issue-N-slug` must be recorded and relaunched
+        # against THAT branch, not against the name the slug implies.
+        branch = lane_env.get("LANE_BRANCH") or (f"issue-{issue}-{slug}" if slug else "")
         worktree = checkout / ".worktrees" / branch if branch else None
         head = git_head(worktree) if worktree and worktree.exists() else None
         out.append({
@@ -509,6 +604,7 @@ def live_lanes(root: Path | None = None, processes: Processes | None = None,
             "head": head,
             "step": lane_step(state_dir, issue),
             "statuses": statuses(head),
+            "env": lane_env,
             "pid": pid,
         })
     out.sort(key=lambda row: int(row["issue"]))
@@ -563,59 +659,204 @@ def new_failed_markers(before: dict[str, float], root: Path | None = None) -> li
 # Stopping
 # ---------------------------------------------------------------------------
 
-def stop(session: dict, limits: dict, processes: Processes,
-         dry_run: bool = False) -> dict:
-    """SIGTERM, then SIGKILL after the recorded grace.
+def is_ours(session: dict, processes: Processes) -> str | None:
+    """None when the pid is still the recorded session, else why it is not.
 
-    A pid is signalled only while it is still the process the record names: ghz
-    is a 128-core host shared with other users' jobs, so a recycled pid is a
-    real possibility and an unverified kill stops someone else's work.
+    Fail-closed.  ghz is a 128-core host shared with other users' jobs and the
+    spool keeps a row `running` until the janitor expires it, so a recycled pid
+    is a real possibility: an unreadable command line is NOT a licence to
+    signal, and `dispatch.sh` appearing anywhere in a command line says only
+    that the pid is *a* dispatcher, not that it is *this* session's.
     """
-    pid, name = session.get("pid"), session.get("name") or ""
-    row = {"pid": pid, "signal": "none", "stopped_at": None}
+    pid = session.get("pid")
     if not isinstance(pid, int) or isinstance(pid, bool):
-        row["signal"] = "no-pid"
-        return row
+        return "no-pid"
     if not processes.alive(pid):
-        row["signal"] = "already-gone"
-        return row
+        return "already-gone"
     cmd = processes.cmdline(pid)
-    if name and cmd and name not in cmd and "dispatch.sh" not in cmd:
-        row["signal"] = "not-ours"
-        row["cmdline"] = cmd[:60]
+    if not cmd:
+        return "not-ours"
+    role, issue = session.get("role"), session.get("issue")
+    # `dispatch.sh` in the command line says only that the pid is *a* dispatcher
+    # — the host runs several — so it is necessary and never sufficient.  The
+    # command line does not carry the session name (dispatch.sh mints it), but
+    # it does carry the worktree and the role/issue pair the record holds.
+    if "dispatch.sh" not in cmd:
+        return "not-ours"
+    identifying = [str(value) for value in (session.get("name"),
+                                            session.get("worktree")) if value]
+    if role and issue:
+        identifying.append(f"--role {role} --issue {issue}")
+    if not identifying or not any(value in cmd for value in identifying):
+        return "not-ours"
+    return None
+
+
+def child_map(processes: Processes) -> dict[int, list[int]]:
+    """Every live pid indexed by its parent, read once per landing phase."""
+    kids: dict[int, list[int]] = {}
+    for pid in processes.pids():
+        parent = processes.ppid(pid)
+        if parent:
+            kids.setdefault(parent, []).append(pid)
+    return kids
+
+
+def descendants(pid: int, kids: dict[int, list[int]]) -> list[int]:
+    out: list[int] = []
+    seen = {pid}
+    queue = [pid]
+    while queue:
+        for child in kids.get(queue.pop(0), ()):
+            if child in seen:
+                continue
+            seen.add(child)
+            out.append(child)
+            queue.append(child)
+    return out
+
+
+def terminate(session: dict, processes: Processes, kids: dict[int, list[int]],
+              dry_run: bool = False) -> dict:
+    """SIGTERM the recorded dispatcher AND the codex process it owns.
+
+    The spool records `dispatch.sh`'s pid, and dispatch.sh runs codex as a
+    foreground pipeline: bash defers a trap until that pipeline returns, so its
+    `trap 'exit 143' TERM` does nothing while codex runs, and codex keeps
+    spending quota until something kills it.  Signalling the wrapper's whole
+    process tree ends codex, which lets the wrapper's TERM trap — and with it
+    `cleanup`, which frees the account slot, the worktree lock and the branch
+    claim — run for itself.  Nothing outside that tree is touched.
+    """
+    pid = session.get("pid")
+    row = {"pid": pid, "signal": "none", "stopped_at": None}
+    reason = is_ours(session, processes)
+    if reason:
+        row["signal"] = reason
+        if reason == "not-ours":
+            row["cmdline"] = processes.cmdline(pid)[:60] if isinstance(pid, int) else ""
         return row
+    tree = descendants(pid, kids)
+    row["tree"] = tree
     if dry_run:
         row["signal"] = "TERM (dry-run)"
         return row
+    for target in tree:
+        processes.signal(target, signal.SIGTERM)
     processes.signal(pid, signal.SIGTERM)
     row["signal"] = "TERM"
-    processes.sleep(limits["phases"]["grace_s"])
-    if processes.alive(pid):
-        processes.signal(pid, signal.SIGKILL)
+    return row
+
+
+def free_locks(session: dict, root: Path | None = None) -> list[str]:
+    """Release what a SIGKILLed dispatcher could no longer release itself.
+
+    `cleanup` runs on the wrapper's EXIT; a SIGKILL skips it, and the leaked
+    account slot is counted by `account_router.reserve`, so the resumed run
+    would admit fewer workers than its restored cap for as long as the janitor
+    takes.  The spool row goes too: while it says `running`, its pid can be
+    recycled and the next landing would classify a stranger as this session.
+    """
+    root = root or cache_root()
+    pid = session.get("pid")
+    freed: list[str] = []
+    if not isinstance(pid, int) or isinstance(pid, bool):
+        return freed
+    accounts = root / "accounts"
+    try:
+        holders = list(accounts.iterdir())
+    except OSError:
+        holders = []
+    for holder in holders:
+        slot = holder / str(pid)
+        if slot.exists():
+            try:
+                slot.unlink()
+                freed.append(str(slot))
+            except OSError:
+                pass
+    try:
+        locks = sorted((root / "locks").iterdir())
+    except OSError:
+        locks = []
+    for lock in locks:
+        marker = lock / "pid"
+        try:
+            held = marker.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if held != str(pid):
+            continue
+        for name in ("pid", "since", "role", "session"):
+            try:
+                (lock / name).unlink()
+            except OSError:
+                pass
+        try:
+            lock.rmdir()
+            freed.append(str(lock))
+        except OSError:
+            pass
+    spool = session.get("spool")
+    if spool:
+        try:
+            os.unlink(str(spool))
+            freed.append(str(spool))
+        except OSError:
+            pass
+    return freed
+
+
+def finish(session: dict, processes: Processes, root: Path | None = None) -> dict:
+    """SIGKILL what survived the grace, then free what cleanup could not."""
+    row: dict = {"stopped_at": utcnow()}
+    pid = session.get("pid")
+    survivors = [target for target in list(session.get("tree") or []) + [pid]
+                 if isinstance(target, int) and processes.alive(target)]
+    for target in survivors:
+        processes.signal(target, signal.SIGKILL)
+    if pid in survivors:
         row["signal"] = "KILL"
-    row["stopped_at"] = utcnow()
+        row["freed"] = free_locks(session, root)
     return row
 
 
 def land(sessions: list[dict], phase: str, limits: dict,
-         processes: Processes | None = None, dry_run: bool = False) -> list[dict]:
+         processes: Processes | None = None, dry_run: bool = False,
+         root: Path | None = None) -> list[dict]:
     """Stop the sessions this phase owns and return them, annotated.
 
-    `now` stops the young only.  `last` stops everything still running — the
-    mature reviewers that did not finish and the checkpointed writers.
+    `now` stops the young only.  `last` is a superset: it stops everything the
+    landing has not stopped yet — the mature reviewers that did not finish, the
+    checkpointed writers, and any row an earlier phase failed to reach — so a
+    phase that died never leaves a session both unstopped and unrecorded.
+
+    The grace is slept ONCE for the whole phase, not once per session.  Sleeping
+    it per session cost `grace_s x sessions`: with the shipped policy, a 90-second
+    landing window and the seventeen sessions of 2026-09-12, the last call alone
+    would have run 340 seconds — four minutes past the owner's deadline.
     """
     processes = processes or Processes()
     wanted = "stop-now" if phase == "now" else "stop-at-last-call"
-    out = []
-    for session in sessions:
-        row = dict(session)
-        if row.get("action") != wanted or row.get("signal") not in (None, "", "pending"):
-            out.append(row)
-            continue
-        row.update(stop(row, limits, processes, dry_run))
+    rows = [dict(session) for session in sessions]
+    mine = [row for row in rows
+            if row.get("signal") in (None, "", "pending")
+            and (row.get("action") == wanted or phase == "last")]
+    if not mine:
+        return rows
+    kids = {} if dry_run else child_map(processes)
+    for row in mine:
+        row.update(terminate(row, processes, kids, dry_run))
         row["landed_in_phase"] = phase
-        out.append(row)
-    return out
+    if dry_run:
+        return rows
+    if any(row.get("signal") == "TERM" for row in mine):
+        processes.sleep(limits["phases"]["grace_s"])
+    for row in mine:
+        if row.get("signal") == "TERM":
+            row.update(finish(row, processes, root))
+        row.pop("tree", None)
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -637,6 +878,34 @@ def build_manifest(root: Path | None = None, processes: Processes | None = None,
         "sessions": classified(root, processes, now, limits),
         "failed_markers": [],
     }
+
+
+def merge_manifest(previous: dict, fresh: dict) -> dict:
+    """Fold a fresh classification into a landing that is already under way.
+
+    The lock only blocks a CONCURRENT pause, so a second owner-pause.sh — the
+    owner repeating the word, or an operator re-running after a phase failure —
+    reaches `manifest` again.  Replacing the record wholesale would lose every
+    `signal`, `stopped_at` and `thread_id` the first landing wrote, and would
+    re-snapshot the markers from a tree that already contains the ones the first
+    landing caused, so the resume would never clear them.
+    """
+    if not isinstance(previous, dict) or not previous:
+        return fresh
+    out = dict(fresh)
+    kept = [row for row in previous.get("sessions") or []
+            if row.get("signal") not in (None, "", "pending")]
+    names = {row.get("name") for row in kept}
+    out["sessions"] = kept + [row for row in (fresh.get("sessions") or [])
+                              if row.get("name") not in names]
+    before = previous.get("markers_before")
+    if isinstance(before, dict) and before:
+        out["markers_before"] = before
+    if previous.get("failed_markers"):
+        out["failed_markers"] = previous["failed_markers"]
+    if previous.get("landed_at"):
+        out["landed_at"] = previous["landed_at"]
+    return out
 
 
 def read_manifest(state: Path) -> dict:
@@ -672,10 +941,17 @@ def lane_resume_step(lane: dict) -> str:
     """Where a parked lane restarts.
 
     The head is the anchor: a lane whose worktree still holds the head the pause
-    recorded needs no dispatch, no merge, no build and no push, and each of the
-    two summary statuses already `success` on that head removes the step that
-    posts it.  A head that moved, or that cannot be read, resumes the whole
-    lane — re-running a step is cheap next to skipping one that never ran.
+    recorded needs no merge, no build and no push, and each of the two summary
+    statuses already `success` on that head removes the step that posts it.
+
+    `publish` is only for a lane that REACHED publication — one that left a
+    `<issue>.pr.md` behind.  A lane stopped at `warm` or `dispatch` resumes at
+    `dispatch`: its head is unchanged by definition (its worker had not
+    committed, or committed only milestones), and `publish` would set
+    SKIP_DISPATCH=1, skip lane.sh's `dispatch exit 0` and uncommitted-changes
+    gates, and spend a full CI run and a full independent review on a proof that
+    is not finished — the opposite of not paying twice.  Resuming at `dispatch`
+    costs nothing: lane.sh rebuilds `--resume` from `<state>/<issue>.thread`.
     """
     if lane.get("step") == "done":
         return "done"
@@ -687,38 +963,104 @@ def lane_resume_step(lane: dict) -> str:
         return "done"
     if states.get(CI_STATUS) == "success":
         return "review"
-    if lane.get("step") in ("ci", "review"):
-        return "ci"
-    return "publish"
+    if lane.get("step") in ("publish", "ci", "review"):
+        return "ci" if lane.get("step") in ("ci", "review") else "publish"
+    return "dispatch"
+
+
+def lane_env(lane: dict, step: str) -> dict[str, str]:
+    """The environment a relaunched lane needs: its own, plus the resume step.
+
+    LANE_RESUME_STEP travels in the environment rather than as an `env K=V`
+    argv prefix: a process started as `env …` has `env` as argv[0], which
+    matches neither this module's LANE_RE nor owner-pause.sh's anchored sweep
+    patterns, so one pause-resume cycle would make every lane invisible to the
+    next pause — still pushing and opening PRs after the owner was told the run
+    was paused.
+    """
+    env = {str(key): str(value) for key, value in (lane.get("env") or {}).items()
+           if key in LANE_ENV_KEYS}
+    env["LANE_RESUME_STEP"] = step
+    # A finished review on an unchanged head is the most expensive step there is
+    # to pay for twice; lane.sh already understands SKIP_REVIEW.
+    if (lane.get("statuses") or {}).get(REVIEW_STATUS) == "success":
+        env["SKIP_REVIEW"] = "1"
+    return env
 
 
 def lane_command(lane: dict, step: str, checkout: Path) -> list[str]:
-    return ["env", f"LANE_RESUME_STEP={step}",
-            str(Path(checkout) / "local" / "bin" / "lane.sh"),
+    return ["bash", str(Path(checkout) / "local" / "bin" / "lane.sh"),
             str(lane.get("issue")), str(lane.get("slug") or ""),
             str(lane.get("role") or "prover")]
 
 
 def session_command(session: dict, checkout: Path) -> list[str] | None:
+    """The one command that puts a stopped session back, or None with a reason.
+
+    Every field the spool recorded travels back: account_router refuses a resume
+    whose model differs from the thread's observed model, and the model comes
+    from the role, the job class, the effort and the hardness reason — so a
+    resume that drops them exits 4 and the paid context is lost while the
+    resume still reports `launched pid N`.
+    """
     dispatch = str(Path(checkout) / "local" / "bin" / "dispatch.sh")
     role = session.get("role") or "prover"
-    if session.get("resume") == "thread" and session.get("thread_id"):
-        argv = [dispatch, "--role", role, "--issue", str(session.get("issue") or ""),
-                "--sandbox", "workspace-write"]
-        if session.get("worktree"):
-            argv += ["--worktree", str(session["worktree"])]
-        argv += ["--resume", str(session["thread_id"]), "--", CONTINUE_PROMPT]
-        return argv
     if role == "reviewer":
         if not session.get("pr"):
             return None
         return [str(Path(checkout) / "local" / "bin" / "review.sh"), str(session["pr"])]
-    return None
+    issue = str(session.get("issue") or "").strip()
+    if not issue:
+        return None  # dispatch.sh exits 2 on an empty --issue; do not pretend
+    argv = [dispatch, "--role", role, "--issue", issue,
+            "--sandbox", str(session.get("sandbox") or "workspace-write")]
+    if session.get("worktree"):
+        argv += ["--worktree", str(session["worktree"])]
+    for field, flag in RESUME_FIELD_FLAGS:
+        value = session.get(field)
+        if value:
+            argv += [flag, str(value)]
+    # `persona` is recorded as the label dispatch.sh printed, `<ref>:<path>`;
+    # only that shape can be turned back into the flags it came from.
+    label = str(session.get("persona") or "")
+    ref = str(session.get("persona_ref") or "")
+    if ref and label.startswith(f"{ref}:"):
+        argv += ["--persona", label[len(ref) + 1:], "--persona-ref", ref]
+    if session.get("resume") == "thread" and session.get("thread_id"):
+        argv += ["--resume", str(session["thread_id"]), "--", CONTINUE_PROMPT]
+    else:
+        argv += ["--", RESTART_PROMPT]
+    return argv
 
 
-def resume_plan(manifest: dict, checkout: Path | None = None) -> list[dict]:
-    """Every action the resume takes to put the work back, as data."""
+def lane_owned(manifest: dict) -> dict[str, str]:
+    """Worktree and branch -> the issue of the lane that owns them.
+
+    `lane.sh` dispatches its worker into the lane's worktree and keeps the
+    thread id in `<state>/<issue>.thread`, so the lane IS the session's owner:
+    relaunching both would run `git merge`, `lake build` and `pr_open.py` in a
+    worktree a resumed codex session is editing, and the second writer would be
+    refused its branch claim after paying for its startup.
+    """
+    owners: dict[str, str] = {}
+    for lane in manifest.get("lanes") or []:
+        for key in (lane.get("worktree"), lane.get("branch")):
+            if key:
+                owners[str(key)] = str(lane.get("issue"))
+    return owners
+
+
+def resume_plan(manifest: dict, checkout: Path | None = None,
+                force: bool = False) -> list[dict]:
+    """Every action the resume takes to put the work back, as data.
+
+    A manifest already replayed yields nothing: the stamp is what keeps a second
+    owner-resume.sh — routine after "the resume message was not delivered" —
+    from launching a second writer per branch and a second review per PR.
+    """
     checkout = checkout or checkout_root()
+    if manifest.get("replayed_at") and not force:
+        return []
     plan: list[dict] = []
     for marker in manifest.get("failed_markers") or []:
         if marker.get("created_by_landing") and marker.get("path"):
@@ -730,27 +1072,48 @@ def resume_plan(manifest: dict, checkout: Path | None = None) -> list[dict]:
         step = lane_resume_step(lane)
         entry = {"kind": "lane", "issue": lane.get("issue"), "branch": lane.get("branch"),
                  "head": lane.get("head"), "step_reached": lane.get("step"),
-                 "resume_step": step, "statuses": lane.get("statuses") or {}}
+                 "resume_step": step, "statuses": lane.get("statuses") or {},
+                 "env": {}}
         if step == "done":
             entry["argv"] = None
             entry["why"] = "the head already carries both summary statuses"
         else:
             entry["argv"] = lane_command(lane, step, checkout)
+            entry["env"] = lane_env(lane, step)
             entry["why"] = f"parked at '{lane.get('step')}'; resumed at '{step}'"
         plan.append(entry)
+    owners = lane_owned(manifest)
     for session in manifest.get("sessions") or []:
         if session.get("signal") in (None, "", "none", "pending", "already-gone",
                                      "not-ours", "no-pid"):
             continue
-        argv = session_command(session, checkout)
-        plan.append({
-            "kind": "session", "name": session.get("name"), "role": session.get("role"),
-            "resume": session.get("resume"), "thread_id": session.get("thread_id"),
-            "worktree": session.get("worktree"), "argv": argv,
-            "why": ("resumed on its own thread; the worktree still holds its work"
-                    if session.get("resume") == "thread"
-                    else "restarted from scratch; a resumed review re-reads its whole context"),
-        })
+        entry = {"kind": "session", "name": session.get("name"),
+                 "role": session.get("role"), "resume": session.get("resume"),
+                 "thread_id": session.get("thread_id"),
+                 "worktree": session.get("worktree"), "env": {}}
+        owner = owners.get(str(session.get("worktree"))) or \
+            owners.get(str(session.get("branch")))
+        if owner is not None:
+            entry["argv"] = None
+            entry["owned_by_lane"] = owner
+            entry["why"] = (f"lane {owner} owns this worktree; the lane relaunch "
+                            "resumes the thread from its own record")
+            plan.append(entry)
+            continue
+        entry["argv"] = session_command(session, checkout)
+        if entry["argv"] is None:
+            entry["why"] = ("STOPPED AND NOT PUT BACK: no command can be rebuilt for "
+                            f"this {session.get('role')} (no PR number, or no issue); "
+                            "its worktree is untouched — relaunch it by hand")
+        elif session.get("resume") == "thread" and session.get("thread_id"):
+            entry["why"] = "resumed on its own thread; the worktree still holds its work"
+        elif session.get("role") == "reviewer":
+            entry["why"] = ("restarted from scratch; a resumed review re-reads its "
+                            "whole context")
+        else:
+            entry["why"] = ("no thread id was captured, so a FRESH session continues "
+                            "from the worktree it left")
+        plan.append(entry)
     return plan
 
 
@@ -762,6 +1125,12 @@ def resume_exec(plan: list[dict], log: Path | None = None, runner=None,
     through a shell and no generated text is ever `eval`ed.  The launcher is a
     seam: a test supplies its own and asserts the commands instead of running
     them.
+
+    One item that cannot be launched must not cost the rest of the plan: a
+    missing `review.sh`, or a `lane.sh` that lost its executable bit, used to
+    raise out of the loop and leave every later lane and session unlaunched —
+    and invisible, so a hand replay would double-launch the ones that did run.
+    Each failure is recorded on its own row and the plan continues.
     """
     handle = None
     if runner is None and not dry_run:
@@ -769,10 +1138,11 @@ def resume_exec(plan: list[dict], log: Path | None = None, runner=None,
             log.parent.mkdir(parents=True, exist_ok=True)
             handle = open(log, "a", encoding="utf-8")
 
-        def runner(argv):  # noqa: E306 — the real launcher, detached like the daemons
+        def runner(argv, env=None):  # noqa: E306 — detached, like the daemons
             return subprocess.Popen(argv, stdin=subprocess.DEVNULL,
                                     stdout=handle or subprocess.DEVNULL,
                                     stderr=subprocess.STDOUT,
+                                    env={**os.environ, **(env or {})},
                                     start_new_session=True).pid
     done = []
     try:
@@ -793,12 +1163,25 @@ def resume_exec(plan: list[dict], log: Path | None = None, runner=None,
             elif dry_run:
                 row["done"] = "would launch"
             else:
-                row["done"] = f"launched pid {runner(argv)}"
+                try:
+                    row["done"] = f"launched pid {runner(argv, entry.get('env') or {})}"
+                    row["resumed_at"] = utcnow()
+                except Exception as exc:  # noqa: BLE001 — one item must not end the plan
+                    row["done"] = f"FAILED to launch: {exc}"
             done.append(row)
     finally:
         if handle is not None:
             handle.close()
     return done
+
+
+def stamp_replay(manifest: dict, done: list[dict]) -> dict:
+    """Record that this manifest has been replayed, and with what result."""
+    manifest["replayed_at"] = utcnow()
+    manifest["replay"] = [
+        {"kind": row.get("kind"), "issue": row.get("issue"), "name": row.get("name"),
+         "pr": row.get("pr"), "done": row.get("done")} for row in done]
+    return manifest
 
 
 def quote(argv: list[str]) -> str:
@@ -815,7 +1198,12 @@ def format_plan(plan: list[dict]) -> str:
             lines.append(f"# lane {entry['issue']} — {entry['why']}")
         else:
             lines.append(f"# session {entry['name']} ({entry['role']}) — {entry['why']}")
-        lines.append(quote(entry["argv"]) if entry.get("argv") else "#   nothing to run")
+        if entry.get("argv"):
+            prefix = "".join(f"{key}={quote([value])} "
+                             for key, value in sorted((entry.get("env") or {}).items()))
+            lines.append(prefix + quote(entry["argv"]))
+        else:
+            lines.append("#   nothing to run")
     return "\n".join(lines) + ("\n" if lines else "")
 
 
@@ -843,6 +1231,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("classify")
     p.add_argument("--json", action="store_true")
     p.add_argument("--now", type=float, default=None)
+    sub.add_parser("markers").add_argument("--state", default=None)
+    sub.add_parser("statuses").add_argument("--state", default=None)
     p = sub.add_parser("manifest")
     p.add_argument("--cutoff-at", default=None)
     p.add_argument("--no-github", action="store_true")
@@ -855,10 +1245,12 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("resume-plan")
     p.add_argument("--state", default=None)
     p.add_argument("--json", action="store_true")
+    p.add_argument("--force", action="store_true")
     p = sub.add_parser("resume-exec")
     p.add_argument("--state", default=None)
     p.add_argument("--log", default=None)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--force", action="store_true")
     args = parser.parse_args(argv)
 
     state = Path(getattr(args, "state", None) or (watchdog_dir() / "pause-state.json"))
@@ -882,17 +1274,57 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(rows, indent=1) if args.json else _render_sessions(rows), end="")
         return 0
 
+    if args.cmd == "markers":
+        # Taken at the START of the pause, before the merge daemon is stopped:
+        # the daemon is the only writer of `daemon/pr<N>.failed`, so a snapshot
+        # taken at the landing phase — ten minutes after the daemon died — can
+        # never contain a marker the pause caused, and requirement 4's "clear
+        # the kill-caused markers" would be dead code on every real pause.
+        manifest = read_manifest(state) or {"schema": SCHEMA}
+        if manifest.get("markers_before"):
+            print(f"markers already snapshotted: {len(manifest['markers_before'])}")
+            return 0
+        manifest["markers_before"] = failed_markers()
+        write_manifest(state, manifest)
+        print(f"daemon failure markers before the pause: "
+              f"{len(manifest['markers_before'])}")
+        return 0
+
     if args.cmd == "manifest":
         statuses = (lambda sha: {}) if args.no_github else None
         manifest = build_manifest(statuses=statuses, now=args.now,
                                   limits=limits, cutoff_at=args.cutoff_at)
+        previous = read_manifest(state)
+        manifest = merge_manifest(previous, manifest)
         # The mtimes, not only the names: `new_failed_markers` decides by
         # difference, and a snapshot of bare paths would make every marker that
         # already existed look like one the landing caused — and the resume
         # would then clear a real failure verdict.
-        manifest["markers_before"] = failed_markers()
+        if not manifest.get("markers_before"):
+            manifest["markers_before"] = failed_markers()
         write_manifest(state, manifest)
         print(json.dumps(manifest, indent=1, sort_keys=True))
+        return 0
+
+    if args.cmd == "statuses":
+        # Read AFTER the young are stopped, never before: a GitHub read is
+        # bounded but not free, and the landing window is 90 seconds wide.
+        manifest = read_manifest(state)
+        if not manifest:
+            print(f"pause_landing.py: no landing manifest in {state}", file=sys.stderr)
+            return 3
+        deadline = time.monotonic() + STATUS_BUDGET_S
+        read = 0
+        for lane in manifest.get("lanes") or []:
+            if time.monotonic() >= deadline:
+                break
+            fresh = head_statuses(lane.get("head"))
+            if fresh:
+                lane["statuses"] = fresh
+                read += 1
+        write_manifest(state, manifest)
+        print(f"head statuses read for {read} of "
+              f"{len(manifest.get('lanes') or [])} lanes")
         return 0
 
     if args.cmd == "land":
@@ -918,6 +1350,11 @@ def main(argv: list[str] | None = None) -> int:
         if not manifest:
             print(f"pause_landing.py: no landing manifest in {state}", file=sys.stderr)
             return 3
+        if manifest.get("replayed_at") and not args.force:
+            print(f"this landing manifest was already replayed at "
+                  f"{manifest['replayed_at']}; nothing is launched again "
+                  f"(pass --force to replay it deliberately)")
+            return 0
         for lane in manifest.get("lanes") or []:
             lane["head_now"] = git_head(lane.get("worktree"))
             # The pause read the statuses against a deadline and may have run out
@@ -925,14 +1362,28 @@ def main(argv: list[str] | None = None) -> int:
             fresh = head_statuses(lane.get("head"))
             if fresh:
                 lane["statuses"] = fresh
-        plan = resume_plan(manifest)
+        plan = resume_plan(manifest, force=args.force)
         if args.cmd == "resume-plan":
             print(json.dumps(plan, indent=1) if args.json else format_plan(plan), end="")
             return 0
         print(format_plan(plan), end="")
         log = Path(args.log) if args.log else None
-        for row in resume_exec(plan, log=log, dry_run=args.dry_run):
+        done = resume_exec(plan, log=log, dry_run=args.dry_run)
+        for row in done:
             print(f"  {row['kind']}: {row['done']}")
+        if not args.dry_run:
+            # The stamp goes down whatever happened, so a second resume cannot
+            # launch a second writer per branch; --force is the deliberate way
+            # back in, and the per-item rows say what still needs a hand.
+            write_manifest(state, stamp_replay(manifest, done))
+        failed = [row for row in done if str(row.get("done", "")).startswith("FAILED")]
+        if failed:
+            print(f"pause_landing.py: {len(failed)} of {len(done)} items could not be "
+                  f"launched; the rest were", file=sys.stderr)
+            for row in failed:
+                print(f"  {row.get('kind')} {row.get('issue') or row.get('name')}: "
+                      f"{row['done']}", file=sys.stderr)
+            return 4
         return 0
 
     return 2
