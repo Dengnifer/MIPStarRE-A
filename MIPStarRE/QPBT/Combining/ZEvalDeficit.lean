@@ -22,7 +22,7 @@ calculations. The concrete X-deficit argument is separate, in
 
 ## References
 
-The Z deficit supports blueprint `lem:claim-17-3-re-direct`, alongside the
+The Z deficit supports blueprint `lem:claim-17-3-direct-real`, alongside the
 source `lem:claim-17-3`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`; the
 consistency input is `lem:qld-xz-lines` and the ordered products are those of

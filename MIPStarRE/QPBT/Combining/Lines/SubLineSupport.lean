@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Combining.Defs
 # Generating laws of the restricted line-point distributions
 
 This module rewrites the two restricted line-point laws of
-`def:ith-restricted-line` as push-forwards of a single uniformly sampled
+`def:ith-restricted-line-refined` as push-forwards of a single uniformly sampled
 low-degree vector conditioned on the coordinate-index fiber of its retained
 scalar seed.  In that form the point block, the seed and the direction block
 of the sampled vector are visibly the independent generating data of the
@@ -18,8 +18,8 @@ is asserted to follow a restricted law.
 The generating descriptions support `lem:qld-sublines` in
 blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The restricted laws themselves are `def:ith-restricted-line`, blueprint lines
-1209--1228, paper lines 1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048.
 -/
 
 open scoped BigOperators
@@ -92,9 +92,9 @@ theorem Distribution.restrict_map {α β : Type*} [DecidableEq α] [DecidableEq 
 
 /-! ## The coordinate-index event on a single uniform vector -/
 
-/-- The coordinate-index event of `def:ith-restricted-line` read on the single
+/-- The coordinate-index event of `def:ith-restricted-line-refined` read on the single
 uniformly sampled low-degree vector that generates the line-point laws.
-Blueprint `def:ith-restricted-line`, paper
+Blueprint `def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 def ldSeedEvent (L : LdParams) (i : Fin L.m) (z : LdSpace L) : Prop :=
   chiIndex L (LdSpace.seed z) = i
@@ -108,7 +108,7 @@ instance ldSeedEvent_decidablePred (L : LdParams) (i : Fin L.m) :
 
 /-- The coordinate-index event has positive mass under the uniform law on
 low-degree vectors, so the conditioning below is normalized.  Blueprint
-`def:ith-restricted-line`, paper
+`def:ith-restricted-line-refined`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
 theorem ldSeedEvent_positive (L : LdParams) (i : Fin L.m) :
     0 < ∑ z ∈ (uniformDistribution (LdSpace L)).support.filter

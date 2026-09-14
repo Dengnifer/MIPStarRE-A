@@ -1,16 +1,21 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
 import MIPStarRE.QPBT.Combining.Lines.SubLineBind
+import MIPStarRE.QPBT.Combining.Lines.SubLineTransport
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.LDT.Basic.DistributionAvg
 
 /-!
-# A uniform point of the extended space from the sub-line law
+# A uniform point of the extended space from the directly indexed sub-line law
 
 The first scalar estimate in the combining argument samples an extended line
-from the sub-line witness and then a uniform affine parameter on that line.
+from the auxiliary `SubLineWitness` and then a uniform affine parameter on that line.
 This module records that the resulting extended point is uniform and hence
-that its two source coordinate blocks are independent uniform points.
+that its two source coordinate blocks are independent uniform points. These
+identities concern `directLinePointDist`. Transport to the source's seed-indexed
+carrier remains open, as recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+"Scalar estimates on the auxiliary subline law".
 
 ## References
 
@@ -127,41 +132,6 @@ theorem avgOver_directLinePointDist_line_add_smul (D : DirectLdParams)
     WinImplications.avgOver_mix, haxis, hdiag]
   ring
 
-/-- Identify the directly indexed extended coordinates with the combining
-coordinate split. -/
-private def extendedFinCombineEquiv (P : AdmissibleParams) :
-    Fin P.extendedDirectLd.m ≃ ((Fin P.m ⊕ Fin P.m) ⊕ Fin 2) :=
-  (finCongr (by rfl)).trans (finCombineEquiv P.m)
-
-/-- Split an extended point into its two source blocks and two remaining
-scalar coordinates. -/
-private noncomputable def extendedPointBlocksEquiv (P : AdmissibleParams) :
-    (Fin P.extendedDirectLd.m → DirectScalarQ P.extendedDirectLd) ≃
-      ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) ×
-        (Fin 2 → PauliScalar P) :=
-  (Equiv.arrowCongr (extendedFinCombineEquiv P)
-      (extendedDirectScalarEquiv P)).trans
-    ((Equiv.sumArrowEquivProdArrow (Fin P.m ⊕ Fin P.m) (Fin 2)
-      (PauliScalar P)).trans
-      (Equiv.prodCongr
-        (Equiv.sumArrowEquivProdArrow (Fin P.m) (Fin P.m) (PauliScalar P))
-        (Equiv.refl (Fin 2 → PauliScalar P))))
-
-/-- The two source blocks of a uniform extended point are independent and
-uniform after the canonical scalar identification. -/
-private theorem uniformDistribution_map_projX_projZ_pauli_current
-    (P : AdmissibleParams) :
-    (uniformDistribution
-          (Fin P.extendedDirectLd.m → DirectScalarQ P.extendedDirectLd)).map
-        (fun u => (projX (directPointToPauli P u),
-          projZ (directPointToPauli P u))) =
-      uniformDistribution
-        ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) := by
-  classical
-  apply uniformDistribution_map_fst_of_equiv (extendedPointBlocksEquiv P)
-  intro u
-  apply Prod.ext <;> funext i <;> rfl
-
 /-- Under a sub-line witness, the two source blocks of the point at a uniform
 affine parameter are independent uniform source points. -/
 theorem SubLineWitness.avgOver_projX_projZ (P : AdmissibleParams)
@@ -196,8 +166,16 @@ theorem SubLineWitness.avgOver_projX_projZ (P : AdmissibleParams)
   refine (avgOver_directLinePointDist_line_add_smul P.extendedDirectLd
     (fun u => f (projX (directPointToPauli P u),
       projZ (directPointToPauli P u)))).trans ?_
-  rw [← uniformDistribution_map_projX_projZ_pauli_current,
-    Distribution.avgOver_map]
+  have hblocks :
+      (uniformDistribution
+            (Fin P.extendedDirectLd.m → DirectScalarQ P.extendedDirectLd)).map
+          (fun u => (projX (directPointToPauli P u),
+            projZ (directPointToPauli P u))) =
+        uniformDistribution
+          ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) :=
+    (uniformDistribution_map_projX_projZ_pauli P).trans
+      (uniformDistribution_prod _ _).symm
+  rw [← hblocks, Distribution.avgOver_map]
 
 end
 

@@ -3,8 +3,8 @@ import MIPStarRE.QPBT.Combining.Lines.SubLineSource
 /-!
 # The projected mixtures of the sub-line law
 
-This module assembles the two projected point marginals of the sub-line law of
-`lem:qld-sublines` into mixtures of the restricted product laws.  Drawing a
+This module expresses the two projected point marginals of the auxiliary,
+directly indexed sub-line law as mixtures of seed-bearing restricted product laws. Drawing a
 uniform point of the extended line of a mixture of line laws is the same
 mixture of the corresponding uniform-point laws, so the two projected
 marginals of the sub-line law are the mixtures, over the drawn kind and the
@@ -15,11 +15,13 @@ together with the pair of indices assigned to a uniform extended coordinate.
 
 ## References
 
-The assembly is the last step of the proof of `lem:qld-sublines` in
-blueprint `lem:qld-sublines`, whose source is
+This distributional identity is the final step of the auxiliary construction
+supporting blueprint `lem:qld-sublines`, whose source is
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`.
-The restricted laws are `def:ith-restricted-line`, blueprint lines
-1209--1228, paper lines 1038--1048.
+The restricted laws are the auxiliary blueprint `def:ith-restricted-line-refined`,
+supporting paper `def:ith-restricted-line` at lines 1038--1048. Neither the
+extended-line law nor these restrictions have been identified with their source
+counterparts; see `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 -/
 
 open scoped BigOperators
@@ -58,7 +60,7 @@ theorem subLineBranchDist_eq_bind (P : AdmissibleParams) (kind : LineKind) :
               (subLineSeedDist P (subLineZIndex P k)))).map
           fun w => subLineTripleOf P kind k w := by
   classical
-  rw [subLineBranchDist, subLineRawDist, Distribution.bind_map]
+  rw [subLineBranchDist, subLineSamplingDist, Distribution.bind_map]
   refine Distribution.bind_congr_support _ _ _ fun k _ => ?_
   rw [Distribution.map_map]
 
@@ -78,7 +80,7 @@ theorem subLineBranchDist_map_subLineXProjection_at (P : AdmissibleParams)
   classical
   unfold subLinePointDist
   rw [Distribution.prod_map_left, Distribution.map_map, Distribution.map_map]
-  exact subLineBranchRaw_map_projX P kind k
+  exact subLineBranchSampling_map_projX P kind k
 
 /-- The `Z` marginal of a uniform point of the extended line of one branch at
 one extended coordinate is the `Z` component law of the pair of indices of
@@ -96,7 +98,7 @@ theorem subLineBranchDist_map_subLineZProjection_at (P : AdmissibleParams)
   classical
   unfold subLinePointDist
   rw [Distribution.prod_map_left, Distribution.map_map, Distribution.map_map]
-  exact subLineBranchRaw_map_projZ P kind k
+  exact subLineBranchSampling_map_projZ P kind k
 
 /-! ## The mixing law of the two indices -/
 
