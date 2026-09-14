@@ -1268,3 +1268,6 @@
 {"ts": "2026-09-12T17:30:39+0900", "kind": "ci-build", "trigger": "ci.sh pr=539", "seconds": 38, "outcome": "success", "sha": "ce00de934dc4923945cb3931248edd93bb23ee38", "note": "branch issue-519-proof-tildem-consistent-pointmeas-prime"}
 {"ts": "2026-09-12T17:31:15+0900", "kind": "ci-build", "trigger": "ci.sh pr=507", "seconds": 412, "outcome": "success", "sha": "a7d262f3e07a39d8da77bc2592f2c8140d473074", "note": "branch issue-502-reviewed-merge-train"}
 {"ts": "2026-09-12T17:32:07+0900", "kind": "ci-build", "trigger": "ci.sh pr=260", "seconds": 33, "outcome": "success", "sha": "458ff46eb589e0357ff51e2a7ffed720cef8021b", "note": "branch issue-247-standing-owner-policy"}
+{"ts": "2026-09-14T11:20:18+0900", "kind": "ci-build", "trigger": "ci.sh pr=487", "seconds": 21, "outcome": "success", "sha": "5c3296da220928601b46c9e634273052a8874c29", "note": "branch issue-485-completed-point-self-consistency"}
+{"ts": "2026-09-14T11:48:24+0900", "kind": "ci-build", "trigger": "ci.sh pr=552", "seconds": 29, "outcome": "success", "sha": "600cabec05c27591e3780be6474da05b3ef580c5", "note": "branch issue-550-full-speed-v2"}
+{"ts": "2026-09-14T11:54:15+0900", "kind": "ci-build", "trigger": "ci.sh pr=385", "seconds": 31, "outcome": "success", "sha": "896c5727cb9ce6ec3b1f4295cf6e93799d4cbe3e", "note": "branch issue-379-recover-subline-ordered-product"}

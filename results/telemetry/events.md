@@ -8052,3 +8052,146 @@ not actual commit/publication hooks. No productive session was killed.
   PR would have been faster in wall clock and cheaper in rework: the four cross-item defects, the 13 round-1 blocking
   findings and the 9,427-line merge refusal that now blocks the stack all follow from integrating seven work items into
   one episode. The refinement produced no proof progress; it is workflow cost, recorded as such.
+
+## 2026-09-14T02:19:16Z - Resume under SLOW MODE
+
+- Read the new owner SLOW MODE section first and completed the requested
+  status snapshot. Verified current caps: primary0, second1, total1 worker.
+  The three-worker ceiling applies only after the owner enables two primary
+  slots with the new key. No credentials were inspected or changed.
+- The live merge daemon2038146 uses PAR=1 and is already refreshing487 under
+  handle2066425. Its current5c3296da build/render checks passed; the workflow
+  suite ran629 tests OK with9 skips. Its ordinary review stage has first claim
+  on the sole worker slot. No duplicate refresh or review was launched.
+- Verified the deployed owner shim preserves explicit Sol selection and has
+  no priority tier; review.sh defaults to independent_review under the committed
+  Sol policy. Current lane/CI paths are local and do not invoke chsh.
+-552/554/556 worktrees are clean and their local/published heads match:
+ 600cabec, c4106bbb, f2180406. Their CI/review evidence is absent. After ready
+  merge work, process552 then its stacked children through normal CI and Sol
+  review, without deploying their new runtime/offload machinery.
+- The latest owner order supersedes prior bulk lanes, retry/occupancy targets,
+  all-Astra routing and scheduled shutdowns. Use Sol by default, no speculative
+  second attempts, one critical-path prover after the merge/tooling sequence.
+  Astra is exceptional under the owner's20-50-dispatch rule and explicit
+  hardness criteria. Reports only at stage boundaries on27; nothing on168.
+  Main made no manual merge, source edit, main commit/push, or chsh invocation.
+- The owner-authorized goal was still paused; main resumed it with /goal resume.
+  Latest SLOW MODE rules override the goal's historical eight-worker wording.
+ 487 full CI succeeded and daemon reviewer-pr487-20260914-01 was admitted on
+  second; the companion prose lane queues behind the same one-worker cap.
+
+### 2026-09-14T02:25:38Z - Verify the single-slot review handoff
+
+- Current caps remain primary0/second1. Verified live model PID2225016 is
+  reviewer-pr487-20260914-01 on gpt-5.6-sol. Its prose companion stays queued;
+  no second model, duplicate writer, bulk lane or speculative proof was started.
+- Rechecked487's stack: its base is open472, whose own base is463. Neither
+  PR487 nor PR472 head is an ancestor of current mainad829df8. Preserve that
+  dependency; the daemon must not treat a main refresh as resolving the stack.
+ 385/531/285 are open main-based candidates and remain the next merge priorities.
+- This cycle is a verified wait on the existing reviewer and daemon refresh
+  handles.552/554/556 stay behind ready merge work. No new stage boundary or
+  merge occurred, so no extra27 report or168 post was made.
+
+### 2026-09-14T02:30:40Z - Retire mismatched487 automatic disposition
+
+- Code reviewer-pr487-20260914-01 completed with a required blueprint-coverage
+  finding on head5c3296da: product-law and conditioned inverse-mass estimates
+  need their own formalization-only entries. The old placement duplication was
+  correctly classified as unchanged-main material. No completed paper theorem
+  or current-head approval is inferred from the otherwise sound auxiliary proof.
+- The automatic487 template covered only the old sole placement finding, so
+  its applicability condition is now false. Removed487 from the daemon adj-list
+  and archived the template as/tmp/adjudication-487-retired-baseline-20260914.md.
+  Removing the template also prevents the already-running refresh's captured
+  adjudication mode from applying that mismatched disposition. Historical
+  comments, proof changes and reviews remain intact; no finding was waived.
+- Prose reviewer-pr487-20260914-02 is now admitted on Sol after the code lane
+  completed, still within primary0/second1. Await its canonical combined result
+  before choosing a bounded correction or tracked disposition. Other ready
+  main-based merges remain ahead of the tooling stack. No new competing worker,
+  source edits, chsh use, manual merge, or extra stage report was introduced.
+
+### 2026-09-14T02:34:31Z - Prepare bounded487 coverage correction
+
+- Revalidated primary0/second1 and live Sol prose reviewer2355171. No result
+  was inferred from elapsed time; the canonical combined review remains pending.
+- Read the actual completed/conditioned theorem signatures and paper
+  eq:qld-q-self-cons plus its pasting application. Prepared
+  /tmp/qpbt-487-slow-blueprint-fix-20260914.md with the exact distribution,
+  completion, opposite-placement and inverse-retained-mass distinctions.
+  This is an undispatched correction brief pending the combined verdict and
+  main's priority selection, not a new worker or proof change.
+- Main-based ready candidates keep priority, then552/554/556, then one
+  critical-path prover. No stage boundary occurred; no additional27/168 post.
+
+### 2026-09-14T02:38:38Z - Verified wait on487 prose review
+
+- Caps remain primary0/second1. Reviewer2355171 is live on Sol and its capture
+  shows completed source/blueprint searches at02:37:35Z, including distribution
+  and answer-order checks. This is ongoing review work, not a failed dispatch.
+- Preserve the worker and its pending canonical result. The prepared487
+  correction brief is not dispatched, and no historical eight-worker target or
+  speculative lane is applied in SLOW MODE. No stage-boundary post is due.
+
+### 2026-09-14T02:42:20Z - Prepare552 canonical CI without a competing worker
+
+- Verified552 is open and its clean registered worktree matches published
+  head600cabec05c27591e3780be6474da05b3ef580c5. No existing552 CI/review/fix
+  owner was active. Started ordinary local/bin/ci.sh552 as detached PID2610441,
+  logging to watchdog/lanes/pr552.slow-mode-ci-20260914.log.
+- This is non-model preparation for the owner's next tooling stage. The
+  sole worker slot remains with live Sol reviewer2355171 for487; no552 reviewer,
+ 554/556 lane, installer, chsh offload or new proof attempt was dispatched.
+  Required build locking and exact-head gates remain. Inherited model/CI
+  selectors and numeric overrides were removed; offload is explicitly disabled.
+- Ready main-based PRs keep priority for subsequent worker admission and
+  daemon merges.552 then554/556 will receive normal independent Sol review
+  once the current evidence and capacity permit. No runtime deployment or
+  oversized-commit override was inferred from the validation request.
+
+### 2026-09-14T02:48:47Z - Adopt487 review and552 green CI
+
+- Canonical review5193488642 on487 head5c3296da reports four findings: two
+  overlapping coverage requirements, an (X,Z) versus (Z,X) pasting-premise
+  mismatch, and mathematical prose corrections. Confirmed the actual
+  conditioned marginal theorem uses the swapped ordering. Updated the prepared
+  correction brief to include a coordinate-swap corollary without changing
+  existing valid theorem signatures/proofs or adding source hypotheses.
+- The obsolete baseline-only template was not applied: the daemon reported
+  no adjudication template, then advanced to385 refresh2793946.487's
+  findings and stacked dependency remain open. No reviewer approval or
+  automatic future-head waiver was fabricated.
+-552 full canonical CI succeeded on600cabec:1053 workflow tests OK,9 skipped,
+  with build/render and required audits green. Its independent Sol review
+  waits behind ready merge work; no installation, chsh use or tooling deployment
+  occurred. Current caps remain primary0/second1.
+
+### 2026-09-14T02:53:39Z - Verify385 refresh progression
+
+- Caps remain primary0/second1. Verified daemon refresh2793946 is live;
+  published/local385 head896c5727 matches. Build and blueprint-sync passed;
+  raw workflow output is629 tests OK,9 skipped. Remaining audits are running.
+  No stale lock or failed worker was inferred from the wait.
+-552's full non-partial CI manifest is confirmed successful on600cabec.
+  Its independent review remains the next tooling gate after ready merge work.
+  No competing model, bulk lane, chsh invocation or additional stage post.
+
+## 2026-09-14 — Resume in SLOW MODE (owner instruction 02:10Z)
+
+- Owner: resume development in slow mode: yxy key limit 2 + auth-3 key limit 2 = 4 slots, one main session (astra) and at most three
+  subagents, astra:sol about 1:20-50 for subagents (astra only where it pays), default speed. Meta: caps primary 0 / second 1 / total 1
+  until the auth-3 key appears on ghz (it is not in ~/.codex yet; the owner was asked for the file and its endpoint), then primary 2;
+  the shim's sol->astra rewrite removed and model.txt = auto so the published policy decides; daemon v9h restarted with PAR=1, keeper,
+  stack-watch and crons restored by /tmp/owner-resume.sh; slow-mode section appended to the main's handoff; the main session kept at
+  xhigh pending the owner's word on ultra. chsh is not used outside full speed mode.
+- 02:50Z-03:00Z (owner: four keys in /home/drx/.secrets/api-keys.md, limits 1 each and 2 for space-d; ghz only). Probes: space-1 OK,
+  space-d OK, relay-3 OK, relay-1 refused (401 API_KEY_DISABLED). Wiring on the two-account router: primary (~/.codex/auth.json) = the
+  relay-3 key (cap 1; old key backed up under ~/.codex/backup-20260914T0253Z), second (codex-home-yxy/auth.json) = the space-d key (cap 2;
+  the space-1 copy kept beside it); the main session moves to codex-home-space-1 (its own key) at effort ultra. Caps 1/2/3 (main + 3).
+  Ultra, measured with RUST_LOG=trace on the request body: codex sends `"reasoning":{"effort":"max"}` for model_reasoning_effort=ultra
+  now that the owner added ultra to gpt-6-astra's supported levels in ~/.codex/codex-models.json (on 09-05 the level was absent and
+  codex fell back to the model default, medium). "ultra" = max reasoning plus automatic delegation to sub-agents whose effort is
+  `multi_agent_reasoning_effort` (default xhigh); delegation stays OFF here (features.multi_agent=false) because the slot budget is 5.
+  The shim's astra ultra->xhigh mapping was removed.
