@@ -116,3 +116,51 @@ assumptions, weakened conclusion, or change to the final source theorem.
 There are no remaining proof holes or internal proof obligations in this
 auxiliary. Integration into the global polynomial-pair argument and
 independent review belong to subsequent work.
+
+## 2026-09-14 revalidation on today's main
+
+The branch was merged with `github/main` at `cebf210d` (merge commit
+`91e27366`). The merge was clean and changed nothing in this auxiliary: the
+whole difference between the merged branch and main is this file, the Lean
+file, the blueprint entry and one import line. The existing API this file uses
+(`combinedCoefAlgHom`, `combinedCoefInv`, `combinedCoef_eq_sum`,
+`eval_combinedCoef`, `exists_mem_support_of_combinedCoef_ne_zero`,
+`combinedRestrict`, `schwartzZippel_totalDegree`,
+`polynomialAgreement_avg_eq_agreementProbability`) is unchanged on main, and
+none of the five public declarations of this file exists on main under any
+name.
+
+Three review-facing additions were made, none of which touches a statement,
+a hypothesis or a proof of this auxiliary:
+
+- `lem:qpbt-block-specialization` in
+  `blueprint/src/chapter/ch15_qpbt_combining.tex` records the statement and
+  the proof sketch, tags the five public declarations, and carries
+  statement-level and proof-level `\leanok`; the proof of `lem:qld-4-7` now
+  lists it in `\uses`, since this is the specialization step of that proof.
+- `MIPStarRE/QPBT.lean` imports the module, so it is reachable from the
+  umbrella.
+- The two total-degree lemmas and the coefficient-existence lemma state in
+  their docstrings that they are formalization-only auxiliaries of the
+  specialization step following `eq:qld-g-2`, and name the two existing
+  individual-degree bounds `totalDegree_combinedCoef_le` and
+  `totalDegree_combinedRestrict_le` that they complement. Those two existing
+  bounds assume membership in `polyFunc` and conclude `m * d` and `k * d`;
+  the two new ones assume nothing and conclude `p.totalDegree`, so they are
+  not duplicates of the existing API.
+
+Revalidation on the merged tree:
+
+- `lake env lean MIPStarRE/QPBT/Combining/BlockSpecialization.lean` passed
+  with no errors and no warnings.
+- `scripts/blueprint_lean_sync.py --ci` reports blueprint and Lean in sync,
+  and its reverse coverage check reports no changed declaration missing a
+  blueprint entry.
+- `check_statement_paper_origin.py`, `audit_new_proof_obligation_metadata.py`,
+  `audit_paper_facing_proof_debt.py`,
+  `audit_conclusion_shaped_hypotheses.py`, `audit_unfaithful_markers.py`,
+  `audit_lean_axiom_declarations.py`, `check_source_statement_changes.py`,
+  `check_oversized_lean_files.py` and `check_blueprint_latex.py` all pass.
+- The whole-project build and `lake exe checkdecls blueprint/lean_decls`
+  belong to the lane CI at the exact head; the worktree does not carry a
+  complete set of compiled modules.

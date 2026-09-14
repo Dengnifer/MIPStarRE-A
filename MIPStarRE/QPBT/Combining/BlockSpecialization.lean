@@ -17,6 +17,8 @@ of the induced function, permits the argument for arbitrary degrees, including
 ## References
 
 * `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`
+* Blueprint: `lem:qpbt-block-specialization` in
+  `blueprint/src/chapter/ch15_qpbt_combining.tex`.
 * Issue #283.
 -/
 
@@ -37,7 +39,13 @@ private theorem combined_exp_sum_split {m k : ℕ} (s : Fin (m + k) →₀ ℕ) 
   rfl
 
 /-- Taking the coefficient of an `x`-monomial does not increase total degree
-in the remaining parameter variables. -/
+in the remaining parameter variables.
+
+Formalization-only auxiliary lemma for the specialization step following
+`eq:qld-g-2` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
+It is the total-degree counterpart of `totalDegree_combinedCoef_le`, which
+bounds the same coefficient through an individual-degree hypothesis. -/
 theorem totalDegree_combinedCoef_le_totalDegree {K : Type*} [CommSemiring K]
     {m k : ℕ} (p : MvPolynomial (Fin (m + k)) K) (μ : Fin k →₀ ℕ) :
     (combinedCoef p μ).totalDegree ≤ p.totalDegree := by
@@ -50,7 +58,12 @@ theorem totalDegree_combinedCoef_le_totalDegree {K : Type*} [CommSemiring K]
         ((combined_exp_sum_split s).symm.le.trans (MvPolynomial.le_totalDegree hs)))
   · simp
 
-/-- Substituting values for a block of variables does not increase total degree. -/
+/-- Substituting values for a block of variables does not increase total degree.
+
+Formalization-only auxiliary lemma for the specialization step following
+`eq:qld-g-2` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
+It is the total-degree counterpart of `totalDegree_combinedRestrict_le`. -/
 theorem totalDegree_combinedRestrict_le_totalDegree {K : Type*} [CommSemiring K]
     {m k : ℕ} (p : MvPolynomial (Fin (m + k)) K) (z : Fin m → K) :
     (combinedRestrict p z).totalDegree ≤ p.totalDegree := by
@@ -67,7 +80,11 @@ theorem totalDegree_combinedRestrict_le_totalDegree {K : Type*} [CommSemiring K]
 
 /-- Polynomial dependence on the `x` block supplies a nonzero coefficient
 polynomial of a positive-degree `x`-monomial. Dependence is expressed by
-excluding the image of the polynomial ring in the parameter variables. -/
+excluding the image of the polynomial ring in the parameter variables.
+
+Formalization-only auxiliary lemma constructing the witness used by the
+specialization step following `eq:qld-g-2` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`. -/
 theorem exists_nonzero_combinedCoef_of_depends_on_block {K : Type*} [CommSemiring K]
     {m k : ℕ} (p : MvPolynomial (Fin (m + k)) K)
     (hdep : ∀ r : MvPolynomial (Fin m) K,
