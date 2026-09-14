@@ -1,3 +1,13 @@
+---
+title: "Issue 509: unrestricted supplied point error"
+date: 2026-09-12
+purpose: >
+  Records the source mismatch and verified counterexample-supporting lemmas for
+  the unrestricted supplied point error tracked by issue #509 and PR #531.
+issue: "#509"
+pr: "#531"
+---
+
 # Issue 509: unrestricted supplied point error
 
 Session `prover-509-20260912-01`, based on main
