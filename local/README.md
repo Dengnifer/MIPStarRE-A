@@ -47,6 +47,29 @@ only: the "Dependencies" bullets in a packet body are commentary
 (`protocols/issues-prs.md` §1). A merged packet closes its issue and therefore
 unblocks its dependents with no edit anywhere.
 
+## The owner's live files
+
+Two runtime files are the **owner's**, not the pipeline's. Nothing in `local/bin`
+overwrites either of them, and every tool reads them rather than carrying a copy.
+
+| File (under `~/.cache/mipstarre-dev/watchdog/`) | Written by | Read by |
+|---|---|---|
+| `run-brief.json` | the owner, once per run | `local/bin/run_mode.py apply` |
+| `accounts.json` | the owner, at any moment | the capacity controller and `account_router.py`, every tick and every reservation |
+
+`accounts.json` is the live list of keys, their **ceilings** and whether the pipeline may
+use them — one entry per key, any number of endpoints and keys, and no key value ever
+stored in it. `run_mode.py apply` seeds it from the brief when it is absent and never
+overwrites an existing one, so the brief stays one-shot while the accounts stay live. Edit
+it with `results/telemetry/owner-tools/accounts.sh`, or from GitHub with an
+`ACCOUNTS: <name> ceiling=<n>` comment on the owner inbox issue
+(`local/protocols/full-speed-mode.md` §1.1).
+
+**Repository owner login:** `Dengnifer` — the one GitHub account whose `ACCOUNTS:` comments
+`local/bin/accounts_inbox.py` applies. Keep the line in exactly this form: the tool reads
+it from this file (after `MIPSTARRE_OWNER_LOGIN`, before the owner half of the repository
+slug), and `scripts/tests/test_accounts_inbox.py` checks that it is still here.
+
 ## Telemetry
 
 Retired useful-work queue: [historical protocol](protocols/useful-queue.md).

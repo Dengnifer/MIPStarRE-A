@@ -11,7 +11,8 @@
 #                         [--no-persona]          dispatch with the built-in role frame only
 #                         [--resume THREAD_ID]    continue an existing codex thread
 #                         [--continue-from FILE]  fresh primary checkpoint/budget handoff JSON
-#                         [--account ACCOUNT]     auto|primary|second (default auto)
+#                         [--account ACCOUNT]     auto, or a name from the live
+#                                                 accounts file (default auto)
 #                         [--effort LEVEL]        model_reasoning_effort override
 #                         [--job-class CLASS]     bounded audit-backed job class
 #                         [--context-file FILE]   untrusted data to attach (repeatable)
@@ -74,9 +75,10 @@
 #   MIPSTARRE_SESSION (dispatching session name), MIPSTARRE_DISPATCH_LOCK_WAIT,
 #   MIPSTARRE_MAX_CONTEXT_BYTES (default 100000), MIPSTARRE_LAKE_ROOT,
 #   LOCAL_REVIEW_ENABLED.
-#   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
-#   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home;
-#   overrides the brief's accounts[].codex_home, which is the default source).
+#   MIPSTARRE_CODEX_ACCOUNT (auto, or a name from watchdog/accounts.json),
+#   MIPSTARRE_ACCOUNT_WAIT (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND
+#   (the historical second account's home; overrides that entry's codex_home in
+#   the live accounts file, which is the default source for every account).
 #   MIPSTARRE_DISPATCH_ATTEMPTS (default 5), MIPSTARRE_DISPATCH_ATTEMPT (the
 #   attempt this invocation starts at, default 1), MIPSTARRE_DISPATCH_BACKOFF_S
 #   (base, default 30), MIPSTARRE_DISPATCH_BACKOFF_MAX_S (cap, default 600),
@@ -136,7 +138,9 @@ release_locks() {
 
 cleanup() {
   if [ "${ACCOUNT_ROUTING:-0}" -eq 1 ]; then
-    rm -f "$CACHE_ROOT/accounts/primary/$$" "$CACHE_ROOT/accounts/second/$$"
+    # Every account, not the two historical names: a reservation marker left
+    # behind holds a slot of a key nobody is using until the router reaps it.
+    rm -f "$CACHE_ROOT"/accounts/*/"$$"
   fi
   release_locks
   # A capture file is created early to reserve the sequence number. If we die
@@ -321,9 +325,16 @@ done
 
 TASK_PROMPT="$*"
 
+# Shape only here: the account SET lives on disk (watchdog/accounts.json, then
+# the cap files) and this runs before CACHE_ROOT is resolved.  Membership is
+# checked once below, before the attempt loop, so a typo is a usage error
+# instead of five retries with exponential backoff against a name that does not
+# exist.  A key the owner added with owner-tools/accounts.sh needs no code change.
 case "$ACCOUNT" in
-  auto|primary|second) ;;
-  *) die 2 "--account must be auto, primary, or second" ;;
+  auto) ;;
+  ''|*[!a-z0-9_-]*) die 2 "--account must be auto or an account name matching
+  [a-z0-9][a-z0-9_-]*, got '$ACCOUNT'" ;;
+  [!a-z0-9]*) die 2 "--account must start with a letter or a digit, got '$ACCOUNT'" ;;
 esac
 case "$ACCOUNT_WAIT" in
   ''|*[!0-9]*) die 2 "MIPSTARRE_ACCOUNT_WAIT must be a whole number of seconds" ;;
@@ -833,12 +844,70 @@ if isinstance(node, (str, int, float)) and not isinstance(node, bool):
 PY
 }
 
+account_list() {
+  # account_list — every routable account name, space separated, newest source
+  # first: the owner's live watchdog/accounts.json, then the max-codex-<name>
+  # files that exist, then the two historical names.  account_router.py owns
+  # that order; asking it here keeps admission and dispatch from disagreeing
+  # about which keys exist.
+  python3 - "$SCRIPT_DIR" "$CACHE_ROOT" <<'PY' 2>/dev/null || printf 'primary second'
+import sys
+from pathlib import Path
+
+sys.path.insert(0, sys.argv[1])
+try:
+    import account_router
+    print(" ".join(account_router.account_names(Path(sys.argv[2]))))
+except Exception:
+    print("primary second")
+PY
+}
+
+account_home() {
+  # account_home <account> — that key's CODEX_HOME, expanded, or empty.
+  #
+  # The source is `account_router.account_homes()`, which reads
+  # watchdog/accounts.json DIRECTLY — the same file `account_names()` admits
+  # against.  Asking `run_mode.py get codex_home.<account>` instead was the
+  # fail-open hole: that accessor goes through load_mode() -> with_live_accounts()
+  # and exits 2 on an invalid accounts file, so it resolved nothing for a third
+  # key while the router happily admitted to it from the max-codex-* glob, and
+  # the worker then ran on the ambient ~/.codex against the owner's ceiling of 5.
+  # account_homes() supplies ~/.codex for `primary` and honours
+  # MIPSTARRE_CODEX_HOME_SECOND, so the historical pair still resolves with no
+  # run mode at all; `run_mode.py get` stays as the second source for a host
+  # whose accounts file is absent but whose brief names a home.
+  local account="$1" home=""
+  home="$(python3 - "$SCRIPT_DIR" "$CACHE_ROOT" "$account" <<'PY' 2>/dev/null || true
+import sys
+from pathlib import Path
+
+sys.path.insert(0, sys.argv[1])
+try:
+    import account_router
+    resolved = account_router.account_homes(Path(sys.argv[2])).get(sys.argv[3])
+except Exception:
+    resolved = None
+if resolved:
+    print(resolved)
+PY
+)"
+  if [ -z "$home" ]; then
+    home="$(run_mode_field "codex_home.$account")"
+  fi
+  [ -n "$home" ] || return 0
+  case "$home" in "~/"*) home="$HOME/${home#\~/}" ;; esac
+  printf '%s' "$home"
+}
+
 account_labels() {
   # account_labels <account> — two lines: the key label, then the endpoint.
-  # These are the owner's brief as run-mode recorded it, so a key moved between
-  # homes keeps the identity failures and health are attributed to.
-  [ -f "$RUN_MODE_JSON" ] || return 0
-  python3 - "$RUN_MODE_JSON" "$1" <<'PY' 2>/dev/null || true
+  # The live accounts file is the routing source, so telemetry must read the
+  # same row. The run-mode snapshot is used only when no live file exists.
+  local source="$CACHE_ROOT/watchdog/accounts.json"
+  [ -f "$source" ] || source="$RUN_MODE_JSON"
+  [ -f "$source" ] || return 0
+  python3 - "$source" "$1" <<'PY' 2>/dev/null || true
 import json, sys
 
 try:
@@ -880,10 +949,12 @@ resolve_labels() {
   fi
   [ -n "$ENDPOINT_LABEL" ] || ENDPOINT_LABEL="$KEY_LABEL"
   valid_label "$KEY_LABEL" || die 4 "key label '$KEY_LABEL' for account '$account' is outside
-  [a-z0-9.-]{1,40}. Fix the account's 'label' in $RUN_MODE_JSON (or
+  [a-z0-9.-]{1,40}. Fix the account's live 'label' in
+  $CACHE_ROOT/watchdog/accounts.json (or
   MIPSTARRE_KEY_LABEL); dispatch refuses rather than recording the wrong key."
   valid_label "$ENDPOINT_LABEL" || die 4 "endpoint label '$ENDPOINT_LABEL' for account
-  '$account' is outside [a-z0-9.-]{1,40}. Fix the account's 'endpoint' in $RUN_MODE_JSON."
+  '$account' is outside [a-z0-9.-]{1,40}. Fix the account's live 'endpoint' in
+  $CACHE_ROOT/watchdog/accounts.json."
 }
 
 endpoint_health() {
@@ -916,7 +987,7 @@ endpoint_available() {
   # never reserved on: five client-side retries against a dead endpoint are how
   # 69 refusals became 69 deaths (events.md 2026-09-12, 05:30Z-05:58Z).
   local account state
-  for account in primary second; do
+  for account in ${ACCOUNT_LIST:-$(account_list)}; do
     case "$ACCOUNT_REQUESTED" in
       auto) ;;
       "$account") ;;
@@ -1118,6 +1189,16 @@ the spool entry is left for the janitor"
 # ---------------------------------------------------------------------------
 
 ACCOUNT_REQUESTED="$ACCOUNT"
+ACCOUNT_LIST="$(account_list)"
+if [ "$ACCOUNT_REQUESTED" != auto ]; then
+  case " $ACCOUNT_LIST " in
+    *" $ACCOUNT_REQUESTED "*) ;;
+    *) die 2 "--account '$ACCOUNT_REQUESTED' is not one of the configured accounts
+  (${ACCOUNT_LIST:-none}). Add the key with results/telemetry/owner-tools/accounts.sh
+  add <name> --endpoint E --codex-home D --ceiling N; it is routable at the next
+  reservation, with no restart and no re-brief." ;;
+  esac
+fi
 resolve_cutoff
 
 if [ "$DRY_RUN" -eq 0 ] && [ "$SANDBOX" != "read-only" ]; then
@@ -1217,18 +1298,25 @@ while :; do
   export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
   resolve_labels "$ACCOUNT"
   ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
-  if [ "$ACCOUNT" = second ]; then
-    # The BRIEF decides which home the second key uses.  `accounts[].codex_home`
-    # is validated by run_mode.py and exposed as `get codex_home.<account>`;
-    # reading `endpoint` and `label` from the run mode but not this one left the
-    # field inert, the same class the round-2 review fixed for run.main and
-    # models.override.  The environment variable stays as the override, and the
-    # 2026-09-12 path is the last fallback.
-    SECOND_HOME="$(run_mode_field codex_home.second)"
-    [ -n "${MIPSTARRE_CODEX_HOME_SECOND:-}" ] && SECOND_HOME="$MIPSTARRE_CODEX_HOME_SECOND"
-    [ -n "$SECOND_HOME" ] || SECOND_HOME="$HOME/.cache/mipstarre-dev/codex-home-yxy"
-    case "$SECOND_HOME" in "~/"*) SECOND_HOME="$HOME/${SECOND_HOME#\~/}" ;; esac
-    ACCOUNT_ENV+=("CODEX_HOME=$SECOND_HOME")
+  # The OWNER'S FILE decides which home each key uses — every key, not a special
+  # case for the second one.  `codex_home` is validated by accounts_file.py and
+  # read back through `run_mode.py get codex_home.<account>`.  An account whose
+  # home is the default ~/.codex needs no CODEX_HOME at all, so `primary` sets
+  # nothing and the variable stays UNSET rather than being set to the default —
+  # the deployed PATH shim treats "any non-default CODEX_HOME" as the thing it
+  # gates on, and setting it redundantly would arm that gate for no reason.
+  ACCOUNT_HOME="$(account_home "$ACCOUNT")"
+  # FAIL CLOSED.  An unresolvable home used to mean "omit CODEX_HOME", which is
+  # "run on ~/.codex" — the primary key — while the router had already counted
+  # the session against a different one.  Two keys' caps then landed on one key
+  # and no report said so.  A key the dispatcher cannot place is a refusal.
+  [ -n "$ACCOUNT_HOME" ] || die 4 "account '$ACCOUNT' has no codex_home the dispatcher
+  can resolve. It is admitted by watchdog/max-codex-$ACCOUNT but absent from
+  $CACHE_ROOT/watchdog/accounts.json (or that file does not parse). Running it
+  would spend the DEFAULT ~/.codex key under another key's name: refusing instead.
+  Fix the entry with results/telemetry/owner-tools/accounts.sh list / add."
+  if [ "$ACCOUNT_HOME" != "$HOME/.codex" ]; then
+    ACCOUNT_ENV+=("CODEX_HOME=$ACCOUNT_HOME")
   fi
 
   CODEX_ARGS=(exec)

@@ -142,6 +142,8 @@ before sharding; `telemetry.py events --since DATE` reads both.
 # Order is precedence: the first class whose pattern appears wins, because a
 # concurrency refusal and a 5xx outage both end in an exhausted reconnect and
 # the root cause is the one the controller must act on.
+# The built-in order mirrors the shipped policy.  A loaded policy keeps its own
+# order exactly; changing the JSON row order is an intentional precedence edit.
 DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
     "endpoint_5xx": [
         "503 Service Unavailable",
@@ -156,12 +158,40 @@ DEFAULT_FAILURE_PATTERNS: dict[str, list[str]] = {
     "retries_exhausted": [
         "Reconnecting... 5/5",
     ],
+    "auth": [
+        "401 Unauthorized",
+        "403 Forbidden",
+        "invalid_api_key",
+        "Invalid API key",
+        "invalid_request_error: api key",
+    ],
+    "insufficient_balance": [
+        "INSUFFICIENT_BALANCE",
+        "insufficient balance",
+        "insufficient_quota",
+        "You exceeded your current quota",
+        "billing_hard_limit_reached",
+    ],
     "timeout": [
         "deadline exceeded",
         "request timed out",
         "connection timed out",
     ],
 }
+
+#: Classes the policy legitimately names that the stream classifier does not
+#: scan for: the dispatcher records `refused` and `endpoint_down` from its own
+#: decision, `task_failure` follows from the exit code, and `none`/`unknown` are
+#: outcomes rather than wordings.  The controller reads their `counts_as` from
+#: the same policy rows, so they are skipped here silently rather than warned
+#: about as "unknown failure class".
+POLICY_ONLY_FAILURE_CLASSES = ("none", "refused", "endpoint_down", "task_failure",
+                               "unknown")
+
+#: Precedence for `classify_failure`: the first class whose pattern appears wins.
+#: Derived from the table above so a class added there cannot be silently
+#: unreachable — the drift that made `insufficient_balance` a dead letter.
+FAILURE_CLASS_ORDER = tuple(DEFAULT_FAILURE_PATTERNS)
 
 # Classes the dispatcher may retry (a refusal is not the session's fault).
 TRANSIENT_FAILURE_CLASSES = (
@@ -174,6 +204,11 @@ TRANSIENT_FAILURE_CLASSES = (
 KNOWN_FAILURE_CLASSES = (
     "none",
     "refused",
+    # The key itself is unusable: the answer is "disable this key and say why",
+    # not "lower the cap".  Deliberately NOT transient — retrying an invalid or
+    # exhausted key five times with backoff only spends the run's wall clock.
+    "auth",
+    "insufficient_balance",
     # `endpoint_down` is never produced by the stream: it is what the dispatcher
     # records when it refused to reserve on an endpoint the controller had
     # already marked down, so a preflight refusal is distinguishable from a
@@ -412,6 +447,32 @@ def find_rollout(thread_id: str | None) -> str | None:
     return str(matches[-1]) if matches else None
 
 
+def _policy_pattern_table(table) -> dict[str, list] | None:
+    """The policy's failure wordings as ``class -> patterns``, or ``None``.
+
+    ``local/capacity-policy.json`` writes the LIST form the capacity controller
+    validates — one object per class carrying ``failure_class``, ``counts_as``
+    and ``patterns`` — while older knobs wrote a plain object.  Reading only the
+    object form is how the policy's ``auth`` and ``insufficient_balance``
+    wordings never reached the classifier: the whole table was discarded without
+    a word, every quota refusal classified ``unknown``, and ``unknown`` is
+    neutral, so a dead key kept its cap.  Both shapes are read here so the file
+    the controller validates and the table the classifier uses cannot disagree.
+    """
+    if isinstance(table, dict):
+        return table
+    if not isinstance(table, list):
+        return None
+    out: dict[str, list] = {}
+    for row in table:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("failure_class")
+        if isinstance(name, str) and name:
+            out[name] = row.get("patterns")
+    return out or None
+
+
 def load_failure_patterns(repo_root: Path | None = None) -> dict[str, list[str]]:
     """Failure wordings, from ``local/capacity-policy.json`` when it exists.
 
@@ -439,13 +500,26 @@ def load_failure_patterns(repo_root: Path | None = None) -> dict[str, list[str]]
             if not isinstance(value, list):
                 warn(f"capacity-policy.json: failure_patterns[{index}].patterns is not a list")
                 continue
-            ordered[row["failure_class"]] = [
+            name = row["failure_class"]
+            if name in POLICY_ONLY_FAILURE_CLASSES:
+                continue
+            if name not in DEFAULT_FAILURE_PATTERNS:
+                warn(f"capacity-policy.json: ignoring unknown failure class {name!r}")
+                continue
+            cleaned = [
                 item for item in value if isinstance(item, str) and item.strip()
             ]
+            if cleaned:
+                ordered[name] = cleaned
         return ordered or patterns
     if not isinstance(table, dict):
         return patterns
     for name, value in table.items():
+        if name in POLICY_ONLY_FAILURE_CLASSES:
+            continue
+        if name not in DEFAULT_FAILURE_PATTERNS:
+            warn(f"capacity-policy.json: ignoring unknown failure class {name!r}")
+            continue
         if isinstance(value, str):
             value = [value]
         if not isinstance(value, list):
