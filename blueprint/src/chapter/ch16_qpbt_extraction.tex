@@ -494,6 +494,64 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	extraction conclusion below, remain open in Lean.
 \end{example}
 
+\begin{example}[Evaluated Pauli consistency from a supplied global witness]
+  \label{lem:qld-evaluated-pauli-given-global-pair}
+  \lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
+  \lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
+  \lean{MIPStarRE.QPBT.evaluated_pauli_tilde_consistency_ofGlobalPairWitness}
+  \leanok
+  \uses{lem:qld-4-7, lem:qld-construct-the-paulis, lem:qld-win-implications}
+  Assume the global polynomial-pair witness at error $\delta_G\geq0$ as data.
+  Each of the two point comparisons in Item 1 of
+  Lemma~\ref{lem:qld-construct-the-paulis} has a universal bound $CB$, where
+  $B=\delta_G+\sqrt\eps+md/q$ and $0\leq\eps\leq1$.
+  After enlarging the universal constant, the two consistency defects between
+  the evaluated total-Pauli measurement of one player and the pulled-apart
+  measurement of the other player are also at most $CB$ on $\ket{\hat\psi}$.
+  The constants precede all parameters, strategies, and supplied witnesses.
+  No construction of the global witness is asserted.
+\end{example}
+
+\begin{lemma}[Pauli comparison after a change of state]
+  \label{lem:qld-pauli-overlap-state-transfer}
+  \lean{MIPStarRE.QPBT.pauli_overlap_transfer}
+  \lean{MIPStarRE.QPBT.pauli_distance_on_ideal_le}
+  \lean{MIPStarRE.QPBT.extraction_small_error_absorption}
+  \leanok
+  \uses{def:generalized-pauli, def:EPR, lem:schwartz-zippel-total-degree}
+  Let $A=\{A_h\}$ be any POVM on $\mathcal H_A\ot\mathbb C^{q^M}$,
+  and let $\vartheta$ be a unit vector on the two local spaces
+  $(\mathcal H_A\ot\mathbb C^{q^M})\ot
+  (\mathcal H_B\ot\mathbb C^{q^M})$.
+  For a unit auxiliary vector set $\Delta=\mathrm{aux}\ot\mathrm{EPR}_q^{\ot M}$,
+  in local player order, and write
+  \[
+    E(\vartheta)=\mathbb E_u\sum_a
+      \langle\vartheta,A_{[g_h(u)=a]}\ot
+        (\Id_{\mathcal H_B}\ot\tau^W_{[g_h(u)=a]})\vartheta\rangle.
+  \]
+  Then, for either Pauli basis,
+  \[
+    \sum_h\|((A_h-\Id_{\mathcal H_A}\ot\tau^W_h)\ot\Id)\Delta\|^2
+    \leq 2(1-E(\vartheta))+2md/q+4\|\vartheta-\Delta\|.
+  \]
+  More generally, for any two local POVMs the evaluated overlap on
+  $\vartheta$ is at most their full diagonal overlap on $\Delta$ plus
+  $md/q+2\|\vartheta-\Delta\|$.
+  These bounds are independent of the dimensions and the number of answers.
+  Finally, for $0\leq\delta\leq1$ and $C\geq18$, both $16\delta$ and
+  $2\delta+2md/q+16\sqrt\delta$ are at most $C(\delta^{1/4}+md/q)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  A selected sum of effects of the product POVM is a positive contraction.
+  Its expectation changes by at most twice the distance between unit vectors.
+  Schwartz--Zippel bounds the unequal-encoding contribution by $md/q$.
+  Symmetry of the Pauli projectors moves their action across the EPR pair,
+  and the agreement inequality bounds the full distance by twice the overlap
+  deficit. The scalar bounds follow from $\delta,\sqrt\delta\leq\delta^{1/4}$.
+\end{proof}
+
 \begin{example}[Extraction with allowed error at least four]
 	\label{lem:qld-large-error-extraction-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness_of_four_le}

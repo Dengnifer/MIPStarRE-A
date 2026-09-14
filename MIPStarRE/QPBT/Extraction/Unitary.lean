@@ -2,6 +2,8 @@ import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.EPRState
 import MIPStarRE.QPBT.Extraction.Bounds
 import MIPStarRE.QPBT.Extraction.StateExtraction
+import MIPStarRE.QPBT.Extraction.PauliComparison
+import MIPStarRE.QPBT.Extraction.EvaluatedPauliConsistency
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -162,8 +164,14 @@ small-error case split, and combine the point-measurement consistency with the
 exact swap conjugation identities. The algebraic projection identity and
 corrected projection estimate are proved in `Extraction.EPRProjection`;
 `ProjectiveSetting.exists_unit_aux_near_eprProjection` supplies normalization.
-Issue #523 still requires deriving the correlation bounds for the swapped
-state and proving the total-Pauli measurement comparison. -/
+The swapped correlation bounds and normalized state are proved in
+`exists_extraction_aux_ofGlobalPairWitness`. The evaluated comparison is
+`evaluated_pauli_tilde_consistency_ofGlobalPairWitness`; the dimension-independent
+ideal-state estimate is `pauli_distance_on_ideal_le`. Issue #523 still requires
+transporting the evaluated comparison by both concrete swaps, identifying the
+result with the overlap in that estimate for each player, and assembling the
+fields with one common constant. `extraction_small_error_absorption` supplies
+the final scalar inequality. See `audits/2026-09-14_issue-523-continuation.md`. -/
 theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),

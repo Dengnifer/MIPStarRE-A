@@ -57,6 +57,10 @@ target's nested scale when C is at least four and construction error at least on
 
 ## Required Action
 
+The subsequent continuation's estimates and current remaining obligation are
+recorded in `2026-09-14_issue-523-pauli-comparison.md`. The paragraph below
+records the proof boundary at this earlier state-extraction checkpoint.
+
 The remaining construction is the small-error total-Pauli comparison on the
 normalized ideal state, paper lines 1785-1858. Combine supplied-witness point
 consistency with the game's evaluated Pauli/point consistency, conjugate the
