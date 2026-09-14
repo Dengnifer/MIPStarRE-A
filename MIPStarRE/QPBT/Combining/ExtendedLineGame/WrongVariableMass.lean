@@ -45,7 +45,9 @@ def scalarWrongVariableMass {P : AdmissibleParams} {ε : ℝ}
       (Finsupp.single (if reverse then 0 else 1) 1) reverse = MvPolynomial.C r),
     ‖applyOperatorToState (S.place p (R.effect g)) S.psiHat‖ ^ 2
 
-private theorem placed_fiber_orderedIndicator {P : AdmissibleParams} {ε : ℝ}
+/-- Exact placement and order transport for the common joint scalar sample.
+This also transports the retained-overlap calculation in `lem:qld-4-7`. -/
+theorem placed_fiber_orderedIndicator {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (p : Placement) (reverse : Bool)
     (x z : Fin P.m → PauliScalar P) (v : Fin 2 → PauliScalar P) (a : PauliScalar P) :
     orderedIndicator

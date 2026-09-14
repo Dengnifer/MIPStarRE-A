@@ -55,6 +55,7 @@ import MIPStarRE.QPBT.Combining.OrderedPolynomialEstimates
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.RoundedPolynomialEstimates
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ScalarNonlinearMass
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.WrongVariableMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport

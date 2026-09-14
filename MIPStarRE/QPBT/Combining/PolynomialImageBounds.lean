@@ -139,7 +139,7 @@ private theorem orderedIndicator_zero (X Z : Quantum.Measurement F ι) (α a : F
 /-- Every linear-answer ordered indicator is a contraction. For nonzero
 second coefficient this follows from the diagonal identity; at zero it
 follows from completeness and projective postprocessing. -/
-private theorem orderedIndicator_gram_le_one (X Z : Quantum.Measurement F ι)
+theorem orderedIndicator_gram_le_one (X Z : Quantum.Measurement F ι)
     (hX : Measurement.IsProjective X) (hZ : Measurement.IsProjective Z) (α β a : F) :
     (orderedIndicator X Z α β a)ᴴ * orderedIndicator X Z α β a ≤ 1 := by
   by_cases hβ : β = 0

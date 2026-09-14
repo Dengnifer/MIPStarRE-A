@@ -3174,6 +3174,172 @@ nonnegative domains.
 	$Dg(\eps,\rho)\ge1$, so the cap proves the same bound.
 \end{proof}
 
+\begin{definition}[Restriction and completion on polynomial pairs]
+\label{def:qld-pair-restriction-completion}
+\lean{MIPStarRE.QPBT.recoverCombinedPair}
+\lean{MIPStarRE.QPBT.recoverCombinedPair_combinePoly}
+\lean{MIPStarRE.QPBT.combinePoly_injective}
+\lean{MIPStarRE.QPBT.combinedPolyEmbedding}
+\lean{MIPStarRE.QPBT.combinedPolyEmbedding_eval}
+\lean{MIPStarRE.QPBT.combinedPairSubmeasurement}
+\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_projective}
+\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_missing}
+\lean{MIPStarRE.QPBT.completedPairLabel}
+\lean{MIPStarRE.QPBT.completedPairLabel_combinedPolyEmbedding}
+\lean{MIPStarRE.QPBT.completedPairLabel_of_not_mem_range}
+\lean{MIPStarRE.QPBT.completedPairMeasurement}
+\lean{MIPStarRE.QPBT.completedPairMeasurement_effect}
+\lean{MIPStarRE.QPBT.completedPairMeasurement_projective}
+\leanok
+For admissible parameters, write $j(g_X,g_Z)=\combine_{g_X,g_Z}$.
+Substituting the scalar coordinates $(1,0)$ and $(0,1)$ and setting the
+unused base block to zero recovers the two formal polynomials, so $j$ is
+injective without any field-size restriction. Evaluation satisfies
+$j(g_X,g_Z)(x,z,\alpha,\beta)=\alpha g_X(x)+\beta g_Z(z)$.
+Given a complete measurement $R$ on bounded extended polynomials, define
+$U_{g_X,g_Z}=R_{j(g_X,g_Z)}$. Its missing operator is
+$D=I-\sum U=\sum_{g\notin\operatorname{range}j}R_g$.
+For a fixed pair $p_0$, relabel each combined outcome by its pair and each
+remaining outcome by $p_0$. The resulting complete measurement has effects
+$C_p=U_p+1_{p=p_0}D$. If $R$ is projective, both $U$ and $C$ are projective.
+These are the algebraic constructions in the completion paragraph of the
+proof of Lemma~\ref{lem:qld-4-7} in \cite{Ji2020MIPStar}.
+\end{definition}
+
+\begin{definition}[Completion of the actual singleton outcomes]
+\label{def:qld-direct-pair-completion}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPolynomialEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement_effect}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_projective}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.mem_range_directCombinedEmbedding}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding_read}
+\leanok
+\uses{def:qld-pair-restriction-completion}
+Taking the unique component of a singleton polynomial tuple and applying the
+canonical field isomorphism gives an equivalence $e$ with bounded extended
+polynomials over $\F_q$. Support inclusion transports the individual-degree
+certificate in both directions. Put $j_{\rm dir}=e^{-1}\circ j$ and relabel
+the actual rounded measurement by $e$; its effect at $h$ is exactly
+$R_{e^{-1}(h)}$. Apply Definition~\ref{def:qld-pair-restriction-completion}
+to obtain $C$. This preserves projectivity and every outcome.
+Membership in the range of $j_{\rm dir}$ is precisely equality, after field
+transport, to $\combine_{g_X,g_Z}$ for a bounded pair. The actual direct
+readout of $j_{\rm dir}(g_X,g_Z)$ is
+$\alpha g_X(x)+\beta g_Z(z)$ under the joint question equivalence.
+\end{definition}
+
+\begin{theorem}[Incorrect outer projection of the ordered product]
+\label{thm:qld-retained-local-mismatch}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.orderedIndicator_gram_le_one}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_wrong_ordered_norm_sq_le}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.point_mismatch_le_ordered_error}
+\leanok
+Let $X,Z$ be complete projective measurements with outcomes in a finite
+field $F$, let $r,t\in F$, and let $v$ be any vector. Set
+$T_{\alpha,\beta}=\sum_{\alpha b+\beta c=\alpha r+\beta t}X_bZ_c$.
+Each $T_{\alpha,\beta}$ is a contraction, and
+\[
+ \mathbb E_{\alpha,\beta}\|(I-X_r)T_{\alpha,\beta}v\|^2
+ \leq \frac{2}{|F|}\|v\|^2,
+ \qquad
+ \|(I-X_r)v\|^2\leq
+ 2\mathbb E_{\alpha,\beta}\|v-T_{\alpha,\beta}v\|^2
+ +\frac{4}{|F|}\|v\|^2.
+\]
+No normalization or commutation of $X$ with $Z$ is required.
+\end{theorem}
+\begin{proof}
+\leanok
+When $\beta\ne0$, orthogonality identifies the squared norm with the
+sum of $Z_cX_bZ_c$ selected by the scalar check and $b\ne r$.
+The affine collision probability is $1/|F|$ for each such pair. Sum its
+nonnegative sandwich weights before using completeness. The exception
+$\beta=0$ contributes at most another $\|v\|^2/|F|$ by contraction.
+Apply the squared triangle inequality to
+$(I-X_r)v=(I-X_r)(v-Tv)+(I-X_r)Tv$.
+\end{proof}
+
+\begin{theorem}[Retained point overlap on both register placements]
+\label{thm:qld-retained-point-overlap}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.placed_fiber_orderedIndicator}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch_le_ordered_error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointOverlap}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch_eq}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointOverlap_ge_ordered_error}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-retained-local-mismatch}
+Let $R$ be a complete projective singleton-polynomial measurement on a
+placement $p_1$, and let $p_2$ be opposite. For a bounded pair $g$, put
+$v_g=(R_{j_{\rm dir}(g)})_{p_1}\hat\psi$. Define
+\[
+ K_W=\mathbb E_u\sum_g\|(I-\hat M^{W,u}_{g_W(u)})_{p_2}v_g\|^2,
+ \qquad
+ H_W=\mathbb E_u\sum_g
+ \langle\hat\psi|(R_{j_{\rm dir}(g)})_{p_1}
+   (\hat M^{W,u}_{g_W(u)})_{p_2}|\hat\psi\rangle.
+\]
+Write $G$ for the actual mass outside the bounded combining image, and
+$E^{XZ},E^{ZX}$ for the full ordered errors. Then
+\[
+ K_W=1-G-H_W,\qquad
+ K_X\leq2E^{XZ}+4/q,\qquad K_Z\leq2E^{ZX}+4/q.
+\]
+Thus $H_X\geq1-G-2E^{XZ}-4/q$ and
+$H_Z\geq1-G-2E^{ZX}-4/q$. These statements hold for every opposite
+placement, including both $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{theorem}
+\begin{proof}
+\leanok
+Apply Theorem~\ref{thm:qld-retained-local-mismatch} on each actual vector
+$v_g$, reversing both base and scalar blocks for Z. The joint coordinate
+equivalence preserves the uniform law and the placed ordered product.
+Injectivity bounds the retained sums by the full outcome sums.
+Projectivity and normalization give total squared mass one. Opposite
+placements commute, yielding the exact identity for $K_W$.
+\end{proof}
+
+\begin{theorem}[Completed pair witness with the actual rounded error]
+\label{thm:qld-completed-pair-actual-error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le_ordered_error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_pairWitness_of_points_lines}
+\leanok
+\uses{thm:qld-retained-point-overlap, def:qld-pair-restriction-completion}
+There are universal $a\geq1$ and $0<b\leq1$ with the following property.
+Given an admissible projective setting, a combined-point witness of error
+$\delta_Q$, and a directly indexed completed-answer extended-line witness
+of error $\delta_L$ for that same point witness, put
+\[
+ \delta=\delta_{\rm ld}\left(a,b,
+  3\left(\sqrt{\delta_Q+\delta_L}+md/q\right),q,2m+2,d,1\right),
+ \quad \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta},
+ \quad E=4\eta+8\delta_Q.
+\]
+The actual rounded measurements give complete projective polynomial-pair
+measurements whose four point-consistency defects, for X and Z on each
+player placement, are all at most
+\[
+ 8E+\frac{12md+4d+14}{q}.
+\]
+More generally, completion has defect at most $G+K_W$, hence at most
+$G+2E^W+4/q$, on each opposite placement.
+This auxiliary explicitly assumes the two displayed witnesses. The source
+Lemma~\ref{lem:qld-4-7} remains open pending their construction from its
+original hypotheses and absorption of this actual error into $\delta_{\rm qld}$.
+\end{theorem}
+\begin{proof}
+\leanok
+Completion only increases the retained overlap, because its added operator
+and the opposite point effect are commuting positive operators. Combine
+the preceding retained bounds with $G\leq6E+(12md+4d+10)/q$.
+The two rounded measurements are chosen before either basis estimate, so
+one completed measurement on each player side supplies both conclusions.
+\end{proof}
+
 \begin{theorem}[Absorption into the global polynomial-pair error]
 	\label{thm:qld-global-pair-error-bound}
 	\lean{MIPStarRE.QPBT.exists_global_pair_error_bound}
