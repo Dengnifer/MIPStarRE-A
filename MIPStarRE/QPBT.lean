@@ -26,6 +26,8 @@ import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.Sandwich
 import MIPStarRE.QPBT.Games.CondLinearTheorems
 import MIPStarRE.QPBT.Games.TypedCondLinear
+import MIPStarRE.QPBT.Games.GroundCompression
+import MIPStarRE.QPBT.Games.SupportedCompletion
 import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.Setup

@@ -7,6 +7,7 @@ import MIPStarRE.Quantum.FiniteMatrix.NormalizedTrace
 import MIPStarRE.Quantum.FiniteConicDuality
 import MIPStarRE.Quantum.ProjectorONB
 import MIPStarRE.Quantum.Measurement
+import MIPStarRE.Quantum.ControlledUnitary
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
