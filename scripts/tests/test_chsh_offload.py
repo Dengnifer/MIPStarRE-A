@@ -339,6 +339,7 @@ class FallbackTest(ShellTestCase):
             # these tests state it: without it the helper answers "not a full
             # speed run" and never reaches the script at all.
             env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
+                         MIPSTARRE_OFFLOAD="1",
                          MIPSTARRE_RUN_MODE=str(self.run_mode_stub("yes"))))
         self.ran = ran
         self.built = built
@@ -403,6 +404,7 @@ class FallbackTest(ShellTestCase):
             helper=HELPER_SH, built=built, worktree=self.worktree, local_rc=0))
         done = subprocess.run(["bash", str(driver)], capture_output=True, text=True,
                               env=self.env(MIPSTARRE_OFFLOAD_SCRIPT=str(script),
+                                           MIPSTARRE_OFFLOAD="1",
                                            MIPSTARRE_RUN_MODE=str(self.run_mode_stub("no"))))
         self.assertIn("host=ghz", done.stdout)
         self.assertFalse(ran.exists(),
