@@ -86,25 +86,40 @@ These stay in `~/bin` on the host — they are the owner's, not the pipeline's �
 ## The owner's four commands
 
 ```sh
+owner-bin/owner-pause.sh  --cutoff [--reason "..."] [--dry-run]     # word 1: admission only
 owner-bin/owner-pause.sh  [--deadline 15m] [--reason "..."] [--dry-run]
-owner-bin/owner-resume.sh [--dry-run] [--force-crontab]
+owner-bin/owner-resume.sh [--dry-run] [--force-crontab] [--no-work]
 owner-bin/owner-say.sh --mode idle|interrupt|terminal [--timeout N] "TEXT"
 owner-bin/install-crons.sh [--paused] [--dry-run] [--restore FILE]
 ```
 
+### `owner-pause.sh --cutoff` — the first word: admission only
+
+Caps to 0 through run-mode, `watchdog/drain` touched, one `owner-say.sh --mode interrupt`
+telling the main session to start nothing new — and that is all. **No process is
+signalled, no daemon is stopped and the crontab is untouched**, so everything already
+running finishes and the merge daemon still merges what passes. It records
+`watchdog/cutoff` and a `pause-state.json` with `status: cutoff`. A second `--cutoff`
+inside the same `cutoff_lead_min` window re-asserts admission silently; one given after
+that window has elapsed sends a fresh message, because a main session that was never
+paused is still dispatching into refused reservations. `owner-resume.sh` removes
+`watchdog/cutoff`, so the next cutoff always speaks. Give it as early as you can: the
+lead is what makes the pause cheap.
+
 ### `owner-pause.sh` — pause within the deadline
 
 The deadline comes from `run.pause_deadline_min` in the run brief; no timestamp is written
-into the script. `--dry-run` prints the phase plan and the computed deadline and touches
-nothing.
+into the script. `--dry-run` prints the phase plan, the computed deadline, the landing
+rule and the thresholds it read, and touches nothing.
 
 | T | Phase |
 |---|---|
-| +0:00 | `run_mode.py pause` — caps to 0, pre-pause caps saved **inside** `capacity/state.json`; `touch watchdog/drain` |
+| +0:00 | `run_mode.py pause` — caps to 0, pre-pause caps saved **inside** `capacity/state.json` (and read back from `saved_caps` when a cutoff already zeroed the live ones); `touch watchdog/drain` **and** `watchdog/paused`, which is the marker `owner-resume.sh`'s post-condition requires; snapshot the merge daemon's `daemon/pr<N>.failed` markers **before** the daemon is stopped, since afterwards nothing can write one |
 | +0:30 | queued dispatches release themselves at the drain (none is killed); keeper, merge daemon, stack-watch and **capacityd** stopped by stop file (**kept**) and by a pid the script verifies against `/proc/<pid>/cmdline` first — a paused pipeline has no daemons running, and on a 128-core host shared with other users a recycled pid is real |
 | +1:00 | exactly one `owner-say.sh --mode terminal`: closing progress comment and handoff, no prose on the estimate issue, **no auto-resume** |
 | +2:00 | `crontab -l` backed up verbatim to `$W/crontab.<ts>.bak` (the phase fails if it returns nothing), then the paused crontab installed from a file under `$W` |
-| D−2:00 | leftovers killed with anchored patterns only, SIGTERM then SIGKILL after 20 s; partial work stays in the worker's worktree, never `git clean` |
+| D − `landing_lead_s` | **the landing**: `pause_landing.py` classifies every live codex session by role and elapsed time and stops the **young** ones only, then writes the manifest into `pause-state.json` |
+| D − `last_call_s` | **the last call**: everything the landing has not stopped yet — the mature reviewers that did not finish, the checkpointed writers, and any row an earlier phase failed to reach. One SIGTERM pass over the phase (the dispatcher **and** the codex process it owns, since a dispatcher's TERM trap cannot run while its codex pipeline is in the foreground), **one** `grace_s` sleep for the whole phase, then SIGKILL to the survivors and an explicit release of the account slot, branch claim and spool row a killed wrapper could no longer release. A pid whose command line does not name the recorded session — or cannot be read — is never signalled. The anchored pattern table then sweeps the lane runners and helper loops no registry row names. Partial work stays in the worker's worktree, never `git clean` |
 | D−0:01 | "Goal paused" confirmed in the pane, `watchdog/pause-state.json` written, `stages.jsonl` and an `events.d/` entry appended, telemetry committed and published through `checked-push.sh`. One minute **before** the deadline, so a publish that takes a few seconds still finishes inside "within 15 minutes" |
 
 `watchdog/pause-state.json` is the single record: caps (**from run-mode, not from the
@@ -115,6 +130,26 @@ caps are known, so a pause that dies mid-way still leaves the one number the res
 reconstruct, and the complete one (`status: paused`) after the telemetry is published, so
 it also lists the phases that failed at the very end. A deadline shorter than the nominal
 plan clamps the later phases onto it instead of running past it; the printed plan says so.
+
+### The landing — `local/bin/pause_landing.py`
+
+| Class | Rule |
+|---|---|
+| young (elapsed under `young_max_min`) | little sunk cost: stopped at the landing phase, whatever the role |
+| mature `reviewer` / `scout` | usually finishes, and a resumed review re-reads its whole context anyway: runs to the last call, then **restarted from scratch** |
+| mature writer (`prover`, `mathfix`, `orc`, …) | **checkpointed**: the worktree is left exactly as it is, the codex thread id, worktree, step and elapsed time are recorded, and it is stopped only at the last call |
+
+A live session has no registry row yet — `dispatch.sh` appends that when codex returns — so
+the classifier reads the **spool** entry `dispatch.sh` writes before it reserves a slot, and
+takes the thread id from the live capture's first `thread.started` event. Every threshold
+lives in `local/capacity-policy.json` under `landing`; the module carries the same values as
+documented fallbacks and no number is written into a shell script.
+
+`pause-state.json` gains a `landing` key: the thresholds, the lanes (issue, branch, head,
+the step reached, and the `local-ci/summary` / `local-review/summary` states on that head),
+the stopped sessions (thread id, role, worktree, elapsed, resumable) and the
+`daemon/pr<N>.failed` markers that appeared **during** the landing — recorded by
+before/after difference, so a marker that records a real failure is never cleared.
 
 ### `owner-resume.sh` — restore from that record only
 
@@ -128,8 +163,46 @@ from `run_mode.py show`. Then a post-condition check that fails loudly: every ca
 exists, is numeric and nonzero for an account the brief enables (queried as
 `run_mode.py get enabled.<account>`, whose answer is `yes`/`no` — a briefed
 `enabled: false` account is skipped, not reported as a failure), no account is `down`, a
-capacity controller and a merge daemon are actually running, and `watchdog/drain` is gone.
-A resume that leaves no controller running exits 5: its caps could never move again.
+capacity controller and a merge daemon are actually running. Only then are
+`watchdog/{drain,paused,cutoff}` removed. A resume that leaves no controller running exits
+5: its caps could never move again.
+
+Then, and only then, it puts the **work** back from the `landing` manifest
+(`pause_landing.py resume-exec`, one argv list per item, each launched detached; nothing
+generated is passed through a shell):
+
+* a parked lane is relaunched with `LANE_RESUME_STEP` — `review` when the head already
+  carries `local-ci/summary` success, `ci` when it is published but untested, `publish`
+  only when the lane actually reached publication (it left a `<issue>.pr.md`), and
+  `dispatch` otherwise: for a lane stopped at `warm` or `dispatch`, whose proof is not
+  finished, and for a head that moved or cannot be read. `publish` sets `SKIP_DISPATCH=1`,
+  which skips lane.sh's `dispatch exit 0` and uncommitted-changes gates, so using it for
+  unfinished work would spend a full CI run and a full review on it. A head carrying both
+  `local-ci/summary` and `local-review/summary` success is not relaunched at all, and a
+  head that already carries a finished review is relaunched with `SKIP_REVIEW=1`. The
+  lane's own environment (`LANE_BRANCH`, `SKIP_REVIEW`, `MIPSTARRE_REVIEW_CMD`, read from
+  `/proc/<pid>/environ` at the pause) travels back with it, in the environment rather than
+  as an `env K=V` argv prefix — a process started as `env …` matches neither the
+  classifier nor the sweep, so one cycle would make the lane invisible to the next pause;
+* a checkpointed writer **the lane does not own** is resumed with
+  `dispatch.sh --resume <thread>`, a continue prompt pointing it at its own worktree, and
+  the job class, effort, hardness reason, persona, sandbox and account the spool recorded —
+  `account_router` refuses a resume whose model differs from the thread's, and the model is
+  selected from exactly those fields. A lane owns the sessions in its worktree: relaunching
+  both would put two writers into one worktree, so the session is listed as owned and the
+  lane relaunch (which rebuilds `--resume` from `<state>/<issue>.thread`) is the one item;
+* a stopped writer whose thread id was never captured gets a **fresh** dispatch with a
+  continue-from-the-worktree prompt rather than silently nothing;
+* a stopped reviewer is restarted from scratch;
+* each recorded failed marker is removed, so the daemon stops skipping a PR a kill marked.
+
+The replay is stamped into the manifest (`landing.replayed_at`, and one `replay` row per
+item), so a second `owner-resume.sh` launches nothing again; `resume-exec --force` is the
+deliberate way back in. A launch that fails is recorded on its own row and the rest of the
+plan continues — exit 4 means "the plan ran, some items need a hand", not "nothing ran".
+
+`--dry-run` prints that plan without running any of it; `--no-work` restores the caps, the
+crontab and the daemons and leaves the parked work alone.
 
 ### `owner-say.sh` — one message, three modes
 

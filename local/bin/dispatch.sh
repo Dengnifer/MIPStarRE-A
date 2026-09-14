@@ -588,7 +588,7 @@ fi
 builtin_frame() {
   case "$ROLE" in
     orc) printf '%s\n' "You are the orchestrator: you plan, split and dispatch work, and you never do the proof work yourself when a specialist session can." ;;
-    prover) printf '%s\n' "You are a Lean 4 prover: you close goals faithfully, never by weakening a statement or adding hypotheses the paper does not assume." ;;
+    prover) printf '%s\n' "You are a Lean 4 prover: you close goals faithfully, never by weakening a statement or adding hypotheses the paper does not assume. You commit each proved lemma before starting the next." ;;
     reviewer) printf '%s\n' "You are a reviewer: you read a diff you did not write, judge it against AGENTS.md and docs/CONTRIBUTING.md, and emit a verdict. You do not fix." ;;
     simplifier) printf '%s\n' "You are a simplifier: you change how code and prose are expressed, never what they mean." ;;
     blueprint) printf '%s\n' "You are a blueprint writer: you keep blueprint/src in sync with the Lean development and with the source paper, in mathematical prose." ;;
@@ -736,6 +736,21 @@ sanitize_untrusted() {
   printf '%s\n' "5. Runtime state belongs in ~/.cache/mipstarre-dev/, never in the repo."
   printf '%s\n' "6. Your final message is captured to $LAST_MESSAGE — put the result,"
   printf '%s\n' "   the residual risk, and anything the next session must know in it."
+  # The milestone-commit rule.  A session that is stopped — by the owner's pause,
+  # by a provider death or by a crash — keeps only what is committed in its
+  # worktree; 17 sessions died mid-work on 2026-09-12 and every uncommitted hour
+  # went with them.  It is addressed to the roles that WRITE proofs, because they
+  # are the ones a soft landing checkpoints and resumes on their own thread.
+  case "$ROLE" in
+    prover|mathfix|orc|simplifier)
+      printf '%s\n' "7. Commit each proved lemma (or each finished unit of work) in your"
+      printf '%s\n' "   worktree, with the hooks running, BEFORE you start the next one. Do"
+      printf '%s\n' "   not batch a session's work into one commit at the end: if this"
+      printf '%s\n' "   session is stopped, everything after your last commit is lost, and"
+      printf '%s\n' "   a resumed session continues from the worktree, not from memory."
+      printf '%s\n' "   Still do not push; publication is the lane's job."
+      ;;
+  esac
   printf '%s\n' ""
 
   if [ "${#CONTEXT_FILES[@]}" -gt 0 ]; then

@@ -48,7 +48,25 @@
 # Environment: MIPSTARRE_CHECKOUT, MIPSTARRE_CACHE_ROOT, MIPSTARRE_LAKE_DATA,
 #   LANE_BRANCH (refresh an existing PR branch), SKIP_DISPATCH=1 (the worktree
 #   already holds the finished work), SKIP_REVIEW=1 (stacked PR),
-#   MIPSTARRE_LANE_SLOT_WAIT_S (default 1800), MIPSTARRE_REVIEW_CMD.
+#   MIPSTARRE_LANE_SLOT_WAIT_S (default 1800), MIPSTARRE_REVIEW_CMD,
+#   LANE_RESUME_STEP (the step a soft-landing resume restarts this lane at).
+#
+# LANE_RESUME_STEP is how `owner-resume.sh` puts a lane the pause parked back on
+# the step it had reached, instead of paying for the whole lane again:
+#
+#   dispatch  (default)  the whole lane, exactly as before
+#   publish              the worktree already holds the work: skip the dispatch,
+#                        then merge, build, publish, CI and review as usual
+#   ci                   the head is unchanged and already published: skip the
+#                        dispatch, the merge of github/main and both builds, adopt
+#                        the open PR through pr_open.py (which pushes nothing when
+#                        the head is already there), then CI and review
+#   review               as `ci`, and `local-ci/summary` is already success on the
+#                        head, so CI is skipped too and only the review runs
+#
+# Only the steps whose evidence the pause recorded are skipped; a head that moved
+# during the pause resumes at `dispatch`, because re-running a step is cheap next
+# to skipping one that never ran.
 set -u
 
 P="${MIPSTARRE_CHECKOUT:-$HOME/MIPStarRE-qpbt}"
@@ -67,6 +85,16 @@ export MIPSTARRE_SESSION="owner-operator"
 
 STATE="$CACHE_ROOT/watchdog/lanes"; mkdir -p "$STATE"
 SKIP_DISPATCH="${SKIP_DISPATCH:-0}"
+LANE_RESUME_STEP="${LANE_RESUME_STEP:-dispatch}"
+case "$LANE_RESUME_STEP" in
+  dispatch|publish|ci|review) : ;;
+  *) printf 'lane.sh: LANE_RESUME_STEP must be dispatch, publish, ci or review\n' >&2; exit 2 ;;
+esac
+# `publish` and later mean the worker has already run for this head.
+[ "$LANE_RESUME_STEP" = dispatch ] || SKIP_DISPATCH=1
+# `ci` and `review` mean the head is unchanged and already on github.
+SKIP_MERGE_BUILD=0
+case "$LANE_RESUME_STEP" in ci|review) SKIP_MERGE_BUILD=1 ;; esac
 SLOT_WAIT_S="${MIPSTARRE_LANE_SLOT_WAIT_S:-1800}"
 BUILD_LOCK="${MIPSTARRE_FULL_BUILD_LOCK:-$CACHE_ROOT/.full-build-lock}"
 BUILD_LOCK_WAIT_S="${MIPSTARRE_LANE_BUILD_LOCK_WAIT_S:-14400}"
@@ -295,6 +323,10 @@ fi
 [ "$(git -C "$W" rev-list --count "$BEFORE..HEAD")" -gt 0 ] || fail no-commits-ahead "no commits ahead of main for #$N"
 
 # ------------------------------------------------ fresh base (gate 2b) + #222
+if [ "$SKIP_MERGE_BUILD" = 1 ]; then
+  AFTER="$(git -C "$W" rev-parse HEAD)"
+  log "resume at '$LANE_RESUME_STEP': merge of github/main, both builds and the push skipped; head $AFTER is the one the pause recorded"
+else
 git -C "$W" merge -q --no-edit github/main || fail merge-conflicted "merging github/main conflicted in $W"
 # post-merge silent-loss guard (issue #222): a path present on github/main but
 # absent after the merge must have been deleted by a branch commit, never by
@@ -357,6 +389,7 @@ if [ -n "$CHANGED_MODS" ]; then
     release_build_lock; fail build-failed "lake build of changed modules failed (see $STATE/$N.build.log)"; }
 fi
 release_build_lock
+fi
 
 # ------------------------------------------------------------- publication
 # pr_open.py -> checked-push.sh is the ONLY publication path.  There is no
@@ -388,9 +421,13 @@ done
 [ "$PUBLISHED_HEAD" = "$AFTER" ] || fail head-not-published \
   "PR $PR head is ${PUBLISHED_HEAD:-unreadable}, expected $AFTER"
 
-log "ci.sh $PR"
-local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1 || \
-  fail ci-failed "ci.sh $PR failed on exact head $AFTER"
+if [ "$LANE_RESUME_STEP" = review ]; then
+  log "ci skipped (the pause recorded local-ci/summary success on head $AFTER)"
+else
+  log "ci.sh $PR"
+  local/bin/ci.sh "$PR" >> "$STATE/$N.ci.log" 2>&1 || \
+    fail ci-failed "ci.sh $PR failed on exact head $AFTER"
+fi
 
 # --------------------------------------------------------------- review
 if [ "${SKIP_REVIEW:-0}" = 1 ]; then

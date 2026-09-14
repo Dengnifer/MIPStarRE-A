@@ -286,18 +286,107 @@ side channel each pinned a model behind the policy's back.
 
 ## 6. Pause and resume
 
-The owner's word starts the deadline in `run.pause_deadline_min`. The procedure
-is one tracked script, `results/telemetry/owner-tools/owner-pause.sh`, which
-ends admission and hands the rest to the standing duties:
+There are **two owner words**, and they are different instructions.
+
+`owner-pause.sh --cutoff` is the first: it stops **admission and nothing else**.
+Caps to 0, `watchdog/drain` touched, queued dispatches release themselves, no
+process is signalled and every daemon keeps running, so work already in flight
+finishes and still merges. It may be given long before the pause — that lead is
+the whole point, because the sessions still running when the pause word comes
+are then only the ones that could not finish.
+
+`owner-pause.sh` (no flag) is the pause word and starts the deadline in
+`run.pause_deadline_min`. A pause given without a prior cutoff is not an error:
+it closes admission itself and degrades to the landing rule below.
 
 | T | Phase |
 |---|---|
-| +0:00 | `run_mode.py pause` — caps to 0, the pre-pause caps saved **inside the run mode**, `watchdog/drain` touched |
-| +0:30 | queued dispatches release themselves on `watchdog/drain`; keeper, merge daemon and stack-watch stopped by their stop files |
+| +0:00 | `run_mode.py pause` — caps to 0, the pre-pause caps saved **inside the run mode** (and read back from `saved_caps` when a cutoff already zeroed the live ones), `watchdog/drain` **and** `watchdog/paused` touched, the daemon's failed markers snapshotted before the daemon is stopped |
+| +0:30 | queued dispatches release themselves on `watchdog/drain`; keeper, merge daemon, stack-watch and capacityd stopped by their stop files |
 | +1:00 | one terminal message to the main session (`owner-say.sh --mode terminal`); the *content* of the closing report is a standing duty, not a dictation |
 | +2:00 | crontab backed up verbatim, then installed from a file; never an in-place `sed` |
-| deadline −2:00 | leftover workers killed by anchored patterns; partial work stays in the worktree |
+| deadline − `landing_lead_s` | **the landing**: `pause_landing.py` classifies every live session and stops the **young** ones only, then writes the manifest |
+| deadline − `last_call_s` | **the last call**: the mature leftovers are stopped, then the anchored pattern table sweeps the lane runners and helper loops no registry row names |
 | deadline | confirm, write `watchdog/pause-state.json`, append telemetry, publish |
+
+### The landing is age-based, not a blanket kill
+
+A codex session has already paid for its input and its reasoning; only its
+rollout survives a kill, so restarting it pays everything again. The 2026-09-12
+pause killed 17 sessions mid-work, and on 2026-09-14 the fallout was reviewers
+that "exited 143", kill-caused `daemon/pr<N>.failed` markers that made the
+merge daemon skip those PRs for two hours, and lanes restarted from scratch on
+heads that already carried a green CI and a finished review.
+
+| Class | Rule |
+|---|---|
+| young (elapsed under `young_max_min`) | little sunk cost: stopped at the landing phase, whatever the role |
+| mature reviewer or scout | usually finishes inside the window, and a resumed review re-reads its whole context anyway: runs to the last call, then **restarted from scratch** |
+| mature writer (prover, mathfix, orc, …) | **checkpointed**: worktree untouched, codex thread id, worktree, step and elapsed time recorded, stopped at the last call, resumed on its own thread |
+
+Every stop is one SIGTERM pass over the phase — the recorded `dispatch.sh` **and
+the codex process it owns**, because a dispatcher's `trap … TERM` cannot run
+while its `codex | tee` pipeline is the foreground job, so a TERM to the wrapper
+alone leaves codex spending quota — then **one** `grace_s` sleep for the whole
+phase, then SIGKILL to the survivors. Sleeping the grace per session made the
+landing cost `grace_s x sessions`: with the 17 sessions of 2026-09-12 the last
+call alone would have run four minutes past the owner's deadline. A pid is
+signalled only while its command line still names the session the record names —
+an unreadable command line is spared, not killed, because a recycled pid on a
+128-core shared host is a real possibility — and whatever a SIGKILLed wrapper
+could no longer release (its account slot, its branch claim, its spool row) is
+released explicitly, so the resumed run admits its full cap. Every threshold lives in
+`local/capacity-policy.json` under `landing`; no number is written into any
+shell script, and `pause_landing.py` carries the same values as documented
+fallbacks for the case where the policy file cannot be read.
+
+### The manifest, and what the resume does with it
+
+`watchdog/pause-state.json` gains a `landing` key: the resolved thresholds, the
+lanes with their issue, branch, head, the step each reached and the statuses
+already on that head, the stopped sessions with thread id, role, worktree,
+elapsed time and whether each is resumable, and the `daemon/pr<N>.failed`
+markers that appeared **during the pause** — recorded by difference against a
+snapshot taken at T+0:00, before the merge daemon is stopped, so a marker that
+records a real failure is never confused with one a kill caused. Snapshotting at
+the landing phase instead made that list empty on every pause: by then the only
+process that writes such a marker had been dead for ten minutes.
+
+`owner-resume.sh` restores the caps, the crontab and the daemons as before, and
+then — only after its post-condition check passes — replays that manifest:
+
+* each parked lane is relaunched with `LANE_RESUME_STEP` and the environment it
+  carried (`LANE_BRANCH`, `SKIP_REVIEW`, `MIPSTARRE_REVIEW_CMD`): the merge, the
+  build and the push are skipped while the head is unchanged, CI is skipped when
+  the head already carries `local-ci/summary` success, the review is skipped when
+  it already carries `local-review/summary` success, and a head carrying both is
+  not relaunched at all. `publish` is only for a lane that reached publication;
+  one stopped at `warm` or `dispatch` resumes at `dispatch`, where `lane.sh`
+  rebuilds `--resume` from its own thread record — resuming it at `publish` would
+  skip lane.sh's completion gates and spend a CI run and a review on an
+  unfinished proof;
+* each checkpointed writer **the lane does not own** is resumed with
+  `dispatch.sh --resume <thread>`, a continue prompt that points it at its own
+  worktree, and the job class, effort, hardness reason, persona, sandbox and
+  account the spool recorded, because `account_router` refuses a resume whose
+  model differs from the thread's and the model is selected from those fields. A
+  lane owns the sessions in its worktree: emitting both would put two writers
+  into one worktree, so only the lane is relaunched;
+* a stopped writer whose thread id was never captured gets a fresh dispatch with
+  a continue-from-the-worktree prompt, and is named in the output — never
+  silently dropped;
+* each stopped reviewer is restarted from scratch;
+* each recorded failed marker is removed, so the merge daemon stops skipping a
+  PR that a kill, not a defect, marked.
+
+The replay is stamped into the manifest, so a second `owner-resume.sh` launches
+nothing again (`resume-exec --force` is the deliberate way back in), and one
+launch that fails does not abort the rest of the plan.
+
+`--no-work` restores the caps and the daemons only. Provers are told, in the
+dispatch prompt and in `local/personas/prover.md`, to commit each proved lemma
+before starting the next: a kill then costs at most the work since the last
+commit, and the resumed session continues from the worktree.
 
 `run_mode.py pause` is idempotent: a second pause does not overwrite the saved
 caps with the zeros the first one wrote. `run_mode.py resume` restores **from

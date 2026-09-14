@@ -9,11 +9,31 @@
 # resume message (already wrong by 04:58Z on the day it ran), and it restored caps from a
 # caps-before-pause file that a later phase could — and did — overwrite with zeros.
 #
-# Usage: owner-resume.sh [--dry-run] [--force-crontab] [--state FILE]
+# Usage: owner-resume.sh [--dry-run] [--force-crontab] [--no-work] [--state FILE]
 #   --dry-run        print what would be restored and check nothing is missing; touch nothing
 #   --force-crontab  install the recorded backup even though the live crontab was edited
 #                    during the pause (the difference is printed either way)
+#   --no-work        restore the caps, the crontab and the daemons only, and leave the
+#                    parked lanes and the stopped sessions alone
 #   --state FILE     use FILE instead of watchdog/pause-state.json
+#
+# Restoring the caps and the daemons is not restoring the RUN.  The landing wrote a
+# manifest into the same record — the lanes it parked with the step each reached and the
+# statuses already on its head, the sessions it stopped with their thread ids and
+# worktrees, and the `daemon/pr<N>.failed` markers it caused — and `pause_landing.py`
+# turns that manifest into one command per item, which this runs after the post-condition
+# check passes: each parked lane relaunched at the step it reached (no dispatch, no merge,
+# no build and no push while the head is unchanged; no CI and no review while the head
+# already carries `local-ci/summary` and `local-review/summary` success), each
+# checkpointed writer the lane does not own resumed on its own codex thread with a continue
+# prompt, each stopped reviewer restarted from scratch, and each recorded failed marker
+# removed so the merge daemon stops skipping a PR a kill, not a defect, marked.
+#
+# The replay is idempotent: pause_landing.py stamps the manifest as it replays it, so a
+# second run of this script (routine after "the resume message was not delivered") puts
+# nothing back twice — two lane.sh for one worktree, or two `codex exec resume` on one
+# thread id, is how a resume turns one outage into two.  `resume-exec --force` is the
+# deliberate way back in.
 #
 # Post-condition check, loud on failure: every cap file exists, is numeric and nonzero for
 # an enabled account, no account is "down", the capacity controller and the merge daemon are
@@ -33,14 +53,15 @@ L="$W/lanes"
 OWNER_BIN="${MIPSTARRE_OWNER_BIN:-$CACHE_ROOT/owner-bin}"
 S="${MIPSTARRE_TMUX_SESSION:-qpbt}"
 
-DRY=0; FORCE_CRON=0; STATE="$W/pause-state.json"
+DRY=0; FORCE_CRON=0; WORK=1; STATE="$W/pause-state.json"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run) DRY=1 ;;
     --force-crontab) FORCE_CRON=1 ;;
+    --no-work) WORK=0 ;;
     --state) STATE="${2:-}"; shift ;;
     --state=*) STATE="${1#--state=}" ;;
-    -h|--help) sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,45p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "$PROG: unknown argument '$1'" >&2; exit 2 ;;
   esac
   shift
@@ -50,6 +71,7 @@ ROOT="${MIPSTARRE_REPO_ROOT:-}"
 if [ -z "$ROOT" ] && [ -r "$OWNER_BIN/repo-root" ]; then ROOT="$(cat "$OWNER_BIN/repo-root")"; fi
 if [ -z "$ROOT" ]; then ROOT="$HOME/MIPStarRE-qpbt"; fi
 RUN_MODE="${MIPSTARRE_RUN_MODE:-$ROOT/local/bin/run_mode.py}"
+LANDING="${MIPSTARRE_PAUSE_LANDING:-$ROOT/local/bin/pause_landing.py}"
 SAY="${MIPSTARRE_OWNER_SAY:-$OWNER_BIN/owner-say.sh}"
 CRONS="${MIPSTARRE_INSTALL_CRONS:-$OWNER_BIN/install-crons.sh}"
 CRONTAB_BIN="${MIPSTARRE_CRONTAB:-crontab}"
@@ -120,6 +142,11 @@ if [ "$DRY" -eq 1 ]; then
   echo "$PROG: [dry-run]        remove watchdog/{drain,goal-hold,paused} and the stop files;"
   echo "$PROG: [dry-run]        send one resume message rendered from run_mode.py show."
   [ -n "$CRON_BAK" ] && [ ! -r "$CRON_BAK" ] && echo "$PROG: [dry-run] WARNING: $CRON_BAK is missing" >&2
+  if [ "$WORK" -eq 1 ] && [ -r "$LANDING" ]; then
+    echo "$PROG: [dry-run] the work the landing manifest would put back:"
+    python3 "$LANDING" resume-plan --state "$STATE" 2>/dev/null | sed 's/^/  /' || \
+      echo "  (this record carries no landing manifest; only caps and daemons are restored)"
+  fi
   exit 0
 fi
 
@@ -232,7 +259,7 @@ ONELINE="$(python3 "$RUN_MODE" show --oneline 2>/dev/null | head -n 1 | tr -d '\
 if [ -z "$ONELINE" ]; then
   ONELINE="$(printf '%s\n' "$CAPS_LINES" | awk '{printf "%s=%s ", $1, $2}')speed=$SPEED"
 fi
-MSG="OWNER (resume): the pause is over; the run mode is $ONELINE. Read local/personas/main.md and the last comments on the progress issue, run status-snapshot.sh --prs, dispatch detached workers through local/bin/dispatch.sh until the live count reaches the occupancy floor, and resume the cycle. Every number you report must be measured by you, not copied from this message."
+MSG="OWNER (resume): the pause is over; the run mode is $ONELINE. The lanes and sessions the landing parked are being relaunched from the pause record, so count the live workers before you dispatch anything. Read local/personas/main.md and the last comments on the progress issue, run status-snapshot.sh --prs, dispatch detached workers through local/bin/dispatch.sh until the live count reaches the occupancy floor, and resume the cycle. Every number you report must be measured by you, not copied from this message."
 
 # --- 5. the post-condition check, loud ---------------------------------------------------------
 RC=0
@@ -302,10 +329,46 @@ fi
 
 # Success has one commit point: no owner notification or committed telemetry
 # precedes restoration and the complete post-condition check.
-rm -f "$W/paused" "$W/drain"
-if [ -e "$W/paused" ] || [ -e "$W/drain" ]; then
+# watchdog/cutoff goes too.  It is the marker of the FIRST owner word, and nothing
+# else removes it: a surviving one makes the next `owner-pause.sh --cutoff` log
+# "admission re-asserted, no second message" and send nothing, so the main session
+# is never told to start nothing new and keeps burning turns on refused
+# reservations — and the next manifest records the stale timestamp as the reason
+# its sessions are mature.
+rm -f "$W/paused" "$W/drain" "$W/cutoff"
+if [ -e "$W/paused" ] || [ -e "$W/drain" ] || [ -e "$W/cutoff" ]; then
   resume_incomplete "admission pause markers could not be cleared"
 fi
+# --- 6. the work the landing parked --------------------------------------------------------
+# After the post-condition check, never before it: relaunching lanes into a run whose caps
+# are wrong or whose controller is dead is how a resume turns one outage into two.  Every
+# command comes from pause_landing.py as an argv list, so nothing generated is passed
+# through a shell, and each launch is detached like the daemons above.
+WORK_RESUMED=0
+if [ "$WORK" -eq 1 ] && [ -r "$LANDING" ]; then
+  # The manifest is stamped `replayed_at` as it is replayed, so running this
+  # script twice — routine after "the resume message was not delivered" — puts
+  # nothing back a second time.  Exit 4 means the plan RAN and some items failed:
+  # the rest were launched, so the record must still be believed.
+  WORK_OUT="$(python3 "$LANDING" resume-exec --state "$STATE" --log "$L/resume-work.log" 2>&1)"
+  WORK_RC=$?
+  printf '%s\n' "$WORK_OUT" | sed 's/^/  /'
+  WORK_RESUMED="$(printf '%s\n' "$WORK_OUT" | grep -c 'launched pid\|marker cleared' || true)"
+  if [ "$WORK_RC" -eq 0 ]; then
+    log "work resumed from the landing manifest: $WORK_RESUMED items (log $L/resume-work.log)"
+  elif [ "$WORK_RC" -eq 4 ]; then
+    log "work resumed PARTIALLY: $WORK_RESUMED items launched; the failures are listed above"
+    echo "$PROG: some items of the landing manifest could not be launched (see above);" >&2
+    echo "$PROG: they are recorded under \"landing\".\"replay\" in $STATE." >&2
+  else
+    echo "$PROG: the landing manifest could not be replayed (exit $WORK_RC)." >&2
+    echo "$PROG: caps, crontab and daemons ARE restored; the parked work is not." >&2
+    echo "$PROG: replay it by hand with: python3 $LANDING resume-plan --state $STATE" >&2
+  fi
+else
+  log "work resume skipped (--no-work, or no pause_landing.py at $LANDING)"
+fi
+
 if tmux has-session -t "$S" 2>/dev/null; then
   bash "$SAY" --mode interrupt --timeout 300 "$MSG" || \
     echo "$PROG: the resume message was not delivered" >&2
@@ -314,13 +377,14 @@ else
 fi
 rm -f "$W/resume-incomplete"
 
-python3 - "$ROOT/results/telemetry/stages.jsonl" "$PAUSED_AT" "$ONELINE" <<'PY'
+python3 - "$ROOT/results/telemetry/stages.jsonl" "$PAUSED_AT" "$ONELINE" "$WORK_RESUMED" <<'PY'
 import datetime, json, sys
 row = {"ts": datetime.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z"),
        "stage": "operator", "event": "resume",
        "note": ("owner resume from watchdog/pause-state.json (paused at %s): caps, speed and "
                 "crontab restored verbatim from the record, daemon/stack-watch/keeper restarted, "
-                "one resume message rendered from run-mode (%s)" % (sys.argv[2], sys.argv[3]))}
+                "one resume message rendered from run-mode (%s), and %s items of parked work "
+                "relaunched from the landing manifest" % (sys.argv[2], sys.argv[3], sys.argv[4]))}
 with open(sys.argv[1], "a", encoding="utf-8") as fh:
     fh.write(json.dumps(row) + "\n")
 PY
