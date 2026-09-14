@@ -368,9 +368,14 @@ class OwnerPausePlanTests(OwnerToolsFixture):
         self.assertTrue(offsets, "the plan must print T+mm:ss offsets")
         self.assertLessEqual(max(offsets), 15 * 60,
                              "no phase may be scheduled after the deadline")
+        # The landing replaced the single "kill leftovers" phase with two: the
+        # classifying landing that stops the young, and the last call that stops
+        # what the rule let run on (issue #560).
         for phase in ("stop admission", "release waiters", "one message", "crontab",
-                      "kill leftovers", "confirm/record"):
+                      "landing", "last call", "confirm/record"):
             self.assertIn(phase, body)
+        self.assertIn("landing rule (thresholds from", body)
+        self.assertNotIn("kill leftovers", body)
         # The last phase ends with a checked-push.sh publish, so it is scheduled
         # BEFORE the deadline rather than on it: a publish started at T+deadline
         # returns after it, and "pause within 15 minutes" is the whole instruction.
@@ -393,7 +398,7 @@ class OwnerPausePlanTests(OwnerToolsFixture):
                 result = self.run_script(OWNER_PAUSE, "--deadline", f"{minutes}m", "--dry-run")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 offsets = self.phases(result.stdout)
-                self.assertEqual(len(offsets), 6, "all six phases must be printed")
+                self.assertEqual(len(offsets), 7, "all seven phases must be printed")
                 self.assertEqual(offsets, sorted(offsets), "phases must stay in order")
                 self.assertLessEqual(max(offsets), minutes * 60,
                                      "no phase may be scheduled after the deadline")
