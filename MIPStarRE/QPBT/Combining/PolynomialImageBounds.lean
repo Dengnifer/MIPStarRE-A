@@ -152,7 +152,7 @@ private theorem orderedIndicator_gram_le_one (X Z : Quantum.Measurement F ι)
 
 /-- The pointwise error in `eq:qld-g-prime` is supported on the zero second
 coefficient and bounded by the squared norm of the actual state vector. -/
-private theorem abs_orderedIndicator_norm_sq_sub_diagonal_le (X Z : Quantum.Measurement F ι)
+theorem abs_orderedIndicator_norm_sq_sub_diagonal_le (X Z : Quantum.Measurement F ι)
     (hX : Measurement.IsProjective X) (hZ : Measurement.IsProjective Z)
     (α β a : F) (ψ : EuclideanSpace ℂ ι) :
     |‖applyOperatorToState (orderedIndicator X Z α β a) ψ‖ ^ 2 -
@@ -227,7 +227,10 @@ private theorem specialization_ne_linear_of_coeff {n : ℕ}
   simpa [MvPolynomial.coeff_map, MvPolynomial.coeff_C_mul, MvPolynomial.coeff_X,
     Ne.symm he0, Ne.symm he1] using hc
 
-private theorem avg_eval_eq_le {n D : ℕ} (p r : MvPolynomial (Fin n) F)
+/-- Schwartz--Zippel in the uniform-average notation used by the coefficient
+and fiber calculations in `eq:qld-g-prime-bound` and `eq:qld-g-2`.
+Proof recovered from PR296, as recorded in the module provenance. -/
+theorem avg_eval_eq_le {n D : ℕ} (p r : MvPolynomial (Fin n) F)
     (hne : p ≠ r) (hp : p.totalDegree ≤ D) (hr : r.totalDegree ≤ D) :
     avgOver (uniformDistribution (Fin n → F))
       (fun u => if MvPolynomial.eval u p = MvPolynomial.eval u r then 1 else 0) ≤
@@ -410,6 +413,22 @@ private theorem avg_sum_orderedIndicator_norm_sq_le_of_not_linear {n : ℕ} {Γ 
   exact Finset.sum_le_sum fun g hg =>
     avg_orderedIndicator_norm_sq_le_of_not_linear (p g) (hp g hg) X Z hX hZ (ψ g)
 
+omit [DecidableEq ι] in
+/-- The squared-norm triangle inequality retains each outcome's state vector.
+This is the norm-to-residual step recovered from PR296, now shared with the
+wrong-variable argument in `eq:qld-g-prime-xpt-bound`; support for blueprint
+`lem:qld-4-7`. No normalization is assumed. -/
+theorem sum_mass_le_residual_add_image {Γ : Type*} (s : Finset Γ)
+    (ψ A : Γ → EuclideanSpace ℂ ι) :
+    ∑ g ∈ s, ‖ψ g‖ ^ 2 ≤
+      2 * ∑ g ∈ s, ‖ψ g - A g‖ ^ 2 + 2 * ∑ g ∈ s, ‖A g‖ ^ 2 := by
+  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+  refine Finset.sum_le_sum fun g _ => ?_
+  have htriangle := norm_add_le (ψ g - A g) (A g)
+  rw [sub_add_cancel] at htriangle
+  have hsquare := pow_le_pow_left₀ (norm_nonneg _) htriangle 2
+  nlinarith [sq_nonneg (‖ψ g - A g‖ - ‖A g‖)]
+
 /-- Scalar-linearity concentration with the actual ordered-correlation error
 displayed in the conclusion. Combining this inequality with `eq:qld-g-42`
 requires deriving that correlation from the source measurements; no such
@@ -434,13 +453,8 @@ theorem nonlinear_mass_le_ordered_error {n : ℕ} {Γ : Type*}
       (MvPolynomial.eval v (MvPolynomial.map (MvPolynomial.eval u) (p g)))) (ψ g)
   have hpoint (u : Fin n → F) (v : Fin 2 → F) :
       ∑ g ∈ s, ‖ψ g‖ ^ 2 ≤
-        2 * ∑ g ∈ s, ‖ψ g - A u v g‖ ^ 2 + 2 * ∑ g ∈ s, ‖A u v g‖ ^ 2 := by
-    rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-    refine Finset.sum_le_sum fun g _ => ?_
-    have htriangle := norm_add_le (ψ g - A u v g) (A u v g)
-    rw [sub_add_cancel] at htriangle
-    have hsquare := pow_le_pow_left₀ (norm_nonneg _) htriangle 2
-    nlinarith [sq_nonneg (‖ψ g - A u v g‖ - ‖A u v g‖)]
+        2 * ∑ g ∈ s, ‖ψ g - A u v g‖ ^ 2 + 2 * ∑ g ∈ s, ‖A u v g‖ ^ 2 :=
+    sum_mass_le_residual_add_image s ψ (A u v)
   have havg := avgOver_mono (uniformDistribution (Fin n → F)) _ _ fun u =>
     avgOver_mono (uniformDistribution (Fin 2 → F)) _ _ (hpoint u)
   simp only [avgOver_uniform_const, avgOver_add, avgOver_const_mul] at havg

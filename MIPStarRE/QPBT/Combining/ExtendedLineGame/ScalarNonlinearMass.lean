@@ -52,7 +52,10 @@ private theorem placed_orderedIndicator {P : AdmissibleParams} {ε : ℝ}
   simp only [orderedIndicator, ProjectiveSetting.placedMeasurement_effect,
     ProjectiveSetting.place_mul]
 
-private theorem placed_residual {P : AdmissibleParams} {ε : ℝ}
+/-- Opposite placements commute, identifying the residual on the actual
+projected state with the ordered-error residual. This supports both orders
+of `eq:qld-g-42/43` and blueprint `lem:qld-4-7`. -/
+theorem placed_residual {P : AdmissibleParams} {ε : ℝ}
     (S : ProjectiveSetting P ε) (p1 p2 : Placement) (hopposite : p1.IsOpposite p2)
     (R : Op (S.ExpandedLocalSpace p1.side)) (T : Op (S.ExpandedLocalSpace p2.side)) :
     applyOperatorToState (S.place p1 R) S.psiHat -

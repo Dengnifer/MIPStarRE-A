@@ -2519,6 +2519,208 @@ Choose both measurements by the rounded ordered-estimate theorem.
 Apply the actual mass bound to $AA'\mid BA''$ and $BB'\mid AB''$.
 \end{proof}
 
+\begin{lemma}[Uniform polynomial and scalar collisions]
+\label{lem:qld-fiber-collisions}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_eval_eq_le}
+\lean{MIPStarRE.QPBT.affine_collision_average}
+\leanok
+Over a finite field $F$, distinct polynomials of total degree at most $D$
+agree at a uniform point with probability at most $D/|F|$.
+For two pairs $u,u'\in F^2$, the probability that
+$\alpha u_1+\beta u_2=\alpha u'_1+\beta u'_2$ is one if $u=u'$ and
+$1/|F|$ otherwise. These are auxiliary forms of Schwartz--Zippel and
+the scalar collision calculation in \texttt{eq:qld-g-separable}.
+\end{lemma}
+\begin{proof}
+\leanok
+Apply Schwartz--Zippel in the first assertion. In the second, a nonzero
+coefficient difference determines exactly one value of one scalar for
+each value of the other. These proofs reuse the existing polynomial-image
+and affine coarse-graining calculations.
+\end{proof}
+
+\begin{lemma}[Ordered norm and residual comparisons]
+\label{lem:qld-fiber-norm-comparisons}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.abs_orderedIndicator_norm_sq_sub_diagonal_le}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.sum_mass_le_residual_add_image}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.placed_residual}
+\leanok
+For complete projective measurements $X,Z$ and any vector $\psi$, the
+ordered and diagonal indicators satisfy
+\[
+ \bigl|\|T_{\alpha,\beta,a}\psi\|^2
+       -\langle\psi,H_{\alpha,\beta,a}\psi\rangle\bigr|
+ \leq 1_{\beta=0}\|\psi\|^2.
+\]
+For any finite set $s$ and vectors $\psi_g,A_g$,
+$\sum_{g\in s}\|\psi_g\|^2\leq
+2\sum_{g\in s}\|\psi_g-A_g\|^2+2\sum_{g\in s}\|A_g\|^2$.
+For opposite expanded placements, the residual
+$(R_g)_{p_1}\hat\psi-T_{p_2}(R_g)_{p_1}\hat\psi$
+equals $(R_g)_{p_1}(I-T_{p_2})\hat\psi$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:qld-polynomial-indicators}
+For nonzero $\beta$, orthogonality gives the diagonal Gram identity.
+For zero $\beta$, both quadratic forms are between zero and $\|\psi\|^2$.
+The second assertion is the squared-norm triangle inequality.
+The final identity follows from commutation of opposite placements.
+The first two calculations are shared with the recovered polynomial-image proof.
+\end{proof}
+
+\begin{definition}[Partial coefficient polynomials]
+\label{def:qld-block-coefficient-polynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.fiberQuestionEquiv}
+\leanok
+For a scalar coefficient $c_{g,a}(x,z)$, view it as a polynomial in $x$
+with coefficients in $F[z]$, or in $z$ with coefficients in $F[x]$.
+The Boolean parameter false selects the first order and true the second.
+The associated joint question equivalence takes a fixed block, a varying
+block, and two scalars to the actual extended question. Reversal exchanges
+both the point blocks and the scalars.
+\end{definition}
+
+\begin{theorem}[Partial degrees and the separated image]
+\label{thm:qld-block-coefficient-degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial_degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial_eval}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_linear_read_fiber}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_polyPair_of_scalar_separated}
+\leanok
+For an actual singleton outcome, every coefficient of either partial
+polynomial and the partial polynomial itself have total degree at most $md$.
+Partial evaluation is exactly evaluation of the original coefficient at the
+corresponding two blocks. For a scalar-linear outcome, this recovers the
+actual readout in either block and scalar order.
+If the coefficient of $\alpha$ is independent of $z$ and the coefficient
+of $\beta$ is independent of $x$, there is a pair of individual-degree-$d$
+polynomials $(g_X,g_Z)$ such that the field-transported outcome equals
+$\combine_{g_X,g_Z}$ as a formal polynomial.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-block-coefficient-polynomial, thm:qld-scalar-expansion-degrees,
+def:combine-map}
+Nonzero partial coefficients are coefficients of the original polynomial;
+each exponent is at most $d$. The ring equivalences commute with evaluation.
+A constant partial polynomial is the renamed polynomial of the fixed block.
+Its coefficients inherit the individual-degree certificate. Apply the
+injective scalar expansion to identify the resulting pair with the existing
+combining map.
+\end{proof}
+
+\begin{theorem}[Common exceptional coefficient and weighted fibers]
+\label{thm:qld-common-exceptional-fibers}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.exists_common_exceptional_coefficient}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_weighted_fiber_le}
+\leanok
+Let $p\in F[z_1,\ldots,z_k][x_1,\ldots,x_n]$ be nonconstant in $x$,
+with coefficient degrees at most $C$ and degree in $x$ at most $D$.
+There is a nonzero nonconstant coefficient $c(z)$ whose zero set has
+probability at most $C/|F|$. For every $z$ outside this one set and every
+$b\in F$, $\Pr_x[p(x,z)=b]\leq D/|F|$.
+Consequently, if $w(z,b)\geq0$ and $\sum_b w(z,b)=M$ for every $z$, then
+\[
+ \mathbb E_z\sum_b\Pr_x[p(x,z)=b]w(z,b)
+ \leq \frac{C+D}{|F|}M.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:qld-fiber-collisions}
+Choose one nonzero coefficient at a nonconstant monomial. Specialization
+outside its zero set leaves a polynomial distinct from every constant.
+Apply Schwartz--Zippel twice. Sum the weights on the common exceptional
+set before averaging it; no outcome-cardinality factor appears.
+\end{proof}
+
+\begin{theorem}[Wrong-variable ordered norm]
+\label{thm:qld-wrong-variable-norm}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_orderedIndicator_norm_sq_le_of_nonconstant}
+\leanok
+With $p,C,D$ as above, let $X(x),Z(z)$ be complete projective measurements,
+let $r(x,z)$ be any field-valued function, and let $\psi$ be any vector.
+The ordered indicator for the readout $\alpha r(x,z)+\beta p(x,z)$ satisfies
+\[
+ \mathbb E_z\mathbb E_x\mathbb E_{\alpha,\beta}
+   \|T_{\alpha,\beta,\alpha r(x,z)+\beta p(x,z)}\psi\|^2
+ \leq \frac{C+D+2}{|F|}\|\psi\|^2.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-common-exceptional-fibers, lem:qld-fiber-norm-comparisons,
+lem:qld-fiber-collisions}
+The zero second scalar and the unequal scalar-answer collision each cost
+$|F|^{-1}\|\psi\|^2$. Remove the middle $X$ contraction from $ZXZ$.
+Its remaining $Z$ weight is independent of $x$, so the weighted fiber
+theorem applies. Interchanging both blocks and measurements gives $XZX$.
+\end{proof}
+
+\begin{definition}[Wrong-variable and nonseparated masses]
+\label{def:qld-wrong-variable-masses}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarWrongVariableMass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.separatedPolynomialMass}
+\leanok
+For a complete extended-polynomial measurement $R$ on placement $p$, let
+$W_p^{XZ}(R)$ be the sum of $\|(R_g)_p\hat\psi\|^2$ over scalar-linear
+outcomes whose beta coefficient depends on $x$. Define $W_p^{ZX}(R)$
+using the alpha coefficient depending on $z$.
+Let $G_p(R)$ be the same mass sum outside the field-transported image of
+the existing bounded combining map $(g_X,g_Z)\mapsto\combine_{g_X,g_Z}$.
+\end{definition}
+
+\begin{theorem}[Actual wrong-variable and separated masses]
+\label{thm:qld-actual-separated-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarWrongVariableMass_le_ordered_error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.separatedPolynomialMass_le_ordered_errors}
+\leanok
+For every opposite pair $p_1,p_2$ and complete projective measurement $R$
+on $p_1$, for both $o=XZ,ZX$,
+\[
+ W_{p_1}^{o}(R)\leq2E^o_{p_1,p_2}(R)+\frac{2(2md+2)}q,
+\qquad
+ G_{p_1}(R)\leq4E^{XZ}_{p_1,p_2}(R)+2E^{ZX}_{p_1,p_2}(R)
+                  +\frac{12md+4d+10}q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-wrong-variable-norm, thm:qld-block-coefficient-degrees,
+thm:qld-projective-outcome-mass, thm:qld-actual-scalar-nonlinear-mass,
+def:qld-wrong-variable-masses}
+Use the actual vectors $(R_g)_{p_1}\hat\psi$ and opposite placed point
+measurements. Their squared masses sum to one. The norm-to-residual
+comparison retains the full outcome sum. The complement of the combining
+image lies in the union of the three excluded classes; sum their bounds.
+\end{proof}
+
+\begin{theorem}[Rounded concentration on polynomial pairs]
+\label{thm:qld-rounded-separated-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_wrong_variable_mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_separated_mass}
+\leanok
+Under exactly the hypotheses and definitions of $\delta,\eta$ in
+Theorem~\ref{thm:qld-rounded-polynomial-ordered}, the actual rounded
+measurements satisfy both ordered estimates with $E=4\eta+8\delta_Q$.
+They also satisfy both wrong-variable bounds $2E+2(2md+2)/q$ and the
+scalar-nonlinear bound of Theorem~\ref{thm:qld-rounded-scalar-linearity}.
+For the same measurements on both heterogeneous placements,
+\[
+ G_{AA'}(R_A),\ G_{BB'}(R_B)\leq6E+\frac{12md+4d+10}q.
+\]
+The directly indexed completed-answer line-witness restriction remains
+explicit. This proves concentration, not the subsequent retained overlaps,
+completion consistency, or the source global-pair theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-polynomial-ordered, thm:qld-actual-separated-mass}
+Apply the actual mass inequalities to $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{proof}
+
 \begin{theorem}[Polynomial consistency from point comparisons]
 \label{thm:qld-polynomial-consistency-from-points}
 \lean{MIPStarRE.QPBT.direct_polynomial_consistency_le_point_bounds}
