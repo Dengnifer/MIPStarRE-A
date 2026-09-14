@@ -1,4 +1,3 @@
-import MIPStarRE.QPBT.Combining.Points.Closeness
 import MIPStarRE.QPBT.Combining.Points.WitnessMarginals
 import MIPStarRE.QPBT.Combining.PointsDataProcessing
 
