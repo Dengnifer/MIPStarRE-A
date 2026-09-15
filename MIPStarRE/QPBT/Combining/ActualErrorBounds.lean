@@ -18,8 +18,8 @@ the global error function.
 namespace MIPStarRE.QPBT
 
 /-- On the unit interval, all actual rounding terms are bounded by an eighth
-root. The point error is controlled through its square root, as in the saved
-direct passing bound. The cap uses the independent unit bound on defects. -/
+root. The point error is controlled through its square root, as in the direct
+passing estimate. The cap uses the independent unit bound on defects. -/
 theorem actual_rounding_error_le_root {delta point ratio t : ℝ}
     (hd : 0 ≤ delta) (hp : 0 ≤ point)
     (hdt : delta ≤ t) (hpt : Real.sqrt point ≤ t) (hrt : ratio ≤ t) :

@@ -52,7 +52,8 @@ spaces and requires neither projectivity nor an assumed polynomial defect.
 
 This is an operator estimate for the first paragraph of `lem:qld-4-7`,
 paper lines 1278--1288; it is not a construction of its global pair witness.
-The source/import distinction is recorded in
+The distinction between this operator estimate and the source's global-pair
+construction is recorded in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 theorem direct_polynomial_consistency_le_point_bounds
     (D : DirectLdParams) {I J : Type*}

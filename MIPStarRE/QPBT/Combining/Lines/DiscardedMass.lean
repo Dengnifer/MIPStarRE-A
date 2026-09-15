@@ -15,7 +15,7 @@ noncomputable section
 /-- Under the unchanged diagonal line-point law, zero projected directions have
 probability at most the inverse field size: the final unprojected direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
-`08_classical_and_quantum_low_degree_tests.tex:274-287`. This proof-only bound
+`08_classical_and_quantum_low_degree_tests.tex:274-287`. This formalization-only bound
 supports the collision restriction used in the paired-line construction. -/
 theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
     avgOver (dLinePointDist L) (fun sample =>
@@ -59,7 +59,7 @@ theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
 
 
 /-- The equal mixture of axis and diagonal line-point laws gives zero directions
-mass at most `1 / (2q)`. This proof-only estimate preserves the source sampler of
+mass at most `1 / (2q)`. This formalization-only estimate preserves the source sampler of
 `def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`,
 including its degenerate fibers. -/
 theorem linePointDist_zero_direction_mass_le (L : LdParams) :
@@ -78,7 +78,7 @@ theorem linePointDist_zero_direction_mass_le (L : LdParams) :
 
 /-- For two independent line-point samples, excluding only zero X directions
 costs at most `1 / (2q)`. Only X requires the collision estimate when the
-X-outer sandwich is instantiated with `G2 = X`. This is a proof-only bound for
+X-outer sandwich is instantiated with `G2 = X`. This is a formalization-only bound for
 paper `14_analysis_of_the_pauli_basis_test.tex:943-963`. -/
 theorem prod_linePointDist_zero_X_direction_mass_le (L : LdParams) :
     avgOver (Distribution.prod (linePointDist L) (linePointDist L))

@@ -1956,8 +1956,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{def:qld-conditional-extended-line-measurement}
 	\lean{MIPStarRE.QPBT.SubLineWitness.Fiber}
 	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw}
-	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw_isProbability}
-	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_conditionalLaw}
 	\lean{MIPStarRE.QPBT.SubLineWitness.affineData}
 	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial}
 	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement}
@@ -1977,18 +1975,15 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\]
 	The extended-line measurement at $\ell$ is the conditional average, under
 	$D_{\mid\ell}$, of the concrete paired-line measurements postprocessed by
-	$(f_X,f_Z)\mapsto h$. The positive fiber mass makes $D_{\mid\ell}$ a
-	probability distribution, and finite disintegration gives
-	\[
-		\mathbb E_{\ell}\mathbb E_{D_{\mid\ell}}[F]=\mathbb E_D[F]
-	\]
-	for every real-valued function $F$ on supported subline triples.
+	$(f_X,f_Z)\mapsto h$.
 \end{definition}
 
-\begin{lemma}[Formalization support: conditional extended-line identities]
+\begin{example}[Formalization support: conditional extended-line identities]
 	\label{lem:qld-conditional-extended-line-properties}
 	\lean{MIPStarRE.QPBT.directLinePointDist_line_weight_pos}
 	\lean{MIPStarRE.QPBT.SubLineWitness.fiber_mass_pos}
+	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw_isProbability}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_conditionalLaw}
 	\lean{MIPStarRE.QPBT.SubLineWitness.affineData_compatible}
 	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evaluatesTo}
 	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evalOpt}
@@ -1996,20 +1991,28 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\uses{def:qld-conditional-extended-line-measurement,
 		def:direct-subline-law, def:combine-map}
 	Every directly indexed extended line has positive marginal mass, and hence
-	each of its subline fibers has positive mass. The selected affine data satisfy
-	the projection identities in
+	each of its subline fibers has positive mass. Consequently, the conditional
+	law $D_{\mid\ell}$ is a probability distribution, and finite disintegration
+	gives
+	\[
+		\mathbb E_{\ell}\mathbb E_{D_{\mid\ell}}[F]=\mathbb E_D[F]
+	\]
+	for every real-valued function $F$ on supported subline triples. The selected
+	affine data satisfy the projection identities in
 	Definition~\ref{def:direct-subline-law}. If the two source polynomials
 	evaluate to $a$ and $b$ at the projected point, their combined polynomial
 	evaluates there to $\alpha a+\beta b$. The same identity holds for completed
 	evaluation whenever both source evaluations are defined.
-\end{lemma}
+\end{example}
 \begin{proof}
 	\leanok
 	\uses{def:qld-conditional-extended-line-measurement,
 		def:direct-subline-law, def:combine-map}
-	Positivity follows from the explicit direct-line sampler. The evaluation
-	identities follow by substituting the compatible affine data in the
-	polynomial combination formula.
+	Positivity follows from the explicit direct-line sampler. Normalizing each
+	fiber gives total mass one, and grouping the original finite sum by its
+	extended-line coordinate proves the disintegration identity. The evaluation
+	identities follow by substituting the compatible affine data in the polynomial
+	combination formula.
 \end{proof}
 
 \begin{lemma}[Formalization support: axis degree of the combined polynomial]
@@ -2826,6 +2829,60 @@ this readout, for an order parameter $o\in\{XZ,ZX\}$. The outcome sum is over
 every singleton polynomial tuple, without a support restriction.
 \end{definition}
 
+\begin{theorem}[Formalization support: direct soundness for arbitrary strategies]
+\label{thm:qld-direct-soundness-any-strategy}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, def:consistency, def:ld-game}
+This is not a named statement of \cite{Ji2020MIPStar}. There are universal
+constants $a\geq1$ and $0<b\leq1$ such that the following holds. Let
+$D=(q,n,d,k)$ be directly indexed low-degree parameters with $k=1$, let
+$\xi>0$, and let $S$ be an arbitrary, not necessarily projective, strategy for
+the directly indexed game with value at least $1-\xi$. There are complete
+polynomial-tuple POVMs $G^{\mathrm A},G^{\mathrm B}$ on the original player
+spaces for which both point--polynomial consistency defects and the mutual
+polynomial consistency defect are at most
+$\delta_{\rm ld}(a,b,\xi,q,n,d,1)$. The point readout sends every malformed
+answer to the zero tuple, and no projectivity conclusion is asserted for
+$G^{\mathrm A},G^{\mathrm B}$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-soundness-k-one}
+Dilate both question-indexed POVM families by Naimark's theorem, apply
+Theorem~\ref{lem:direct-ld-soundness-k-one} to the resulting projective
+strategy, and compress the two polynomial POVMs at the distinguished ancillary
+coordinates. The game value and all three consistency defects are preserved.
+\end{proof}
+
+\begin{theorem}[Formalization support: simultaneous rounding under postprocessing]
+\label{thm:qld-simultaneous-postprocessed-rounding}
+\lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency}
+\leanok
+\uses{lem:ortho, def:consistency, def:povm-distance}
+Let $\psi$ be a unit vector on a finite-dimensional bipartite space, and let
+$A,B$ be complete POVMs with a common finite outcome set whose cross-player
+consistency defect is at most $\delta\geq0$. There are complete projective
+measurements $P_A,P_B$, chosen before any subsequent question distribution or
+postprocessing, whose squared state-dependent distances from $A,B$ are each at
+most $220\delta^{1/4}$. Moreover, for every finite probability distribution
+$\mu$, every question-dependent outcome map $f$, and every comparison family
+$N$, a consistency bound $\eta$ between $f_*A$ and $N$ implies
+\[
+ \operatorname{Cons}_\mu(f_*P_A,N)
+ \leq\delta+\sqrt{220\delta^{1/4}}+2\sqrt{\delta+\eta},
+\]
+and the analogous implication holds between $N$ and $f_*P_B$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:ortho, def:consistency, def:povm-distance}
+Apply the one-sided projective rounding and consistency transport on each
+tensor factor. The two choices are independent of the later distribution,
+postprocessing map, comparison family, and comparison error, so they form one
+simultaneous pair with the stated bounds.
+\end{proof}
+
 \begin{theorem}[Rounded extended-polynomial ordered estimates]
 \label{thm:qld-rounded-polynomial-ordered}
 \lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_ordered_estimates}
@@ -2853,7 +2910,9 @@ Lemma~\ref{lem:qld-4-7} or assert concentration on separated polynomials.
 \end{theorem}
 \begin{proof}
 \leanok
-\uses{lem:qld-opposite-ordered-products, def:qld-extended-polynomial-ordered-error}
+\uses{thm:qld-direct-soundness-any-strategy,
+  thm:qld-simultaneous-postprocessed-rounding,
+  lem:qld-opposite-ordered-products, def:qld-extended-polynomial-ordered-error}
 Apply the established direct soundness theorem for arbitrary strategies
 at $k=1$. Compression preserves all three conclusions, so the polynomial
 consistency error and both evaluated errors are at most $\delta$.
@@ -3282,6 +3341,34 @@ nonnegative bipartite outcome weights therefore bounds the full polynomial
 defect by the evaluated defect plus $nd/q$.
 \end{proof}
 
+\begin{theorem}[Formalization support: postprocessed consistency under ground compression]
+\label{thm:qld-ground-compression-postprocessing}
+\lean{MIPStarRE.QPBT.consistency_defect_ground_compress_measurement_postprocess}
+\lean{MIPStarRE.QPBT.ground_compress_dilated_measurement}
+\leanok
+\uses{def:consistency}
+Let $\psi$ be a bipartite vector, let $k_0,l_0$ be distinguished coordinates
+of two ancillary spaces, and let $A^x,B^x$ be finite families of complete POVMs
+on the corresponding padded spaces. For question-dependent maps $f_x,g_x$ to
+a common finite outcome set, the consistency defect of the postprocessed
+families on the state padded at $(k_0,l_0)$ is exactly the consistency defect of
+their ground-coordinate compressions on $\psi$:
+\[
+ \operatorname{Cons}_\mu(f_*A,g_*B;\operatorname{pad}_{k_0,l_0}\psi)
+ =\operatorname{Cons}_\mu(f_*A^0,g_*B^0;\psi).
+\]
+In particular, compressing the completed Naimark dilation of a POVM at its
+distinguished residual coordinate recovers the original POVM.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:consistency}
+Expand the off-diagonal defect and use the equality of each bipartite quadratic
+form before and after ground-coordinate compression. Compression commutes with
+postprocessing. The final assertion is the defining compression identity for
+the completed Naimark dilation.
+\end{proof}
+
 \begin{theorem}[Consistency after ground compression]
 \label{thm:qld-compressed-polynomial-consistency}
 \lean{MIPStarRE.QPBT.direct_point_consistency_le_point_rejection}
@@ -3309,6 +3396,8 @@ passing error $3(\sqrt{\delta_Q+\delta_L}+md/q)$.
 \end{theorem}
 \begin{proof}
 \leanok
+\uses{thm:qld-ground-compression-postprocessing,
+  thm:qld-polynomial-consistency-from-points}
 Different point readouts force rejection; wrong-format answers also reject.
 The established point/point rejection estimate gives the bound $\delta_Q$.
 Ground compression preserves every bipartite correlation on the padded state
@@ -3637,20 +3726,35 @@ nonnegative domains.
 	\lean{MIPStarRE.QPBT.rpow_quarter_nonneg}
 	\lean{MIPStarRE.QPBT.sqrt_deficit_bound_le}
 	\leanok
-	For every $x\in\R$, the real quarter power $x^{1/4}$ is nonnegative.
+	For $x\in\R$, write
+	\[
+	 \operatorname{RePow}_{1/4}(x)=
+	 \begin{cases}
+	  \exp\bigl(\frac14\log x\bigr),&x>0,\\
+	  0,&x=0,\\
+	  \exp\bigl(\frac14\log(-x)\bigr)\cos(\pi/4),&x<0.
+	 \end{cases}
+	\]
+	This is the real part of the principal complex quarter power. In particular,
+	the negative-base branch is part of the operation rather than the ordinary
+	real fourth root. It is nonnegative for every real $x$.
 	If $m\geq1$ and $\delta_P,\delta_Q\geq0$, then
 	\[
 	 \sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
-	 \leq2\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr).
+	 \leq2\sqrt m\bigl(
+	  \operatorname{RePow}_{1/4}(\delta_P)
+	  +\operatorname{RePow}_{1/4}(\delta_Q)\bigr).
 	\]
 	These are formalization-only scalar estimates used in the real-part bounds
 	of Claims 17-2 and 17-3.
 \end{theorem}
 \begin{proof}
 	\leanok
-	Separate the two nonnegative summands under the outer square root, simplify
-	the square roots of $4m^2\delta_P$ and $4\delta_Q$, and compare the remaining
-	factor $2$ with $2\sqrt m$.
+	For a negative base, the displayed convention is a product of a positive
+	exponential and $\cos(\pi/4)>0$; the nonnegative-base case is immediate.
+	For the inequality, separate the two nonnegative summands under the outer
+	square root, simplify the square roots of $4m^2\delta_P$ and $4\delta_Q$,
+	and compare the remaining factor $2$ with $2\sqrt m$.
 \end{proof}
 
 \begin{theorem}[Polynomial error after conditioning]
@@ -3782,6 +3886,8 @@ placement, including both $AA'\mid BA''$ and $BB'\mid AB''$.
 \end{theorem}
 \begin{proof}
 \leanok
+\uses{thm:qld-retained-local-mismatch, thm:qld-projective-outcome-mass,
+  thm:qld-direct-pair-completion-properties}
 Apply Theorem~\ref{thm:qld-retained-local-mismatch} on each actual vector
 $v_g$, reversing both base and scalar blocks for Z. The joint coordinate
 equivalence preserves the uniform law and the placed ordered product.
@@ -3790,14 +3896,61 @@ Projectivity and normalization give total squared mass one. Opposite
 placements commute, yielding the exact identity for $K_W$.
 \end{proof}
 
+\begin{theorem}[Consistency of the direct polynomial-pair completion]
+\label{thm:qld-direct-pair-consistency}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-retained-point-overlap,
+  def:consistency}
+Let $R$ be a complete projective singleton-polynomial measurement on a
+placement $p_1$, let $p_2$ be opposite, and complete the direct restriction of
+$R$ at a fixed polynomial pair. For either basis $W$, the consistency defect of
+the completed pair measurement against the point measurement on $p_2$ is at
+most
+\[
+ G_{p_1}(R)+K_W,
+\]
+where $G_{p_1}(R)$ is the mass outside the bounded combining image and $K_W$ is
+the retained mismatch of Theorem~\ref{thm:qld-retained-point-overlap}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-retained-point-overlap,
+  thm:qld-direct-pair-completion-properties,
+  lem:qld-combined-pair-completion}
+The completion adds a positive operator at the distinguished pair. On opposite
+placements this operator commutes with each point effect, so the diagonal
+overlap cannot decrease. The defect is therefore bounded by one minus the
+retained overlap, which equals the excluded mass plus the retained mismatch.
+\end{proof}
+
+\begin{theorem}[Ordered-error bound for the direct polynomial-pair completion]
+\label{thm:qld-direct-pair-ordered-consistency}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le_ordered_error}
+\leanok
+\uses{thm:qld-direct-pair-consistency, thm:qld-retained-point-overlap,
+  def:qld-extended-polynomial-ordered-error}
+In the setting of Theorem~\ref{thm:qld-direct-pair-consistency}, let
+$o\in\{XZ,ZX\}$ select the corresponding point basis $W$. Then the completed
+measurement has point-consistency defect at most
+\[
+ G_{p_1}(R)+2E^o_{p_1,p_2}(R)+\frac4q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-direct-pair-consistency, thm:qld-retained-point-overlap}
+Apply Theorem~\ref{thm:qld-direct-pair-consistency} and substitute the retained
+mismatch estimate from Theorem~\ref{thm:qld-retained-point-overlap}.
+\end{proof}
+
 \begin{theorem}[Completed pair witness with the actual rounded error]
 \label{thm:qld-completed-pair-actual-error}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le}
-\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le_ordered_error}
 \lean{MIPStarRE.QPBT.ExtendedLineGame.exists_pairWitness_of_points_lines}
 \leanok
-\uses{thm:qld-retained-point-overlap, def:qld-pair-restriction-completion,
-  thm:qld-rounded-separated-mass}
+\uses{def:qld-direct-pair-completion, thm:qld-rounded-separated-mass,
+  thm:qld-direct-pair-ordered-consistency,
+  thm:qld-direct-pair-completion-properties}
 There are universal $a\geq1$ and $0<b\leq1$ with the following property.
 Given an admissible projective setting, a combined-point witness of error
 $\delta_Q$, and a directly indexed completed-answer extended-line witness
@@ -3814,17 +3967,22 @@ player placement, are all at most
 \[
  8E+\frac{12md+4d+14}{q}.
 \]
-More generally, completion has defect at most $G+K_W$, hence at most
-$G+2E^W+4/q$, on each opposite placement.
 This auxiliary explicitly assumes the two displayed witnesses.
 Lemma~\ref{lem:qld-4-13-established} supplies them from the original strategy,
 and Theorem~\ref{thm:qld-actual-rounded-error-bound} absorbs their actual error.
 \end{theorem}
 \begin{proof}
 \leanok
-Completion only increases the retained overlap, because its added operator
-and the opposite point effect are commuting positive operators. Combine
-the preceding retained bounds with $G\leq6E+(12md+4d+10)/q$.
+\uses{def:qld-direct-pair-completion, thm:qld-rounded-separated-mass,
+  thm:qld-direct-pair-ordered-consistency,
+  thm:qld-direct-pair-completion-properties}
+Apply Theorem~\ref{thm:qld-rounded-separated-mass} to obtain one rounded
+measurement on each player space with both ordered estimates and the stated
+excluded-mass bound. Complete each measurement at the zero polynomial pair.
+The completion is projective by
+Theorem~\ref{thm:qld-direct-pair-completion-properties}, and
+Theorem~\ref{thm:qld-direct-pair-ordered-consistency} bounds each point defect.
+Combine these bounds with $G\leq6E+(12md+4d+10)/q$.
 The two rounded measurements are chosen before either basis estimate, so
 one completed measurement on each player side supplies both conclusions.
 \end{proof}

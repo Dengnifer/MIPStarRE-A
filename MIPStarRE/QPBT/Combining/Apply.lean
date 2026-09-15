@@ -234,11 +234,10 @@ direct carrier realizes the required dimension without assuming
 `2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
 for the directly indexed game by applying `MIPStarRE.LDT.Test.mainFormal` and
 verifying `400 M d <= N` at each LDT application dimension `M`, with sampling
-count `N = 2560000 M^3 d`.  The source import at seed-indexed dimension `M`
-instead chooses `K = M^3 d` for a tensor-code theorem requiring
-`K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
-claimed tensor-code game correspondence.  Both source-import obligations
-remain open and are documented in
+count `N = 2560000 M^3 d`.  At seed-indexed dimension `M`, the source instead
+chooses `K = M^3 d` while invoking a tensor-code theorem that requires
+`K >= 12 M (d + 1)`, and it asserts a correspondence with the tensor-code game.
+The direct proof establishes neither assertion.  Both remain open and are documented in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
 
 The independent algebraic restriction, projective completion, and retained-overlap

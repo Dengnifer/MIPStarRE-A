@@ -8,10 +8,6 @@ preserves the Pauli soundness error family after halving the exponent.
 
 ## References
 
-Recovered from the verified issue #529 object at
-`a7a52e4c0d7bad95d471036accedd33b358694fb`,
-`MIPStarRE/QPBT/Test/Soundness/ErrorBounds.lean`, for issue #513.
-
 Blueprint `rem:pauli-robustness-form`; the source states the squared bound at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1868-1876`,
 whereas `thm:pauli` bounds the unsquared norm.
