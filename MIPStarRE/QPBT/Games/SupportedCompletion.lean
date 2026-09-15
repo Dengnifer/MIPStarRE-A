@@ -318,7 +318,7 @@ theorem abs_postprocess_consistency_right_sub_le
 /-- After any outcome maps agreeing on the good outcomes, the constructed
 completion changes Alice-first consistency by at most the bad projection's
 state mass. Together with `complete_isProjective`, this is the finite-measurement
-adapter for the completion step of `lem:qld-4-7`, not its source mass estimate. -/
+estimate used in the completion step of `lem:qld-4-7`, not its source mass estimate. -/
 theorem abs_complete_consistency_left_sub_le
     (μ : Distribution X) (hμ : μ.IsProbability) (M : Measurement α ιA)
     (N : X → Measurement β ιB) (good : α → Prop) [DecidablePred good]

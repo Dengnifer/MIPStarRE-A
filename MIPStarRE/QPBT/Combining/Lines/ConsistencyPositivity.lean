@@ -12,8 +12,8 @@ after separating the two placements along the corresponding tensor
 bipartition, the off-diagonal sum is
 `∑_a (place p₁ E_a) (place p₂ (∑_{b ≠ a} F_b))`, a sum of products of
 positive operators supported on complementary registers.  The placement
-algebra itself — additivity, the image of zero, positivity and the
-commutation of opposite placements — is the shared API of
+algebra itself — additivity, the image of zero, positivity and the commutation
+of opposite placements — is supplied by the placement identities proved in
 `MIPStarRE.QPBT.Combining.Points.PlacementSupport` and
 `MIPStarRE.QPBT.Observables.LineMeasurement.LinePointOverlap`.
 
