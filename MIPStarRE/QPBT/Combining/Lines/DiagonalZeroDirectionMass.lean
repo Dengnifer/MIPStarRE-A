@@ -22,10 +22,11 @@ private theorem dLineDescOf_ldDLineCL_direction (L : LdParams) (z : LdSpace L) :
     (dLineDescOf L (ldDLineCL L z)).direction = (dLineDescOf L z).direction := by
   exact prefixProjection_idempotent _ _
 
-/-- Under the unchanged diagonal line-point law, zero projected directions have
-probability at most the inverse field size: the final raw direction coordinate
-must vanish and is uniform. This is a formalization-only consequence of
-`def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`. -/
+/-- Under the diagonal line-point law, vanishing of the projected direction forces
+the last sampled direction coordinate to vanish; that coordinate is uniform.
+Thus the probability is at most the inverse field size. This is a formalization-only
+consequence of the projection and distribution in paper
+`08_classical_and_quantum_low_degree_tests.tex:230-237,274-287`. -/
 theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
     avgOver (dLinePointDist L) (fun sample =>
       if sample.1.direction = 0 then 1 else 0) ≤
