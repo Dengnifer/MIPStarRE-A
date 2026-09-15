@@ -2810,9 +2810,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor_at}
 	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_at}
 	\leanok
-	\uses{def:paired-subline-overlap, def:direct-subline-law,
-		lem:qld-4-10-same-placement, lem:overlap-gap-distance,
-		lem:concrete-X-deficit-direct, lem:qld-sublines-uniform-point}
+	\uses{def:paired-subline-overlap, def:direct-subline-law}
 	These formalization-only auxiliary estimates give the directly indexed real
 	overlap steps used in the first route of Lemma~\ref{lem:qld-4-13}. Let the
 	directly indexed sub-line law, a joint point family of error
@@ -2832,12 +2830,29 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
-		lem:concrete-X-deficit-direct, lem:qld-sublines-uniform-point,
-		lem:restricted-line-mixture-bounds}
+		lem:qld-x-point-overlap-deficit, lem:qld-sublines-uniform-point,
+		lem:restricted-line-mixture-bounds, thm:qld-quarter-power-deficit-bound}
 	The first estimate uses the squared-distance comparison with the ordered point
-	product. The second uses the separate $X$ marginal of the directly indexed law
-	and the concrete $X$-overlap deficit. The third uses the separate $Z$ marginal,
-	positivity, and point self-consistency.
+	product. For the second, the separate $X$ marginal of the directly indexed law
+	and Lemma~\ref{lem:qld-x-point-overlap-deficit} bound the $X$-overlap deficit by
+	\[
+		2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}.
+	\]
+	This bound holds for every paired-line family with consistency error
+	$\delta_P$ relative to the joint point family of error $\delta_Q$.
+	The source proof of Claim~\ref{lem:claim-17-2} uses the concrete
+	$X$-$Z$-$X$ sandwich; no such identification of the paired-line family is
+	assumed here. Cauchy--Schwarz bounds the change on removing the $X$ factor
+	by the square root of this deficit bound. The consistency hypotheses imply
+	$\delta_P,\delta_Q\geq0$, and admissibility gives $m\geq1$, so
+	Theorem~\ref{thm:qld-quarter-power-deficit-bound} gives
+	\[
+		\sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
+		\leq 2\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr).
+	\]
+	Thus the quarter powers arise from the two successive square roots.
+	The third estimate uses the separate $Z$ marginal, positivity, and point
+	self-consistency.
 \end{proof}
 
 \begin{lemma}[Formalization support: the paired subline overlap]
