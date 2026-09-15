@@ -1793,18 +1793,20 @@ variants.
 	\end{enumerate}
 	Furthermore, all symmetric equivalents of these approximations also
 	hold. The proof exhibits the measurements of
-	Definition~\ref{def:expanded-line-measurement} as witnesses, with
-	item~\ref{eq:qld-comm-line-pt-cons} holding with error $\eps$ and
-	items~\ref{enu:qld-comm-line-self-cons}
-	and~\ref{eq:qld-comm-line-pt-cons2} with
-	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
+	Definition~\ref{def:expanded-line-measurement} as witnesses, with the
+	common error $\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$ in all three
+	items. The stronger linear-error assertion made in the source proof is
+	stated separately in Lemma~\ref{lem:expanded-line-point-linear-error}.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{def:expanded-line-measurement, lem:expanded-line-measurement-postprocess,
-	def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing,
+	def:expanded-point-measurement, lem:qld-win-implications,
+	lem:qld-reversed-consistency, fact:data-processing,
 	fact:add-a-proj2, fact:agreement, def:line-point-dist,
 	def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
+	We first recall the source argument, then describe the order of the
+	estimates used in the formalization.
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1896,7 +1898,8 @@ variants.
 	The formalization uses an equivalent order of the estimates. The exact
 	Pauli overlap computation identifies the inconsistency of the expanded
 	evaluation classes with that of the strategy's original completed
-	evaluation classes. Applying the winning implication and the
+	evaluation classes. Applying the winning implication, its reversed form
+	in Lemma~\ref{lem:qld-reversed-consistency}, and the
 	agreement estimate gives item~\ref{eq:qld-comm-line-pt-cons2} with
 	an error linear in $\eps$. Projective refinement then gives
 	item~\ref{eq:qld-comm-line-pt-cons}, also with linear error.
@@ -1908,6 +1911,53 @@ variants.
 	their explicit bipartition identities. Thus the Lean proof does not
 	rely on the symmetric-equivalent transfer lemma or the intermediate
 	sub-measurement inequality in the preceding source argument.
+\end{proof}
+
+\begin{lemma}[Linear error in expanded line-point consistency]
+	\label{lem:expanded-line-point-linear-error}
+	\lean{MIPStarRE.QPBT.expLine_point_cons_linear}
+	\leanok
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement,
+	def:expanded-state, def:line-point-dist, def:povm-distance,
+	def:ideg-deg-polynomials, def:symmetric-equivalents}
+	Under the projective-strategy hypotheses of this section, the concrete
+	measurements of Definition~\ref{def:expanded-line-measurement} satisfy
+	\begin{equation}
+		\label{eq:qld-comm-line-pt-cons-eps}
+		(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+		\,\approx_{\eps}\,
+		(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+		\ot (\hat{M}^{(\mathrm{Point},W),u}_{f(u)})_{\mathsf{B}\mathsf{A}''}
+	\end{equation}
+	on the line-point distribution, for every $W\in\{X,Z\}$ and all four
+	directed opposite placements. The answer sum runs over
+	$f\in\deg_{md}(\ell)$; the selected point effect is zero when $f$ has
+	no evaluation at $u$. More precisely, the average squared distance is at
+	most $C\eps$ for a universal $C\geq1$, independent of the parameters,
+	strategy, basis and placements. This is the stronger assertion in the
+	proof of the expanded-line consistency lemma of \cite{Ji2020MIPStar},
+	% Source: eq:qld-comm-line-pt-cons-eps and the following paragraph.
+	rather than the common-polynomial statement of
+	Lemma~\ref{lem:qld-comm-line-cons}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-win-implications, lem:qld-reversed-consistency,
+	fact:agreement, fact:add-a-proj2, def:expanded-line-measurement,
+	def:expanded-point-measurement, def:symmetric-equivalents}
+	Let $D_{\mathrm I}$ be the distance in the displayed assertion and
+	$D_{\mathrm{II}}$ the distance between the completed expanded
+	evaluation classes and point measurements. Projective refinement gives
+	$D_{\mathrm I}\leq D_{\mathrm{II}}$. The exact consistency of the
+	ancillary Pauli projectors identifies their summed overlap with that
+	of the original strategy measurements, including the $\bot$ class.
+	The agreement inequality therefore gives
+	$D_{\mathrm{II}}\leq 2\,\mathrm{Cons}_{\mathrm{strategy}}$.
+	For a line on Alice's side the forward low-degree winning implication
+	bounds this defect by $C_1\eps$; for a line on Bob's side use
+	Lemma~\ref{lem:qld-reversed-consistency} to obtain $C_2\eps$.
+	Both estimates apply on each ancillary bipartition. Taking
+	$C=2(C_1+C_2)$ proves the assertion for all four directed pairs.
 \end{proof}
 
 The expanded point and line measurements constructed in this section, being
