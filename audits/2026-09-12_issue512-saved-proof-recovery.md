@@ -194,3 +194,35 @@ correction for PR #549. The construction continues to obtain the discarded
 mass bound through `Lines/Conditioning.lean`, which imports
 `Lines/DiscardedMass.lean`; no theorem used by
 `exists_extendedLinesWitness_established` was removed or replaced.
+
+## Quantitative preservation supplement (2026-09-15)
+
+The preceding retirement note records the correction at `a25c2417`. Its
+non-use observation does not establish equivalence of the distinct retained-mass
+bound with the active conditioning results. In fact,
+`nondegenerateLinePastingMass_bounds` gives only a lower bound of `1/2`, and
+`prod_linePointDist_nondegenerate_mass_pos` gives positivity; neither alone
+recovers the deleted lower bound of `3/4`.
+
+The stronger bound follows from the preserved canonical
+`linePointDist_zero_direction_mass_le` on exactly the same domain `L : LdParams`.
+Writing `p` for the zero-direction probability and `r` for the nonzero-direction
+probability under `linePointDist L`, normalization gives `r + p = 1`.
+The canonical estimate gives `p <= 1/(2q) <= 1/4`, since the scalar field has
+at least two elements. Thus `r >= 3/4`. The public theorem
+`linePointDist_nondegenerate_mass_ge` and its finite-sum proof are now preserved
+in `Lines/DiscardedMass.lean`, using that canonical estimate. Its unchanged
+signature has no additional dimension, degree, or conditioning hypothesis.
+Blueprint `lem:qld-nondegenerate-line-mass` records precisely this auxiliary
+result. No duplicate sampler or replacement assumption is introduced.
+
+The three duplicated discarded-mass bounds remain in their canonical module,
+and the representative-parameter identity remains in `Lines/SubLineUniform.lean`
+under `avgOver_uniform_lineRepMap_resample_parameter`, with the same field
+instances, arbitrary finite dimension, arbitrary direction (including zero),
+and arbitrary real-valued integrand. `Lines/Sampling.lean` remains retired.
+The restored bound is not required by the established extended-line proof;
+its restoration preserves the stronger quantitative result and public name.
+All dated recovery actions, previous attempts, review rounds, queue time,
+the 419-second outage, and the 1973-second publication continuation remain
+historical costs. This supplement neither replaces nor resets those records.

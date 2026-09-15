@@ -1120,6 +1120,24 @@ assembled by Fourier averaging.
 	the stated bounds.
 \end{proof}
 
+\begin{lemma}[Formalization support: retained nonzero-direction mass]
+	\label{lem:qld-nondegenerate-line-mass}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_mass_ge}
+	\leanok
+	\uses{def:line-point-dist, lem:qld-zero-direction-mass}
+	For every admissible low-degree parameter tuple, the unchanged line-point
+	law assigns probability at least $3/4$ to lines with nonzero direction.
+	This is an auxiliary bound for the conditioning in the proof of
+	Lemma~\ref{lem:qld-xz-lines}, not an additional source assertion.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-zero-direction-mass}
+	The retained probability is one minus the zero-direction probability.
+	Lemma~\ref{lem:qld-zero-direction-mass} bounds the latter by $1/(2q)$,
+	which is at most $1/4$ because a field has at least two elements.
+\end{proof}
+
 \begin{lemma}[Formalization support: conditioning and restoring line defects]
 	\label{lem:qld-line-conditioning-restoration}
 	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
@@ -1893,18 +1911,26 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.subLineTripleOf_axis_closure}
 	\leanok
 	\uses{def:direct-subline-law}
-	The concrete law $D_{\mathrm{dir}}$ is the equal mixture of the axis and
+	Fix an admissible parameter tuple. The concrete law $D_{\mathrm{dir}}$ is
+	the equal mixture of the axis and
 	diagonal sampling branches in Definition~\ref{def:direct-subline-law}. It is
 	a probability law, and its extended-line marginal is the directly indexed
 	extended-line marginal. Its projected $X$- and $Z$-point marginals are the
 	two mixtures in that definition, with one common probability law on the line
 	kind and the two source coordinate indices.
 
-	Every triple in the support is produced by auxiliary point, direction, and
-	seed data from one of the two branches. Such a triple satisfies incidence of
-	the two projected points with their source lines, the affine compatibility
-	relations for both projections, and closure of both source lines under an
+	The extended coordinate, point, and direction are uniform. Conditional on
+	the extended coordinate, the two source seeds are independent and uniform
+	on their prescribed coordinate-index fibers; these fibers have positive
+	mass. Every triple in the support is produced by such data from one of the
+	two branches. For every point on its extended line, such a triple satisfies
+	incidence of the two projected points with their source lines, the affine
+	compatibility relations for both projections, and closure of both source lines under an
 	axis-parallel extended line.
+	The projected laws use an independent uniform affine parameter and are
+	separate one-point marginals, not a joint conditional independence claim.
+	Zero diagonal directions are retained, and the scalar fields of the direct
+	and source coordinates are related by the fixed field identifications.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -2199,6 +2225,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	For every directed pair of opposite placements, the consistency defect
 	between the evaluated extended-line measurement and the combined-value point
 	measurement is consequently at most one minus the average paired overlap.
+	Both measurements here have alphabet $\F_q\cup\{\bot\}$: the point
+	measurement sends $(a,b)$ to the single value $\alpha a+\beta b$ and has
+	zero effect at $\bot$, while the line measurement uses completed evaluation.
 \end{lemma}
 \begin{proof}
 	\leanok
