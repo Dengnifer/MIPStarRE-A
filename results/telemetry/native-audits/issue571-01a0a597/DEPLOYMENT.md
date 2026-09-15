@@ -31,3 +31,21 @@ Issue 571 remains open for a bounded live scan when a review-eligible head
 exists: review-body retrieval and nonempty candidate emission are fixture-tested
 but have not yet been exercised live. A successful empty-candidate scan is not
 evidence of a successful merge or of every network path being exercised.
+
+## Subsequent Nonempty Scan
+
+On 2026-09-15 at 15:44:32Z the deployed daemon emitted PR549 as an adjudicated
+candidate. That scan covered all 74 PRs in 18.075 seconds, with one candidate
+and zero review-body queries. The daemon then passed its unchanged gates and
+merged PR549 as `40ca8cd5257649d2ef429724c308165f03925a55` at 15:45:06Z,
+independently confirmed through primary gh_common.py. The registered literal-head
+adjudication was accepted; no MAIN merge command was used.
+
+An earlier read in the same cycle saw the preceding empty scan. A bounded
+GraphQL comparison confirmed that the PR commit node was the actual b49709fc
+head and its statuses agreed with the direct commit object. The apparent delay
+was normal scan cadence, not a metadata or selector failure; no repair was made.
+
+Nonempty adjudicated-candidate emission has therefore now been exercised live.
+Clean-review body retrieval remains fixture-tested only, and issue571 stays open
+for that narrower remaining transport check. Earlier evidence is retained above.
