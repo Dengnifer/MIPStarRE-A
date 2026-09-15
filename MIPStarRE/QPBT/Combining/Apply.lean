@@ -13,8 +13,9 @@ combining argument.  Directly indexed combined-line measurements are recorded bo
 with the error form printed in the source and with the weaker estimate established by
 its first proof route.  The final witness consists of a projective measurement of a
 pair of global bounded individual-degree polynomials. The directly indexed
-established-error construction is proved; the printed-error and global-pair
-existence assertions remain open.
+construction with an existentially supplied point family and the established
+error is proved. The two printed-error assertions, the unrestricted
+supplied-point established-error assertion, and the global-pair assertion remain open.
 
 ## References
 
@@ -111,18 +112,28 @@ theorem exists_extendedLinesWitness :
                 ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Construction of the extended-line measurements with the estimate actually
+/-- Retained conditional statement for extended-line measurements with the estimate
 delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
 
-This is an established auxiliary form of the argument, not the source-labelled
-`lem:qld-4-13`; it must not be advertised as that theorem. The source discrepancy
-is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the
-companion directly indexed declaration, the extended questions use the directly
-indexed line-space construction. This conditional declaration takes an already
-constructed point witness; the obligation below supplies it existentially. Relating
-its game to the source's seed-bearing game requires the transport and soundness
-obligations in
+This conditional auxiliary uses the error form established by the first proof route,
+but its own proof remains open; it is not the source-labelled `lem:qld-4-13` and must
+not be advertised as that theorem. The source discrepancy is analyzed in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the companion directly
+indexed declaration, the extended questions use the directly indexed line-space
+construction. This conditional declaration takes an already constructed point
+witness; the obligation below supplies it existentially. Relating its game to the
+source's seed-bearing game requires the transport and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Unfaithful:** This helper quantifies over an arbitrary scalar `δQ`, although
+its line error is independent of `δQ`. This assertion is false for arbitrary
+supplied point measurements and does not follow from `lem:qld-4-13`; the
+obstruction is documented in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and tracked by issue #511.
+Elimination: either restrict the supplied point family to the polynomially
+controlled error produced by `exists_combinedPointsWitness`, or remove this
+helper once no proof requires the unrestricted form. Its proof remains open,
+and it must not support a claim that the source lemma is complete.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form

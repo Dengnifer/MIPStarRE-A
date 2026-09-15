@@ -30,8 +30,8 @@ noncomputable section
 /-- Under the unchanged diagonal line-point law, zero projected directions have
 probability at most the inverse field size: the last sampled direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
-`08_classical_and_quantum_low_degree_tests.tex:274-287`. This proof-only bound
-supports the collision restriction in issue #118. -/
+`08_classical_and_quantum_low_degree_tests.tex:274-287`. This formalization-only
+auxiliary bound supports the collision restriction used for `lem:qld-xz-lines`. -/
 theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
     avgOver (dLinePointDist L) (fun sample =>
       if sample.1.direction = 0 then 1 else 0) ≤
@@ -73,9 +73,10 @@ theorem dLinePointDist_zero_direction_mass_le (L : LdParams) :
   · exact le_rfl
 
 /-- The equal mixture of axis and diagonal line-point laws gives zero directions
-mass at most `1 / (2q)`. This proof-only estimate preserves the source sampler of
-`def:line-point-dist`, paper `08_classical_and_quantum_low_degree_tests.tex:274-287`,
-including its degenerate fibers. -/
+mass at most `1 / (2q)`. This formalization-only auxiliary estimate preserves the
+sampler of `def:line-point-dist`, paper
+`08_classical_and_quantum_low_degree_tests.tex:274-287`, including its degenerate
+fibers. -/
 theorem linePointDist_zero_direction_mass_le (L : LdParams) :
     avgOver (linePointDist L) (fun sample =>
       if sample.1.direction = 0 then 1 else 0) ≤
@@ -109,8 +110,9 @@ theorem avgOver_lineRepMap_resample_parameter {K : Type*} [Field K] [Fintype K] 
 
 /-- Nondegenerate line fibers have total mass at least three quarters in the
 unchanged line-point law. This follows from the zero-direction mass bound and
-the fact that a field has at least two elements. This proof-only positivity bound
-supports conditioning at paper `14_analysis_of_the_pauli_basis_test.tex:950-963`. -/
+the fact that a field has at least two elements. This formalization-only auxiliary
+positivity bound supports the conditioning at paper
+`14_analysis_of_the_pauli_basis_test.tex:950-963`. -/
 theorem linePointDist_nondegenerate_mass_ge (L : LdParams) :
     (3 / 4 : ℝ) ≤ ∑ sample ∈ (linePointDist L).support.filter
       (fun sample => sample.1.direction ≠ 0), (linePointDist L).weight sample := by
@@ -131,8 +133,9 @@ theorem linePointDist_nondegenerate_mass_ge (L : LdParams) :
 
 /-- For two independent line-point samples, excluding only zero X directions
 costs at most `1 / (2q)`. Only X requires the collision estimate when the
-X-outer sandwich is instantiated with `G2 = X`. This is a proof-only bound for
-paper `14_analysis_of_the_pauli_basis_test.tex:943-963`. -/
+X-outer sandwich is instantiated with `G2 = X`. This formalization-only auxiliary
+bound supports the pasting calculation at paper
+`14_analysis_of_the_pauli_basis_test.tex:943-963`. -/
 theorem prod_linePointDist_zero_X_direction_mass_le (L : LdParams) :
     avgOver (Distribution.prod (linePointDist L) (linePointDist L))
       (fun samples => if samples.1.1.direction = 0 then 1 else 0) ≤

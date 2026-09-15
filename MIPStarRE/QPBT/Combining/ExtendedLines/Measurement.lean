@@ -3,9 +3,9 @@ import MIPStarRE.QPBT.Combining.Lines
 /-!
 # Conditional extended-line measurements
 
-This directly indexed auxiliary construction follows the first consistency
-route for combined lines. The question carrier, completed answer alphabet,
-and corrected error convention retain their existing meanings.
+This construction uses the directly indexed extended-line space, the answer
+alphabet obtained from the field by adjoining an undefined-evaluation outcome,
+and the corrected sum-form convention for polynomial errors.
 
 ## References
 
@@ -105,7 +105,8 @@ theorem SubLineWitness.fiber_mass_pos {params : AdmissibleParams}
   exact directLinePointDist_line_weight_pos _ _
 
 /-- The genuine conditional law of the supported subline triples given their
-extended line, as in paper lines 1118--1132. There is no zero-mass branch. -/
+extended line, as in paper lines 1118--1132. Every extended line has positive
+marginal mass. -/
 def SubLineWitness.conditionalLaw {params : AdmissibleParams}
     (sublines : SubLineWitness params) (line : DirectLineDesc params.extendedDirectLd) :
     Distribution (sublines.Fiber line) where
@@ -251,7 +252,7 @@ private theorem evalCoefficient_extendedScalar {params : AdmissibleParams} {boun
 /-- If both projected polynomials have determined values, their actual combined
 polynomial has the required determined value at the extended point. This also
 covers zero-direction lines: every parameter is checked, rather than selecting
-one parameter or assigning a field-valued fallback. -/
+one parameter or assigning an arbitrary field value. -/
 theorem SubLineWitness.combinedPolynomial_evaluatesTo {params : AdmissibleParams}
     (sublines : SubLineWitness params) (sample : SubLineTriple params)
     (hsample : sample ∈ sublines.D.support)

@@ -191,8 +191,8 @@ set_option maxHeartbeats 800000 in
 and line families bounds their conditional defect. Both supplied point
 families and both marginal errors are retained. Answers are ordered Z then X,
 as required by the X-outer sandwich. Source: `eq:qld-4-13-1`, paper
-`14_analysis_of_the_pauli_basis_test.tex:950-963`; the proof-only conditioning
-and point-error dependence are explained in
+`14_analysis_of_the_pauli_basis_test.tex:950-963`; the formalization-only
+conditioning auxiliary and the point-error dependence are explained in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. -/
 theorem exists_combinedLine_conditioned_defect_le :
     ∃ constant : ℝ, 1 ≤ constant ∧

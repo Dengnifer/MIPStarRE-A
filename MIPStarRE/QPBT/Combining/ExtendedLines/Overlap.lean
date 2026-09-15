@@ -4,9 +4,9 @@ import MIPStarRE.QPBT.Combining.SubLineXDeficit
 /-!
 # Consistency of the extended-line measurements
 
-This directly indexed auxiliary construction follows the first consistency
-route for combined lines. The question carrier, completed answer alphabet,
-and corrected error convention retain their existing meanings.
+This construction uses the directly indexed extended-line space, the answer
+alphabet obtained from the field by adjoining an undefined-evaluation outcome,
+and the corrected sum-form convention for polynomial errors.
 
 ## References
 

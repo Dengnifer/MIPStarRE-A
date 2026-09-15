@@ -28,7 +28,8 @@ noncomputable section
 /-- For arbitrary complete measurements on opposite placements, conditioning
 and question relabeling inflate the defect by at most the inverse retained mass.
 The needed nonnegativity follows from positivity on opposite registers, not a
-new input. Proof-only support for `eq:pasting-q1`, paper lines 936--963. -/
+new input. This formalization-only auxiliary supports `eq:pasting-q1`, paper
+lines 936--963. -/
 theorem consistencyDefect_nondegenerateLinePastingDist_le {P : AdmissibleParams} {ε : ℝ}
     {Outcome : Type*} [Fintype Outcome] [DecidableEq Outcome]
     (S : ProjectiveSetting P ε) (p1 p2 : Placement) (hopp : p1.IsOpposite p2)
@@ -116,11 +117,12 @@ theorem exists_combinedPoints_conditioned_line_marginal_defect_le :
     exact h
 
 set_option maxHeartbeats 800000 in
--- Unfolding the conditioned product law creates a large finite-sum normalization goal.
+-- Expanding the conditioned product law gives the corresponding finite normalization identity.
 /-- Restore the unconditioned consistency defect with its retained-mass factor
 and additive cost at most `1/(2q)`. This holds for the supplied measurement
 families on every directed opposite placement, without a defect hypothesis.
-Proof-only support for `lem:qld-xz-lines`, paper lines 950--963. -/
+This formalization-only auxiliary supports `lem:qld-xz-lines`, paper
+lines 950--963. -/
 theorem consistencyDefect_le_nondegenerateLinePastingDist_add_mass
     {P : AdmissibleParams} {ε : ℝ}
     {Outcome : Type*} [Fintype Outcome] [DecidableEq Outcome]

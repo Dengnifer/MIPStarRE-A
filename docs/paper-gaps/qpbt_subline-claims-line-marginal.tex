@@ -154,7 +154,7 @@ estimate is retained as
 \leanid{subline\_replace\_by\_ordered\_product\_re\_direct}.
 Its constant is $2\sqrt{\delta_Q}$: the squared-distance comparison on
 one placement is $4\delta_Q$ and uses $W^\dagger W$, not $W^2$.
-The source Claim 17-1 remains a separate uncertified blueprint statement.
+The source Claim 17-1 remains open in its complex-modulus, source-law form.
 Likewise \leanid{subline\_Z\_term\_near\_one\_re\_direct} retains the
 proved real Z-overlap estimate with its directly indexed domain explicit.
 No reality or distribution-transport theorem is asserted by these renamings.
@@ -170,15 +170,19 @@ Scalar realignment is tracked in \ghissue{474} and review of PR~478.
 The distribution and complex-overlap work under \ghissue{118} remains open;
 its historical budget is unchanged.
 
-The abstract combined-line witness record remains unchanged. Its fields
-faithfully express the existential conclusion of the combined-lines lemma,
-but do not characterize the construction used in its proof. The internal
-consistency obligation now refers to the concrete sandwich. Both witness
-existence proofs construct their records with that measurement. A later
-argument needing the exact construction can use the consistency obligation
-and the same explicit record; merely choosing an unspecified existential
-witness does not recover its defining formula.\footnote{The Lean-only
-theorem is \leanid{combined\_line\_measurement\_consistency} in
+The abstract combined-line witness record remains unchanged. It records a
+complete paired-line POVM, the two axis-degree conditions, and consistency on
+every directed opposite placement. Its consistency field, however, compares
+the completed evaluation alphabet obtained by adjoining an undefined outcome,
+whereas Lemma~\path{lem:qld-xz-lines} sums only over field-valued evaluations.
+Consequently the record captures the measurement and degree data used by the
+source construction but does not yet express its field-valued consistency
+conclusion. The source blueprint node therefore remains open. Both witness
+existence proofs instantiate the record with the concrete sandwich. A later
+argument needing that construction can use the consistency theorem and the
+same explicit record; merely choosing an unspecified existential witness does
+not recover its defining formula.\footnote{The formalization-only theorem is
+\leanid{combined\_line\_measurement\_consistency} in
 \path{MIPStarRE/QPBT/Combining/Lines/Construction.lean}. Its hypotheses explicitly supply
 a polynomially controlled point family. Its proof was recovered for
 \ghissue{512} from the saved point-to-line comparisons and pasting argument,
@@ -213,7 +217,7 @@ forces a domain correction. Using the defined sandwich restores the measurement 
 scalar conclusion is restored for the directly indexed auxiliary obligation;
 its complex proof and transport to the source distribution remain
 open. The source claims themselves retain their complex-modulus statements
-without unsupported formalization marks.
+without asserting proofs of their source-law forms.
 
 \bibliographystyle{alpha}
 \bibliography{references}
