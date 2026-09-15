@@ -99,9 +99,11 @@ The encoding-supported reference and Schwartz--Zippel estimates in
 decoder identity; see `docs/paper-gaps/qpbt_decoding-identity.tex`.
 **Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
 point-consistency fields; it is not constructed here from `lem:qld-4-7`.
-Issue #518 and `docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
-Elimination: discharge the construction required by `exists_pulled_apart_consistency`
-using `exists_globalPairWitness`, including its missing zero-error case. -/
+The missing source-facing composition is documented in
+`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
+Elimination: discharge the construction required by
+`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
+its missing zero-error case. -/
 theorem tildeM_consistent_pointMeas_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -216,10 +218,11 @@ identity suffices, as explained in `docs/paper-gaps/qpbt_decoding-identity.tex`.
 
 **Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
 point-consistency fields; it is not constructed here from `lem:qld-4-7`.
-Issue #519 and `docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
+The missing source-facing composition is documented in
+`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
 Elimination: discharge the construction required by the source-facing
-`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including its
-missing zero-error case. -/
+`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
+its missing zero-error case. -/
 theorem tildeM_consistent_pointMeas'_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),

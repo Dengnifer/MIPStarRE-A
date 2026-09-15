@@ -163,10 +163,11 @@ The two evaluated consistency bounds are transported by the concrete swaps in
 `ProjectiveSetting.extraction_pauli_dist_le`. Choose one universal constant
 above both construction coefficients and eighteen, and use
 `extraction_small_error_absorption` when the construction error is at most one.
-The complete large-error witness covers the other case. This discharges the
-conditional construction tracked by issue #523; the source global-witness
-construction and the later isometry transfer remain separate obligations.
-See `audits/2026-09-14_issue-523-extraction-completion.md`. -/
+The complete large-error witness covers the other case. Thus every supplied
+global polynomial-pair witness yields a normalized auxiliary state, the
+transformed-state estimate, and both total-Pauli comparison bounds. This result
+neither constructs the global witness nor passes from the swap unitaries to the
+isometries of the source theorem. -/
 theorem exists_extractionWitness_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),

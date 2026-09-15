@@ -13,7 +13,9 @@ separately; their composition with the source construction remains below.
 
 - Blueprint `lem:qld-construct-the-paulis`.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1267-1274,1463-1480`.
-- `docs/paper-gaps/qpbt_decoding-identity.tex`, issue #519.
+- `docs/paper-gaps/qpbt_decoding-identity.tex` for the decoder correction.
+- `docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #123, for the
+  global-witness composition.
 -/
 
 namespace MIPStarRE.QPBT
@@ -34,12 +36,13 @@ strategy quantifiers. Zero error is included, as in the source setting.
 and error enlargement documented in `docs/paper-gaps/qpbt_decoding-identity.tex`
 and blueprint `lem:qld-construct-the-paulis`.
 
-**Proof obligation:** The `sorry` introduced by this paper realignment is tracked
-by issue #519 and the cited gap note. Discharge `exists_pulled_apart_consistency`
-by constructing the global measurements as in `exists_globalPairWitness`, including
-the zero-error case missing from its current domain, and applying the three proved
-supplied-witness estimates to the same witness. A common maximum of their constants
-gives the displayed scale. No witness is an input here. -/
+**Proof obligation:** Issue #123 and
+`docs/paper-gaps/qpbt_extraction-transfer.tex` track the missing source-facing
+composition. Discharge `exists_pulled_apart_consistency` by constructing the
+global measurements as in `exists_globalPairWitness`, including the zero-error
+case missing from its current domain, and applying the three proved
+supplied-witness estimates to the same witness. A common maximum of their
+constants gives the displayed scale. No witness is an input here. -/
 theorem exists_pulled_apart_consistency :
     ∃ a b C : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧ 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon : ℝ),

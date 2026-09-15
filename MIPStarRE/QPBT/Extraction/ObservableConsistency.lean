@@ -12,7 +12,7 @@ an explicit premise.
 
 - Blueprint `lem:qld-construct-the-paulis-given-global-pair`, Item 2.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1476-1662`.
-- Issues #520 and #519; `docs/paper-gaps/qpbt_decoding-identity.tex`.
+- `docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #123.
 - The joint source obligation for `lem:qld-construct-the-paulis` is stated in
   `Extraction.Construction`.
 -/
@@ -39,10 +39,11 @@ fixed-coordinate character conversion. It does not use the non-encoding mass
 or complement-absorption obligations.
 
 **Unfaithful:** The premise `w : GlobalPairWitness S deltaG` is not constructed
-here from `lem:qld-4-7`. Issue #519 and
-`docs/paper-gaps/qpbt_decoding-identity.tex` record this distinction.
-Elimination: discharge the construction required by `exists_pulled_apart_consistency`
-using `exists_globalPairWitness`, including its missing zero-error case.
+here from `lem:qld-4-7`. The missing source-facing composition is documented in
+`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
+Elimination: discharge the construction required by
+`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
+its missing zero-error case.
 The joint source obligation is stated separately in `Extraction.Construction`;
 this proof establishes only the supplied-witness estimate. -/
 theorem tildeObs_selfConsistent_ofGlobalPairWitness :
