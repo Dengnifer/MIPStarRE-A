@@ -242,19 +242,18 @@ class ModelPolicyTests(unittest.TestCase):
             self.assertEqual(mismatch['effective_model'], policy.ASTRA)
             self.assertEqual(mismatch['status'], 'failed')
 
-    def test_external_zero_blocks_routine_sol_without_a_new_pool(self):
+    def test_missing_worker_caps_block_routine_sol(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'watchdog').mkdir()
-            (root / 'watchdog/primary-external-admission').write_text('0')
             with mock.patch.dict(os.environ, MIPSTARRE_CODEX_MODEL=policy.SOL,
                                  MIPSTARRE_DISPATCH_ROLE='prover'), \
-                 mock.patch('sys.argv', ['account_router.py', directory, 'auto', '123', '0',
+                 mock.patch('sys.argv', ['account_router.py', 'reserve', directory, 'auto', '123', '0',
                                         str(root / 'registry')]), self.assertRaises(SystemExit) as error:
                 account_router.main()
             self.assertEqual(error.exception.code, 4)
 
-    def test_post_activation_routine_shim_uses_sol_and_keeps_external_zero(self):
+    def test_routine_shim_keeps_model_selection_and_ignores_retired_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             local = root / 'local/bin'
@@ -283,6 +282,8 @@ class ModelPolicyTests(unittest.TestCase):
             self.assertIn(policy.SOL, json.loads(result.stdout))
             (root / 'cache/watchdog').mkdir()
             (root / 'cache/watchdog/primary-external-admission').write_text('0')
+            self.assertEqual(subprocess.run(args, env=env, capture_output=True).returncode, 0)
+            marker.unlink()
             self.assertEqual(subprocess.run(args, env=env, capture_output=True).returncode, 4)
 
 

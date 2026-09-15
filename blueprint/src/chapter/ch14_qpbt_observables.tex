@@ -1501,8 +1501,9 @@ every tuple $\omega$.
 Several lemmas below conclude by asserting that all symmetric equivalents
 of the stated approximations also hold, in each case by
 Lemma~\ref{lem:symmetric-equivalents-transfer} unless the individual register
-pairs are established separately, as in Lemma~\ref{lem:qld-comm-cons}; later
-chapters invoke exactly these variants.
+pairs are established separately, as in Lemmas~\ref{lem:qld-comm-cons}
+and~\ref{lem:qld-comm-line-cons}; later chapters invoke exactly these
+variants.
 
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
@@ -1641,6 +1642,7 @@ chapters invoke exactly these variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
+	\lean{MIPStarRE.QPBT.tauLineMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1686,11 +1688,57 @@ chapters invoke exactly these variants.
 	projective measurement.
 \end{definition}
 
+\begin{definition}[Auxiliary strategy--Pauli product measurement on a line]
+	\label{def:line-tau-product-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas_effect}
+	\leanok
+	\uses{def:expanded-line-measurement, def:ideg-deg-polynomials}
+	For $W \in \{X,Z\}$ and a line $\ell$, the product measurement
+	\[
+		\hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}
+		\,=\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \tau^{W,\ell}_{f''}\,,
+		\qquad (f',f'') \in \deg_{md}(\ell) \times \deg_{md}(\ell),
+	\]
+	has outcome set $\deg_{md}(\ell) \times \deg_{md}(\ell)$ and retains the
+	strategy polynomial and the Pauli line polynomial as separate outcomes;
+	completeness follows from completeness of the two factors.
+	This auxiliary measurement is used in the proof of
+	Lemma~\ref{lem:qld-comm-line-cons}; its addition postprocessing is identified
+	in Lemma~\ref{lem:expanded-line-measurement-postprocess}.
+\end{definition}
+
+\begin{lemma}[Addition postprocessing of the line product measurement]
+	\label{lem:expanded-line-measurement-postprocess}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_effect_eq_lineTauMeas_postprocess}
+	\leanok
+	\uses{def:expanded-line-measurement, def:line-tau-product-measurement}
+	For either player, $W \in \{X,Z\}$ and a line $\ell$, the image of the
+	product measurement of Definition~\ref{def:line-tau-product-measurement}
+	under the addition map $(f',f'') \mapsto f'+f''$ is the expanded line
+	measurement. Thus, for every $f \in \deg_{md}(\ell)$,
+	\[
+		\hat{M}^{(\mathrm{Line},W),\ell}_f
+		\,=\, \sum_{f'+f''=f} \hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-line-measurement, def:line-tau-product-measurement}
+	Expand the effect of the postprocessed measurement. Its fibre over $f$
+	consists of the pairs $(f',f'')$ satisfying $f'+f''=f$, so the resulting sum
+	is exactly the convolution defining the expanded line effect.
+\end{proof}
+
 \begin{lemma}[Consistency of the expanded line measurements]
 	\label{lem:qld-comm-line-cons}
 	\lean{MIPStarRE.QPBT.deltaLine, MIPStarRE.QPBT.deltaLine_isPolyErr}
 	\lean{MIPStarRE.QPBT.expLine_self_cons, MIPStarRE.QPBT.expLine_point_cons}
 	\lean{MIPStarRE.QPBT.expLine_point_cons', MIPStarRE.QPBT.exists_deltaLine}
+	\lean{MIPStarRE.QPBT.ExpandedLineConclusions}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineEvalMeasExp}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.pointMeasExpOption}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPointEffectAtLineAnswer}
 	\leanok
 	\uses{def:expanded-point-measurement, def:expanded-line-measurement, def:expanded-state, def:line-point-dist, def:approx-question-indexed-operators, def:povm-distance, def:ideg-deg-polynomials, def:symmetric-equivalents}
 	Here $\poly(\eps)$ uses the corrected one-parameter convention: there
@@ -1745,14 +1793,20 @@ chapters invoke exactly these variants.
 	\end{enumerate}
 	Furthermore, all symmetric equivalents of these approximations also
 	hold. The proof exhibits the measurements of
-	Definition~\ref{def:expanded-line-measurement} as witnesses, with
-	item~\ref{eq:qld-comm-line-pt-cons} holding with error $\eps$ and
-	items~\ref{enu:qld-comm-line-self-cons}
-	and~\ref{eq:qld-comm-line-pt-cons2} with
-	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$.
+	Definition~\ref{def:expanded-line-measurement} as witnesses, with the
+	common error $\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$ in all three
+	items. The stronger linear-error assertion made in the source proof is
+	stated separately in Lemma~\ref{lem:expanded-line-point-linear-error}.
 \end{lemma}
 \begin{proof}
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, lem:symmetric-equivalents-transfer}
+	\leanok
+	\uses{def:expanded-line-measurement, lem:expanded-line-measurement-postprocess,
+	def:expanded-point-measurement, lem:qld-win-implications,
+	lem:qld-reversed-consistency, fact:data-processing,
+	fact:add-a-proj2, fact:agreement, def:line-point-dist,
+	def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
+	We first recall the source argument, then describe the order of the
+	estimates used in the formalization.
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
@@ -1840,6 +1894,70 @@ chapters invoke exactly these variants.
 	$\delta_{\mathrm{Line}}(\eps) = \sqrt{\eps}$. The symmetric
 	equivalents follow from
 	Lemma~\ref{lem:symmetric-equivalents-transfer}.
+
+	The formalization uses an equivalent order of the estimates. The exact
+	Pauli overlap computation identifies the inconsistency of the expanded
+	evaluation classes with that of the strategy's original completed
+	evaluation classes. Applying the winning implication, its reversed form
+	in Lemma~\ref{lem:qld-reversed-consistency}, and the
+	agreement estimate gives item~\ref{eq:qld-comm-line-pt-cons2} with
+	an error linear in $\eps$. Projective refinement then gives
+	item~\ref{eq:qld-comm-line-pt-cons}, also with linear error.
+	For each estimate, combining $x\leq a\eps$ with the universal bound
+	$x\leq 4$ gives $x\leq(a+4)\sqrt{\eps}$: use
+	$\eps\leq\sqrt{\eps}$ when $0\leq\eps\leq 1$ and
+	$1\leq\sqrt{\eps}$ when $\eps\geq 1$.
+	The four directed opposite-placement pairs are proved separately by
+	their explicit bipartition identities. Thus the Lean proof does not
+	rely on the symmetric-equivalent transfer lemma or the intermediate
+	sub-measurement inequality in the preceding source argument.
+\end{proof}
+
+\begin{lemma}[Linear error in expanded line-point consistency]
+	\label{lem:expanded-line-point-linear-error}
+	\lean{MIPStarRE.QPBT.expLine_point_cons_linear}
+	\leanok
+	\uses{def:expanded-line-measurement, def:expanded-point-measurement,
+	def:expanded-state, def:line-point-dist, def:povm-distance,
+	def:ideg-deg-polynomials, def:symmetric-equivalents}
+	Under the projective-strategy hypotheses of this section, the concrete
+	measurements of Definition~\ref{def:expanded-line-measurement} satisfy
+	\begin{equation}
+		\label{eq:qld-comm-line-pt-cons-eps}
+		(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+		\,\approx_{\eps}\,
+		(\hat{M}^{(\mathrm{Line},W),\ell}_f)_{\mathsf{A}\mathsf{A}'}
+		\ot (\hat{M}^{(\mathrm{Point},W),u}_{f(u)})_{\mathsf{B}\mathsf{A}''}
+	\end{equation}
+	on the line-point distribution, for every $W\in\{X,Z\}$ and all four
+	directed opposite placements. The answer sum runs over
+	$f\in\deg_{md}(\ell)$; the selected point effect is zero when $f$ has
+	no evaluation at $u$. More precisely, the average squared distance is at
+	most $C\eps$ for a universal $C\geq1$, independent of the parameters,
+	strategy, basis and placements. This is the stronger assertion in the
+	proof of the expanded-line consistency lemma of \cite{Ji2020MIPStar},
+	% Source: eq:qld-comm-line-pt-cons-eps and the following paragraph.
+	rather than the common-polynomial statement of
+	Lemma~\ref{lem:qld-comm-line-cons}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-win-implications, lem:qld-reversed-consistency,
+	fact:agreement, fact:add-a-proj2, def:expanded-line-measurement,
+	def:expanded-point-measurement, def:symmetric-equivalents}
+	Let $D_{\mathrm I}$ be the distance in the displayed assertion and
+	$D_{\mathrm{II}}$ the distance between the completed expanded
+	evaluation classes and point measurements. Projective refinement gives
+	$D_{\mathrm I}\leq D_{\mathrm{II}}$. The exact consistency of the
+	ancillary Pauli projectors identifies their summed overlap with that
+	of the original strategy measurements, including the $\bot$ class.
+	The agreement inequality therefore gives
+	$D_{\mathrm{II}}\leq 2\,\mathrm{Cons}_{\mathrm{strategy}}$.
+	For a line on Alice's side the forward low-degree winning implication
+	bounds this defect by $C_1\eps$; for a line on Bob's side use
+	Lemma~\ref{lem:qld-reversed-consistency} to obtain $C_2\eps$.
+	Both estimates apply on each ancillary bipartition. Taking
+	$C=2(C_1+C_2)$ proves the assertion for all four directed pairs.
 \end{proof}
 
 The expanded point and line measurements constructed in this section, being

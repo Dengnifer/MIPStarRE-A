@@ -85,7 +85,8 @@ Duties:
 - **Every external Codex session goes through `dispatch.sh`** so token usage and wall
   time land in `sessions.jsonl`. A session started any other way is a
   telemetry hole; if one happens, backfill a line with `dispatcher: manual`.
-- Native descendants use `telemetry.py native-record` under `sessions.md`:
+- Historical native descendants were recorded with `telemetry.py native-record`
+  under `sessions.md`:
   `dispatcher: native`, root/parent IDs, key label, actual model/requested effort,
   worktree, timestamps and status. `observed_usage` preserves raw cumulative rollout
   counters, but `usage` remains null with `usage_scope: unknown`; parent inclusion
@@ -106,7 +107,7 @@ Model-policy records (#301) retain `requested_model`, `selected_model`,
 `effective_model` only when observed, `job_class`, and `model_policy` with
 routine/hard classification and the explicit hardness/escalation rationale.
 External capture without model evidence records effective model as null, not the
-CLI argument. Native observations retain all bound current-turn contexts; mixed
+CLI argument. Historical native observations retain all bound current-turn contexts; mixed
 models/efforts and requested/observed mismatches fail closed. Prior/forked contexts
 are not attributed to a new job. Requested effort remains distinct from provider
 effort; missing usage remains unknown and historical records are not rewritten.
@@ -115,7 +116,7 @@ boundary. Ratio reports count actual distinct new threads with matching observed
 and selected models, with a rolling 100-dispatch window and separate cumulative
 counts. Unknowns may resolve from later observations; conflicts remain unknown.
 Main, pre-activation workers and resumes do not count. Preserve predecessor and
-cumulative-budget links when a model change requires a fresh native identity.
+cumulative-budget links recorded when a model change required a fresh native identity.
 
 The project doubles as a study of a self-evolving formalization workflow.
 Three artifacts must therefore stay trustworthy:

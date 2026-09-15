@@ -11,7 +11,7 @@
 
 \title{Triangle Estimates and Isometry Transfer in Pauli Extraction}
 \author{}
-\date{2026-09-03}
+\date{2026-09-15}
 
 \begin{document}
 \maketitle
@@ -131,38 +131,38 @@ unitarity equations for the concrete swap maps, a normalized auxiliary state,
 the transformed-state estimate, and the two-player Pauli-projector comparison.
 The theorem \path{exists_extractionWitness_ofGlobalPairWitness} concludes the
 existence of this data at the explicit extraction scale, but it takes the
-\path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis
-rather than obtaining it from \path{exists_globalPairWitness}.  That bundle
-carries the projective global polynomial-pair measurements and both
-point-consistency estimates, and the blueprint proof of
-Lemma~\path{lem:qld-unitary} obtains it from Lemma~\path{lem:qld-4-7}; deleting
-the hypothesis would leave that construction unproved.  By the criterion of
-\path{docs/paper-gaps/proof-gap-protocol.tex} the hypothesis is therefore proof
-debt rather than a faithful boundary condition, and the declaration is a
-conditional helper: it does not certify the source lemma, and the blueprint
-node Lemma~\path{lem:qld-unitary} accordingly neither links it nor carries any
-statement-level formalization mark.  The declaration is recorded instead on the
-separate formalization-support node
-\path{lem:qld-unitary-given-global-pair}, whose statement assumes the global
-polynomial-pair measurement explicitly and whose formal link points only to the
-conditional helper.  It therefore cannot be mistaken for the source result.
-Apart from that hypothesis the
-conclusion matches the Stage~4.2 extraction lemma, including the corrected
-numerical estimates; the later passage to the isometries in the soundness
-theorem is not formalized, and no declaration yet states that passage.
+\path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis.
+It therefore remains a conditional helper rather than a formalization of the
+source lemma.  The blueprint records it on the separate formalization-support
+node \path{lem:qld-unitary-given-global-pair}, whose statement displays the
+global polynomial-pair measurement as supplied data.  The helper is proved at
+this conditional statement and has only the standard axioms \path{propext},
+\path{Classical.choice}, and \path{Quot.sound}.  Apart from the supplied witness,
+its conclusion matches the Stage~4.2 extraction lemma, including the corrected
+numerical estimates.
 
-The conditional character of the result is visible wherever the declaration is
-invoked: the suffix \path{ofGlobalPairWitness} names the extra premise in the
-declaration itself, and its docstring records the statement as conditional and
-its dependence on the assumed witness as unfaithful.  Discharging the debt
-requires composing \path{exists_globalPairWitness} with this helper to obtain
-the source lemma; no declaration carries out that composition.
+The preceding global-measurement construction is now complete.
+The theorem \path{exists_globalPairWitness} proves the full-domain construction
+of Lemma~\path{lem:qld-4-7} for every strategy error, including zero.  The
+source-facing theorem \path{exists_pulled_apart_consistency} chooses one such
+witness, applies the two point-consistency estimates and the observable
+self-consistency estimate to it, and replaces their three universal constants
+by their maximum.  Thus Lemma~\path{lem:qld-construct-the-paulis} is proved for
+the stated domain $0\leq\epsilon\leq1$, including the zero-error boundary.
+
+This completion does not establish Lemma~\path{lem:qld-unitary}.  No declaration
+yet composes \path{exists_globalPairWitness} with
+\path{exists_extractionWitness_ofGlobalPairWitness} to state the source lemma
+without a witness premise.  The later passage from the concrete swap operators
+to the isometries in the soundness theorem also remains unformalized and still
+requires the range-projection argument of the preceding section.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
-\ghissue{123} owns the source-facing composition through
-\path{exists_globalPairWitness}.  \ghissue{47} tracks the separate
-range-projection transfer needed by \path{pauli_soundness}; that theorem must
-be derived from the concrete data rather than stored in the witness.
+\ghissue{123} records the source-facing composition work: the pulled-apart
+consistency composition is complete, while the source-unitary declaration is
+still absent.  \ghissue{47} tracks the separate range-projection transfer needed
+by \path{pauli_soundness}; that theorem must be derived from the concrete data
+rather than stored in the witness.
 
 \section{Conclusion}
 
@@ -171,10 +171,12 @@ last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
 the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  Independently of both defects, the
-present extraction declaration is conditional on the global polynomial-pair
-measurement, and that conditionality must be removed before it may be
-advertised as the source lemma.
+already supplied by the extraction lemma.  The global polynomial-pair witness
+and the three pulled-apart consistency estimates are now composed in a proved
+source-facing theorem, including at zero error.  The subsequent extraction
+witness theorem remains conditional on a supplied global measurement, and no
+source-facing declaration yet establishes Lemma~\path{lem:qld-unitary}; the
+final range-projection transfer remains separate and open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -7,20 +7,20 @@ import MIPStarRE.QPBT.Extraction.Observables
 
 This module records the two estimates by which the polynomial marginals absorb
 the expanded point measurements, with all heterogeneous placements written
-explicitly. It also states the consistency of the pulled-apart
-measurements with the original point measurements and the self-consistency of
-the corresponding observables.
+explicitly. It also defines the mass of non-encoding marginal outcomes and
+states the support estimate needed by the corrected decoder calculation.
 
-The direct marginal agreement estimates and the reverse-placement correlation
-transports are developed from the given global polynomial-pair witness.
+The marginal agreement estimates and reverse-placement correlation transports
+are developed from a supplied global polynomial-pair witness.
 
 ## References
 
 The marginal estimates formalize blueprint
 `lem:qld-constructing-the-paulis-helper`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1609-1664`.
-The remaining declarations formalize blueprint `lem:qld-construct-the-paulis`,
-from paper lines 1458-1608.
+The non-encoding support obligation contributes to blueprint
+`lem:qld-construct-the-paulis`, from paper lines 1458-1608; see
+`docs/paper-gaps/qpbt_decoding-identity.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -694,89 +694,6 @@ theorem nonencodingMarginalMass_le :
             (side : PlayerSide) (W : PauliKind),
             nonencodingMarginalMass w side W ≤
               deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-! ## Consistency of the pulled-apart measurements -/
-
-/-- Alice's original point measurement is consistent with Bob's pulled-apart
-measurement on average over uniformly random points. This is the first display
-of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-The source reuses `deltaS` after absorbing the non-encoding and game-error
-terms. The bound keeps the global polynomial-pair witness error `deltaG`
-separate in `deltaConstructPaulis`.
-
-**Proof obligation:** issue #47 tracks the non-encoding-mass estimate required
-by the restricted decoder identity; see
-`docs/paper-gaps/qpbt_decoding-identity.tex`. -/
-theorem tildeM_consistent_pointMeas :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind),
-            consistencyDefect
-              (uniformDistribution (Fin P.m → PauliScalar P))
-              (fun u a =>
-                S.placePlayer .alice ((S.pointMeas .alice W u).effect a))
-              (fun u a => S.placeSide .bob
-                (tildeM w .bob W (indicatorVec u) a))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-- Alice's pulled-apart measurement is consistent with Bob's original point
-measurement on average over uniformly random points. This is the
-register-interchanged display of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-The conclusion uses the same explicit construction scale as the first player
-ordering.
-
-**Proof obligation:** issue #47 tracks the player-interchanged
-non-encoding-mass argument. -/
-theorem tildeM_consistent_pointMeas' :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind),
-            consistencyDefect
-              (uniformDistribution (Fin P.m → PauliScalar P))
-              (fun u a => S.placeSide .alice
-                (tildeM w .alice W (indicatorVec u) a))
-              (fun u a =>
-                S.placePlayer .bob ((S.pointMeas .bob W u).effect a))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-- The pulled-apart observables on Alice's and Bob's extraction blocks are
-self-consistent on average over the uniformly random Pauli register. This is
-Item 2 of blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1476-1605`.
-
-The construction scale exposes the square-root game error and
-Schwartz--Zippel loss that the source absorbs into `deltaS`.
-
-**Proof obligation:** issue #47 tracks the pulling-consistency calculation and
-the final trace postprocessing from measurements to observables. -/
-theorem tildeObs_selfConsistent :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind)
-            (j : Fin P.model.basisDim),
-            opDistSq (uniformDistribution (PauliRegister P))
-              (fun u => S.placeSide .alice (tildeObs w .alice W u j))
-              (fun u => S.placeSide .bob (tildeObs w .bob W u j))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
   sorry
 
 end
