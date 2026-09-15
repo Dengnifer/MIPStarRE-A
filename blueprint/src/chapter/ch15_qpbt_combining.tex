@@ -1037,16 +1037,20 @@ assembled by Fourier averaging.
 	\label{lem:combined-line-restored-defect}
 	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
 	\leanok
-	\uses{lem:qld-comm-line-cons, lem:pasting,
+	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
 		def:concrete-paired-line-measurement, def:consistency}
 	This formalization-only auxiliary statement isolates the pasting estimate
 	behind Lemma~\ref{lem:combined-line-measurement-consistency} before the
 	polynomial error functions are composed. There are a constant $c\ge1$ and a
 	function $f(x,y)=\poly(x,y)$ with the following property. Let a projective
-	strategy pass with error $\eps$, let a joint point family have consistency
-	error $\delta_Q$, and let $\mu$ be the probability that the sampled $X$
-	direction is nonzero. For every directed opposite placement, the consistency
-	defect between the joint point family and the evaluated POVM
+	strategy pass with error $\eps$, and let complete projective joint point
+	measurements satisfy, for every directed opposite placement, self-consistency
+	and consistency with both ordered products $\hat M^X_a(x)\hat M^Z_b(z)$ and
+	$\hat M^Z_b(z)\hat M^X_a(x)$, each with squared-distance error at most
+	$\delta_Q$; these are all the conclusions of Lemma~\ref{lem:qld-4-10}. Let
+	$\mu$ be the probability that the sampled $X$ direction is nonzero. For every
+	directed opposite placement, the consistency defect between the joint point
+	measurements and the evaluated POVM
 	$T^{\ell_X,\ell_Z}$, averaged over two independent line-point samples of the
 	unconditioned law, is at most
 	\[
@@ -1377,7 +1381,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
-	\lean{MIPStarRE.QPBT.SubLineWitness}
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
