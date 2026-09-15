@@ -317,7 +317,9 @@ theorem stateQForm_one {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- The quadratic form of `Wᴴ M W` in `ψ` is the quadratic form of `M` in
 `W ψ`.  This is the conjugation identity behind the placed-sandwich
-rewritings; it is formalization-only auxiliary content. -/
+rewritings: conjugating transfers the outer operator to the state vector.
+It is formalization-only auxiliary content, shared by the overlap-gap estimate
+and the sandwich self-consistency argument. -/
 theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
     (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
     stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
