@@ -1,5 +1,6 @@
-import MIPStarRE.QPBT.Extraction.Consistency
-import MIPStarRE.QPBT.Test.SoundnessDefs
+import MIPStarRE.QPBT.Combining.Apply
+import MIPStarRE.QPBT.Extraction.ObservableConsistency
+import MIPStarRE.QPBT.Extraction.SuppliedPointConsistency
 
 /-!
 # Construction of consistent pulled-apart Pauli measurements
@@ -7,7 +8,7 @@ import MIPStarRE.QPBT.Test.SoundnessDefs
 This module states the joint source-facing construction of the global
 polynomial-pair measurements and their three extraction consistency estimates.
 The corresponding estimates from a supplied global measurement are proved
-separately; their composition with the source construction remains below.
+separately and are composed here with the source construction.
 
 ## References
 
@@ -36,13 +37,12 @@ strategy quantifiers. Zero error is included, as in the source setting.
 and error enlargement documented in `docs/paper-gaps/qpbt_decoding-identity.tex`
 and blueprint `lem:qld-construct-the-paulis`.
 
-**Proof obligation:** Issue #123 and
-`docs/paper-gaps/qpbt_extraction-transfer.tex` track the missing source-facing
-composition. Discharge `exists_pulled_apart_consistency` by constructing the
-global measurements as in `exists_globalPairWitness`, including the zero-error
-case missing from its current domain, and applying the three proved
-supplied-witness estimates to the same witness. A common maximum of their
-constants gives the displayed scale. No witness is an input here. -/
+The theorem composes the full-domain construction `exists_globalPairWitness`
+with the three supplied-witness estimates. All estimates use the same witness,
+and taking the maximum of their constants gives the displayed common scale.
+This discharges the pulled-apart consistency composition recorded under issue
+#123 and `docs/paper-gaps/qpbt_extraction-transfer.tex`; no witness is an input
+here. -/
 theorem exists_pulled_apart_consistency :
     ∃ a b C : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧ 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon : ℝ),
@@ -65,7 +65,40 @@ theorem exists_pulled_apart_consistency :
                     (fun u => S.placeSide .bob (tildeObs w .bob W u j))
                     S.psiHat ≤ deltaConstructPaulis C epsilon
                       (deltaQld a b epsilon P.m P.d P.q) P.m P.d P.q := by
-  sorry
+  obtain ⟨a, b, ha, hb, hb_one, hglobal⟩ := exists_globalPairWitness
+  obtain ⟨C_AB, hC_AB, hAB⟩ := tildeM_consistent_pointMeas_ofGlobalPairWitness
+  obtain ⟨C_BA, _, hBA⟩ := tildeM_consistent_pointMeas'_ofGlobalPairWitness
+  obtain ⟨C_obs, _, hobs⟩ := tildeObs_selfConsistent_ofGlobalPairWitness
+  let C := max (max C_AB C_BA) C_obs
+  have hAB_C : C_AB ≤ C := by
+    exact (le_max_left C_AB C_BA).trans (le_max_left (max C_AB C_BA) C_obs)
+  have hBA_C : C_BA ≤ C := by
+    exact (le_max_right C_AB C_BA).trans (le_max_left (max C_AB C_BA) C_obs)
+  have hobs_C : C_obs ≤ C := le_max_right (max C_AB C_BA) C_obs
+  refine ⟨a, b, C, ha, hb, hb_one, hC_AB.trans hAB_C, ?_⟩
+  intro P epsilon hepsilon hepsilon_one S
+  obtain ⟨w⟩ := hglobal P epsilon S
+  have ha_nonneg : 0 ≤ a := by linarith
+  have hdelta : 0 ≤ deltaQld a b epsilon P.m P.d P.q := by
+    simp only [deltaQld, Real.rpow_eq_pow]
+    positivity
+  have hscale : 0 ≤ deltaQld a b epsilon P.m P.d P.q + Real.sqrt epsilon +
+      ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by
+    positivity
+  have hmono (c : ℝ) (hc : c ≤ C) :
+      deltaConstructPaulis c epsilon (deltaQld a b epsilon P.m P.d P.q)
+          P.m P.d P.q ≤
+        deltaConstructPaulis C epsilon (deltaQld a b epsilon P.m P.d P.q)
+          P.m P.d P.q := by
+    unfold deltaConstructPaulis
+    exact mul_le_mul_of_nonneg_right hc hscale
+  refine ⟨w, fun W => ⟨?_, ?_, fun j => ?_⟩⟩
+  · exact (hAB P epsilon _ hepsilon hepsilon_one hdelta S w W).trans
+      (hmono C_AB hAB_C)
+  · exact (hBA P epsilon _ hepsilon hepsilon_one hdelta S w W).trans
+      (hmono C_BA hBA_C)
+  · exact (hobs P epsilon _ hepsilon hepsilon_one hdelta S w W j).trans
+      (hmono C_obs hobs_C)
 
 end
 

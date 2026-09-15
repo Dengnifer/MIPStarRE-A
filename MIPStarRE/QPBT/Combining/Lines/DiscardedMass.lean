@@ -75,6 +75,31 @@ theorem linePointDist_zero_direction_mass_le (L : LdParams) :
       mul_le_mul_of_nonneg_left hdiag (by norm_num)
     _ = _ := by rw [one_div_mul_one_div]
 
+/-- Nonzero directions have mass at least three quarters under the unchanged
+line-point law. This formalization-only consequence of the discarded-mass bound
+supports the conditioning in paper `lem:qld-xz-lines`,
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.
+Blueprint `lem:qld-nondegenerate-line-mass`. The original public statement from
+`Lines/Sampling.lean` is preserved here; see the 2026-09-15 supplement to
+`audits/2026-09-12_issue512-saved-proof-recovery.md`. -/
+theorem linePointDist_nondegenerate_mass_ge (L : LdParams) :
+    (3 / 4 : ℝ) ≤ ∑ sample ∈ (linePointDist L).support.filter
+      (fun sample => sample.1.direction ≠ 0), (linePointDist L).weight sample := by
+  classical
+  have hsplit : (∑ sample ∈ (linePointDist L).support.filter
+        (fun sample => sample.1.direction ≠ 0), (linePointDist L).weight sample) +
+      avgOver (linePointDist L) (fun sample => if sample.1.direction = 0 then 1 else 0) = 1 := by
+    simp only [avgOver, mul_ite, mul_one, mul_zero, ← Finset.sum_filter]
+    rw [add_comm, Finset.sum_filter_add_sum_filter_not]
+    exact (linePointDist_isProbability L).weight_sum_eq_one
+  have hmass := linePointDist_zero_direction_mass_le L
+  have hcard : (2 : ℝ) ≤ Fintype.card (ScalarQ L) := by
+    exact_mod_cast Fintype.one_lt_card (α := ScalarQ L)
+  have hquarter : 1 / (2 * (Fintype.card (ScalarQ L) : ℝ)) ≤ 1 / 4 := by
+    apply one_div_le_one_div_of_le (by norm_num)
+    linarith
+  linarith
+
 
 /-- For two independent line-point samples, excluding only zero X directions
 costs at most `1 / (2q)`. Only X requires the collision estimate when the
