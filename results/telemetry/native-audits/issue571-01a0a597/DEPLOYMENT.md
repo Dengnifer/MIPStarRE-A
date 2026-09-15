@@ -49,3 +49,20 @@ was normal scan cadence, not a metadata or selector failure; no repair was made.
 Nonempty adjudicated-candidate emission has therefore now been exercised live.
 Clean-review body retrieval remains fixture-tested only, and issue571 stays open
 for that narrower remaining transport check. Earlier evidence is retained above.
+
+## Review-Eligible Live Coverage
+
+The scan ending before the daemon's 2026-09-15T16:34:35Z candidate entry covered
+all 73 open PRs in eight pages and 18.958 seconds. It fetched exactly one
+eligible-head review batch, containing two review bodies, and emitted one clean
+candidate, PR568. The daemon subsequently passed its unchanged gates and merged
+PR568 as `29f0c16c737a5069a0b178d49e877416c5fa5824` at 16:35:05Z, confirmed
+through primary gh_common.py. Subsequent scans covered the remaining 72 PRs.
+
+MAIN rechecked the deployed helper/daemon hashes and live PID3395055 with PAR0.
+Both runtime files still match the deployment hashes above. Empty, adjudicated,
+and naturally review-eligible clean paths have now been exercised live; the
+error/mismatch predicate cases remain covered by the 15 fixture tests.
+The repair's stated verification is complete. Issue571 can be closed with this
+evidence; this is not a claim that future network failures are impossible.
+Earlier failures, narrower coverage statements and all costs remain preserved.
