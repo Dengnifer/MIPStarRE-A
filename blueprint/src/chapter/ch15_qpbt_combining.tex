@@ -1032,12 +1032,95 @@ assembled by Fourier averaging.
 	It is a factor of the defining sandwich, so the sandwich vanishes.
 \end{proof}
 
+\begin{lemma}[Formalization support: swapping paired answer coordinates]
+	\label{lem:paired-postprocessing-swap}
+	\lean{MIPStarRE.QPBT.postprocess_pair_swap_effect}
+	\leanok
+	\uses{def:povm-conventions}
+	Let $M$ be a finite measurement and let $e$ map its answers to pairs. If
+	$e^{\mathrm{op}}$ is obtained by exchanging the two coordinates, then the
+	effect of the postprocessed measurement $M[e^{\mathrm{op}}]$ at $(b,a)$ is
+	the effect of $M[e]$ at $(a,b)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-conventions}
+	Both effects are the sum of the effects of $M$ over the same fiber of $e$.
+\end{proof}
+
+\begin{lemma}[Formalization support: invariance under outcome equivalence]
+	\label{lem:consistency-defect-outcome-equivalence}
+	\lean{MIPStarRE.QPBT.consistencyDefect_outcome_equiv}
+	\leanok
+	\uses{def:consistency}
+	Simultaneously relabeling the common finite answer set of two operator
+	families by a bijection leaves their consistency defect unchanged.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:consistency}
+	Change variables by the bijection in both finite answer sums.
+\end{proof}
+
+\begin{lemma}[Formalization support: the conditioned paired-line defect]
+	\label{lem:combined-line-conditioned-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_conditioned_defect_le}
+	\leanok
+	\uses{lem:qld-4-10,
+		def:concrete-paired-line-measurement, def:consistency}
+	There are a constant $c\ge1$ and a function $f(x,y)=\poly(x,y)$ with the
+	following property. Let a projective strategy pass with error $\eps$, and
+	let complete projective joint point measurements satisfy all the conclusions
+	of Lemma~\ref{lem:qld-4-10} with error $\delta_Q$. Write $\mu$ for the
+	probability that the sampled $X$ direction is nonzero. For every directed
+	opposite placement, under the line-point law conditioned on that event, the
+	consistency defect between the completed joint point measurement and the
+	evaluated concrete paired-line POVM, with both answer pairs ordered $Z$ then
+	$X$, is at most
+	\[
+		f\!\left(\frac{md}{q},
+			\frac{8\delta_Q+c(\eps+\sqrt{\eps})}{\mu}\right).
+	\]
+\end{lemma}
+
+\begin{lemma}[Formalization support: restoration of the paired-line law]
+	\label{lem:combined-line-mass-restoration}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
+	\leanok
+	\uses{lem:qld-4-10,
+		def:concrete-paired-line-measurement, def:line-point-dist, def:consistency}
+	Let $\mu$ be the probability that the sampled $X$ direction is nonzero.
+	Let complete projective joint point measurements satisfy all the conclusions
+	of Lemma~\ref{lem:qld-4-10}. For every directed opposite placement, the
+	consistency defect under the unconditioned product line-point law between
+	the completed joint point measurement on the first placement and the
+	evaluated concrete paired-line POVM on the second, with answers ordered $X$
+	then $Z$, is at most $\mu$ times the corresponding defect under the
+	conditioned law, plus $1/(2q)$.
+\end{lemma}
+
+\begin{lemma}[Formalization support: symmetry across opposite placements]
+	\label{lem:consistency-defect-opposite-symmetry}
+	\lean{MIPStarRE.QPBT.consistencyDefect_opposite_symm}
+	\leanok
+	\uses{def:expanded-state, def:consistency}
+	For two complete measurement families placed on opposite registers of the
+	expanded state, exchanging the two placements leaves their consistency
+	defect unchanged.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:consistency}
+	Effects on opposite registers commute. Exchange the two finite answer sums
+	and commute the two effects in every off-diagonal term.
+\end{proof}
+
 \begin{lemma}[Formalization support: the restored defect of the paired-line
 	measurement]
 	\label{lem:combined-line-restored-defect}
 	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
 	\leanok
-	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
+	\uses{lem:qld-4-10,
 		def:concrete-paired-line-measurement, def:consistency}
 	This formalization-only auxiliary statement isolates the pasting estimate
 	behind Lemma~\ref{lem:combined-line-measurement-consistency} before the
@@ -1063,7 +1146,10 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-comm-line-cons, lem:pasting,
+	\uses{lem:combined-line-conditioned-defect,
+		lem:paired-postprocessing-swap,
+		lem:consistency-defect-outcome-equivalence,
+		lem:combined-line-mass-restoration,
 		def:concrete-paired-line-measurement}
 	Condition the line-point law on the sampled $X$ direction being nonzero.
 	On that event the point-to-line comparisons of
@@ -1118,8 +1204,12 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:combined-line-restored-defect,
+		lem:consistency-defect-opposite-symmetry,
+		lem:consistency-defect-integrand-le-one,
 		thm:qld-conditioned-polynomial-bound}
-	Lemma~\ref{lem:combined-line-restored-defect} bounds the defect of the
+	First exchange the two opposite placements using
+	Lemma~\ref{lem:consistency-defect-opposite-symmetry}.
+	Lemma~\ref{lem:combined-line-restored-defect} then bounds the defect of the
 	two measurements under the unconditioned line-point law by
 	$\mu f(md/q,(8\delta_Q(\eps)+c(\eps+\sqrt{\eps}))/\mu)+md/q$, since the
 	retained mass satisfies $\mu\in[1/2,1]$ and $1/(2q)\le md/q$.
@@ -2345,7 +2435,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
 	\leanok
-	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
+	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
 	It records a directly indexed auxiliary with the numerical error estimate
@@ -2354,6 +2444,18 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	the printed error form $\poly(m^2\eps, md/q)$ or the source question carrier,
 	line-point law, and field-valued answer sum of Lemma~\ref{lem:qld-4-13}; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
+	More precisely, there exist a polynomially controlled function
+	$\delta_Q:\mathbb R\to\mathbb R$, a constant $C>0$, and a polynomially
+	controlled function
+	$\delta_{\combine}:\mathbb R^2\to\mathbb R$ such that, for every admissible
+	$(q,m,d)$ and every projective strategy passing with error $\eps$, there is a
+	complete projective joint point family satisfying all the conclusions of
+	Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$ and, relative to that
+	same point family, an extended-line witness whose axis-degree property and
+	both completed-answer consistency bounds hold with error
+	\[
+		C m\,\delta_{\combine}\!\left(\eps,\frac{md}{q}\right).
+	\]
 	Within the directly indexed, completed-answer setting described below, the
 	quantitative change from the printed estimate is the error form. Compared
 	with Lemma~\ref{lem:qld-4-13}, the auxiliary construction also differs in
@@ -2379,7 +2481,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\leanok
 	\uses{lem:qld-4-10, lem:combined-lines-given-points,
 		lem:direct-subline-witness-exists, lem:subline-joint-overlap,
-		lem:extended-line-measurement-support, thm:qld-combining-polynomial-bound}
+		lem:extended-line-measurement-support,
+		lem:consistency-defect-integrand-le-one,
+		thm:qld-combining-polynomial-bound}
 	The construction conditions the directly indexed subline law on
 	the extended line and averages the combined polynomial outcomes of the
 	constructed $X$-$Z$-$X$ line measurement. The point family is the one
