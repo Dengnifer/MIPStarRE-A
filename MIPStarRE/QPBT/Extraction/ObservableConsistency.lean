@@ -38,14 +38,14 @@ the evaluated difference-polynomial comparison, the collision bound, and the
 fixed-coordinate character conversion. It does not use the non-encoding mass
 or complement-absorption obligations.
 
-**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` is not constructed
-here from `lem:qld-4-7`. The missing source-facing composition is documented in
-`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
-Elimination: discharge the construction required by
-`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
-its missing zero-error case.
-The joint source obligation is stated separately in `Extraction.Construction`;
-this proof establishes only the supplied-witness estimate. -/
+**Conditional:** The premise `w : GlobalPairWitness S deltaG` is supplied rather
+than constructed here, so this declaration is not the source-facing result.
+The theorem `exists_pulled_apart_consistency` now obtains the witness from
+`exists_globalPairWitness`, including at zero error, and applies this estimate
+together with the two point-consistency estimates to the same witness.
+The completed composition is in `Extraction.Construction`; this theorem proves
+only the supplied-witness estimate. The remaining extraction obligations are
+recorded in `docs/paper-gaps/qpbt_extraction-transfer.tex` under issue #123. -/
 theorem tildeObs_selfConsistent_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
