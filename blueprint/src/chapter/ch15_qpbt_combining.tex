@@ -1283,6 +1283,8 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-paired-line-restored-defect,
+		lem:qld-opposite-bipartition-transport,
+		lem:consistency-defect-integrand-le-one,
 		thm:qld-conditioned-polynomial-bound}
 	Condition on the first line having nonzero direction. The two completed
 	point-to-line marginal comparisons and heterogeneous pasting bound the
@@ -1409,7 +1411,7 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.ExtendedLinesWitness}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness}
 	\notready
-	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
+	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	% Statement as in the source (references/qpbt-paper/
 	% 14_analysis_of_the_pauli_basis_test.tex, lem:qld-4-13), including the
@@ -1877,6 +1879,42 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{definition}
 
+\begin{lemma}[Formalization support: construction of the directly indexed sub-line law]
+	\label{lem:direct-subline-law-construction}
+	\lean{MIPStarRE.QPBT.subLineDist}
+	\lean{MIPStarRE.QPBT.subLineDist_isProbability}
+	\lean{MIPStarRE.QPBT.subLineDist_map_fst}
+	\lean{MIPStarRE.QPBT.subLineDist_map_subLineXProjection}
+	\lean{MIPStarRE.QPBT.subLineDist_map_subLineZProjection}
+	\lean{MIPStarRE.QPBT.subLineDist_source_mixture}
+	\lean{MIPStarRE.QPBT.exists_raw_of_mem_subLineDist_support}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_incidence}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_compatibility}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_axis_closure}
+	\leanok
+	\uses{def:direct-subline-law}
+	The concrete law $D_{\mathrm{dir}}$ is the equal mixture of the axis and
+	diagonal sampling branches in Definition~\ref{def:direct-subline-law}. It is
+	a probability law, and its extended-line marginal is the directly indexed
+	extended-line marginal. Its projected $X$- and $Z$-point marginals are the
+	two mixtures in that definition, with one common probability law on the line
+	kind and the two source coordinate indices.
+
+	Every triple in the support is produced by auxiliary point, direction, and
+	seed data from one of the two branches. Such a triple satisfies incidence of
+	the two projected points with their source lines, the affine compatibility
+	relations for both projections, and closure of both source lines under an
+	axis-parallel extended line.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:direct-subline-law}
+	Normalization follows from the uniform branch law and the normalized seed
+	laws. The representative--parameter identities give the extended and
+	projected marginals. Recovering the auxiliary sample from a supported triple
+	gives the incidence, compatibility, and axis-closure conclusions.
+\end{proof}
+
 \begin{lemma}[Existence of a directly indexed sub-line witness]
 	\label{lem:direct-subline-witness-exists}
 	\lean{MIPStarRE.QPBT.exists_subLineWitness}
@@ -1890,11 +1928,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:direct-subline-law}
-	Use the directly indexed sampling law. Its extended-line marginal is the
-	direct line marginal; the two projected point laws are the stated mixtures,
-	and the sampled coordinates give the incidence, affine compatibility, and
-	axis-closure properties on every point of the support.
+	\uses{lem:direct-subline-law-construction}
+	Apply Lemma~\ref{lem:direct-subline-law-construction} and collect its
+	normalization, marginal, incidence, compatibility, and axis-closure
+	properties into the directly indexed sub-line witness.
 \end{proof}
 
 \begin{lemma}[Formalization support: a uniform point under the directly indexed law]
@@ -2675,36 +2712,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	the scalar estimate of that chaining.
 \end{proof}
 
-\begin{lemma}[Formalization support: the extended-line measurement of a subline
-	witness]
-	\label{lem:extended-line-measurement-support}
-	\lean{MIPStarRE.QPBT.SubLineWitness.extended_consistencyDefect_le}
-	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_axis_degree}
-	\leanok
-	\uses{def:extended-line-measurement, def:paired-subline-overlap,
-		def:combine-map, def:consistency, def:ideg-deg-polynomials}
-	Let a subline witness and a paired line family be given, and let the extended
-	line measurement be the conditional average of the paired-line POVMs along
-	the sublines of an extended line, pushed forward by the combining map. Two
-	properties hold. First, on the completed answer alphabet its consistency
-	defect with the zero-extended joint point family, taken over the directly
-	indexed extended line-point law, is at most $1$ minus the average paired
-	subline overlap, for both directed opposite placements. Second, on an
-	extended axis line it has no outcome of degree exceeding $d$ in the axis
-	variable.
-\end{lemma}
-\begin{proof}
-	\leanok
-	\uses{def:extended-line-measurement, def:paired-subline-overlap,
-		def:combine-map}
-	The first property is the identification of a consistency defect with one
-	minus the corresponding overlap for a probability law and normalized POVMs,
-	applied to the extended measurement and the zero-extended point family. The
-	second follows because the axis closure of the subline witness keeps each
-	conditioned sample on an axis line, where the degree support of the paired
-	line POVM and the combining map give the bound.
-\end{proof}
-
 \begin{lemma}[Obstruction to absorbing the first combined-line estimate]
 	\label{lem:qld-combining-quarter-power-obstruction}
 	\lean{MIPStarRE.QPBT.not_exists_combining_quarter_power_bound}
@@ -2791,8 +2798,9 @@ Construct the polynomially controlled joint point family of
 Lemma~\ref{lem:qld-4-10}, and apply
 Lemma~\ref{lem:combined-lines-given-points} to that same family. The direct
 subline witness of Lemma~\ref{lem:direct-subline-witness-exists} supplies the
-conditional extended-line measurement. Its axis-degree theorem gives the
-support field, while the extended-overlap comparison and
+conditional extended-line measurement. Its axis-degree theorem proves that no
+outcome above degree $d$ occurs on an axis-parallel extended line, while the
+extended-overlap comparison and
 Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
 consistency estimates. The independent unit bound handles large errors, and
 Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms

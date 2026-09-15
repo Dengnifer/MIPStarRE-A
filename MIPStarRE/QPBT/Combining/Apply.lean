@@ -114,8 +114,8 @@ theorem exists_extendedLinesWitness :
                 ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Retained conditional statement for extended-line measurements with the estimate
-delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
+/-- Conditional existence of extended-line measurements with the first-route
+estimate `C * m * poly(epsilon, md / q)`.
 
 This conditional auxiliary uses the error form established by the first proof route,
 but its own proof remains open; it is not the source-labelled `lem:qld-4-13` and must

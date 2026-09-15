@@ -165,3 +165,32 @@ approximately 27,188 seconds before this recovery session. Session
 that history; its final elapsed time belongs to the dispatcher receipt.
 This recovery does not reset B8 or the historical mathematical-gap budget.
 Independent review remains the next session's responsibility.
+
+## Correction after reconciliation with main (2026-09-15)
+
+This note supersedes only the statements above that every recovered module was
+needed by the final construction and that `Lines/Sampling.lean` remained part
+of its module decomposition. After the recovery branch was reconciled with
+main, no module imported `MIPStarRE.QPBT.Combining.Lines.Sampling`, and none of
+its declarations was used by the target or its dependency graph.
+
+The three zero-direction declarations in that file had the same public
+statements and proofs as the canonical declarations in
+`MIPStarRE/QPBT/Combining/Lines/DiscardedMass.lean`:
+`dLinePointDist_zero_direction_mass_le`,
+`linePointDist_zero_direction_mass_le`, and
+`prod_linePointDist_zero_X_direction_mass_le`. The theorem
+`avgOver_lineRepMap_resample_parameter` was the same representative-parameter
+average, up to bound-variable names, as the canonical theorem
+`avgOver_uniform_lineRepMap_resample_parameter` in
+`MIPStarRE/QPBT/Combining/Lines/SubLineUniform.lean`.
+
+The remaining theorem, `linePointDist_nondegenerate_mass_ge`, was distinct but
+unreferenced. It was not exposed by an imported module, and the active
+conditioning argument instead uses `nondegenerateLinePastingMass_bounds` and
+`prod_linePointDist_nondegenerate_mass_pos` from the canonical retained-mass
+modules. Consequently `Lines/Sampling.lean` was retired in the operator
+correction for PR #549. The construction continues to obtain the discarded
+mass bound through `Lines/Conditioning.lean`, which imports
+`Lines/DiscardedMass.lean`; no theorem used by
+`exists_extendedLinesWitness_established` was removed or replaced.
