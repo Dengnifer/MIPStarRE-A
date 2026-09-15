@@ -1642,7 +1642,7 @@ variants.
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_isProjective}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expLineOp_zero_of_not_deg_d}
-	\lean{MIPStarRE.QPBT.tauLineMeas, MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.tauLineMeas}
 	\leanok
 	% In the source this measurement is defined inside the proof of the lemma
 	% labelled lem:qld-comm-line-cons (lines 552-556); it is recorded as a
@@ -1687,6 +1687,48 @@ variants.
 	$\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}_{f \in \deg_{md}(\ell)}$ is a
 	projective measurement.
 \end{definition}
+
+\begin{definition}[Auxiliary strategy--Pauli product measurement on a line]
+	\label{def:line-tau-product-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineTauMeas_effect}
+	\leanok
+	\uses{def:expanded-line-measurement, def:ideg-deg-polynomials}
+	For $W \in \{X,Z\}$ and a line $\ell$, the product measurement
+	\[
+		\hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}
+		\,=\, M^{(\mathrm{Line},W),\ell}_{f'} \ot \tau^{W,\ell}_{f''}\,,
+		\qquad (f',f'') \in \deg_{md}(\ell) \times \deg_{md}(\ell),
+	\]
+	has outcome set $\deg_{md}(\ell) \times \deg_{md}(\ell)$ and retains the
+	strategy polynomial and the Pauli line polynomial as separate outcomes;
+	completeness follows from completeness of the two factors.
+	This auxiliary measurement is used in the proof of
+	Lemma~\ref{lem:qld-comm-line-cons}; its addition postprocessing is identified
+	in Lemma~\ref{lem:expanded-line-measurement-postprocess}.
+\end{definition}
+
+\begin{lemma}[Addition postprocessing of the line product measurement]
+	\label{lem:expanded-line-measurement-postprocess}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.lineMeasExp_effect_eq_lineTauMeas_postprocess}
+	\leanok
+	\uses{def:expanded-line-measurement, def:line-tau-product-measurement}
+	For either player, $W \in \{X,Z\}$ and a line $\ell$, the image of the
+	product measurement of Definition~\ref{def:line-tau-product-measurement}
+	under the addition map $(f',f'') \mapsto f'+f''$ is the expanded line
+	measurement. Thus, for every $f \in \deg_{md}(\ell)$,
+	\[
+		\hat{M}^{(\mathrm{Line},W),\ell}_f
+		\,=\, \sum_{f'+f''=f} \hat{N}^{(\mathrm{Line},W),\ell}_{(f',f'')}\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-line-measurement, def:line-tau-product-measurement}
+	Expand the effect of the postprocessed measurement. Its fibre over $f$
+	consists of the pairs $(f',f'')$ satisfying $f'+f''=f$, so the resulting sum
+	is exactly the convolution defining the expanded line effect.
+\end{proof}
 
 \begin{lemma}[Consistency of the expanded line measurements]
 	\label{lem:qld-comm-line-cons}
@@ -1759,7 +1801,10 @@ variants.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:expanded-line-measurement, def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing, fact:add-a-proj2, fact:agreement, def:line-point-dist, def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
+	\uses{def:expanded-line-measurement, lem:expanded-line-measurement-postprocess,
+	def:expanded-point-measurement, lem:qld-win-implications, fact:data-processing,
+	fact:add-a-proj2, fact:agreement, def:line-point-dist,
+	def:ideg-deg-polynomials, def:pauli-win-predicate, def:symmetric-equivalents}
 	Take $\{\hat{M}^{(\mathrm{Line},W),\ell}_f\}$ to be the measurement of
 	Definition~\ref{def:expanded-line-measurement}.
 	Item~\ref{enu:qld-comm-line-self-cons} follows from the fact that the
