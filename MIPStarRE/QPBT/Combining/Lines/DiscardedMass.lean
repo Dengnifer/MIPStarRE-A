@@ -13,7 +13,7 @@ open MIPStarRE.LDT
 noncomputable section
 
 /-- Under the unchanged diagonal line-point law, zero projected directions have
-probability at most the inverse field size: the last raw direction coordinate must
+probability at most the inverse field size: the final unprojected direction coordinate must
 vanish and is uniform. Source: `def:line-point-dist`, paper
 `08_classical_and_quantum_low_degree_tests.tex:274-287`. This proof-only bound
 supports the collision restriction used in the paired-line construction. -/

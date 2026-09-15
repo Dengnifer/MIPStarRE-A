@@ -1032,6 +1032,214 @@ assembled by Fourier averaging.
 	It is a factor of the defining sandwich, so the sandwich vanishes.
 \end{proof}
 
+\begin{lemma}[Formalization support: point marginals and completed answers]
+	\label{lem:qld-line-point-marginal-identities}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_point}
+	\lean{MIPStarRE.QPBT.avgOver_prod_linePointDist_points}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_fst_effect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_snd_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.opFamilyDistSq_postprocess_some}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.completed_fst_effect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.completed_snd_effect}
+	\leanok
+	\uses{def:line-point-dist, def:povm-distance, lem:qld-4-10}
+	The point marginal of the line-point distribution is uniform, and two
+	independent line-point samples have independent uniform point marginals.
+	For a joint point measurement, postprocessing by either coordinate gives
+	the corresponding marginal sum. Adjoining an undefined answer with zero
+	effect preserves the state-dependent squared distance between two
+	measurements. Moreover, taking either marginal commutes with adjoining this
+	answer, both before and after completing a joint point measurement.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, def:povm-distance, lem:qld-4-10}
+	The marginal identities follow by expanding the line-point mixture and the
+	postprocessing sums. The additional answer contributes the zero operator,
+	so it contributes neither to a marginal nor to the squared distance.
+\end{proof}
+
+\begin{lemma}[Formalization support: point-to-line marginal estimates]
+	\label{lem:qld-point-line-marginal-bounds}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_option_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_option_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.exists_expLine_point_same_placement_distance_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_distance_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_defect_le}
+	\leanok
+	\uses{lem:qld-line-point-marginal-identities, lem:qld-4-10,
+		lem:qld-comm-line-cons, fact:triangle, def:consistency}
+	Let the joint point witness have error $\delta_Q$. On every directed
+	opposite placement, each of its $X$ and $Z$ marginals has squared distance
+	at most $4\delta_Q$ from the corresponding point measurement, both on the
+	original and on the completed answer alphabet. There is a universal
+	$C_0\geq1$ such that an evaluated line measurement and the corresponding
+	completed point measurement on the same placement have squared distance at
+	most $C_0(\eps+\sqrt\eps)$.
+
+	Consequently, for universal constants $C_1,C_2\geq1$, which need not be
+	equal, both completed joint-point marginals have squared distance at most
+	\[
+		8\delta_Q+C_1(\eps+\sqrt\eps)
+	\]
+	from the corresponding evaluated line measurements, and the analogous two
+	consistency defects are at most
+	$8\delta_Q+C_2(\eps+\sqrt\eps)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-line-point-marginal-identities, lem:qld-4-10,
+		lem:qld-comm-line-cons, fact:triangle, def:consistency}
+	Rewrite the line-point averages using their uniform point marginals. Apply
+	the point-witness estimates, then insert the evaluated line measurement and
+	use the squared-distance triangle inequality. The consistency estimates
+	follow from the corresponding distance bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: discarded zero directions]
+	\label{lem:qld-zero-direction-mass}
+	\lean{MIPStarRE.QPBT.dLinePointDist_zero_direction_mass_le}
+	\lean{MIPStarRE.QPBT.linePointDist_zero_direction_mass_le}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_zero_X_direction_mass_le}
+	\leanok
+	\uses{def:line-point-dist}
+	Under the diagonal line-point law, the probability of a zero direction is
+	at most $1/q$. Under the equal mixture of axis-parallel and diagonal laws it
+	is at most $1/(2q)$. Hence, for two independent line-point samples, removing
+	the event that the $X$-line has zero direction discards mass at most
+	$1/(2q)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist}
+	A zero diagonal direction forces the final unprojected direction coordinate
+	to vanish, and that coordinate is uniform. Axis-parallel directions are
+	nonzero. Averaging the two cases and then the unused independent sample gives
+	the stated bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditioning and restoring line defects]
+	\label{lem:qld-line-conditioning-restoration}
+	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_conditioned_line_marginal_defect_le}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_mass}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
+	\leanok
+	\uses{lem:qld-point-line-marginal-bounds, lem:qld-zero-direction-mass,
+		def:consistency, def:concrete-paired-line-measurement}
+	Let $\mu$ be the probability that the first line in a pair of independent
+	line-point samples has nonzero direction. For arbitrary complete
+	measurements on directed opposite placements, conditioning on this event
+	increases the consistency defect by at most a factor $1/\mu$, while restoring
+	the original law gives
+	\[
+		\operatorname{defect}_{\mathrm{all}}
+		\leq \mu\operatorname{defect}_{\mathrm{cond}}+\frac1{2q}.
+	\]
+	For the completed joint point marginals and the evaluated $Z$- and $X$-line
+	measurements in the order required by the $X$-outer sandwich, there is a
+	universal $C\geq1$ for which both conditioned defects are at most
+	\[
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}.
+	\]
+	The same restoration inequality applies to the concrete paired-line
+	measurement and the completed joint points.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-point-line-marginal-bounds, lem:qld-zero-direction-mass,
+		def:consistency, def:concrete-paired-line-measurement}
+	Restrict the finite expectation to the nondegenerate event and divide by its
+	positive mass. The integrand is nonnegative and at most one on opposite
+	placements, so restoring the discarded event costs at most its probability.
+\end{proof}
+
+\begin{definition}[The opposite-placement bipartition]
+	\label{def:qld-opposite-bipartition}
+	\lean{MIPStarRE.QPBT.bbAbBipartition}
+	\leanok
+	\uses{def:expanded-state}
+	For the directed placement with the $BB'$ registers first and the $AB''$
+	registers second, regroup the six registers as
+	\[
+		BB'\mid AB''(A'A'').
+	\]
+	Concretely, the coordinate tuple
+	$((A,(A',A'')),(B,(B',B'')))$ is sent to
+	$((B,B'),((A,B''),(A',A'')))$. The final factor is retained as an unused
+	tensor factor.
+\end{definition}
+
+\begin{lemma}[Formalization support: opposite-placement transport]
+	\label{lem:qld-opposite-bipartition-transport}
+	\lean{MIPStarRE.QPBT.bbAbBipartition_apply}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_opposite_bipartition}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.consistencyDefect_bipartition}
+	\lean{MIPStarRE.QPBT.evaluated_pastedMeasurement_heteroKron_one}
+	\lean{MIPStarRE.QPBT.postprocess_pair_swap_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_evaluated_eq_pasted}
+	\lean{MIPStarRE.QPBT.consistencyDefect_opposite_symm}
+	\leanok
+	\uses{def:qld-opposite-bipartition, def:concrete-paired-line-measurement,
+		def:consistency, def:expanded-state}
+	Every directed pair of opposite placements admits a bipartition of the six
+	registers in which operators on the first placement act as $A\otimes I$ and
+	operators on the second act as $I\otimes B\otimes I$; the remaining EPR
+	pair is unused. Reindexing through this bipartition preserves consistency
+	defects. Tensoring the pasted measurement with the identity on the unused
+	factor commutes with outcome evaluation.
+
+	For any paired postprocessing, swapping the two output coordinates swaps the
+	corresponding effect. Evaluating the concrete $X$-$Z$-$X$ paired-line
+	measurement gives exactly the evaluated sandwich used by one-sided pasting.
+	Finally, the consistency defect of two measurements on opposite placements
+	is unchanged when their order is reversed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-opposite-bipartition, def:concrete-paired-line-measurement,
+		def:consistency, def:expanded-state}
+	Check the four directed placement pairs by their coordinate equivalences.
+	The remaining assertions follow by expanding reindexing, tensor products,
+	postprocessing sums, the sandwich definition, and the consistency defect.
+\end{proof}
+
+\begin{lemma}[Formalization support: the restored paired-line defect]
+	\label{lem:qld-paired-line-restored-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_conditioned_defect_le}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
+	\leanok
+	\uses{lem:qld-line-conditioning-restoration,
+		lem:qld-opposite-bipartition-transport, lem:pasting,
+		def:concrete-paired-line-measurement}
+	There are a universal constant $C\geq1$ and a polynomially small function
+	$p$ of two variables such that, on every directed opposite placement, the
+	conditioned consistency defect between the completed joint points and the
+	evaluated concrete paired-line measurement is at most
+	\[
+		p\left(\frac{md}{q},
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}\right).
+	\]
+	Here $\mu$ is the nonzero-$X$-direction mass. On the original product
+	line-point law, the corresponding defect is at most
+	\[
+		\mu p\left(\frac{md}{q},
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}\right)+\frac1{2q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-line-conditioning-restoration,
+		lem:qld-opposite-bipartition-transport, lem:pasting,
+		def:concrete-paired-line-measurement}
+	Transport the two measurement families to a bipartite tensor product and
+	apply heterogeneous one-sided pasting with the two conditioned marginal
+	bounds. Identify its sandwich with the concrete paired-line measurement,
+	then restore the discarded event and its mass factor.
+\end{proof}
+
 \begin{lemma}[Consistency of the constructed paired-line measurement]
 	\label{lem:combined-line-measurement-consistency}
 	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
@@ -1059,12 +1267,14 @@ assembled by Fourier averaging.
 	measurement; see \cite{gap:qpbt_subline-claims-line-marginal}.
 \end{lemma}
 \begin{proof}
-\leanok
-Condition on the first line having nonzero direction. The two completed
-point-to-line marginal comparisons and heterogeneous pasting bound the
-actual sandwich measurement on that law. Restore the discarded probability,
-at most $1/(2q)$, and multiply the conditioned error by its retained mass.
-Polynomial absorption and the independent unit defect bound give the result.
+	\leanok
+	\uses{lem:qld-paired-line-restored-defect,
+		thm:qld-conditioned-polynomial-bound}
+	Condition on the first line having nonzero direction. The two completed
+	point-to-line marginal comparisons and heterogeneous pasting bound the
+	actual sandwich measurement on that law. Restore the discarded probability,
+	at most $1/(2q)$, and multiply the conditioned error by its retained mass.
+	Polynomial absorption and the independent unit defect bound give the result.
 \end{proof}
 
 \section{Applying the classical low-degree test}
@@ -1536,20 +1746,23 @@ on registers $\mathsf{A}\mathsf{A}'$, the second tensor factor is placed on
 registers $\mathsf{B}\mathsf{A}''$, and the sums range over
 $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
-\begin{lemma}[Formalization support: the ordered product on one placement]
+\begin{lemma}[Formalization support: ordered products on one placement]
 	\label{lem:qld-4-10-same-placement}
 	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedZX_dist_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedXZ_dist_le}
 	\leanok
 	\uses{lem:qld-4-10, fact:triangle, def:povm-distance}
-	On one placement, the joint point measurement and the ordered
-	$Z$-then-$X$ product have squared distance at most $4\delta_Q$.
+	On one placement, the joint point measurement has squared distance at most
+	$4\delta_Q$ from each of the ordered $Z$-then-$X$ and $X$-then-$Z$
+	products.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{lem:qld-4-10, fact:triangle, def:symmetric-equivalents}
 	Insert the joint measurement on the opposite placement and apply the
-	squared-distance triangle inequality to the two $\delta_Q$ bounds.
+	squared-distance triangle inequality to the corresponding two
+	$\delta_Q$ bounds.
 \end{proof}
 
 \begin{lemma}[Formalization support: replacing one factor of a real overlap]
@@ -1737,6 +1950,231 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	The separate Z marginal and restricted consistency estimates bound the
 	nonnegative overlap deficit; taking a square root gives the displayed
 	bound with $C=2$.
+\end{proof}
+
+\begin{definition}[Conditional extended-line construction]
+	\label{def:qld-conditional-extended-line-measurement}
+	\lean{MIPStarRE.QPBT.SubLineWitness.Fiber}
+	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw}
+	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw_isProbability}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_conditionalLaw}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement}
+	\leanok
+	\uses{def:direct-subline-law, def:combine-map,
+		def:concrete-paired-line-measurement}
+	Fix a directly indexed extended line $\ell$. Its fiber consists of the
+	supported subline triples $(\ell,\ell_X,\ell_Z)$ above it. Normalize the
+	original subline law on this fiber to obtain the conditional law
+	$D_{\mid\ell}$.
+
+	For each supported triple, choose the affine coordinate data supplied by
+	Definition~\ref{def:direct-subline-law}. If $f_X$ and $f_Z$ are the two
+	source-line polynomials, let $h$ be their affine combination
+	\[
+		h(t)=\alpha(t)f_X(a_X+b_Xt)+\beta(t)f_Z(a_Z+b_Zt).
+	\]
+	The extended-line measurement at $\ell$ is the conditional average, under
+	$D_{\mid\ell}$, of the concrete paired-line measurements postprocessed by
+	$(f_X,f_Z)\mapsto h$. The positive fiber mass makes $D_{\mid\ell}$ a
+	probability distribution, and finite disintegration gives
+	\[
+		\mathbb E_{\ell}\mathbb E_{D_{\mid\ell}}[F]=\mathbb E_D[F]
+	\]
+	for every real-valued function $F$ on supported subline triples.
+\end{definition}
+
+\begin{lemma}[Formalization support: conditional extended-line identities]
+	\label{lem:qld-conditional-extended-line-properties}
+	\lean{MIPStarRE.QPBT.directLinePointDist_line_weight_pos}
+	\lean{MIPStarRE.QPBT.SubLineWitness.fiber_mass_pos}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData_compatible}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evaluatesTo}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evalOpt}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:combine-map}
+	Every directly indexed extended line has positive marginal mass, and hence
+	each of its subline fibers has positive mass. The selected affine data satisfy
+	the projection identities in
+	Definition~\ref{def:direct-subline-law}. If the two source polynomials
+	evaluate to $a$ and $b$ at the projected point, their combined polynomial
+	evaluates there to $\alpha a+\beta b$. The same identity holds for completed
+	evaluation whenever both source evaluations are defined.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:combine-map}
+	Positivity follows from the explicit direct-line sampler. The evaluation
+	identities follow by substituting the compatible affine data in the
+	polynomial combination formula.
+\end{proof}
+
+\begin{lemma}[Formalization support: axis degree of the combined polynomial]
+	\label{lem:qld-combined-polynomial-axis-degree}
+	\lean{MIPStarRE.QPBT.combineLinePoly_axis_degree}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData_axis}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_axis_degree}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_axis_degree}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties,
+		lem:concrete-paired-line-degree-support}
+	Suppose two univariate coefficient families vanish above degree $d\geq1$.
+	Their affine combination also vanishes above degree $d$ whenever either
+	both coefficient functions $\alpha,\beta$ are constant or both projected
+	line parameters are constant. The affine data of every supported
+	axis-parallel extended line satisfy one of these alternatives. Consequently,
+	the combined polynomial has degree at most $d$, and the conditional
+	extended-line measurement has zero effect on every outcome of degree greater
+	than $d$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties,
+		lem:concrete-paired-line-degree-support}
+	Affine substitution preserves the source degree bounds. On an extended
+	coordinate line, either the $\alpha$ and $\beta$ slopes vanish or both
+	projected direction parameters vanish. Average the resulting zero effects
+	over the conditional law.
+\end{proof}
+
+\begin{definition}[Paired, extended, and ordered subline overlaps]
+	\label{def:qld-subline-overlaps}
+	\lean{MIPStarRE.QPBT.pairedSublineOverlap}
+	\lean{MIPStarRE.QPBT.extendedPointOverlap}
+	\lean{MIPStarRE.QPBT.orderedSublineOverlap}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:expanded-state}
+	For a supported subline triple, the paired overlap is the uniform-parameter
+	average of the overlap between the paired-line measurement and the completed
+	joint point measurement evaluated at the two projected points. The extended
+	point overlap compares the conditional extended-line measurement with the
+	point measurement postprocessed by $(a,b)\mapsto\alpha a+\beta b$. The
+	ordered subline overlap replaces the joint point effect in the paired overlap
+	by the ordered $Z$-then-$X$ product.
+\end{definition}
+
+\begin{lemma}[Formalization support: comparison with the extended overlap]
+	\label{lem:qld-extended-line-overlap-comparison}
+	\lean{MIPStarRE.QPBT.SubLineWitness.completedPoint_effect_le}
+	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_overlap}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedPointOverlap_ge}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_extendedPointOverlap_ge}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extended_consistencyDefect_le}
+	\leanok
+	\uses{def:qld-subline-overlaps,
+		lem:qld-conditional-extended-line-properties, def:consistency}
+	At a point of a supported extended line, the completed joint-point effect at
+	the two source evaluations is bounded above by the effect obtained by
+	postprocessing with the combined value $\alpha a+\beta b$. Uniformly
+	resampling the affine parameter preserves the full direct line-point law.
+	Expanding the conditional extended-line measurement in a placed overlap
+	therefore shows that the average extended point overlap is at least the
+	average paired subline overlap.
+
+	For every directed pair of opposite placements, the consistency defect
+	between the evaluated extended-line measurement and the combined-value point
+	measurement is consequently at most one minus the average paired overlap.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-subline-overlaps, def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties, def:consistency}
+	Expand the conditional measurement, group equal postprocessed answers, and
+	use positivity on opposite registers to preserve the pointwise effect
+	inequality. Disintegrate the subline law and use the identity expressing a
+	consistency defect as one minus its matched-outcome overlap.
+\end{proof}
+
+\begin{definition}[The completed X-point overlap]
+	\label{def:qld-x-point-overlap}
+	\lean{MIPStarRE.QPBT.xPointOverlapAt}
+	\leanok
+	\uses{def:qld-subline-overlaps, def:expanded-point-measurement}
+	For a pair of source lines and an $X$-point, the completed $X$-point overlap
+	is the sum, over both line-polynomial outcomes, of the paired-line effect
+	against the completed $X$-point effect indexed by the $X$-line evaluation.
+\end{definition}
+
+\begin{lemma}[Formalization support: the X-point overlap deficit]
+	\label{lem:qld-x-point-overlap-deficit}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_regrouped_eq_at}
+	\lean{MIPStarRE.QPBT.xPointOverlap_eq_at}
+	\lean{MIPStarRE.QPBT.SubLineWitness.one_sub_avgOver_xPointOverlap_le_at}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.completedPair_norm_sq_sum_XZ}
+	\lean{MIPStarRE.QPBT.CombinedLinesWitness.one_sub_X_overlap_le_at}
+	\lean{MIPStarRE.QPBT.CombinedLinesWitness.one_sub_X_overlap_restricted_le_at}
+	\leanok
+	\uses{def:qld-x-point-overlap, lem:qld-4-10-same-placement,
+		lem:restricted-line-mixture-bounds, def:consistency}
+	Regrouping the two line-answer sums identifies the subline average with the
+	overlap of the evaluated paired-line measurement and a completed point
+	family. Completing the joint point measurement and the ordered
+	$X$-then-$Z$ product preserves their squared distance exactly.
+
+	More generally, let $\nu$ be any probability law on pairs of line-point
+	samples. If the evaluated paired-line measurement has consistency defect at
+	most $\eta$ with the completed joint points, and those joint points have
+	squared distance at most $\zeta$ from the completed $X$-then-$Z$ product,
+	then the completed $X$-point overlap has deficit at most
+	$2\sqrt\eta+2\sqrt\zeta$. On a product of two restricted line-point laws this
+	gives
+	\[
+		2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}.
+	\]
+	The same bound holds for the directly indexed subline average by its
+	one-point mixture identity.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-x-point-overlap, lem:qld-4-10-same-placement,
+		lem:restricted-line-mixture-bounds, def:consistency}
+	Apply the consistency-to-overlap estimate and Cauchy--Schwarz to the two
+	comparisons. Restricted line consistency inflates by $4m^2$, while the
+	same-placement $X$-then-$Z$ point estimate contributes $4\delta_Q$.
+	Average these bounds over the subline mixture.
+\end{proof}
+
+\begin{lemma}[Formalization support: components of the first overlap route]
+	\label{lem:qld-first-route-overlap-components}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_at}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_at}
+	\lean{MIPStarRE.QPBT.SubLineWitness.paired_ordered_overlap_gap_le}
+	\leanok
+	\uses{def:qld-subline-overlaps, lem:qld-x-point-overlap-deficit,
+		lem:qld-4-10-same-placement, lem:restricted-line-mixture-bounds}
+	Let $I_{\mathrm{pair}}$ and $I_{ZX}$ denote the averages of the paired and
+	ordered subline overlaps. For arbitrary placements,
+	\[
+		|I_{\mathrm{pair}}-I_{ZX}|\leq\sqrt{4\delta_Q}.
+	\]
+	For opposite placements, let $I_Z$ be the same ordered overlap after
+	removing the $X$-point factor. There are universal constants $C_X,C_Z>0$
+	such that
+	\[
+		|I_{ZX}-I_Z|
+		\leq C_X\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr)
+	\]
+	and
+	\[
+		|I_Z-1|\leq C_Z\sqrt m
+		\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-subline-overlaps, lem:qld-x-point-overlap-deficit,
+		lem:qld-4-10-same-placement, lem:restricted-line-mixture-bounds}
+	The first estimate replaces the completed joint points by the ordered
+	product. For the second, apply Cauchy--Schwarz to the $X$-point deficit. The
+	last estimate is the $Z$-line/point overlap bound under the separate
+	one-point mixture law.
 \end{proof}
 
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
@@ -2082,7 +2520,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}
 \leanok
 \uses{lem:combined-line-measurement-consistency, def:direct-subline-law,
-	  lem:qld-4-10, lem:qld-sublines, thm:qld-direct-line-real-overlap,
+	  def:qld-conditional-extended-line-measurement,
+	  lem:qld-combined-polynomial-axis-degree,
+	  lem:qld-extended-line-overlap-comparison, lem:qld-4-10,
+	  lem:qld-sublines, thm:qld-direct-line-real-overlap,
 	  thm:qld-combining-polynomial-bound}
 Condition the directly indexed subline law on its extended line and average
 the combined polynomial outcomes of the constructed $X$-$Z$-$X$ POVM.
@@ -3438,6 +3879,7 @@ one completed measurement on each player side supplies both conclusions.
 \label{thm:qld-direct-line-real-overlap}
 \lean{MIPStarRE.QPBT.subline_joint_overlap_near_one_at}
 \leanok
+\uses{def:qld-subline-overlaps, lem:qld-first-route-overlap-components}
 This auxiliary concerns the actual directly indexed subline law. Let the
 combined point and paired-line witnesses have errors $Q$ and $L$, and let
 $I$ be their paired overlap, averaged over the subline law and a uniform
@@ -3450,6 +3892,7 @@ For every directed opposite placement there is a universal $C>0$ such that
 \end{theorem}
 \begin{proof}
 \leanok
+\uses{def:qld-subline-overlaps, lem:qld-first-route-overlap-components}
 Replace the joint points by the ordered product, remove the X factor by
 Cauchy--Schwarz, and bound the remaining Z deficit. The one-point mixture
 laws suffice; no joint conditional product law is assumed.

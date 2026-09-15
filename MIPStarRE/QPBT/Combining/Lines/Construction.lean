@@ -385,7 +385,7 @@ theorem consistencyDefect_opposite_symm {params : AdmissibleParams} {error : ℝ
   rw [setting.place_comm first second hopposite]
   simp only [eq_comm]
 
-/-- Lean-only consistency theorem for the particular X-Z-X measurement
+/-- Formalization-only consistency theorem for the particular X-Z-X measurement
 constructed in the proof of `lem:qld-xz-lines`, paper
 `14_analysis_of_the_pauli_basis_test.tex:942-961`.
 
