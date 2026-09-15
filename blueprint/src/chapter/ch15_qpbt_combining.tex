@@ -904,15 +904,25 @@ assembled by Fourier averaging.
 	\leanok
 	\uses{def:line-point-dist}
 	Fix an arbitrary low-degree parameter tuple $L=(q,m,d,k)$ as in
-	Definition~\ref{def:ld-game}, and write $D_{\mathsf{Line}}^L$ for the
-	line-point distribution of Definition~\ref{def:line-point-dist}. For two
-	independent samples $(\ell_X,x),(\ell_Z,z)\sim D_{\mathsf{Line}}^L$, define
-	the retained mass
+	Definition~\ref{def:ld-game}. Write $D_{\mathsf{Line}}^L$ for the source
+	line-point law at $L$ and $\widetilde D_{\mathsf{Line}}^L$ for its
+	seed-bearing refinement in Definition~\ref{def:line-point-dist}. In the
+	refined law, $\ell$ is a line description retaining its kind, canonical base
+	point and seed $s$: an axis description records $(u_0,s)$ and a diagonal
+	description records $(u_0,s,v)$, with the base and prefix conditions of that
+	definition. Set $\operatorname{dir}(\ell)=e_{\chi(s)}$ in the axis case and
+	$\operatorname{dir}(\ell)=v$ in the diagonal case; the latter is the stored,
+	already projected direction. Mapping the axis description to
+	$(u_0,e_{\chi(s)})$ and leaving the diagonal description unchanged sends
+	$\widetilde D_{\mathsf{Line}}^L$ to $D_{\mathsf{Line}}^L$.
+	For two independent samples
+	$(\ell_X,x),(\ell_Z,z)\sim\widetilde D_{\mathsf{Line}}^L$, define the retained mass
 	\[
 		\mu_{\mathrm{nd}}(L)
 		:= \sum_{\substack{(\ell_X,x),(\ell_Z,z)\\
 			\operatorname{dir}(\ell_X)\ne 0}}
-		D_{\mathsf{Line}}^L(\ell_X,x)D_{\mathsf{Line}}^L(\ell_Z,z).
+		\widetilde D_{\mathsf{Line}}^L(\ell_X,x)
+		\widetilde D_{\mathsf{Line}}^L(\ell_Z,z).
 	\]
 	Thus $\mu_{\mathrm{nd}}(L)$ is the probability that the first sampled line
 	has nonzero direction; the second line-point sample is unrestricted. This is
@@ -933,7 +943,8 @@ assembled by Fourier averaging.
 \end{theorem}
 \begin{proof}
 	\leanok
-	\uses{def:line-point-dist, lem:axis-line-zero-direction-mass}
+	\uses{def:nondegenerate-line-pasting-mass, def:line-point-dist,
+		lem:axis-line-zero-direction-mass}
 	The axis-parallel component has weight one half and always has nonzero
 	direction, while the diagonal component contributes nonnegative mass. This
 	gives the lower bound. The upper bound follows because the retained samples
@@ -944,11 +955,10 @@ assembled by Fourier averaging.
 	\label{thm:nondegenerate-line-pasting-mass-positive}
 	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
 	\leanok
-	\uses{def:nondegenerate-line-pasting-mass,
-		thm:nondegenerate-line-pasting-mass-bounds}
+	\uses{def:nondegenerate-line-pasting-mass}
 	For every low-degree parameter tuple $L$, the event
 	$\operatorname{dir}(\ell_X)\ne 0$ has positive mass under
-	$D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$; equivalently,
+	$\widetilde D_{\mathsf{Line}}^L\times\widetilde D_{\mathsf{Line}}^L$; equivalently,
 	$0<\mu_{\mathrm{nd}}(L)$.
 \end{theorem}
 \begin{proof}
@@ -961,9 +971,9 @@ assembled by Fourier averaging.
 	\label{def:nondegenerate-line-pasting-dist}
 	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
 	\leanok
-	\uses{def:line-point-dist,
+	\uses{def:nondegenerate-line-pasting-mass,
 		thm:nondegenerate-line-pasting-mass-positive}
-	Condition $D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$ on
+	Condition $\widetilde D_{\mathsf{Line}}^L\times\widetilde D_{\mathsf{Line}}^L$ on
 	$\operatorname{dir}(\ell_X)\ne 0$, using the positive retained mass from
 	Theorem~\ref{thm:nondegenerate-line-pasting-mass-positive}, and push the
 	result forward along
@@ -972,21 +982,30 @@ assembled by Fourier averaging.
 		\longmapsto
 		\big(((\ell_X,\ell_Z),(\ell_Z,z)),(\ell_X,x)\big).
 	\]
-	Denote the resulting distribution by $D_{\mathrm{nd}}^L$. Thus the paired
-	lines are ordered $X,Z$, followed by the full $Z$ sample and then the full
+	Denote the resulting distribution by $D_{\mathrm{nd}}^L$; every line
+	description in its carrier still retains its seed. Thus the paired lines
+	are ordered $X,Z$, followed by the full $Z$ sample and then the full
 	$X$ sample, and only the first, $X$-line direction is restricted. This
 	formalization-only law supports the pasting construction. The source
 	conclusion of Lemma~\ref{lem:qld-xz-lines} remains an average over two
-	independent, unconditioned samples from $D_{\mathsf{Line}}^L$; the transfer
-	back to that source law remains part of the uncertified proof of that lemma.
+	independent, unconditioned samples from $D_{\mathsf{Line}}^L$.
+	Lemma~\ref{lem:qld-line-conditioning-restoration} transfers the internal
+	estimate back to the unconditioned product of the refined laws, as used in
+	Lemma~\ref{lem:qld-paired-line-restored-defect}. The resulting comparison is
+	on the completed answer alphabet $(\F_q\cup\{\bot\})^2$: line evaluation
+	returns $\bot$ when no value at the sampled point is determined, and the
+	joint point measurement assigns zero effect to outcomes containing $\bot$.
+	The source comparison instead has answers $(a,b)\in\F_q^2$.
+	Relating these answer conventions remains necessary to identify the
+	completed-answer estimate with Lemma~\ref{lem:qld-xz-lines}; restoring the
+	unconditioned law does not by itself make that identification.
 \end{definition}
 
 \begin{theorem}[Formalization support: normalization of the conditioned law]
 	\label{thm:nondegenerate-line-pasting-dist-probability}
 	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
 	\leanok
-	\uses{def:nondegenerate-line-pasting-dist,
-		thm:nondegenerate-line-pasting-mass-positive}
+	\uses{def:nondegenerate-line-pasting-dist}
 	For every low-degree parameter tuple $L$, $D_{\mathrm{nd}}^L$ is a
 	probability distribution.
 \end{theorem}
@@ -1227,11 +1246,11 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_mass}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
 	\leanok
-	\uses{lem:qld-point-line-marginal-bounds, lem:qld-zero-direction-mass,
+	\uses{def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
 		def:consistency, def:concrete-paired-line-measurement}
-	Let $\mu$ be the probability that the first line in a pair of independent
-	line-point samples has nonzero direction. For arbitrary complete
-	measurements on directed opposite placements, conditioning on this event
+	Write $\mu=\mu_{\mathrm{nd}}(L)$ for the retained mass and use
+	$D_{\mathrm{nd}}^L$ for the conditioned law. For arbitrary complete
+	measurements on directed opposite placements, conditioning on nonzero $X$ direction
 	increases the consistency defect by at most a factor $1/\mu$, while restoring
 	the original law gives
 	\[
@@ -1250,6 +1269,8 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-point-line-marginal-bounds, lem:qld-zero-direction-mass,
+		def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive,
 		def:consistency, def:concrete-paired-line-measurement}
 	Restrict the finite expectation to the nondegenerate event and divide by its
 	positive mass. The integrand is nonnegative and at most one on opposite
@@ -1333,10 +1354,16 @@ assembled by Fourier averaging.
 	\leanok
 	\uses{lem:qld-line-conditioning-restoration,
 		lem:qld-opposite-bipartition-transport, lem:pasting,
+		def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive,
+		thm:nondegenerate-line-pasting-dist-probability,
 		def:concrete-paired-line-measurement}
 	Transport the two measurement families to a bipartite tensor product and
 	apply heterogeneous one-sided pasting with the two conditioned marginal
-	bounds. Identify its sandwich with the concrete paired-line measurement,
+	bounds. Positivity of the retained mass makes the error parameter
+	nonnegative, and the conditioned law is normalized by
+	Theorem~\ref{thm:nondegenerate-line-pasting-dist-probability}.
+	Identify its sandwich with the concrete paired-line measurement,
 	then restore the discarded event and its mass factor.
 \end{proof}
 
@@ -1369,12 +1396,14 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-paired-line-restored-defect,
+		thm:nondegenerate-line-pasting-mass-bounds,
 		thm:qld-conditioned-polynomial-bound}
 	Condition on the first line having nonzero direction. The two completed
 	point-to-line marginal comparisons and heterogeneous pasting bound the
 	actual sandwich measurement on that law. Restore the discarded probability,
 	at most $1/(2q)$, and multiply the conditioned error by its retained mass.
-	Polynomial absorption and the independent unit defect bound give the result.
+	The bounds $1/2\leq\mu_{\mathrm{nd}}(L)\leq1$ allow polynomial absorption;
+	together with the independent unit defect bound, this gives the result.
 \end{proof}
 
 \section{Applying the classical low-degree test}
