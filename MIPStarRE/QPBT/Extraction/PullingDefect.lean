@@ -1,4 +1,4 @@
-import MIPStarRE.QPBT.Extraction.Consistency
+import MIPStarRE.QPBT.Extraction.BlockMeasurement
 import MIPStarRE.QPBT.Extraction.PullingPointConsistency
 
 /-!
@@ -23,60 +23,6 @@ open MIPStarRE.Quantum DistanceCalculus
 
 noncomputable section
 
-/-- Place a complete measurement on its three-register extraction block. -/
-private def pullingPlacedMeasurement {P : AdmissibleParams} {epsilon : ℝ}
-    (S : ProjectiveSetting P epsilon) (side : PlayerSide) {A : Type*} [Fintype A]
-    (M : Measurement A (ExtractionBlock P (S.LocalSpace side))) :
-    Measurement A (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := by
-  refine Measurement.ofSumEqOne (fun a => S.placeSide side (M.effect a)) ?_ ?_
-  · intro a
-    cases side
-    · exact ProjectiveSetting.reindexOp_nonneg _
-        (kronecker_nonneg (M.pos a) Matrix.PosSemidef.one.nonneg)
-    · exact ProjectiveSetting.reindexOp_nonneg _
-        (kronecker_nonneg Matrix.PosSemidef.one.nonneg (M.pos a))
-  · cases side
-    · rw [← S.placeSide_alice_finset_sum, M.sum_eq_one]
-      change reindexOp _ (heteroKron (1 : Op (ExtractionBlock P S.toStrategy.ιA))
-        (1 : Op (ExtractionBlock P S.toStrategy.ιB))) = 1
-      rw [heteroKron_one_one]
-      ext row col
-      simp [reindexOp, Matrix.one_apply]
-    · rw [← S.placeSide_bob_finset_sum, M.sum_eq_one]
-      change reindexOp _ (heteroKron (1 : Op (ExtractionBlock P S.toStrategy.ιA))
-        (1 : Op (ExtractionBlock P S.toStrategy.ιB))) = 1
-      rw [heteroKron_one_one]
-      ext row col
-      simp [reindexOp, Matrix.one_apply]
-
-private theorem pullingPlacedMeasurement_effect {P : AdmissibleParams} {epsilon : ℝ}
-    (S : ProjectiveSetting P epsilon) (side : PlayerSide) {A : Type*} [Fintype A]
-    (M : Measurement A (ExtractionBlock P (S.LocalSpace side))) (a : A) :
-    (pullingPlacedMeasurement S side M).effect a = S.placeSide side (M.effect a) := by
-  rfl
-
-/-- Placing a projective measurement on an extraction block preserves projectivity. -/
-private theorem pullingPlacedMeasurement_isProjective {P : AdmissibleParams} {epsilon : ℝ}
-    (S : ProjectiveSetting P epsilon) (side : PlayerSide) {A : Type*} [Fintype A]
-    (M : Measurement A (ExtractionBlock P (S.LocalSpace side)))
-    (hM : Measurement.IsProjective M) :
-    Measurement.IsProjective (pullingPlacedMeasurement S side M) := by
-  classical
-  let e := sixRegExtractionEquiv P S.toStrategy.ιA S.toStrategy.ιB
-  letI : DecidableEq (ExtractionRegisters P S.toStrategy.ιA S.toStrategy.ιB) :=
-    instDecidableEqProd
-  cases side
-  · have h := reindexMeasurement_isProjective e (leftPlacedMeasurement M)
-      (fun a => MakingMeasurementsProjective.isProj_kronecker (hM a)
-        (IsStarProjection.one _))
-    convert h using 1
-    rfl
-  · have h := reindexMeasurement_isProjective e (rightPlacedMeasurement M)
-      (fun a => MakingMeasurementsProjective.isProj_kronecker
-        (IsStarProjection.one _) (hM a))
-    convert h using 1
-    rfl
-
 /-- The Alice evaluation defect is bounded by the supplied global consistency
 error, with no decoder correction or non-encoding mass term. -/
 theorem pullingMeas_eval_point_consistent_alice {P : AdmissibleParams}
@@ -88,7 +34,7 @@ theorem pullingMeas_eval_point_consistent_alice {P : AdmissibleParams}
       (fun u a => S.placePlayer .bob ((S.pointMeas .bob W u).effect a)) S.psiHat ≤
         deltaG := by
   let mu := uniformDistribution (Fin P.m → PauliScalar P)
-  let pulled := fun u => pullingPlacedMeasurement S .alice
+  let pulled := fun u => S.blockMeasurement .alice
     ((pullingMeas w .alice W).postprocess (fun g => evalPoly g u))
   let point := fun u => S.placedMeasurement .BB' (leftPlacedMeasurement (S.pointMeas .bob W u))
   let marginal := fun u => S.placedMeasurement .AA'
@@ -106,7 +52,7 @@ theorem pullingMeas_eval_point_consistent_alice {P : AdmissibleParams}
     apply congrArg (1 - ·)
     apply avgOver_congr
     intro u
-    simp only [pulled, point, marginal, expanded, pullingPlacedMeasurement_effect,
+    simp only [pulled, point, marginal, expanded, ProjectiveSetting.blockMeasurement_effect,
       ProjectiveSetting.placedMeasurement_effect]
     change (∑ a, stateQForm S.psiHat (S.placeSide .alice
       (((pullingMeas w .alice W).postprocess (fun g => evalPoly g u)).effect a) *
@@ -121,8 +67,8 @@ theorem pullingMeas_eval_point_consistent_alice {P : AdmissibleParams}
     (fun u a => (expanded u).effect a) S.psiHat ≤ deltaG at hbound
   exact heq.le.trans hbound
 
-/-- Bob's evaluation defect has the same bound, using the other consistency
-field of the supplied witness and its `BB'`--`AB''` placements. -/
+/-- Bob's evaluation defect has the same bound, using the Bob point-consistency
+estimate of the supplied witness and its `BB'`--`AB''` placements. -/
 theorem pullingMeas_eval_point_consistent_bob {P : AdmissibleParams}
     {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S deltaG) (W : PauliKind) :
@@ -132,7 +78,7 @@ theorem pullingMeas_eval_point_consistent_bob {P : AdmissibleParams}
         (((pullingMeas w .bob W).postprocess (fun g => evalPoly g u)).effect a)) S.psiHat ≤
         deltaG := by
   let mu := uniformDistribution (Fin P.m → PauliScalar P)
-  let pulled := fun u => pullingPlacedMeasurement S .bob
+  let pulled := fun u => S.blockMeasurement .bob
     ((pullingMeas w .bob W).postprocess (fun g => evalPoly g u))
   let point := fun u => S.placedMeasurement .AA' (leftPlacedMeasurement (S.pointMeas .alice W u))
   let marginal := fun u => S.placedMeasurement .BB'
@@ -150,7 +96,7 @@ theorem pullingMeas_eval_point_consistent_bob {P : AdmissibleParams}
     apply congrArg (1 - ·)
     apply avgOver_congr
     intro u
-    simp only [pulled, point, marginal, expanded, pullingPlacedMeasurement_effect,
+    simp only [pulled, point, marginal, expanded, ProjectiveSetting.blockMeasurement_effect,
       ProjectiveSetting.placedMeasurement_effect]
     change (∑ a, stateQForm S.psiHat
       (S.placePlayer .alice ((S.pointMeas .alice W u).effect a) * S.placeSide .bob
@@ -176,40 +122,9 @@ theorem point_consistencyDefect_psiHat {P : AdmissibleParams} {epsilon : ℝ}
       consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
         (fun u a => heteroKron ((S.pointMeas .alice W u).effect a) 1)
         (fun u a => heteroKron 1 ((S.pointMeas .bob W u).effect a)) S.toStrategy.ψ := by
-  classical
-  have htransfer (A : Op S.toStrategy.ιA) (B : Op S.toStrategy.ιB)
-      (hA : A.IsHermitian) (hB : B.IsHermitian) :
-      stateQForm S.psiHat (S.placePlayer .alice A * S.placePlayer .bob B) =
-        stateQForm S.toStrategy.ψ (heteroKron A 1 * heteroKron 1 B) := by
-    letI : DecidableEq (((S.toStrategy.ιA × S.toStrategy.ιB) ×
-        (PauliRegister P × PauliRegister P)) × (PauliRegister P × PauliRegister P)) :=
-      instDecidableEqProd
-    have hAB := heteroKron_isHermitian A B hA hB
-    rw [placed_product_stateQForm_eq]
-    change stateQForm S.psiHat
-      (S.place .AA' (heteroKron A 1) * S.place .BB' (heteroKron B 1)) = _
-    rw [S.psiHat_eq_reindexState, WinImplications.stateQForm_reindexState,
-      WinImplications.reindexOp_mul, S.reindexOp_sixRegShuffle_place_AA'_heteroKron,
-      S.reindexOp_sixRegShuffle_place_BB'_heteroKron]
-    simp only [heteroKron_mul, Matrix.one_mul, Matrix.mul_one, heteroKron_one_one]
-    rw [stateQForm_vecTensor_heteroKron _ _ _ _
-      (heteroKron_isHermitian _ _ hAB Matrix.isHermitian_one) Matrix.isHermitian_one,
-      stateQForm_vecTensor_heteroKron _ _ _ _ hAB Matrix.isHermitian_one,
-      stateQForm_one_eq_norm_sq, eprState_norm]
-    ring
-  unfold consistencyDefect
-  apply avgOver_congr
-  intro u
-  apply Finset.sum_congr rfl
-  intro a _
-  apply Finset.sum_congr rfl
-  intro b _
-  by_cases hab : a = b
-  · simp only [hab, if_true]
-  · simp only [if_neg hab, consistency_term_eq_stateQForm]
-    exact htransfer _ _
-      (Matrix.nonneg_iff_posSemidef.mp ((S.pointMeas .alice W u).pos a)).isHermitian
-      (Matrix.nonneg_iff_posSemidef.mp ((S.pointMeas .bob W u).pos b)).isHermitian
+  exact S.consistencyDefect_placePlayers
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun u => S.pointMeas .alice W u) (fun u => S.pointMeas .bob W u)
 
 /-- The evaluated difference-polynomial measurements are self-consistent.
 Agreement and two squared-distance triangle inequalities combine the two
@@ -226,9 +141,9 @@ theorem pullingMeas_eval_consistencyDefect_le {P : AdmissibleParams}
           (((pullingMeas w .bob W).postprocess (fun g => evalPoly g u)).effect a))
         S.psiHat ≤ 12 * deltaG + 8 * (Fintype.card PauliEdge : ℝ) * epsilon := by
   let mu := uniformDistribution (Fin P.m → PauliScalar P)
-  let A := fun u => pullingPlacedMeasurement S .alice
+  let A := fun u => S.blockMeasurement .alice
     ((pullingMeas w .alice W).postprocess (fun g => evalPoly g u))
-  let B := fun u => pullingPlacedMeasurement S .bob
+  let B := fun u => S.blockMeasurement .bob
     ((pullingMeas w .bob W).postprocess (fun g => evalPoly g u))
   let PA := fun u => S.placedMeasurement .AA'
     (leftPlacedMeasurement (S.pointMeas .alice W u))
@@ -253,9 +168,9 @@ theorem pullingMeas_eval_consistencyDefect_le {P : AdmissibleParams}
   have hAP := opFamilyDistSq_le_of_le_of_le mu _ _ _ S.psiHat _ _ hA hP
   have hAB := opFamilyDistSq_le_of_le_of_le mu _ _ _ S.psiHat _ _ hAP hB
   have hproj (side : PlayerSide) (u : Fin P.m → PauliScalar P) :
-      Measurement.IsProjective (pullingPlacedMeasurement S side
+      Measurement.IsProjective (S.blockMeasurement side
         ((pullingMeas w side W).postprocess (fun g => evalPoly g u))) :=
-    pullingPlacedMeasurement_isProjective S side _
+    S.blockMeasurement_isProjective side _
       (SandwichProduct.postprocess_isProjective _ (pullingMeas_isProjective w side W) _)
   have hdef := consistencyDefect_le_opFamilyDistSq_of_projective mu A B S.psiHat
     (hproj .alice) (hproj .bob)

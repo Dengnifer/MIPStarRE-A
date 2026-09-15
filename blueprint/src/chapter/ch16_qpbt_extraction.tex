@@ -511,7 +511,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	\label{lem:qld-state-extraction-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness}
 	\leanok
-	\uses{lem:qld-4-7, def:v-swap-unitary, thm:qld-epr-projection-estimates}
+	\uses{lem:qld-construct-the-paulis-given-global-pair, def:v-swap-unitary,
+		thm:qld-epr-projection-estimates}
 	Assume the global polynomial-pair measurement and both consistency estimates
 	of Lemma~\ref{lem:qld-4-7} as supplied data at error $\delta_G\geq0$.
 	There is a universal constant $C\geq1$ such that, for every admissible
@@ -531,7 +532,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
   \lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
   \lean{MIPStarRE.QPBT.evaluated_pauli_tilde_consistency_ofGlobalPairWitness}
   \leanok
-  \uses{lem:qld-4-7, lem:qld-construct-the-paulis, lem:qld-win-implications}
+  \uses{lem:qld-construct-the-paulis-given-global-pair, lem:qld-win-implications}
   Assume the global polynomial-pair witness at error $\delta_G\geq0$ as data.
   Each of the two point comparisons in Item 1 of
   Lemma~\ref{lem:qld-construct-the-paulis} has a universal bound $CB$, where

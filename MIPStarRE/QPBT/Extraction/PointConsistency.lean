@@ -109,7 +109,7 @@ theorem sum_pointMeas_mul_tildeM_eq_decoded_overlap
   rfl
 
 /-- The pulled-apart consistency defect is one minus the decoded overlap.
-This packages completeness with the first three lines of the source's
+This combines completeness with the first three lines of the source's
 calculation, still without imposing an encoding restriction. -/
 theorem tildeM_consistencyDefect_eq_one_sub_decoded_overlap
     {P : AdmissibleParams} {epsilon deltaG : ℝ} {S : ProjectiveSetting P epsilon}

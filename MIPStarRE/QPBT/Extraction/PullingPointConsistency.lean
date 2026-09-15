@@ -58,7 +58,7 @@ theorem pullingMeas_eval_effect {P : AdmissibleParams} {epsilon deltaG : ℝ}
   simp only [hlabel]
 
 /-- Alice's evaluated difference measurement has precisely the overlap with
-Bob's point measurement that appears in the witness's Alice consistency field. -/
+Bob's point measurement in the Alice point-consistency estimate of the witness. -/
 theorem sum_pullingMeas_eval_mul_pointMeas {P : AdmissibleParams} {epsilon deltaG : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
     (W : PauliKind) (u : Fin P.m → PauliScalar P) :
@@ -75,7 +75,7 @@ theorem sum_pullingMeas_eval_mul_pointMeas {P : AdmissibleParams} {epsilon delta
   rw [← Finset.mul_sum, ← S.place_finset_sum, S.pointMeasExp_effect_eq_sum_sub .bob W u]
   rfl
 
-/-- The reverse-player overlap uses the witness's Bob consistency field, with
+/-- The reverse-player overlap uses the witness's Bob point-consistency relation, with
 the original `BB'` and `AB''` placements retained. -/
 theorem sum_pointMeas_mul_pullingMeas_eval {P : AdmissibleParams} {epsilon deltaG : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)

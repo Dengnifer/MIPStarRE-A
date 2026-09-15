@@ -98,7 +98,7 @@ The encoding-supported reference and Schwartz--Zippel estimates in
 `NonencodingSupport` control the non-encoding mass required by the restricted
 decoder identity; see `docs/paper-gaps/qpbt_decoding-identity.tex`.
 **Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
-point-consistency fields; it is not constructed here from `lem:qld-4-7`.
+point-consistency hypotheses; it is not constructed here from `lem:qld-4-7`.
 The missing source-facing composition is documented in
 `docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
 Elimination: discharge the construction required by
@@ -217,7 +217,7 @@ Schwartz--Zippel estimates of `NonencodingSupport`. Thus the restricted decoder
 identity suffices, as explained in `docs/paper-gaps/qpbt_decoding-identity.tex`.
 
 **Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
-point-consistency fields; it is not constructed here from `lem:qld-4-7`.
+point-consistency hypotheses; it is not constructed here from `lem:qld-4-7`.
 The missing source-facing composition is documented in
 `docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
 Elimination: discharge the construction required by the source-facing
