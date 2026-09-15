@@ -1,12 +1,13 @@
 import MIPStarRE.QPBT.Combining.ExtendedLines.Measurement
 import MIPStarRE.QPBT.Combining.SubLineXDeficit
+import MIPStarRE.QPBT.Combining.Lines.SubLineUniform
 
 /-!
 # Consistency of the extended-line measurements
 
-This construction uses the directly indexed extended-line space, the answer
-alphabet obtained from the field by adjoining an undefined-evaluation outcome,
-and the corrected sum-form convention for polynomial errors.
+This directly indexed auxiliary construction follows the first consistency
+route for combined lines. The question carrier, completed answer alphabet,
+and corrected error convention retain their existing meanings.
 
 ## References
 
@@ -111,7 +112,7 @@ theorem avgOver_directLinePointDist_resample_parameter (params : DirectLdParams)
     intro direction
     simpa only [directLdSpaceIndexEquiv, Equiv.coe_fn_symm_mk, directALineDescOf,
       DirectLineDesc.base, DirectLineDesc.direction, lineRepMap_apply_self] using
-      avgOver_lineRepMap_resample_parameter (coordinateDirection index)
+      avgOver_uniform_lineRepMap_resample_parameter (coordinateDirection index)
         (fun base point => quantity
           (.axis (lineRepMap (coordinateDirection index) base) index
             (lineRepMap_apply_self _ _), point))
@@ -128,7 +129,7 @@ theorem avgOver_directLinePointDist_resample_parameter (params : DirectLdParams)
     intro direction
     simpa only [directLdSpaceIndexEquiv, Equiv.coe_fn_symm_mk, directDLineDescOf,
       DirectLineDesc.base, DirectLineDesc.direction, lineRepMap_apply_self] using
-      avgOver_lineRepMap_resample_parameter (directPrefixProjection index direction)
+      avgOver_uniform_lineRepMap_resample_parameter (directPrefixProjection index direction)
         (fun base point => quantity
           (.diagonal (lineRepMap (directPrefixProjection index direction) base) index
             (directPrefixProjection index direction) (lineRepMap_apply_self _ _)

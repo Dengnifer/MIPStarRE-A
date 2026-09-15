@@ -1,8 +1,10 @@
 import MIPStarRE.QPBT.Combining.Lines.PointComparison
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
-import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
 import MIPStarRE.QPBT.Games.Sandwich
+import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
+import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
+import MIPStarRE.QPBT.Combining.Lines.DiscardedMass
 
 /-!
 # Conditioning the line-pasting distribution
@@ -13,8 +15,9 @@ bounds apply there, and the discarded probability is restored explicitly.
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions are
-documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions remain
+as documented in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT
@@ -28,8 +31,7 @@ noncomputable section
 /-- For arbitrary complete measurements on opposite placements, conditioning
 and question relabeling inflate the defect by at most the inverse retained mass.
 The needed nonnegativity follows from positivity on opposite registers, not a
-new input. This formalization-only auxiliary supports `eq:pasting-q1`, paper
-lines 936--963. -/
+new input. Formalization-only support for `eq:pasting-q1`, paper lines 936--963. -/
 theorem consistencyDefect_nondegenerateLinePastingDist_le {P : AdmissibleParams} {ε : ℝ}
     {Outcome : Type*} [Fintype Outcome] [DecidableEq Outcome]
     (S : ProjectiveSetting P ε) (p1 p2 : Placement) (hopp : p1.IsOpposite p2)
@@ -117,12 +119,10 @@ theorem exists_combinedPoints_conditioned_line_marginal_defect_le :
     exact h
 
 set_option maxHeartbeats 800000 in
--- Expanding the conditioned product law gives the corresponding finite normalization identity.
 /-- Restore the unconditioned consistency defect with its retained-mass factor
 and additive cost at most `1/(2q)`. This holds for the supplied measurement
 families on every directed opposite placement, without a defect hypothesis.
-This formalization-only auxiliary supports `lem:qld-xz-lines`, paper
-lines 950--963. -/
+Formalization-only support for `lem:qld-xz-lines`, paper lines 950--963. -/
 theorem consistencyDefect_le_nondegenerateLinePastingDist_add_mass
     {P : AdmissibleParams} {ε : ℝ}
     {Outcome : Type*} [Fintype Outcome] [DecidableEq Outcome]
@@ -200,6 +200,10 @@ theorem ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned
     (fun sample => (S.combinedLineMeasurement p2.side sample.1.1 sample.2.1).postprocess
       (fun polys => (evalOpt sample.1.1 sample.1.2 polys.1,
         evalOpt sample.2.1 sample.2.2 polys.2)))
+
+/-! ## Unequal-dimensional bipartite transport -/
+
+open DistanceCalculus in
 
 end
 

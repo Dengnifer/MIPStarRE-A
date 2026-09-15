@@ -1,6 +1,8 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.PairCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLines.Estimates
-import MIPStarRE.QPBT.Combining.ErrorBounds
+import MIPStarRE.QPBT.Combining.ActualErrorBounds
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.PointErrorObstruction
 import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
@@ -12,10 +14,10 @@ This module states the two application obligations at the end of the Pauli-basis
 combining argument.  Directly indexed combined-line measurements are recorded both
 with the error form printed in the source and with the weaker estimate established by
 its first proof route.  The final witness consists of a projective measurement of a
-pair of global bounded individual-degree polynomials. The directly indexed
-construction with an existentially supplied point family and the established
-error is proved. The two printed-error assertions, the unrestricted
-supplied-point established-error assertion, and the global-pair assertion remain open.
+pair of global bounded individual-degree polynomials.  The existence assertions below
+record the measurements and quantitative estimates required by the combining argument.
+The established direct-line constructor and the source global-pair theorem are proved.
+The three stronger or unrestricted supplied-point line assertions remain open.
 
 ## References
 
@@ -172,7 +174,10 @@ closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
 of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
 the two-dimensional strategy that refutes the product form are recorded in
 `docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
-Here `poly(epsilon, md / q)` is read in that sense. -/
+Here `poly(epsilon, md / q)` is read in that sense.
+
+The proof uses the point, line, and subline constructions together with both
+opposite-placement comparisons. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧
@@ -239,21 +244,59 @@ direct carrier realizes the required dimension without assuming
 `2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
 for the directly indexed game by applying `MIPStarRE.LDT.Test.mainFormal` and
 verifying `400 M d <= N` at each LDT application dimension `M`, with sampling
-count `N = 2560000 M^3 d`.  The source import at seed-indexed dimension `M`
-instead chooses `K = M^3 d` for a tensor-code theorem requiring
-`K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
-claimed tensor-code game correspondence.  Both source-import obligations
-remain open and are documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
-combined-lines prefactor into the final universal constants is to use
-`deltaQld_mono` on its stated source parameter domain.
+count `N = 2560000 M^3 d`.  At seed-indexed dimension `M`, the source instead
+chooses `K = M^3 d` while invoking a tensor-code theorem that requires
+`K >= 12 M (d + 1)`, and it asserts a correspondence with the tensor-code game.
+The direct proof establishes neither assertion.  Both remain open and are documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+The independent algebraic restriction, projective completion, and retained-overlap
+estimates remain available in `PairCompletion.lean`.
+
+The proof below composes the established direct-line construction with the actual
+rounded polynomial-pair construction. Its four defects are bounded both by one
+and by the constructed error. `exists_actual_rounded_global_pair_error_bound`
+absorbs their minimum, including the eighth-root rounding term and both point
+and line errors, for every nonnegative strategy error. This alternative proof
+does not require an identification with the source's seed-bearing auxiliary game.
 -/
 theorem exists_globalPairWitness :
     ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ), 0 < ε →
-        ∀ S : ProjectiveSetting P ε,
-          Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
-  sorry
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+        Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
+  obtain ⟨pointError, hpoint, C, hC, lineError, hline, hlines⟩ :=
+    exists_extendedLinesWitness_established
+  obtain ⟨a, b, ha, hb, hb1, hpairs⟩ :=
+    ExtendedLineGame.exists_pairWitness_of_points_lines
+  obtain ⟨A, B, hA, hB, hB1, hscalar⟩ :=
+    exists_actual_rounded_global_pair_error_bound pointError hpoint lineError hline
+      C a b hC.le ha hb hb1
+  refine ⟨A, B, hA, hB, hB1, ?_⟩
+  intro P ε S
+  obtain ⟨points, ⟨lines⟩⟩ := hlines P ε S
+  obtain ⟨pair⟩ := hpairs P ε (pointError ε)
+    (C * (P.m : ℝ) * lineError ε ((P.m * P.d : ℕ) / (P.q : ℝ))) S points lines
+  have hbound := hscalar P ε S.eps_nonneg
+  simp only [Nat.cast_mul] at hbound
+  refine ⟨{ pair with point_consistent_alice := ?_, point_consistent_bob := ?_ }⟩
+  · intro W
+    refine (le_min (show _ ≤ (1 : ℝ) from ?_) (pair.point_consistent_alice W)).trans ?_
+    · unfold consistencyDefect
+      calc
+        _ ≤ avgOver (uniformDistribution (Fin P.m → PauliScalar P)) (fun _ => 1) :=
+          avgOver_mono _ _ _ fun u => consistencyDefect_integrand_le_one
+            S .AA' .BA'' (by trivial) _ _
+        _ = 1 := avgOver_const_of_isProbability _ (uniformDistribution_isProbability _) 1
+    · with_unfolding_all simpa only [Nat.cast_mul, Real.rpow_eq_pow] using hbound
+  · intro W
+    refine (le_min (show _ ≤ (1 : ℝ) from ?_) (pair.point_consistent_bob W)).trans ?_
+    · unfold consistencyDefect
+      calc
+        _ ≤ avgOver (uniformDistribution (Fin P.m → PauliScalar P)) (fun _ => 1) :=
+          avgOver_mono _ _ _ fun u => consistencyDefect_integrand_le_one
+            S .BB' .AB'' (by trivial) _ _
+        _ = 1 := avgOver_const_of_isProbability _ (uniformDistribution_isProbability _) 1
+    · with_unfolding_all simpa only [Nat.cast_mul, Real.rpow_eq_pow] using hbound
 
 end
 

@@ -1,4 +1,8 @@
-import MIPStarRE.QPBT.Combining.Lines.Sampling
+import MIPStarRE.QPBT.Combining.Lines.DiagonalResampling
+import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
+import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.Lines.PointwiseDefect
+import MIPStarRE.QPBT.Games.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Points.MarginalContraction
 
 /-!
@@ -6,12 +10,15 @@ import MIPStarRE.QPBT.Combining.Points.MarginalContraction
 
 Projection contraction and the original line-point law give the two marginal
 comparisons used by the X-Z-X line construction.
+The joint-point marginal estimates are imported through `Points` from
+`Points.WitnessMarginals`, which retains the same statements and proofs.
 
 ## References
 
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-963`,
-blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions are
-documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+blueprint `lem:qld-xz-lines`. The source and completed-answer distinctions remain
+as documented in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT
