@@ -114,18 +114,28 @@ theorem exists_extendedLinesWitness :
                 ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Construction of the extended-line measurements with the estimate actually
-delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
+/-- Conditional existence of extended-line measurements with the first-route
+estimate `C * m * poly(epsilon, md / q)`.
 
-This is an established auxiliary form of the argument, not the source-labelled
-`lem:qld-4-13`; it must not be advertised as that theorem. The source discrepancy
-is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the
-companion directly indexed declaration, the extended questions use the directly
-indexed line-space construction. This conditional declaration takes an already
-constructed point witness; the obligation below supplies it existentially. Relating
-its game to the source's seed-bearing game requires the transport and soundness
-obligations in
+This conditional auxiliary uses the error form established by the first proof route,
+but its own proof remains open; it is not the source-labelled `lem:qld-4-13` and must
+not be advertised as that theorem. The source discrepancy is analyzed in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the companion directly
+indexed declaration, the extended questions use the directly indexed line-space
+construction. This conditional declaration takes an already constructed point
+witness; the obligation below supplies it existentially. Relating its game to the
+source's seed-bearing game requires the transport and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Unfaithful:** This helper quantifies over an arbitrary scalar `δQ`, although
+its line error is independent of `δQ`. This assertion is false for arbitrary
+supplied point measurements and does not follow from `lem:qld-4-13`; the
+obstruction is documented in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and tracked by issue #511.
+Elimination: either restrict the supplied point family to the polynomially
+controlled error produced by `exists_combinedPointsWitness`, or remove this
+helper once no proof requires the unrestricted form. Its proof remains open,
+and it must not support a claim that the source lemma is complete.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
