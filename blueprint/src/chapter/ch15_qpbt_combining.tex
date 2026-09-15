@@ -1112,6 +1112,107 @@ assembled by Fourier averaging.
 	the registers modified gives all symmetric equivalents.
 \end{proof}
 
+	\begin{definition}[Retained mass of the nondegenerate-line restriction]
+		\label{def:qld-nondegenerate-pasting-mass}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+		\leanok
+		\uses{def:line-point-dist}
+		This quantity is not named in the source article; it is the normalization
+		constant of the first-line conditioning used in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Draw two independent samples from the
+		line-point distribution of Definition~\ref{def:line-point-dist}. The
+		\emph{retained mass} is the probability that the line of the first sample
+		has nonzero direction.
+	\end{definition}
+
+	\begin{lemma}[The retained mass lies between one half and one]
+		\label{lem:qld-nondegenerate-pasting-mass-bounds}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-mass, def:line-point-dist}
+		The retained mass of Definition~\ref{def:qld-nondegenerate-pasting-mass} is
+		at least $1/2$ and at most $1$.
+	\end{lemma}
+
+	\begin{lemma}[The first-line nondegeneracy event has positive mass]
+		\label{lem:qld-nondegenerate-pasting-mass-pos}
+		\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-mass, def:line-point-dist}
+		Under two independent samples from the line-point distribution of
+		Definition~\ref{def:line-point-dist}, the event that the line of the first
+		sample has nonzero direction has positive probability.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-nondegenerate-pasting-mass-bounds}
+		That probability is the retained mass of
+		Definition~\ref{def:qld-nondegenerate-pasting-mass}, which is at least
+		$1/2$ by Lemma~\ref{lem:qld-nondegenerate-pasting-mass-bounds}.
+	\end{proof}
+
+	\begin{definition}[Nondegenerate-line pasting distribution]
+		\label{def:qld-nondegenerate-pasting-dist}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+		\leanok
+		\uses{def:line-point-dist, lem:qld-nondegenerate-pasting-mass-pos}
+		This law is not named in the source article; it is the proof-only question
+		law of the first-line conditioning in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Condition two independent samples from the
+		line-point distribution of Definition~\ref{def:line-point-dist} on the
+		event that the line of the first sample has nonzero direction, which is
+		legitimate by Lemma~\ref{lem:qld-nondegenerate-pasting-mass-pos}, and
+		present the outcome as the pair of the two lines, followed by the second
+		line-point sample and then the first.
+	\end{definition}
+
+	\begin{lemma}[The nondegenerate-line pasting law is normalized]
+		\label{lem:qld-nondegenerate-pasting-dist-prob}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-dist}
+		The law of Definition~\ref{def:qld-nondegenerate-pasting-dist} has total
+		mass one.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-nondegenerate-pasting-mass-pos}
+		Conditioning on an event of positive mass yields a normalized law by
+		Lemma~\ref{lem:qld-nondegenerate-pasting-mass-pos}, and the relabeling of
+		the sample preserves the total mass.
+	\end{proof}
+
+	\begin{lemma}[Conditioning inflates the consistency defect by the inverse retained mass]
+		\label{lem:qld-conditioned-pasting-defect}
+		\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-dist, def:qld-nondegenerate-pasting-mass,
+			def:consistency, def:line-point-dist}
+		This estimate is not a named statement of the source article; it quantifies
+		the cost of the first-line conditioning used in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Fix admissible parameters, an error
+		parameter, and two \emph{opposite} placements of the two players. Let two
+		families of measurements on the corresponding expanded local spaces be
+		indexed by a pair of line-point samples. Then the consistency defect of
+		Definition~\ref{def:consistency} measured under the conditioned law of
+		Definition~\ref{def:qld-nondegenerate-pasting-dist} is at most the
+		consistency defect measured under two independent line-point samples,
+		divided by the retained mass of
+		Definition~\ref{def:qld-nondegenerate-pasting-mass}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-nondegenerate-pasting-mass-pos}
+		The relabeling built into
+		Definition~\ref{def:qld-nondegenerate-pasting-dist} only restores the
+		original order of the two samples, so both sides average the same
+		integrand. Because the two placements are opposite, that integrand is
+		nonnegative at every sample. Restricting the average of a nonnegative
+		integrand to an event multiplies it by at most the inverse of the mass of
+		that event, which is positive by
+		Lemma~\ref{lem:qld-nondegenerate-pasting-mass-pos}.
+	\end{proof}
+
 \begin{definition}[The concrete paired-line POVM]
 	\label{def:concrete-paired-line-measurement}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
