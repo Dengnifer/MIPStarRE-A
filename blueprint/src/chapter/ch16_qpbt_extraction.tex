@@ -220,6 +220,7 @@ Each displayed construction estimate below has its own universal constant $C_E \
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
 	\lean{MIPStarRE.QPBT.exists_pulled_apart_consistency}
 	\lean{MIPStarRE.QPBT.deltaConstructPaulis}
+	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
@@ -249,10 +250,44 @@ Each displayed construction estimate below has its own universal constant $C_E \
 		\]
 	\end{enumerate}
 	The construction above does not assume a supplied global measurement. Its
-	remaining step is to extend Lemma~\ref{lem:qld-4-7} to zero error and combine
-	that measurement with the three conditional estimates below. This obligation
-	is recorded in \cite{gap:qpbt_extraction-transfer}.
+	proof chooses the global polynomial-pair measurements supplied by
+	Lemma~\ref{lem:qld-4-7}, applies the three estimates of
+	Example~\ref{lem:qld-construct-the-paulis-given-global-pair} to the same
+	witness, and replaces their universal constants by their maximum. The
+	separate numerical and isometry-transfer questions arising later in the
+	extraction argument are recorded in \cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-7, lem:qld-construct-the-paulis-given-global-pair}
+	Choose the global polynomial-pair measurements from
+	Lemma~\ref{lem:qld-4-7}. Example~\ref{lem:qld-construct-the-paulis-given-global-pair}
+	provides universal constants for the two point-consistency estimates and the
+	observable self-consistency estimate for this same witness. Let $C_*$ be their
+	maximum. Since $B=\delta_G+\sqrt\eps+md/q$ is nonnegative, replacing each
+	constant by $C_*$ only enlarges its allowed error. The three conclusions
+	therefore hold simultaneously at the common scale $C_*B$.
+\end{proof}
+
+\begin{example}[Conditional estimates given a global polynomial-pair witness]
+	\label{lem:qld-construct-the-paulis-given-global-pair}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent_ofGlobalPairWitness}
+	\leanok
+	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:qld-4-7,
+		lem:projective-strategy-setup, def:expanded-state, def:consistency,
+		def:approx-question-indexed-operators, def:indicator-vector}
+	For each of the three estimates in Lemma~\ref{lem:qld-construct-the-paulis},
+	there is a universal constant $C_E\geq1$ such that the estimate holds for
+	every admissible tuple, every $0\leq\eps\leq1$, every projective strategy at
+	error $\eps$, every $\delta_G\geq0$, and every supplied pair of projective
+	polynomial-pair measurements satisfying both point-consistency estimates of
+	Lemma~\ref{lem:qld-4-7} at error $\delta_G$.
+	The global measurement and its consistency estimates are hypotheses of this
+	statement. Consequently, this auxiliary does not assert their construction
+	or the unrestricted conclusion of Lemma~\ref{lem:qld-construct-the-paulis}.
+\end{example}
 \begin{proof}
 	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, def:tilde-m-measurement, def:tau-dot-product-projector, lem:qld-decoder-evaluation, lem:qld-decoder-linearity, def:indicator-vector, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:triangle, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
 	% Support restriction added: the source (line 1492 of
@@ -293,26 +328,6 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	\]
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
-
-\begin{example}[Conditional estimates given a global polynomial-pair witness]
-	\label{lem:qld-construct-the-paulis-given-global-pair}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
-	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent_ofGlobalPairWitness}
-	\leanok
-	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:qld-4-7,
-		lem:projective-strategy-setup, def:expanded-state, def:consistency,
-		def:approx-question-indexed-operators, def:indicator-vector}
-	For each of the three estimates in Lemma~\ref{lem:qld-construct-the-paulis},
-	there is a universal constant $C_E\geq1$ such that the estimate holds for
-	every admissible tuple, every $0\leq\eps\leq1$, every projective strategy at
-	error $\eps$, every $\delta_G\geq0$, and every supplied pair of projective
-	polynomial-pair measurements satisfying both point-consistency estimates of
-	Lemma~\ref{lem:qld-4-7} at error $\delta_G$.
-	The global measurement and its consistency estimates are hypotheses of this
-	statement. Consequently, this auxiliary does not assert their construction
-	or the unrestricted conclusion of Lemma~\ref{lem:qld-construct-the-paulis}.
-\end{example}
 
 \begin{lemma}[Non-encoding support estimate]
 \label{lem:qld-nonencoding-mass-bound}

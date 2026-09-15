@@ -97,13 +97,13 @@ separate in `deltaConstructPaulis`.
 The encoding-supported reference and Schwartz--Zippel estimates in
 `NonencodingSupport` control the non-encoding mass required by the restricted
 decoder identity; see `docs/paper-gaps/qpbt_decoding-identity.tex`.
-**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
-point-consistency hypotheses; it is not constructed here from `lem:qld-4-7`.
-The missing source-facing composition is documented in
-`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
-Elimination: discharge the construction required by
-`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
-its missing zero-error case. -/
+**Conditional:** The premise `w : GlobalPairWitness S deltaG` is supplied rather
+than constructed here, so this declaration is not the source-facing result.
+The theorem `exists_pulled_apart_consistency` now obtains the witness from
+`exists_globalPairWitness`, including at zero error, and applies this estimate
+together with the other two supplied-witness estimates to the same witness.
+The completed composition and the remaining extraction obligations are recorded
+in `docs/paper-gaps/qpbt_extraction-transfer.tex` under issue #123. -/
 theorem tildeM_consistent_pointMeas_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -216,13 +216,13 @@ The non-encoding mass is controlled by the encoding-supported reference and
 Schwartz--Zippel estimates of `NonencodingSupport`. Thus the restricted decoder
 identity suffices, as explained in `docs/paper-gaps/qpbt_decoding-identity.tex`.
 
-**Unfaithful:** The premise `w : GlobalPairWitness S deltaG` supplies both
-point-consistency hypotheses; it is not constructed here from `lem:qld-4-7`.
-The missing source-facing composition is documented in
-`docs/paper-gaps/qpbt_extraction-transfer.tex` and tracked by issue #123.
-Elimination: discharge the construction required by the source-facing
-`exists_pulled_apart_consistency` using `exists_globalPairWitness`, including
-its missing zero-error case. -/
+**Conditional:** The premise `w : GlobalPairWitness S deltaG` is supplied rather
+than constructed here, so this declaration is not the source-facing result.
+The theorem `exists_pulled_apart_consistency` now obtains the witness from
+`exists_globalPairWitness`, including at zero error, and applies this estimate
+together with the other two supplied-witness estimates to the same witness.
+The completed composition and the remaining extraction obligations are recorded
+in `docs/paper-gaps/qpbt_extraction-transfer.tex` under issue #123. -/
 theorem tildeM_consistent_pointMeas'_ofGlobalPairWitness :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
