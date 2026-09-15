@@ -898,6 +898,106 @@ assembled by Fourier averaging.
 	difference would force them to be equal, contradicting $f\ne g$.
 \end{proof}
 
+\begin{definition}[Formalization support: retained nondegenerate mass]
+	\label{def:nondegenerate-line-pasting-mass}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+	\leanok
+	\uses{def:line-point-dist}
+	Fix an arbitrary low-degree parameter tuple $L=(q,m,d,k)$ as in
+	Definition~\ref{def:ld-game}, and write $D_{\mathsf{Line}}^L$ for the
+	line-point distribution of Definition~\ref{def:line-point-dist}. For two
+	independent samples $(\ell_X,x),(\ell_Z,z)\sim D_{\mathsf{Line}}^L$, define
+	the retained mass
+	\[
+		\mu_{\mathrm{nd}}(L)
+		:= \sum_{\substack{(\ell_X,x),(\ell_Z,z)\\
+			\operatorname{dir}(\ell_X)\ne 0}}
+		D_{\mathsf{Line}}^L(\ell_X,x)D_{\mathsf{Line}}^L(\ell_Z,z).
+	\]
+	Thus $\mu_{\mathrm{nd}}(L)$ is the probability that the first sampled line
+	has nonzero direction; the second line-point sample is unrestricted. This is
+	a formalization-only normalization factor for the conditioning step in the
+	proof of Lemma~\ref{lem:qld-xz-lines}. It does not replace the independent,
+	unconditioned product law in that lemma's statement.
+\end{definition}
+
+\begin{theorem}[Formalization support: retained-mass bounds]
+	\label{thm:nondegenerate-line-pasting-mass-bounds}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass}
+	For every low-degree parameter tuple $L$,
+	\[
+		\frac12\leq \mu_{\mathrm{nd}}(L)\leq 1.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, lem:axis-line-zero-direction-mass}
+	The axis-parallel component has weight one half and always has nonzero
+	direction, while the diagonal component contributes nonnegative mass. This
+	gives the lower bound. The upper bound follows because the retained samples
+	form an event in the product of two probability distributions.
+\end{proof}
+
+\begin{theorem}[Formalization support: positivity of the retained mass]
+	\label{thm:nondegenerate-line-pasting-mass-positive}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass,
+		thm:nondegenerate-line-pasting-mass-bounds}
+	For every low-degree parameter tuple $L$, the event
+	$\operatorname{dir}(\ell_X)\ne 0$ has positive mass under
+	$D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$; equivalently,
+	$0<\mu_{\mathrm{nd}}(L)$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:nondegenerate-line-pasting-mass-bounds}
+	The lower bound $\mu_{\mathrm{nd}}(L)\geq\frac12$ is strictly positive.
+\end{proof}
+
+\begin{definition}[Formalization support: conditioned pasting distribution]
+	\label{def:nondegenerate-line-pasting-dist}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+	\leanok
+	\uses{def:line-point-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Condition $D_{\mathsf{Line}}^L\times D_{\mathsf{Line}}^L$ on
+	$\operatorname{dir}(\ell_X)\ne 0$, using the positive retained mass from
+	Theorem~\ref{thm:nondegenerate-line-pasting-mass-positive}, and push the
+	result forward along
+	\[
+		\big((\ell_X,x),(\ell_Z,z)\big)
+		\longmapsto
+		\big(((\ell_X,\ell_Z),(\ell_Z,z)),(\ell_X,x)\big).
+	\]
+	Denote the resulting distribution by $D_{\mathrm{nd}}^L$. Thus the paired
+	lines are ordered $X,Z$, followed by the full $Z$ sample and then the full
+	$X$ sample, and only the first, $X$-line direction is restricted. This
+	formalization-only law supports the pasting construction. The source
+	conclusion of Lemma~\ref{lem:qld-xz-lines} remains an average over two
+	independent, unconditioned samples from $D_{\mathsf{Line}}^L$; the transfer
+	back to that source law remains part of the uncertified proof of that lemma.
+\end{definition}
+
+\begin{theorem}[Formalization support: normalization of the conditioned law]
+	\label{thm:nondegenerate-line-pasting-dist-probability}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	For every low-degree parameter tuple $L$, $D_{\mathrm{nd}}^L$ is a
+	probability distribution.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Normalization by the positive retained mass gives a probability
+	distribution on the restricted event, and push-forward preserves total mass.
+\end{proof}
+
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
