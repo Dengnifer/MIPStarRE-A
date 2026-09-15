@@ -220,6 +220,7 @@ Each displayed construction estimate below has its own universal constant $C_E \
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
 	\lean{MIPStarRE.QPBT.exists_pulled_apart_consistency}
 	\lean{MIPStarRE.QPBT.deltaConstructPaulis}
+	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
@@ -249,11 +250,14 @@ Each displayed construction estimate below has its own universal constant $C_E \
 		\]
 	\end{enumerate}
 	The construction above does not assume a supplied global measurement. Its
-	remaining step is to extend Lemma~\ref{lem:qld-4-7} to zero error and combine
-	that measurement with the three conditional estimates below. This obligation
-	is recorded in \cite{gap:qpbt_extraction-transfer}.
+	Lean proof obtains the full-domain witness from Lemma~\ref{lem:qld-4-7},
+	applies the three conditional estimates below to that same witness, and
+	enlarges their constants to one common maximum. The composition history and
+	separate extraction-transfer corrections are recorded in
+	\cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, def:tilde-m-measurement, def:tau-dot-product-projector, lem:qld-decoder-evaluation, lem:qld-decoder-linearity, def:indicator-vector, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:triangle, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
 	% Support restriction added: the source (line 1492 of
 	% 14_analysis_of_the_pauli_basis_test.tex) rewrites Dec(g).ind_m(u) as
