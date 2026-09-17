@@ -54,6 +54,11 @@ import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
 import MIPStarRE.QPBT.Combining.Linearity.Stability
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.OrderedPolynomialEstimates
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.RoundedPolynomialEstimates
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.ScalarNonlinearMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.WrongVariableMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
@@ -68,6 +73,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.DiagonalParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PassingValue
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PolynomialConsistency
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
@@ -77,6 +83,7 @@ import MIPStarRE.QPBT.Extraction.Defs
 import MIPStarRE.QPBT.Extraction.EncodingSupport
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
+import MIPStarRE.QPBT.Extraction.Construction
 import MIPStarRE.QPBT.Extraction.Unitary
 import MIPStarRE.Quantum.ControlledUnitary
 

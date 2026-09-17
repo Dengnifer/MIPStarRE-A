@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a0a524-472d-73c0-a075-7a9161317d76"}
+{"type":"turn.started"}
+{"type":"error","message":"Reconnecting... 1/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: f3466d78-4afa-4b34-9e25-ba3f1995d720)"}
+{"type":"error","message":"Reconnecting... 2/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: 7abc17f0-7613-4b4a-8bae-810b35f78a9e)"}
+{"type":"error","message":"Reconnecting... 3/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: 34803a9c-37ae-4026-af25-e48e1d1ad125)"}
+{"type":"error","message":"Reconnecting... 4/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: 845d5cd4-dfdd-4469-87b4-808367327c53)"}
+{"type":"error","message":"Reconnecting... 5/5 (unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: bfc39382-3507-42af-a2f3-73140a15d33a)"}
+{"type":"error","message":"unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: 2274f58f-5ace-48bd-bead-d3489eade9d7"}
+{"type":"turn.failed","error":{"message":"unexpected status 503 Service Unavailable: Service temporarily unavailable, url: https://api.finite-dimensional.space/responses, request id: 2274f58f-5ace-48bd-bead-d3489eade9d7"}}

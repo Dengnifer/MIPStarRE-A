@@ -11,11 +11,14 @@ representative together with a uniformly random affine parameter along the
 direction: the map sending a pair to the point at that parameter on the line
 through the representative has constant fibers of size `q`, because the
 kernel of the canonical representative map is the span of the direction and
-for the zero direction that map is the identity.  Second, the two coordinate
-blocks of an elementary coordinate direction of the extended space are the
-corresponding elementary direction of the source space in the block that
-carries the coordinate, and zero in the other block and at the two scalar
-coordinates.
+for the zero direction that map is the identity.  In averaged form this is the
+resampling identity used by the line-point samplers: a quantity of the
+canonical representative and of the point may equivalently be averaged over the
+point and an independent uniform affine parameter along the direction.  Second,
+the two coordinate blocks of an elementary coordinate direction of the extended
+space are the corresponding elementary direction of the source space in the
+block that carries the coordinate, and zero in the other block and at the two
+scalar coordinates.
 
 ## References
 
@@ -142,7 +145,8 @@ theorem avgOver_uniform_lineRepMap_resample_parameter {K : Type*} [Field K]
   have hmap := uniformDistribution_map_lineRepMap_add_smul v
   have havg := congrArg (fun dist => avgOver dist
     (fun point => value (lineRepMap v point) point)) hmap
-  rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
+  rw [Distribution.avgOver_map, uniformDistribution_prod,
+    SandwichProduct.avgOver_distribution_prod] at havg
   simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
 
 /-! ## Injectivity of the two block embeddings -/

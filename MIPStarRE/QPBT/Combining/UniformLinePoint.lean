@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
-import MIPStarRE.QPBT.Combining.Lines.SubLineBind
+import MIPStarRE.QPBT.Combining.Lines.SubLineUniform
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.LDT.Basic.DistributionAvg

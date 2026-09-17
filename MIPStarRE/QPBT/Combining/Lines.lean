@@ -1,5 +1,5 @@
+import MIPStarRE.QPBT.Combining.Lines.Construction
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
-import MIPStarRE.QPBT.Combining.Lines.ConditionedPastingDefect
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
@@ -9,6 +9,7 @@ import MIPStarRE.QPBT.Combining.Lines.MixedResampling
 import MIPStarRE.QPBT.Combining.Lines.ProductWeightedCollision
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
+import MIPStarRE.QPBT.Combining.Lines.PairStateConsistencyTransport
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
@@ -50,50 +51,23 @@ noncomputable section
 
 /-! ## Combined line measurements -/
 
-/-- Lean-only consistency obligation for the particular X-Z-X measurement
-constructed in the proof of `lem:qld-xz-lines`, paper
-`14_analysis_of_the_pauli_basis_test.tex:942-961`.
-
-The point family is supplied with its polynomial error bound. The line error
-may depend on this function, as in `exists_combinedLinesWitness_ofPointsWitness`.
-The conclusion concerns `combinedLineMeasurement` itself, so subsequent uses of
-Claim 17-2 retain the source construction.
-
-**Proof obligation (issues #18 and #414):** This retains the unfinished
-consistency part of `exists_combinedLinesWitness_ofPointsWitness`. Discharge it
-by the point-to-line comparisons and pasting argument at paper lines 900--961.
-The degree support and POVM construction are already proved. See
-`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`; no equality or marginal
-assumption is added to a paper-facing theorem. -/
-theorem combined_line_measurement_consistency (deltaQ : ℝ → ℝ)
-    (hdeltaQ : IsPolyErr deltaQ) :
-    ∃ deltaP : ℝ → ℝ → ℝ, IsPolyErr₂ deltaP ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
-        (points : CombinedPointsWitness S (deltaQ ε))
-        (p1 p2 : Placement), p1.IsOpposite p2 →
-        consistencyDefect
-          (Distribution.prod (linePointDist P.toLdParams)
-            (linePointDist P.toLdParams))
-          (fun sample answer => S.place p1
-            (((S.combinedLineMeasurement p1.side sample.1.1 sample.2.1).postprocess
-              fun fs => (evalOpt sample.1.1 sample.1.2 fs.1,
-                evalOpt sample.2.1 sample.2.2 fs.2)).effect answer))
-          (fun sample answer => S.place p2
-            (((points.Q p2.side sample.1.2 sample.2.2).postprocess fun ab =>
-              (some ab.1, some ab.2)).effect answer))
-          S.psiHat ≤ deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ)) := by
-  sorry
 
 /-- Conditional joint X/Z line measurements for a polynomially controlled
 point-witness family supporting `lem:qld-xz-lines`.
 
-**Source statement:** blueprint
+**Conditional auxiliary supporting:** blueprint
 `lem:qld-xz-lines`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:882-894`.
+The matching conditional blueprint entry is `lem:combined-lines-given-points`.
 The error depends polynomially on `ε` and `md/q`, and the witness retains all
-directed opposite-placement comparisons.  This Lean-only conditional form takes
-the point-error function and its polynomial bound before choosing the line-error
-function.  The witness at strategy error `ε` must have error `deltaQ ε`.
+directed opposite-placement comparisons. This formalization-only conditional form
+takes the supplied point-error function `deltaQ` and its bound `hdeltaQ : IsPolyErr deltaQ`
+before choosing the line-error function. It also assumes a supplied point witness
+`points : CombinedPointsWitness S (deltaQ ε)` at strategy error `ε`.
+The separate source-facing declaration `exists_combinedLinesWitness` supplies
+the point-error function, its bound, and the point witness existentially.
+The comparisons here use the completed answer alphabet; the conditional entry
+does not certify the source comparison on field-valued answers.
 
 **Domain repair (issue #389):** The former statement quantified an arbitrary
 scalar point error after choosing `deltaP`, although the pasting estimate depends
@@ -103,8 +77,8 @@ that family existentially and has an unchanged statement.  The obstruction and
 the named construction obligations are recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
-The witness below uses `S.combinedLineMeasurement` explicitly. Its remaining
-proof obligation is `combined_line_measurement_consistency`, as recorded in
+The witness below uses `S.combinedLineMeasurement` explicitly. Its consistency
+is proved by the point-to-line comparisons and pasting construction; see
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` and issue #414.
 
 **Error contract:** the polynomial bound printed in the source is carried
@@ -144,9 +118,9 @@ quantifies the point error function and witness construction together with the
 line construction, as the preceding source lemma supplies those points.
 
 The proof constructs the line witness with `T := S.combinedLineMeasurement`.
-The only remaining line-construction obligation is
-`combined_line_measurement_consistency`, from paper lines 942--961 and tracked
-by issue #414 in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
+The line consistency is proved by `combined_line_measurement_consistency`,
+from paper lines 942--961 and documented in
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`.
 Downstream arguments requiring the construction use that consistency theorem
 and the same explicit record, rather than an unspecified existential witness.
 
@@ -240,11 +214,11 @@ theorem avg_restricted_prod_le {P : AdmissibleParams}
   refine (avgOver_prod_restrictedLinePointDist_le f hf kindX kindZ i j).trans ?_
   exact mul_le_mul_of_nonneg_left havg (by positivity)
 
-/-- Formalization-only auxiliary for item 3 of
+/-- Formalization-only application of the product estimate in item 2 of blueprint
 `lem:restricted-line-mixture-bounds`: a consistency defect of two complete
 measurements placed on opposite registers inflates by at most `4m^2` when
-both line-point coordinates are restricted.  Blueprint
-`lem:restricted-line-mixture-bounds`, paper
+both line-point coordinates are restricted. This supports the conditional application
+`thm:conditional-restricted-lines-consistency`. The source application is at
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`. -/
 private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
     {ε δ : ℝ} {α : Type*} [Fintype α] [DecidableEq α]
@@ -279,10 +253,14 @@ private theorem consistencyDefect_restricted_prod_le {P : AdmissibleParams}
 /-- The evaluated joint line measurement remains consistent with the joint
 point measurement on every product of restricted line distributions.
 
-**Source statement:** item 3 and Equation `eq:qld-xz-lines-restricted` of
-blueprint
-`lem:restricted-line-mixture-bounds`, from
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`.
+**Conditional auxiliary:** blueprint `thm:conditional-restricted-lines-consistency`.
+The supplied `points : CombinedPointsWitness S δQ` and
+`lines : CombinedLinesWitness S points δP` include the unrestricted consistency
+bound. Applying item 2 of `lem:restricted-line-mixture-bounds` restricts that bound.
+The source application in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1058-1061`
+provides the context; this auxiliary does not construct the source measurements
+or establish the separate source statement `lem:qld-xz-lines-restricted`.
 Here `consistencyDefect` is the finite POVM form of the displayed expectation
 against `Id - Q` after both measurements are postprocessed by evaluation.
 The universal constant is outside all strategy and parameter quantifiers, and
@@ -336,7 +314,7 @@ conditional law.
 The witness is the sub-line law `subLineDist` of the sampling procedure.  Its
 pointwise fields follow from `subLineTripleOf_incidence`,
 `subLineTripleOf_compatibility`, and `subLineTripleOf_axis_closure`, after
-recovering the auxiliary sample with `exists_raw_of_mem_subLineDist_support`.
+recovering the sampling data with `exists_samplingData_of_mem_subLineDist_support`.
 Its extended-line marginal is `subLineDist_map_fst`, and its two projected
 point marginals are the separate mixtures of `subLineDist_source_mixture`. -/
 theorem exists_subLineWitness (P : AdmissibleParams) :
@@ -350,15 +328,15 @@ theorem exists_subLineWitness (P : AdmissibleParams) :
             axis_closure := ?_ }⟩
   · intro sample hsample u hu
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_incidence P kind k w hx hz hu
   · intro sample hsample
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_compatibility P kind k w hx hz
   · intro sample hsample haxis
     obtain ⟨kind, k, w, hx, hz, rfl⟩ :=
-      exists_raw_of_mem_subLineDist_support P hsample
+      exists_samplingData_of_mem_subLineDist_support P hsample
     exact subLineTripleOf_axis_closure P kind k w haxis
 
 end
