@@ -28,7 +28,7 @@ The projective soundness input formalizes the shape of paper
 The Naimark transport supports the first paragraph of the proof of paper
 `lem:qld-4-7`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1277-1289`.
-This module is Lean-only support and does not claim completion of that lemma.
+This module is formalization-only support and does not claim completion of that lemma.
 -/
 
 open scoped BigOperators
@@ -105,11 +105,12 @@ coordinates. The padded-state defect identity preserves the two point versus
 polynomial bounds and the polynomial self-consistency bound exactly, with the
 same witnesses `a`, `b`, and `deltaLd` as the projective theorem.
 
-This theorem is Lean-only support for the Naimark step in the proof of paper
+This theorem is formalization-only support for the Naimark step in the proof of paper
 `lem:qld-4-7`,
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1277-1289`.
-It does not assert projectivity of the compressed POVMs and introduces no
-premise for a paper-labelled QPBT producer. -/
+Its separate blueprint entry is `thm:qld-direct-soundness-any-strategy`.
+It does not assert projectivity of the compressed POVMs and does not add a
+hypothesis to any paper-labelled theorem. -/
 theorem exists_direct_ld_soundness_of_k_eq_one_any_strategy :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
       ∀ (D : DirectLdParams) (ε : ℝ), D.k = 1 → 0 < ε →
