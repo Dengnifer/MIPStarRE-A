@@ -350,18 +350,41 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
 
-\begin{lemma}[Non-encoding support estimate]
+\begin{lemma}[Non-encoding support estimate for a supplied witness]
 \label{lem:qld-nonencoding-mass-bound}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass_le}
+	\leanok
 	\uses{def:s-w-marginals, def:qld-full-field-decoder, def:expanded-state,
 		lem:qld-4-7}
-	For either player and either Pauli basis, the non-encoding marginal mass in
+	This formalization-only auxiliary estimate is not a separate statement of
+	the source paper. Fix a global polynomial-pair witness with projective
+	measurements and both point-consistency bounds of Lemma~\ref{lem:qld-4-7},
+	with error $\delta_G$. If $0\leq\eps\leq1$ and $\delta_G\geq0$, then for
+	either player and either Pauli basis, the non-encoding marginal mass in
 	Equation~\eqref{eq:qld-nonencoding-mass} is at most
 	$\delta_P^{\mathrm{supp}}=C_{\mathrm{supp}}B$ for a universal
-	$C_{\mathrm{supp}}\geq1$. This bound must be derived from point consistency and
-	Schwartz--Zippel; it is not an additional extraction hypothesis.
+	$C_{\mathrm{supp}}\geq1$, independent of the parameters and the witness.
+	The estimate is not an additional hypothesis of the extraction lemma.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-win-implications, lem:qld-comm-cons,
+		fact:triangle-for-simeq, lem:schwartz-zippel-individual}
+	Measure the original Pauli answer $h$ and the ancillary Pauli answer $h'$
+	and return $g_{h+h'}$. This reference measurement is supported on encodings.
+	Perfect ancillary consistency preserves the point and Pauli-basis
+	consistency defects under additive convolution. The consistency triangle
+	therefore bounds the evaluated inconsistency between the supplied marginal
+	and the reference by $\delta_G+c\sqrt\eps$, for a universal $c$.
+	Schwartz--Zippel bounds their full polynomial inconsistency by
+	$\delta_G+c\sqrt\eps+md/q$. Every non-encoding marginal outcome differs
+	from the reference outcome, so its total mass satisfies this bound.
+	Enlarging the universal constant gives $C_{\mathrm{supp}}B$ on both sides.
+	The global witness is an input to this auxiliary estimate; the proof of
+	Lemma~\ref{lem:qld-construct-the-paulis} constructs its own witness and
+	uses separate point-consistency estimates.
+\end{proof}
 
 % Following the source, the next lemma is stated after
 % lem:qld-construct-the-paulis, whose proof invokes it; its own proof
