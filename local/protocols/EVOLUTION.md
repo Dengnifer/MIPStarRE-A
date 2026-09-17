@@ -1188,3 +1188,33 @@ GitHub's wording.
 off the commits page without opening the merge, no pull request that cleared the
 seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
 covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - The merge subject's Lean delta counts code lines only (#574)
+
+**Trigger:** owner request recorded in issue #574: the `[lean +A -D]` bracket
+added by issue #557 counted every changed line of every `*.lean` file, so a
+docstring sweep or a commented-out block read on the commits page like a large
+code change and the figure stopped answering the question it was added for.
+
+**Change:** `issues-prs.md` records that A and D count changed Lean **code**
+lines. `pr_merge.lean_line_delta` now takes the changed blobs from
+`git diff --raw -z --find-renames` (blob ids, so renames need no path handling),
+reads the added line numbers from the head blob's `-U0` hunk headers and the
+removed ones from the merge-base blob's, and counts a line only when a
+single-pass scanner calls it code. That scanner tracks nesting block comments —
+`/-`, and the `/--` and `/-!` forms that share its `-/` closer — skips line
+comments, blank and whitespace-only lines, and keeps a line whose code is merely
+trailed by a comment. It is naive by design about the rest of Lean's grammar:
+only double-quoted strings hide delimiters, and string and escape state carry
+across physical lines until the closing quote. Added and deleted files count
+their own code lines; a pure rename counts none.
+
+**Scope disposition:** the cosmetic-by-contract rule of issue #557 is unchanged
+and now explicit in the code: the measurement is wrapped so that it returns
+`None` on any failure and cannot raise, the subject format stays
+`[lean +A -D]` with `[lean 0]` for a PR that changes no Lean code line, and no
+gate, CI step or REST payload key changes.
+
+**Expected effect:** the bracket tracks the Lean code a packet actually moved,
+documentation-only and comment-only work reads as such on the commits page, and
+no pull request that cleared the seven gates can fail on the number.
