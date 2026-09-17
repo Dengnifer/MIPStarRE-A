@@ -171,6 +171,23 @@ that refuse by default:
 `--adjudicated` waives gate 4's adverse verdict and nothing else, and only when
 an exact-head `ADJUDICATION` comment backs it; gate 5 is never adjudicable.
 
+**Merge subject.** Past the gates, the merge is given the subject
+`Merge PR #N: <PR title> [lean +A -D]`, where A and D sum the added and deleted
+lines of `git diff --numstat <merge base>...<head> -- '*.lean'` and a PR that
+changes no Lean line reads `[lean 0]`; the title is sanitized, collapsed to one
+line and truncated to 80 characters, and the one-line body names the frozen head
+SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
+`gh_common.merge_pr` omits entirely when its optional arguments are absent. The
+count is an **approximate** size signal for GitHub's commits page (issue #557),
+never evidence: it is measured after every gate, nothing reads it back, and a
+failed measurement sends no wording at all — GitHub then titles the merge as it
+always did, and the merge still happens. Closing keywords in the title are
+defused first (`closes #900` reads `closes issue 900` in the subject): gate 7
+checked the PR body and the branch commits, never the subject, so a merge commit
+must not be able to close an issue whose open sub-issues nobody examined.
+`pr_merge.py --check-only` prints the subject it would use, so the operator can
+read it before the merge.
+
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).

@@ -38,7 +38,7 @@ theorem avgOver_aLinePointDist_resample_parameter (L : LdParams)
   rw [← hblock]
   simp only [Distribution.avgOver_map]
   rw [uniformDistribution_prod]
-  simp only [avgOver_prod]
+  simp only [SandwichProduct.avgOver_distribution_prod]
   rw [avgOver_comm, avgOver_comm (uniformDistribution (Fin L.m → ScalarQ L))]
   apply congrArg
   funext block
