@@ -5,10 +5,13 @@ import Mathlib.Analysis.MeanInequalitiesPow
 
 /-! # Scalar error bounds for combining polynomial measurements
 
-This module proves three formalization-only scalar estimates: polynomial
-bounds after conditioning, composition with the dimension factor retained, and
-absorption into the global polynomial-pair error scale. The estimates quantify
-over error functions and numerical parameters; they do not construct measurements.
+This module proves the formalization-only scalar estimates used by the combining
+argument: nonnegativity of the real fourth root, the quarter-power form of a
+square root of two deficit terms, polynomial bounds after conditioning,
+composition with the dimension factor retained, and absorption into the global
+polynomial-pair error scale. The estimates quantify over error functions and
+numerical parameters; they do not construct measurements, and none of them is
+specific to Claims 17-1 through 17-3.
 
 ## References
 
@@ -22,6 +25,83 @@ factor are documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 -/
 
 namespace MIPStarRE.QPBT
+
+/-- The real fourth root is nonnegative on all of `ℝ`. For `x < 0` the real power
+`x ^ (1/4)` is defined as `|x| ^ (1/4) * cos (π/4)`, which is positive, and for
+`0 ≤ x` it is the usual fourth root. The estimates of `lem:qld-4-13` are stated
+with quarter powers of error quantities whose nonnegativity is not always
+available at the point of use, so the bound is recorded without a sign
+hypothesis. -/
+theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
+  change 0 ≤ x ^ (1 / 4 : ℝ)
+  rcases lt_or_ge x 0 with hx | hx
+  · rw [Real.rpow_def_of_neg hx,
+      show (1 / 4 : ℝ) * Real.pi = Real.pi / 4 by ring, Real.cos_pi_div_four]
+    positivity
+  · exact Real.rpow_nonneg hx _
+
+/-- Converting a square root of a sum of two deficit terms into quarter powers.
+For `m ≥ 1` and nonnegative `δP, δQ`,
+\[
+  \sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
+    \le 2\sqrt{m}\,(\delta_P^{1/4}+\delta_Q^{1/4}).
+\]
+Subadditivity of the square root separates the two summands, each of which is a
+quarter power up to the factor `2√m`; the hypothesis `1 ≤ m` lets the second
+summand absorb the same prefactor. This is the scalar step that turns the
+Cauchy--Schwarz square root in the overlap estimates into the quarter-power form
+in which the first-route error of `lem:qld-4-13` is stated. -/
+theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
+    (hQ : 0 ≤ δQ) :
+    Real.sqrt (2 * Real.sqrt (4 * m ^ 2 * δP) + 2 * Real.sqrt (4 * δQ)) ≤
+      2 * Real.sqrt m * (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
+  have hm0 : 0 ≤ m := by linarith
+  have hsqrtm : 1 ≤ Real.sqrt m := by
+    rw [← Real.sqrt_one]
+    exact Real.sqrt_le_sqrt hm
+  have h1 : Real.sqrt (4 * m ^ 2 * δP) = 2 * m * Real.sqrt δP := by
+    rw [Real.sqrt_mul (by positivity), show (4 * m ^ 2 : ℝ) = (2 * m) ^ 2 by ring,
+      Real.sqrt_sq (by linarith)]
+  have h2 : Real.sqrt (4 * δQ) = 2 * Real.sqrt δQ := by
+    rw [Real.sqrt_mul (by norm_num), show (4 : ℝ) = 2 ^ 2 by norm_num,
+      Real.sqrt_sq (by norm_num)]
+  have hquarter : ∀ x : ℝ, 0 ≤ x →
+      Real.sqrt (Real.sqrt x) = Real.rpow x (1 / 4 : ℝ) := by
+    intro x hx
+    rw [Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul hx]
+    norm_num
+  have hsplit : ∀ a b : ℝ, 0 ≤ a → 0 ≤ b →
+      Real.sqrt (a + b) ≤ Real.sqrt a + Real.sqrt b := by
+    intro a b ha hb
+    rw [← Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg a) (Real.sqrt_nonneg b))]
+    refine Real.sqrt_le_sqrt ?_
+    nlinarith [Real.sq_sqrt ha, Real.sq_sqrt hb, Real.sqrt_nonneg a,
+      Real.sqrt_nonneg b]
+  have hPa : 0 ≤ 2 * (2 * m * Real.sqrt δP) :=
+    mul_nonneg (by norm_num)
+      (mul_nonneg (mul_nonneg (by norm_num) hm0) (Real.sqrt_nonneg _))
+  have hQa : 0 ≤ 2 * (2 * Real.sqrt δQ) :=
+    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  have hPb : Real.sqrt (2 * (2 * m * Real.sqrt δP)) =
+      2 * Real.sqrt m * Real.rpow δP (1 / 4 : ℝ) := by
+    rw [show 2 * (2 * m * Real.sqrt δP) = 2 ^ 2 * m * Real.sqrt δP by ring,
+      Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 ^ 2),
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2), hquarter δP hP]
+  have hQb : Real.sqrt (2 * (2 * Real.sqrt δQ)) = 2 * Real.rpow δQ (1 / 4 : ℝ) := by
+    rw [show 2 * (2 * Real.sqrt δQ) = 2 ^ 2 * Real.sqrt δQ by ring,
+      Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 ^ 2),
+      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2), hquarter δQ hQ]
+  rw [h1, h2]
+  calc
+    Real.sqrt (2 * (2 * m * Real.sqrt δP) + 2 * (2 * Real.sqrt δQ))
+        ≤ Real.sqrt (2 * (2 * m * Real.sqrt δP)) +
+          Real.sqrt (2 * (2 * Real.sqrt δQ)) := hsplit _ _ hPa hQa
+    _ = 2 * Real.sqrt m * Real.rpow δP (1 / 4 : ℝ) +
+          2 * Real.rpow δQ (1 / 4 : ℝ) := by rw [hPb, hQb]
+    _ ≤ 2 * Real.sqrt m *
+          (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
+      have hQ4 : 0 ≤ Real.rpow δQ (1 / 4 : ℝ) := Real.rpow_nonneg hQ _
+      nlinarith [hsqrtm, hQ4]
 
 /-- Additive polynomial errors remain polynomial after conditioning and insertion
 of a polynomially small point error. The minimum uses the independent unit bound

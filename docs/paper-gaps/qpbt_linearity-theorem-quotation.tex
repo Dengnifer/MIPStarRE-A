@@ -9,7 +9,7 @@
 \renewcommand{\ghissue}[1]{%
   \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
 
-\title{The Quoted Quantum Linearity Theorem in the Pauli Basis Analysis}
+\title{Quantum Linearity and a Direct Combined-Point Construction}
 \author{}
 \date{2026-09-04}
 
@@ -38,6 +38,15 @@
   \cite{Natarajan2017Linearity}, the operator BLR identity, finite averaging,
   and extension by the identity on orthogonal summands.  The remaining
   common-extension reduction is tracked in \ghissue{19}.
+  \item \textbf{Combined points.} A separate, completed argument proves the
+  combined-point lemma on the original expanded spaces.  It uses a
+  field-valued sandwich POVM, finite-character Parseval, an exact overlap
+  identity, and projective rounding with a dimension-independent bound
+  $K\varepsilon^{1/8}$.  This replaces the binary-linearity argument; it does
+  not complete the common-extension construction.  The implementation in
+  \ghissue{388} comprises roughly 2,400 lines, predominantly project-local
+  measurement arguments using Mathlib finite sums, inner products, and real
+  powers.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -91,6 +100,37 @@ most one, and no good--bad fiber split, is needed.  One must still formulate
 the finite common-extension step that makes the auxiliary space uniform over
 $(x,z)$.
 
+For the combined-point conclusion, take admissible QPBT parameters
+$q=2^t,m,M$ and a projective strategy on $H_A\otimes H_B$ with unit state
+$\psi$ and winning probability at least $1-\varepsilon$.  Its expanded state is
+\[
+ \Psi=\psi_{AB}\otimes\Phi_{A'A''}\otimes\Phi_{B'B''},\qquad
+ \Phi=q^{-M/2}\sum_{v\in\mathbb F_q^M}|v,v\rangle.
+\]
+Write $X_a^x$ and $Z_b^z$ for the field-valued expanded point effects, and
+$H_i^+=H_i\otimes(\mathbb C^q)^{\otimes M}$ for player $i$'s existing expanded
+local space.  For families on the six-register space, put
+\[
+ d^2(A,B)=\mathop{\mathbb E}_{x,z}\sum_{a,b\in\mathbb F_q}
+   \|(A^{x,z}_{a,b}-B^{x,z}_{a,b})\Psi\|^2.
+\]
+Lemma~\path{lem:qld-4-10}, at lines~689--709 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}, asserts
+projective measurements $Q_i^{x,z}$ on $H_i^+$ with outcomes in
+$\mathbb F_q^2$.  The opposite placement pairs are $(AA',BA'')$ and
+$(BB',AB'')$, in either direction.  For each such pair $(p_1,p_2)$ its three
+conclusions are
+\[
+ d^2(Q_{p_1},Q_{p_2}),\quad
+ d^2(Q_{p_1},(XZ)_{p_2}),\quad
+ d^2(Q_{p_1},(ZX)_{p_2})\ \leq\ \delta_Q(\varepsilon),
+\]
+where $\delta_Q$ is polynomially small in the paper's convention.  Here
+$(XZ)^{x,z}_{a,b}=X_a^xZ_b^z$ and $(ZX)^{x,z}_{a,b}=Z_b^zX_a^x$;
+subscripts denote register placement, using the measurement for that player.
+The direct construction below gives $\delta_Q(\varepsilon)=K\varepsilon^{1/8}$
+for a universal $K$, without another ancillary extension.
+
 \section{Comparison with the quoted statement}
 
 Lines~711--725 of
@@ -130,6 +170,150 @@ observables do.  Averaging then yields the conclusion used later in the
 chapter.  This is an open reduction, not a counterexample to the quoted theorem
 or to the source's eventual combined-measurement conclusion.
 
+\section{Direct construction of the combined points}
+\label{sec:direct-combined-points}
+
+The source's three-step plan at line~711 and proof at lines~731--881 first
+combine binary refinements, prove approximate linearity in their scalar
+indices, and apply quantum linearity.  The following replacement retains the
+statement of \path{lem:qld-4-10}, but forms and rounds a sandwich with
+field-valued outcomes.  The required commutation estimate is obtained without
+a factor depending on the field size.
+
+\paragraph{Parseval transfer.}
+Fix a point pair and a placement, suppressing these indices.  With
+$\chi(v)=(-1)^{\operatorname{tr}(v)}$, the Fourier formulas at paper
+lines~384--418 give
+\[
+ X_a=q^{-1}\sum_r\chi(ar)\widehat X^r,\qquad
+ Z_b=q^{-1}\sum_s\chi(bs)\widehat Z^s.
+\]
+Write $[A,B]=AB-BA$.  Character orthogonality applied to the vectors
+$[\widehat X^r,\widehat Z^s]\Psi$ yields the exact identity
+\[
+ \sum_{a,b}\|[X_a,Z_b]\Psi\|^2
+ =q^{-2}\sum_{r,s}\|[\widehat X^r,\widehat Z^s]\Psi\|^2.
+\]
+Indeed, the commutator Fourier expansion has coefficient $q^{-2}$; squaring
+contributes $q^{-4}$, and orthogonality contributes $q^2$.  The remaining
+$q^{-2}$ is precisely uniform averaging.  This is finite-dimensional Parseval
+for vector-valued sums, not an estimate of each outcome separately.  The
+observable commutation bound underlying \path{lem:qld-comm-cons}, item~2
+(paper lines~466--505 and its proof), therefore gives
+$\mathbb E_{x,z}\sum_{a,b}\|[X_a,Z_b]\Psi\|^2\leq C_{\rm com}\sqrt\varepsilon$
+on each placement.  Equivalently, the binary-refinement commutators are
+$(-1)^{c+d}[\widehat X^r,\widehat Z^s]/4$, so passing from their summed
+squared norms to the observable bound costs only a factor of four.
+
+\paragraph{The sandwich and its overlap.}
+For each player and point pair set $R_{a,b}=Z_bX_aZ_b$.
+Projectivity gives $R_{a,b}=(X_aZ_b)^\dagger(X_aZ_b)\geq0$ and
+$\sum_{a,b}R_{a,b}=I$.  Moreover,
+$R_{a,b}-Z_bX_a=Z_b[X_a,Z_b]$, so contraction by $Z_b$ shows
+$d^2(R,ZX)\leq C_{\rm com}\sqrt\varepsilon$.
+
+Now fix opposite placements, denoted by subscripts $1,2$, and a point pair.
+Every operator on the first placement commutes with every operator on the
+second.  Put
+\[
+ D^X_a=X_{1,a}-X_{2,a},\quad D^Z_b=Z_{1,b}-Z_{2,b},\quad
+ W_b=Z_{1,b}Z_{2,b},\quad K^i_{a,b}=[X_{i,a},Z_{i,b}].
+\]
+For complete projective measurements $P,Q$ on opposite placements and any
+vector $w$, expanding the squared differences gives
+\[
+ \sum_c\langle w,P_cQ_cw\rangle
+ =\|w\|^2-\tfrac12\sum_c\|(P_c-Q_c)w\|^2.
+\]
+Since $R_{1,a,b}R_{2,a,b}=W_b^\dagger X_{1,a}X_{2,a}W_b$, apply this identity
+first to $X_1,X_2$ in $W_b\Psi$, and then to $Z_1,Z_2$ in $\Psi$.  The result is
+\[
+ 1-\sum_{a,b}\langle\Psi,R_{1,a,b}R_{2,a,b}\Psi\rangle
+ =\tfrac12\sum_b\|D^Z_b\Psi\|^2
+   +\tfrac12\sum_{a,b}\|D^X_aW_b\Psi\|^2.
+\]
+The left side is the off-diagonal consistency mass because both POVMs are
+complete.  This exact identity replaces the source's Cauchy--Schwarz chain
+\path{eq:qld-rw-self-cons-1} through \path{eq:qld-rw-self-cons-4}
+(paper lines~743--778).
+
+To bound its second term, use the algebraic decomposition
+\[
+ D^X_aW_b=W_bD^X_a+Z_{2,b}K^1_{a,b}-Z_{1,b}K^2_{a,b}.
+\]
+The squared norm of a sum of three vectors is at most three times the sum
+of their squared norms.  Projection contraction bounds the last two terms,
+and $\sum_b\|W_bv\|^2\leq\sum_b\|Z_{2,b}v\|^2=\|v\|^2$ bounds the first
+after summing over $b$.  Thus the off-diagonal mass is at most
+\[
+ \begin{aligned}
+ c(x,z):={}&\tfrac12\sum_b\|D^Z_b\Psi\|^2
+       +\tfrac32\sum_a\|D^X_a\Psi\|^2\\
+   &+\tfrac32\left(\sum_{a,b}\|K^1_{a,b}\Psi\|^2
+       +\sum_{a,b}\|K^2_{a,b}\Psi\|^2\right).
+ \end{aligned}
+\]
+Item~1 of \path{lem:qld-comm-cons} bounds each averaged point-consistency
+sum by $C_{\rm sc}\varepsilon$.  Together with Parseval this gives
+\[
+ \mathbb E_{x,z}c(x,z)\leq
+ 2C_{\rm sc}\varepsilon+3C_{\rm com}\sqrt\varepsilon
+ \leq C_0(\varepsilon+\sqrt\varepsilon),
+ \qquad C_0=2C_{\rm sc}+3C_{\rm com}.
+\]
+All constants can be taken at least one and independent of $q,m,M$ and the
+strategy dimensions.
+
+\paragraph{Rounding on the original spaces.}
+The orthonormalization lemma \path{lem:ortho}, also used at paper
+lines~782--786, says that a local POVM consistent with a POVM on the other
+tensor factor can be replaced by a projective measurement on the same local
+space.  Its proved explicit form gives summed squared distance at most
+$220c^{1/4}$ whenever the consistency defect is at most $c\geq0$; no upper
+bound on $c$ is required.  Apply it separately to each point pair, with
+bipartitions $AA'\mid BA''(B'B'')$ for Alice and
+$BA''\mid AA'(B'B'')$ for Bob.  All choices lie in the already fixed spaces
+$H_A^+$ and $H_B^+$, so no compatibility of newly returned spaces is needed.
+Concavity of the fourth root gives
+\[
+ d^2(Q,R)\leq220\,\mathbb E_{x,z}c(x,z)^{1/4}
+ \leq220\,[C_0(\varepsilon+\sqrt\varepsilon)]^{1/4}.
+\]
+The ancillary permutation $(A'\ B'')(A''\ B')$ fixes $A,B$ and fixes
+$\Psi$: it exchanges the two identical EPR factors and reverses both pairs.
+It transports these same-side distances from $AA'$ to $AB''$ and from $BA''$
+to $BB'$.  This independently proved involution requires no symmetric
+strategy.  It is not the four-cycle $(A'\ B''\ A''\ B')$ induced by
+$\sigma\theta$ in blueprint \path{lem:symmetric-equivalents-transfer}.
+
+\paragraph{The final error.}
+Transporting one factor at a time across opposite placements gives
+$d^2((ZX)_{p_1},(XZ)_{p_2})\leq C_3\varepsilon$ with $C_3=4C_{\rm sc}$.
+The contraction used in this transport is
+$\sum_a\|M_av\|^2\leq\|v\|^2$, valid for every POVM since
+$\sum_a M_a^\dagger M_a\leq\sum_a M_a=I$.
+Let $C_1=C_2=C_{\rm com}$ bound respectively the sandwich-to-product and
+commutation errors, and take the convenient larger rounding bound
+$\eta=440[C_0(\varepsilon+\sqrt\varepsilon)]^{1/4}$.
+Repeatedly using $d^2(A,C)\leq2d^2(A,B)+2d^2(B,C)$ along the sequence
+\[
+ Q_{p_1},\ R_{p_1},\ (ZX)_{p_1},\ (XZ)_{p_2},\ (ZX)_{p_2},\ R_{p_2},\ Q_{p_2}
+\]
+bounds all three required distances by
+\[
+ 12\eta+20C_1\sqrt\varepsilon+16C_3\varepsilon+4C_2\sqrt\varepsilon.
+\]
+For $0\leq\varepsilon\leq1$, both $\varepsilon$ and $\sqrt\varepsilon$ are
+at most $\varepsilon^{1/8}$, while
+$[C_0(\varepsilon+\sqrt\varepsilon)]^{1/4}
+ \leq2C_0\varepsilon^{1/8}$.
+Hence one may take $K=12(880C_0)+20C_1+16C_3+4C_2$.
+For $\varepsilon>1$, each relevant family has
+$\sum_{a,b}A_{a,b}^\dagger A_{a,b}\leq I$ (equality for the ordered products
+of projective measurements), so every distance is at most $4\leq
+K\varepsilon^{1/8}$.  No step incurs a factor from the number of outcomes,
+point pairs, or Hilbert-space dimension.
+
 \section{Blueprint and formalization status}
 
 Theorem~\path{thm:linearity} and
@@ -153,6 +337,16 @@ operator bound.  Both are linked from Theorem~\path{thm:linearity}.  The
 normalization analysis was carried out in \ghissue{124} and the statement
 repair in \ghissue{129}; both are closed.  No Lean declaration yet supplies
 the finite common-extension construction for the family indexed by $(x,z)$.
+Independently, \path{exists_combinedPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Points.lean} proves the combined-point statement
+of blueprint \path{lem:qld-4-10} on the original expanded spaces by
+Section~\ref{sec:direct-combined-points}.  The modules in
+\path{MIPStarRE/QPBT/Combining/Points/} formalize respectively placement
+invariance, Parseval commutation transfer, the sandwich POVM, its overlap
+identity and consistency bound, projective rounding, and the final distance
+estimates.  This is a replacement proof of the same statement, not a
+formalization of the source's binary-linearity proof.  It neither invokes nor
+discharges the common-extension obligation of \path{rem:linearity-import}.
 The complete QPBT audit status is recorded in
 \path{docs/paper-gaps/qpbt-gap-register.md}.
 
@@ -172,7 +366,11 @@ is treated separately.  The single-family theorem is now
 proved with mean squared operator error at most $2\delta$, equivalently mean
 squared binary-measurement error at most $\delta$.  Its use for the family
 indexed by $(x,z)$ still requires an explicit finite common-extension argument;
-that is the remaining open formal reduction.
+that remains an open formal reduction for the linearity route.  The
+combined-point conclusion itself is proved independently on the original
+expanded spaces, with the universal bound $K\varepsilon^{1/8}$ and no
+additional hypotheses.  There is no statement discrepancy in this
+replacement construction.
 
 \bibliographystyle{alpha}
 \bibliography{references}
