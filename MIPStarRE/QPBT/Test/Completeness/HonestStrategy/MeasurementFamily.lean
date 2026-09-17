@@ -28,9 +28,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-variable {K ι : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K]
-  [Fintype ι] [DecidableEq ι]
-
 /-! ### Tensor placement and relabeling -/
 
 /-- The one-outcome measurement, used to make the harmless branches of the
@@ -434,13 +431,6 @@ theorem pauliDLineMeasurement_effect_transpose (P : AdmissibleParams) (W : Pauli
   intro h
   exact pauliProj_transpose W h
 
-/-- The effects of the generalized Pauli basis measurement are symmetric: they
-are the projectors `τ^W_h` themselves, which are symmetric in the computational
-basis. -/
-theorem pauliBasisMeasurement_effect_transpose (W : PauliKind) (h : PauliRegister P) :
-    ((pauliBasisMeasurement W).effect h)ᵀ = (pauliBasisMeasurement W).effect h := by
-  exact pauliProj_transpose W h
-
 /-- The global honest measurement has symmetric effects. -/
 theorem honestMeasurement_effect_transpose (P : AdmissibleParams) (t : PauliType)
     (z : PauliSpace P) (a : PauliAnswer P) :
@@ -465,8 +455,8 @@ theorem honestMeasurement_effect_transpose (P : AdmissibleParams) (t : PauliType
   | pauli W =>
       change ((honestPauliMeasurement P W).effect a)ᵀ =
         (honestPauliMeasurement P W).effect a
-      exact placedPauliMeasurement_effect_transpose _
-        (pauliBasisMeasurement_effect_transpose W) _ _
+      exact placedPauliMeasurement_effect_transpose (pauliBasisMeasurement W)
+        (pauliProj_transpose W) _ _
   | pairW W =>
       change ((honestPairWMeasurement P W z).effect a)ᵀ =
         (honestPairWMeasurement P W z).effect a
