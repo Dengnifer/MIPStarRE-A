@@ -10,8 +10,11 @@ of the characteristic-two Pauli basis projectors, with no strategy hypothesis.
 
 The transpose identities are supplied by `pauliProj_transpose` in
 `Algebra.Pauli` and `ProjectiveSetting.tauPointProj_transpose` in
-`Observables.ExpandedDefs`. The latter module also supplies the actual
-measurement `ProjectiveSetting.tauPointMeas`, whose effects are `tauPointProj`.
+`Observables.ExpandedDefs`. Orthogonality of the Pauli eigenspace projectors and
+of the point fibers is likewise reused from `pauliProj_mul_pauliProj` and
+`ProjectiveSetting.tauPointProj_mul_tauPointProj` in those two modules. The
+latter module also supplies the actual measurement
+`ProjectiveSetting.tauPointMeas`, whose effects are `tauPointProj`.
 
 ## References
 
@@ -32,49 +35,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-section PauliProjectors
-
-variable {K ι : Type*} [Field K] [Fintype K] [DecidableEq K]
-  [Algebra (ZMod 2) K] [Fintype ι] [DecidableEq ι]
-
-/-- The characteristic-two Pauli eigenvectors have real coordinates. -/
-theorem star_pauliVec (W : PauliKind) (e x : ι → K) :
-    star (pauliVec W e x) = pauliVec W e x := by
-  cases W
-  · change star (∏ i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-        phaseSign (binTrace K (e i * x i))) =
-      ∏ i : ι, (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ *
-        phaseSign (binTrace K (e i * x i))
-    simp [star_phaseSign]
-  · change star (∏ i : ι, (if x i = e i then 1 else 0 : ℂ)) = _
-    simp only [star_prod, apply_ite star, star_one, star_zero]
-    rfl
-
-/-- The Pauli basis projectors are mutually orthogonal. Completeness says that
-the square matrix of basis columns has a right inverse given by its adjoint;
-Mathlib's `mul_eq_one_comm` gives the left inverse and hence the Gram matrix. -/
-theorem pauliProj_mul (W : PauliKind) (e f : ι → K) :
-    pauliProj W e * pauliProj W f = if e = f then pauliProj W e else 0 := by
-  classical
-  let U : Op (ι → K) := fun x h => pauliVec W h x
-  have hU : U * Uᴴ = 1 := by
-    ext x y
-    simpa [U, Matrix.mul_apply, Matrix.conjTranspose_apply, pauliProj,
-      Matrix.vecMulVec_apply, Matrix.sum_apply] using
-      congrFun (congrFun (sum_pauliProj_eq_one (K := K) (ι := ι) W) x) y
-  have hU' : Uᴴ * U = 1 := mul_eq_one_comm.mp hU
-  have hGram : (fun x => star (pauliVec W e x)) ⬝ᵥ pauliVec W f =
-      if e = f then 1 else 0 := by
-    simpa [U, Matrix.mul_apply, Matrix.conjTranspose_apply, dotProduct,
-      Matrix.one_apply] using congrFun (congrFun hU' e) f
-  simp only [pauliProj, Matrix.vecMulVec_mul_vecMulVec, hGram]
-  split_ifs with hef
-  · subst f
-    simp
-  · simp
-
-end PauliProjectors
-
 namespace ProjectiveSetting
 
 open MIPStarRE.LDT hiding Measurement
@@ -82,23 +42,12 @@ open DistanceCalculus
 
 variable {P : AdmissibleParams}
 
-/-- Distinct point fibers are sums of disjoint sets of orthogonal Pauli projectors. -/
+/-- Distinct point fibers annihilate one another. This is the off-diagonal case
+of the existing `tauPointProj_mul_tauPointProj` in `Observables.ExpandedDefs`. -/
 theorem tauPointProj_mul_eq_zero_of_ne (W : PauliKind)
     (u : Fin P.m → PauliScalar P) {a b : PauliScalar P} (hab : a ≠ b) :
     tauPointProj W u a * tauPointProj W u b = 0 := by
-  classical
-  unfold tauPointProj
-  rw [Finset.sum_mul]
-  apply Finset.sum_eq_zero
-  intro e he
-  rw [Finset.mul_sum]
-  apply Finset.sum_eq_zero
-  intro f hf
-  have hef : e ≠ f := by
-    intro h
-    subst f
-    exact hab ((Finset.mem_filter.mp he).2.symm.trans (Finset.mem_filter.mp hf).2)
-  rw [pauliProj_mul, if_neg hef]
+  simp only [tauPointProj_mul_tauPointProj, if_neg hab]
 
 /-- The ideal point projector has the same action on either half of one EPR
 pair, as used in the proof of `lem:qld-comm-cons`, paper line 489. -/
