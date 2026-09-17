@@ -34,7 +34,6 @@ import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.Setup
 import MIPStarRE.QPBT.Observables.Defs
 import MIPStarRE.QPBT.Observables.ExpandedDefs
-import MIPStarRE.QPBT.Observables.ExpandedSpectator
 import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement
 import MIPStarRE.QPBT.Observables.WinImplications
@@ -63,6 +62,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SpectatorExpectation
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.MixedLinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PointPointRejection
