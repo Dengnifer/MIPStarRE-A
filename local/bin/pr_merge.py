@@ -37,7 +37,10 @@ merge commit's subject is ``Merge PR #N: <title> [lean +A -D]``: the PR's approx
 Lean line delta against its merge base, so the commits page shows each packet's size
 without opening it (issue #557).  That count is cosmetic — it is measured after the
 gates, it is never evidence, and an unmeasurable delta leaves GitHub's own wording
-in place rather than refusing anything.  The
+in place rather than refusing anything.  Closing keywords in that title are defused
+(``closes #900`` -> ``closes issue 900``) because gate 7 scanned the body and the
+branch commits, not the subject, and a merge commit that closes an unchecked issue
+would bypass it.  The
 best-effort tail then fast-forwards local ``main``, refreshes the
 ``refs/remotes/origin/main`` alias the hooks and diff-based audits need in order not
 to self-disable (DESIGN.md:83-85), warms the cache and drops the branch.
@@ -99,6 +102,23 @@ GITHUB_SNAPSHOT_PATH_PARTS = TELEMETRY_PATH_PARTS + ("github-snapshot",)
 #: merge.  ``Addresses`` keeps an issue open and imposes no dependency
 #: (CONTRIBUTING.md:61-62).  Keep in sync with pr_open.py CLOSES_RE.
 CLOSES_RE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)", re.IGNORECASE)
+
+
+def neutralize_closing_keywords(text: str) -> str:
+    """Defuse GitHub's closing keywords in text bound for the merge commit.
+
+    Gate 7 (``check_dependencies``) scans the PR body and the branch commits, the
+    two surfaces that existed when it ran.  The merge subject adds a third — the
+    PR title, untrusted text that reaches the default branch only here — and
+    GitHub honors closing keywords in a merge commit message just as it does in a
+    body.  A title reading ``closes #900`` would therefore close an issue whose
+    open sub-issues and deferred status nobody checked.  ``closes #900`` becomes
+    ``closes issue 900``: the sentence still reads, the reference no longer fires.
+
+    Applied before any truncation, which could otherwise forge a *different*
+    reference by cutting ``#9001`` down to ``#900``.
+    """
+    return CLOSES_RE.sub(lambda m: m.group(0).replace("#", "issue "), text)
 
 
 class GateFailure(LayerError):
@@ -651,22 +671,30 @@ def merge_commit_title(number: int, pr_title: str, delta: tuple[int, int] | None
     is the ``None`` case, where the caller sends no title at all and GitHub words
     the merge exactly as it did before issue #557.  The PR title is sanitized
     (untrusted text, protocols/issues-prs.md section 4), collapsed to one line —
-    a newline would otherwise split the subject from the body — and truncated,
-    with the bracket kept last where a reader's eye and a grep both expect it.
+    a newline would otherwise split the subject from the body — its closing
+    keywords are defused so the subject cannot close an issue gate 7 never saw,
+    and it is truncated with the bracket kept last where a reader's eye and a
+    grep both expect it.
     """
     if delta is None:
         return None
-    cleaned = " ".join(sanitize(pr_title, TITLE_LIMIT).split())
+    cleaned = neutralize_closing_keywords(" ".join(sanitize(pr_title, TITLE_LIMIT).split()))
     if len(cleaned) > MERGE_TITLE_PR_LIMIT:
         cleaned = cleaned[:MERGE_TITLE_PR_LIMIT - 3].rstrip() + "..."
     added, deleted = delta
     suffix = f"[lean +{added} -{deleted}]" if (added or deleted) else "[lean 0]"
-    return f"Merge PR #{number}: {cleaned} {suffix}" if cleaned else f"Merge PR #{number} {suffix}"
+    subject = (f"Merge PR #{number}: {cleaned} {suffix}" if cleaned
+               else f"Merge PR #{number} {suffix}")
+    # Belt and braces: a subject that still reads as a closing reference is wording
+    # no gate cleared, so drop it entirely.  GitHub then titles the merge itself —
+    # the same fallback an unmeasurable delta takes, and never a refusal to merge.
+    return None if CLOSES_RE.search(subject) else subject
 
 
 def merge_commit_message(branch: str, head_sha: str) -> str:
     """The one-line merge body: the exact commit the gate froze and merged."""
-    return f"Head {head_sha} of {' '.join(sanitize(branch, TITLE_LIMIT).split())}."
+    name = neutralize_closing_keywords(" ".join(sanitize(branch, TITLE_LIMIT).split()))
+    return f"Head {head_sha} of {name}."
 
 
 # --------------------------------------------------------------- entry point

@@ -181,8 +181,12 @@ SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
 count is an **approximate** size signal for GitHub's commits page (issue #557),
 never evidence: it is measured after every gate, nothing reads it back, and a
 failed measurement sends no wording at all — GitHub then titles the merge as it
-always did, and the merge still happens. `pr_merge.py --check-only` prints the
-subject it would use, so the operator can read it before the merge.
+always did, and the merge still happens. Closing keywords in the title are
+defused first (`closes #900` reads `closes issue 900` in the subject): gate 7
+checked the PR body and the branch commits, never the subject, so a merge commit
+must not be able to close an issue whose open sub-issues nobody examined.
+`pr_merge.py --check-only` prints the subject it would use, so the operator can
+read it before the merge.
 
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local

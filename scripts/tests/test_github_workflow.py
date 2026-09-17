@@ -1381,6 +1381,31 @@ class MergeSubjectTests(unittest.TestCase):
         self.assertIsNone(pr_merge.merge_commit_title(557, "feat: whatever", None),
                           "no delta must mean no title, so GitHub words the merge itself")
 
+    def test_title_cannot_close_an_issue_gate_seven_never_checked(self) -> None:
+        """PR 558 review F1 — closing keywords in the PR title are defused.
+
+        ``check_dependencies`` scans the PR body and the branch commits before the
+        subject exists, so a title reading ``closes #900`` would ride onto the
+        default branch inside the merge commit and close an issue whose open
+        sub-issues and deferred status no gate ever examined.  The wording must
+        survive as prose while the reference stops firing.
+        """
+        self.assertEqual(
+            pr_merge.merge_commit_title(557, "feat(local): closes #900 at last", (3, 1)),
+            "Merge PR #557: feat(local): closes issue 900 at last [lean +3 -1]")
+        for wording in ("Fixes #900", "resolved: #900", "CLOSED  #900", "fix\n#900"):
+            with self.subTest(wording=wording):
+                subject = pr_merge.merge_commit_title(7, f"docs: {wording} now", (0, 0))
+                self.assertIsNotNone(subject)
+                self.assertEqual(pr_merge.CLOSES_RE.findall(subject), [],
+                                 f"{subject!r} still reads as a closing reference")
+        with self.subTest("truncation cannot forge a shorter reference"):
+            subject = pr_merge.merge_commit_title(7, "fixes #9001 " + "x" * 200, (1, 0))
+            self.assertEqual(pr_merge.CLOSES_RE.findall(subject), [], subject)
+        with self.subTest("the merge body is defused too"):
+            body = pr_merge.merge_commit_message("issue-900-closes #900", "0" * 40)
+            self.assertEqual(pr_merge.CLOSES_RE.findall(body), [], body)
+
     def test_title_collapses_and_truncates_untrusted_pr_wording(self) -> None:
         subject = pr_merge.merge_commit_title(557, "feat(local): " + "x" * 200, (1, 0))
         self.assertTrue(subject.startswith("Merge PR #557: feat(local): xxx"), subject)
