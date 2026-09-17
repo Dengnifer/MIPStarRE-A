@@ -249,6 +249,69 @@ issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
 c8f1999): read-only research data, never edited or read as active input.
 
+## 7. Duplicate-work guards
+
+Two tasks covering the same mathematics, dispatched weeks apart, cost a prover
+run, reviews, repairs and refresh attempts each before anyone noticed that
+`main` already had the result (issue #576: PRs 212, 296, 398, 488, 539, 289 and
+274 were the examples). Three model-free guards close that hole; all of them
+read the local `github/main` ref and the registry, none calls a model.
+
+**Before proof work.** `local/bin/dup_check.py check` searches a reference for
+a declaration by exact fully qualified name, by last name component inside the
+`MIPStarRE` namespace, and by statement after a cheap normalisation (comments
+stripped, the proof cut at the top-level `:=`/`by`/`where`, binder names
+renamed positionally, whitespace collapsed). It takes `--name`, a blueprint
+node label with `--node` (its `\lean{...}` names), or a whole branch or open PR
+with `--branch`/`--pr`, whose declarations *new against the merge base* are
+checked. Exit 0 is clean, 3 means duplicates were printed as `file:line`, 2 is
+a usage or environment error; `--json` is the machine form.
+
+Every native delegate and every Opus helper runs it before starting or
+repairing proof work on a declaration, and records the result in the session
+note. A `statement` match is a signal to read both declarations, never by
+itself a verdict — the tool compares text, not terms.
+
+**Declaration claims.** `local/registry/declaration-claims.jsonl` is an
+append-only registry binding declaration names to the issue producing them
+(`local/registry/README.md` has the row format). `dup_check.py claim --issue N
+--name X` records a claim and refuses (exit 3) when another issue's open claim
+holds the name or when `main` already declares it; `claims-check` is the
+read-only form, `claims-release` closes a claim once its PR merges, and
+`claims-list` prints what is open. **Issue creation records the claim** for the
+declarations the packet will produce, and **dispatch checks it**, so two open
+issues cannot target the same declaration unnoticed. `--force` records a
+refused claim anyway and still exits 3, so an accepted overlap stays visible in
+the log rather than disappearing.
+
+`dispatch.sh` runs `dup_check.py predispatch --issue N` for the `prover`,
+`mathfix` and `simplifier` roles before the session starts. It is advisory by
+default: exit 3 (`main` already has a claimed name) and exit 4 (nothing claimed
+for that issue, or `github/main` is absent locally) both print a warning and
+let the dispatch through. `MIPSTARRE_DUP_CHECK=fatal` turns exit 3 into a
+refusal, and `=off` skips the check; a non-numeric `--issue` scope word has no
+claim to check and is skipped with that explanation.
+
+**Superseded-PR sweep.** `dup_check.py sweep` walks every open PR, parses only
+the Lean files that PR touches at its head and at its merge base, and reports
+the declarations new at the head that `main` already contains by name or by
+normalised statement. It writes the Markdown report of `audits/` with
+`--out`, exits 3 when any PR is flagged, and takes its PR list from a JSON file
+with `--prs-file` instead of the GitHub read. The main session runs it before a
+merge-train pass, so a superseded PR is closed or shrunk early instead of
+repaired. A head branch not present locally is reported as skipped rather than
+silently clean: the sweep never fetches on its own.
+
+**Worker claims are separate.** `local/bin/claim.sh` is the atomic list that
+stops two *workers* touching the same PR at once (the main session and a helper
+both repaired PR 577 on 2026-09-17). It claims a PR or issue number for one
+party and kind, refuses a second claim while one is open, and appends its
+release line; the file is
+`${MIPSTARRE_CLAIM_FILE:-${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/watchdog/meta-dispatched.txt}`,
+append-only, in the format the meta session's copy writes. `dup_check.py`
+answers "has this mathematics already been done"; `claim.sh` answers "is
+somebody else doing this right now". Both are cheap and both are run first.
+
 ## 6. Owner inbox and mathematical-gap escalation
 
 Pinned issue #26 is the owner inbox: it receives only decisions that require

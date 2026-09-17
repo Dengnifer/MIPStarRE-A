@@ -1148,3 +1148,35 @@ GitHub's wording.
 off the commits page without opening the merge, no pull request that cleared the
 seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
 covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - Model-free duplicate-work guards before dispatch (#576)
+
+**Trigger:** owner observation recorded in issue #576: quota was spent twice on
+the same mathematics. Several open PRs (212, 296, 398, 488, 539, and per the
+Opus reviews 289 and 274) prove or declare results `main` already contains,
+because tasks covering the same statements were dispatched weeks apart and the
+overlap surfaced only at review or merge. On the same day a helper and the main
+session repaired PR 577 simultaneously.
+
+**Change:** `local/bin/dup_check.py` searches a ref for a declaration by exact
+fully qualified name, by last name component inside the `MIPStarRE` namespace,
+and by statement after a cheap normalisation, over explicit names, a blueprint
+node's `\lean{}` names, or the declarations a branch or open PR adds against
+its merge base; its `sweep` mode reports the same over every open PR as an
+`audits/` document. `local/registry/declaration-claims.jsonl` binds declaration
+names to the issue producing them, checked at issue creation and at dispatch.
+`dispatch.sh` runs the check for the `prover`, `mathfix` and `simplifier` roles
+as a warning (`MIPSTARRE_DUP_CHECK=fatal` refuses, `=off` skips).
+`local/bin/claim.sh` brings the meta session's atomic worker-claim list into the
+repository, format unchanged, with the file location overridable so it can be
+tested. `scripts/blueprint_lean_sync.collect_file_lean_decls` gained an optional
+`text=` argument so a ref can be parsed without a checkout; its behaviour is
+unchanged when the argument is absent. `issues-prs.md` section 7 records the
+obligations. No tool calls a model, and only the sweep's list of open PRs
+touches the network.
+
+**Expected effect:** an overlap is visible before a prover run pays for it, the
+main session can close or shrink a superseded PR instead of repairing it, and
+two workers no longer repair the same PR at once. The guards are advisory by
+construction: a text match is a prompt to look, never a verdict about the
+mathematics, and no gate is weakened by them.
