@@ -28,7 +28,7 @@ strategy.
 
 The construction is the strategy displayed in the proof of
 `lem:pauli-completeness`,
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1360`;
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1237-1360`;
 blueprint `lem:pauli-completeness`.
 -/
 
@@ -65,6 +65,8 @@ noncomputable def pauliBasisMeasurement (W : PauliKind) :
     Measurement (ι → K) (ι → K) :=
   Measurement.ofSumEqOne (pauliProj W) (pauliProj_nonneg W) (sum_pauliProj_eq_one W)
 
+/-- The effect of the generalized Pauli basis measurement at outcome `e` is the
+projector `τ^W_e` onto the corresponding generalized Pauli eigenspace. -/
 @[simp] theorem pauliBasisMeasurement_effect (W : PauliKind) (e : ι → K) :
     (pauliBasisMeasurement W).effect e = pauliProj W e := rfl
 
@@ -74,7 +76,7 @@ omit [Fintype K] in
 /-- Generalized Pauli observables are symmetric matrices in the computational
 basis.  Symmetry is what makes the honest measurements consistent on the EPR
 state used by `lem:pauli-completeness`, paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1360`. -/
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1237-1360`. -/
 theorem tauObservable_transpose (W : PauliKind) (a : ι → K) :
     (tauObservable W a)ᵀ = tauObservable W a := by
   haveI : CharP K 2 := (Algebra.charP_iff (ZMod 2) K 2).mp (ZMod.charP 2)
@@ -149,12 +151,12 @@ For an ambient question `ω = (u_X, u_Z, r_X, r_Z)` the honest player measures
 the Pauli register in basis `W` and reports the binary trace
 `tr(g_h(u_W) r_W)` of the resulting label.  These are the measurements `A` and
 `B` of the proof of `lem:pauli-completeness`,
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1330`.
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1277-1286`.
 -/
 
 /-- The binary trace bit `tr(g_h(u) r)` reported by the honest Pair/W
 measurement on the Pauli label `h`.  Paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1330`. -/
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1277-1286`. -/
 noncomputable def pauliTraceBit (P : AdmissibleParams)
     (u : Fin P.m → PauliScalar P) (r : PauliScalar P) (h : PauliRegister P) : ZMod 2 :=
   fixedBinTrace P.model (lowDegreeEnc h u * r)
@@ -162,13 +164,16 @@ noncomputable def pauliTraceBit (P : AdmissibleParams)
 /-- The honest Pair/W measurement `τ^W_{[tr(g_·(u) r) = β]}` of the proof of
 `lem:pauli-completeness`: the generalized Pauli basis measurement coarse-grained
 by the trace bit.  Paper
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1330`,
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1277-1286`,
 blueprint `lem:pauli-completeness`. -/
 noncomputable def pauliTraceMeasurement (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (r : PauliScalar P) :
     Measurement (ZMod 2) (PauliRegister P) :=
   (pauliBasisMeasurement W).postprocess (pauliTraceBit P u r)
 
+/-- The effect of the honest Pair/`W` measurement at the bit `β` is the sum of
+the generalized Pauli projectors over the labels whose trace bit equals `β`,
+which is the coarse-grained projector `τ^W_{[tr(g_·(u) r) = β]}` of the paper. -/
 theorem pauliTraceMeasurement_effect (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (r : PauliScalar P) (b : ZMod 2) :
     (pauliTraceMeasurement P W u r).effect b =

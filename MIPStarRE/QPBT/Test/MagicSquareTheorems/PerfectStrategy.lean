@@ -42,8 +42,10 @@ private theorem msConstraintVars_exists_iff
   · intro h
     exact ⟨k, rfl, h⟩
 
-/-- A constraint effect commutes with each incident variable effect in the
-measurement family assembled from commuting projective cell measurements. -/
+/-- Formalization-only auxiliary for the perfect Magic Square strategy and the
+proof of `lem:pauli-completeness`: a constraint effect commutes with each
+incident variable effect in the measurement family built from commuting
+projective cell measurements. -/
 theorem msStrategyMeasurement_incident_commute
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -125,8 +127,9 @@ private theorem msStrategyMeasurement_rejected_mul_reverse
   exact msStrategyMeasurement_rejected_mul P hP hcomm hmul i k b a
     (by simpa [msWinPredicate_symm] using hrej)
 
-/-- Every supported Magic Square question pair is an incident
-constraint-variable pair in one of its two orders. -/
+/-- Formalization-only auxiliary for the perfect Magic Square strategy and the
+proof of `lem:pauli-completeness`: every supported Magic Square question
+pair is an incident constraint-variable pair in one of its two orders. -/
 theorem msGame_support_incidence (x y : MsType)
     (hxy : (x, y) ∈ msGameSymm.μ.support) :
     (∃ i : Fin 6, ∃ k : Fin 3,
@@ -173,8 +176,10 @@ private theorem msStrategyMeasurement_commuting
   · rcases hxy with ⟨i, k, rfl, rfl⟩
     exact (msStrategyMeasurement_incident_commute P hP hcomm i k b a).symm
 
-/-- The constructed Magic Square family has zero operator product on rejected
-answers in its support, from the stated cell and joint-measurement identities. -/
+/-- Formalization-only auxiliary for the perfect Magic Square strategy and the
+proof of `lem:pauli-completeness`: the constructed Magic Square family has
+zero operator product on rejected answers in its support, from the stated cell
+and joint-measurement identities. -/
 theorem msStrategyMeasurement_rejected_mul_on_support
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -197,8 +202,10 @@ theorem msStrategyMeasurement_rejected_mul_on_support
   · rcases hxy with ⟨i, k, rfl, rfl⟩
     exact msStrategyMeasurement_rejected_mul_reverse P hP hcomm hmul i k a b hrej
 
-/-- The constructed Magic Square family has symmetric effects when its
-underlying projective cell measurements have symmetric effects. -/
+/-- Formalization-only auxiliary for the perfect Magic Square strategy and the
+proof of `lem:pauli-completeness`: the constructed Magic Square family has
+symmetric effects when its underlying projective cell measurements have
+symmetric effects. -/
 theorem msStrategyMeasurement_effect_transpose
     {V : Type*} [Fintype V] [DecidableEq V]
     (P : Fin 9 → Measurement (ZMod 2) V)
@@ -218,8 +225,10 @@ theorem msStrategyMeasurement_effect_transpose
         (fun ab => .triple (parityTriple i ab))
         (msConstraintJoint_effect_transpose P hP hcomm hPt i) a
 
-/-- Local effects with zero product annihilate the EPR vector after tensor
-placement when the second effect is symmetric. -/
+/-- Formalization-only auxiliary for the perfect Magic Square strategy and the
+proof of `lem:pauli-completeness`: local effects with zero product
+annihilate the maximally entangled vector after tensor placement, provided the
+second effect is symmetric. -/
 theorem heteroKron_mulVec_epr_eq_zero_of_mul_eq_zero
     {V : Type*} [Fintype V] [DecidableEq V] [Nonempty V]
     (E F : Op V) (hFt : Fᵀ = F) (hEF : E * F = 0) :

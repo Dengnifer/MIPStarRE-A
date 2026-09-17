@@ -1,10 +1,10 @@
-import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly
+import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.MeasurementFamily
 
 /-!
 # Commutation of the honest Pauli measurements
 
 This module proves that the honest measurement family of
-`MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly` has commuting effects
+`MIPStarRE.QPBT.Test.Completeness.HonestStrategy.MeasurementFamily` has commuting effects
 on every question pair of positive weight for the Pauli question sampler.  The
 argument first characterises the supported question pairs as the typed
 conditionally linear images of a single ambient coefficient vector along an edge
@@ -144,7 +144,7 @@ theorem placedPauliMeasurement_effect_eq {P : AdmissibleParams}
 
 /-- Placing a coarse-grained measurement of the Pauli register and relabelling
 its outcomes is the placement of the original measurement relabelled along the
-composite; this is the fibre-collapse identity for iterated coarse-graining. -/
+composite; this is the composition identity for successive coarse-grainings. -/
 theorem placedPauliMeasurement_postprocess_eq {P : AdmissibleParams}
     {ζ α : Type*} [Fintype ζ] [DecidableEq ζ] [Fintype α] [DecidableEq α]
     (M : Measurement ζ (PauliRegister P)) (g : ζ → α) (u : α → PauliAnswer P) :

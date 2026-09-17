@@ -4,7 +4,7 @@ import MIPStarRE.QPBT.Test.Completeness.Commutation
 # Rejection of wrong answers by the honest Pauli measurements
 
 This module shows that the honest measurement family of
-`MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly` assigns the zero
+`MIPStarRE.QPBT.Test.Completeness.HonestStrategy.MeasurementFamily` assigns the zero
 operator product to every answer pair rejected by the Pauli win predicate on a
 question pair of positive weight for the Pauli question sampler.  Together with
 the normalisation of the Born weights this yields the value-one assertion of
@@ -27,10 +27,10 @@ noncomputable section
 
 set_option maxRecDepth 8000
 
-/-! ### Answers carrying the wrong constructor -/
+/-! ### Answers of an inadmissible form -/
 
 /-- The honest Point/W measurement assigns the zero effect to every answer that
-is not a field value; part of the constructor-shape rejection clause of
+is not a field value; part of the answer-format rejection clause of
 `def:pauli-win-predicate`. -/
 theorem honestPointMeasurement_effect_eq_zero (P : AdmissibleParams)
     (W : PauliKind) (z : PauliSpace P) {a : PauliAnswer P}
@@ -41,7 +41,7 @@ theorem honestPointMeasurement_effect_eq_zero (P : AdmissibleParams)
   simp [validPauliAnswer] at ha
 
 /-- The honest Axis-line/W measurement assigns the zero effect to every answer
-that is not a degree-`d` coefficient list; part of the constructor-shape
+that is not a degree-`d` coefficient list; part of the answer-format
 rejection clause of `def:pauli-win-predicate`. -/
 theorem honestALineMeasurement_effect_eq_zero (P : AdmissibleParams)
     (W : PauliKind) (z : PauliSpace P) {a : PauliAnswer P}
@@ -53,7 +53,7 @@ theorem honestALineMeasurement_effect_eq_zero (P : AdmissibleParams)
 
 /-- The honest Diagonal-line/W measurement assigns the zero effect to every
 answer that is not a degree-`m d` coefficient list; part of the
-constructor-shape rejection clause of `def:pauli-win-predicate`. -/
+answer-format rejection clause of `def:pauli-win-predicate`. -/
 theorem honestDLineMeasurement_effect_eq_zero (P : AdmissibleParams)
     (W : PauliKind) (z : PauliSpace P) {a : PauliAnswer P}
     (ha : validPauliAnswer (.dline W) a = false) :
@@ -63,7 +63,7 @@ theorem honestDLineMeasurement_effect_eq_zero (P : AdmissibleParams)
   simp [validPauliAnswer] at ha
 
 /-- The honest Pauli/W measurement assigns the zero effect to every answer that
-is not a Pauli label; part of the constructor-shape rejection clause of
+is not a Pauli label; part of the answer-format rejection clause of
 `def:pauli-win-predicate`. -/
 theorem honestPauliMeasurement_effect_eq_zero (P : AdmissibleParams)
     (W : PauliKind) {a : PauliAnswer P}
@@ -74,7 +74,7 @@ theorem honestPauliMeasurement_effect_eq_zero (P : AdmissibleParams)
   simp [validPauliAnswer] at ha
 
 /-- The honest Pair/W measurement assigns the zero effect to every answer that
-is not a bit; part of the constructor-shape rejection clause of
+is not a bit; part of the answer-format rejection clause of
 `def:pauli-win-predicate`. -/
 theorem honestPairWMeasurement_effect_eq_zero (P : AdmissibleParams)
     (W : PauliKind) (z : PauliSpace P) {a : PauliAnswer P}
@@ -85,7 +85,7 @@ theorem honestPairWMeasurement_effect_eq_zero (P : AdmissibleParams)
   simp [validPauliAnswer] at ha
 
 /-- The honest Pair measurement assigns the zero effect to every answer that is
-not a pair of bits; part of the constructor-shape rejection clause of
+not a pair of bits; part of the answer-format rejection clause of
 `def:pauli-win-predicate`. -/
 theorem honestPairMeasurement_effect_eq_zero (P : AdmissibleParams)
     (z : PauliSpace P) {a : PauliAnswer P}
@@ -112,7 +112,7 @@ theorem honestPairMeasurement_effect_eq_zero (P : AdmissibleParams)
 
 /-- The honest Magic Square measurement assigns the zero effect to every answer
 that is not the one prescribed by its Magic Square question type; part of the
-constructor-shape rejection clause of `def:pauli-win-predicate`. -/
+answer-format rejection clause of `def:pauli-win-predicate`. -/
 theorem honestMagicMeasurement_effect_eq_zero (P : AdmissibleParams)
     (s : MsType) (z : PauliSpace P) {a : PauliAnswer P}
     (ha : validPauliAnswer (.ms s) a = false) :
@@ -169,8 +169,8 @@ theorem honestMagicMeasurement_effect_eq_zero (P : AdmissibleParams)
             exact absurd ha (by rw [← hca]; simp [pauliAnswerOfMs, validPauliAnswer])
 
 /-- The honest measurement family assigns the zero effect to every answer whose
-constructor is not the one prescribed by its question type; this is the
-constructor-shape rejection clause of `def:pauli-win-predicate`, blueprint
+form is not the one prescribed by its question type; this is the
+answer-format rejection clause of `def:pauli-win-predicate`, blueprint
 `def:pauli-win-predicate`. -/
 theorem honestMeasurement_effect_eq_zero_of_invalid (P : AdmissibleParams)
     (t : PauliType) (z : PauliSpace P) {a : PauliAnswer P}

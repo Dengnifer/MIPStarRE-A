@@ -1,9 +1,9 @@
 import MIPStarRE.QPBT.Test.Completeness.HonestStrategy
 
 /-!
-# Assembling the honest Pauli strategy
+# The honest Pauli measurement family
 
-This module assembles the measurements of
+This module collects the measurements of
 `MIPStarRE.QPBT.Test.Completeness.HonestStrategy` into a single measurement
 family indexed by the question type of the Pauli basis test.  Each honest
 measurement acts on the tensor product of the Pauli register with the qubit
@@ -13,9 +13,9 @@ projectivity and the symmetry of every effect of that family.
 
 ## References
 
-The strategy assembled here is the one displayed in the proof of
+The measurement family described here is the one displayed in the proof of
 `lem:pauli-completeness`,
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1290-1360`;
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1237-1360`;
 blueprint `lem:pauli-completeness`.
 -/
 
@@ -31,7 +31,7 @@ noncomputable section
 variable {K ι : Type*} [Field K] [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K]
   [Fintype ι] [DecidableEq ι]
 
-/-! ### Measurement assembly lemmas -/
+/-! ### Tensor placement and relabeling -/
 
 /-- The one-outcome measurement, used to make the harmless branches of the
 honest strategy total on questions outside the sampler support. -/
@@ -173,7 +173,7 @@ second factor is the qubit supplied to the Magic Square construction. -/
 abbrev HonestIndex (P : AdmissibleParams) := PauliRegister P × ZMod 2
 
 /-- Place a Pauli-register measurement on the first factor of the honest local
-space and relabel its outcomes with a global answer constructor. -/
+space and relabel its outcomes with a global answer embedding. -/
 noncomputable def placedPauliMeasurement {P : AdmissibleParams}
     {α : Type*} [Fintype α] [DecidableEq α]
     (M : Measurement α (PauliRegister P)) (f : α → PauliAnswer P) :
@@ -399,6 +399,11 @@ theorem honestMeasurement_projective (P : AdmissibleParams) (t : PauliType)
           (SandwichProduct.postprocess_isProjective (pauliMagicMeasurement P z hg t)
             (pauliMagicMeasurement_projective P z hg t) pauliAnswerOfMs)
 
+/-- The honest `Point/W` effects are symmetric matrices: each is a sum of
+generalized Pauli projectors, and those are symmetric in the computational
+basis.  Symmetry of the effects is what lets the maximally entangled state
+transfer a player's measurement to its partner in the consistency step of
+`lem:pauli-completeness`. -/
 theorem pauliPointMeasurement_effect_transpose (P : AdmissibleParams) (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
     ((pauliPointMeasurement P W u).effect a)ᵀ =
@@ -407,6 +412,9 @@ theorem pauliPointMeasurement_effect_transpose (P : AdmissibleParams) (W : Pauli
   intro h
   exact pauliProj_transpose W h
 
+/-- The honest `ALine/W` effects are symmetric matrices, by the same
+coarse-graining of symmetric generalized Pauli projectors as in the `Point`
+case. -/
 theorem pauliALineMeasurement_effect_transpose (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (a : Fin (P.d + 1) → PauliScalar P) :
     ((pauliALineMeasurement P W z).effect a)ᵀ =
@@ -415,6 +423,9 @@ theorem pauliALineMeasurement_effect_transpose (P : AdmissibleParams) (W : Pauli
   intro h
   exact pauliProj_transpose W h
 
+/-- The honest `DLine/W` effects are symmetric matrices, by the same
+coarse-graining of symmetric generalized Pauli projectors as in the `Point`
+case. -/
 theorem pauliDLineMeasurement_effect_transpose (P : AdmissibleParams) (W : PauliKind)
     (z : PauliSpace P) (a : Fin (P.m * P.d + 1) → PauliScalar P) :
     ((pauliDLineMeasurement P W z).effect a)ᵀ =
@@ -423,6 +434,9 @@ theorem pauliDLineMeasurement_effect_transpose (P : AdmissibleParams) (W : Pauli
   intro h
   exact pauliProj_transpose W h
 
+/-- The effects of the generalized Pauli basis measurement are symmetric: they
+are the projectors `τ^W_h` themselves, which are symmetric in the computational
+basis. -/
 theorem pauliBasisMeasurement_effect_transpose (W : PauliKind) (h : PauliRegister P) :
     ((pauliBasisMeasurement W).effect h)ᵀ = (pauliBasisMeasurement W).effect h := by
   exact pauliProj_transpose W h

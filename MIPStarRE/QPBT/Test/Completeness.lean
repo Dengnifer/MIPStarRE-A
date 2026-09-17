@@ -2,7 +2,7 @@ import MIPStarRE.QPBT.Games.StrategyClasses
 import MIPStarRE.QPBT.Games.TypedCondLinear
 import MIPStarRE.QPBT.Test.Completeness.Commutation
 import MIPStarRE.QPBT.Test.Completeness.HonestStrategy
-import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly
+import MIPStarRE.QPBT.Test.Completeness.HonestStrategy.MeasurementFamily
 import MIPStarRE.QPBT.Test.Completeness.Rejection
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
@@ -191,10 +191,10 @@ theorem pauliBasisTestSymm_toGame (P : AdmissibleParams) :
   rfl
 
 /-- The honest strategy of `lem:pauli-completeness`: the total honest
-measurement family of `MIPStarRE.QPBT.Test.Completeness.HonestStrategy.Assembly`
+measurement family of `MIPStarRE.QPBT.Test.Completeness.HonestStrategy.MeasurementFamily`
 on the maximally entangled state of the Pauli register tensored with the Magic
 Square qubit.  Blueprint `lem:pauli-completeness`, paper
-`08_classical_and_quantum_low_degree_tests.tex:1290-1360`. -/
+`08_classical_and_quantum_low_degree_tests.tex:1237-1360`. -/
 noncomputable def honestStrategy (P : AdmissibleParams) :
     SymmetricStrategy (pauliBasisTestSymm P) where
   ι := HonestIndex P

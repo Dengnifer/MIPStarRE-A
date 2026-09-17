@@ -1,3 +1,19 @@
+---
+title: "Recovery of the honest Pauli strategy"
+date: 2026-09-07
+purpose: >
+  Records the mathematical content, source manifest, public interfaces, and
+  validation of the honest value-one SPCC strategy constructed for
+  `lem:pauli-completeness`, so that later readers can check the construction
+  against the paper without re-deriving it.
+status: active
+track: qpbt
+kind: construction-audit
+origin: "issue #156"
+issue: "#156"
+pr: "#299"
+---
+
 # Recovery of the Honest Pauli Strategy
 
 ## Mathematical Statement
@@ -24,7 +40,7 @@ trace effects define the Pair measurement. Otherwise the anticommuting
 observables define the Magic Square measurements.
 
 The recovered family covers all 26 question types, including every constraint
-and variable type, and assigns zero effects to malformed answer constructors.
+and variable type, and assigns zero effects to answers of an inadmissible form.
 Commutation is proved on each supported graph edge and its reverse. For each
 rejected answer pair the product of the corresponding effects is zero; EPR
 consistency then gives zero rejected Born weight. Summing the normalized Born
