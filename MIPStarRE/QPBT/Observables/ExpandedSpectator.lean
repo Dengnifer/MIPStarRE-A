@@ -26,7 +26,6 @@ open scoped BigOperators Matrix
 namespace MIPStarRE.QPBT
 
 open MIPStarRE.Quantum
-open Classical
 
 /-- The unused normalized EPR pair contributes one to the complex expectation.
 This coordinate calculation is specialized to an identity operator on the
@@ -115,6 +114,7 @@ def bobSpectatorShuffle (S : ProjectiveSetting P ε) :
   left_inv p := by cases p; rfl
   right_inv p := by cases p; rfl
 
+open Classical in
 /-- Coordinate factorization of `eq:def-psihat` with the unused pair `B'B''`
 last. The remaining pair is exactly the one used by `AA'`, `BA''`. -/
 theorem psiHat_eq_alicePair_tensor_epr (S : ProjectiveSetting P ε) :
@@ -123,6 +123,7 @@ theorem psiHat_eq_alicePair_tensor_epr (S : ProjectiveSetting P ε) :
   ext p
   rfl
 
+open Classical in
 /-- Coordinate factorization of `eq:def-psihat` with the unused pair `A'A''`
 last. The remaining pair is exactly the one used by `BB'`, `AB''`. -/
 theorem psiHat_eq_bobPair_tensor_epr (S : ProjectiveSetting P ε) :

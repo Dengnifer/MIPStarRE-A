@@ -68,9 +68,14 @@ module and the QPBT root also succeed. All six public theorem axiom closures
 are exactly `[propext, Classical.choice, Quot.sound]`. Blueprint declaration
 synchronization succeeds after regenerating its ignored declaration list.
 
-The unchanged module's `open Classical` at line 29 produces an existing style
-warning under the Lake target build. It is recorded here without modifying
-the preserved source or suppressing the linter. Other imported proof debt is
+The module's former module-wide `open Classical` produced a
+`linter.style.openClassical` warning under the Lake target build. Review
+finding F1 is addressed by replacing it with declaration-scoped
+`open Classical in` on `psiHat_eq_alicePair_tensor_epr` and
+`psiHat_eq_bobPair_tensor_epr`, the only declarations that need classical
+decidability. No statement, proof term, or definition is altered, and the
+linter is not suppressed. The targeted build and the direct `lake env lean`
+check of the module now report no warning. Other imported proof debt is
 unchanged by this packet. Historical CI evidence cited by the preceding PR
 description belongs to its recorded old head, not to this refreshed head.
 Checked publication, fresh exact-head full CI, independent review, and merge
