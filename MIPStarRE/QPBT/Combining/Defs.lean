@@ -39,9 +39,8 @@ noncomputable abbrev Poly (P : AdmissibleParams) :=
 measurement in `lem:qld-4-7`. -/
 noncomputable abbrev PolyPair (P : AdmissibleParams) := Poly P × Poly P
 
-/-- Split the extended coordinate set into the `X` block, the `Z` block, and
-the two scalar coordinates.  This is formalization-only coordinate plumbing
-for blueprint
+/-- This equivalence decomposes the extended coordinate set into the `X` block,
+    the `Z` block, and the two scalar coordinates.  It supports blueprint
 `def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`. -/
 def finCombineEquiv (m : ℕ) :
