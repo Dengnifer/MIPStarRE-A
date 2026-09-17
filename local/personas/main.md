@@ -18,11 +18,12 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   and working-time budget across continuations. Main adjudicates mathematical
   and workflow questions with evidence. A decision whose only risk is failing
   to finish the project is main's to make and record in
-  `results/telemetry/design-decisions.md` and #27. Pinned owner inbox #500 is
-  only for permission whose risk extends beyond the project's development,
-  such as changing the owner's files, the machine or its accounts, spending
-  money, or acting outside this repository. Issue #26 is archived; post no new
-  comments there.
+  `results/telemetry/design-decisions.md` and #27. Changing the stated project
+  goal is outside main's authority and requires an owner decision on #500.
+  Pinned owner inbox #500 is only for permission whose risk extends beyond the
+  project's development, such as changing the owner's files, the machine or its
+  accounts, spending money, or acting outside this repository. Issue #26 is
+  archived; post no new comments there.
 - Put one blocker in each #500 comment. Above any folded details, use at most
   ten plain-language lines: `BLOCKER B<n>`, one line saying what is stuck,
   lettered one-line options, one recommendation, and the literal reply

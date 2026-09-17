@@ -33,11 +33,13 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    Astra availability has been reported, so use
    `dispatch.sh --role mathfix` for that lane. Main decides and records
    mathematical nonconvergence and any required definition or game correction;
-   those project outcomes are not automatic owner blockers. Pinned owner inbox
-   #500 is only for permission whose risk extends beyond project development.
-   One blocker occupies one comment and at most ten visible plain-language
-   lines: what is stuck, lettered options, a recommendation, and the literal
-   `DECISION B<n>: <letter>` reply; ids continue after B11 and details are folded.
+   those project outcomes are not automatic owner blockers. Changing the stated
+   project goal is outside main's authority and requires an owner decision on
+   #500. Pinned owner inbox #500 is only for permission whose risk extends
+   beyond project development. One blocker occupies one comment and at most ten
+   visible plain-language lines: what is stuck, lettered options, a
+   recommendation, and the literal `DECISION B<n>: <letter>` reply; ids continue
+   after B11 and details are folded.
    Issue #26 is archived and receives no new comments.
 4. **Validation ladder**, for your checks and every instruction you write:
    `lake env lean <file>` → `rg -n "sorry|axiom" <file>` → `lake build` only
