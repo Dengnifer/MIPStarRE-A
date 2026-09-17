@@ -220,7 +220,7 @@ theorem exists_pasting_error_of_marginal_consistency :
       mul_nonneg (show (0:ℝ) ≤ 3 * C + 19 by linarith) ha]
 
 /-- The one-sided pasting estimate on independent Alice and Bob spaces.
-This is a stronger Lean-only auxiliary for paper `lem:pasting`,
+This is a stronger formalization-only auxiliary for paper `lem:pasting`,
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525`: only its two
 forward marginal comparisons are required. The paper-facing
 `exists_pasting_error` continues to retain all three printed hypotheses.

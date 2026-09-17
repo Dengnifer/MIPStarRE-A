@@ -33,6 +33,14 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 ``--adjudicated`` waives gate 4's adverse verdict — nothing else — when an
 ``ADJUDICATION`` comment names this exact head (review.md 12).  GitHub merges and
 closes the linked issues itself, so no local bookkeeping can double-count.  The
+merge commit's subject is ``Merge PR #N: <title> [lean +A -D]``: the PR's approximate
+Lean line delta against its merge base, so the commits page shows each packet's size
+without opening it (issue #557).  That count is cosmetic — it is measured after the
+gates, it is never evidence, and an unmeasurable delta leaves GitHub's own wording
+in place rather than refusing anything.  Closing keywords in that title are defused
+(``closes #900`` -> ``closes issue 900``) because gate 7 scanned the body and the
+branch commits, not the subject, and a merge commit that closes an unchecked issue
+would bypass it.  The
 best-effort tail then fast-forwards local ``main``, refreshes the
 ``refs/remotes/origin/main`` alias the hooks and diff-based audits need in order not
 to self-disable (DESIGN.md:83-85), warms the cache and drops the branch.
@@ -59,6 +67,11 @@ CI_STEPS = ("build", "blueprint-render", "paper-gaps", "blueprint-sync",
             "file-length", "proof-debt", "proof-evasion", "statement-origin")
 CI_CONTEXTS = tuple(f"local-ci/{step}" for step in CI_STEPS) + ("local-ci/summary",)
 REVIEW_CONTEXT = "local-review/summary"
+
+#: Issue #557 — the merge subject carries the PR's Lean line delta so the commits page
+#: shows the size of each packet without opening the merge.  The PR title is truncated
+#: to this many characters so the subject stays readable beside the ``[lean …]`` bracket.
+MERGE_TITLE_PR_LIMIT = 80
 
 #: Findings are task-list items; an unticked box is an open finding.  Kept compatible
 #: with review.sh's tally and autofix.sh's ledger read.
@@ -89,6 +102,23 @@ GITHUB_SNAPSHOT_PATH_PARTS = TELEMETRY_PATH_PARTS + ("github-snapshot",)
 #: merge.  ``Addresses`` keeps an issue open and imposes no dependency
 #: (CONTRIBUTING.md:61-62).  Keep in sync with pr_open.py CLOSES_RE.
 CLOSES_RE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)", re.IGNORECASE)
+
+
+def neutralize_closing_keywords(text: str) -> str:
+    """Defuse GitHub's closing keywords in text bound for the merge commit.
+
+    Gate 7 (``check_dependencies``) scans the PR body and the branch commits, the
+    two surfaces that existed when it ran.  The merge subject adds a third — the
+    PR title, untrusted text that reaches the default branch only here — and
+    GitHub honors closing keywords in a merge commit message just as it does in a
+    body.  A title reading ``closes #900`` would therefore close an issue whose
+    open sub-issues and deferred status nobody checked.  ``closes #900`` becomes
+    ``closes issue 900``: the sentence still reads, the reference no longer fires.
+
+    Applied before any truncation, which could otherwise forge a *different*
+    reference by cutting ``#9001`` down to ``#900``.
+    """
+    return CLOSES_RE.sub(lambda m: m.group(0).replace("#", "issue "), text)
 
 
 class GateFailure(LayerError):
@@ -485,7 +515,11 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool,
     merge_base = check_fix_gates(repo_root, branch, base, head_sha)
     check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha,
                        deferred_issues)
-    return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base}
+    # The merge base travels out with the facts: the merge subject's Lean line delta
+    # is measured from it, and re-deriving it in the caller could pick a different
+    # commit if the base moved between the two reads.
+    return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base,
+            "merge_base": merge_base}
 
 
 # ------------------------------------- post-merge tail: best effort, non-fatal
@@ -610,6 +644,66 @@ def post_merge(repo_root: Path, base: str, branch: str, *, warm_cache: bool) -> 
     remove_branch_and_worktree(repo_root, branch)
 
 
+# ------------------------------------- the merge subject: an approximate delta
+
+def lean_line_delta(repo_root: Path, merge_base: str, head_sha: str) -> tuple[int, int] | None:
+    """Added and deleted ``*.lean`` lines between *merge_base* and *head_sha*.
+
+    Deliberately approximate (issue #557): a size signal for GitHub's commits
+    page, never merge evidence.  Rename detection stays at git's default, and a
+    row git reports as binary carries no line delta and is skipped.  Every
+    failure returns ``None`` rather than a guess — a cosmetic count must never
+    be the reason a pull request that cleared seven gates fails to merge.
+    """
+    result = _run_git(repo_root, "diff", "--numstat",
+                      f"{merge_base}...{head_sha}", "--", "*.lean")
+    if result.returncode != 0:
+        return None
+    added = deleted = 0
+    for row in result.stdout.splitlines():
+        fields = row.split("\t")
+        # "<added>\t<deleted>\t<path>"; git writes "-\t-\t<path>" for a binary blob.
+        if len(fields) < 3 or not (fields[0].isdigit() and fields[1].isdigit()):
+            continue
+        added += int(fields[0])
+        deleted += int(fields[1])
+    return added, deleted
+
+
+def merge_commit_title(number: int, pr_title: str, delta: tuple[int, int] | None) -> str | None:
+    """``Merge PR #N: <title> [lean +A -D]``, or ``None`` for GitHub's default.
+
+    ``[lean 0]`` marks a pull request that changed no Lean line, so a reader can
+    tell "no Lean in this packet" from "the count was unavailable" — the latter
+    is the ``None`` case, where the caller sends no title at all and GitHub words
+    the merge exactly as it did before issue #557.  The PR title is sanitized
+    (untrusted text, protocols/issues-prs.md section 4), collapsed to one line —
+    a newline would otherwise split the subject from the body — its closing
+    keywords are defused so the subject cannot close an issue gate 7 never saw,
+    and it is truncated with the bracket kept last where a reader's eye and a
+    grep both expect it.
+    """
+    if delta is None:
+        return None
+    cleaned = neutralize_closing_keywords(" ".join(sanitize(pr_title, TITLE_LIMIT).split()))
+    if len(cleaned) > MERGE_TITLE_PR_LIMIT:
+        cleaned = cleaned[:MERGE_TITLE_PR_LIMIT - 3].rstrip() + "..."
+    added, deleted = delta
+    suffix = f"[lean +{added} -{deleted}]" if (added or deleted) else "[lean 0]"
+    subject = (f"Merge PR #{number}: {cleaned} {suffix}" if cleaned
+               else f"Merge PR #{number} {suffix}")
+    # Belt and braces: a subject that still reads as a closing reference is wording
+    # no gate cleared, so drop it entirely.  GitHub then titles the merge itself —
+    # the same fallback an unmeasurable delta takes, and never a refusal to merge.
+    return None if CLOSES_RE.search(subject) else subject
+
+
+def merge_commit_message(branch: str, head_sha: str) -> str:
+    """The one-line merge body: the exact commit the gate froze and merged."""
+    name = neutralize_closing_keywords(" ".join(sanitize(branch, TITLE_LIMIT).split()))
+    return f"Head {head_sha} of {name}."
+
+
 # --------------------------------------------------------------- entry point
 
 def run_merge(args: argparse.Namespace) -> int:
@@ -620,8 +714,17 @@ def run_merge(args: argparse.Namespace) -> int:
     with file_lock(f"pr-{number}"):
         gate = run_gate(repo_root, number, adjudicated=args.adjudicated)
         head_sha, branch, base = gate["head_sha"], gate["branch"], gate["base"]
-        title = sanitize(str(gate["pr"].get("title") or branch), TITLE_LIMIT)
+        raw_title = str(gate["pr"].get("title") or branch)
+        title = sanitize(raw_title, TITLE_LIMIT)
         passed(f"gate passed: PR #{number} {title} @ {head_sha[:12]} -> {base}")
+        # Issue #557 — the subject the merge commit will carry.  Computed after every
+        # gate because it is cosmetic: an unavailable count leaves GitHub's own wording
+        # in place and merges regardless, and nothing here can refuse a merge.
+        delta = lean_line_delta(repo_root, gate["merge_base"], head_sha)
+        commit_title = merge_commit_title(number, raw_title, delta)
+        commit_message = None if commit_title is None else merge_commit_message(branch, head_sha)
+        passed("merge subject: " + (commit_title or "GitHub's default wording — the Lean "
+                                    "line delta could not be measured"))
         if args.check_only:
             return 0
         if args.dry_run:
@@ -631,8 +734,9 @@ def run_merge(args: argparse.Namespace) -> int:
                              f"refs/remotes/origin/{base}, warm the cache, then remove the "
                              f"worktree and branch {branch}\n")
             return 0
-        sys.stdout.write(f"merged as {gh_common.merge_pr(number, head_sha)}; GitHub closed "
-                         "the linked issues\n")
+        merge_commit = gh_common.merge_pr(number, head_sha, commit_title=commit_title,
+                                          commit_message=commit_message)
+        sys.stdout.write(f"merged as {merge_commit}; GitHub closed the linked issues\n")
     try:
         post_merge(repo_root, base, branch, warm_cache=not args.no_warm_cache)
     except LayerError as exc:

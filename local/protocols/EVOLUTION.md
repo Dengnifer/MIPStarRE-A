@@ -1164,3 +1164,28 @@ the reviewed ordinary-PR telemetry freshness predicate and PR506's step-failure
 explanation. No allowlist, member gate, publication, or cleanup rule changes.
 **Expected effect:** ordinary telemetry movement remains tolerated; any train
 base movement still refuses. Independent verification follows genuine green CI.
+
+## 2026-09-14 - Merge subjects carry the PR's Lean line delta (#557)
+
+**Trigger:** owner decision recorded in issue #557: GitHub's commits page showed
+`Merge pull request #N from Dengnifer/issue-...` and nothing about the size of
+the packet, so reading how much Lean a merge brought meant opening it.
+
+**Change:** `issues-prs.md` records the merge subject
+`Merge PR #N: <PR title> [lean +A -D]`, measured past the gates from
+`git diff --numstat <merge base>...<head> -- '*.lean'`, with `[lean 0]` for a PR
+that changes no Lean line and a one-line body naming the frozen head SHA.
+`pr_merge.py` computes it and `gh_common.merge_pr` forwards it through the REST
+`commit_title` / `commit_message` keys, which stay out of the payload entirely
+when absent. The count is cosmetic by contract: measured after every gate, never
+read back as evidence, and absent rather than wrong when git cannot answer — the
+merge then keeps GitHub's own wording instead of failing. Following PR #558
+review finding F1, closing keywords in the untrusted PR title are defused
+(`closes #900` becomes `closes issue 900`) before they reach the subject, and a
+subject that would still read as a closing reference is dropped in favour of
+GitHub's wording.
+
+**Expected effect:** the owner reads each merged packet's approximate Lean size
+off the commits page without opening the merge, no pull request that cleared the
+seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
+covering every closing reference that reaches the default branch.

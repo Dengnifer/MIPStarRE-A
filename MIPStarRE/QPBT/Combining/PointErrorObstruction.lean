@@ -25,7 +25,7 @@ noncomputable section
 
 /-- An unrestricted scalar error admits every projective joint point family.
 The finitely many placement comparisons have a common real upper bound. This is
-a Lean-only observation about the witness domain, not the point construction of
+a formalization-only observation about the witness domain, not the point construction of
 `lem:qld-4-10`: no dependence of the bound on the strategy error is asserted. -/
 theorem CombinedPointsWitness.exists_error_of_projective
     {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
@@ -62,7 +62,7 @@ theorem CombinedPointsWitness.exists_error_of_projective
 
 /-- A coefficient answer with zero quadratic coefficient agrees with a nonzero
 multiple of the square function on at most a `2 / q` fraction of the field.
-This is the Lean-only scalar part of the X-axis obstruction for `m = d = 1` in issue #509;
+This is the formalization-only scalar part of the X-axis obstruction for `m = d = 1` in issue #509;
 the existing coefficient collision theorem supplies the root count. -/
 theorem linear_quadratic_agreement_le (D : DirectLdParams)
     (f : DirectDegPoly D 2) (hf : f 2 = 0)

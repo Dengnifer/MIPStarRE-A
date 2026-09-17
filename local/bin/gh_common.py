@@ -276,18 +276,31 @@ def pr_reviews(number: int) -> list[dict]:
     return api(f"pulls/{number}/reviews", paginate=True)
 
 
-def merge_pr(number: int, sha: str) -> str:
+def merge_pr(number: int, sha: str, *, commit_title: str | None = None,
+             commit_message: str | None = None) -> str:
     """Merge PR *number* iff its head is exactly *sha*; verify topology.
 
     The REST ``sha`` parameter makes GitHub reject the merge when the head
     moved — the atomic exact-head guard, independent of the gh CLI version.
     Returns the merge commit SHA after verifying it has exactly two parents
     with the frozen head second.
+
+    *commit_title* and *commit_message* travel as the REST payload keys of the
+    same names, which set the merge commit's subject and body (``pr_merge.py``
+    puts the PR's Lean line delta in the subject, issue #557).  Each is left
+    out of the payload when ``None``, so a caller passing neither sends exactly
+    the two keys this function always sent and gets GitHub's own wording.
+    Neither is evidence: the exact-SHA guard above and the topology check below
+    are what authorize the merge, and they do not read either string.
     """
+    payload: dict = {"sha": sha, "merge_method": "merge"}
+    if commit_title is not None:
+        payload["commit_title"] = commit_title
+    if commit_message is not None:
+        payload["commit_message"] = commit_message
     put_error = ""
     try:
-        api(f"pulls/{number}/merge", method="PUT",
-            payload={"sha": sha, "merge_method": "merge"}, mutation=True)
+        api(f"pulls/{number}/merge", method="PUT", payload=payload, mutation=True)
     except LayerError as exc:
         put_error = str(exc)  # fall through: the read-back below is the authority
     pr = pr_view(number)
@@ -476,6 +489,7 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("pr-reviews"); p.add_argument("number", type=int)
     p = sub.add_parser("merge-pr")
     p.add_argument("number", type=int); p.add_argument("sha")
+    p.add_argument("--commit-title"); p.add_argument("--commit-message")
     p = sub.add_parser("issue-view"); p.add_argument("number", type=int)
     p = sub.add_parser("add-blocked-by")
     p.add_argument("issue", type=int); p.add_argument("blocker", type=int)
@@ -514,7 +528,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "pr-reviews":
             _emit(pr_reviews(args.number))
         elif args.cmd == "merge-pr":
-            _emit(merge_pr(args.number, args.sha))
+            _emit(merge_pr(args.number, args.sha,
+                           commit_title=args.commit_title,
+                           commit_message=args.commit_message))
         elif args.cmd == "issue-view":
             _emit(issue_view(args.number))
         elif args.cmd == "add-blocked-by":
