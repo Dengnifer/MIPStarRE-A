@@ -1,3 +1,13 @@
+---
+title: "Exact swap identities for extraction"
+date: 2026-09-07
+purpose: >
+  Records the source comparison, exact proofs, and validation for the four
+  remaining swap identities of issue 121.
+issue: "#121"
+pr: "#294"
+---
+
 # Exact Swap Identities for Extraction
 
 ## Scope and Dependencies
