@@ -149,6 +149,34 @@ class RegistryCliTests(unittest.TestCase):
         self.assertEqual(json.loads(out)["claim_conflicts"][0]["issue"], 605)
         self.assertEqual(Path(self.registry).read_text(), before)
 
+    def test_claim_against_an_absent_ref_is_advisory_not_clean(self):
+        code, out = self._claim("--issue", "610", "--ref", "github/nope",
+                                "--name", "MIPStarRE.QPBT.already_on_main")
+        self.assertEqual(code, 4)
+        self.assertIn("duplicate check skipped", out)
+        self.assertNotIn("DUPLICATE", out)
+        self.assertEqual(len(dup_check.read_claims(Path(self.registry))), 1)
+
+    def test_claims_check_against_an_absent_ref_is_advisory_not_clean(self):
+        code, out = run_cli("claims-check", "--repo", str(self.repo),
+                            "--registry", self.registry, "--ref", "github/nope",
+                            "--issue", "611", "--name",
+                            "MIPStarRE.QPBT.already_on_main")
+        self.assertEqual(code, 4)
+        self.assertIn("duplicate check skipped", out)
+        self.assertNotIn("no duplicate", out)
+
+    def test_claims_check_absent_ref_still_reports_a_registry_conflict(self):
+        self._claim("--issue", "612", "--name", "MIPStarRE.QPBT.contested")
+        code, out = run_cli("claims-check", "--repo", str(self.repo),
+                            "--registry", self.registry, "--ref", "github/nope",
+                            "--json", "--issue", "613", "--name",
+                            "MIPStarRE.QPBT.contested")
+        self.assertEqual(code, 3)
+        payload = json.loads(out)
+        self.assertEqual(payload["claim_conflicts"][0]["issue"], 612)
+        self.assertIn("skipped", payload)
+
     def test_predispatch_without_a_claim_is_advisory(self):
         code, out = run_cli("predispatch", "--repo", str(self.repo),
                             "--registry", self.registry, "--issue", "607")

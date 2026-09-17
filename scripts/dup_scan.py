@@ -364,6 +364,16 @@ def render_matches(matches: list[Match], queried: int, ref: str) -> str:
 # The superseded-PR sweep
 # ---------------------------------------------------------------------------
 
+def matched_declarations(duplicates: list[dict]) -> int:
+    """How many *distinct* queried declarations have at least one match.
+
+    One declaration can match a reference several ways (``fqn`` and ``short``,
+    say), so the number of matches is not a declaration count and can exceed
+    the new-declaration count.
+    """
+    return len({hit["query"] for hit in duplicates})
+
+
 def sweep(repo: Path, ref: str, pulls: list[dict]) -> dict:
     """Per open PR: the new declarations that *ref* already contains.
 
@@ -399,6 +409,7 @@ def sweep(repo: Path, ref: str, pulls: list[dict]) -> dict:
             kind: sum(1 for hit in entry["duplicates"] if hit["match"] == kind)
             for kind in ("fqn", "statement", "short")
         }
+        entry["matched_declarations"] = matched_declarations(entry["duplicates"])
         results.append(entry)
     flagged = [row for row in results if row["duplicates"]]
     return {
@@ -483,18 +494,25 @@ def render_sweep_markdown(report: dict, *, title: str, issue: int | None,
         "",
         "## Per pull request",
         "",
-        "| PR | new declarations | already on the reference | fqn | statement | short |",
-        "|---:|---:|---:|---:|---:|---:|",
+        "`already on the reference` counts the *new declarations* with at least",
+        "one match; `matches` counts the matches themselves, of which one",
+        "declaration can have several (the `fqn`, `statement` and `short`",
+        "columns split those matches by kind).",
+        "",
+        "| PR | new declarations | already on the reference | matches | fqn | "
+        "statement | short |",
+        "|---:|---:|---:|---:|---:|---:|---:|",
     ]
     ordered = sorted(rows, key=lambda row: (-len(row["duplicates"]), row["number"]))
     for row in ordered:
         if row["skipped"]:
-            body.append(f"| #{row['number']} | – | – | – | – | "
+            body.append(f"| #{row['number']} | – | – | – | – | – | "
                         f"skipped: {row['skipped']} |")
             continue
         kinds = row.get("by_kind", {})
         body.append(
             f"| #{row['number']} | {row['new_declarations']} | "
+            f"{row.get('matched_declarations', matched_declarations(row['duplicates']))} | "
             f"{len(row['duplicates'])} | {kinds.get('fqn', 0)} | "
             f"{kinds.get('statement', 0)} | {kinds.get('short', 0)} |"
         )

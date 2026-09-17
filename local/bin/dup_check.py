@@ -26,7 +26,10 @@ registry and the dispatch-time check.  No subcommand calls a model, and only
 
 Exit codes: ``0`` clean, ``2`` usage or environment error, ``3`` duplicates
 found (or a conflicting claim), ``4`` advisory — nothing was claimed for the
-issue, or the ref is absent locally, so nothing could be checked.
+issue, or the ref is absent locally, so nothing could be checked.  Every
+subcommand that searches a ref (``check``, ``sweep``, ``claim``,
+``claims-check``, ``predispatch``) returns ``4`` when the ref cannot be read,
+never ``0``: an unread reference is not a clean one.
 """
 
 from __future__ import annotations
@@ -167,6 +170,24 @@ def _require_ref(repo: Path, ref: str) -> None:
         )
 
 
+def _unreadable_ref(repo: Path, ref: str) -> str | None:
+    """The advisory reason why *ref* cannot be read here, or ``None``.
+
+    Every subcommand that searches a reference calls this first and returns the
+    advisory exit ``4`` when it answers: an absent reference means nothing was
+    checked, which must never be reported as a clean result.
+    """
+    if ref_exists(repo, ref):
+        return None
+    return (f"ref {ref} not present locally; duplicate check skipped "
+            f"(this tool never fetches on its own)")
+
+
+def _print_skipped(reason: str, *, as_json: bool, ref: str) -> None:
+    print(json.dumps({"ref": ref, "skipped": reason}, indent=2, sort_keys=True)
+          if as_json else reason)
+
+
 def _queried_names(repo: Path, args) -> list[str]:
     names = list(args.name)
     if args.node:
@@ -175,7 +196,8 @@ def _queried_names(repo: Path, args) -> list[str]:
 
 
 def _matches_on_ref(repo: Path, ref: str, names: list[str]) -> list[Match]:
-    if not names or not ref_exists(repo, ref):
+    """Matches of *names* on *ref*; callers check the ref is readable first."""
+    if not names:
         return []
     inventory = build_inventory(repo, ref)
     return [match for name in names for match in match_name(inventory, name)]
@@ -183,7 +205,10 @@ def _matches_on_ref(repo: Path, ref: str, names: list[str]) -> list[Match]:
 
 def cmd_check(args) -> int:
     repo = _resolve_repo(args)
-    _require_ref(repo, args.ref)
+    skipped = _unreadable_ref(repo, args.ref)
+    if skipped:
+        _print_skipped(skipped, as_json=args.json, ref=args.ref)
+        return 4
     names = _queried_names(repo, args)
     head = args.branch
     if args.pr is not None and head is None:
@@ -244,7 +269,10 @@ def open_pull_requests(prs_file: str | None) -> list[dict]:
 
 def cmd_sweep(args) -> int:
     repo = _resolve_repo(args)
-    _require_ref(repo, args.ref)
+    skipped = _unreadable_ref(repo, args.ref)
+    if skipped:
+        _print_skipped(skipped, as_json=args.json, ref=args.ref)
+        return 4
     report = sweep(repo, args.ref, open_pull_requests(args.prs_file))
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -273,11 +301,14 @@ def cmd_claim(args) -> int:
     names = _claim_names(repo, args)
     path = registry_path(repo, args.registry)
     conflicts = claim_conflicts(read_claims(path), args.issue, names)
-    matches = _matches_on_ref(repo, args.ref, names)
+    skipped = _unreadable_ref(repo, args.ref)
+    matches = [] if skipped else _matches_on_ref(repo, args.ref, names)
     for name, row in conflicts:
         print(f"CONFLICT claim     {name} -> issue #{row.issue} claimed it {row.ts}")
     for match in matches:
         print(match.as_line())
+    if skipped:
+        print(skipped)
     blocked = bool(conflicts or matches)
     if blocked and not args.force:
         print("refusing to record the claim; re-run with --force to override "
@@ -287,7 +318,9 @@ def cmd_claim(args) -> int:
         ts=utcstamp(), action="claim", issue=args.issue, names=tuple(names),
         nodes=tuple(args.node), by=args.by, note=args.note))
     print(f"claimed {len(names)} name(s) for issue #{args.issue} in {path}")
-    return 3 if blocked else 0
+    if blocked:
+        return 3
+    return 4 if skipped else 0
 
 
 def cmd_claims_check(args) -> int:
@@ -295,20 +328,26 @@ def cmd_claims_check(args) -> int:
     names = _claim_names(repo, args)
     conflicts = claim_conflicts(
         read_claims(registry_path(repo, args.registry)), args.issue, names)
-    matches = _matches_on_ref(repo, args.ref, names)
+    skipped = _unreadable_ref(repo, args.ref)
+    matches = [] if skipped else _matches_on_ref(repo, args.ref, names)
     if args.json:
-        print(json.dumps({
+        payload = {
             "issue": args.issue, "names": names,
             "claim_conflicts": [{"name": name, "issue": row.issue, "ts": row.ts}
                                 for name, row in conflicts],
             "duplicates": [match.as_dict() for match in matches],
-        }, indent=2, sort_keys=True))
+        }
+        if skipped:
+            payload["skipped"] = skipped
+        print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         for name, row in conflicts:
             print(f"CONFLICT claim     {name} -> issue #{row.issue} "
                   f"claimed it {row.ts}")
-        print(render_matches(matches, len(names), args.ref))
-    return 3 if (conflicts or matches) else 0
+        print(skipped or render_matches(matches, len(names), args.ref))
+    if conflicts or matches:
+        return 3
+    return 4 if skipped else 0
 
 
 def cmd_claims_release(args) -> int:
@@ -354,8 +393,9 @@ def cmd_predispatch(args) -> int:
               f"record one with: local/bin/dup_check.py claim --issue "
               f"{args.issue} --name <FullyQualified.Name>")
         return 4
-    if not ref_exists(repo, args.ref):
-        print(f"ref {args.ref} not present locally; duplicate check skipped")
+    skipped = _unreadable_ref(repo, args.ref)
+    if skipped:
+        print(skipped)
         return 4
     matches = _matches_on_ref(repo, args.ref, list(claim.names))
     print(render_matches(matches, len(claim.names), args.ref))

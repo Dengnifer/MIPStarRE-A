@@ -208,10 +208,21 @@ class RefSearchTests(unittest.TestCase):
         code, out = run_cli("check", "--repo", str(self.repo), "--branch", "fresh")
         self.assertEqual(code, 0, out)
 
-    def test_missing_ref_is_an_environment_error(self):
-        code = dup_check.main(["check", "--repo", str(self.repo),
-                               "--ref", "github/nope", "--name", "x"])
-        self.assertEqual(code, 2)
+    def test_missing_ref_is_advisory_and_never_reported_clean(self):
+        code, out = run_cli("check", "--repo", str(self.repo),
+                            "--ref", "github/nope",
+                            "--name", "MIPStarRE.QPBT.foo_bar")
+        self.assertEqual(code, 4)
+        self.assertIn("duplicate check skipped", out)
+        self.assertNotIn("no duplicate", out)
+
+    def test_missing_ref_in_json_mode_carries_the_skip(self):
+        code, out = run_cli("check", "--repo", str(self.repo), "--json",
+                            "--ref", "github/nope", "--name", "x")
+        self.assertEqual(code, 4)
+        payload = json.loads(out)
+        self.assertIn("skipped", payload)
+        self.assertNotIn("duplicates", payload)
 
 
 class SweepTests(unittest.TestCase):
@@ -285,6 +296,12 @@ class SweepTests(unittest.TestCase):
         self.assertIn("fully qualified name** (the strongest signal): **0**", text)
         self.assertIn("skipped: head branch not present locally", text)
 
+    def test_sweep_with_an_absent_ref_is_advisory_and_not_clean(self):
+        code, out = run_cli("sweep", "--repo", str(self.repo),
+                            "--ref", "github/nope", "--prs-file", str(self.prs))
+        self.assertEqual(code, 4)
+        self.assertIn("duplicate check skipped", out)
+
     def test_clean_sweep_exits_zero(self):
         prs = Path(self.tmp.name) / "clean.json"
         prs.write_text(json.dumps([
@@ -294,6 +311,42 @@ class SweepTests(unittest.TestCase):
                             "--prs-file", str(prs))
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out)["flagged"], [])
+
+
+class ReportColumnTests(unittest.TestCase):
+    """The per-PR table must count declarations, not matches, as overlap."""
+
+    REPORT = {
+        "ref": "github/main",
+        "generated_at": "2026-09-17T00:00:00Z",
+        "ref_declarations": 2,
+        "pull_requests": [{
+            "number": 11, "title": "one declaration, two matches", "url": "",
+            "head_ref": "topic", "new_declarations": 1,
+            "duplicates": [
+                {"query": "MIPStarRE.QPBT.foo_bar", "match": "fqn",
+                 "fqn": "MIPStarRE.QPBT.foo_bar", "location": "A.lean:6"},
+                {"query": "MIPStarRE.QPBT.foo_bar", "match": "short",
+                 "fqn": "MIPStarRE.Games.foo_bar", "location": "S.lean:5"},
+            ],
+            "by_kind": {"fqn": 1, "statement": 0, "short": 1},
+            "skipped": "",
+        }],
+        "flagged": [11],
+        "flagged_by_name": [11],
+    }
+
+    def test_distinct_declarations_are_counted(self):
+        self.assertEqual(
+            dup_scan.matched_declarations(self.REPORT["pull_requests"][0]["duplicates"]),
+            1)
+
+    def test_overlap_column_cannot_exceed_the_new_declaration_column(self):
+        text = dup_scan.render_sweep_markdown(
+            self.REPORT, title="t", issue=576, pr=579)
+        self.assertIn("| #11 | 1 | 1 | 2 | 1 | 0 | 1 |", text)
+        self.assertIn("| matches |", text)
+        self.assertIn('pr: "#579"', text)
 
 
 if __name__ == "__main__":
