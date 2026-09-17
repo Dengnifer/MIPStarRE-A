@@ -103,7 +103,8 @@ theorem avgOver_directLinePointDist_resample_parameter (params : DirectLdParams)
     unfold directALinePointDist
     simp only [Distribution.avgOver_map]
     rw [← uniformDistribution_map_equiv (directLdSpaceIndexEquiv params).symm]
-    simp only [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod]
+    simp only [Distribution.avgOver_map, uniformDistribution_prod,
+      SandwichProduct.avgOver_distribution_prod]
     apply avgOver_congr
     intro index
     conv_lhs => rw [avgOver_comm]
@@ -120,7 +121,8 @@ theorem avgOver_directLinePointDist_resample_parameter (params : DirectLdParams)
     unfold directDLinePointDist
     simp only [Distribution.avgOver_map]
     rw [← uniformDistribution_map_equiv (directLdSpaceIndexEquiv params).symm]
-    simp only [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod]
+    simp only [Distribution.avgOver_map, uniformDistribution_prod,
+      SandwichProduct.avgOver_distribution_prod]
     apply avgOver_congr
     intro index
     conv_lhs => rw [avgOver_comm]
@@ -441,7 +443,8 @@ theorem SubLineWitness.paired_ordered_overlap_gap_le {params : AdmissibleParams}
               (setting.pointMeasExp second.side .X (projX (point sample))).effect answer.1))
         setting.psiHat‖ ^ 2) ≤ _
     rw [show law = Distribution.prod sublines.D
-      (uniformDistribution (DirectScalarQ params.extendedDirectLd)) from rfl, avgOver_prod]
+      (uniformDistribution (DirectScalarQ params.extendedDirectLd)) from rfl,
+      SandwichProduct.avgOver_distribution_prod]
     dsimp only [point]
     rw [SubLineWitness.avgOver_projX_projZ params sublines
       (fun coordinates => ∑ answer : PauliScalar params × PauliScalar params,
@@ -468,7 +471,7 @@ theorem SubLineWitness.paired_ordered_overlap_gap_le {params : AdmissibleParams}
                   evalOpt sample.2.2 (projZ (point (sample, parameter))) pair.2))))) := by
     change avgOver (Distribution.prod sublines.D
       (uniformDistribution (DirectScalarQ params.extendedDirectLd))) _ = _
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     apply avgOver_congr
     intro sample
     apply avgOver_congr

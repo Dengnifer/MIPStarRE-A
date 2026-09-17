@@ -72,7 +72,7 @@ theorem SubLineWitness.avgOver_regrouped_eq_at {P : AdmissibleParams}
                     (s.1.1.base + s.2 • s.1.1.direction)))
                   (projZ (directPointToPauli P
                     (s.1.1.base + s.2 • s.1.1.direction))) o.1 o.2))) := by
-  rw [avgOver_prod]
+  rw [SandwichProduct.avgOver_distribution_prod]
   refine avgOver_congr _ _ _ fun sample => ?_
   refine avgOver_congr _ _ _ fun t => ?_
   exact (regroup_line_answer_sum_at lines first second sample.2.1 sample.2.2 _ _ (G _ _)).symm
