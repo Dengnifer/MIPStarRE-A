@@ -1495,3 +1495,4 @@
 {"ts": "2026-09-18T04:42:50+0900", "kind": "ci-build", "trigger": "ci.sh pr=581", "seconds": 114, "outcome": "success", "sha": "8eaebbe3e0ffbb947456361ea74ed1b757e3fd8c", "note": "branch issue-519-witness-docstring-20260918"}
 {"ts": "2026-09-18T04:53:26+0900", "kind": "ci-build", "trigger": "ci.sh pr=582", "seconds": 199, "outcome": "success", "sha": "9bd12f2d31e1608ab1aa33765c6fb4da2f6e05bf", "note": "branch issue-395-preserve-combined-support-20260918"}
 {"ts": "2026-09-18T04:58:14+0900", "kind": "ci-build", "trigger": "ci.sh pr=271", "seconds": 36, "outcome": "success", "sha": "5840bcbb342f3cf646f1a2c38c0565ea464245b6", "note": "branch issue-267-ideal-point-perfect-consistency"}
+{"ts": "2026-09-18T05:40:57+0900", "kind": "ci-build", "trigger": "ci.sh pr=456", "seconds": 36, "outcome": "success", "sha": "d9bd07927083965375696006dd7eb52a9dffcc33", "note": "branch issue-452-mixed-line-resampling"}
