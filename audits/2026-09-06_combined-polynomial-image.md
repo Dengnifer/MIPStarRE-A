@@ -1,3 +1,18 @@
+---
+title: "The separated polynomial image: statement integrity"
+date: 2026-09-06
+purpose: >
+  Records the statement-integrity audit of the separated locus of the
+  polynomial combining map, comparing the new declarations of
+  MIPStarRE/QPBT/Combining/CombinedPolynomialImage.lean with the combining map
+  and separated image of the source paper and of the blueprint.
+status: active
+track: qpbt
+kind: statement-integrity-audit
+issue: "#284"
+pr: "#289"
+---
+
 # The separated polynomial image: statement integrity
 
 Issue #284 concerns the algebraic combining map in
@@ -85,8 +100,10 @@ requested recovery map with a chosen inverse.
 The reverse degree bound uses `combinedCoef_mem_polyFunc` and preservation of
 individual degree under an injective renaming. The forward direction uses
 the proved `combinePolyTuple_mem_polyFunc` after embedding the two separate
-point blocks. It does not use the admitted `combinePoly_mem_polyFunc` in
-`Combining/Defs.lean`.
+point blocks, rather than the equally proved direct theorem
+`combinePoly_mem_polyFunc` of `Combining/Defs.lean`; both are complete proofs
+at this head, and routing through the tuple map keeps the argument uniform
+with the reconstruction direction.
 
 ## Scope and proof integrity
 
