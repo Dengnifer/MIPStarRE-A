@@ -256,14 +256,15 @@ c8f1999): read-only research data, never edited or read as active input.
 Pinned issue #500 is the permissions-only owner inbox. Post there only when an
 action needs the owner's permission because its risk extends beyond the
 project's development, for example changing the owner's files, the machine or
-its accounts, spending money, or acting outside this repository. A decision
+its accounts, spending money, or acting outside this repository. Changing the
+stated project goal also requires an owner decision there. Any other decision
 whose only risk is failing to finish the project is main's to make and record
 in `results/telemetry/design-decisions.md` and on #27, never a blocker. Routine
 reports, watchdog and poller notes, and progress also go to #27. Issue #26 is
 archived and receives no new comments.
 
 Use one #500 comment per blocker. The visible part is at most ten lines in
-plain words and has this form; ids continue from B11.
+plain words and has this form; ids continue after B11, so the next id is B12.
 
 ```markdown
 <!-- owner-inbox id=B<n> -->
@@ -323,13 +324,15 @@ is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. Main decides mathematical
 corrections with the preceding evidence and independent review, including
 definition/game corrections that preserve the intended source semantics;
-main must not silently change the stated project goal. If the current authorized
-budget expires, stop that lane and record the attempted statements,
-counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Main then decides and records the
-project outcome from that evidence; mathematical difficulty alone is not an
-owner decision. Use #500 only when the next action independently crosses the
-owner-permission boundary stated above.
+changing the stated project goal is outside main's authority and requires an
+owner decision on #500. If the current authorized budget expires, stop that lane
+and record the attempted statements, counterexamples, proof sketches and
+unresolved consumers on #27 and in the gap note. Do not reset attempts or
+working time. Main then decides and records the project outcome from that
+evidence; mathematical difficulty alone is not an owner decision. Recording a
+decision never substitutes for that owner decision on the goal. Otherwise use
+#500 only when the next action independently crosses the owner-permission
+boundary stated above.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the

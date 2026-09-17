@@ -46,7 +46,7 @@ The current owner inbox is #500 and is permissions-only: main decides and
 records outcomes whose only risk is failure to finish the project. Any genuine
 owner blocker uses one comment with at most ten visible plain-language lines,
 lettered options, a recommendation, and the literal
-`DECISION B<n>: <letter>` reply; ids continue from B11 and details are folded.
+`DECISION B<n>: <letter>` reply; ids continue after B11 and details are folded.
 No other source-paper discrepancy discussed in those records lacked a note.
 
 Future QPBT paper-gap packets should add a row here when they add a note and

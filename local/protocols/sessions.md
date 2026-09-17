@@ -225,7 +225,7 @@ per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
 Main decides and records nonconverged project outcomes. Pinned owner inbox #500
 is only for permission whose risk extends beyond project development, and any
 such blocker uses section 6's at-most-ten-line plain-language format with ids
-continuing from B11. Issue #26 is archived and receives no new comments.
+continuing after B11. Issue #26 is archived and receives no new comments.
 
 ## 3. Naming
 

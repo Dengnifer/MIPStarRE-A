@@ -111,7 +111,7 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
     and records every question whose only risk is failure to finish the
     project. Each blocker is one comment with at most ten visible
     plain-language lines: what is stuck, lettered options, one recommendation,
-    and the literal `DECISION B<n>: <letter>` reply. Ids continue from B11;
+    and the literal `DECISION B<n>: <letter>` reply. Ids continue after B11;
     details are folded. Its immutable `<!-- owner-inbox id=B<n> -->` identity
     marker keys every `ensure-pr-comment` update; resolution changes the
     separate status field to `<!-- owner-inbox-status=closed -->` and adds

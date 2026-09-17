@@ -27,7 +27,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   ten plain-language lines: `BLOCKER B<n>`, one line saying what is stuck,
   lettered one-line options, one recommendation, and the literal reply
   `DECISION B<n>: <letter>`, where the letter is one offered alternative (`A`,
-  `B`, or `C`). Ids continue from B11. Key both creation and resolution with the
+  `B`, or `C`). Ids continue after B11. Key both creation and resolution with the
   unchanged `<!-- owner-inbox id=B<n> -->` marker passed to
   `gh_common.py ensure-pr-comment`; keep `<!-- owner-inbox-status=open -->` as a
   separate body field. After the owner replies, update that same comment, set

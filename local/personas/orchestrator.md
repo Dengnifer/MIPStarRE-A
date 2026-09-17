@@ -37,7 +37,7 @@ that dispatches other sessions. Runtime state lives in `~/.cache/mipstarre-dev/`
    #500 is only for permission whose risk extends beyond project development.
    One blocker occupies one comment and at most ten visible plain-language
    lines: what is stuck, lettered options, a recommendation, and the literal
-   `DECISION B<n>: <letter>` reply; ids continue from B11 and details are folded.
+   `DECISION B<n>: <letter>` reply; ids continue after B11 and details are folded.
    Issue #26 is archived and receives no new comments.
 4. **Validation ladder**, for your checks and every instruction you write:
    `lake env lean <file>` → `rg -n "sorry|axiom" <file>` → `lake build` only
