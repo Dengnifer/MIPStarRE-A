@@ -35,7 +35,7 @@ and the commutators on the two placements, since
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:743-790`,
 blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex:851-880`
 (`lem:qld-4-10`, first step); the identity route is explained in
-`docs/paper-gaps/qpbt_combined-points-direct.tex`.
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -48,19 +48,6 @@ open MIPStarRE.Quantum DistanceCalculus
 noncomputable section
 
 /-! ## Quadratic-form identities -/
-
-/-- The quadratic form of `Wᴴ M W` in `ψ` is the quadratic form of `M` in
-`W ψ`. -/
-theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
-    stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
-  unfold stateQForm
-  rw [DistanceCalculus.applyOperatorToState_mul,
-    DistanceCalculus.applyOperatorToState_mul]
-  congr 1
-  change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
-    inner ℂ (Matrix.toEuclideanLin W ψ) _
-  rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint, LinearMap.adjoint_inner_right]
 
 /-- The squared norm of `W ψ` is the quadratic form of `Wᴴ W`. -/
 theorem norm_applyOperatorToState_sq_eq_stateQForm {ι : Type*} [Fintype ι]
