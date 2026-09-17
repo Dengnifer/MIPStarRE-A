@@ -799,6 +799,55 @@ assembled by Fourier averaging.
 	$\mathcal{O}^u$ is used. The hypothesis then bounds the average by $\eta$.
 \end{proof}
 
+\begin{lemma}[Field-valued approximate commutation of the expanded point
+	measurements]
+	\label{lem:expanded-point-field-commutation}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPoint_comm}
+	\leanok
+	\uses{lem:qld-comm-cons, def:expanded-state,
+		def:expanded-point-measurement, def:povm-distance,
+		def:symmetric-equivalents}
+	There is a constant $C \geq 1$ such that the following holds for every
+	admissible parameter set, every $\eps$, every projective strategy of value
+	at least $1-\eps$, and each of the four register placements of
+	Definition~\ref{def:symmetric-equivalents}. Writing $(\cdot)_p$ for the
+	chosen placement, on average over uniformly random $x, z \in \F_q^m$,
+	\[
+		\E_{x,z} \sum_{a, b \in \F_q}
+		\bigl\lVert
+		\bigl(\hat{M}^{(\mathrm{Point},X),x}_{a}\,
+		\hat{M}^{(\mathrm{Point},Z),z}_{b}
+		- \hat{M}^{(\mathrm{Point},Z),z}_{b}\,
+		\hat{M}^{(\mathrm{Point},X),x}_{a}\bigr)_{p}
+		\ket{\hat{\psi}}
+		\bigr\rVert^2
+		\;\leq\; C\sqrt{\eps}\,.
+	\]
+	The outcomes $a, b$ range over $\F_q$, whereas the commutation conclusion
+	of item~2 of Lemma~\ref{lem:qld-comm-cons} is stated for the binary
+	refinements in $\F_2$. The error is the same $\sqrt{\eps}$: the transfer
+	to field-valued outcomes loses no factor depending on the field size.
+	This is the estimate actually used by the formal proof of
+	Lemma~\ref{lem:qld-4-10}; paper
+	\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:466--505}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-comm-cons, lem:twisted-commutation,
+		def:expanded-observables, def:expanded-point-measurement}
+	Each field-valued effect is the character average of the expanded point
+	observables over the dual scalar, so the commutator of the two effects is
+	the corresponding average of the commutators of the observables. The
+	characters of $\F_q$ are orthogonal, so, for each fixed $x,z$ and placement
+	$p$, Parseval's identity identifies the unnormalized sum over the outcomes
+	$a,b$ of the squared effect-commutator norms with the uniform average over
+	the dual scalars $r,s$ of the squared observable-commutator norms.
+	Averaging this identity over uniformly random $x,z$ gives the
+	twisted-commutator average, with no factor depending on $q$
+	(Lemma~\ref{lem:twisted-commutation}) already bounded by $C\sqrt{\eps}$ in
+	the proof of item~2 of Lemma~\ref{lem:qld-comm-cons}.
+\end{proof}
+
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
@@ -844,117 +893,204 @@ assembled by Fourier averaging.
 	conclusions.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-comm-cons, def:expanded-point-trace-projection,
-		fact:add-a-proj, fact:agreement, lem:ortho, thm:linearity,
-		lem:avg-closeness, lem:cancellation, def:povm-distance}
-	Throughout the proof every intermediate error is a $\poly(\eps)$ function
-	that may differ from one use of $\approx_\delta$ to the next. For
-	$\omega = (x,z,r,s) \in \F_q^m \times \F_q^m \times \F_q \times \F_q$
-	and $a, b \in \F_2$ define the sandwich POVM
-	$\hat{R}^{\omega}_{a,b}
-	= \hat{M}^{(\mathrm{Point},Z),z,s}_{b}
-	\hat{M}^{(\mathrm{Point},X),x,r}_{a}
-	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}$
-	from the binary refinements of
-	Definition~\ref{def:expanded-point-trace-projection}; by the approximate
-	commutation of Lemma~\ref{lem:qld-comm-cons}, projectivity, and
-	Lemma~\ref{fact:add-a-proj}, on average over $\omega$ one has
-	$\hat{R}^{\omega}_{a,b}
-	\approx_{\sqrt{\delta_{\mathrm{acom}}}}
-	\hat{M}^{(\mathrm{Point},Z),z,s}_{b}
-	\hat{M}^{(\mathrm{Point},X),x,r}_{a}$,
-	and a Cauchy--Schwarz chain with successive errors
-	$\delta_{\mathrm{acom}}^{1/4}$, $\delta_{\mathrm{acom}}^{1/4}$,
-	$\sqrt{\eps}$, $\eps$ establishes the self-consistency
-	$(\hat{R}^{\omega}_{a,b})_{\mathsf{A}\mathsf{A}'} \simeq_\delta
-	(\hat{R}^{\omega}_{a,b})_{\mathsf{B}\mathsf{A}''}$, hence the
-	corresponding $\approx_\delta$ relation by Lemma~\ref{fact:agreement}.
-	The orthonormalization lemma (Lemma~\ref{lem:ortho}) then produces
-	projective measurements $\{\hat{L}^{\omega}_{a,b}\}$ with
-	$\hat{L}^{\omega}_{a,b} \approx_\delta \hat{R}^{\omega}_{a,b}$ on
-	average over $\omega$. Next, the refined point measurements satisfy the
-	exact linearity
-	$\sum_{b+b'=c} \hat{M}^{(\mathrm{Point},W),u,r}_{b}
-	\hat{M}^{(\mathrm{Point},W),u,r'}_{b'}
-	= \hat{M}^{(\mathrm{Point},W),u,r+r'}_{c}$
-	(a direct consequence of projectivity of
-	$\{\hat{M}^{(\mathrm{Point},W),u}_a\}$), which transfers, on average over
-	$x, z, r, r', s, s'$, to an approximate linearity of the
-	$\{\hat{R}^{\omega}_{a,b}\}$ in the index pair $(r,s)$ and then to the
-	$\{\hat{L}^{\omega}_{a,b}\}$. Consequently the binary observables
-	$\mathcal{O}^{\omega}
-	= \sum_{a,b \in \F_2} (-1)^{a+b} \hat{L}^{\omega}_{a,b}$
-	satisfy
-	$\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	\approx_\delta \mathcal{O}^{x,z,r+r',s+s'}$
-	on average over $x, z, r, r', s, s'$. Identify $\F_q \cong \F_2^t$ so
-	that the pair $(r,s)$ ranges over $\F_2^{2t}$, and let $\rho$ be the
-	reduced density operator of $\ket{\hat\psi}$ on the registers carrying
-	the $\mathcal{O}^{\omega}$, so that $\Tr(S\rho)$ is the expectation
-	value of $S$ in $\ket{\hat\psi}$ for every operator $S$ on those
-	registers. For fixed $(x,z)$ let $\delta_{x,z}$ denote the
-	conditional average, given $(x,z)$, of the squared linearity defect
-	$\lVert (\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	- \mathcal{O}^{x,z,r+r',s+s'}) \ket{\hat\psi} \rVert^2$, so that
-	$\E_{x,z}\, \delta_{x,z} = O(\delta)$; expanding the square, using
-	unitarity of the observables, and relabelling the averaged index pair
-	shows that, for each $(x,z)$, the correlation hypothesis of
-	Theorem~\ref{thm:linearity} holds in the form
-	$\E\, \Tr(\mathcal{O}^{x,z,r,s} \mathcal{O}^{x,z,r',s'}
-	\mathcal{O}^{x,z,r+r',s+s'} \rho)
-	= 1 - \tfrac{1}{2}\delta_{x,z}$,
-	the average being over $(r,s)$ and $(r',s')$ uniform in $\F_2^{2t}$.
-	Since Theorem~\ref{thm:linearity} imposes no upper bound on its error
-	parameter, it applies for every fixed $(x,z)$ with
-	$\delta := \tfrac{1}{2}\delta_{x,z}$ and yields binary observables
-	$\{\mathcal{L}^{x,z,r,s}\}$, exactly linear in $(r,s)$ for all pairs,
-	acting on an extension by an ancilla register in a pure state, with
-	$\E_{r,s}\, d\big(\mathcal{L}^{x,z,r,s},\ \mathcal{O}^{x,z,r,s} \ot
-	\Id\big)^2 \le \delta_{x,z}$
-	in the state-dependent distance of the extended state; taking the
-	expectation over $(x,z)$ shows that the two families are
-	$\delta$-close, in the sense of Definition~\ref{def:povm-distance},
-	on average over $x, z, r, s$, the averaged form of closeness being
-	the one Theorem~\ref{thm:linearity} supplies and the only one used
-	below (Remark~\ref{rem:linearity-import}).
-	% Import obligation (see rem:linearity-import): the ancilla register
-	% and its pure state produced by thm:linearity may depend on (x,z);
-	% following the source ("By assuming that |hat psi> has sufficiently
-	% many ancilla zero qubits, we do not need to extend the state
-	% further", references/qpbt-paper/
-	% 14_analysis_of_the_pauli_basis_test.tex:832), they are to be
-	% absorbed, uniformly in (x,z), into zero-state padding of the
-	% strategy state, so that the L^{x,z,r,s} act on hilb ot (C^q)^{ot M}
-	% as the statement requires. The source assumes this padding without
-	% construction; the absorption is an unresolved obligation of the
-	% import, not established here.
-	The ancilla register and its state are absorbed into zero-state
-	padding of the strategy state, an obligation of the import recorded
-	in Remark~\ref{rem:linearity-import}. Define
-	$\hat{Q}^{x,z}_{a,b}
-	= \E_{r,s} (-1)^{\tr(ra+sb)} \mathcal{L}^{x,z,r,s}$
-	for $a, b \in \F_q$: exact linearity makes each $\hat{Q}^{x,z}_{a,b}$ a
-	projection, and the family sums to the identity because
-	$\sum_{a,b} \hat{Q}^{x,z}_{a,b} = \mathcal{L}^{x,z,0,0} = \Id$, the
-	latter identity because exact linearity at $(r,s) = (r',s') = (0,0)$
-	makes $\mathcal{L}^{x,z,0,0}$ an idempotent unitary; so
-	$\{\hat{Q}^{x,z}_{a,b}\}$ is a
-	projective measurement recovering $\F_q$-valued outcomes from the binary
-	data by Fourier averaging over $(r,s)$. Its self-consistency
-	\eqref{eq:qld-q-self-cons} follows from Lemma~\ref{lem:avg-closeness}
-	together with the self-consistency of the $\{\mathcal{O}^{\omega}\}$;
-	the consistency \eqref{eq:qld-q-cons-m-hat-zx} follows from a Fourier
-	computation that replaces $\mathcal{L}$ by $\mathcal{O}$, then by
-	$\hat{R}$, then by the ordered product of refined point measurements, and
-	finally resolves the averages over $r$ and $s$ using
-	Lemma~\ref{lem:cancellation}; and \eqref{eq:qld-q-cons-m-hat-xz} follows
-	by inserting one application of the approximate commutation of
-	Lemma~\ref{lem:qld-comm-cons} into the same chain. Repeating the argument
-	with the tensor factors on registers $\mathsf{B}\mathsf{B}'$ and
-	$\mathsf{A}\mathsf{B}''$ gives all symmetric equivalents.
+	\leanok
+	\uses{lem:qld-comm-cons, lem:expanded-point-field-commutation,
+		lem:ortho, fact:triangle,
+		def:expanded-point-measurement, def:symmetric-equivalents,
+		def:povm-distance}
+	The formal proof works with field-valued outcomes directly. On each
+	expanded local space form the complete sandwich POVM
+	$R^{x,z}_{a,b}=M^{Z,z}_b M^{X,x}_a M^{Z,z}_b$.
+	Field-valued approximate commutation bounds its distance from the ordered
+	point product. Point self-consistency and the same commutation estimate
+	bound its off-diagonal overlap across opposite placements.
+	Apply orthonormalization to obtain a projective measurement for each
+	point pair, on the same expanded local space, close to this POVM.
+	The squared-distance triangle inequality gives self-consistency of the
+	projective families and their distances from both ordered products.
+	The placement comparisons give all symmetric equivalents.
+	The estimates are absorbed into $\delta_Q(\eps)=K\eps^{1/8}$ for one
+	universal constant $K$.
+
+	This proves the stated measurement construction without using the source's
+	intermediate binary refinements and quantum linearity construction.
+	The zero-state padding needed by that source proof remains the separate
+	import issue in Remark~\ref{rem:linearity-import} and
+	\cite{gap:qpbt_linearity-theorem-quotation}.
 \end{proof}
 
 \section{Combined line measurements}
+
+\begin{lemma}[Formalization support for coefficient polynomial agreement]
+	\label{lem:coefficient-polynomial-agreement}
+	\lean{MIPStarRE.QPBT.evalCoefficient_collision_card_le}
+	\lean{MIPStarRE.QPBT.linePolynomialOfCoefficients_eq_ofFn,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_eval,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_injective,
+		MIPStarRE.QPBT.linePolynomialOfCoefficients_natDegree_le}
+	\leanok
+	Let $K$ be a finite integral domain, let $c\in\N$, and let
+	$f,g\in K^{c+1}$ be distinct coefficient vectors. Their polynomials
+	$p_f(T)=\sum_{i=0}^{c}f_iT^i$ and $p_g(T)=\sum_{i=0}^{c}g_iT^i$
+	agree at at most $c$ elements of $K$.
+	The coefficient representation is injective, preserves evaluation,
+	and has natural degree at most $c$.
+	This is a formalization-only auxiliary for the Schwartz--Zippel step
+	in the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:955}).
+	There is no restriction $c<|K|$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The coefficient representation is injective, preserves evaluation,
+	and gives polynomials of degree at most $c$. If the polynomials agreed
+	at more than $c$ elements, the univariate root bound applied to their
+	difference would force them to be equal, contradicting $f\ne g$.
+\end{proof}
+
+\begin{lemma}[Evaluation at the parameter of a nondegenerate affine line]
+	\label{lem:affine-line-evaluation}
+	\lean{MIPStarRE.QPBT.evalOpt_affine_parameter_of_direction_ne_zero}
+	\leanok
+	\uses{def:ld-line-description, def:ideg-deg-polynomials, def:line}
+	Let $\ell$ be a line description with base point $u_0$ and direction
+	$v \neq 0$, let $c \in \N$, let $f \in \deg_{c}(\ell)$ be given by its
+	coefficient list, and let $t \in \F_q$. Then the completed evaluation of
+	$f$ at the point $u_0 + t v$ is defined and equals the value of the
+	coefficient polynomial of $f$ at $t$.
+	This is the geometric step of the collision argument in the proof of
+	Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}): on a
+	line with nonzero direction a point determines its affine parameter, so
+	completed evaluation is unambiguous there.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The point $u_0 + t v$ lies on $\ell$ with parameter $t$. If
+	$u_0 + t v = u_0 + t' v$ for some $t'$, then $(t - t')v = 0$, and
+	$v \neq 0$ forces $t = t'$. The parameter witnessing membership is
+	therefore unique, so completed evaluation is defined at $u_0 + t v$ and
+	returns the value of the coefficient polynomial at $t$.
+\end{proof}
+
+\begin{definition}[Formalization support: retained nondegenerate mass]
+	\label{def:nondegenerate-line-pasting-mass}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+	\leanok
+	\uses{def:line-point-dist}
+	Fix an arbitrary low-degree parameter tuple $L=(q,m,d,k)$ as in
+	Definition~\ref{def:ld-game}. Write $D_{\mathsf{Line}}^L$ for the source
+	line-point law at $L$ and $\widetilde D_{\mathsf{Line}}^L$ for its
+	seed-bearing refinement in Definition~\ref{def:line-point-dist}. In the
+	refined law, $\ell$ is a line description retaining its kind, canonical base
+	point and seed $s$: an axis description records $(u_0,s)$ and a diagonal
+	description records $(u_0,s,v)$, with the base and prefix conditions of that
+	definition. Set $\operatorname{dir}(\ell)=e_{\chi(s)}$ in the axis case and
+	$\operatorname{dir}(\ell)=v$ in the diagonal case; the latter is the stored,
+	already projected direction. Mapping the axis description to
+	$(u_0,e_{\chi(s)})$ and leaving the diagonal description unchanged sends
+	$\widetilde D_{\mathsf{Line}}^L$ to $D_{\mathsf{Line}}^L$.
+	For two independent samples
+	$(\ell_X,x),(\ell_Z,z)\sim\widetilde D_{\mathsf{Line}}^L$, define the retained mass
+	\[
+		\mu_{\mathrm{nd}}(L)
+		:= \sum_{\substack{(\ell_X,x),(\ell_Z,z)\\
+			\operatorname{dir}(\ell_X)\ne 0}}
+		\widetilde D_{\mathsf{Line}}^L(\ell_X,x)
+		\widetilde D_{\mathsf{Line}}^L(\ell_Z,z).
+	\]
+	Thus $\mu_{\mathrm{nd}}(L)$ is the probability that the first sampled line
+	has nonzero direction; the second line-point sample is unrestricted. This is
+	a formalization-only normalization factor for the conditioning step in the
+	proof of Lemma~\ref{lem:qld-xz-lines}. It does not replace the independent,
+	unconditioned product law in that lemma's statement.
+\end{definition}
+
+\begin{theorem}[Formalization support: retained-mass bounds]
+	\label{thm:nondegenerate-line-pasting-mass-bounds}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass}
+	For every low-degree parameter tuple $L$,
+	\[
+		\frac12\leq \mu_{\mathrm{nd}}(L)\leq 1.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass, def:line-point-dist,
+		lem:axis-line-zero-direction-mass}
+	The axis-parallel component has weight one half and always has nonzero
+	direction, while the diagonal component contributes nonnegative mass. This
+	gives the lower bound. The upper bound follows because the retained samples
+	form an event in the product of two probability distributions.
+\end{proof}
+
+\begin{theorem}[Formalization support: positivity of the retained mass]
+	\label{thm:nondegenerate-line-pasting-mass-positive}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass}
+	For every low-degree parameter tuple $L$, the event
+	$\operatorname{dir}(\ell_X)\ne 0$ has positive mass under
+	$\widetilde D_{\mathsf{Line}}^L\times\widetilde D_{\mathsf{Line}}^L$; equivalently,
+	$0<\mu_{\mathrm{nd}}(L)$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:nondegenerate-line-pasting-mass-bounds}
+	The lower bound $\mu_{\mathrm{nd}}(L)\geq\frac12$ is strictly positive.
+\end{proof}
+
+\begin{definition}[Formalization support: conditioned pasting distribution]
+	\label{def:nondegenerate-line-pasting-dist}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Condition $\widetilde D_{\mathsf{Line}}^L\times\widetilde D_{\mathsf{Line}}^L$ on
+	$\operatorname{dir}(\ell_X)\ne 0$, using the positive retained mass from
+	Theorem~\ref{thm:nondegenerate-line-pasting-mass-positive}, and push the
+	result forward along
+	\[
+		\big((\ell_X,x),(\ell_Z,z)\big)
+		\longmapsto
+		\big(((\ell_X,\ell_Z),(\ell_Z,z)),(\ell_X,x)\big).
+	\]
+	Denote the resulting distribution by $D_{\mathrm{nd}}^L$; every line
+	description in its carrier still retains its seed. Thus the paired lines
+	are ordered $X,Z$, followed by the full $Z$ sample and then the full
+	$X$ sample, and only the first, $X$-line direction is restricted. This
+	formalization-only law supports the pasting construction. The source
+	conclusion of Lemma~\ref{lem:qld-xz-lines} remains an average over two
+	independent, unconditioned samples from $D_{\mathsf{Line}}^L$.
+	Lemma~\ref{lem:qld-line-conditioning-restoration} transfers the internal
+	estimate back to the unconditioned product of the refined laws, as used in
+	Lemma~\ref{lem:qld-paired-line-restored-defect}. The resulting comparison is
+	on the completed answer alphabet $(\F_q\cup\{\bot\})^2$: line evaluation
+	returns $\bot$ when no value at the sampled point is determined, and the
+	joint point measurement assigns zero effect to outcomes containing $\bot$.
+	The source comparison instead has answers $(a,b)\in\F_q^2$.
+	Relating these answer conventions remains necessary to identify the
+	completed-answer estimate with Lemma~\ref{lem:qld-xz-lines}; restoring the
+	unconditioned law does not by itself make that identification.
+\end{definition}
+
+\begin{theorem}[Formalization support: normalization of the conditioned law]
+	\label{thm:nondegenerate-line-pasting-dist-probability}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist}
+	For every low-degree parameter tuple $L$, $D_{\mathrm{nd}}^L$ is a
+	probability distribution.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive}
+	Normalization by the positive retained mass gives a probability
+	distribution on the restricted event, and push-forward preserves total mass.
+\end{proof}
 
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
@@ -992,7 +1128,8 @@ assembled by Fourier averaging.
 	\uses{def:expanded-line-measurement, lem:qld-4-10, fact:add-a-proj,
 		lem:cool-closeness-fact, lem:qld-comm-line-cons, fact:agreement,
 		fact:data-processing, lem:pasting, lem:schwartz-zippel-total-degree,
-		def:symmetric-equivalents}
+		def:symmetric-equivalents, def:concrete-paired-line-measurement,
+		lem:concrete-paired-line-degree-support}
 	Define, for all lines $\ell_X, \ell_Z$ and
 	$(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$, the sandwich
 	operator
@@ -1050,6 +1187,334 @@ assembled by Fourier averaging.
 	the registers modified gives all symmetric equivalents.
 \end{proof}
 
+\begin{definition}[The concrete paired-line POVM]
+	\label{def:concrete-paired-line-measurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_effect}
+	\leanok
+	\uses{def:expanded-line-measurement, def:povm-conventions,
+		def:ideg-deg-polynomials}
+	For any projective setting, either player, and any two source lines,
+	define the POVM on the expanded local space by
+	\[
+		T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+		 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+		 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X},
+		\qquad (f_X,f_Z)\in\deg_{md}(\ell_X)\times\deg_{md}(\ell_Z).
+	\]
+	Each effect is positive. Summing first over $f_Z$ and then over $f_X$
+	gives the identity by completeness and projectivity of the line
+	measurements. This is the construction in the proof of
+	Lemma~\ref{lem:qld-xz-lines} in \cite{Ji2020MIPStar}.
+\end{definition}
+
+\begin{lemma}[Axis-degree support of the concrete paired-line POVM]
+	\label{lem:concrete-paired-line-degree-support}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_X}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_Z}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	For either player and $W\in\{X,Z\}$, if $\ell_W$ is axis-parallel
+	and $f_W$ does not have degree at most $d$, then
+	$T^{\ell_X,\ell_Z}_{f_X,f_Z}=0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	The corresponding expanded line effect vanishes outside degree $d$.
+	It is a factor of the defining sandwich, so the sandwich vanishes.
+\end{proof}
+
+\begin{lemma}[Formalization support: point marginals and completed answers]
+	\label{lem:qld-line-point-marginal-identities}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_point}
+	\lean{MIPStarRE.QPBT.avgOver_prod_linePointDist_points}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_fst_effect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.postprocess_snd_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.opFamilyDistSq_postprocess_some}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.completed_fst_effect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.completed_snd_effect}
+	\leanok
+	\uses{def:line-point-dist, def:povm-distance, lem:qld-4-10}
+	The point marginal of the line-point distribution is uniform, and two
+	independent line-point samples have independent uniform point marginals.
+	For a joint point measurement, postprocessing by either coordinate gives
+	the corresponding marginal sum. Adjoining an undefined answer with zero
+	effect preserves the state-dependent squared distance between two
+	measurements. Moreover, taking either marginal commutes with adjoining this
+	answer, both before and after completing a joint point measurement.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, def:povm-distance, lem:qld-4-10}
+	The marginal identities follow by expanding the line-point mixture and the
+	postprocessing sums. The additional answer contributes the zero operator,
+	so it contributes neither to a marginal nor to the squared distance.
+\end{proof}
+
+\begin{lemma}[Formalization support: point-to-line marginal estimates]
+	\label{lem:qld-point-line-marginal-bounds}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_option_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_option_linePoint_distance_le}
+	\lean{MIPStarRE.QPBT.exists_expLine_point_same_placement_distance_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_distance_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_line_marginal_defect_le}
+	\leanok
+	\uses{lem:qld-line-point-marginal-identities, lem:qld-4-10,
+		lem:qld-comm-line-cons, fact:triangle, def:consistency}
+	Let the joint point witness have error $\delta_Q$. On every directed
+	opposite placement, each of its $X$ and $Z$ marginals has squared distance
+	at most $4\delta_Q$ from the corresponding point measurement, both on the
+	original and on the completed answer alphabet. There is a universal
+	$C_0\geq1$ such that an evaluated line measurement and the corresponding
+	completed point measurement on the same placement have squared distance at
+	most $C_0(\eps+\sqrt\eps)$.
+
+	Consequently, for universal constants $C_1,C_2\geq1$, which need not be
+	equal, both completed joint-point marginals have squared distance at most
+	\[
+		8\delta_Q+C_1(\eps+\sqrt\eps)
+	\]
+	from the corresponding evaluated line measurements, and the analogous two
+	consistency defects are at most
+	$8\delta_Q+C_2(\eps+\sqrt\eps)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-line-point-marginal-identities, lem:qld-4-10,
+		lem:qld-comm-line-cons, fact:triangle, def:consistency}
+	Rewrite the line-point averages using their uniform point marginals. Apply
+	the point-witness estimates, then insert the evaluated line measurement and
+	use the squared-distance triangle inequality. The consistency estimates
+	follow from the corresponding distance bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: discarded zero directions]
+	\label{lem:qld-zero-direction-mass}
+	\lean{MIPStarRE.QPBT.dLinePointDist_zero_direction_mass_le}
+	\lean{MIPStarRE.QPBT.linePointDist_zero_direction_mass_le}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_zero_X_direction_mass_le}
+	\leanok
+	\uses{def:line-point-dist}
+	Under the diagonal line-point law, the probability of a zero direction is
+	at most $1/q$. Under the equal mixture of axis-parallel and diagonal laws it
+	is at most $1/(2q)$. Hence, for two independent line-point samples, removing
+	the event that the $X$-line has zero direction discards mass at most
+	$1/(2q)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist}
+	A zero diagonal direction forces the final unprojected direction coordinate
+	to vanish, and that coordinate is uniform. Axis-parallel directions are
+	nonzero. Averaging the two cases and then the unused independent sample gives
+	the stated bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: retained nonzero-direction mass]
+	\label{lem:qld-nondegenerate-line-mass}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_mass_ge}
+	\leanok
+	\uses{def:line-point-dist, lem:qld-zero-direction-mass}
+	For every admissible low-degree parameter tuple, the unchanged line-point
+	law assigns probability at least $3/4$ to lines with nonzero direction.
+	This is an auxiliary bound for the conditioning in the proof of
+	Lemma~\ref{lem:qld-xz-lines}, not an additional source assertion.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-zero-direction-mass}
+	The retained probability is one minus the zero-direction probability.
+	Lemma~\ref{lem:qld-zero-direction-mass} bounds the latter by $1/(2q)$,
+	which is at most $1/4$ because a field has at least two elements.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditioning and restoring line defects]
+	\label{lem:qld-line-conditioning-restoration}
+	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
+	\lean{MIPStarRE.QPBT.exists_combinedPoints_conditioned_line_marginal_defect_le}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_mass}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
+		def:consistency, def:concrete-paired-line-measurement}
+	Write $\mu=\mu_{\mathrm{nd}}(L)$ for the retained mass and use
+	$D_{\mathrm{nd}}^L$ for the conditioned law. For arbitrary complete
+	measurements on directed opposite placements, conditioning on nonzero $X$ direction
+	increases the consistency defect by at most a factor $1/\mu$, while restoring
+	the original law gives
+	\[
+		\operatorname{defect}_{\mathrm{all}}
+		\leq \mu\operatorname{defect}_{\mathrm{cond}}+\frac1{2q}.
+	\]
+	For the completed joint point marginals and the evaluated $Z$- and $X$-line
+	measurements in the order required by the $X$-outer sandwich, there is a
+	universal $C\geq1$ for which both conditioned defects are at most
+	\[
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}.
+	\]
+	The same restoration inequality applies to the concrete paired-line
+	measurement and the completed joint points.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-point-line-marginal-bounds, lem:qld-zero-direction-mass,
+		def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive,
+		def:consistency, def:concrete-paired-line-measurement}
+	Restrict the finite expectation to the nondegenerate event and divide by its
+	positive mass. The integrand is nonnegative and at most one on opposite
+	placements, so restoring the discarded event costs at most its probability.
+\end{proof}
+
+\begin{definition}[The opposite-placement bipartition]
+	\label{def:qld-opposite-bipartition}
+	\lean{MIPStarRE.QPBT.bbAbBipartition}
+	\leanok
+	\uses{def:expanded-state}
+	For the directed placement with the $BB'$ registers first and the $AB''$
+	registers second, regroup the six registers as
+	\[
+		BB'\mid AB''(A'A'').
+	\]
+	Concretely, the coordinate tuple
+	$((A,(A',A'')),(B,(B',B'')))$ is sent to
+	$((B,B'),((A,B''),(A',A'')))$. The final factor is retained as an unused
+	tensor factor.
+\end{definition}
+
+\begin{lemma}[Formalization support: opposite-placement transport]
+	\label{lem:qld-opposite-bipartition-transport}
+	\lean{MIPStarRE.QPBT.bbAbBipartition_apply}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_opposite_bipartition}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.consistencyDefect_bipartition}
+	\lean{MIPStarRE.QPBT.evaluated_pastedMeasurement_heteroKron_one}
+	\lean{MIPStarRE.QPBT.postprocess_pair_swap_effect}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_evaluated_eq_pasted}
+	\lean{MIPStarRE.QPBT.consistencyDefect_opposite_symm}
+	\leanok
+	\uses{def:qld-opposite-bipartition, def:concrete-paired-line-measurement,
+		def:consistency, def:expanded-state}
+	Every directed pair of opposite placements admits a bipartition of the six
+	registers in which operators on the first placement act as $A\otimes I$ and
+	operators on the second act as $I\otimes B\otimes I$; the remaining EPR
+	pair is unused. Reindexing through this bipartition preserves consistency
+	defects. Tensoring the pasted measurement with the identity on the unused
+	factor commutes with outcome evaluation.
+
+	For any paired postprocessing, swapping the two output coordinates swaps the
+	corresponding effect. Evaluating the concrete $X$-$Z$-$X$ paired-line
+	measurement gives exactly the evaluated sandwich used by one-sided pasting.
+	Finally, the consistency defect of two measurements on opposite placements
+	is unchanged when their order is reversed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-opposite-bipartition, def:concrete-paired-line-measurement,
+		def:consistency, def:expanded-state}
+	Check the four directed placement pairs by their coordinate equivalences.
+	The remaining assertions follow by expanding reindexing, tensor products,
+	postprocessing sums, the sandwich definition, and the consistency defect.
+\end{proof}
+
+\begin{lemma}[Formalization support: the restored paired-line defect]
+	\label{lem:qld-paired-line-restored-defect}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_conditioned_defect_le}
+	\lean{MIPStarRE.QPBT.exists_combinedLine_restored_defect_le}
+	\leanok
+	\uses{lem:qld-line-conditioning-restoration,
+		lem:qld-opposite-bipartition-transport, lem:pasting,
+		def:concrete-paired-line-measurement}
+	There are a universal constant $C\geq1$ and a polynomially small function
+	$p$ of two variables such that, on every directed opposite placement, the
+	conditioned consistency defect between the completed joint points and the
+	evaluated concrete paired-line measurement is at most
+	\[
+		p\left(\frac{md}{q},
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}\right).
+	\]
+	Here $\mu$ is the nonzero-$X$-direction mass. On the original product
+	line-point law, the corresponding defect is at most
+	\[
+		\mu p\left(\frac{md}{q},
+		\frac{8\delta_Q+C(\eps+\sqrt\eps)}{\mu}\right)+\frac1{2q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-line-conditioning-restoration,
+		lem:qld-opposite-bipartition-transport, lem:pasting,
+		def:nondegenerate-line-pasting-dist,
+		thm:nondegenerate-line-pasting-mass-positive,
+		thm:nondegenerate-line-pasting-dist-probability,
+		def:concrete-paired-line-measurement}
+	Transport the two measurement families to a bipartite tensor product and
+	apply heterogeneous one-sided pasting with the two conditioned marginal
+	bounds. Positivity of the retained mass makes the error parameter
+	nonnegative, and the conditioned law is normalized by
+	Theorem~\ref{thm:nondegenerate-line-pasting-dist-probability}.
+	Identify its sandwich with the concrete paired-line measurement,
+	then restore the discarded event and its mass factor.
+\end{proof}
+
+\begin{lemma}[Consistency of the constructed paired-line measurement]
+	\label{lem:combined-line-measurement-consistency}
+	\lean{MIPStarRE.QPBT.combined_line_measurement_consistency}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-comm-line-cons, lem:pasting,
+		def:concrete-paired-line-measurement, def:consistency,
+		thm:qld-conditioned-polynomial-bound}
+	This is a formalization-only construction theorem. Fix a polynomially small
+	function $\delta_Q(\eps)$. There is a function
+	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$, in the corrected sum sense,
+	such that for every projective strategy passing with error $\eps$ and
+	every joint point family satisfying the conclusions of
+	Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$, the concrete POVM
+	\[
+		T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+		 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+		 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+	\]
+	has evaluated consistency defect at most $\delta_P(\eps,md/q)$ with that
+	joint point family, averaged over two independent line-point samples,
+	for every directed opposite placement.
+
+	The two measurements are compared on the completed answer alphabet
+	$(\F_q\cup\{\bot\})^2$. An outcome $(f_X,f_Z)$ of $T^{\ell_X,\ell_Z}$ is
+	postprocessed to the pair of evaluations of $f_X$ and $f_Z$ at the two
+	sampled points, with $\bot$ recorded in a coordinate whose polynomial
+	admits no evaluation at its point. The joint point family is extended to
+	the same alphabet by the inclusion $\F_q\subseteq\F_q\cup\{\bot\}$ in each
+	coordinate, so it assigns the zero operator to every answer having $\bot$
+	in a coordinate. The quantity bounded is therefore the full off-diagonal
+	defect on $(\F_q\cup\{\bot\})^2$: pairs in which a line evaluation is
+	undefined while the point family answers in $\F_q$ contribute to it, and
+	it is not the summation over answers in $\F_q$ alone.
+
+	The line-error function is chosen after $\delta_Q$ and its polynomial
+	bound. This isolates the consistency part of the preceding construction
+	while retaining its defining measurement; see
+	\cite{gap:qpbt_subline-claims-line-marginal}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-paired-line-restored-defect,
+		thm:nondegenerate-line-pasting-mass-bounds,
+		lem:qld-opposite-bipartition-transport,
+		lem:consistency-defect-integrand-le-one,
+		thm:qld-conditioned-polynomial-bound}
+	Condition on the first line having nonzero direction. The two completed
+	point-to-line marginal comparisons and heterogeneous pasting bound the
+	actual sandwich measurement on that law. Restore the discarded probability,
+	at most $1/(2q)$, and multiply the conditioned error by its retained mass.
+	The bounds $1/2\leq\mu_{\mathrm{nd}}(L)\leq1$ allow polynomial absorption;
+	together with the independent unit defect bound, this gives the result.
+\end{proof}
+
 \section{Applying the classical low-degree test}
 \label{sec:apply-ldt}
 
@@ -1061,9 +1526,9 @@ the quantum soundness of the classical low individual degree test
 (Theorem~\ref{lem:ld-soundness}). The classical game, its question
 distribution, and the line-point distribution are defined at dimension $2m+2$
 only when $2m+2$ divides $q$ (Definition~\ref{def:ld-game}), a condition that
-admissibility of $(q,m,d)$ does not supply; the statements below are the
-source statements, without that condition, and their proofs are blocked at
-the instantiation step for admissible parameters with $m \ge 2$. The
+admissibility of $(q,m,d)$ does not supply. The seed-bearing source route is
+blocked at the instantiation step for admissible parameters with $m \ge 2$.
+The global-pair conclusion also has the directly indexed proof below. The
 obstruction is recorded in Remark~\ref{rem:qld-4-7-divisibility} and
 analyzed, together with candidate repairs, in
 \cite{gap:qpbt_ld-dimension-divisibility}.
@@ -1222,19 +1687,23 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.restrictedALineDist, MIPStarRE.QPBT.restrictedDLineDist}
 	\lean{MIPStarRE.QPBT.restrictedALineDist_isProbability}
 	\lean{MIPStarRE.QPBT.restrictedDLineDist_isProbability}
-	\notready
+	\leanok
 	\uses{def:line-point-dist, def:ld-question-distribution}
-	For any $i \in \{1, \dots, m\}$, the \emph{$i$-th restricted
+	Use coordinate indices $i\in\{0,\dots,m-1\}$ throughout this definition,
+	the following mixture estimates, and the sub-line construction below. Write
+	$\bar\chi(s)=\chi(s)-1$, where $\chi$ is the one-based index function of
+	Definition~\ref{def:ld-question-distribution}. Thus $\bar\chi$ takes
+	values in $\{0,\dots,m-1\}$, and index $i$ here denotes coordinate $i+1$
+	in the one-based notation of \cite{Ji2020MIPStar}.
+	For any such $i$, the \emph{$i$-th restricted
 	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
 	restriction of $D_{\mathrm{ALine}}$ to pairs $(\ell, u)$ where the line
 	$\ell$ is along the direction $e_i$, i.e.\ is of the form
 	$\ell = (u_0, e_i)$. Similarly, the \emph{$i$-th restricted diagonal line
 	distribution} $D_{\mathrm{DLine},i}$ is the restriction of
 	$D_{\mathrm{DLine}}$ to pairs $(\ell, u)$ where the line
-	$\ell = (u_0, s, v)$ satisfies $\chi(s) = i$ and coordinates
-	$1, \dots, i-1$ of $v$ are $0$. (The function $\chi$ is the one used in
-	the question distribution of the low individual degree game,
-	Definition~\ref{def:ld-question-distribution}.)
+	$\ell = (u_0, s, v)$ satisfies $\bar\chi(s) = i$ and coordinates
+	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]
@@ -1242,14 +1711,14 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
 	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
-	\notready
+	\leanok
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
 	\uses{def:ith-restricted-line, def:line-point-dist, lem:qld-xz-lines,
 		lem:qld-4-10, def:expanded-state}
 	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
-	distributions $D_{\mathrm{ALine},i}$ for $i \in \{1, \dots, m\}$, and
+	distributions $D_{\mathrm{ALine},i}$ for $i \in \{0, \dots, m-1\}$, and
 	likewise $D_{\mathrm{DLine}}$ is a uniform mixture of the
 	$D_{\mathrm{DLine},i}$. As a consequence:
 	\begin{enumerate}
@@ -1262,7 +1731,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 		of restricted distributions with error $4m^2\delta$;
 		\item in particular, by Lemma~\ref{lem:qld-xz-lines}, for any types
 		$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine},
-		\mathrm{DLine}\}$ and any $i, j \in \{1, \dots, m\}$,
+		\mathrm{DLine}\}$ and any $i, j \in \{0, \dots, m-1\}$,
 		\begin{equation}
 			\label{eq:qld-xz-lines-restricted}
 			\E_{(\ell_X,x) \sim D_{\mathrm{v}_1,i}}\
@@ -1279,6 +1748,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
 	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
 	axis-parallel and diagonal components and, within each component, uniform
@@ -1296,7 +1766,6 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
-	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
@@ -1328,7 +1797,7 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 		$u$ chosen uniformly at random on $\ell$, is a mixture of
 		components indexed by a type
 		$\mathrm{v} \in \{\mathrm{ALine}, \mathrm{DLine}\}$ and indices
-		$i, j \in \{1, \dots, m\}$ with the following two properties
+		$i, j \in \{0, \dots, m-1\}$ with the following two properties
 		within the component $(\mathrm{v}, i, j)$: the pair
 		$(\ell_X, \ell_Z)$ is distributed according to the product of the
 		marginal distributions on lines of $D_{\mathrm{v},i}$ and of
@@ -1360,13 +1829,17 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$(\ell, u)$ from the line-point distribution over $\F_q^{2m+2}$ and write
 	$u = (u_X, u_Z, \alpha, \beta)$, so that Property~1 holds by
 	construction; all auxiliary randomness introduced below is sampled
-	independently of $(\ell, u)$. We write $\chi$ for the index function of
-	Definition~\ref{def:ld-question-distribution} at dimension $m$, whose
-	classes $\chi^{-1}(i)$ for $i \in \{1, \dots, m\}$ partition $\F_q$
-	into sets of equal size $q/m$, and $\chi_{2m+2}$ for the index function
-	at dimension $2m+2$. The function $\chi_{2m+2}$, and with it the
-	line-point distribution over $\F_q^{2m+2}$ from which $(\ell, u)$ is
-	drawn, is defined only when $2m+2$ divides $q$
+	independently of $(\ell, u)$. As in
+	Definition~\ref{def:ith-restricted-line}, write $\bar\chi$ for the
+	zero-based shift of the index function at dimension $m$. Its classes
+	$\bar\chi^{-1}(i)$ for $i \in \{0, \dots, m-1\}$ partition $\F_q$
+	into sets of equal size $q/m$. Write $\bar\chi_{2m+2}$ for the analogous
+	zero-based shift at dimension $2m+2$. For the extended-coordinate index in
+	the construction below, write $k=r-1$ when the paper writes $r$; the
+	source-line indices $i_X,i_Z$ are shifted in the same way. The function
+	$\bar\chi_{2m+2}$ is defined only when $2m+2$ divides $q$, and hence so is
+	the line-point distribution over $\F_q^{2m+2}$ from which $(\ell, u)$ is
+	drawn
 	(Definition~\ref{def:ld-question-distribution}); admissibility of
 	$(q,m,d)$ supplies only that $m$ divides $q$, and for admissible
 	parameters with $m \ge 2$ the required divisibility fails, so this
@@ -1377,17 +1850,17 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	By a
 	\emph{fresh diagonal direction pair} we mean a pair $(s', w')$ with
 	$s'$ uniformly random in $\F_q$ and $w' \in \F_q^m$ having coordinates
-	$1, \dots, \chi(s')-1$ equal to $0$ and the remaining coordinates
+	$0, \dots, \bar\chi(s')-1$ equal to $0$ and the remaining coordinates
 	uniformly random; this is exactly the law of the coordinate--direction
 	data of the diagonal component of the line-point distribution over
 	$\F_q^m$ (Definition~\ref{def:line-point-dist}).
 
-	If $\ell$ is axis-parallel, $\ell = (v, e_j)$ with
-	$v = (v_X, v_Z, \alpha_0, \beta_0)$ and $j \in \{1, \dots, 2m+2\}$, set
+	If $\ell$ is axis-parallel, $\ell = (v, e_k)$ with
+	$v = (v_X, v_Z, \alpha_0, \beta_0)$ and $k \in \{0, \dots, 2m+1\}$, set
 	$\ell_X = (v'_X, e_{i_X})$ and $\ell_Z = (v'_Z, e_{i_Z})$ where: for
-	$1 \le j \le m$, $i_X = j$ and $i_Z$ is uniformly random in
-	$\{1,\dots,m\}$; for $m+1 \le j \le 2m$, $i_X$ is uniformly random and
-	$i_Z = j - m$; for $2m+1 \le j \le 2m+2$, both $i_X$ and $i_Z$ are
+	$0 \le k < m$, $i_X = k$ and $i_Z$ is uniformly random in
+	$\{0,\dots,m-1\}$; for $m \le k < 2m$, $i_X$ is uniformly random and
+	$i_Z = k - m$; for $2m \le k < 2m+2$, both $i_X$ and $i_Z$ are
 	uniformly random; and $v'_X, v'_Z$ are the canonical line
 	representatives of $v_X, v_Z$ for the chosen directions
 	(Definition~\ref{def:line-representative}), so that $v_X \in \ell_X$
@@ -1397,26 +1870,27 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	the diagonal component of the line-point distribution
 	(Definition~\ref{def:ld-question-distribution} instantiated at
 	dimension $2m+2$) the direction $w = (w_X, w_Z, \gamma, \delta)$ has
-	coordinates $1, \dots, j-1$ equal to $0$, where $j = \chi_{2m+2}(s)$,
+	coordinates $0, \dots, k-1$ equal to $0$, where
+	$k = \bar\chi_{2m+2}(s)$,
 	and its remaining coordinates are uniformly random. These remaining
 	coordinates may also vanish, so $w$ need not have a nonzero coordinate
-	at index $j$ and may be the zero vector, in which case $\ell$ is a
+	at index $k$ and may be the zero vector, in which case $\ell$ is a
 	singleton (Definition~\ref{def:line}).
-	% The source proof describes w as "a direction vector whose first
-	% nonzero coordinate is j = chi(s)"
+	% In its one-based notation, the source proof describes w as "a direction
+	% vector whose first nonzero coordinate is j = chi(s)"
 	% (references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex, proof
 	% of lem:qld-sublines); the distribution delivers only the weaker
 	% property recorded here, which is the one the argument uses. The
 	% source also leaves the laws of s_X and s_Z unspecified ("chosen such
-	% that chi(s_X) = j"); the uniform choices below are needed for the
-	% exact marginals claimed in Property 2.
+	% that chi(s_X) = j" in its one-based notation); the uniform choices
+	% below are needed for the exact marginals claimed in Property 2.
 	Sample $\ell_X = (v'_X, s_X, w'_X)$ and $\ell_Z = (v'_Z, s_Z, w'_Z)$
-	where: for $1 \le j \le m$, $w'_X = w_X$ and $w'_Z = w_Z$, with $s_X$
-	uniformly random in the class $\chi^{-1}(j)$ and $s_Z$ uniformly
-	random in the class $\chi^{-1}(1)$; for $m+1 \le j \le 2m$, the pair
+	where: for $0 \le k < m$, $w'_X = w_X$ and $w'_Z = w_Z$, with $s_X$
+	uniformly random in the class $\bar\chi^{-1}(k)$ and $s_Z$ uniformly
+	random in the class $\bar\chi^{-1}(0)$; for $m \le k < 2m$, the pair
 	$(s_X, w'_X)$ is a fresh diagonal direction pair and $w'_Z = w_Z$,
-	with $s_Z$ uniformly random in the class $\chi^{-1}(j-m)$; for
-	$2m+1 \le j \le 2m+2$, both $(s_X, w'_X)$ and $(s_Z, w'_Z)$ are fresh
+	with $s_Z$ uniformly random in the class $\bar\chi^{-1}(k-m)$; for
+	$2m \le k < 2m+2$, both $(s_X, w'_X)$ and $(s_Z, w'_Z)$ are fresh
 	diagonal direction pairs, sampled independently; and $v'_X, v'_Z$ are
 	the canonical representatives of $v_X, v_Z$ for the directions
 	$w'_X, w'_Z$.
@@ -1427,8 +1901,8 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	$u^\dagger = (u^\dagger_X, u^\dagger_Z, \alpha^\dagger,
 	\beta^\dagger)$ of $\ell$: the block $u^\dagger_X$ differs from $v_X$
 	by a multiple of the direction of $\ell_X$ when that direction is
-	inherited from $\ell$ (namely $e_j$ for axis-parallel $\ell$ with
-	$1 \le j \le m$, and $w_X$ for diagonal $\ell$ with $1 \le j \le m$),
+	inherited from $\ell$ (namely $e_k$ for axis-parallel $\ell$ with
+	$0 \le k < m$, and $w_X$ for diagonal $\ell$ with $0 \le k < m$),
 	and equals $v_X$ in all other cases, since then the corresponding
 	block of the direction of $\ell$ vanishes; in either case
 	$u^\dagger_X \in \ell_X$ because $v_X \in \ell_X$, and symmetrically
@@ -1451,37 +1925,37 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	the procedure itself.
 
 	Condition on the component of the line-point distribution
-	(axis-parallel or diagonal) and on $j$; the mixture of Property~2 is
+	(axis-parallel or diagonal) and on $k$; the mixture of Property~2 is
 	over these choices together with the fresh index choices, and the
 	blocks $u_X, u_Z$ of $u$ are independent and uniform on $\F_q^m$,
 	independent of all direction data. In the axis-parallel case with
-	$1 \le j \le m$, the pair $(\ell_X, u_X)$ consists of the uniformly
+	$0 \le k < m$, the pair $(\ell_X, u_X)$ consists of the uniformly
 	random point $u_X$ together with the canonical axis-parallel line
-	through it in direction $e_j$, so
-	$(\ell_X, u_X) \sim D_{\mathrm{ALine},j}$, while, conditioned
+	through it in direction $e_k$, so
+	$(\ell_X, u_X) \sim D_{\mathrm{ALine},k}$, while, conditioned
 	additionally on $i_Z$, the pair $(\ell_Z, u_Z)$ consists of the
 	uniformly random point $u_Z$ together with the canonical line through
 	it in direction $e_{i_Z}$, so
 	$(\ell_Z, u_Z) \sim D_{\mathrm{ALine},i_Z}$; the two pairs are
 	functions of the disjoint independent data $u_X$ and $(u_Z, i_Z)$,
-	hence independent. In the diagonal case with $1 \le j \le m$, the
+	hence independent. In the diagonal case with $0 \le k < m$, the
 	triple $(u_X, w_X, s_X)$ has $u_X$ uniform, $w_X$ with coordinates
-	$1, \dots, j-1$ equal to $0$ and the remaining coordinates uniform,
-	and $s_X$ uniform in $\chi^{-1}(j)$, which is exactly the law
-	generating $D_{\mathrm{DLine},j}$; hence
-	$(\ell_X, u_X) \sim D_{\mathrm{DLine},j}$, and similarly
-	$(\ell_Z, u_Z) \sim D_{\mathrm{DLine},1}$ since $w_Z$ is uniform and
-	$s_Z$ is uniform in $\chi^{-1}(1)$; the two pairs are functions of the
-	disjoint independent data $(u_X, w_X, s_X)$ and $(u_Z, w_Z, s_Z)$,
+	$0, \dots, k-1$ equal to $0$ and the remaining coordinates uniform,
+	and $s_X$ uniform in $\bar\chi^{-1}(k)$, which is exactly the law
+	generating $D_{\mathrm{DLine},k}$; hence
+	$(\ell_X, u_X) \sim D_{\mathrm{DLine},k}$, and similarly
+	$(\ell_Z, u_Z) \sim D_{\mathrm{DLine},0}$ since $w_Z$ is uniform and
+	$s_Z$ is uniform in $\bar\chi^{-1}(0)$; the two pairs are functions of
+	the disjoint independent data $(u_X, w_X, s_X)$ and $(u_Z, w_Z, s_Z)$,
 	hence independent. The remaining cases are analogous: each of
 	$(\ell_X, u_X)$ and $(\ell_Z, u_Z)$ is either built from the inherited
 	direction block as above, or from a fresh axis index or fresh diagonal
 	direction pair, in which case it is distributed as the uniform mixture
-	over $i$ of $D_{\mathrm{v},i}$ for the corresponding type
-	$\mathrm{v}$; and the two pairs are always functions of disjoint
-	independent collections of the variables $u_X$, $u_Z$, the direction
-	blocks, and the fresh auxiliary choices, hence independent conditioned
-	on the component. Within each component this yields exactly the
+	over $i \in \{0, \dots, m-1\}$ of $D_{\mathrm{v},i}$ for the
+	corresponding type $\mathrm{v}$; and the two pairs are always functions of
+	disjoint independent collections of the variables $u_X$, $u_Z$, the
+	direction blocks, and the fresh auxiliary choices, hence independent
+	conditioned on the component. Within each component this yields exactly the
 	description of Property~2: the pair $(\ell_X, \ell_Z)$ is
 	product-distributed according to the line marginals of
 	$D_{\mathrm{v},i}$ and $D_{\mathrm{v},j}$, and, conditioned on
@@ -1509,9 +1983,553 @@ on registers $\mathsf{A}\mathsf{A}'$, the second tensor factor is placed on
 registers $\mathsf{B}\mathsf{A}''$, and the sums range over
 $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
+\begin{lemma}[Formalization support: ordered products on one placement]
+	\label{lem:qld-4-10-same-placement}
+	\lean{MIPStarRE.QPBT.Placement.exists_isOpposite}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedZX_dist_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.orderedXZ_dist_le}
+	\leanok
+	\uses{lem:qld-4-10, fact:triangle, def:povm-distance}
+	On one placement, the joint point measurement has squared distance at most
+	$4\delta_Q$ from each of the ordered $Z$-then-$X$ and $X$-then-$Z$
+	products.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, fact:triangle, def:symmetric-equivalents}
+	Insert the joint measurement on the opposite placement and apply the
+	squared-distance triangle inequality to the corresponding two
+	$\delta_Q$ bounds.
+\end{proof}
+
+\begin{lemma}[Formalization support: replacing one factor of a real overlap]
+	\label{lem:overlap-gap-distance}
+	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
+	\leanok
+	\uses{def:povm-distance, def:expanded-state}
+	A complete measurement weights the real part of the overlap gap between operator families by
+	at most the square root of their state-dependent squared distance.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance, def:expanded-state, def:povm-conventions}
+	Apply Cauchy--Schwarz to the outcome sum and then to the question average;
+	completeness bounds the squared norm of the left factor by one.
+\end{proof}
+
+\begin{lemma}[Formalization support: axis lines have nonzero direction]
+	\label{lem:axis-line-zero-direction-mass}
+	\lean{MIPStarRE.QPBT.aLinePointDist_zero_direction_mass}
+	\leanok
+	\uses{def:line-point-dist, def:line}
+	Under the axis-parallel line-point distribution of
+	Definition~\ref{def:line-point-dist}, the indicator of the event that the
+	sampled line has direction $0$ has expectation $0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist, def:line}
+	An axis-parallel sample has direction $e_i$ for the sampled coordinate
+	$i$, and the $i$-th entry of $e_i$ is $1 \ne 0$. The indicator therefore
+	vanishes at every sample, hence so does its expectation.
+\end{proof}
+
+\begin{lemma}[Formalization support: the pointwise consistency defect is at most one]
+	\label{lem:consistency-defect-integrand-le-one}
+	\lean{MIPStarRE.QPBT.consistencyDefect_integrand_le_one}
+	\leanok
+	\uses{def:expanded-state, def:consistency}
+	Let $\{A_a\}_{a \in \mathcal{O}}$ and $\{B_a\}_{a \in \mathcal{O}}$ be
+	complete measurements with the same finite outcome set, placed on two
+	opposite registers of the expanded state $\ket{\hat\psi}$ of
+	Definition~\ref{def:expanded-state}. Then
+	\[
+		\sum_{a \ne b} \bra{\hat\psi} A_a B_b \ket{\hat\psi} \,\le\, 1\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:distance-point-defect, lem:distance-qform-nonnegative,
+		def:expanded-state}
+	By Lemma~\ref{lem:distance-point-defect} the left-hand side equals
+	$\|\hat\psi\|^2-\sum_a \bra{\hat\psi} A_a B_a \ket{\hat\psi}$, and
+	$\|\hat\psi\|=1$. On opposite placements the two effects commute and are
+	positive semidefinite, so each diagonal term is nonnegative and the
+	subtracted sum is nonnegative.
+\end{proof}
+
+\begin{definition}[Directly indexed sub-line laws]
+	\label{def:direct-subline-law}
+	\lean{MIPStarRE.QPBT.SubLineWitness}
+	\leanok
+	\uses{def:ith-restricted-line, def:line-representative, def:combine-map}
+	Put $n=2m+2$. The directly indexed extended line-point law samples
+	$i\in\{0,\dots,n-1\}$ and $u,v\in\F_q^n$ independently and uniformly,
+	and chooses the axis or diagonal kind with equal probabilities.
+	For the axis kind set $w=e_i$; for the diagonal kind set $w_j=0$ for
+	$j<i$ and $w_j=v_j$ for $j\ge i$. The line has base $L_w^{\mathrm{lnf}}(u)$
+	and direction $w$, retaining its kind and coordinate index; the sampled
+	point is $u$. Zero diagonal directions are included.
+
+	A directly indexed sub-line law $D_{\mathrm{dir}}$ is a probability law
+	on triples $(\ell,\ell_X,\ell_Z)$ with the following properties.
+	Its extended-line marginal is the line marginal just defined.
+	Every supported triple admits affine maps $t\mapsto a_W+b_Wt$ such that
+	\[
+		\pi_W(\ell(t))=\ell_W(a_W+b_Wt),\qquad W\in\{X,Z\},
+	\]
+	where $\ell(t)$ denotes base plus parameter times direction and the
+	field identifications are understood. Thus each extended point projects
+	onto its two source lines, with affine scalar coordinates $\alpha(t)$
+	and $\beta(t)$ as in Definition~\ref{def:combine-map}. An axis-parallel
+	extended line has axis-parallel source lines.
+
+	Finally there is one probability law on
+	$(\mathrm v,i,j)\in\{\mathrm{ALine},\mathrm{DLine}\}
+	\times\{0,\dots,m-1\}^2$ with the following two mixture properties.
+	Sample a triple from $D_{\mathrm{dir}}$ and an independent uniform
+	parameter $t$ on $\ell$. The law of $(\ell_X,\ell_Z,\pi_X(\ell(t)))$
+	is the mixture obtained by sampling $(\ell_X,x)$ from
+	$D_{\mathrm v,i}$ and independently $\ell_Z$ from the line marginal of
+	$D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,x)$.
+	The law of $(\ell_X,\ell_Z,\pi_Z(\ell(t)))$ is the mixture obtained
+	by retaining $(\ell_X,\ell_Z,z)$ from the corresponding independent
+	samples of $\ell_X$ and $(\ell_Z,z)$. These are separate one-point
+	marginal identities, with the same mixture weights; they impose no
+	joint conditional independence of the two projected points.
+	Identification with the source law $D$ is a separate obligation;
+	see \cite{gap:qpbt_ld-dimension-divisibility}.
+\end{definition}
+
+\begin{lemma}[Formalization support: construction of the directly indexed sub-line law]
+	\label{lem:direct-subline-law-construction}
+	\lean{MIPStarRE.QPBT.subLineDist}
+	\lean{MIPStarRE.QPBT.subLineDist_isProbability}
+	\lean{MIPStarRE.QPBT.subLineDist_map_fst}
+	\lean{MIPStarRE.QPBT.subLineDist_map_subLineXProjection}
+	\lean{MIPStarRE.QPBT.subLineDist_map_subLineZProjection}
+	\lean{MIPStarRE.QPBT.subLineDist_source_mixture}
+	\lean{MIPStarRE.QPBT.exists_raw_of_mem_subLineDist_support}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_incidence}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_compatibility}
+	\lean{MIPStarRE.QPBT.subLineTripleOf_axis_closure}
+	\leanok
+	\uses{def:direct-subline-law}
+	Fix an admissible parameter tuple. The concrete law $D_{\mathrm{dir}}$ is
+	the equal mixture of the axis and
+	diagonal sampling branches in Definition~\ref{def:direct-subline-law}. It is
+	a probability law, and its extended-line marginal is the directly indexed
+	extended-line marginal. Its projected $X$- and $Z$-point marginals are the
+	two mixtures in that definition, with one common probability law on the line
+	kind and the two source coordinate indices.
+
+	The extended coordinate, point, and direction are uniform. Conditional on
+	the extended coordinate, the two source seeds are independent and uniform
+	on their prescribed coordinate-index fibers; these fibers have positive
+	mass. Every triple in the support is produced by such data from one of the
+	two branches. For every point on its extended line, such a triple satisfies
+	incidence of the two projected points with their source lines, the affine
+	compatibility relations for both projections, and closure of both source lines under an
+	axis-parallel extended line.
+	The projected laws use an independent uniform affine parameter and are
+	separate one-point marginals, not a joint conditional independence claim.
+	Zero diagonal directions are retained, and the scalar fields of the direct
+	and source coordinates are related by the fixed field identifications.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:direct-subline-law}
+	Normalization follows from the uniform branch law and the normalized seed
+	laws. The representative--parameter identities give the extended and
+	projected marginals. Recovering the auxiliary sample from a supported triple
+	gives the incidence, compatibility, and axis-closure conclusions.
+\end{proof}
+
+\begin{lemma}[Existence of a directly indexed sub-line witness]
+	\label{lem:direct-subline-witness-exists}
+	\lean{MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
+	\uses{def:direct-subline-law}
+	This formalization-only auxiliary is not the source sub-line lemma. For every
+	admissible parameter tuple, there exists a probability law on
+	triples $(\ell,\ell_X,\ell_Z)$ satisfying all the incidence, affine
+	compatibility, separate projected-marginal, and axis-closure properties of
+	Definition~\ref{def:direct-subline-law}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:direct-subline-law-construction}
+	Apply Lemma~\ref{lem:direct-subline-law-construction} and collect its
+	normalization, marginal, incidence, compatibility, and axis-closure
+	properties into the directly indexed sub-line witness.
+\end{proof}
+
+\begin{lemma}[Formalization support: a uniform point under the directly indexed law]
+	\label{lem:qld-sublines-uniform-point}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
+	\lean{MIPStarRE.QPBT.avgOver_uniform_directLdSpace_line_add_smul}
+	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_projX_projZ}
+	\leanok
+	\uses{def:direct-subline-law, def:line-representative,
+		def:combine-map}
+	For any $D_{\mathrm{dir}}$ as in Definition~\ref{def:direct-subline-law},
+	a uniform affine parameter on the sampled extended line gives a uniform
+	point of $\F_q^{2m+2}$, whose $x$ and $z$ blocks are independent uniform
+	points of $\F_q^m$. This statement does not transport that law to the
+	source distribution $D$; see \cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:direct-subline-law, def:line-representative, def:combine-map}
+	The representative--parameter map has constant fibers of size $q$; the
+	coordinate split and scalar identification are bijections.
+\end{proof}
+
+\begin{lemma}[Formalization support: real-part replacement under the directly indexed law]
+	\label{lem:claim-17-1-re-direct}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
+	\leanok
+	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
+		lem:qld-sublines-uniform-point, lem:qld-xz-lines}
+	There is a universal $C>0$ such that the following holds.
+	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law},
+	and let $Q,T$ satisfy the joint point and line measurement properties of
+	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
+	$\delta_Q,\delta_P$. Write
+	$A_{\mathrm{dir}},B_{\mathrm{dir}}$ for the two expectations displayed in
+	Lemma~\ref{lem:claim-17-1}, using $D_{\mathrm{dir}}$ and partial
+	evaluation in $\F_q \cup \{\bot\}$, with zero point effects for undefined
+	outcomes. Then
+	$|\Re A_{\mathrm{dir}}-\Re B_{\mathrm{dir}}|\le C\sqrt{\delta_Q}$.
+	This formalization-only estimate asserts neither a complex-modulus bound
+	nor transport to the source distribution.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
+		lem:qld-sublines-uniform-point}
+	The real overlap estimate and the same-placement squared-distance bound
+	$4\delta_Q$ give $2\sqrt{\delta_Q}$. Use the uniform-point identity to
+	rewrite the point average, and take $C=2$.
+\end{proof}
+
+\begin{lemma}[Formalization support: the concrete X marginal]
+	\label{lem:concrete-line-X-marginal}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	For the concrete X-Z-X measurement,
+	$\sum_{f_Z}T^{\ell_X,\ell_Z}_{f_X,f_Z}
+	=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	Sum the middle factor to the identity and use projectivity of the X factor.
+\end{proof}
+
+\begin{lemma}[Formalization support: the concrete X deficit under the directly indexed law]
+	\label{lem:concrete-X-deficit-direct}
+	\lean{MIPStarRE.QPBT.concreteXPointOverlap}
+	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
+	\leanok
+	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
+		lem:qld-comm-line-cons, def:direct-subline-law}
+	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law}.
+	For the concrete X-Z-X measurement, let
+	$A_X(\ell_X,\ell_Z,x)$ be the real overlap obtained by summing
+	$T_{f_X,f_Z}^{\ell_X,\ell_Z}\ot
+	\hat M^{(\mathrm{Point},X),x}_{f_X(x)}$ over both outcomes, using
+	partial evaluation in $\F_q \cup \{\bot\}$, with zero point effects for
+	undefined outcomes. There is a universal $C>0$ such that
+	$1-\E_{D_{\mathrm{dir}}}\E_{(x,z,\alpha,\beta)\in\ell} A_X
+	\le C m^2\delta_{\mathrm{Line}}(\eps)$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
+		lem:qld-comm-line-cons, def:direct-subline-law}
+	The concrete marginal identity reduces the overlap to X-line/point
+	consistency. The separate X marginal of the directly indexed subline law
+	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
+\end{proof}
+
+\begin{lemma}[Formalization obligation: complex X-factor removal under the directly indexed law]
+	\label{lem:claim-17-2-direct}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_direct}
+	\uses{lem:concrete-X-deficit-direct}
+	For the concrete X-Z-X measurement and the directly indexed law
+	$D_{\mathrm{dir}}$, with partial evaluation in $\F_q \cup \{\bot\}$ and
+	zero point effects for undefined outcomes, the complex
+	modulus of the difference in Lemma~\ref{lem:claim-17-2} is at most
+	$C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$ for a universal $C>0$.
+	The remaining obligation is the complex weighted Cauchy--Schwarz step.
+	Transport to the source law is separate; see
+	\cite{gap:qpbt_subline-claims-line-marginal,gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+
+\begin{lemma}[Formalization support: the real Z overlap under the directly indexed law]
+	\label{lem:claim-17-3-re-direct}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
+	\leanok
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement,
+		lem:overlap-gap-distance, def:direct-subline-law}
+	There is a universal $C>0$ such that the following holds.
+	Let $Q,T$ satisfy the joint point and line measurement properties of
+	Lemmas~\ref{lem:qld-4-10} and~\ref{lem:qld-xz-lines} with errors
+	$\delta_Q,\delta_P$, and let $D_{\mathrm{dir}}$ be a directly indexed
+	subline law as in Definition~\ref{def:direct-subline-law}. If $B_Z$ is the
+	expectation in Lemma~\ref{lem:claim-17-3} under that law, with partial
+	evaluation in $\F_q \cup \{\bot\}$ and zero point effects for undefined
+	outcomes, then
+	$|\Re B_Z-1|\le
+	C\sqrt m(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10,
+		lem:qld-4-10-same-placement, lem:overlap-gap-distance, def:direct-subline-law,
+		def:expanded-point-measurement}
+	The separate Z marginal and restricted consistency estimates bound the
+	nonnegative overlap deficit; taking a square root gives the displayed
+	bound with $C=2$.
+\end{proof}
+
+\begin{definition}[Conditional extended-line construction]
+	\label{def:qld-conditional-extended-line-measurement}
+	\lean{MIPStarRE.QPBT.SubLineWitness.Fiber}
+	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement}
+	\leanok
+	\uses{def:direct-subline-law, def:combine-map,
+		def:concrete-paired-line-measurement}
+	Fix a directly indexed extended line $\ell$. Its fiber consists of the
+	supported subline triples $(\ell,\ell_X,\ell_Z)$ above it. Normalize the
+	original subline law on this fiber to obtain the conditional law
+	$D_{\mid\ell}$.
+
+	For each supported triple, choose the affine coordinate data supplied by
+	Definition~\ref{def:direct-subline-law}. If $f_X$ and $f_Z$ are the two
+	source-line polynomials, let $h$ be their affine combination
+	\[
+		h(t)=\alpha(t)f_X(a_X+b_Xt)+\beta(t)f_Z(a_Z+b_Zt).
+	\]
+	The extended-line measurement at $\ell$ is the conditional average, under
+	$D_{\mid\ell}$, of the concrete paired-line measurements postprocessed by
+	$(f_X,f_Z)\mapsto h$.
+\end{definition}
+
+\begin{example}[Formalization support: conditional extended-line identities]
+	\label{lem:qld-conditional-extended-line-properties}
+	\lean{MIPStarRE.QPBT.directLinePointDist_line_weight_pos}
+	\lean{MIPStarRE.QPBT.SubLineWitness.fiber_mass_pos}
+	\lean{MIPStarRE.QPBT.SubLineWitness.conditionalLaw_isProbability}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_conditionalLaw}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData_compatible}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evaluatesTo}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_evalOpt}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:combine-map}
+	Every directly indexed extended line has positive marginal mass, and hence
+	each of its subline fibers has positive mass. Consequently, the conditional
+	law $D_{\mid\ell}$ is a probability distribution, and finite disintegration
+	gives
+	\[
+		\mathbb E_{\ell}\mathbb E_{D_{\mid\ell}}[F]=\mathbb E_D[F]
+	\]
+	for every real-valued function $F$ on supported subline triples. The selected
+	affine data satisfy the projection identities in
+	Definition~\ref{def:direct-subline-law}. If the two source polynomials
+	evaluate to $a$ and $b$ at the projected point, their combined polynomial
+	evaluates there to $\alpha a+\beta b$. The same identity holds for completed
+	evaluation whenever both source evaluations are defined.
+\end{example}
+\begin{proof}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:combine-map}
+	Positivity follows from the explicit direct-line sampler. Normalizing each
+	fiber gives total mass one, and grouping the original finite sum by its
+	extended-line coordinate proves the disintegration identity. The evaluation
+	identities follow by substituting the compatible affine data in the polynomial
+	combination formula.
+\end{proof}
+
+\begin{lemma}[Formalization support: axis degree of the combined polynomial]
+	\label{lem:qld-combined-polynomial-axis-degree}
+	\lean{MIPStarRE.QPBT.combineLinePoly_axis_degree}
+	\lean{MIPStarRE.QPBT.SubLineWitness.affineData_axis}
+	\lean{MIPStarRE.QPBT.SubLineWitness.combinedPolynomial_axis_degree}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_axis_degree}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties,
+		lem:concrete-paired-line-degree-support}
+	Suppose two univariate coefficient families vanish above degree $d\geq1$.
+	Their affine combination also vanishes above degree $d$ whenever either
+	both coefficient functions $\alpha,\beta$ are constant or both projected
+	line parameters are constant. The affine data of every supported
+	axis-parallel extended line satisfy one of these alternatives. Consequently,
+	the combined polynomial has degree at most $d$, and the conditional
+	extended-line measurement has zero effect on every outcome of degree greater
+	than $d$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties,
+		lem:concrete-paired-line-degree-support}
+	Affine substitution preserves the source degree bounds. On an extended
+	coordinate line, either the $\alpha$ and $\beta$ slopes vanish or both
+	projected direction parameters vanish. Average the resulting zero effects
+	over the conditional law.
+\end{proof}
+
+\begin{definition}[Paired, extended, and ordered subline overlaps]
+	\label{def:qld-subline-overlaps}
+	\lean{MIPStarRE.QPBT.pairedSublineOverlap}
+	\lean{MIPStarRE.QPBT.extendedPointOverlap}
+	\lean{MIPStarRE.QPBT.orderedSublineOverlap}
+	\leanok
+	\uses{def:qld-conditional-extended-line-measurement,
+		def:direct-subline-law, def:expanded-state}
+	For a supported subline triple, the paired overlap is the uniform-parameter
+	average of the overlap between the paired-line measurement and the completed
+	joint point measurement evaluated at the two projected points. The extended
+	point overlap compares the conditional extended-line measurement with the
+	point measurement postprocessed by $(a,b)\mapsto\alpha a+\beta b$. The
+	ordered subline overlap replaces the joint point effect in the paired overlap
+	by the ordered $Z$-then-$X$ product.
+\end{definition}
+
+\begin{lemma}[Formalization support: comparison with the extended overlap]
+	\label{lem:qld-extended-line-overlap-comparison}
+	\lean{MIPStarRE.QPBT.SubLineWitness.completedPoint_effect_le}
+	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement_overlap}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedPointOverlap_ge}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_extendedPointOverlap_ge}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extended_consistencyDefect_le}
+	\leanok
+	\uses{def:qld-subline-overlaps,
+		lem:qld-conditional-extended-line-properties, def:consistency}
+	At a point of a supported extended line, the completed joint-point effect at
+	the two source evaluations is bounded above by the effect obtained by
+	postprocessing with the combined value $\alpha a+\beta b$. Uniformly
+	resampling the affine parameter preserves the full direct line-point law.
+	Expanding the conditional extended-line measurement in a placed overlap
+	therefore shows that the average extended point overlap is at least the
+	average paired subline overlap.
+
+	For every directed pair of opposite placements, the consistency defect
+	between the evaluated extended-line measurement and the combined-value point
+	measurement is consequently at most one minus the average paired overlap.
+	Both measurements here have alphabet $\F_q\cup\{\bot\}$: the point
+	measurement sends $(a,b)$ to the single value $\alpha a+\beta b$ and has
+	zero effect at $\bot$, while the line measurement uses completed evaluation.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-subline-overlaps, def:qld-conditional-extended-line-measurement,
+		lem:qld-conditional-extended-line-properties, def:consistency}
+	Expand the conditional measurement, group equal postprocessed answers, and
+	use positivity on opposite registers to preserve the pointwise effect
+	inequality. Disintegrate the subline law and use the identity expressing a
+	consistency defect as one minus its matched-outcome overlap.
+\end{proof}
+
+\begin{definition}[The completed X-point overlap]
+	\label{def:qld-x-point-overlap}
+	\lean{MIPStarRE.QPBT.xPointOverlapAt}
+	\leanok
+	\uses{def:qld-subline-overlaps, def:expanded-point-measurement}
+	For a pair of source lines and an $X$-point, the completed $X$-point overlap
+	is the sum, over both line-polynomial outcomes, of the paired-line effect
+	against the completed $X$-point effect indexed by the $X$-line evaluation.
+\end{definition}
+
+\begin{lemma}[Formalization support: the X-point overlap deficit]
+	\label{lem:qld-x-point-overlap-deficit}
+	\lean{MIPStarRE.QPBT.SubLineWitness.avgOver_regrouped_eq_at}
+	\lean{MIPStarRE.QPBT.xPointOverlap_eq_at}
+	\lean{MIPStarRE.QPBT.SubLineWitness.one_sub_avgOver_xPointOverlap_le_at}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.completedPair_norm_sq_sum_XZ}
+	\lean{MIPStarRE.QPBT.CombinedLinesWitness.one_sub_X_overlap_le_at}
+	\lean{MIPStarRE.QPBT.CombinedLinesWitness.one_sub_X_overlap_restricted_le_at}
+	\leanok
+	\uses{def:qld-x-point-overlap, lem:qld-4-10-same-placement,
+		lem:restricted-line-mixture-bounds, def:consistency}
+	Regrouping the two line-answer sums identifies the subline average with the
+	overlap of the evaluated paired-line measurement and a completed point
+	family. Completing the joint point measurement and the ordered
+	$X$-then-$Z$ product preserves their squared distance exactly.
+
+	More generally, let $\nu$ be any probability law on pairs of line-point
+	samples. If the evaluated paired-line measurement has consistency defect at
+	most $\eta$ with the completed joint points, and those joint points have
+	squared distance at most $\zeta$ from the completed $X$-then-$Z$ product,
+	then the completed $X$-point overlap has deficit at most
+	$2\sqrt\eta+2\sqrt\zeta$. On a product of two restricted line-point laws this
+	gives
+	\[
+		2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}.
+	\]
+	The same bound holds for the directly indexed subline average by its
+	one-point mixture identity.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-x-point-overlap, lem:qld-4-10-same-placement,
+		lem:restricted-line-mixture-bounds, def:consistency}
+	Apply the consistency-to-overlap estimate and Cauchy--Schwarz to the two
+	comparisons. Restricted line consistency inflates by $4m^2$, while the
+	same-placement $X$-then-$Z$ point estimate contributes $4\delta_Q$.
+	Average these bounds over the subline mixture.
+\end{proof}
+
+\begin{lemma}[Formalization support: components of the first overlap route]
+	\label{lem:qld-first-route-overlap-components}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_at}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_at}
+	\lean{MIPStarRE.QPBT.SubLineWitness.paired_ordered_overlap_gap_le}
+	\leanok
+	\uses{def:qld-subline-overlaps, lem:qld-x-point-overlap-deficit,
+		lem:qld-4-10-same-placement, lem:restricted-line-mixture-bounds}
+	Let $I_{\mathrm{pair}}$ and $I_{ZX}$ denote the averages of the paired and
+	ordered subline overlaps. For arbitrary placements,
+	\[
+		|I_{\mathrm{pair}}-I_{ZX}|\leq\sqrt{4\delta_Q}.
+	\]
+	For opposite placements, let $I_Z$ be the same ordered overlap after
+	removing the $X$-point factor. There are universal constants $C_X,C_Z>0$
+	such that
+	\[
+		|I_{ZX}-I_Z|
+		\leq C_X\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr)
+	\]
+	and
+	\[
+		|I_Z-1|\leq C_Z\sqrt m
+		\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-subline-overlaps, lem:qld-x-point-overlap-deficit,
+		lem:qld-4-10-same-placement, lem:restricted-line-mixture-bounds}
+	The first estimate replaces the completed joint points by the ordered
+	product. For the second, apply Cauchy--Schwarz to the $X$-point deficit. The
+	last estimate is the $Z$-line/point overlap bound under the separate
+	one-point mixture law.
+\end{proof}
+
 \begin{lemma}[Replacing the combined point measurement by the ordered product]
 	\label{lem:claim-17-1}
-	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product}
 	\notready
 	% claim:17-1 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
@@ -1536,8 +2554,12 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-10, lem:qld-sublines, lem:qld-xz-lines,
-		def:line-point-dist}
+	\uses{lem:qld-4-10, lem:qld-4-10-same-placement, lem:qld-sublines,
+		lem:qld-xz-lines, lem:overlap-gap-distance,
+		lem:qld-sublines-uniform-point, def:line-point-dist}
+	The scalar approximation here is a complex-modulus bound. Its formal
+	proof over the source law remains open; the real-part auxiliary above
+	does not establish it. See \cite{gap:qpbt_subline-claims-line-marginal}.
 	Write
 	$W^{x,z}_{a,b} = \hat{Q}^{x,z}_{a,b}
 	- \hat{M}^{(\mathrm{Point},Z),z}_{b}
@@ -1552,15 +2574,15 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	of $\F_q^{2m+2}$, so the coordinates $x, z$ are independent and uniform
 	in $\F_q^m$; hence
 	$\E_{x,z} \sum_{a,b}
-	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^2 \ket{\hat\psi}
-	\le \delta_Q$
-	by \eqref{eq:qld-q-cons-m-hat-zx}. The total error is therefore at most
-	$\sqrt{\delta_Q}$.
+	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^\dagger W^{x,z}_{a,b} \ket{\hat\psi}
+	\le 4\delta_Q$
+	using Lemma~\ref{lem:qld-4-10-same-placement}. The resulting error is
+	$2\sqrt{\delta_Q}$, which has the stated asymptotic scale. The adjoint
+	is necessary since $W$ need not be Hermitian; the source writes $W^2$.
 \end{proof}
 
 \begin{lemma}[Removing the $X$-point factor]
 	\label{lem:claim-17-2}
-	\lean{MIPStarRE.QPBT.subline_remove_X_factor}
 	\notready
 	% claim:17-2 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity. The source right-hand side
@@ -1569,6 +2591,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\uses{lem:qld-sublines, lem:qld-xz-lines,
 		def:expanded-point-measurement, lem:qld-comm-line-cons,
 		def:expanded-state}
+	Let $T$ be the X-Z-X measurement defined in the proof of
+	Lemma~\ref{lem:qld-xz-lines}. The construction is part of this claim's
+	domain: its degree and evaluated consistency properties alone do not
+	imply the following estimate, as shown in
+	\cite{gap:qpbt_subline-claims-line-marginal}.
 	\begin{align*}
 		\E_{(\ell,\ell_X,\ell_Z) \sim D}\
 		\E_{(x,z,\alpha,\beta) \in \ell}
@@ -1629,7 +2656,6 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 
 \begin{lemma}[The remaining $Z$-point term is close to one]
 	\label{lem:claim-17-3}
-	\lean{MIPStarRE.QPBT.subline_Z_term_near_one}
 	\notready
 	% claim:17-3 in the paper; the original label is recorded here as a
 	% comment for cross-reference fidelity.
@@ -1783,21 +2809,212 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{remark}
 
+\begin{example}[The paired-line construction given a joint point family]
+	\label{lem:combined-lines-given-points}
+	\lean{MIPStarRE.QPBT.exists_combinedLinesWitness_ofPointsWitness}
+	\leanok
+	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
+		def:ideg-deg-polynomials}
+	Fix a function $\delta_Q(\eps)=\poly(\eps)$. There is a function
+	$\delta_P(\eps,md/q)=\poly(\eps,md/q)$ with the following property. Let a
+	projective setting with error $\eps$ be given, together with complete
+	projective joint point measurements $Q^{x,z}_{a,b}$ on both expanded local
+	spaces. Suppose that, for every directed opposite placement, these
+	measurements are self-consistent with squared-distance error at most
+	$\delta_Q(\eps)$ and are within the same error of both ordered products
+	$\hat M^X_a(x)\hat M^Z_b(z)$ and
+	$\hat M^Z_b(z)\hat M^X_a(x)$.
+
+	Then there exists a complete paired-line POVM family
+	$T^{\ell_X,\ell_Z}_{f_X,f_Z}$ on each expanded local space, with outcomes
+	$(f_X,f_Z)$ of degree at most $md$ on their respective lines. Outcomes outside
+	degree $d$ have zero effect in the $X$ coordinate when $\ell_X$ is
+	axis-parallel, and likewise in the $Z$ coordinate when $\ell_Z$ is
+	axis-parallel. Independently sample $(\ell_X,x)$ and $(\ell_Z,z)$ from the
+	line-point law. For every directed opposite placement, postprocessing the line
+	outcome to $(f_X(x),f_Z(z))$ and comparing it with the joint point outcome on
+	the completed alphabet $(\F_q\cup\{\bot\})^2$ gives consistency defect at most
+	$\delta_P(\eps,md/q)$. The point measurement is extended to this alphabet by
+	assigning zero effect to every pair containing $\bot$.
+
+	Because the joint point family is an explicit hypothesis, this auxiliary is
+	separate from Lemma~\ref{lem:qld-xz-lines} and does not prove that source
+	lemma.
+\end{example}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-line-measurement-consistency,
+		def:concrete-paired-line-measurement,
+		lem:concrete-paired-line-degree-support}
+	Choose the concrete sandwich of
+	Definition~\ref{def:concrete-paired-line-measurement}. The three required
+	properties are
+	Lemma~\ref{lem:concrete-paired-line-degree-support} for the two axis-degree
+	properties and Lemma~\ref{lem:combined-line-measurement-consistency} for the
+	completed-answer consistency bound on the explicitly given point family.
+\end{proof}
+
+\begin{definition}[The paired subline overlap]
+	\label{def:paired-subline-overlap}
+	\lean{MIPStarRE.QPBT.pairedSublineOverlap}
+	\leanok
+	\uses{def:direct-subline-law, def:consistency}
+	For a joint point family, a paired-line family, two placements, and a triple
+	$(\ell,\ell_X,\ell_Z)$, define the paired subline overlap to be the
+	average over a uniform affine parameter on $\ell$ of the real correlation
+	between $T^{\ell_X,\ell_Z}_{f_X,f_Z}$ on the first placement and the completed
+	joint point effect indexed by the evaluations of $(f_X,f_Z)$ at the projected
+	point on the second placement, summed over $(f_X,f_Z)$.
+\end{definition}
+
+\begin{definition}[The extended-line measurement from a subline witness]
+	\label{def:extended-line-measurement}
+	\lean{MIPStarRE.QPBT.SubLineWitness.extendedMeasurement}
+	\leanok
+	\uses{def:direct-subline-law, def:combine-map, def:povm-conventions}
+	For a fixed directly indexed extended line $\ell$, condition the sub-line law
+	on the triples whose first coordinate is $\ell$. Push each paired-line POVM
+	forward by the polynomial combination map and average over this conditional
+	law. The resulting effects form a POVM on polynomials of degree at most
+	$md+1$ on $\ell$.
+\end{definition}
+
+\begin{lemma}[Auxiliary estimates for the paired subline overlap]
+	\label{lem:paired-subline-overlap-estimates}
+	\lean{MIPStarRE.QPBT.SubLineWitness.paired_ordered_overlap_gap_le}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_at}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_at}
+	\leanok
+	\uses{def:paired-subline-overlap, def:direct-subline-law}
+	These formalization-only auxiliary estimates give the directly indexed real
+	overlap steps used in the first route of Lemma~\ref{lem:qld-4-13}. Let the
+	directly indexed sub-line law, a joint point family of error
+	$\delta_Q$, and a paired-line family of error $\delta_P$ be fixed. Replacing
+	the joint point effect in the paired overlap by the ordered $Z$-then-$X$
+	product changes the average by at most $\sqrt{4\delta_Q}$ for arbitrary
+	placements. For opposite placements, there are universal positive constants
+	such that removing the remaining $X$ factor changes the average by at most
+	\[
+		C\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr),
+	\]
+	and the resulting $Z$ overlap differs from one by at most
+	\[
+		C'\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10-same-placement, lem:overlap-gap-distance,
+		lem:qld-x-point-overlap-deficit, lem:qld-sublines-uniform-point,
+		lem:restricted-line-mixture-bounds, thm:qld-quarter-power-deficit-bound}
+	The first estimate uses the squared-distance comparison with the ordered point
+	product. For the second, the separate $X$ marginal of the directly indexed law
+	and Lemma~\ref{lem:qld-x-point-overlap-deficit} bound the $X$-overlap deficit by
+	\[
+		2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}.
+	\]
+	This bound holds for every paired-line family with consistency error
+	$\delta_P$ relative to the joint point family of error $\delta_Q$.
+	The source proof of Claim~\ref{lem:claim-17-2} uses the concrete
+	$X$-$Z$-$X$ sandwich; no such identification of the paired-line family is
+	assumed here. Cauchy--Schwarz bounds the change on removing the $X$ factor
+	by the square root of this deficit bound. The consistency hypotheses imply
+	$\delta_P,\delta_Q\geq0$, and admissibility gives $m\geq1$, so
+	Theorem~\ref{thm:qld-quarter-power-deficit-bound} gives
+	\[
+		\sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
+		\leq 2\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}\bigr).
+	\]
+	Thus the quarter powers arise from the two successive square roots.
+	The third estimate uses the separate $Z$ marginal, positivity, and point
+	self-consistency.
+\end{proof}
+
+\begin{lemma}[Formalization support: the paired subline overlap]
+	\label{lem:subline-joint-overlap}
+	\lean{MIPStarRE.QPBT.subline_joint_overlap_near_one_at}
+	\leanok
+	\uses{def:paired-subline-overlap, def:direct-subline-law}
+	There is a constant $c>0$ such that, for every projective strategy with
+	error $\eps$, every joint point family with error $\delta_Q$, every paired
+	line family with error $\delta_P$, every subline witness, and every directed
+	opposite placement, the average paired subline overlap differs from $1$ by at
+	most
+	\[
+		c\left(\delta_Q^{1/2}+\sqrt{m}\,
+			\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr)\right).
+	\]
+	This is the first-route estimate of the proof of
+	Lemma~\ref{lem:qld-4-13}, stated for both opposite placements. It compares
+	real parts of overlaps; it does not assert the complex modulus comparisons of
+	Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3} over the source
+	distribution, which remain open in their complex-modulus, source-law forms. See
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:paired-subline-overlap-estimates}
+	Chain the paired-to-ordered overlap gap, the removal of the $X$ factor, and
+	the near-one estimate for the remaining $Z$ term, each taken over the
+	directly indexed subline law, and collect the resulting quarter powers with
+	the scalar estimate of that chaining.
+\end{proof}
+
+\begin{lemma}[Obstruction to absorbing the first combined-line estimate]
+	\label{lem:qld-combining-quarter-power-obstruction}
+	\lean{MIPStarRE.QPBT.not_exists_combining_quarter_power_bound}
+	\leanok
+	\uses{def:admissible}
+	There is no function $f:\mathbb R^2\to\mathbb R$ satisfying
+	$0\leq f(x,y)\leq C(x^r+y^s)$ on the closed nonnegative quadrant,
+	for constants $C\geq 1$ and
+	$r,s>0$, which satisfies
+	\[
+		\min\{1,m\eps^{1/4}\}\leq f(m^2\eps,md/q)
+	\]
+	for every admissible $(q,m,d)$ and every $\eps\geq0$.
+	This is a scalar obstruction to the first proof route in
+	Remark~\ref{rem:qld-4-13-source-defects}, not a counterexample to
+	Lemma~\ref{lem:qld-4-13}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and $\eps_n=m_n^{-4}$.
+	These parameters are admissible: $q_n=2^{6n+3}$ has odd exponent and
+	$m_n\mid q_n$. Both arguments of $f$ equal $m_n^{-2}$, so the assumed
+	polynomial upper bound tends to zero. But
+	$\min\{1,m_n\eps_n^{1/4}\}=1$ for every $n$, a contradiction.
+\end{proof}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
-	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
+	\leanok
+	\uses{lem:qld-4-10, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
 	This formalization-only auxiliary is not a named statement of the paper.
 	It records a directly indexed auxiliary with the numerical error estimate
 	$C \cdot m \cdot \poly(\eps, md/q)$ obtained from the first route in the
 	printed proof, for a universal constant $C > 0$. It does not claim either
-	the printed error form $\poly(m^2\eps, md/q)$ or a source-shaped replacement
-	for Lemma~\ref{lem:qld-4-13}; see
+	the printed error form $\poly(m^2\eps, md/q)$ or the source question carrier,
+	line-point law, and field-valued answer sum of Lemma~\ref{lem:qld-4-13}; see
 	Remark~\ref{rem:qld-4-13-source-defects}.
-	The intended comparison with Lemma~\ref{lem:qld-4-13} changes only the
-	error form. The available auxiliary construction also differs from that
-	lemma in three respects. Its extended questions are
+	More precisely, there exist a polynomially controlled function
+	$\delta_Q:\mathbb R\to\mathbb R$, a constant $C>0$, and a polynomially
+	controlled function
+	$\delta_{\mathrm{combine}}:\mathbb R^2\to\mathbb R$ such that, for every admissible
+	$(q,m,d)$ and every projective strategy passing with error $\eps$, there is a
+	complete projective joint point family satisfying all the conclusions of
+	Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$ and, relative to that
+	same point family, an extended-line witness whose axis-degree property and
+	both completed-answer consistency bounds hold with error
+	\[
+		C m\,\delta_{\mathrm{combine}}\!\left(\eps,\frac{md}{q}\right).
+	\]
+	Within the directly indexed, completed-answer setting described below, the
+	quantitative change from the printed estimate is the error form. Compared
+	with Lemma~\ref{lem:qld-4-13}, the auxiliary construction also differs in
+	three respects. Its extended questions are
 	drawn from the directly indexed line space of
 	\cite{gap:qpbt_ld-dimension-divisibility} rather than from the lines of
 	$\F_q^{2m+2}$ used above; its average is taken over the corresponding
@@ -1809,26 +3026,37 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	alphabet $\F_q \cup \{\bot\}$, whose extra outcome collects the line
 	polynomials that admit no evaluation at the sampled point, rather than
 	under the answer summation over $a \in \F_q$ used above. Thus the auxiliary
-	construction does not establish this formulation until the question carrier
+	construction does not establish the source formulation until the question carrier
 	and law are related by the transport obligation of
 	\cite{gap:qpbt_ld-dimension-divisibility} and the completed answer comparison
 	is related to the source sum by
 	\cite{gap:qpbt_combined-lines-error-term}.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-xz-lines, lem:qld-sublines, def:combine-map,
-		lem:qld-4-12, lem:claim-17-1, lem:claim-17-2, lem:claim-17-3}
-	Chaining the three claims gives the numerical estimate
-	\eqref{eq:qld-combined-lines-consistency} by
-	$O(m(\eps^{1/4} + \delta_P^{1/4} + \delta_Q^{1/4} +
-	\delta_{\mathrm{Line}}^{1/2}))$, a function of the form
-	$m \cdot \poly(\eps, md/q)$. This calculation is the only established part
-	of the comparison. Applying it to the source statement remains conditional
-	on transporting the question space and distribution and on converting the
-	completed answer comparison, including zero-direction singleton lines, to
-	the source sum over $a \in \F_q$; these obligations are recorded in
-	\cite{gap:qpbt_ld-dimension-divisibility} and
-	\cite{gap:qpbt_combined-lines-error-term}.
+\leanok
+\uses{lem:qld-4-10, lem:combined-lines-given-points,
+	  lem:direct-subline-witness-exists,
+	  def:qld-conditional-extended-line-measurement,
+	  lem:qld-combined-polynomial-axis-degree,
+	  lem:qld-extended-line-overlap-comparison,
+	  thm:qld-direct-line-real-overlap,
+	  lem:consistency-defect-integrand-le-one,
+	  thm:qld-combining-polynomial-bound}
+Construct the polynomially controlled joint point family of
+Lemma~\ref{lem:qld-4-10}, and apply
+Lemma~\ref{lem:combined-lines-given-points} to that same family. The direct
+subline witness of Lemma~\ref{lem:direct-subline-witness-exists} supplies the
+conditional extended-line measurement. Its axis-degree theorem proves that no
+outcome above degree $d$ occurs on an axis-parallel extended line, while the
+extended-overlap comparison and
+Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
+consistency estimates. The independent unit bound handles large errors, and
+Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms
+into $m\cdot\poly(\eps,md/q)$. This proves the stated directly indexed
+auxiliary. Its comparison with the printed source formulation remains subject
+to the separate question-law and completed-answer issues in
+\cite{gap:qpbt_ld-dimension-divisibility} and
+\cite{gap:qpbt_combined-lines-error-term}.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
@@ -1836,12 +3064,140 @@ constitute a strategy for the classical low individual degree game in $2m+2$
 variables. Applying the quantum soundness of that game yields a single
 projective measurement whose outcomes are pairs of global polynomials.
 
+\begin{definition}[Restriction and completion of combined polynomial outcomes]
+	\label{def:qld-pair-restriction-completion}
+	\lean{MIPStarRE.QPBT.recoverCombinedPair}
+	\lean{MIPStarRE.QPBT.combinedPolyEmbedding}
+	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement}
+	\lean{MIPStarRE.QPBT.completedPairLabel}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement}
+	\leanok
+	\uses{def:combine-map, def:polyfunc, def:povm-conventions}
+	For admissible $(q,m,d)$, write
+	$j(g_X,g_Z)=\mathrm{combine}_{g_X,g_Z}$. Given a complete measurement
+	$T$ on bounded polynomials in $2m+2$ variables, define the restricted
+	sub-measurement $R_{g_X,g_Z}=T_{j(g_X,g_Z)}$. For a specified pair $p_0$,
+	complete it by relabeling every outcome outside the range of $j$ by $p_0$.
+	The resulting measurement is denoted by $C$.
+\end{definition}
+
+\begin{lemma}[Properties of polynomial-pair restriction and completion]
+	\label{lem:qld-combined-pair-completion}
+	\lean{MIPStarRE.QPBT.recoverCombinedPair_combinePoly}
+	\lean{MIPStarRE.QPBT.combinePoly_injective}
+	\lean{MIPStarRE.QPBT.combinedPolyEmbedding_eval}
+	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_projective}
+	\lean{MIPStarRE.QPBT.combinedPairSubmeasurement_missing}
+	\lean{MIPStarRE.QPBT.completedPairLabel_combinedPolyEmbedding}
+	\lean{MIPStarRE.QPBT.completedPairLabel_of_not_mem_range}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement_effect}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement_projective}
+	\leanok
+	\uses{def:qld-pair-restriction-completion}
+	The combining map $j$ is injective and satisfies
+	$j(g_X,g_Z)(x,z,\alpha,\beta)=\alpha g_X(x)+\beta g_Z(z)$.
+	If $T$ is projective, then the restricted sub-measurement $R$ is projective,
+	and its missing operator is
+	\[
+		\Id-\sum_{g_X,g_Z}R_{g_X,g_Z}=\sum_{g\notin\operatorname{range}j}T_g.
+	\]
+	The completion satisfies $C_p=R_p+1_{p=p_0}(\Id-\sum R)$ and is projective.
+	No bound on the state mass of the missing operator, or on consistency with
+	point measurements, is asserted here.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:qld-pair-restriction-completion,
+		lem:sandwich-postprocess-projective}
+	Substitute $(\alpha,\beta)=(1,0)$ and set the $Z$ variables to zero
+	to recover $g_X$ as a formal polynomial; the opposite substitution
+	recovers $g_Z$. Thus distinct pairs label distinct effects, proving
+	the sub-measurement assertion. Partitioning the outcomes into
+	$\mathcal G$ and its complement gives the operator identity.
+	Relabel each outcome in $\mathcal G$ by its unique pair, and all
+	remaining outcomes by $p_0$. This is precisely the stated completion,
+	and projectivity follows from projective postprocessing.
+\end{proof}
+
+\begin{definition}[Completion of the actual singleton outcomes]
+	\label{def:qld-direct-pair-completion}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPolynomialEquiv}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement}
+	\leanok
+	\uses{def:qld-pair-restriction-completion}
+	Taking the unique component of a singleton polynomial tuple and applying the
+	canonical field isomorphism gives an equivalence $e$ with bounded extended
+	polynomials over $\F_q$. Put $j_{\rm dir}=e^{-1}\circ j$, relabel the actual
+	rounded measurement by $e$, and apply
+	Definition~\ref{def:qld-pair-restriction-completion}.
+\end{definition}
+
+\begin{theorem}[Properties of the actual polynomial-pair completion]
+	\label{thm:qld-direct-pair-completion-properties}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.canonicalPolynomialMeasurement_effect}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_projective}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.mem_range_directCombinedEmbedding}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.directCombinedEmbedding_read}
+	\leanok
+	\uses{def:qld-direct-pair-completion, lem:qld-combined-pair-completion}
+	The canonical relabeling has effect $R_{e^{-1}(h)}$ at $h$, and the completed
+	measurement is projective whenever the rounded measurement is projective.
+	Membership in the range of $j_{\rm dir}$ is precisely equality, after field
+	transport, to $\mathrm{combine}_{g_X,g_Z}$ for a bounded pair. Moreover, the
+	direct readout of $j_{\rm dir}(g_X,g_Z)$ is
+	$\alpha g_X(x)+\beta g_Z(z)$ under the joint question equivalence.
+\end{theorem}
+\begin{proof}
+	\leanok
+	Support inclusion transports the individual-degree certificate in both
+	directions. The field equivalence and the combining-map evaluation identity
+	give the effect, range, and readout formulas. Projectivity follows from
+	projective postprocessing and completion.
+\end{proof}
+
+\begin{lemma}[Agreement after completing the polynomial-pair measurement]
+	\label{lem:qld-completed-pair-agreement}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement_evaluated_defect_le}
+	\lean{MIPStarRE.QPBT.completedPairMeasurement_consistencyDefect_le}
+	\leanok
+	\uses{lem:qld-combined-pair-completion, def:consistency}
+	This is a formalization-only estimate for the last paragraph of the proof
+	of Lemma~\ref{lem:qld-4-7}. Let $T$ be any complete measurement on extended
+	polynomials, $R_p=T_{\mathrm{combine}_p}$ its restriction to polynomial
+	pairs, and $C$ its completion at a fixed pair $p_0$. Projectivity is not
+	required for this estimate. Let $U$ be a nonempty finite question set,
+	$e_u$ a map from polynomial pairs to a finite answer alphabet, and
+	$\{B^u_a\}_a$ a complete measurement on the opposite tensor factor.
+	For every vector $\psi$, the consistency defect satisfies
+	\[
+		\E_{u\in U}\sum_{a\ne b}
+		\langle\psi|C_{[e_u=a]}\otimes B^u_b|\psi\rangle
+		\le \|\psi\|^2-
+		\E_{u\in U}\sum_p
+		\langle\psi|R_p\otimes B^u_{e_u(p)}|\psi\rangle.
+	\]
+	The same inequality holds pointwise for each $u$. It does not assert a
+	lower bound for the retained overlap on the right-hand side.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-combined-pair-completion}
+	Each difference $C_p-R_p$ is positive semidefinite. Tensoring it with
+	$B^u_{e_u(p)}$ therefore gives a nonnegative quadratic form, so
+	completion increases the diagonal overlap. Since $C$ and $B^u$ are
+	complete, their off-diagonal overlap equals $\|\psi\|^2$ minus their
+	diagonal overlap. Postprocessing groups the latter by the fibers of $e_u$.
+	Apply the resulting inequality and average over $u$.
+\end{proof}
+
 \begin{lemma}[The global polynomial-pair measurement]
 	\label{lem:qld-4-7}
 	\lean{MIPStarRE.QPBT.Poly, MIPStarRE.QPBT.PolyPair, MIPStarRE.QPBT.evalAt}
 	\lean{MIPStarRE.QPBT.GlobalPairWitness}
 	\lean{MIPStarRE.QPBT.exists_globalPairWitness}
-	\notready
+	\leanok
 	\uses{def:polyfunc, def:expanded-state, def:expanded-point-measurement,
 		def:consistency, def:bracket, def:ideg-deg-polynomials}
 	% Statement as in the source (references/qpbt-paper/
@@ -1879,102 +3235,695 @@ projective measurement whose outcomes are pairs of global polynomials.
 	if $W = Z$.
 \end{lemma}
 \begin{proof}
-	\uses{lem:qld-4-13-established, lem:qld-4-12, thm:naimark,
-		lem:ld-soundness, def:ld-game, fact:agreement, fact:add-a-proj2,
-		fact:data-processing, lem:schwartz-zippel-total-degree,
-		def:combine-map}
-	Lemma~\ref{lem:qld-4-13-established} supplies measurements on the directly
-	indexed line carrier: an axis line records its base point and directly sampled
-	coordinate index, while a diagonal line also records a direction whose earlier
-	coordinates vanish. Its averages use the corresponding
-	directly indexed line-point law, and its consistency relations use the completed
-	answer alphabet $\F_q \cup \{\bot\}$. These data are not yet a strategy for the
-	classical low individual degree game of Definition~\ref{def:ld-game}, whose line
-	questions retain a field-valued seed. Such a strategy requires a transport from
-	the directly indexed carrier and law to the seed-indexed question distribution,
-	and a conversion from the completed-answer relations, including degenerate
-	zero-direction lines, to the game's field-valued answer checks. These open
-	transports are recorded in \cite{gap:qpbt_ld-dimension-divisibility} and
-	\cite{gap:qpbt_combined-lines-error-term}.
-	Conditional on these transports, Lemmas~\ref{lem:qld-4-12}
-	and~\ref{lem:qld-4-13-established} give a strategy with parameters
-	$(q,2m+2,d,1)$ and success probability $1-\delta_{\mathrm{combine}}$; the
-	axis-parallel clause supplies the required degree-$d$ answer format. The
-	numerical estimate available for $\delta_{\mathrm{combine}}$ is
-	$C \cdot m \cdot \poly(\eps,md/q)$, not the unproved form
-	$\poly(m^2\eps,md/q)$ printed in Lemma~\ref{lem:qld-4-13}
-	(Remark~\ref{rem:qld-4-13-source-defects}). The error function $\delta_S$
-	absorbs the prefactor $m$ into $(md)^a$.
-	(For $(q, 2m+2, d, 1)$ to be a parameter tuple of
-	Definition~\ref{def:ld-game} the dimension $2m+2$ must divide $q$;
-	admissibility of $(q,m,d)$ supplies only that $m$ divides $q$, and for
-	admissible parameters with $m \ge 2$ the divisibility fails, so this
-	instantiation is an unresolved obligation of the source argument,
-	recorded in Remark~\ref{rem:qld-4-7-divisibility} and analyzed in
-	\cite{gap:qpbt_ld-dimension-divisibility}.) Since $\{\hat{Q}^{\ell}_{f}\}$ is
-	only a POVM, it is first made projective by Naimark dilation
-	(Theorem~\ref{thm:naimark}), which preserves the $\simeq$ conclusions of
-	Lemma~\ref{lem:qld-4-13}. The quantum soundness of the classical test
-	(Theorem~\ref{lem:ld-soundness}, applied with $m$ replaced by $2m+2$ and
-	$\eps$ by $\delta_{\mathrm{combine}}$) then yields a POVM
-	$\{\hat{S}_g\}$ with outcomes $g \in \mathrm{ideg}_{d,2m+2}(\F_q)$ that
-	is $\delta_{\mathrm{ld}}$-self-consistent and
-	$\delta_{\mathrm{ld}}$-consistent with the points measurements
-	$\{\hat{Q}^{x,z,\alpha,\beta}_{a}\}$, where
-	$\delta_{\mathrm{ld}}
-	= a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$
-	for universal constants $a, b$; a second application of Naimark dilation
-	makes $\{\hat{S}_g\}$ projective with the same guarantees. Let
-	$\mathcal{G}$ be the set of polynomials of the form
-	$g(x,z,\alpha,\beta) = \alpha g_X(x) + \beta g_Z(z)$ with
-	$g_X, g_Z \in \mathrm{ideg}_{d,m}(\F_q)$. A chain of approximations
-	built from the consistency of $\{\hat{S}_g\}$ with the points
-	measurements and the relations
-	\eqref{eq:qld-4-12-cons-m-hat}--\eqref{eq:qld-4-12-cons-m-hat2} of
-	Lemma~\ref{lem:qld-4-12} (using Lemma~\ref{fact:agreement} to convert
-	$\simeq$ into $\approx$ and Lemma~\ref{fact:add-a-proj2}) correlates
-	$\hat{S}_g$ with the indicator-weighted products of the $X$ and $Z$
-	point measurements in both orders. Combining this with Schwartz--Zippel
-	case analyses (Lemma~\ref{lem:schwartz-zippel-total-degree}, applied to
-	polynomials of total degree at most $(2m+2)d$) --- first ruling out the
-	$g$ that are not linear in $(\alpha, \beta)$, then, among the linear
-	ones $g = \alpha g_1(x,z) + \beta g_2(x,z)$, ruling out those whose
-	coefficient polynomials $g_1$ or $g_2$ depend on the wrong block of
-	variables --- yields
-	$\sum_{g \notin \mathcal{G}}
-	\| (\hat{S}_g)_{\mathsf{A}\mathsf{A}'} \ket{\hat\psi} \|^2
-	\le O(\delta_{\mathrm{ld}} + \delta_Q + md/q)
-	=: \delta_{\mathcal{G}}$.
-	Define the projective sub-measurement
-	$\hat{S}_{g_X,g_Z} = \hat{S}_{\mathrm{combine}_{g_X,g_Z}}$
-	(Definition~\ref{def:combine-map}); its incompleteness is at most
-	$\delta_{\mathcal{G}}$, and a further approximation chain with
-	successive errors $\delta_{\mathcal{G}}$, $\delta_Q^{1/2}$,
-	$\delta_Q^{1/2}$, $1/q$, $1/q$ gives
-	\[
-		\big(\hat{S}_{[\mathrm{eval}_x(\cdot) = a,\
-			\mathrm{eval}_z(\cdot) = b]}
-		\big)_{\mathsf{A}\mathsf{A}'}
-		\simeq_{O(\delta_{\mathcal{G}} + \delta_Q^{1/2} + 1/q)}
-		\big(\hat{M}^{(\mathrm{Point},X),x}_{a}\,
-		\hat{M}^{(\mathrm{Point},Z),z}_{b}\,
-		\hat{M}^{(\mathrm{Point},X),x}_{a}
-		\big)_{\mathsf{B}\mathsf{A}''}\,.
-	\]
-	Completing the sub-measurement by adding
-	$\Id - \sum_{g_X,g_Z} \hat{S}_{g_X,g_Z}$ to an arbitrary element costs a
-	further $\delta_{\mathcal{G}}$, and the resulting error
-	$\delta_S = O(\delta_{\mathrm{ld}} + \delta_Q^{1/2} + md/q)$ has the
-	stated form for suitable universal constants (here
-	$\delta_{\mathrm{combine}}$ may be taken to be the bound
-	$m \cdot \poly(\eps, md/q)$ established in the proof of
-	Lemma~\ref{lem:qld-4-13}, whose prefactor $m$ is absorbed
-	into $(md)^a$ after enlarging $a$ and shrinking $b$); an application of
-	Lemma~\ref{fact:data-processing} then gives
-	\eqref{eq:qld-s-point-con-alice} for $W = X$. For $W = Z$ the same
-	steps are performed with $X$ and $Z$ interchanged, starting from the
-	opposite-order correlation, and entirely analogous calculations with
-	the registers swapped yield \eqref{eq:qld-s-point-con-bob}.
+\leanok
+\uses{lem:qld-4-13-established, thm:qld-completed-pair-actual-error,
+  thm:qld-actual-rounded-error-bound}
+Lemma~\ref{lem:qld-4-13-established} supplies the actual point and directly
+indexed line witnesses with errors $\delta_Q=p(\eps)$ and
+$\delta_L=Cm\,g(\eps,md/q)$, for polynomially small $p,g$ and universal $C>0$.
+Theorem~\ref{thm:qld-completed-pair-actual-error} constructs both projective
+polynomial-pair measurements, with all four point-consistency defects at most
+\[
+ D=8(4\eta+8\delta_Q)+\frac{12md+4d+14}{q},\qquad
+ \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta},
+\]
+where
+\[
+ \delta=\delta_{\rm ld}\left(a,b,
+ 3\left(\sqrt{\delta_Q+\delta_L}+md/q\right),q,2m+2,d,1\right).
+\]
+Each defect is also at most one, since both measurements are complete and
+the state is normalized. Theorem~\ref{thm:qld-actual-rounded-error-bound}
+bounds $\min\{1,D\}$ by the required universal error function for every
+nonnegative error. The same two measurements therefore satisfy both
+displayed relations for both bases.
+
+This proof uses soundness for the directly indexed game. The separate
+comparison with the source's seed-bearing auxiliary game, and the
+discrepancies documented in \cite{gap:qpbt_ld-dimension-divisibility} and
+\cite{gap:qpbt_combined-lines-error-term}, remain unchanged.
+\end{proof}
+
+\begin{lemma}[Projective refinement of an operator comparison]
+\label{lem:qld-projective-refinement-ordered}
+\lean{MIPStarRE.QPBT.projective_refinement_ordered_dist_le}
+\leanok
+This is an auxiliary quantitative form of the insertion calculation in the
+paper equations labelled \texttt{eq:qld-g-42} and \texttt{eq:qld-g-43}
+in \cite{Ji2020MIPStar}. Let $R=\{R_g\}$ be a
+complete projective measurement, let $e_x(g)$ be a finite outcome readout,
+and let $A^x,B^x$ be complete measurements on the same finite-dimensional
+space. Let $T^x_a$ be arbitrary operators. For a finite distribution $\mu$
+and a state $\psi$, suppose that
+\[
+ \operatorname{Cons}_\mu(R^{e_x},B^x)\leq\eta,\qquad
+ \mathbb E_\mu\sum_a\|(B^x_a-A^x_a)\psi\|^2\leq\delta_0,\qquad
+ \mathbb E_\mu\sum_a\|(A^x_a-T^x_a)\psi\|^2\leq\delta_1.
+\]
+Then
+\[
+ \mathbb E_\mu\sum_g\|R_g(I-T^x_{e_x(g)})\psi\|^2
+ \leq 4\eta+4\delta_0+4\delta_1.
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{fact:agreement, fact:add-a-proj2}
+Projectivity gives $R_gR^{e_x}_{e_x(g)}=R_g$. Agreement and projective
+refinement bound the insertion of $B^x_{e_x(g)}$ by $2\eta$.
+The squared-distance triangle inequality bounds the comparison from $B$
+to $T$ by $2\delta_0+2\delta_1$. Left multiplication by $R_g$, with
+the full outcome sum retained, contracts this bound. A second application
+of the triangle inequality gives the displayed constants.
+\end{proof}
+
+\begin{lemma}[Both ordered products on opposite expanded blocks]
+\label{lem:qld-opposite-ordered-products}
+\lean{MIPStarRE.QPBT.CombinedPointsWitness.ordered_dist_le}
+\leanok
+Fix a projective Pauli strategy and a combined-point witness with error
+$\delta_Q$. Let $p_1,p_2$ be any directed opposite pair of expanded register
+placements. Suppose a complete projective measurement $R$ on $p_1$, read
+by $e_{x,z,\alpha,\beta}$, has consistency defect at most $\eta$ against
+$\hat Q^{x,z,\alpha,\beta}$ on $p_2$, on the actual expanded state.
+For either order $XZ$ or $ZX$, define
+\[
+ T^{XZ}_{x,z,\alpha,\beta,c}
+ =\sum_{\alpha r+\beta s=c}\hat M^{(\mathrm{Point},X),x}_r
+                              \hat M^{(\mathrm{Point},Z),z}_s,
+ \qquad
+ T^{ZX}_{x,z,\alpha,\beta,c}
+ =\sum_{\alpha r+\beta s=c}\hat M^{(\mathrm{Point},Z),z}_s
+                              \hat M^{(\mathrm{Point},X),x}_r.
+\]
+Then, for each order $o\in\{XZ,ZX\}$,
+\[
+ \mathbb E_{x,z,\alpha,\beta}\sum_g
+ \|(R_g)_{p_1}(I-(T^o_{x,z,\alpha,\beta,e_{x,z,\alpha,\beta}(g)})_{p_2})
+       \hat\psi\|^2\leq4\eta+8\delta_Q.
+\]
+This auxiliary uses the actual point-comparison error $\eta$, including any
+rounding loss. It does not identify that error with the unrounded
+low-degree soundness error.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:qld-projective-refinement-ordered, lem:qld-4-12}
+Use the opposite-block $Q$ as $B$ and the same-block $Q$ as $A$.
+The two comparison errors in Lemma~\ref{lem:qld-projective-refinement-ordered}
+are both bounded by $\delta_Q$, separately for the two orders.
+\end{proof}
+
+\begin{definition}[Extended-polynomial ordered error]
+\label{def:qld-extended-polynomial-ordered-error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.extendedPolynomialRead}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.extendedPolynomialOrderedError}
+\leanok
+For the directly indexed extended game at $k=1$, its polynomial outcome is
+a singleton tuple $g$. Identify its scalar field with the Pauli scalar
+field and evaluate its single polynomial at $(x,z,\alpha,\beta)$; denote
+the resulting readout by $e_{x,z,\alpha,\beta}(g)$.
+For a measurement $R$, let $E^o_{p_1,p_2}(R)$ be the full averaged
+squared-norm sum in Lemma~\ref{lem:qld-opposite-ordered-products} with
+this readout, for an order parameter $o\in\{XZ,ZX\}$. The outcome sum is over
+every singleton polynomial tuple, without a support restriction.
+\end{definition}
+
+\begin{theorem}[Formalization support: direct soundness for arbitrary strategies]
+\label{thm:qld-direct-soundness-any-strategy}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, def:consistency, def:ld-game}
+This is not a named statement of \cite{Ji2020MIPStar}. There are universal
+constants $a\geq1$ and $0<b\leq1$ such that the following holds. Let
+$D=(q,n,d,k)$ be directly indexed low-degree parameters with $k=1$, let
+$\xi>0$, and let $S$ be an arbitrary, not necessarily projective, strategy for
+the directly indexed game with value at least $1-\xi$. There are complete
+polynomial-tuple POVMs $G^{\mathrm A},G^{\mathrm B}$ on the original player
+spaces for which both point--polynomial consistency defects and the mutual
+polynomial consistency defect are at most
+$\delta_{\rm ld}(a,b,\xi,q,n,d,1)$. The point readout sends every malformed
+answer to the zero tuple, and no projectivity conclusion is asserted for
+$G^{\mathrm A},G^{\mathrm B}$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-soundness-k-one}
+Dilate both question-indexed POVM families by Naimark's theorem, apply
+Theorem~\ref{lem:direct-ld-soundness-k-one} to the resulting projective
+strategy, and compress the two polynomial POVMs at the distinguished ancillary
+coordinates. The game value and all three consistency defects are preserved.
+\end{proof}
+
+\begin{theorem}[Formalization support: simultaneous rounding under postprocessing]
+\label{thm:qld-simultaneous-postprocessed-rounding}
+\lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency}
+\leanok
+\uses{lem:ortho, def:consistency, def:povm-distance}
+Let $\psi$ be a unit vector on a finite-dimensional bipartite space, and let
+$A,B$ be complete POVMs with a common finite outcome set whose cross-player
+consistency defect is at most $\delta\geq0$. There are complete projective
+measurements $P_A,P_B$, chosen before any subsequent question distribution or
+postprocessing, whose squared state-dependent distances from $A,B$ are each at
+most $220\delta^{1/4}$. Moreover, for every finite probability distribution
+$\mu$, every question-dependent outcome map $f$, and every comparison family
+$N$, a consistency bound $\eta$ between $f_*A$ and $N$ implies
+\[
+ \operatorname{Cons}_\mu(f_*P_A,N)
+ \leq\delta+\sqrt{220\delta^{1/4}}+2\sqrt{\delta+\eta},
+\]
+and the analogous implication holds between $N$ and $f_*P_B$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:ortho, def:consistency, def:povm-distance}
+Apply the one-sided projective rounding and consistency transport on each
+tensor factor. The two choices are independent of the later distribution,
+postprocessing map, comparison family, and comparison error, so they form one
+simultaneous pair with the stated bounds.
+\end{proof}
+
+\begin{theorem}[Rounded extended-polynomial ordered estimates]
+\label{thm:qld-rounded-polynomial-ordered}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_ordered_estimates}
+\leanok
+There are universal direct-soundness constants $a\geq1$ and $0<b\leq1$
+with the following property. Fix admissible Pauli parameters, a projective
+Pauli strategy, a combined-point witness with error $\delta_Q$, and an
+extended-line witness with error $\delta_L$ on the directly indexed
+completed-answer domain. Set
+\[
+ e=3\bigl(\sqrt{\delta_Q+\delta_L}+md/q\bigr),\qquad
+ \delta=\delta_{\mathrm{ld}}(a,b,e,q,2m+2,d,1),\qquad
+ \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta}.
+\]
+There exist complete projective extended-polynomial measurements $R_A,R_B$
+on the original expanded local spaces such that, for both $o=XZ,ZX$,
+\[
+ E^o_{AA',BA''}(R_A)\leq4\eta+8\delta_Q,\qquad
+ E^o_{BB',AB''}(R_B)\leq4\eta+8\delta_Q.
+\]
+The line witness is an explicit input to this auxiliary theorem. Its
+domain restrictions remain those of
+Remark~\ref{rem:qld-4-13-source-defects}; this theorem does not certify
+Lemma~\ref{lem:qld-4-7} or assert concentration on separated polynomials.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-direct-soundness-any-strategy,
+  thm:qld-simultaneous-postprocessed-rounding,
+  lem:qld-opposite-ordered-products, def:qld-extended-polynomial-ordered-error}
+Apply the established direct soundness theorem for arbitrary strategies
+at $k=1$. Compression preserves all three conclusions, so the polynomial
+consistency error and both evaluated errors are at most $\delta$.
+Simultaneous projective rounding therefore gives the displayed $\eta$
+for both evaluated comparisons. Read the singleton scalar coordinate,
+transport the joint uniform question law by its coordinate equivalence,
+and transport the bipartite correlations to the two expanded placements.
+Lemma~\ref{lem:qld-opposite-ordered-products} gives both conclusions.
+\end{proof}
+
+\begin{definition}[Scalar coefficient expansion]
+\label{def:qld-scalar-coefficient-expansion}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.baseCoordinateEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarBaseCoordinateEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarBaseQuestionEquiv}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarNonlinearMass}
+\leanok
+Identify the first $2m$ coordinates with the ordered blocks $(x,z)$ and
+the last two with $(\alpha,\beta)$. Identify the direct scalar field with
+the Pauli scalar field $F=\mathbb F_q$. For a singleton polynomial outcome
+$g$, write its transported polynomial as
+\[
+ p_g(\alpha,\beta)=\sum_{i,j}c_{g,i,j}(x,z)\alpha^i\beta^j
+ \in F[x,z][\alpha,\beta].
+\]
+For an expanded placement $p$ and a complete measurement $R$, define
+\[
+ N_p(R)=\sum_{g:\,p_g\ne\alpha r+\beta t\ \text{for all }r,t\in F[x,z]}
+   \|(R_g)_p\hat\psi\|^2.
+\]
+The coefficient polynomials $r,t$ in this definition may depend on both
+base blocks. These are auxiliary definitions for the scalar-linearity
+argument in the proof of Lemma~\ref{lem:qld-4-7}.
+\end{definition}
+
+\begin{theorem}[Faithful scalar expansion and degree bounds]
+\label{thm:qld-scalar-expansion-degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_injective}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_eval}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_degree_term_le}
+\leanok
+For admissible parameters, the map $g\mapsto p_g$ is injective and
+evaluating $p_g$ after specializing its coefficients at $(x,z)$ gives
+exactly $e_{x,z,\alpha,\beta}(g)$. The coordinate splitting is an
+equivalence of the full joint sample spaces. Moreover,
+\[
+ \deg c_{g,i,j}\leq2md,\qquad \deg_{\alpha,\beta}p_g\leq2d.
+\]
+Writing
+$D(p)=\max_{e\in\operatorname{supp}p}\deg(\operatorname{coeff}_e p)
++\max\{1,\deg p\}+1$, with the empty maximum equal to zero, gives
+$D(p_g)\leq(2m+2)d+1$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-scalar-coefficient-expansion}
+Field transport, variable renaming, and the coefficient expansion are
+injective ring maps. The singleton tuple adds no information. Evaluation
+commutes with each map. A nonzero coefficient of a coefficient polynomial
+is the coefficient of the corresponding combined monomial of $g$.
+Every exponent is at most $d$; summing over the $2m$ base coordinates
+or the two scalar coordinates gives the degree bounds. Use $d\geq1$
+for the maximum in $D$.
+\end{proof}
+
+\begin{definition}[Ordered and diagonal indicators]
+\label{def:qld-polynomial-indicators}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.orderedIndicator}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.diagonalIndicator}
+\leanok
+For complete measurements $X,Z$ with outcomes in a finite field $F$, set
+\[
+ T_{\alpha,\beta,a}=\sum_{\alpha b+\beta c=a}X_bZ_c,
+ \qquad H_{\alpha,\beta,a}=\sum_{\alpha b+\beta c=a}Z_cX_bZ_c.
+\]
+These operators are the ordered indicator and diagonal sandwich in the
+scalar-linearity argument of Lemma~\ref{lem:qld-4-7}.
+\end{definition}
+
+\begin{theorem}[Projective outcome mass]
+\label{thm:qld-projective-outcome-mass}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.sum_projective_state_norm_sq}
+\leanok
+For a complete projective measurement $R$ on any finite-dimensional
+space and any vector $\psi$, one has $\sum_g\|R_g\psi\|^2=\|\psi\|^2$.
+\end{theorem}
+\begin{proof}
+\leanok
+Expand each squared norm, use $R_g^*R_g=R_g$, and sum the effects.
+\end{proof}
+
+\begin{theorem}[Scalar-nonlinear mass and ordered error]
+\label{thm:qld-nonlinear-mass-ordered-error}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.nonlinear_mass_le_ordered_error}
+\leanok
+Let $F$ be a finite field, let $s$ be a finite set of labels, and let
+$p_g\in F[u_1,\ldots,u_n][\alpha,\beta]$ for $g\in s$, with
+$p_g\ne\alpha r+\beta t$ for all coefficient polynomials $r,t$.
+Let $X(u),Z(u)$ be complete projective measurements on a common finite
+space, and let $\psi_g$ be arbitrary vectors on that space. With
+$T_{u,v,g}=T_{v_0,v_1,p_g(u,v)}$ and $D$ as above,
+\[
+ \sum_{g\in s}\|\psi_g\|^2\leq
+ 2\mathbb E_{u\in F^n}\mathbb E_{v\in F^2}
+   \sum_{g\in s}\|\psi_g-T_{u,v,g}\psi_g\|^2
+ +2\sum_{g\in s}\frac{D(p_g)}{|F|}\|\psi_g\|^2.
+\]
+Both expectations are uniform. The vectors need not be normalized, and
+no commutation assumption between $X$ and $Z$ is imposed.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-polynomial-indicators}
+For each $g$, choose a nonzero coefficient outside the two scalar-linear
+monomials. Its zero set is a common exceptional set of base points for
+all measurement outcomes. Apply Schwartz--Zippel to that coefficient,
+then to the specialized scalar polynomial minus each linear answer.
+Positivity and completeness of the diagonal sandwich preserve the weight
+$\|\psi_g\|^2$. The event $\beta=0$ contributes at most
+$|F|^{-1}\|\psi_g\|^2$. Finally apply the squared-norm triangle inequality
+and sum over the labels.
+\end{proof}
+
+\begin{theorem}[Actual scalar-nonlinear mass]
+\label{thm:qld-actual-scalar-nonlinear-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarNonlinearMass_le_ordered_error}
+\leanok
+For a projective Pauli setting with admissible parameters, any opposite
+placements $p_1,p_2$, and any complete projective extended-polynomial
+measurement $R$ on $p_1$,
+\[
+ N_{p_1}(R)\leq2E^{XZ}_{p_1,p_2}(R)+\frac{2((2m+2)d+1)}q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-nonlinear-mass-ordered-error, thm:qld-scalar-expansion-degrees,
+thm:qld-projective-outcome-mass, def:qld-extended-polynomial-ordered-error}
+Use $\psi_g=(R_g)_{p_1}\hat\psi$ and the point projectors on $p_2$.
+Opposite placements commute, so the residual in the preceding theorem
+equals the residual defining the ordered error. Transport the full joint
+uniform distribution through the coordinate equivalence. Enlarge the
+nonnegative restricted sums to all polynomial outcomes and use
+$\sum_g\|\psi_g\|^2=1$, together with the proved degree bound.
+\end{proof}
+
+\begin{theorem}[Rounded scalar-linearity concentration]
+\label{thm:qld-rounded-scalar-linearity}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_scalar_mass}
+\leanok
+There are universal constants $a\geq1$ and $0<b\leq1$ with the following
+property. Under the explicit point and directly indexed completed-answer
+line-witness hypotheses of Theorem~\ref{thm:qld-rounded-polynomial-ordered},
+with exactly its definitions of $\delta$ and $\eta$, there exist complete
+projective measurements $R_A,R_B$ satisfying both ordered estimates of
+that theorem and, simultaneously,
+\[
+ N_{AA'}(R_A),\ N_{BB'}(R_B)
+ \leq 2(4\eta+8\delta_Q)+\frac{2((2m+2)d+1)}q.
+\]
+The line witness remains an input on its stated restricted domain.
+Neither an ordered-error bound nor a mass bound is an input.
+Dependence of the coefficient of $\alpha$ on $z$, dependence of the
+coefficient of $\beta$ on $x$, and the retained point overlaps are not
+conclusions of this auxiliary theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-polynomial-ordered, thm:qld-actual-scalar-nonlinear-mass}
+Choose both measurements by the rounded ordered-estimate theorem.
+Apply the actual mass bound to $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{proof}
+
+\begin{lemma}[Uniform polynomial and scalar collisions]
+\label{lem:qld-fiber-collisions}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_eval_eq_le}
+\lean{MIPStarRE.QPBT.affine_collision_average}
+\leanok
+Over a finite field $F$, distinct polynomials of total degree at most $D$
+agree at a uniform point with probability at most $D/|F|$.
+For two pairs $u,u'\in F^2$, the probability that
+$\alpha u_1+\beta u_2=\alpha u'_1+\beta u'_2$ is one if $u=u'$ and
+$1/|F|$ otherwise. These are auxiliary forms of Schwartz--Zippel and
+the scalar collision calculation in \texttt{eq:qld-g-separable}.
+\end{lemma}
+\begin{proof}
+\leanok
+Apply Schwartz--Zippel in the first assertion. In the second, a nonzero
+coefficient difference determines exactly one value of one scalar for
+each value of the other. These proofs reuse the existing polynomial-image
+and affine coarse-graining calculations.
+\end{proof}
+
+\begin{lemma}[Ordered norm and residual comparisons]
+\label{lem:qld-fiber-norm-comparisons}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.abs_orderedIndicator_norm_sq_sub_diagonal_le}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.sum_mass_le_residual_add_image}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.placed_residual}
+\leanok
+For complete projective measurements $X,Z$ and any vector $\psi$, the
+ordered and diagonal indicators satisfy
+\[
+ \bigl|\|T_{\alpha,\beta,a}\psi\|^2
+       -\langle\psi,H_{\alpha,\beta,a}\psi\rangle\bigr|
+ \leq 1_{\beta=0}\|\psi\|^2.
+\]
+For any finite set $s$ and vectors $\psi_g,A_g$,
+$\sum_{g\in s}\|\psi_g\|^2\leq
+2\sum_{g\in s}\|\psi_g-A_g\|^2+2\sum_{g\in s}\|A_g\|^2$.
+For opposite expanded placements, the residual
+$(R_g)_{p_1}\hat\psi-T_{p_2}(R_g)_{p_1}\hat\psi$
+equals $(R_g)_{p_1}(I-T_{p_2})\hat\psi$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{def:qld-polynomial-indicators}
+For nonzero $\beta$, orthogonality gives the diagonal Gram identity.
+For zero $\beta$, both quadratic forms are between zero and $\|\psi\|^2$.
+The second assertion is the squared-norm triangle inequality.
+The final identity follows from commutation of opposite placements.
+The first two calculations are also used in the polynomial-image estimate.
+\end{proof}
+
+\begin{definition}[Partial coefficient polynomials]
+\label{def:qld-block-coefficient-polynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.fiberQuestionEquiv}
+\leanok
+For a scalar coefficient $c_{g,a}(x,z)$, view it as a polynomial in $x$
+with coefficients in $F[z]$, or in $z$ with coefficients in $F[x]$.
+An order parameter $o\in\{x\mid z,z\mid x\}$ selects the varying block.
+The associated joint question equivalence takes a fixed block, a varying
+block, and two scalars to the actual extended question. Reversal exchanges
+both the point blocks and the scalars.
+\end{definition}
+
+\begin{theorem}[Partial degrees and the separated image]
+\label{thm:qld-block-coefficient-degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial_degrees}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial_eval}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarPolynomial_linear_read_fiber}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_polyPair_of_scalar_separated}
+\leanok
+For an actual singleton outcome, every coefficient of either partial
+polynomial and the partial polynomial itself have total degree at most $md$.
+Partial evaluation is exactly evaluation of the original coefficient at the
+corresponding two blocks. For a scalar-linear outcome, this recovers the
+actual readout in either block and scalar order.
+If the coefficient of $\alpha$ is independent of $z$ and the coefficient
+of $\beta$ is independent of $x$, there is a pair of individual-degree-$d$
+polynomials $(g_X,g_Z)$ such that the field-transported outcome equals
+$\mathrm{combine}_{g_X,g_Z}$ as a formal polynomial.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-block-coefficient-polynomial, thm:qld-scalar-expansion-degrees,
+def:combine-map}
+Nonzero partial coefficients are coefficients of the original polynomial;
+each exponent is at most $d$. The ring equivalences commute with evaluation.
+A constant partial polynomial is the renamed polynomial of the fixed block.
+Its coefficients inherit the individual-degree certificate. Apply the
+injective scalar expansion to identify the resulting pair with the existing
+combining map.
+\end{proof}
+
+\begin{theorem}[Common exceptional coefficient and weighted fibers]
+\label{thm:qld-common-exceptional-fibers}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.exists_common_exceptional_coefficient}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_weighted_fiber_le}
+\leanok
+Let $p\in F[z_1,\ldots,z_k][x_1,\ldots,x_n]$ be nonconstant in $x$,
+with coefficient degrees at most $C$ and degree in $x$ at most $D$.
+There is a nonzero coefficient $c(z)$ of a nonconstant $x$-monomial whose
+zero set has probability at most $C/|F|$. For every $z$ outside this one set and every
+$b\in F$, $\Pr_x[p(x,z)=b]\leq D/|F|$.
+Consequently, if $w(z,b)\geq0$ and $\sum_b w(z,b)=M$ for every $z$, then
+\[
+ \mathbb E_z\sum_b\Pr_x[p(x,z)=b]w(z,b)
+ \leq \frac{C+D}{|F|}M.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:qld-fiber-collisions}
+Choose one nonzero coefficient at a nonconstant monomial. Specialization
+outside its zero set leaves a polynomial distinct from every constant.
+Apply Schwartz--Zippel twice. Sum the weights on the common exceptional
+set before averaging it; no outcome-cardinality factor appears.
+\end{proof}
+
+\begin{theorem}[Wrong-variable ordered norm]
+\label{thm:qld-wrong-variable-norm}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_orderedIndicator_norm_sq_le_of_nonconstant}
+\leanok
+With $p,C,D$ as above, let $X(x),Z(z)$ be complete projective measurements,
+let $r(x,z)$ be any field-valued function, and let $\psi$ be any vector.
+The ordered indicator for the readout $\alpha r(x,z)+\beta p(x,z)$ satisfies
+\[
+ \mathbb E_z\mathbb E_x\mathbb E_{\alpha,\beta}
+   \|T_{\alpha,\beta,\alpha r(x,z)+\beta p(x,z)}\psi\|^2
+ \leq \frac{C+D+2}{|F|}\|\psi\|^2.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-common-exceptional-fibers, lem:qld-fiber-norm-comparisons,
+lem:qld-fiber-collisions}
+The zero second scalar and the unequal scalar-answer collision each cost
+$|F|^{-1}\|\psi\|^2$. Remove the middle $X$ contraction from $ZXZ$.
+Its remaining $Z$ weight is independent of $x$, so the weighted fiber
+theorem applies. Interchanging both blocks and measurements gives $XZX$.
+\end{proof}
+
+\begin{definition}[Wrong-variable and nonseparated masses]
+\label{def:qld-wrong-variable-masses}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarWrongVariableMass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.separatedPolynomialMass}
+\leanok
+For a complete extended-polynomial measurement $R$ on placement $p$, let
+$W_p^{XZ}(R)$ be the sum of $\|(R_g)_p\hat\psi\|^2$ over scalar-linear
+outcomes whose beta coefficient depends on $x$. Define $W_p^{ZX}(R)$
+using the alpha coefficient depending on $z$.
+Let $G_p(R)$ be the same mass sum outside the field-transported image of
+the existing bounded combining map $(g_X,g_Z)\mapsto\mathrm{combine}_{g_X,g_Z}$.
+\end{definition}
+
+\begin{theorem}[Actual wrong-variable and separated masses]
+\label{thm:qld-actual-separated-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.scalarWrongVariableMass_le_ordered_error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.separatedPolynomialMass_le_ordered_errors}
+\leanok
+For every opposite pair $p_1,p_2$ and complete projective measurement $R$
+on $p_1$, for both $o=XZ,ZX$,
+\[
+ W_{p_1}^{o}(R)\leq2E^o_{p_1,p_2}(R)+\frac{2(2md+2)}q,
+\qquad
+ G_{p_1}(R)\leq4E^{XZ}_{p_1,p_2}(R)+2E^{ZX}_{p_1,p_2}(R)
+                  +\frac{12md+4d+10}q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-wrong-variable-norm, thm:qld-block-coefficient-degrees,
+thm:qld-projective-outcome-mass, thm:qld-actual-scalar-nonlinear-mass,
+def:qld-wrong-variable-masses}
+Use the actual vectors $(R_g)_{p_1}\hat\psi$ and opposite placed point
+measurements. Their squared masses sum to one. The norm-to-residual
+comparison retains the full outcome sum. The complement of the combining
+image lies in the union of the three excluded classes; sum their bounds.
+\end{proof}
+
+\begin{theorem}[Rounded wrong-variable concentration]
+\label{thm:qld-rounded-wrong-variable-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_wrong_variable_mass}
+\leanok
+Under exactly the hypotheses and definitions of $\delta,\eta$ in
+Theorem~\ref{thm:qld-rounded-polynomial-ordered}, there exist actual rounded
+measurements satisfying both ordered estimates with $E=4\eta+8\delta_Q$,
+both wrong-variable bounds $2E+2(2md+2)/q$, and the scalar-nonlinear bound
+of Theorem~\ref{thm:qld-rounded-scalar-linearity}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-scalar-linearity, thm:qld-actual-separated-mass}
+Apply the wrong-variable mass inequality to each of the two measurements
+supplied by rounded scalar-linearity concentration.
+\end{proof}
+
+\begin{theorem}[Rounded concentration on polynomial pairs]
+\label{thm:qld-rounded-separated-mass}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_rounded_polynomial_separated_mass}
+\leanok
+Under the same hypotheses, there exist actual rounded measurements satisfying
+both ordered estimates with $E=4\eta+8\delta_Q$ and, on both heterogeneous
+placements,
+\[
+ G_{AA'}(R_A),\ G_{BB'}(R_B)\leq6E+\frac{12md+4d+10}q.
+\]
+The directly indexed completed-answer line-witness restriction remains
+explicit. This proves concentration, not the subsequent retained overlaps,
+completion consistency, or the source global-pair theorem.
+This existential choice is separate from the measurements in the preceding theorem.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-rounded-polynomial-ordered, thm:qld-actual-separated-mass}
+Apply the actual mass inequalities to $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{proof}
+
+\begin{theorem}[Polynomial consistency from point comparisons]
+\label{thm:qld-polynomial-consistency-from-points}
+\lean{MIPStarRE.QPBT.direct_polynomial_consistency_le_point_bounds}
+\leanok
+This is an auxiliary estimate for the polynomial measurements in
+Lemma~\ref{lem:qld-4-7}. Let $(q,n,d,k)$ be directly indexed low-degree
+parameters, and let $A$ and $B$ be complete POVMs on two finite-dimensional
+spaces whose outcomes are $k$-tuples of individual-degree-$d$ polynomials in
+$n$ variables over $\F_q$. Let $Q_A^u,Q_B^u$ be complete POVMs with outcomes
+in $\F_q^k$, and let the bipartite state be normalized. Write $A^u,B^u$ for
+the evaluation of every component at $u$, and write
+$\operatorname{Cons}$ for the off-diagonal consistency defect, averaged over
+uniform $u$ when the measurements depend on $u$. If
+\[
+\operatorname{Cons}(A^u,Q_B^u)\leq\eta_A,\qquad
+\operatorname{Cons}(Q_A^u,B^u)\leq\eta_B,\qquad
+\operatorname{Cons}(Q_A^u,Q_B^u)\leq\delta_Q,
+\]
+then
+\[
+\operatorname{Cons}(A,B)
+\leq \eta_A+2\sqrt{\delta_Q+\eta_B}+\frac{nd}{q}.
+\]
+No projectivity assumption is required.
+\end{theorem}
+\begin{proof}
+\lean{MIPStarRE.QPBT.direct_poly_tuple_collision_le}
+\leanok
+The consistency comparison through $Q_B^u,Q_A^u$ bounds
+$\operatorname{Cons}(A^u,B^u)$ by
+$\eta_A+2\sqrt{\delta_Q+\eta_B}$. Distinct polynomial tuples differ in
+at least one component. The Schwartz--Zippel bound for that component gives
+collision probability at most $nd/q$ for the entire tuple. Summing the
+nonnegative bipartite outcome weights therefore bounds the full polynomial
+defect by the evaluated defect plus $nd/q$.
+\end{proof}
+
+\begin{theorem}[Formalization support: postprocessed consistency under ground compression]
+\label{thm:qld-ground-compression-postprocessing}
+\lean{MIPStarRE.QPBT.consistency_defect_ground_compress_measurement_postprocess}
+\lean{MIPStarRE.QPBT.ground_compress_dilated_measurement}
+\leanok
+\uses{def:consistency}
+Let $\psi$ be a bipartite vector, let $k_0,l_0$ be distinguished coordinates
+of two ancillary spaces, and let $A^x,B^x$ be finite families of complete POVMs
+on the corresponding padded spaces. For question-dependent maps $f_x,g_x$ to
+a common finite outcome set, the consistency defect of the postprocessed
+families on the state padded at $(k_0,l_0)$ is exactly the consistency defect of
+their ground-coordinate compressions on $\psi$:
+\[
+ \operatorname{Cons}_\mu(f_*A,g_*B;\operatorname{pad}_{k_0,l_0}\psi)
+ =\operatorname{Cons}_\mu(f_*A^0,g_*B^0;\psi).
+\]
+In particular, compressing the completed Naimark dilation of a POVM at its
+distinguished residual coordinate recovers the original POVM.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:consistency}
+Expand the off-diagonal defect and use the equality of each bipartite quadratic
+form before and after ground-coordinate compression. Compression commutes with
+postprocessing. The final assertion is the defining compression identity for
+the completed Naimark dilation.
+\end{proof}
+
+\begin{theorem}[Consistency after ground compression]
+\label{thm:qld-compressed-polynomial-consistency}
+\lean{MIPStarRE.QPBT.direct_point_consistency_le_point_rejection}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.point_consistency_le}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.compressed_polynomial_consistency_le}
+\leanok
+This is an auxiliary estimate for the directly indexed strategy constructed
+from combined point and extended line measurements with errors $\delta_Q$
+and $\delta_L$. Its point readout maps wrong-format answers to the zero tuple.
+For any directly indexed strategy, the consistency defect of these readouts
+is at most the point/point rejection probability. For the constructed
+extended strategy it is therefore at most $\delta_Q$.
+
+Let $A,B$ be polynomial POVMs on the Naimark dilation of this strategy,
+with the two opposite point-consistency defects at most $\eta_A,\eta_B$.
+If $J_A,J_B$ insert the distinguished ancillary coordinates and
+$A_g^0=J_A^*A_gJ_A$, $B_g^0=J_B^*B_gJ_B$, then on the original expanded
+bipartite state,
+\[
+\operatorname{Cons}(A^0,B^0)
+\leq\eta_A+2\sqrt{\delta_Q+\eta_B}+\frac{(2m+2)d}{q}.
+\]
+In applying direct soundness, both point-comparison errors retain the
+passing error $3(\sqrt{\delta_Q+\delta_L}+md/q)$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-ground-compression-postprocessing,
+  thm:qld-polynomial-consistency-from-points}
+Different point readouts force rejection; wrong-format answers also reject.
+The established point/point rejection estimate gives the bound $\delta_Q$.
+Ground compression preserves every bipartite correlation on the padded state
+and commutes with outcome postprocessing. Apply
+Theorem~\ref{thm:qld-polynomial-consistency-from-points} to the compressed
+POVMs with $n=2m+2$ and $k=1$.
 \end{proof}
 
 % This remark records a defect of the source argument; it is not a statement
@@ -2278,7 +4227,7 @@ projective measurement whose outcomes are pairs of global polynomials.
 
 \section{Scalar error estimates}
 
-The following three formalization-only auxiliary statements concern real
+The following formalization-only auxiliary statements concern real
 functions and numerical parameters, independently of the standing strategy
 assumptions of this chapter. They isolate calculations supporting
 Lemmas~\ref{lem:qld-xz-lines}, \ref{lem:qld-4-13}, and \ref{lem:qld-4-7}
@@ -2291,6 +4240,42 @@ $s,t>0$. These are the corrected error conventions of
 \cite{gap:qpbt_polynomial-error-square-root,gap:qpbt_pasting-product-error}.
 The functions are defined on all real arguments; these bounds concern their
 nonnegative domains.
+
+\begin{theorem}[Quarter powers and square-root deficits]
+	\label{thm:qld-quarter-power-deficit-bound}
+	\lean{MIPStarRE.QPBT.rpow_quarter_nonneg}
+	\lean{MIPStarRE.QPBT.sqrt_deficit_bound_le}
+	\leanok
+	For $x\in\R$, write
+	\[
+	 \operatorname{RePow}_{1/4}(x)=
+	 \begin{cases}
+	  \exp\bigl(\frac14\log x\bigr),&x>0,\\
+	  0,&x=0,\\
+	  \exp\bigl(\frac14\log(-x)\bigr)\cos(\pi/4),&x<0.
+	 \end{cases}
+	\]
+	This is the real part of the principal complex quarter power. In particular,
+	the negative-base branch is part of the operation rather than the ordinary
+	real fourth root. It is nonnegative for every real $x$.
+	If $m\geq1$ and $\delta_P,\delta_Q\geq0$, then
+	\[
+	 \sqrt{2\sqrt{4m^2\delta_P}+2\sqrt{4\delta_Q}}
+	 \leq2\sqrt m\bigl(
+	  \operatorname{RePow}_{1/4}(\delta_P)
+	  +\operatorname{RePow}_{1/4}(\delta_Q)\bigr).
+	\]
+	These are formalization-only scalar estimates used in the real-part bounds
+	of Claims 17-2 and 17-3.
+\end{theorem}
+\begin{proof}
+	\leanok
+	For a negative base, the displayed convention is a product of a positive
+	exponential and $\cos(\pi/4)>0$; the nonnegative-base case is immediate.
+	For the inequality, separate the two nonnegative summands under the outer
+	square root, simplify the square roots of $4m^2\delta_P$ and $4\delta_Q$,
+	and compare the remaining factor $2$ with $2\sqrt m$.
+\end{proof}
 
 \begin{theorem}[Polynomial error after conditioning]
 	\label{thm:qld-conditioned-polynomial-bound}
@@ -2358,6 +4343,170 @@ nonnegative domains.
 	$Dg(\eps,\rho)\ge1$, so the cap proves the same bound.
 \end{proof}
 
+\begin{theorem}[Incorrect outer projection of the ordered product]
+\label{thm:qld-retained-local-mismatch}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.orderedIndicator_gram_le_one}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_wrong_ordered_norm_sq_le}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.point_mismatch_le_ordered_error}
+\leanok
+Let $X,Z$ be complete projective measurements with outcomes in a finite
+field $F$, let $r,t\in F$, and let $v$ be any vector. Set
+$T_{\alpha,\beta}=\sum_{\alpha b+\beta c=\alpha r+\beta t}X_bZ_c$.
+Each $T_{\alpha,\beta}$ is a contraction, and
+\[
+ \mathbb E_{\alpha,\beta}\|(I-X_r)T_{\alpha,\beta}v\|^2
+ \leq \frac{2}{|F|}\|v\|^2,
+ \qquad
+ \|(I-X_r)v\|^2\leq
+ 2\mathbb E_{\alpha,\beta}\|v-T_{\alpha,\beta}v\|^2
+ +\frac{4}{|F|}\|v\|^2.
+\]
+No normalization or commutation of $X$ with $Z$ is required.
+\end{theorem}
+\begin{proof}
+\leanok
+When $\beta\ne0$, orthogonality identifies the squared norm with the
+sum of $Z_cX_bZ_c$ selected by the scalar check and $b\ne r$.
+The affine collision probability is $1/|F|$ for each such pair. Sum its
+nonnegative sandwich weights before using completeness. The exception
+$\beta=0$ contributes at most another $\|v\|^2/|F|$ by contraction.
+Apply the squared triangle inequality to
+$(I-X_r)v=(I-X_r)(v-Tv)+(I-X_r)Tv$.
+\end{proof}
+
+\begin{theorem}[Retained point overlap on both register placements]
+\label{thm:qld-retained-point-overlap}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.placed_fiber_orderedIndicator}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch_le_ordered_error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointOverlap}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointMismatch_eq}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.retainedPointOverlap_ge_ordered_error}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-retained-local-mismatch}
+Let $R$ be a complete projective singleton-polynomial measurement on a
+placement $p_1$, and let $p_2$ be opposite. For a bounded pair $g$, put
+$v_g=(R_{j_{\rm dir}(g)})_{p_1}\hat\psi$. Define
+\[
+ K_W=\mathbb E_u\sum_g\|(I-\hat M^{W,u}_{g_W(u)})_{p_2}v_g\|^2,
+ \qquad
+ H_W=\mathbb E_u\sum_g
+ \langle\hat\psi|(R_{j_{\rm dir}(g)})_{p_1}
+   (\hat M^{W,u}_{g_W(u)})_{p_2}|\hat\psi\rangle.
+\]
+Write $G$ for the actual mass outside the bounded combining image, and
+$E^{XZ},E^{ZX}$ for the full ordered errors. Then
+\[
+ K_W=1-G-H_W,\qquad
+ K_X\leq2E^{XZ}+4/q,\qquad K_Z\leq2E^{ZX}+4/q.
+\]
+Thus $H_X\geq1-G-2E^{XZ}-4/q$ and
+$H_Z\geq1-G-2E^{ZX}-4/q$. These statements hold for every opposite
+placement, including both $AA'\mid BA''$ and $BB'\mid AB''$.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-retained-local-mismatch, thm:qld-projective-outcome-mass,
+  thm:qld-direct-pair-completion-properties}
+Apply Theorem~\ref{thm:qld-retained-local-mismatch} on each actual vector
+$v_g$, reversing both base and scalar blocks for Z. The joint coordinate
+equivalence preserves the uniform law and the placed ordered product.
+Injectivity bounds the retained sums by the full outcome sums.
+Projectivity and normalization give total squared mass one. Opposite
+placements commute, yielding the exact identity for $K_W$.
+\end{proof}
+
+\begin{theorem}[Consistency of the direct polynomial-pair completion]
+\label{thm:qld-direct-pair-consistency}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-retained-point-overlap,
+  def:consistency}
+Let $R$ be a complete projective singleton-polynomial measurement on a
+placement $p_1$, let $p_2$ be opposite, and complete the direct restriction of
+$R$ at a fixed polynomial pair. For either basis $W$, the consistency defect of
+the completed pair measurement against the point measurement on $p_2$ is at
+most
+\[
+ G_{p_1}(R)+K_W,
+\]
+where $G_{p_1}(R)$ is the mass outside the bounded combining image and $K_W$ is
+the retained mismatch of Theorem~\ref{thm:qld-retained-point-overlap}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-retained-point-overlap,
+  thm:qld-direct-pair-completion-properties,
+  lem:qld-combined-pair-completion}
+The completion adds a positive operator at the distinguished pair. On opposite
+placements this operator commutes with each point effect, so the diagonal
+overlap cannot decrease. The defect is therefore bounded by one minus the
+retained overlap, which equals the excluded mass plus the retained mismatch.
+\end{proof}
+
+\begin{theorem}[Ordered-error bound for the direct polynomial-pair completion]
+\label{thm:qld-direct-pair-ordered-consistency}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.directPairMeasurement_consistency_le_ordered_error}
+\leanok
+\uses{thm:qld-direct-pair-consistency, thm:qld-retained-point-overlap,
+  def:qld-extended-polynomial-ordered-error}
+In the setting of Theorem~\ref{thm:qld-direct-pair-consistency}, let
+$o\in\{XZ,ZX\}$ select the corresponding point basis $W$. Then the completed
+measurement has point-consistency defect at most
+\[
+ G_{p_1}(R)+2E^o_{p_1,p_2}(R)+\frac4q.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-direct-pair-consistency, thm:qld-retained-point-overlap}
+Apply Theorem~\ref{thm:qld-direct-pair-consistency} and substitute the retained
+mismatch estimate from Theorem~\ref{thm:qld-retained-point-overlap}.
+\end{proof}
+
+\begin{theorem}[Completed pair witness with the actual rounded error]
+\label{thm:qld-completed-pair-actual-error}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_pairWitness_of_points_lines}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-rounded-separated-mass,
+  thm:qld-direct-pair-ordered-consistency,
+  thm:qld-direct-pair-completion-properties}
+There are universal $a\geq1$ and $0<b\leq1$ with the following property.
+Given an admissible projective setting, a combined-point witness of error
+$\delta_Q$, and a directly indexed completed-answer extended-line witness
+of error $\delta_L$ for that same point witness, put
+\[
+ \delta=\delta_{\rm ld}\left(a,b,
+  3\left(\sqrt{\delta_Q+\delta_L}+md/q\right),q,2m+2,d,1\right),
+ \quad \eta=\delta+\sqrt{220\delta^{1/4}}+2\sqrt{2\delta},
+ \quad E=4\eta+8\delta_Q.
+\]
+The actual rounded measurements give complete projective polynomial-pair
+measurements whose four point-consistency defects, for X and Z on each
+player placement, are all at most
+\[
+ 8E+\frac{12md+4d+14}{q}.
+\]
+This auxiliary explicitly assumes the two displayed witnesses.
+Lemma~\ref{lem:qld-4-13-established} supplies them from the original strategy,
+and Theorem~\ref{thm:qld-actual-rounded-error-bound} absorbs their actual error.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-direct-pair-completion, thm:qld-rounded-separated-mass,
+  thm:qld-direct-pair-ordered-consistency,
+  thm:qld-direct-pair-completion-properties}
+Apply Theorem~\ref{thm:qld-rounded-separated-mass} to obtain one rounded
+measurement on each player space with both ordered estimates and the stated
+excluded-mass bound. Complete each measurement at the zero polynomial pair.
+The completion is projective by
+Theorem~\ref{thm:qld-direct-pair-completion-properties}, and
+Theorem~\ref{thm:qld-direct-pair-ordered-consistency} bounds each point defect.
+Combine these bounds with $G\leq6E+(12md+4d+10)/q$.
+The two rounded measurements are chosen before either basis estimate, so
+one completed measurement on each player side supplies both conclusions.
+\end{proof}
+
 \begin{theorem}[Absorption into the global polynomial-pair error]
 	\label{thm:qld-global-pair-error-bound}
 	\lean{MIPStarRE.QPBT.exists_global_pair_error_bound}
@@ -2402,4 +4551,108 @@ nonnegative domains.
 	$\eps^{b'}+q^{-b'}+2^{-b'md}$. Enlarging $a'$ absorbs both the
 	constant and the power of $md$. For $\eps>1$, this final expression
 	is at least one and hence bounds the capped error.
+\end{proof}
+
+\begin{theorem}[Direct-line real-part overlap]
+\label{thm:qld-direct-line-real-overlap}
+\lean{MIPStarRE.QPBT.subline_joint_overlap_near_one_at}
+\leanok
+\uses{def:qld-subline-overlaps, lem:qld-first-route-overlap-components}
+This auxiliary concerns the actual directly indexed subline law. Let the
+combined point and paired-line witnesses have errors $Q$ and $L$, and let
+$I$ be their paired overlap, averaged over the subline law and a uniform
+affine parameter, using completed evaluations of both line polynomials.
+For every directed opposite placement there is a universal $C>0$ such that
+\[
+ |I-1|\leq C\left(Q^{1/2}+\sqrt m
+   (L^{1/4}+Q^{1/4}+\eps^{1/4})\right).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-subline-overlaps, lem:qld-first-route-overlap-components}
+Replace the joint points by the ordered product, remove the X factor by
+Cauchy--Schwarz, and bound the remaining Z deficit. The one-point mixture
+laws suffice; no joint conditional product law is assumed.
+\end{proof}
+
+\begin{theorem}[Direct passing-error absorption]
+\label{thm:qld-direct-passing-error-bound}
+\lean{MIPStarRE.QPBT.exists_direct_passing_polynomial_bound}
+\lean{MIPStarRE.QPBT.exists_direct_global_pair_error_bound}
+\leanok
+Let $p(x)=\poly(x)$ and $g(x,y)=\poly(x,y)$, with the corrected sum
+convention, and fix $C,s\geq0$, $a\geq1$, $0<b\leq1$.
+For $x,y\geq0$ and $n\geq1$, the capped quantity
+$\min\{1,3(\sqrt{p(x)+Cn g(x,y)}+y)\}$ is at most $n h(x,y)$ for a
+polynomially small function $h$. For admissible parameters, put
+$\rho=md/q$ and $v=3(\sqrt{p(\eps)+Cm g(\eps,\rho)}+\rho)$.
+There exist universal $A_0>1$ and $0<B_0<1$ such that, for every $\eps\geq0$,
+\[
+ \min\{1,s(\delta_{\rm ld}(a,b,v+\eps,q,2m+2,d,1)
+     +\sqrt{p(\eps)}+\rho)\}
+ \leq\delta_{\rm qld}(A_0,B_0,\eps,m,d,q).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-global-pair-error-bound}
+Bound the capped passing error by $m h(\eps,\rho)$ and apply the existing
+polynomial absorption. When $v\geq1$, the capped low-degree error is at
+least one, which justifies replacing the capped passing error by the full v.
+\end{proof}
+
+\begin{theorem}[Square roots and coefficients of the global error]
+\label{thm:pauli-error-square-root-support}
+\lean{MIPStarRE.QPBT.sqrt_deltaQld_le}
+\lean{MIPStarRE.QPBT.scale_deltaQld_le}
+\leanok
+For admissible parameters, $a\geq1$, $\eps\geq0$, $b\in\mathbb R$ and
+$K\geq1$, the global error satisfies
+\[
+ \sqrt{\delta_{\rm qld}(a,b,\eps,m,d,q)}
+ \leq\delta_{\rm qld}(a,b/2,\eps,m,d,q),\qquad
+ K\delta_{\rm qld}(a,b,\eps,m,d,q)
+ \leq\delta_{\rm qld}(Ka,b,\eps,m,d,q).
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+The square root is subadditive on the three nonnegative error terms,
+and the prefactor is at least one. Increasing the prefactor exponent
+preserves order because $md\geq1$. Neither argument restricts $\eps$ to one.
+\end{proof}
+
+\begin{theorem}[Absorption of the actual rounded error]
+\label{thm:qld-actual-rounded-error-bound}
+\lean{MIPStarRE.QPBT.actual_rounding_error_le_root}
+\lean{MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound}
+\leanok
+Fix polynomially small $p,g$, $C\geq0$, $a\geq1$ and $0<b\leq1$.
+For admissible parameters and $\eps\geq0$, put $Q=p(\eps)$,
+$L=Cm g(\eps,md/q)$ and define $\delta,\eta,D$ as in the proof of
+Lemma~\ref{lem:qld-4-7}. There are universal $A>1$, $0<B<1$, chosen
+before these parameters, such that
+\[
+ \min\{1,D\}\leq\delta_{\rm qld}(A,B,\eps,m,d,q).
+\]
+More generally, if $\delta,Q\geq0$, $\delta\leq t$, $\sqrt Q\leq t$ and
+$\rho\leq t$, then
+\[
+ \min\{1,32\delta+32\sqrt{220\delta^{1/4}}+
+ 64\sqrt{2\delta}+64Q+30\rho\}
+ \leq1024\sqrt{\sqrt{\sqrt{\min\{1,t\}}}}.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-direct-passing-error-bound, thm:pauli-error-square-root-support}
+Take $t=\delta_{\rm ld}(a,b,v+\eps,q,2m+2,d,1)+\sqrt Q+md/q$,
+with the actual passing error $v=3(\sqrt{Q+L}+md/q)$.
+Monotonicity gives $\delta\leq t$. If $t\leq1$, all rounding terms
+are bounded by their coefficients times $t^{1/8}$, and $Q\leq t$.
+Also $(12md+4d+14)/q\leq30md/q$. Their coefficient sum is at most 1024.
+If $t\geq1$, use the unit cap. Apply the square-root bound three times
+to the direct absorption constants $A_0,B_0$ and choose
+$A=1024A_0$, $B=B_0/8$.
 \end{proof}

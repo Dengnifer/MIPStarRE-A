@@ -1,0 +1,44 @@
+{
+  "schema": "qpbt-finite-telemetry-boundary-v2",
+  "recorded_at": "2026-09-08T21:32:42.957Z",
+  "main_head": "ef722919001258438a7a087361945ac5860ba1d8",
+  "candidate_pr": 476,
+  "candidate_head": "4c343e6c88b7714a3bbf121b3dc23839df303e3e",
+  "files": [
+    {
+      "path": "results/telemetry/builds.jsonl",
+      "inode_before": 157961188,
+      "inode_after": 157961188,
+      "inode_preserved": true,
+      "base_bytes": 222659,
+      "full_bytes": 223791,
+      "suffix_bytes": 1132,
+      "base_rows": 848,
+      "full_rows": 853,
+      "suffix_rows": 5,
+      "base_sha256": "bdd7ef49cf8cc065fceb702d2cf67d1bfa51ea1c95ae0e4860d18f24a6cf5bee",
+      "full_sha256": "dde955766a97b0c68b57b3de99cb35d3157fe7ad9d43f5a7491067fb20121647",
+      "suffix_sha256": "b7ad81dfc7c470363d062ddf6572b7744292b6e7ef529260b591027c484237f1",
+      "prefix_exact": true
+    },
+    {
+      "path": "results/telemetry/sessions.jsonl",
+      "inode_before": 157961181,
+      "inode_after": 157961181,
+      "inode_preserved": true,
+      "base_bytes": 817465,
+      "full_bytes": 824676,
+      "suffix_bytes": 7211,
+      "base_rows": 1038,
+      "full_rows": 1042,
+      "suffix_rows": 4,
+      "base_sha256": "37465125f14fd7f355dd8b7404d88e9899bb3a57a76be89e88ba8fe77dfeaa40",
+      "full_sha256": "20c29a37f62b31a65c0df2f642a9111a581a3b3c1eb24d3fbb81487d04b9ff30",
+      "suffix_sha256": "f8f31bd3d1d712f8e9b9c67f70e0b7b5c4a3043dffce8cab09bbe41118135be6",
+      "prefix_exact": true
+    }
+  ],
+  "locks": "exclusive flock on both actual JSONL inodes only during snapshot and same-inode rewrite",
+  "held_through_service": false,
+  "clean_tree_gate_weakened": false
+}

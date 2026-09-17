@@ -1,0 +1,45 @@
+{
+  "base_head": "81148545f0752ec09b3efe88332b49bb771312be",
+  "files": [
+    {
+      "bytes": 224410,
+      "inode": 157961188,
+      "path": "results/telemetry/builds.jsonl",
+      "rows": 855,
+      "sha256": "2ab2b90c2dc6d1dfbcbb0d6c56ff63145d700b69d9239ee4e51f544ad611edcc"
+    },
+    {
+      "bytes": 830463,
+      "inode": 157961181,
+      "path": "results/telemetry/sessions.jsonl",
+      "rows": 1045,
+      "sha256": "288670cfe448070e65ec96ec36683ac9ff504aa42d55a0b408b5f6a9c7fd5d3d"
+    }
+  ],
+  "later_appends": "remain unstaged as the next finite suffix",
+  "locks": "exclusive flock on the actual builds/sessions JSONL inodes only while validating and staging",
+  "locks_held_through_commit_or_network": false,
+  "recorded_at": "2026-09-08T21:52:45.636809Z",
+  "schema": "qpbt-finite-telemetry-index-boundary-v1",
+  "staged_paths": [
+    "local/protocols/EVOLUTION.md",
+    "results/telemetry/builds.jsonl",
+    "results/telemetry/events.md",
+    "results/telemetry/owner-audits/review-recovery-20260908/README.md",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr371-single-lane-resume-predecessor-status-20260908.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr400-canonical-combined-consumer-20260908.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr400-combined-resume-command.sh",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr400-source-scope-body.md",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr400-source-scope-repair-20260909.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr400-source-scope-repair-20260909.patch",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-ci-handoff-status-20260909.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-ci-ownership-crossover-20260909.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-postservice-restore-receipt-20260908.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-review-request-status-20260909.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-service-boundary-receipt-20260908.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-pr476-service-integration-20260908.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/qpbt-review-lifecycle-all-ready-20260909.json",
+    "results/telemetry/owner-audits/review-recovery-20260908/source-sha256.txt",
+    "results/telemetry/sessions.jsonl"
+  ]
+}

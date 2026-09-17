@@ -1,0 +1,145 @@
+{
+  "schema": "qpbt-native-occupancy-v1",
+  "timestamp": "2026-09-07T12:28:45Z",
+  "owner_release": "/tmp/qpbt-cap11-release-20260907.md",
+  "runtime_receipt": "/tmp/qpbt-relay3-cap11-receipt-20260907.json",
+  "checkpoint_hold_released": true,
+  "root_thread_id": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "root_pid": 1101986,
+  "actual_credential": "relay-3",
+  "space_credential_authorized": false,
+  "legacy_router_bucket": "space",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "external_admission": 0,
+  "total_allocation": 11,
+  "configured_native_descendant_cap": 9,
+  "useful_native_target": 9,
+  "useful_native_floor": 8,
+  "observed_running_native_workers": 9,
+  "observed_useful_native_workers": 9,
+  "root_excluded_from_worker_count": true,
+  "observation_source": "Fresh collaboration.list_agents immediately before this receipt; all nine non-root entries running. Recent attributable tool activity recorded per task.",
+  "tasks": [
+    {
+      "task": "/root/relay3_integration",
+      "thread_id": "01a07aef-32df-75b2-a189-9b66fe88bac7",
+      "role": "integration coordinator",
+      "assignment": "primary telemetry and PR270 canonical CI",
+      "worktree": "/home/drx/MIPStarRE-qpbt",
+      "native_status": "running",
+      "recent_activity": "Canonical root verification passed; CI270 handle89659 started; primary and PR270 cleanliness checked.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/relay3_honest_recovery",
+      "thread_id": "01a07aef-fef3-7a10-ba1c-55acdfa4f1ff",
+      "role": "mathematical author",
+      "assignment": "full issue116/PR213 recovery and preservation-safe adoption",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-116-expanded-line-current",
+      "native_status": "running",
+      "recent_activity": "Original/recovery branch renames and source/index hashes verified; main refresh has one telemetry conflict.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/relay3_review207",
+      "thread_id": "01a07b2b-0af9-7431-97ef-2ad28af30a73",
+      "role": "mathematical publication author",
+      "assignment": "PR298 publication, then PR299 refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-297-line-restriction-recovery",
+      "native_status": "running",
+      "recent_activity": "Resumed checkpoint; integration coordinator received actual source/publication-tool activity.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr264",
+      "thread_id": "01a07bd0-f953-7292-8059-ac93ebf46773",
+      "role": "mathematical publication author",
+      "assignment": "PR264 support-mass recovery refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/pr264-recovery-20260907",
+      "native_status": "running",
+      "recent_activity": "Release/source receipts read; source fingerprints and pending merge-loss guard verified; original dirty worktree untouched.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr256",
+      "thread_id": "01a07bd1-9344-7d93-b71e-fd5881bd8ac9",
+      "role": "mathematical publication author",
+      "assignment": "PR256 direct marginal-agreement refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-243-extraction-marginal-agreement",
+      "native_status": "running",
+      "recent_activity": "Release/workflow/source receipts read; UUID and clean expected head verified.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr253",
+      "thread_id": "01a07bd2-61a1-7d23-abbb-d21570091c34",
+      "role": "mathematical publication author",
+      "assignment": "PR253 register-transport refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-245-extraction-register-transport",
+      "native_status": "running",
+      "recent_activity": "Release and workflow reads completed; UUID and ownership reported; current branch/hook checks started.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr281",
+      "thread_id": "01a07bd2-c062-7ba2-9f35-0b6ea34d0621",
+      "role": "mathematical publication author",
+      "assignment": "PR281 rounding-transport refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-278-rounding-transport",
+      "native_status": "running",
+      "recent_activity": "Expected clean head, live PR, hooks and frozen remote main verified; guarded merge beginning.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr288",
+      "thread_id": "01a07bd3-560a-7000-924d-d3aabef3ef4e",
+      "role": "mathematical publication author",
+      "assignment": "PR288 block-specialization refresh",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-283-block-specialization",
+      "native_status": "running",
+      "recent_activity": "Release/runtime/publication receipts read; actual UUID and exclusive worktree reported.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    },
+    {
+      "task": "/root/cap11_pr293",
+      "thread_id": "01a07bd3-bda4-7712-8661-722c26b9411e",
+      "role": "mathematical publication author",
+      "assignment": "PR293 pulled-apart projectivity refresh; issue119 hold retained",
+      "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-120-pulled-apart-projectivity",
+      "native_status": "running",
+      "recent_activity": "Actual release/runtime read tools completed; worker/root UUIDs and exclusive ownership reported.",
+      "usage": null,
+      "usage_scope": "unknown; do not sum cumulative native counters"
+    }
+  ],
+  "below_floor_reason": null,
+  "occupancy_exceptions": [
+    {
+      "began_at": "2026-09-07T12:14:10.229885+00:00",
+      "observed_floor_restored_at": "2026-09-07T12:28:45Z",
+      "initial_observed_running_workers": 0,
+      "reason": "Owner-checkpointed restart and initial useful dispatch/refill, including main dispatch latency.",
+      "action_taken": "Resumed three preserved identities and assigned six additional independent mathematical packets.",
+      "duration_upper_bound_s": 875,
+      "duration_note": "Ends at first full-refill registry observation, not an inferred exact instant of reaching eight; no long-run occupancy percentage claimed."
+    }
+  ],
+  "sustain_policy": "Record real task completions and vacancy intervals, refill bounded disjoint successors promptly. Native reviews require fresh direct-parent assignment after canonical requests; never self-review or add a second pool.",
+  "budgets_reset": false,
+  "b8_issue118": {
+    "attempts": 13,
+    "working_seconds": 26509,
+    "new_attempt_authorized": false
+  },
+  "primary_telemetry_owner": "/root/relay3_integration",
+  "preserved_predecessors": "Three checkpointed native identities resumed unchanged; new tasks retain prior publication/checkpoint provenance."
+}
