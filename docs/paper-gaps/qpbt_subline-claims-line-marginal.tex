@@ -20,11 +20,11 @@
 
 \textbf{Difficulty.} The constructed-measurement domain correction and its
 real-part and complex-modulus estimates on the directly indexed subline law
-are formalized. The source distribution correspondence remains open,
-as does the separate concrete paired-line consistency obligation.
+are formalized. The source distribution correspondence remains open.
 \textbf{Estimated weight.} The completed scalar proof combines the concrete
 X marginal, expanded line-point consistency, restricted-distribution
-averaging, and projective Cauchy--Schwarz. Remaining transport work concerns
+averaging, and projective Cauchy--Schwarz. The pasting consistency
+construction has been recovered separately. Remaining transport work concerns
 the extended-line carrier and its evaluations, not this scalar calculation.
 \textbf{Mathlib/project split.} Finite sums, positivity, and real
 square roots use Mathlib; the measurement construction and subline law use
@@ -167,7 +167,7 @@ estimate is retained as
 \leanid{subline\_replace\_by\_ordered\_product\_re\_direct}.
 Its constant is $2\sqrt{\delta_Q}$: the squared-distance comparison on
 one placement is $4\delta_Q$ and uses $W^\dagger W$, not $W^2$.
-The source Claim 17-1 remains a separate uncertified blueprint statement.
+The source Claim 17-1 remains open in its complex-modulus, source-law form.
 Likewise \leanid{subline\_Z\_term\_near\_one\_re\_direct} retains the
 proved real Z-overlap estimate with its directly indexed domain explicit.
 No reality or distribution-transport theorem is asserted by these renamings.
@@ -183,34 +183,39 @@ Scalar realignment is tracked in \ghissue{474} and review of PR~478.
 The distribution and complex-overlap work under \ghissue{118} remains open;
 its historical budget is unchanged.
 
-The original real-part theorem \leanid{subline\_remove\_X\_factor}
-and its proof are also retained, with auxiliary blueprint node
-\path{lem:claim-17-2-direct-real}. The compatibility names
-\leanid{subline\_replace\_by\_ordered\_product} and
-\leanid{subline\_Z\_term\_near\_one} denote the corresponding real-part
-estimates under their explicitly qualified names above.
+The real-part analogue of the second estimate is retained under its
+explicitly qualified name \leanid{subline\_remove\_X\_factor\_re\_direct},
+with auxiliary blueprint node \path{lem:claim-17-2-direct-real}. The
+deprecated compatibility names \leanid{subline\_replace\_by\_ordered\_product},
+\leanid{subline\_remove\_X\_factor} and \leanid{subline\_Z\_term\_near\_one}
+keep the aliasing they have on the base branch.
 
-The abstract combined-line witness record remains unchanged. Its fields
-faithfully express the existential conclusion of the combined-lines lemma,
-but do not characterize the construction used in its proof. The internal
-consistency obligation now refers to the concrete sandwich. Both witness
-existence proofs construct their records with that measurement. A later
-argument needing the exact construction can use the consistency obligation
-and the same explicit record; merely choosing an unspecified existential
-witness does not recover its defining formula.\footnote{The Lean-only
-obligation is \leanid{combined\_line\_measurement\_consistency} in
-\path{MIPStarRE/QPBT/Combining/Lines.lean}. Its hypotheses explicitly supply
-a polynomially controlled point family. It retains the previously
-unfinished consistency proof, to be discharged by the source's point-to-line
-comparisons and pasting argument. The source-facing
+The abstract combined-line witness record remains unchanged. It records a
+complete paired-line POVM, the two axis-degree conditions, and consistency on
+every directed opposite placement. Its consistency field, however, compares
+the completed evaluation alphabet obtained by adjoining an undefined outcome,
+whereas Lemma~\path{lem:qld-xz-lines} sums only over field-valued evaluations.
+Consequently the record captures the measurement and degree data used by the
+source construction but does not yet express its field-valued consistency
+conclusion. The source blueprint node therefore remains open. Both witness
+existence proofs instantiate the record with the concrete sandwich. A later
+argument needing that construction can use the consistency theorem and the
+same explicit record; merely choosing an unspecified existential witness does
+not recover its defining formula.\footnote{The formalization-only theorem is
+\leanid{combined\_line\_measurement\_consistency} in
+\path{MIPStarRE/QPBT/Combining/Lines/Construction.lean}. Its hypotheses explicitly supply
+a polynomially controlled point family. Its proof was recovered for
+\ghissue{512} from the saved point-to-line comparisons and pasting argument,
+including restoration of discarded zero-direction probability. The source-facing
 \leanid{exists\_combinedLinesWitness} has an unchanged statement.}
 
 The concrete scalar calculation is now proved: the exact X marginal,
 expanded line-point consistency, and the separate restricted X-point mixture
-give the deficit bound, and Cauchy--Schwarz closes both the real-part and complex-modulus estimates.
+give the deficit bound, and Cauchy--Schwarz closes both the real-part and
+complex-modulus estimates.
 No marginal identity, equality, or producer was added to the public
-hypotheses. In particular, this proof does not use the still-open
-paired-line consistency obligation.\footnote{The deficit theorem is
+hypotheses. In particular, this proof does not use the
+paired-line consistency theorem.\footnote{The deficit theorem is
 \leanid{exists\_concreteXPointOverlap\_deficit\_le} in
 \path{MIPStarRE/QPBT/Combining/Lines/ConcreteXDeficit.lean}; the scalar
 closure is tracked by \ghissue{480}.}
@@ -253,12 +258,12 @@ uses only the projective setting, auxiliary subline law, and defined X-Z-X
 measurement. This distinction preserves the completed concrete proof without
 claiming that the source carrier or the raw line consistency has been proved.
 
-The separate retained proof obligation
-\leanid{combined\_line\_measurement\_consistency} must establish
-consistency of the unconditioned X-Z-X measurement with the supplied
-polynomially controlled joint point family on the original product of
-line-point distributions, in every opposite placement. Its discharge by
-the source point-to-line comparison and pasting argument is described in
+The recovered theorem \leanid{combined\_line\_measurement\_consistency}
+proves consistency of the same unconditioned X-Z-X measurement
+with the supplied polynomially controlled joint point family on the
+original product of line-point distributions, in every opposite placement.
+The construction and its discharge by the source point-to-line comparison and
+pasting argument are described in
 \path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}.
 
 \section{Statement integrity after merging the scalar estimates}
@@ -269,8 +274,9 @@ difference by $C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$.
 The Lean theorem \leanid{subline\_remove\_X\_factor\_direct} retains
 its existing projective-setting and directly indexed subline hypotheses,
 the defined measurement, and the same complex-modulus conclusion and error
-scale. Its proof introduces no public assumptions. The original real-part
-theorem and the first and third real-part estimates retain their statements.
+scale. Its proof introduces no public assumptions. The real-part analogue
+of the second estimate and the first and third real-part estimates retain
+their statements.
 The verdict relative to the source remains a scope restriction to the
 directly indexed law with optional evaluations; the complex scalar
 conclusion for the second estimate is now proved on that domain.
@@ -281,9 +287,9 @@ The discrepancy lies in the formal quantification over arbitrary witnesses,
 not in the paper's constructed-measurement assertion. The counterexample
 forces a domain correction. Using the defined sandwich restores the measurement domain. The complex
 scalar conclusion is proved for the directly indexed auxiliary law;
-transport to the source distribution and the consistency construction remain
+transport to the source distribution remains
 open. The source claims themselves retain their complex-modulus statements
-without unsupported formalization marks.
+without asserting proofs of their source-law forms.
 
 \bibliographystyle{alpha}
 \bibliography{references}

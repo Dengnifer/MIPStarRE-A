@@ -27,12 +27,10 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The tensor placement of a sum of operators is the sum of the tensor
-placements, in both factors. Formalization-only auxiliary for the convolution
-of `def:expanded-line-measurement`. The same identity is proved as
-`heteroKron_sum_sum` in `MIPStarRE/QPBT/Observables/ExpandedDefs.lean`, where
-it is `private` and therefore invisible from this file; consolidating the two
-copies into the module that defines `heteroKron` is tracked by issue #204. -/
+/-- The Kronecker product of two finite sums is the double sum of the pairwise
+Kronecker products. This bilinearity identity proves completeness of the
+convolution in `def:expanded-line-measurement`, from the construction in the
+proof of the paper's `lem:qld-comm-line-cons`. -/
 private theorem heteroKron_sum_sum {α β ι κ : Type*}
     [Fintype α] [Fintype β] (A : α → Op ι) (B : β → Op κ) :
     heteroKron (∑ x, A x) (∑ y, B y) =

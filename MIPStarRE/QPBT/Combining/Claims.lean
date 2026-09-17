@@ -1,3 +1,4 @@
+import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.OrderedPoints
 import MIPStarRE.QPBT.Combining.OverlapGap
 import MIPStarRE.QPBT.Combining.ComplexOverlapGap
@@ -37,66 +38,6 @@ open MIPStarRE.Quantum MIPStarRE.QPBT.DistanceCalculus
 noncomputable section
 
 set_option synthInstance.maxSize 400
-
-private theorem rpow_quarter_nonneg (x : ℝ) : 0 ≤ Real.rpow x (1 / 4 : ℝ) := by
-  change 0 ≤ x ^ (1 / 4 : ℝ)
-  rcases lt_or_ge x 0 with hx | hx
-  · rw [Real.rpow_def_of_neg hx,
-      show (1 / 4 : ℝ) * Real.pi = Real.pi / 4 by ring, Real.cos_pi_div_four]
-    positivity
-  · exact Real.rpow_nonneg hx _
-
-private theorem sqrt_deficit_bound_le (m δP δQ : ℝ) (hm : 1 ≤ m) (hP : 0 ≤ δP)
-    (hQ : 0 ≤ δQ) :
-    Real.sqrt (2 * Real.sqrt (4 * m ^ 2 * δP) + 2 * Real.sqrt (4 * δQ)) ≤
-      2 * Real.sqrt m * (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
-  have hm0 : 0 ≤ m := by linarith
-  have hsqrtm : 1 ≤ Real.sqrt m := by
-    rw [← Real.sqrt_one]
-    exact Real.sqrt_le_sqrt hm
-  have h1 : Real.sqrt (4 * m ^ 2 * δP) = 2 * m * Real.sqrt δP := by
-    rw [Real.sqrt_mul (by positivity), show (4 * m ^ 2 : ℝ) = (2 * m) ^ 2 by ring,
-      Real.sqrt_sq (by linarith)]
-  have h2 : Real.sqrt (4 * δQ) = 2 * Real.sqrt δQ := by
-    rw [Real.sqrt_mul (by norm_num), show (4 : ℝ) = 2 ^ 2 by norm_num,
-      Real.sqrt_sq (by norm_num)]
-  have hquarter : ∀ x : ℝ, 0 ≤ x →
-      Real.sqrt (Real.sqrt x) = Real.rpow x (1 / 4 : ℝ) := by
-    intro x hx
-    rw [Real.sqrt_eq_rpow, Real.sqrt_eq_rpow, ← Real.rpow_mul hx]
-    norm_num
-  have hsplit : ∀ a b : ℝ, 0 ≤ a → 0 ≤ b →
-      Real.sqrt (a + b) ≤ Real.sqrt a + Real.sqrt b := by
-    intro a b ha hb
-    rw [← Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg a) (Real.sqrt_nonneg b))]
-    refine Real.sqrt_le_sqrt ?_
-    nlinarith [Real.sq_sqrt ha, Real.sq_sqrt hb, Real.sqrt_nonneg a,
-      Real.sqrt_nonneg b]
-  have hPa : 0 ≤ 2 * (2 * m * Real.sqrt δP) :=
-    mul_nonneg (by norm_num)
-      (mul_nonneg (mul_nonneg (by norm_num) hm0) (Real.sqrt_nonneg _))
-  have hQa : 0 ≤ 2 * (2 * Real.sqrt δQ) :=
-    mul_nonneg (by norm_num) (mul_nonneg (by norm_num) (Real.sqrt_nonneg _))
-  have hPb : Real.sqrt (2 * (2 * m * Real.sqrt δP)) =
-      2 * Real.sqrt m * Real.rpow δP (1 / 4 : ℝ) := by
-    rw [show 2 * (2 * m * Real.sqrt δP) = 2 ^ 2 * m * Real.sqrt δP by ring,
-      Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 ^ 2),
-      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2), hquarter δP hP]
-  have hQb : Real.sqrt (2 * (2 * Real.sqrt δQ)) = 2 * Real.rpow δQ (1 / 4 : ℝ) := by
-    rw [show 2 * (2 * Real.sqrt δQ) = 2 ^ 2 * Real.sqrt δQ by ring,
-      Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 ^ 2),
-      Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2), hquarter δQ hQ]
-  rw [h1, h2]
-  calc
-    Real.sqrt (2 * (2 * m * Real.sqrt δP) + 2 * (2 * Real.sqrt δQ))
-        ≤ Real.sqrt (2 * (2 * m * Real.sqrt δP)) +
-          Real.sqrt (2 * (2 * Real.sqrt δQ)) := hsplit _ _ hPa hQa
-    _ = 2 * Real.sqrt m * Real.rpow δP (1 / 4 : ℝ) +
-          2 * Real.rpow δQ (1 / 4 : ℝ) := by rw [hPb, hQb]
-    _ ≤ 2 * Real.sqrt m *
-          (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ)) := by
-      have hQ4 : 0 ≤ Real.rpow δQ (1 / 4 : ℝ) := Real.rpow_nonneg hQ _
-      nlinarith [hsqrtm, hQ4]
 
 /-- Regroup paired-line answers by their two optional evaluations. -/
 private theorem regroup_placed_line_answer_sum {P : AdmissibleParams} {ε δQ δP : ℝ}
@@ -212,7 +153,7 @@ theorem subline_replace_by_ordered_product_re_direct :
                     (projZ (directPointToPauli P
                       (s.1.1.base + s.2 • s.1.1.direction))) o.1 o.2))) := by
     intro G
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     exact (regroup_placed_line_answer_sum lines sample.2.1 sample.2.2 _ _ (G _ _)).symm
@@ -282,7 +223,7 @@ theorem subline_replace_by_ordered_product_re_direct :
                           (projX (directPointToPauli P
                             (sample.1.base + t • sample.1.direction)))).effect ab.1))
                   S.psiHat‖ ^ 2)) :=
-        avgOver_prod _ _ _
+        SandwichProduct.avgOver_distribution_prod _ _ _
       _ = avgOver (uniformDistribution
             ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
           (fun xz => ∑ ab : PauliScalar P × PauliScalar P,
@@ -341,6 +282,145 @@ theorem subline_replace_by_ordered_product_re_direct :
   rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 4), h4, Real.sqrt_eq_rpow]
   exact le_rfl
 
+/-! ### Shared data of the two `X`-factor removal estimates
+
+The real-part estimate and the complex-modulus estimate below compare the same
+two averages, over the same sampling law, with the same placed X-Z-X line
+measurement and the same two placed point factors, and both reduce to the same
+X-overlap deficit. Only the Cauchy--Schwarz estimate applied at the end differs.
+The common families and the common deficit bound are therefore recorded once
+here and used by both theorems. -/
+
+/-- The sampling law of the `X`-factor removal estimates: a sub-line triple
+together with an independent uniform affine parameter. -/
+private def removeXLaw (P : AdmissibleParams) (sublines : SubLineWitness P) :
+    Distribution (SubLineTriple P × DirectScalarQ P.extendedDirectLd) :=
+  Distribution.prod sublines.D
+    (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+
+/-- The placed X-Z-X line measurement of the `X`-factor removal estimates. -/
+private def removeXLine {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
+    (s : SubLineTriple P × DirectScalarQ P.extendedDirectLd) :
+    Measurement (DegPoly P.toLdParams (P.m * P.d) ×
+      DegPoly P.toLdParams (P.m * P.d))
+      (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+  S.placedMeasurement .AA' (S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2)
+
+/-- The placed `X` point factor that the removal estimates drop. -/
+private def removeXPointX {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
+    (s : SubLineTriple P × DirectScalarQ P.extendedDirectLd)
+    (fs : DegPoly P.toLdParams (P.m * P.d) ×
+      DegPoly P.toLdParams (P.m * P.d)) :
+    Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+  S.place .BA'' (S.expPointEffectAtLineAnswer .bob .X s.1.2.1
+    (projX (directPointToPauli P (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
+
+/-- The placed `Z` point factor that the removal estimates keep. -/
+private def removeXPointZ {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
+    (s : SubLineTriple P × DirectScalarQ P.extendedDirectLd)
+    (fs : DegPoly P.toLdParams (P.m * P.d) ×
+      DegPoly P.toLdParams (P.m * P.d)) :
+    Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+  S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
+    (projZ (directPointToPauli P (s.1.1.base + s.2 • s.1.1.direction))) fs.2)
+
+/-- The placed ordered `Z`-`X` point product of the removal estimates. -/
+private def removeXPointZX {P : AdmissibleParams} {ε : ℝ} (S : ProjectiveSetting P ε)
+    (s : SubLineTriple P × DirectScalarQ P.extendedDirectLd)
+    (fs : DegPoly P.toLdParams (P.m * P.d) ×
+      DegPoly P.toLdParams (P.m * P.d)) :
+    Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
+  S.place .BA''
+    (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
+        (projZ (directPointToPauli P
+          (s.1.1.base + s.2 • s.1.1.direction))) fs.2 *
+      S.expPointEffectAtLineAnswer .bob .X s.1.2.1
+        (projX (directPointToPauli P
+          (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
+
+private theorem removeXLaw_isProbability {P : AdmissibleParams}
+    (sublines : SubLineWitness P) : (removeXLaw P sublines).IsProbability :=
+  Distribution.prod_isProbability _ _ sublines.isProbability
+    (uniformDistribution_isProbability _)
+
+/-- A placed point effect read off a line answer is a projection. -/
+private theorem place_expPointEffectAtLineAnswer_isProj {P : AdmissibleParams}
+    {ε : ℝ} (S : ProjectiveSetting P ε) (W : PauliKind)
+    (line : LineDesc P.toLdParams) (u : Fin P.m → PauliScalar P)
+    (f : DegPoly P.toLdParams (P.m * P.d)) :
+    IsProj (S.place .BA'' (S.expPointEffectAtLineAnswer .bob W line u f)) := by
+  rw [← S.pointMeasExpOption_effect_evalOpt]
+  exact S.place_isProj .BA'' (S.pointMeasExpOption_isProj .bob W _ _)
+
+/-- The placed line effects commute with every operator placed on the opposite
+register pair. -/
+private theorem removeXLine_commute_place {P : AdmissibleParams} {ε : ℝ}
+    (S : ProjectiveSetting P ε)
+    (s : SubLineTriple P × DirectScalarQ P.extendedDirectLd)
+    (fs : DegPoly P.toLdParams (P.m * P.d) ×
+      DegPoly P.toLdParams (P.m * P.d))
+    (T : Op (S.ExpandedLocalSpace Placement.BA''.side)) :
+    Commute ((removeXLine S s).effect fs) (S.place .BA'' T) := by
+  change Commute
+    (S.place .AA'
+      ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
+    (S.place .BA'' T)
+  exact S.place_comm .AA' .BA'' trivial _ _
+
+/-- The common deficit estimate of the two `X`-factor removal theorems: the
+square root of the X-overlap deficit of the constructed X-Z-X measurement is at
+most `C * m * deltaLine ε ^ (1/2)`. This is the sole quantitative input of both
+estimates; it uses `exists_concreteXPointOverlap_deficit_le` and assumes no
+marginal identity. -/
+private theorem exists_removeX_sqrt_deficit_le :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ)
+        (S : ProjectiveSetting P ε) (sublines : SubLineWitness P),
+        Real.sqrt (1 - avgOver (removeXLaw P sublines) (fun s => ∑ fs,
+            stateQForm S.psiHat
+              ((removeXLine S s).effect fs * removeXPointX S s fs))) ≤
+          C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+  obtain ⟨K, hK, hdeficit⟩ := exists_concreteXPointOverlap_deficit_le
+  refine ⟨Real.sqrt K, Real.sqrt_pos.2 hK, ?_⟩
+  intro P ε S sublines
+  classical
+  have hoverlap : avgOver (removeXLaw P sublines) (fun s => ∑ fs,
+        stateQForm S.psiHat
+          ((removeXLine S s).effect fs * removeXPointX S s fs)) =
+      avgOver sublines.D (fun sample =>
+        avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
+          (fun t => concreteXPointOverlap S
+            (sample.2, projX (directPointToPauli P
+              (sample.1.base + t • sample.1.direction))))) := by
+    rw [removeXLaw, SandwichProduct.avgOver_distribution_prod]
+    refine avgOver_congr _ _ _ fun sample => ?_
+    refine avgOver_congr _ _ _ fun t => ?_
+    simp only [removeXLine, removeXPointX, concreteXPointOverlap,
+      Placement.side, ProjectiveSetting.placedMeasurement_effect,
+      Fintype.sum_prod_type]
+  have hm : 0 ≤ (P.m : ℝ) := by positivity
+  calc
+    _ ≤ Real.sqrt (K * (P.m : ℝ) ^ 2 * deltaLine ε) := by
+      apply Real.sqrt_le_sqrt
+      rw [hoverlap]
+      exact hdeficit P ε S sublines
+    _ = Real.sqrt K * Real.sqrt ((P.m : ℝ) ^ 2 * deltaLine ε) := by
+      rw [show K * (P.m : ℝ) ^ 2 * deltaLine ε =
+          K * ((P.m : ℝ) ^ 2 * deltaLine ε) by ring,
+        Real.sqrt_mul (le_of_lt hK)]
+    _ = Real.sqrt K *
+        (Real.sqrt ((P.m : ℝ) ^ 2) * Real.sqrt (deltaLine ε)) := by
+      rw [Real.sqrt_mul (sq_nonneg (P.m : ℝ))]
+    _ = Real.sqrt K * (P.m : ℝ) * Real.sqrt (deltaLine ε) := by
+      rw [Real.sqrt_sq hm]
+      ring
+    _ = Real.sqrt K * (P.m : ℝ) *
+        Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
+      have hsqrt : Real.sqrt (deltaLine ε) =
+          Real.rpow (deltaLine ε) (1 / 2 : ℝ) :=
+        Real.sqrt_eq_rpow (deltaLine ε)
+      rw [hsqrt]
+
 /-- Removing the trailing `X`-point factor from the constructed X-Z-X line
 measurement costs the square root of the line-consistency error, with the
 source factor `m`. This is auxiliary blueprint `lem:claim-17-2-direct-real`,
@@ -362,8 +442,10 @@ recorded in the blueprint.
 **Scope restriction:** This proved estimate compares real parts on the
 directly indexed `SubLineWitness` law. The source complex estimate and
 seed-indexed distribution transport remain open, as recorded in the same
-paper-gap note; the scalar proof is no longer a retained obligation. -/
-theorem subline_remove_X_factor :
+paper-gap note; the scalar proof is no longer a retained obligation.
+The deprecated name `subline_remove_X_factor` abbreviates the complex-modulus
+`subline_remove_X_factor_direct` instead. -/
+theorem subline_remove_X_factor_re_direct :
     ∃ C : ℝ, 0 < C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ)
         (S : ProjectiveSetting P ε) (sublines : SubLineWitness P),
@@ -398,72 +480,23 @@ theorem subline_remove_X_factor :
                         (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
                           S.psiHat))).re))| ≤
           C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-  obtain ⟨K, hK, hdeficit⟩ := exists_concreteXPointOverlap_deficit_le
-  refine ⟨Real.sqrt K, Real.sqrt_pos.2 hK, ?_⟩
+  obtain ⟨C, hC, hdeficit⟩ := exists_removeX_sqrt_deficit_le
+  refine ⟨C, hC, ?_⟩
   intro P ε S sublines
   classical
-  let μ := Distribution.prod sublines.D
-    (uniformDistribution (DirectScalarQ P.extendedDirectLd))
-  let A : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      Measurement (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d))
-        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s =>
-    S.placedMeasurement .AA'
-      (S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2)
-  let B : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .X s.1.2.1
-      (projX (directPointToPauli P
-        (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
-  let R : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
-      (projZ (directPointToPauli P
-        (s.1.1.base + s.2 • s.1.1.direction))) fs.2)
-  let RB : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA''
-      (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
-          (projZ (directPointToPauli P
-            (s.1.1.base + s.2 • s.1.1.direction))) fs.2 *
-        S.expPointEffectAtLineAnswer .bob .X s.1.2.1
-          (projX (directPointToPauli P
-            (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
-  have hprob : μ.IsProbability :=
-    Distribution.prod_isProbability _ _ sublines.isProbability
-      (uniformDistribution_isProbability _)
   have hcs := abs_overlap_gap_le_sqrt_one_sub_of_isProj'
-    μ A B R RB S.psiHat hprob S.psiHat_norm
+    (removeXLaw P sublines) (removeXLine S) (removeXPointX S) (removeXPointZ S)
+    (removeXPointZX S) S.psiHat (removeXLaw_isProbability sublines) S.psiHat_norm
     (fun s fs => by
-      dsimp only [B]
-      rw [← S.pointMeasExpOption_effect_evalOpt]
-      exact S.place_isProj .BA''
-        (S.pointMeasExpOption_isProj .bob .X _ _))
+      dsimp only [removeXPointX]
+      exact place_expPointEffectAtLineAnswer_isProj S .X _ _ _)
     (fun s fs => by
-      dsimp only [R]
-      rw [← S.pointMeasExpOption_effect_evalOpt]
-      exact S.place_isProj .BA''
-        (S.pointMeasExpOption_isProj .bob .Z _ _))
+      dsimp only [removeXPointZ]
+      exact place_expPointEffectAtLineAnswer_isProj S .Z _ _ _)
+    (fun s fs => removeXLine_commute_place S s fs _)
+    (fun s fs => removeXLine_commute_place S s fs _)
     (fun s fs => by
-      change Commute
-        (S.place .AA'
-          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
-        (S.place .BA'' _)
-      exact S.place_comm .AA' .BA'' trivial _ _)
-    (fun s fs => by
-      change Commute
-        (S.place .AA'
-          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
-        (S.place .BA'' _)
-      exact S.place_comm .AA' .BA'' trivial _ _)
-    (fun s fs => by
-      dsimp only [RB, R, B]
+      dsimp only [removeXPointZX, removeXPointZ, removeXPointX]
       exact S.place_mul .BA'' _ _)
   have hfirst : avgOver sublines.D (fun sample =>
       avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
@@ -481,9 +514,9 @@ theorem subline_remove_X_factor :
                   (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ *
                     S.expPointEffectAtLineAnswer .bob .X sample.2.1 x fX)).mulVec
                       S.psiHat))).re)) =
-      avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
-        ((A s).effect fs * RB s fs)) := by
-    rw [SandwichProduct.avgOver_distribution_prod]
+      avgOver (removeXLaw P sublines) (fun s => ∑ fs, stateQForm S.psiHat
+        ((removeXLine S s).effect fs * removeXPointZX S s fs)) := by
+    rw [removeXLaw, SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     change (∑ fX, ∑ fZ, stateQForm S.psiHat
@@ -497,8 +530,8 @@ theorem subline_remove_X_factor :
               S.expPointEffectAtLineAnswer .bob .X sample.2.1
                 (projX (directPointToPauli P
                   (sample.1.base + t • sample.1.direction))) fX))) = _
-    simp only [A, RB, ProjectiveSetting.placedMeasurement_effect,
-      Fintype.sum_prod_type]
+    simp only [removeXLine, removeXPointZX,
+      ProjectiveSetting.placedMeasurement_effect, Fintype.sum_prod_type]
   have hsecond : avgOver sublines.D (fun sample =>
       avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
         let u := directPointToPauli P
@@ -513,9 +546,9 @@ theorem subline_remove_X_factor :
                 S.place .BA''
                   (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
                     S.psiHat))).re)) =
-      avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
-        ((A s).effect fs * R s fs)) := by
-    rw [SandwichProduct.avgOver_distribution_prod]
+      avgOver (removeXLaw P sublines) (fun s => ∑ fs, stateQForm S.psiHat
+        ((removeXLine S s).effect fs * removeXPointZ S s fs)) := by
+    rw [removeXLaw, SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => ?_
     refine avgOver_congr _ _ _ fun t => ?_
     change (∑ fX, ∑ fZ, stateQForm S.psiHat
@@ -526,46 +559,10 @@ theorem subline_remove_X_factor :
             (S.expPointEffectAtLineAnswer .bob .Z sample.2.2
               (projZ (directPointToPauli P
                 (sample.1.base + t • sample.1.direction))) fZ))) = _
-    simp only [A, R, ProjectiveSetting.placedMeasurement_effect,
-      Fintype.sum_prod_type]
+    simp only [removeXLine, removeXPointZ,
+      ProjectiveSetting.placedMeasurement_effect, Fintype.sum_prod_type]
   rw [hfirst, hsecond]
-  have hoverlap : avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
-        ((A s).effect fs * B s fs)) =
-        avgOver sublines.D (fun sample =>
-          avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
-            (fun t => concreteXPointOverlap S
-              (sample.2, projX (directPointToPauli P
-                (sample.1.base + t • sample.1.direction))))) := by
-    rw [SandwichProduct.avgOver_distribution_prod]
-    refine avgOver_congr _ _ _ fun sample => ?_
-    refine avgOver_congr _ _ _ fun t => ?_
-    simp only [A, B, concreteXPointOverlap,
-      Placement.side, ProjectiveSetting.placedMeasurement_effect,
-      Fintype.sum_prod_type]
-  have hm : 0 ≤ (P.m : ℝ) := by positivity
-  calc
-    _ ≤ Real.sqrt (1 - avgOver μ (fun s => ∑ fs,
-        stateQForm S.psiHat ((A s).effect fs * B s fs))) := hcs
-    _ ≤ Real.sqrt (K * (P.m : ℝ) ^ 2 * deltaLine ε) := by
-      apply Real.sqrt_le_sqrt
-      rw [hoverlap]
-      exact hdeficit P ε S sublines
-    _ = Real.sqrt K * Real.sqrt ((P.m : ℝ) ^ 2 * deltaLine ε) := by
-      rw [show K * (P.m : ℝ) ^ 2 * deltaLine ε =
-          K * ((P.m : ℝ) ^ 2 * deltaLine ε) by ring,
-        Real.sqrt_mul (le_of_lt hK)]
-    _ = Real.sqrt K *
-        (Real.sqrt ((P.m : ℝ) ^ 2) * Real.sqrt (deltaLine ε)) := by
-      rw [Real.sqrt_mul (sq_nonneg (P.m : ℝ))]
-    _ = Real.sqrt K * (P.m : ℝ) * Real.sqrt (deltaLine ε) := by
-      rw [Real.sqrt_sq hm]
-      ring
-    _ = Real.sqrt K * (P.m : ℝ) *
-        Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-      have hsqrt : Real.sqrt (deltaLine ε) =
-          Real.rpow (deltaLine ε) (1 / 2 : ℝ) :=
-        Real.sqrt_eq_rpow (deltaLine ε)
-      rw [hsqrt]
+  exact hcs.trans (hdeficit P ε S sublines)
 
 /-- Complex-modulus removal of the X factor for the directly indexed subline law.
 
@@ -621,119 +618,39 @@ theorem subline_remove_X_factor_direct :
                         (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
                           S.psiHat))))‖ ≤
           C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-  obtain ⟨K, hK, hdeficit⟩ := exists_concreteXPointOverlap_deficit_le
-  refine ⟨Real.sqrt K, Real.sqrt_pos.2 hK, ?_⟩
+  obtain ⟨C, hC, hdeficit⟩ := exists_removeX_sqrt_deficit_le
+  refine ⟨C, hC, ?_⟩
   intro P ε S sublines
   classical
-  let μ := Distribution.prod sublines.D
-    (uniformDistribution (DirectScalarQ P.extendedDirectLd))
-  let A : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      Measurement (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d))
-        (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s =>
-    S.placedMeasurement .AA'
-      (S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2)
-  let B : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .X s.1.2.1
-      (projX (directPointToPauli P
-        (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
-  let R : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
-      (projZ (directPointToPauli P
-        (s.1.1.base + s.2 • s.1.1.direction))) fs.2)
-  let RB : (SubLineTriple P × DirectScalarQ P.extendedDirectLd) →
-      (DegPoly P.toLdParams (P.m * P.d) ×
-        DegPoly P.toLdParams (P.m * P.d)) →
-      Op (SixReg P S.toStrategy.ιA S.toStrategy.ιB) := fun s fs =>
-    S.place .BA''
-      (S.expPointEffectAtLineAnswer .bob .Z s.1.2.2
-          (projZ (directPointToPauli P
-            (s.1.1.base + s.2 • s.1.1.direction))) fs.2 *
-        S.expPointEffectAtLineAnswer .bob .X s.1.2.1
-          (projX (directPointToPauli P
-            (s.1.1.base + s.2 • s.1.1.direction))) fs.1)
-  have hprob : μ.IsProbability :=
-    Distribution.prod_isProbability _ _ sublines.isProbability
-      (uniformDistribution_isProbability _)
   have hcs := norm_overlap_gap_le_sqrt_one_sub_of_isProj
-    μ A B R RB S.psiHat hprob S.psiHat_norm
+    (removeXLaw P sublines) (removeXLine S) (removeXPointX S) (removeXPointZ S)
+    (removeXPointZX S) S.psiHat (removeXLaw_isProbability sublines) S.psiHat_norm
     (fun s fs => by
-      dsimp only [B]
-      rw [← S.pointMeasExpOption_effect_evalOpt]
-      exact S.place_isProj .BA''
-        (S.pointMeasExpOption_isProj .bob .X _ _))
+      dsimp only [removeXPointX]
+      exact place_expPointEffectAtLineAnswer_isProj S .X _ _ _)
     (fun s fs => by
-      dsimp only [R]
-      rw [← S.pointMeasExpOption_effect_evalOpt]
-      exact S.place_isProj .BA''
-        (S.pointMeasExpOption_isProj .bob .Z _ _))
+      dsimp only [removeXPointZ]
+      exact place_expPointEffectAtLineAnswer_isProj S .Z _ _ _)
+    (fun s fs => removeXLine_commute_place S s fs _)
+    (fun s fs => removeXLine_commute_place S s fs _)
     (fun s fs => by
-      change Commute
-        (S.place .AA'
-          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
-        (S.place .BA'' _)
-      exact S.place_comm .AA' .BA'' trivial _ _)
-    (fun s fs => by
-      change Commute
-        (S.place .AA'
-          ((S.combinedLineMeasurement .alice s.1.2.1 s.1.2.2).effect fs))
-        (S.place .BA'' _)
-      exact S.place_comm .AA' .BA'' trivial _ _)
-    (fun s fs => by
-      dsimp only [RB, R, B]
+      dsimp only [removeXPointZX, removeXPointZ, removeXPointX]
       exact S.place_mul .BA'' _ _)
-  have hoverlap : avgOver μ (fun s => ∑ fs, stateQForm S.psiHat
-        ((A s).effect fs * B s fs)) =
-        avgOver sublines.D (fun sample =>
-          avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
-            (fun t => concreteXPointOverlap S
-              (sample.2, projX (directPointToPauli P
-                (sample.1.base + t • sample.1.direction))))) := by
-    rw [SandwichProduct.avgOver_distribution_prod]
-    refine avgOver_congr _ _ _ fun sample => ?_
-    refine avgOver_congr _ _ _ fun t => ?_
-    simp only [A, B, concreteXPointOverlap,
-      Placement.side, ProjectiveSetting.placedMeasurement_effect,
-      Fintype.sum_prod_type]
-  have hm : 0 ≤ (P.m : ℝ) := by positivity
   have hbound :
-      ‖(∑ s ∈ μ.support, (μ.weight s : ℂ) * ∑ fs,
-          inner ℂ S.psiHat (applyOperatorToState ((A s).effect fs * RB s fs) S.psiHat)) -
-        (∑ s ∈ μ.support, (μ.weight s : ℂ) * ∑ fs,
-          inner ℂ S.psiHat (applyOperatorToState ((A s).effect fs * R s fs) S.psiHat))‖ ≤
-        Real.sqrt K * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-    calc
-      _ ≤ Real.sqrt (1 - avgOver μ (fun s => ∑ fs,
-          stateQForm S.psiHat ((A s).effect fs * B s fs))) := hcs
-      _ ≤ Real.sqrt (K * (P.m : ℝ) ^ 2 * deltaLine ε) := by
-        apply Real.sqrt_le_sqrt
-        rw [hoverlap]
-        exact hdeficit P ε S sublines
-      _ = Real.sqrt K * Real.sqrt ((P.m : ℝ) ^ 2 * deltaLine ε) := by
-        rw [show K * (P.m : ℝ) ^ 2 * deltaLine ε =
-            K * ((P.m : ℝ) ^ 2 * deltaLine ε) by ring,
-          Real.sqrt_mul (le_of_lt hK)]
-      _ = Real.sqrt K *
-          (Real.sqrt ((P.m : ℝ) ^ 2) * Real.sqrt (deltaLine ε)) := by
-        rw [Real.sqrt_mul (sq_nonneg (P.m : ℝ))]
-      _ = Real.sqrt K * (P.m : ℝ) * Real.sqrt (deltaLine ε) := by
-        rw [Real.sqrt_sq hm]
-        ring
-      _ = Real.sqrt K * (P.m : ℝ) *
-          Real.rpow (deltaLine ε) (1 / 2 : ℝ) := by
-        have hsqrt : Real.sqrt (deltaLine ε) =
-            Real.rpow (deltaLine ε) (1 / 2 : ℝ) :=
-          Real.sqrt_eq_rpow (deltaLine ε)
-        rw [hsqrt]
+      ‖(∑ s ∈ (removeXLaw P sublines).support,
+          ((removeXLaw P sublines).weight s : ℂ) * ∑ fs,
+            inner ℂ S.psiHat (applyOperatorToState
+              ((removeXLine S s).effect fs * removeXPointZX S s fs) S.psiHat)) -
+        (∑ s ∈ (removeXLaw P sublines).support,
+          ((removeXLaw P sublines).weight s : ℂ) * ∑ fs,
+            inner ℂ S.psiHat (applyOperatorToState
+              ((removeXLine S s).effect fs * removeXPointZ S s fs) S.psiHat))‖ ≤
+        C * (P.m : ℝ) * Real.rpow (deltaLine ε) (1 / 2 : ℝ) :=
+    hcs.trans (hdeficit P ε S sublines)
   convert hbound using 1
-  simp [μ, Distribution.prod, uniformDistribution, Finset.sum_product,
-    A, RB, R, ProjectiveSetting.placedMeasurement_effect, Fintype.sum_prod_type,
+  simp [removeXLaw, Distribution.prod, uniformDistribution, Finset.sum_product,
+    removeXLine, removeXPointZX, removeXPointZ,
+    ProjectiveSetting.placedMeasurement_effect, Fintype.sum_prod_type,
     applyOperatorToState, mul_assoc, Finset.mul_sum,
     Matrix.toLpLin_apply, Matrix.mulVec_mulVec]
 
@@ -827,69 +744,40 @@ theorem subline_Z_term_near_one_re_direct :
         mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
       nlinarith [mul_nonneg hsm hε]
 
-/-- Compatibility name for the directly indexed real-part ordered-product estimate. -/
-theorem subline_replace_by_ordered_product :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
-        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
-        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
-        |avgOver sublines.D (fun sample =>
-            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
-              let u := directPointToPauli P
-                (sample.1.base + t • sample.1.direction)
-              let x := projX u
-              let z := projZ u
-              ∑ fX, ∑ fZ,
-                (inner ℂ S.psiHat ((EuclideanSpace.equiv
-                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
-                    ((S.place .AA'
-                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
-                      S.place .BA''
-                        (((points.Q .bob x z).postprocess fun ab =>
-                          (some ab.1, some ab.2)).effect
-                            (evalOpt sample.2.1 x fX,
-                              evalOpt sample.2.2 z fZ))).mulVec S.psiHat))).re)) -
-          avgOver sublines.D (fun sample =>
-            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
-              let u := directPointToPauli P
-                (sample.1.base + t • sample.1.direction)
-              let x := projX u
-              let z := projZ u
-              ∑ fX, ∑ fZ,
-                (inner ℂ S.psiHat ((EuclideanSpace.equiv
-                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
-                    ((S.place .AA'
-                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
-                      S.place .BA''
-                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ *
-                          S.expPointEffectAtLineAnswer .bob .X sample.2.1 x fX)).mulVec
-                            S.psiHat))).re))| ≤
-          C * Real.rpow δQ (1 / 2 : ℝ) :=
-  subline_replace_by_ordered_product_re_direct
+/-- Compatibility name for the proved real-part ordered-product estimate.
 
-/-- Compatibility name for the directly indexed real-part Z-correlation estimate. -/
-theorem subline_Z_term_near_one :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
-        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
-        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
-        |avgOver sublines.D (fun sample =>
-            avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd)) (fun t =>
-              let u := directPointToPauli P
-                (sample.1.base + t • sample.1.direction)
-              let z := projZ u
-              ∑ fX, ∑ fZ,
-                (inner ℂ S.psiHat ((EuclideanSpace.equiv
-                  (SixReg P S.toStrategy.ιA S.toStrategy.ιB) ℂ).symm
-                    ((S.place .AA'
-                        ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
-                      S.place .BA''
-                        (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ)).mulVec
-                          S.psiHat))).re)) - 1| ≤
-          C * Real.sqrt (P.m : ℝ) *
-            (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ) +
-              Real.rpow ε (1 / 4 : ℝ)) :=
-  subline_Z_term_near_one_re_direct
+**Scope restriction:** This is `subline_replace_by_ordered_product_re_direct`,
+with its unchanged directly indexed law and real-part conclusion. It does not
+certify paper `claim:17-1`; see issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_replace_by_ordered_product := subline_replace_by_ordered_product_re_direct
+
+/-- Compatibility name for the corrected concrete-measurement X-factor obligation.
+
+**Scope restriction:** The domain and complex-modulus conclusion are those of
+`subline_remove_X_factor_direct`, following paper `claim:17-2` at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1168-1201`.
+The former quantification over arbitrary line witnesses is false, as documented
+in `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issue #414).
+
+The complex Cauchy--Schwarz estimate of `subline_remove_X_factor_direct` is
+proved, from `norm_overlap_gap_le_sqrt_one_sub_of_isProj` and
+`exists_concreteXPointOverlap_deficit_le`. Its source-law transport remains
+open under issues #414 and #474, as recorded in the same paper-gap note.
+The real-part analogue on the same law is
+`subline_remove_X_factor_re_direct`. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_remove_X_factor := subline_remove_X_factor_direct
+
+/-- Compatibility name for the proved real-part Z-correlation estimate.
+
+**Scope restriction:** This is `subline_Z_term_near_one_re_direct`, with its
+unchanged directly indexed law and real-part conclusion. It does not certify
+paper `claim:17-3`; see issue #474 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
+@[deprecated (since := "2026-09-12")]
+alias subline_Z_term_near_one := subline_Z_term_near_one_re_direct
 
 end
 
