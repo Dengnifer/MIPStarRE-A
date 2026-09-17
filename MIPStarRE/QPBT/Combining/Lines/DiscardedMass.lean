@@ -109,7 +109,7 @@ theorem prod_linePointDist_zero_X_direction_mass_le (L : LdParams) :
     avgOver (Distribution.prod (linePointDist L) (linePointDist L))
       (fun samples => if samples.1.1.direction = 0 then 1 else 0) ≤
       1 / (2 * Fintype.card (ScalarQ L)) := by
-  rw [avgOver_prod]
+  rw [SandwichProduct.avgOver_distribution_prod]
   change avgOver (linePointDist L) (fun sample => avgOver (linePointDist L)
     (fun _ => if sample.1.direction = 0 then 1 else 0)) ≤ _
   simp_rw [avgOver_const_of_isProbability _ (linePointDist_isProbability L)]
