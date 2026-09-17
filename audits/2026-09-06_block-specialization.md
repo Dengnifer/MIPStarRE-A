@@ -1,17 +1,48 @@
+---
+title: "Block specialization: statement-integrity audit"
+date: 2026-09-06
+purpose: >
+  Record the statement-integrity check for the uniform block-specialization
+  auxiliary extracted from the proof of the global polynomial-pair lemma, so
+  that later readers and reviewers can confirm its hypotheses, conclusion and
+  boundary cases against the source passage.
+issue: "#283"
+pr: "#288"
+status: active
+track: qpbt
+kind: statement-integrity-audit
+---
+
 # Block specialization: statement-integrity audit
 
-Issue: #283. Source:
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`,
-between `eq:qld-g-2` and `eq:qld-g-prime-xpt-bound`.
-The surrounding blueprint entry is `lem:qld-4-7` in
+## Scope
+
+The only Lean addition is `MIPStarRE/QPBT/Combining/BlockSpecialization.lean`,
+together with its import line in `MIPStarRE/QPBT.lean` and the subordinate
+blueprint node `lem:qpbt-block-specialization` in
 `blueprint/src/chapter/ch15_qpbt_combining.tex`.
 
-The only Lean addition is `MIPStarRE/QPBT/Combining/BlockSpecialization.lean`.
-The global polynomial-pair theorem, its hypotheses, and the blueprint claims
-are unchanged. This file proves an auxiliary used in its specialization
-argument; it does not assert completion of `lem:qld-4-7`.
+The five public declarations audited here are
+`totalDegree_combinedCoef_le_totalDegree`,
+`totalDegree_combinedRestrict_le_totalDegree`,
+`exists_nonzero_combinedCoef_of_depends_on_block`,
+`exists_block_specialization_exceptional_coefficient` and
+`block_specialization_weighted_avg_le`.
 
-## Mathematical statement
+The global polynomial-pair theorem, its hypotheses, and the blueprint claims
+about it are unchanged. This file proves an auxiliary used in its
+specialization argument; it does not assert completion of `lem:qld-4-7`.
+
+## Source of Truth
+
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`,
+between `eq:qld-g-2` and `eq:qld-g-prime-xpt-bound`. The surrounding blueprint
+entry is `lem:qld-4-7` in `blueprint/src/chapter/ch15_qpbt_combining.tex`. The
+source performs the specialization argument inside that proof and states no
+named lemma for it, so every declaration listed above is a formalization-only
+auxiliary.
+
+### Mathematical statement
 
 Let K be a finite field of cardinality q and let p(z,x) have total degree at
 most D, where z ranges over K^m and x ranges over K^k. Assume p does not belong
@@ -32,7 +63,7 @@ The paper takes weights given by expectations of complete measurement
 operators and uses D = (2m+2)d. Its separate preceding term M/q then gives
 (2(2m+2)d+1)M/q. The scalar auxiliary establishes the 2D/q term itself.
 
-## Proof and existing API
+### Proof and existing API
 
 The existing `combinedCoefAlgHom` reads p as a polynomial in x with
 polynomial coefficients in z. If every coefficient at a nonzero exponent
@@ -58,7 +89,9 @@ M(Pr_z[bad] + D/q) after summation and averaging. This proves 2DM/q.
 The same exceptional set is used for all answers; no sum of exceptional
 probabilities over the answer alphabet occurs.
 
-## Assumptions and boundary cases
+## Findings
+
+### Assumptions and boundary cases
 
 Paper assumptions: a polynomial depending nontrivially on the averaged
 block, a total-degree bound, uniform sampling of the two field-coordinate
@@ -71,7 +104,9 @@ For the weighted theorem, `w` is any function of z and b with pointwise
 nonnegativity and sum M at each z. These are actual polynomial and scalar
 hypotheses, with no supplied collision estimate or construction obligation.
 The existing API places z first and x second; this only fixes coordinate
-order in the notation p(z,x).
+order in the notation p(z,x). The two coordinate blocks are `Fin m` and
+`Fin k`, so the blueprint node states the polynomial coordinate-free, on
+K^m times K^k, rather than with one-indexed displayed variables.
 
 Field cardinality positivity follows from the field instances. No positivity
 assumption on m, k, D, or M is added. Parameter spaces remain nonempty when
@@ -92,6 +127,28 @@ Paper conclusion: the second term in `eq:qld-g-2` has the indicated
 above, together with the coefficient and uniform exceptional-set statement.
 Verdict: faithful boundary hypotheses for this auxiliary. No extra
 assumptions, weakened conclusion, or change to the final source theorem.
+
+### Relation to the existing individual-degree API
+
+The existing `totalDegree_combinedCoef_le` and
+`totalDegree_combinedRestrict_le` assume membership in `polyFunc` and
+conclude the bounds m*d and k*d. The two new inequalities assume nothing
+beyond the polynomial itself and conclude `p.totalDegree`, so they are not
+duplicates of the existing API. None of the five public declarations of this
+file exists on main under any other name.
+
+## Required Action
+
+No migration or cleanup remains for this auxiliary. Two obligations belong to
+later work and are not claimed here:
+
+- Integration of `block_specialization_weighted_avg_le` into the global
+  polynomial-pair argument. The Lean proof of `exists_globalPairWitness` does
+  not call it, so the blueprint records no dependency edge from the proof of
+  `lem:qld-4-7` to `lem:qpbt-block-specialization`; the edge should be added
+  only when that proof actually invokes the auxiliary.
+- The unchanged `notready` status and the recorded source defects of
+  `lem:qld-4-7` itself.
 
 ## Validation
 
@@ -117,7 +174,7 @@ There are no remaining proof holes or internal proof obligations in this
 auxiliary. Integration into the global polynomial-pair argument and
 independent review belong to subsequent work.
 
-## 2026-09-14 revalidation on today's main
+### 2026-09-14 revalidation on main
 
 The branch was merged with `github/main` at `cebf210d` (merge commit
 `91e27366`). The merge was clean and changed nothing in this auxiliary: the
@@ -126,28 +183,7 @@ file, the blueprint entry and one import line. The existing API this file uses
 (`combinedCoefAlgHom`, `combinedCoefInv`, `combinedCoef_eq_sum`,
 `eval_combinedCoef`, `exists_mem_support_of_combinedCoef_ne_zero`,
 `combinedRestrict`, `schwartzZippel_totalDegree`,
-`polynomialAgreement_avg_eq_agreementProbability`) is unchanged on main, and
-none of the five public declarations of this file exists on main under any
-name.
-
-Three review-facing additions were made, none of which touches a statement,
-a hypothesis or a proof of this auxiliary:
-
-- `lem:qpbt-block-specialization` in
-  `blueprint/src/chapter/ch15_qpbt_combining.tex` records the statement and
-  the proof sketch, tags the five public declarations, and carries
-  statement-level and proof-level `\leanok`; the proof of `lem:qld-4-7` now
-  lists it in `\uses`, since this is the specialization step of that proof.
-- `MIPStarRE/QPBT.lean` imports the module, so it is reachable from the
-  umbrella.
-- The two total-degree lemmas and the coefficient-existence lemma state in
-  their docstrings that they are formalization-only auxiliaries of the
-  specialization step following `eq:qld-g-2`, and name the two existing
-  individual-degree bounds `totalDegree_combinedCoef_le` and
-  `totalDegree_combinedRestrict_le` that they complement. Those two existing
-  bounds assume membership in `polyFunc` and conclude `m * d` and `k * d`;
-  the two new ones assume nothing and conclude `p.totalDegree`, so they are
-  not duplicates of the existing API.
+`polynomialAgreement_avg_eq_agreementProbability`) is unchanged on main.
 
 Revalidation on the merged tree:
 
@@ -164,3 +200,23 @@ Revalidation on the merged tree:
 - The whole-project build and `lake exe checkdecls blueprint/lean_decls`
   belong to the lane CI at the exact head; the worktree does not carry a
   complete set of compiled modules.
+
+### 2026-09-17 revalidation after the second merge with main
+
+The branch was merged with `github/main` again. The blueprint chapter
+conflicted in two places, both resolved in favour of main's content: the new
+definitions and theorems main added after the strategy paragraph are kept
+verbatim, and main's rewritten proof of `lem:qld-4-7` is kept verbatim, which
+withdraws the dependency edge this branch had added to it. The subordinate
+node `lem:qpbt-block-specialization` is placed immediately before
+`lem:qld-4-7` and is otherwise unchanged in mathematical content.
+
+## Review Use
+
+Reviewers of later PRs that touch the specialization step should read this
+audit before changing any of the five declarations or the blueprint node. The
+node is subordinate formalization support, not a named statement of the
+source; its title and first sentence must keep saying so. A PR that integrates
+the weighted estimate into the global polynomial-pair proof should add the
+dependency edge from that proof at the same time, and should update the
+Required Action section above.

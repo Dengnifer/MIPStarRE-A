@@ -64,6 +64,35 @@ theorem CombinedPointsWitness.orderedZX_dist_le {P : AdmissibleParams}
     (points.consistent_ZX q p hqp)
   linarith
 
+/-- On a single placement, the joint point measurement is close to the ordered
+`X`-then-`Z` point product, with the inflation factor four.  This is the
+same-placement form of the other ordered display of `lem:qld-4-10`, obtained
+from the self-consistency display in the same way. -/
+theorem CombinedPointsWitness.orderedXZ_dist_le {P : AdmissibleParams}
+    {ε δ : ℝ} {S : ProjectiveSetting P ε}
+    (points : CombinedPointsWitness S δ) (p : Placement) :
+    opFamilyDistSq
+        (uniformDistribution
+          ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
+        (fun xz ab => S.place p ((points.Q p.side xz.1 xz.2).effect ab))
+        (fun xz ab => S.place p
+          ((S.pointMeasExp p.side .X xz.1).effect ab.1 *
+            (S.pointMeasExp p.side .Z xz.2).effect ab.2))
+        S.psiHat ≤ 4 * δ := by
+  obtain ⟨q, hpq, hqp⟩ := p.exists_isOpposite
+  have htri := opFamilyDistSq_le_of_le_of_le
+    (uniformDistribution
+      ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
+    (fun xz ab => S.place p ((points.Q p.side xz.1 xz.2).effect ab))
+    (fun xz ab => S.place q ((points.Q q.side xz.1 xz.2).effect ab))
+    (fun xz ab => S.place p
+      ((S.pointMeasExp p.side .X xz.1).effect ab.1 *
+        (S.pointMeasExp p.side .Z xz.2).effect ab.2))
+    S.psiHat δ δ (points.self_consistent p q hpq)
+    (points.consistent_XZ q p hqp)
+  linarith
+
+
 end
 
 end MIPStarRE.QPBT

@@ -44,8 +44,8 @@ in the remaining parameter variables.
 Formalization-only auxiliary lemma for the specialization step following
 `eq:qld-g-2` in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
-It is the total-degree counterpart of `totalDegree_combinedCoef_le`, which
-bounds the same coefficient through an individual-degree hypothesis. -/
+It is the corresponding total-degree estimate; the related bound obtained from
+an individual-degree hypothesis is `m * d`. -/
 theorem totalDegree_combinedCoef_le_totalDegree {K : Type*} [CommSemiring K]
     {m k : ℕ} (p : MvPolynomial (Fin (m + k)) K) (μ : Fin k →₀ ℕ) :
     (combinedCoef p μ).totalDegree ≤ p.totalDegree := by
@@ -63,7 +63,8 @@ theorem totalDegree_combinedCoef_le_totalDegree {K : Type*} [CommSemiring K]
 Formalization-only auxiliary lemma for the specialization step following
 `eq:qld-g-2` in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
-It is the total-degree counterpart of `totalDegree_combinedRestrict_le`. -/
+It is the corresponding total-degree estimate; the related bound obtained from
+an individual-degree hypothesis is `k * d`. -/
 theorem totalDegree_combinedRestrict_le_totalDegree {K : Type*} [CommSemiring K]
     {m k : ℕ} (p : MvPolynomial (Fin (m + k)) K) (z : Fin m → K) :
     (combinedRestrict p z).totalDegree ≤ p.totalDegree := by
@@ -107,8 +108,13 @@ theorem exists_nonzero_combinedCoef_of_depends_on_block {K : Type*} [CommSemirin
 
 /-- One nonzero coefficient polynomial defines an exceptional set of probability
 at most `D / |K|`. Outside this same set, the fiber bound `D / |K|` holds for
-every answer `b`. This is the uniform specialization step following `eq:qld-g-2`
-in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
+every answer `b`.
+
+Formalization-only auxiliary theorem for the uniform specialization step
+following `eq:qld-g-2` in
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`: the
+source carries out this step inside its proof of `lem:qld-4-7` and states no
+named lemma for it. Blueprint: `lem:qpbt-block-specialization`.
 No upper bound on `D` relative to the field cardinality is needed. -/
 theorem exists_block_specialization_exceptional_coefficient {K : Type*} [Field K]
     [Fintype K] [DecidableEq K] {m k D : ℕ}
@@ -158,7 +164,11 @@ theorem exists_block_specialization_exceptional_coefficient {K : Type*} [Field K
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1344-1363`.
 Nonnegative answer weights may depend arbitrarily on the parameter `z`, provided
 their sum is the same mass `M` at every `z`. The weighted average is at most
-`(2 D / |K|) M`, with no factor for the number of answers. -/
+`(2 D / |K|) M`, with no factor for the number of answers.
+
+Formalization-only auxiliary theorem: the source establishes this estimate
+inside its proof of `lem:qld-4-7` and states no named lemma for it.
+Blueprint: `lem:qpbt-block-specialization`. -/
 theorem block_specialization_weighted_avg_le {K : Type*} [Field K] [Fintype K]
     [DecidableEq K] {m k D : ℕ} (p : MvPolynomial (Fin (m + k)) K)
     (hdegree : p.totalDegree ≤ D)
