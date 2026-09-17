@@ -39,9 +39,8 @@ noncomputable abbrev Poly (P : AdmissibleParams) :=
 measurement in `lem:qld-4-7`. -/
 noncomputable abbrev PolyPair (P : AdmissibleParams) := Poly P × Poly P
 
-/-- Split the extended coordinate set into the `X` block, the `Z` block, and
-the two scalar coordinates.  This is formalization-only coordinate plumbing
-for blueprint
+/-- This equivalence decomposes the extended coordinate set into the `X` block,
+    the `Z` block, and the two scalar coordinates.  It supports blueprint
 `def:combine-map`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`. -/
 def finCombineEquiv (m : ℕ) :
@@ -200,22 +199,6 @@ blueprint
 theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ}
     (aX bX aZ bZ uα vα uβ vβ : K) (f g : Fin (c + 1) → K) :
     (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).natDegree ≤ c + 1 := by
-  have coefficientDegree : ∀ h : Fin (c + 1) → K,
-      (linePolynomialOfCoefficients h).natDegree ≤ c := by
-    intro h
-    refine Polynomial.natDegree_sum_le_of_forall_le _ _ ?_
-    intro i _
-    refine Polynomial.natDegree_mul_le.trans ?_
-    rw [Polynomial.natDegree_C]
-    have hpow : (Polynomial.X ^ i.val : Polynomial K).natDegree ≤ i.val := by
-      refine Polynomial.natDegree_pow_le.trans ?_
-      have hX := Polynomial.natDegree_X_le (R := K)
-      calc
-        i.val * (Polynomial.X : Polynomial K).natDegree ≤ i.val * 1 :=
-          Nat.mul_le_mul_left _ hX
-        _ = i.val := by ring
-    have hi : i.val ≤ c := Nat.lt_succ_iff.mp i.isLt
-    omega
   have affineDegree : ∀ u v : K,
       (Polynomial.C u + Polynomial.C v * Polynomial.X).natDegree ≤ 1 := by
     intro u v
@@ -237,7 +220,7 @@ theorem combineLinePolynomial_natDegree_le {K : Type*} [CommSemiring K] {c : ℕ
       calc
         (linePolynomialOfCoefficients h).natDegree *
               (Polynomial.C a + Polynomial.C b * Polynomial.X).natDegree ≤ c * 1 :=
-          Nat.mul_le_mul (coefficientDegree h) (affineDegree a b)
+          Nat.mul_le_mul (linePolynomialOfCoefficients_natDegree_le h) (affineDegree a b)
         _ = c := by ring
     omega
   exact (Polynomial.natDegree_add_le _ _).trans

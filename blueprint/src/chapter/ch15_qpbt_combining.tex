@@ -932,7 +932,7 @@ assembled by Fourier averaging.
 	Let $K$ be a finite integral domain, let $c\in\N$, and let
 	$f,g\in K^{c+1}$ be distinct coefficient vectors. Their polynomials
 	$p_f(T)=\sum_{i=0}^{c}f_iT^i$ and $p_g(T)=\sum_{i=0}^{c}g_iT^i$
-	agree at at most $c$ elements of $K$.
+	agree at most $c$ elements of $K$.
 	The coefficient representation is injective, preserves evaluation,
 	and has natural degree at most $c$.
 	This is a formalization-only auxiliary for the Schwartz--Zippel step
@@ -1370,6 +1370,29 @@ assembled by Fourier averaging.
 	placements, so restoring the discarded event costs at most its probability.
 \end{proof}
 
+\begin{theorem}[Formalization support: positivity on two register pairs]
+	\label{thm:qld-specialized-placement-positivity}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_AA'_mul_place_BA''_nonneg}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_AB''_mul_place_BB'_nonneg}
+	\leanok
+	\uses{def:expanded-state, def:symmetric-equivalents}
+	For every projective setting, let $X$ and $Y$ be positive operators on
+	Alice's and Bob's expanded local spaces, respectively. Then
+	\[
+		X_{AA'}Y_{BA''}\geq 0,
+		\qquad X_{AB''}Y_{BB'}\geq 0.
+	\]
+	These are formalization-only consequences of the register placements,
+	not additional hypotheses on the source consistency statements.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:symmetric-equivalents}
+	Placement preserves positivity. On each displayed pair the two operators
+	act on disjoint registers and therefore commute. The product of commuting
+	positive operators is positive.
+\end{proof}
+
 \begin{definition}[The opposite-placement bipartition]
 	\label{def:qld-opposite-bipartition}
 	\lean{MIPStarRE.QPBT.bbAbBipartition}
@@ -1710,13 +1733,11 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	\label{lem:restricted-line-mixture-bounds}
 	\lean{MIPStarRE.QPBT.linePointDist_eq_mixture_restricted}
 	\lean{MIPStarRE.QPBT.avg_restricted_le, MIPStarRE.QPBT.avg_restricted_prod_le}
-	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
 	% Source: unlabelled prose in the paper --- the discussion following
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
-	\uses{def:ith-restricted-line, def:line-point-dist, lem:qld-xz-lines,
-		lem:qld-4-10, def:expanded-state}
+	\uses{def:ith-restricted-line, def:line-point-dist}
 	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
 	distributions $D_{\mathrm{ALine},i}$ for $i \in \{0, \dots, m-1\}$, and
 	likewise $D_{\mathrm{DLine}}$ is a uniform mixture of the
@@ -1727,41 +1748,87 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 		restricted distribution $D_{\mathrm{ALine},i}$ and
 		$D_{\mathrm{DLine},i}$ with error $2m\delta$;
 		\item any approximation that holds on average over
-		$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ holds over any product
-		of restricted distributions with error $4m^2\delta$;
-		\item in particular, by Lemma~\ref{lem:qld-xz-lines}, for any types
-		$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine},
-		\mathrm{DLine}\}$ and any $i, j \in \{0, \dots, m-1\}$,
-		\begin{equation}
-			\label{eq:qld-xz-lines-restricted}
-			\E_{(\ell_X,x) \sim D_{\mathrm{v}_1,i}}\
-			\E_{(\ell_Z,z) \sim D_{\mathrm{v}_2,j}}
-			\sum_{f_X,f_Z}
-			\bra{\hat\psi}
-			\big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'}
-			\ot
-			\big(\Id - \hat{Q}^{x,z}_{f_X(x),f_Z(z)}
-			\big)_{\mathsf{B}\mathsf{A}''}
-			\ket{\hat\psi}
-			= O(m^2 \delta_P)\,.
-		\end{equation}
+			$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ holds over any product
+			of restricted distributions with error $4m^2\delta$;
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-xz-lines, def:line-point-dist, def:consistency}
+	\uses{def:line-point-dist}
 	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
 	axis-parallel and diagonal components and, within each component, uniform
 	weight on the index $i$, so each restricted distribution carries mixture
 	weight $\tfrac{1}{2m}$ in $D_{\mathrm{Line}}$. A nonnegative average that
 	is at most $\delta$ therefore bounds each mixture component by
 	$2m\delta$, and products of two such mixtures give the factor
-	$(2m)^2 = 4m^2$. The instance \eqref{eq:qld-xz-lines-restricted} is item
-	2 applied to the conclusion of Lemma~\ref{lem:qld-xz-lines}, whose
-	$\simeq_{\delta_P}$ relation over two independent copies of the
-	line-point distribution is precisely the statement that the left-hand
-	side of \eqref{eq:qld-xz-lines-restricted}, averaged over
-	$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$, is at most $\delta_P$.
+	$(2m)^2 = 4m^2$.
+\end{proof}
+
+\begin{lemma}[Restricted consistency of the source line measurements]
+	\label{lem:qld-xz-lines-restricted}
+	\notready
+	% tracked in issue #414
+	\uses{lem:qld-xz-lines, lem:restricted-line-mixture-bounds,
+		def:consistency}
+	For the joint point and line measurements furnished by
+	Lemma~\ref{lem:qld-xz-lines}, for any types
+	$\mathrm{v}_1, \mathrm{v}_2 \in \{\mathrm{ALine},\mathrm{DLine}\}$ and
+	any $i, j \in \{0, \dots, m-1\}$,
+	\begin{equation}
+		\label{eq:qld-xz-lines-restricted}
+		\E_{(\ell_X,x) \sim D_{\mathrm{v}_1,i}}\
+		\E_{(\ell_Z,z) \sim D_{\mathrm{v}_2,j}}
+		\sum_{f_X,f_Z}
+		\bra{\hat\psi}
+		\big(T^{\ell_X,\ell_Z}_{f_X,f_Z}\big)_{\mathsf{A}\mathsf{A}'}
+		\ot
+		\big(\Id - \hat{Q}^{x,z}_{f_X(x),f_Z(z)}
+		\big)_{\mathsf{B}\mathsf{A}''}
+		\ket{\hat\psi}
+		= O(m^2 \delta_P)\,.
+	\end{equation}
+\end{lemma}
+\begin{proof}
+	\uses{lem:qld-xz-lines, lem:restricted-line-mixture-bounds,
+		def:consistency}
+	The consistency conclusion of Lemma~\ref{lem:qld-xz-lines} bounds the
+	displayed nonnegative integrand on average over two independent copies of
+	$D_{\mathrm{Line}}$. Apply the product restriction estimate in
+	Lemma~\ref{lem:restricted-line-mixture-bounds} to obtain the factor
+	$4m^2$.
+\end{proof}
+
+\begin{theorem}[Formalization support: conditional restricted consistency]
+	\label{thm:conditional-restricted-lines-consistency}
+	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
+	\leanok
+	\uses{lem:restricted-line-mixture-bounds, def:consistency,
+		def:expanded-state}
+	There is a universal constant $C>0$ with the following property. Fix
+	admissible parameters, real errors $\eps,\delta_Q,\delta_P$, and a
+	projective setting with expanded state $\hat\psi$. Suppose one is given a
+	projective joint point family whose self-consistency and two ordered-product
+	consistency bounds are at most $\delta_Q$, together with a paired-line
+	measurement family having both axis-degree support properties and evaluated
+	consistency defect at most $\delta_P$ with that point family on every
+	directed opposite placement. Then, for every directed opposite placement
+	pair, every $\mathrm{v}_1,\mathrm{v}_2\in\{\mathrm{ALine},\mathrm{DLine}\}$,
+	and every $i,j\in\{0,\dots,m-1\}$, the same evaluated consistency defect,
+	with both line-point variables restricted to
+	$D_{\mathrm{v}_1,i}\times D_{\mathrm{v}_2,j}$, is at most
+	$C m^2\delta_P$. Evaluation includes an additional undefined outcome when
+	the affine parameter is not uniquely determined.
+
+	This conditional auxiliary theorem assumes the point and line families,
+	including the unrestricted consistency estimate for the latter. It neither
+	constructs the source line measurement nor certifies
+	Lemma~\ref{lem:qld-xz-lines-restricted}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:restricted-line-mixture-bounds, def:consistency}
+	Apply the product restriction estimate to the nonnegative consistency-defect
+	integrand. The supplied unrestricted bound gives the result with $C=4$.
 \end{proof}
 
 \begin{lemma}[The sub-line distribution]
@@ -2109,7 +2176,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.subLineDist_map_subLineXProjection}
 	\lean{MIPStarRE.QPBT.subLineDist_map_subLineZProjection}
 	\lean{MIPStarRE.QPBT.subLineDist_source_mixture}
-	\lean{MIPStarRE.QPBT.exists_raw_of_mem_subLineDist_support}
+	\lean{MIPStarRE.QPBT.exists_samplingData_of_mem_subLineDist_support}
 	\lean{MIPStarRE.QPBT.subLineTripleOf_incidence}
 	\lean{MIPStarRE.QPBT.subLineTripleOf_compatibility}
 	\lean{MIPStarRE.QPBT.subLineTripleOf_axis_closure}

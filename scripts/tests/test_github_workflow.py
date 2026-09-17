@@ -18,6 +18,7 @@ An unmatched route fails the call: a test that forgets to declare one sees it.
 Coverage mirrors the layer's failure modes, one test each: status reduction and
 posting, comment/review idempotency and post-failure adoption, prerequisite
 edge creation and adoption, reviewer-round history, the merge topology check,
+the optional merge subject and its approximate Lean line delta (issue #557),
 label validation and key-marker adoption, the ``pr_merge.py`` gate ladder
 (fail-closed on missing CI evidence and on an adverse verdict), the audit
 snapshot, and a hygiene check that no live tool still reaches for the retired
@@ -287,6 +288,44 @@ class GitHubLayerTests(LayerTestCase):
             self.assertEqual(gh_common.merge_pr(7, HEAD), MERGE_SHA)
             self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/merge"),
                              [{"sha": HEAD, "merge_method": "merge"}])
+
+    def test_merge_pr_sends_a_commit_subject_only_when_one_is_given(self) -> None:
+        """Issue #557 — the subject keys are optional and additive.
+
+        The wire contract has two halves: a caller that supplies wording gets it
+        forwarded verbatim under GitHub's own payload keys, and a caller that
+        supplies none sends the exact two-key payload this function has always
+        sent, so every pre-#557 caller keeps GitHub's default merge wording.
+        """
+        def arm() -> None:
+            self.gh.route(r"^pulls/7/merge", {"merged": True}, method="PUT")
+            self.gh.route(r"^pulls/7$", {"number": 7, "state": "closed", "merged": True,
+                                         "merge_commit_sha": MERGE_SHA, "head": {"sha": HEAD}})
+            self.gh.route(r"^commits/", {"parents": [{"sha": BASE_SHA}, {"sha": HEAD}]})
+
+        with self.subTest("both given -> both keys travel"):
+            arm()
+            self.assertEqual(
+                gh_common.merge_pr(7, HEAD, commit_title="Merge PR #7: port it [lean +9 -2]",
+                                   commit_message=f"Head {HEAD} of issue-7-port."),
+                MERGE_SHA)
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/merge"), [{
+                "sha": HEAD, "merge_method": "merge",
+                "commit_title": "Merge PR #7: port it [lean +9 -2]",
+                "commit_message": f"Head {HEAD} of issue-7-port."}])
+        with self.subTest("neither given -> the payload is the pre-#557 one"):
+            self.gh.reset()
+            arm()
+            gh_common.merge_pr(7, HEAD)
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/merge"),
+                             [{"sha": HEAD, "merge_method": "merge"}])
+        with self.subTest("title only -> no empty commit_message key"):
+            self.gh.reset()
+            arm()
+            gh_common.merge_pr(7, HEAD, commit_title="Merge PR #7: docs only [lean 0]")
+            self.assertEqual(self.gh.payloads("PUT", r"^pulls/7/merge"),
+                             [{"sha": HEAD, "merge_method": "merge",
+                               "commit_title": "Merge PR #7: docs only [lean 0]"}])
 
     def test_issue_create_rejects_unknown_labels_and_adopts_by_key(self) -> None:
         with self.subTest("unknown label is named, nothing is created"):
@@ -1028,6 +1067,37 @@ class MergeGateTests(LayerTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("ancestry or passive-telemetry-only move", result.stdout)
 
+    def test_check_only_previews_the_lean_line_delta_in_the_merge_subject(self) -> None:
+        """Issue #557 — the gate reports the subject the merge commit will carry.
+
+        End to end through the real script: ``run_gate`` must hand the merge base
+        out with the other facts, and ``run_merge`` must measure the branch against
+        it.  ``--check-only`` merges nothing, so the printed subject is the only
+        observable — which is also what makes it the operator's preview.
+        """
+        with self.subTest("a PR that changes no Lean line says so"):
+            self._arm()
+            result = self._check_only()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("merge subject: Merge PR #7: GitHub-native records [lean 0]",
+                          result.stdout)
+        with self.subTest("Lean lines are counted from the merge base"):
+            self.gh.reset()
+            _git(self.repo, "checkout", "-q", self.BRANCH)
+            lean = self.repo / "MIPStarRE" / "QPBT" / "Subject.lean"
+            lean.parent.mkdir(parents=True, exist_ok=True)
+            lean.write_text("theorem a : True := trivial\ntheorem b : True := trivial\n",
+                            encoding="utf-8")
+            _git(self.repo, "add", "-A")
+            _git(self.repo, "commit", "-q", "--no-verify", "-m", "add Lean lines")
+            self.head = _git(self.repo, "rev-parse", "HEAD")
+            _git(self.repo, "checkout", "-q", "main")
+            self._arm()
+            result = self._check_only()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("merge subject: Merge PR #7: GitHub-native records [lean +2 -0]",
+                          result.stdout)
+
     def test_telemetry_path_allowlist_has_exact_boundaries(self) -> None:
         allowed = (
             "results/telemetry/events.md",
@@ -1240,6 +1310,120 @@ class MergeGateTests(LayerTestCase):
 
         with self.assertRaisesRegex(LayerError, "two review rounds"):
             pr_merge.check_review(self.repo, 7, self.head, reviews[:-1], statuses, adjudicated=True)
+
+
+class MergeSubjectTests(unittest.TestCase):
+    """Issue #557 — the merge subject's approximate Lean line delta.
+
+    The owner reads this number off GitHub's commits page, so what matters is
+    that it is right when git can answer, that only Lean lines reach it, and
+    that it is *absent* rather than wrong or fatal when git cannot: the count is
+    cosmetic, and the merge gate must not acquire a new way to fail.  No GitHub
+    call is involved, so this case needs neither the fake ``gh`` nor its env.
+    """
+
+    def setUp(self) -> None:
+        holder = tempfile.TemporaryDirectory()
+        self.addCleanup(holder.cleanup)
+        self.tmp = Path(holder.name)
+        self.repo = self.tmp / "repo"
+        self.repo.mkdir()
+        templates = self.tmp / "no-templates"
+        templates.mkdir()
+        _git(self.repo, "init", "-q", f"--template={templates}")
+        _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
+        _git(self.repo, "config", "user.email", "tests@example.invalid")
+        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "commit.gpgsign", "false")
+        lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
+        lean.parent.mkdir(parents=True)
+        lean.write_text("".join(f"line {n}\n" for n in range(1, 6)), encoding="utf-8")
+        (self.repo / "README.md").write_text("base\n", encoding="utf-8")
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
+        self.merge_base = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "checkout", "-q", "-b", "issue-557-merge-title-lean-loc")
+
+    def _commit(self, message: str) -> str:
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "--no-verify", "-m", message)
+        return _git(self.repo, "rev-parse", "HEAD")
+
+    def test_delta_counts_lean_lines_at_any_depth_and_nothing_else(self) -> None:
+        # Two of the five Lean lines go, three arrive, and a new Lean file two
+        # directories down adds one more — the pathspec is not anchored.  The
+        # Markdown churn beside them is four added lines that must not be counted.
+        (self.repo / "MIPStarRE" / "QPBT" / "Base.lean").write_text(
+            "line 1\nline 2\nline 3\nnew a\nnew b\nnew c\n", encoding="utf-8")
+        (self.repo / "MIPStarRE" / "QPBT" / "Deep").mkdir()
+        (self.repo / "MIPStarRE" / "QPBT" / "Deep" / "Extra.lean").write_text(
+            "theorem extra : True := trivial\n", encoding="utf-8")
+        (self.repo / "README.md").write_text("a\nb\nc\nd\n", encoding="utf-8")
+        head = self._commit("touch Lean and Markdown together")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (4, 2))
+
+    def test_delta_is_zero_for_a_non_lean_pr_and_none_when_git_cannot_answer(self) -> None:
+        (self.repo / "README.md").write_text("documentation only\n", encoding="utf-8")
+        head = self._commit("documentation only")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (0, 0))
+        self.assertIsNone(pr_merge.lean_line_delta(self.repo, "0" * 40, head),
+                          "an unresolvable merge base must yield no count, not a wrong one")
+        self.assertIsNone(pr_merge.lean_line_delta(self.tmp / "no-templates",
+                                                   self.merge_base, head),
+                          "a directory that is no repository must yield no count either")
+
+    def test_title_carries_the_delta_and_marks_a_lean_free_pr(self) -> None:
+        self.assertEqual(
+            pr_merge.merge_commit_title(557, "feat(local): merge titles carry the delta", (12, 3)),
+            "Merge PR #557: feat(local): merge titles carry the delta [lean +12 -3]")
+        self.assertEqual(pr_merge.merge_commit_title(557, "docs: protocol note", (0, 0)),
+                         "Merge PR #557: docs: protocol note [lean 0]")
+        self.assertIsNone(pr_merge.merge_commit_title(557, "feat: whatever", None),
+                          "no delta must mean no title, so GitHub words the merge itself")
+
+    def test_title_cannot_close_an_issue_gate_seven_never_checked(self) -> None:
+        """PR 558 review F1 — closing keywords in the PR title are defused.
+
+        ``check_dependencies`` scans the PR body and the branch commits before the
+        subject exists, so a title reading ``closes #900`` would ride onto the
+        default branch inside the merge commit and close an issue whose open
+        sub-issues and deferred status no gate ever examined.  The wording must
+        survive as prose while the reference stops firing.
+        """
+        self.assertEqual(
+            pr_merge.merge_commit_title(557, "feat(local): closes #900 at last", (3, 1)),
+            "Merge PR #557: feat(local): closes issue 900 at last [lean +3 -1]")
+        for wording in ("Fixes #900", "resolved: #900", "CLOSED  #900", "fix\n#900"):
+            with self.subTest(wording=wording):
+                subject = pr_merge.merge_commit_title(7, f"docs: {wording} now", (0, 0))
+                self.assertIsNotNone(subject)
+                self.assertEqual(pr_merge.CLOSES_RE.findall(subject), [],
+                                 f"{subject!r} still reads as a closing reference")
+        with self.subTest("truncation cannot forge a shorter reference"):
+            subject = pr_merge.merge_commit_title(7, "fixes #9001 " + "x" * 200, (1, 0))
+            self.assertEqual(pr_merge.CLOSES_RE.findall(subject), [], subject)
+        with self.subTest("the merge body is defused too"):
+            body = pr_merge.merge_commit_message("issue-900-closes #900", "0" * 40)
+            self.assertEqual(pr_merge.CLOSES_RE.findall(body), [], body)
+
+    def test_title_collapses_and_truncates_untrusted_pr_wording(self) -> None:
+        subject = pr_merge.merge_commit_title(557, "feat(local): " + "x" * 200, (1, 0))
+        self.assertTrue(subject.startswith("Merge PR #557: feat(local): xxx"), subject)
+        self.assertTrue(subject.endswith(" [lean +1 -0]"), subject)
+        body = subject[len("Merge PR #557: "):-len(" [lean +1 -0]")]
+        self.assertLessEqual(len(body), pr_merge.MERGE_TITLE_PR_LIMIT)
+        self.assertTrue(body.endswith("..."), body)
+        # A newline would split the subject from the commit body; a control
+        # character would reach the terminal of everyone reading git log.
+        self.assertEqual(pr_merge.merge_commit_title(557, "first\nsecond\tthird\x07", (0, 0)),
+                         "Merge PR #557: first second third [lean 0]")
+        self.assertEqual(pr_merge.merge_commit_title(557, "   ", (5, 5)),
+                         "Merge PR #557 [lean +5 -5]")
+
+    def test_message_names_the_frozen_head_on_one_line(self) -> None:
+        message = pr_merge.merge_commit_message("issue-557-merge-title-lean-loc", "a" * 40)
+        self.assertEqual(message, "Head " + "a" * 40 + " of issue-557-merge-title-lean-loc.")
+        self.assertNotIn("\n", message)
 
 
 # --------------------------------------------------------------------------
