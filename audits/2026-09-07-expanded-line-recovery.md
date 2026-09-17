@@ -136,6 +136,16 @@ These replacements leave the archived source proofs available at `f1dc470` and
 reuse their already-public mathematical counterparts, rather than introducing
 assumptions or copying old private WinImplications aliases.
 
+The review repair of the tensor-sum auxiliary in `LineMeasurement/Expanded.lean`
+composes `DistanceCalculus.heteroKron_finset_sum_left` and
+`DistanceCalculus.heteroKron_finset_sum_right` from
+`MIPStarRE/QPBT/Games/DistanceTheorems/Support.lean`. The corresponding auxiliary
+in `ExpandedDefs.lean` is private; no change to its visibility is needed.
+Broader consolidation of these sum auxiliaries, placement of the tensor zero
+laws beside `heteroKron_mul` and `heteroKron_one_one` in `Games/Defs.lean`, and
+uniform presentation of point- and line-measurement projectivity remain tracked
+by #204. These organizational questions do not change the mathematical statements.
+
 ## Fresh Validation
 
 Every recovered implementation module and the public `LineMeasurement` facade

@@ -3352,6 +3352,65 @@ projective measurement whose outcomes are pairs of global polynomials.
 	Apply the resulting inequality and average over $u$.
 \end{proof}
 
+\begin{lemma}[Formalization support for uniform specialization in a block of variables]
+	\label{lem:qpbt-block-specialization}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedCoef_le_totalDegree}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedRestrict_le_totalDegree}
+	\lean{MIPStarRE.QPBT.exists_nonzero_combinedCoef_of_depends_on_block}
+	\lean{MIPStarRE.QPBT.exists_block_specialization_exceptional_coefficient}
+	\lean{MIPStarRE.QPBT.block_specialization_weighted_avg_le}
+	\leanok
+	This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+	specialization estimate between the paper equations labelled
+	\texttt{eq:qld-g-2} and \texttt{eq:qld-g-prime-xpt-bound}, which the source
+	carries out inside its proof of Lemma~\ref{lem:qld-4-7} with
+	$D = (2m+2)d$ and with the weights given by the expectations of a complete
+	measurement.
+
+	Let $p$ be a polynomial on $\F_q^m \times \F_q^k$, written $p(z,x)$, of
+	total degree at most $D$, and assume that $p$ is not a polynomial in $z$
+	alone.  Write $p = \sum_\mu c_\mu(z)\,x^\mu$.  Then there is an exponent
+	$\mu \neq 0$ with $c_\mu \neq 0$ such that $c_\mu$ has total degree at most
+	$D$,
+	\[
+		\Pr_{z \in \F_q^m}[c_\mu(z) = 0] \le \frac{D}{q}\,,
+	\]
+	and, for every $z$ with $c_\mu(z) \neq 0$, simultaneously for every
+	$b \in \F_q$,
+	\[
+		\Pr_{x \in \F_q^k}[p(z,x) = b] \le \frac{D}{q}\,.
+	\]
+	Consequently, for any weights $w(z,b) \ge 0$ with
+	$\sum_{b \in \F_q} w(z,b) = M$ for every $z$,
+	\[
+		\E_{z \in \F_q^m} \sum_{b \in \F_q}
+		\Pr_{x \in \F_q^k}[p(z,x) = b] \, w(z,b)
+		\le \frac{2D}{q} \, M\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	If $c_\mu = 0$ for every $\mu \neq 0$ then $p = c_0(z)$, contrary to the
+	assumption; fix $\mu \neq 0$ with $c_\mu \neq 0$.  Splitting the exponent
+	of each monomial of $p$ into its $z$-part and its $x$-part shows that
+	neither extracting the coefficient of an $x$-monomial nor substituting a
+	value for $z$ raises the total degree, so $c_\mu$ and every
+	$p(z,\cdot)$ have total degree at most $D$.  Applying
+	Lemma~\ref{lem:schwartz-zippel-total-degree} to $c_\mu$ and the zero
+	polynomial bounds $\Pr_z[c_\mu(z) = 0]$ by $D/q$.  If $c_\mu(z) \neq 0$
+	then $p(z,\cdot)$ differs from the constant polynomial $b$ for every
+	$b$, because its coefficient at $\mu \neq 0$ equals $c_\mu(z)$, so the
+	same lemma bounds $\Pr_x[p(z,x) = b]$ by $D/q$, uniformly in $b$.
+	Hence $\Pr_x[p(z,x) = b] \le \mathbf{1}[c_\mu(z) = 0] + D/q$ for all $z$
+	and $b$.  Multiplying by $w(z,b) \ge 0$, summing over $b$, using
+	$\sum_b w(z,b) = M$ and averaging over $z$ gives
+	$(\Pr_z[c_\mu(z) = 0] + D/q)\,M \le (2D/q)\,M$.  One exceptional set
+	serves every answer, so the answer alphabet contributes no factor.
+	Nonconstancy is used as a property of the polynomial and not of the
+	function it induces, so no bound on $D$ in terms of $q$ is needed.
+\end{proof}
+
 \begin{lemma}[The global polynomial-pair measurement]
 	\label{lem:qld-4-7}
 	\lean{MIPStarRE.QPBT.Poly, MIPStarRE.QPBT.PolyPair, MIPStarRE.QPBT.evalAt}
