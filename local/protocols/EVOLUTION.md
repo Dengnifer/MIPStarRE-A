@@ -1148,3 +1148,27 @@ GitHub's wording.
 off the commits page without opening the merge, no pull request that cleared the
 seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
 covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - Record independent mixed-model review (#575)
+
+**Trigger:** owner 11:22Z decision and explicit resend allocating six Mac
+helper slots as three fixers/three reviewers; same-day correction withdrawing
+Opus review of Opus-modified PRs. See `results/telemetry/events.md`,
+"2026-09-17 META 11:22Z owner decisions", "Read new owner11:22Z OPUS
+REVIEWERS handoff and same-day correction", and "2026-09-17 META 11:37Z";
+issue #575 records the requested durable amendment.
+
+**Change:** `review.md` records the owner-run exception to dispatch-only review:
+Opus reviewers take only never-Opus-modified PRs; Opus-changed PRs require
+independent native Codex review. The three Mac reviewers publish marked
+exact-head COMMENT evidence; MAIN checks the published record and owns the
+summary status. Existing claims, trusted-source, CI, caps, round limits,
+source-faithfulness and strict-diff carry remain binding. This changes no
+scripts, keys, allocation, project goal, or merge authority: provenance and
+handback validation are documented operator duties, not new code enforcement.
+
+**Expected effect:** separate reviewer capacity can shorten the review queue
+without same-model approval of Opus repairs or treating stale, malformed, or
+unpublished reviews as merge evidence. Existing automated exact-head gates
+continue to enforce their prior conditions; no throughput gain is asserted
+before observation.
