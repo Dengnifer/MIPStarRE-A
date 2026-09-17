@@ -79,8 +79,11 @@ private theorem map_uniformDistribution_point (L : LdParams) :
     _ = uniformDistribution (Fin L.m → ScalarQ L) := uniformDistribution_map_fst
 
 /-- Formalization-only auxiliary lemma: the shared scalar coordinate of a
-uniformly random ambient vector is uniform. -/
-private theorem map_uniformDistribution_seed (L : LdParams) :
+uniformly random ambient vector is uniform. This is the seed marginal used in
+the proof of `lem:alnf`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:243-257`,
+and in blueprint `def:ith-restricted-line`. -/
+theorem uniformDistribution_map_ldSeed (L : LdParams) :
     (uniformDistribution (LdSpace L)).map LdSpace.seed =
       uniformDistribution (ScalarQ L) := by
   have hsplit : (uniformDistribution (LdSpace L)).map (ldSpaceSplit L) =
@@ -137,7 +140,7 @@ theorem aLinePointDist_point_marginal_uniform (L : LdParams) :
           fun sample => chiIndex L sample.1.seed) = _
       rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
       rfl
-    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
+    rw [hmap, uniformDistribution_map_ldSeed, uniformDistribution_map_chiIndex]
 
 /-- The incidence conclusion of blueprint
 `lem:alnf`, paper
@@ -186,7 +189,7 @@ theorem dLinePointDist_point_marginal_uniform (L : LdParams) :
           fun sample => chiIndex L sample.1.seed) = _
       rw [Distribution.map_map, Distribution.map_map, Distribution.map_map]
       rfl
-    rw [hmap, map_uniformDistribution_seed, uniformDistribution_map_chiIndex]
+    rw [hmap, uniformDistribution_map_ldSeed, uniformDistribution_map_chiIndex]
 
 /-- The incidence conclusion of blueprint
 `lem:dlnf`, paper

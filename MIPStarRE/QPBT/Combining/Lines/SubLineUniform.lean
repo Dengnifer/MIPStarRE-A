@@ -145,7 +145,8 @@ theorem avgOver_uniform_lineRepMap_resample_parameter {K : Type*} [Field K]
   have hmap := uniformDistribution_map_lineRepMap_add_smul v
   have havg := congrArg (fun dist => avgOver dist
     (fun point => value (lineRepMap v point) point)) hmap
-  rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
+  rw [Distribution.avgOver_map, uniformDistribution_prod,
+    SandwichProduct.avgOver_distribution_prod] at havg
   simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
 
 /-! ## Injectivity of the two block embeddings -/

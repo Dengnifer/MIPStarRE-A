@@ -52,7 +52,8 @@ theorem avgOver_prod_linePointDist_points (L : LdParams)
       (fun sample => value (sample.1.2, sample.2.2)) =
       avgOver (uniformDistribution
         ((Fin L.m → ScalarQ L) × (Fin L.m → ScalarQ L))) value := by
-  rw [uniformDistribution_prod, avgOver_prod, avgOver_prod]
+  rw [uniformDistribution_prod, SandwichProduct.avgOver_distribution_prod,
+    SandwichProduct.avgOver_distribution_prod]
   conv_lhs =>
     arg 2
     ext sample
@@ -276,7 +277,7 @@ theorem exists_combinedPoints_line_marginal_distance_le :
       S.psiHat ≤ C * (ε + deltaLine ε) := by
     rw [DistanceCalculus.opFamilyDistSq_symm]
     unfold opFamilyDistSq
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     simp_rw [avgOver_const_of_isProbability _ (linePointDist_isProbability P.toLdParams)]
     exact hbound P ε S p1 p2 hopp .X
   have hZ : opFamilyDistSq (Distribution.prod (linePointDist P.toLdParams)
@@ -288,7 +289,7 @@ theorem exists_combinedPoints_line_marginal_distance_le :
       S.psiHat ≤ C * (ε + deltaLine ε) := by
     rw [DistanceCalculus.opFamilyDistSq_symm]
     unfold opFamilyDistSq
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     erw [avgOver_const_of_isProbability _ (linePointDist_isProbability P.toLdParams)
       (opFamilyDistSq (linePointDist P.toLdParams)
         (fun sample answer => S.place p2
