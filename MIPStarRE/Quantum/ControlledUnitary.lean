@@ -83,8 +83,8 @@ theorem sum_heteroKron_mul_conjTranspose
         heteroKron_one_one]
 
 /-- The reverse adjoint product of a controlled operator is also the identity.
-For finite square matrices, Mathlib's `mul_eq_one_comm` converts either inverse
-identity to the other, both for the components and for the controlled operator.
+For finite square matrices, a left inverse is also a right inverse, both for each
+component and for the controlled operator.
 This supplies the reverse identity implicit in the same source calculation. -/
 theorem conjTranspose_mul_sum_heteroKron
     (measurement : Measurement Outcome Control)
