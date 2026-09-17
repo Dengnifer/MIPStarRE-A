@@ -399,16 +399,15 @@ one native delegate and external lane caps 0/0/0; no key, capacity, permission,
 gate, or project-goal authority changes here.
 
 Before assigning `review <PR>` in
-`~/.cache/mipstarre-dev/watchdog/opus-requests.txt`, MAIN checks
-`results/telemetry/owner-sessions.jsonl` for `opus-fix`, `opus-modernize`, and
-`opus-orc` provenance. An Opus reviewer may review **only a PR no Opus helper
-has ever changed**. The withdrawn first batch (272, 288, 289, 299, 271, 274)
-and PR 294 are not Opus-review assignments. Any Opus-modified PR requires an
-independent native Codex reviewer, even if another fresh Opus thread did not
-author its changes. After a native Codex repair, Opus review is possible only
-when the PR remains Opus-untouched. For each PR head, the reviewer is fresh,
-has never worked on that PR in any role, and is not reused for another head; keep
-the source-faithfulness policy in `AGENTS.md`, the ledger in §9 and the cap in §12.
+`~/.cache/mipstarre-dev/watchdog/opus-requests.txt`, MAIN verifies that the
+assigned reviewer session has never authored, repaired, refreshed, or otherwise
+worked on that PR in any role. A fresh independent Opus session may review any
+PR, including one changed by a different Opus session: model-family provenance
+alone does not disqualify a reviewer. This is the same session-independence rule
+as for native Codex reviewers. Cross-model review is preferred when it costs
+nothing, but is not required. For each PR head, the reviewer is fresh and is
+not reused for another head; keep the source-faithfulness policy in `AGENTS.md`,
+the ledger in §9 and the cap in §12.
 
 Before a review, confirm green CI for the exact head (§2) and no existing
 marked review for that head. The reviewer reads the personas, checklists
