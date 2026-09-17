@@ -1,5 +1,199 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/576",
+  "id": 5487343234,
+  "node_id": "I_kwDOUJyJf88AAAABRxI2gg",
+  "number": 576,
+  "title": "Stop duplicated work and post-merge rework: duplicate check, declaration claims, superseded sweep, approval carry",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025016470,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8wlg",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/automation",
+    "name": "automation",
+    "color": "ededed",
+    "default": false,
+    "description": "",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-17T12:28:29Z",
+  "updated_at": "2026-09-17T12:28:29Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "## Why\n\nOwner observation (2026-09-17): quota is being wasted in two ways.\n\n1. **Duplicated work.** Several open PRs (212, 296, 398, and per the Opus reviews also 488 and 539) prove or declare results that `main` already contains, because two tasks covering the same mathematics were dispatched to different workers weeks apart. Each duplicate cost a prover run, reviews, repairs and refresh attempts before anyone noticed.\n2. **Rework after every merge.** Every merge makes all other published PR heads out of date; approvals are bound to an exact head, and in single-key mode nothing refreshes or carries them automatically. (The merge train of PR 507 addresses the merge side; this issue covers what is left.)\n\n## What\n\nA. **Pre-dispatch duplicate check** (`local/bin`, model-free): before a prover/fixer task starts, search `github/main` (and open PR heads) for the target declaration names, the blueprint node's `\\lean{...}` names and near-identical statements; refuse or flag the dispatch with the matching location when `main` already has it. Wire it into `dispatch.sh` and document it for native delegates and Opus helpers.\nB. **Declaration claims**: a small registry (issue \u2192 blueprint node / declaration names being produced) checked at issue creation and dispatch, so two open issues cannot target the same declaration unnoticed.\nC. **Superseded-PR sweep** (model-free report, runnable any time): for every open PR list its new declarations and blueprint nodes that already exist on `main` (same name, or same statement after whitespace normalisation), so the main session can close or shrink superseded PRs early instead of repairing them.\nD. **Just-in-time update with approval carry**: a model-free step usable by the daemon and by the main session: bring an approved PR up to date, run the gates, and republish the approval for the new head when the PR's own diff fingerprint is unchanged (review.md section 13), without a reviewer. Must compose with the merge train.\n\n## Acceptance\n\n- Unit tests for A\u2013D; protocol text and a dated `EVOLUTION.md` entry.\n- A sweep report over the current open PRs attached to the PR.\n- No model call in any of the four tools.\n",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/576/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/575",
+  "id": 5487192107,
+  "node_id": "I_kwDOUJyJf88AAAABRw_oKw",
+  "number": 575,
+  "title": "docs(local): record independent Opus reviews",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025011061,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8bdQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/infrastructure",
+    "name": "infrastructure",
+    "color": "ededed",
+    "default": false,
+    "description": "Foundational definitions, shared APIs, or supporting layers",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-17T12:14:08Z",
+  "updated_at": "2026-09-17T12:14:08Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: docs-local-record-independent-opus-reviews-2cf1bc59 -->\n### Motivation\n\nThe owner's 2026-09-17 decision adds independent Opus reviews to remove the\nsingle Codex review bottleneck. The six Mac-side helper slots comprise three\nfixers and three reviewers. The same-day handoff correction withdrew the\ninitial batch of Opus-modified PRs and requires cross-model review routing.\n\n### Scope\n\nRecord this active owner-authorized operating mode in the canonical review\nprotocol and a dated EVOLUTION entry. This is documentation of the owner's\ndecision, not a runtime, gate, key, cap, or project-goal change.\n\n### Acceptance Criteria\n\n- A fresh Opus reviewer has never worked on the PR and reads trusted personas\n  and review policy from a pinned published main ref.\n- Opus reviewers cover only PRs no Opus helper has changed, using the\n  owner-sessions provenance record; Opus-modified PRs retain native review.\n- Helpers review the full diff read-only and publish a marked COMMENT with\n  findings and a final VERDICT via primary gh_common.py. They neither post\n  statuses nor merge. They run from the owner's Mac without model calls on ghz.\n- MAIN verifies the actual published commit binding, canonical marker,\n  parseable final verdict and zero unchecked findings before success; adverse\n  or malformed evidence fails closed. MAIN owns status publication.\n- Claims/release records and review requests use the established watchdog\n  files. Document the three-fixer/three-reviewer allocation and existing native\n  one-thread constraint without changing allocation files.\n- Existing whitespace-sensitive review carry rules remain authoritative for\n  unchanged patches after refresh; no redundant review round is introduced.\n- EVOLUTION cites the owner decision and the September17 events entry. No\n  changes to runtime scripts, mathematical source, permission authority, or\n  the project's stated goal.\n\nOwner instruction source: OPUS REVIEWERS and its correction in\n`/tmp/qpbt-main-handoff-v5.md`, plus the explicit owner resend to MAIN on\n2026-09-17. MAIN already recorded the decision and first exact-head handbacks\nin `results/telemetry/events.md`; this issue makes the normative record durable.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/575/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/564",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/564/labels{/name}",
@@ -1859,7 +2053,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -2748,7 +2942,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 1,
    "total_blocking": 1
@@ -3094,92 +3288,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/459/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/455",
-  "id": 5390980401,
-  "node_id": "I_kwDOUJyJf88AAAABQVPVMQ",
-  "number": 455,
-  "title": "Normalize the nondegenerate line-pasting law",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T19:24:35Z",
-  "updated_at": "2026-09-08T19:24:35Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 1,
-   "blocking": 2,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-nondegenerate-line-pasting-distribution-20260909 -->\nDefine the proof-only normalized product line-point distribution used at references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963. Derive positivity internally from the retained-mass bound, preserve the exact first-X-direction restriction and relabeling, and prove the resulting mapped restriction is a probability distribution.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/455/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -5420,7 +5528,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
@@ -5440,137 +5548,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/387/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/380",
-  "id": 5386775924,
-  "node_id": "I_kwDOUJyJf88AAAABQROtdA",
-  "number": 380,
-  "title": "proof(QPBT/Combining): recover sub-line witness distribution",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025012183,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8f1w",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/qpbt-analysis",
-    "name": "qpbt-analysis",
-    "color": "ededed",
-    "default": false,
-    "description": "Soundness/rigidity analysis of the Pauli basis test \u2014 self-testing bounds and error terms",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025012384,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8goA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/proof",
-    "name": "proof",
-    "color": "ededed",
-    "default": false,
-    "description": "Issue is primarily about proving an existing result",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025012779,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8iKw",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/sorry-elimination",
-    "name": "sorry-elimination",
-    "color": "ededed",
-    "default": false,
-    "description": "Explicitly aimed at discharging remaining `sorry` sites",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T12:36:45Z",
-  "updated_at": "2026-09-08T12:36:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
-  "issue_dependencies_summary": {
-   "blocked_by": 1,
-   "total_blocked_by": 2,
-   "blocking": 1,
-   "total_blocking": 2
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-subline-witness-recovery-20260908 -->\n### Target declaration\n\nRecover the preserved kernel-checked proof of `exists_subLineWitness` in `MIPStarRE/QPBT/Combining/Lines.lean`, together with only the necessary sub-line helper modules and imports.\n\n### Source and integrity\n\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`, `lem:qld-sublines`.\n- Preserve the current `SubLineWitness` fields exactly: directly indexed extended carrier, probability, extended marginal, incidence, compatibility, axis closure, and separate X/Z marginal mixtures.\n- Do not strengthen the separate marginal law to a joint conditional law, add divisibility or nonzero-direction hypotheses, or alter declarations owned by the restricted-mixture packet.\n- Recovery source: the completed proof and sub-line leaf modules preserved at commit `0f4ef05370350f4017439ebd839ef0561f13130f`.\n\n### Dependencies and ownership\n\n- Coordinate shared `Lines.lean` imports with #376.\n- #373 / PR #377 supplies the current restricted-seed mass proof when any shared distribution normalization requires it.\n- Own only `exists_subLineWitness`, its docstring/imports, and necessary `Combining/Lines/SubLine*.lean` helpers.\n\n### Acceptance\n\n- Focused Lean checks pass with unchanged target statement and no new `sorry`, axiom, bypass, bridge package, or source-completion claim.\n- The target axiom audit reports only the standard three dependencies.\n- Hook check, target proof-debt scan, and statement-integrity audit pass.\n- Publish through the checked PR wrapper for exact-head CI and independent review.\n\n---\nProof sub-issue of #118.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/380/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -5771,7 +5748,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 1,
-   "blocking": 2,
+   "blocking": 1,
    "total_blocking": 3
   },
   "body": "<!-- mipstarre-issue-key: qpbt-restricted-line-mixture-20260908 -->\n### Target declarations\n\nProve the existing tracked hole in `MIPStarRE/QPBT/Combining/Lines.lean`:\n\n- `linePointDist_eq_mixture_restricted`\n\nIf the finite-mixture identity closes early, also prove the immediately dependent\naverage bounds in the same block without changing their signatures:\n\n- `avg_restricted_le`\n- `avg_restricted_prod_le`\n- `restricted_lines_consistency_bound`\n\nOwn only the restricted-mixture and average block in `Combining/Lines.lean`.\nDo not modify the combined-line producer, point producer, extraction, or sub-line\nconstruction declarations.\n\n### Source and dependencies\n\n- Paper: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1061`.\n- Blueprint: `lem:restricted-line-mixture-bounds`.\n- The proof must expand the finite conditional laws and the equal fibers of\n  `chiIndex`; preserve degenerate directions and exact inflation factors `2m`\n  and `4m^2`.\n- Blocked by #373, which proves positivity of the two restricted seed events used\n  by the conditional distributions.\n\n### Acceptance\n\n- Target declarations have kernel-checked proofs with unchanged statements.\n- No new `sorry`, axiom, bypass, bridge premise, or weakened probability law.\n- Focused Lean check, proof-debt scan, import check, hooks, and three-axiom\n  inspection pass after the prerequisite is integrated.\n- Publication follows exact-head local CI and independent review.\n\n---\nProof sub-issue of #118.\n",
@@ -8409,9 +8386,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 102,
+  "comments": 105,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-17T10:05:47Z",
+  "updated_at": "2026-09-17T14:38:14Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -8526,8 +8503,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 27,
-   "completed": 16,
-   "percent_completed": 59
+   "completed": 17,
+   "percent_completed": 62
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -9141,7 +9118,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 5,
    "blocking": 0,
    "total_blocking": 0
@@ -9161,93 +9138,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/123/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/121",
-  "id": 5345167368,
-  "node_id": "I_kwDOUJyJf88AAAABPpjICA",
-  "number": 121,
-  "title": "feat(QPBT/Extraction): prove extracted observables and swap identities",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 2,
-  "created_at": "2026-09-04T06:49:38Z",
-  "updated_at": "2026-09-06T02:23:45Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 1,
-   "total_blocked_by": 4,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-extraction-observables-swap -->\n### Target declarations\n\nAt PR #46 head `995fc51`, in\n`MIPStarRE/QPBT/Extraction/Observables.lean`, prove:\n\n- line 142 \u2014 `tildeObs_eq_heteroKron`\n- line 156 \u2014 `tildeObs_isHermitian`\n- line 170 \u2014 `tildeObs_mul_self`\n- line 189 \u2014 `tildeObs_twisted_commutation`\n- line 217 \u2014 `swapUnitary_mul_conjTranspose`\n- line 231 \u2014 `conjTranspose_mul_swapUnitary`\n- line 248 \u2014 `swapUnitary_conj_tildeObs`\n- line 266 \u2014 `swapUnitary_conj_tildeM`\n\nBranch: `issue-0019-qpbt-extraction-skeleton`.\n\n### Paper and blueprint references\n\n- Pulled-apart observable product form and Pauli relations:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1426-1463`;\n  PR #46 `blueprint/src/chapter/ch16_qpbt_extraction.tex:125-168`.\n- Swap unitarity and conjugation:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1670-1822`;\n  PR #46 blueprint lines 298-346.\n\n### Dependencies\n\n- PR #46 and #120 must merge first; #120 is the prior owner of the same file.\n- #63, #64, and #68 must merge for decoder, projector, and Pauli identities.\n- Re-resolve PR-branch line numbers after merge while preserving the named targets.\n\n### Acceptance\n\n- All eight target declarations are proved with unchanged signatures and phases.\n- `lake env lean MIPStarRE/QPBT/Extraction/Observables.lean` and direct consumers are green.\n- Fully discharged Chapter 16 nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, unitary assumption,\n  phase simplification, or reversed conjugation is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nThis is the second serialized owner of `Extraction/Observables.lean`.\nPreserve the cross-basis phase, both left/right unitary equations, every player\nside, and the exact conjugation orientation. File targets are from PR #46, not\ncurrent main.\n\n---\nStage 4.3 proof packet under #47; blocked by PR #46 and #120.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/121/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -9317,7 +9207,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 1,
    "total_blocked_by": 5,
-   "blocking": 1,
+   "blocking": 0,
    "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: stage43-unfiled-extraction-marginals -->\n### Target declarations\n\nAt PR #46 head `995fc51` on branch\n`issue-0019-qpbt-extraction-skeleton`:\n\n- `MIPStarRE/QPBT/Extraction/Defs.lean:213` \u2014 `tauDotProj_isProj`\n- `MIPStarRE/QPBT/Extraction/Defs.lean:225` \u2014 `sum_tauDotProj_eq_one`\n- `MIPStarRE/QPBT/Extraction/Observables.lean:68` \u2014 `marginalPoly_isProjective`\n- `MIPStarRE/QPBT/Extraction/Observables.lean:96` \u2014 `tildeM_isProj`\n- `MIPStarRE/QPBT/Extraction/Observables.lean:109` \u2014 `sum_tildeM_eq_one`\n\n### Paper and blueprint references\n\n- Polynomial marginals and pulled-apart measurements:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1416-1439`.\n- PR #46 blueprint:\n  `blueprint/src/chapter/ch16_qpbt_extraction.tex:61-124`,\n  `def:s-w-marginals`, `def:tau-dot-product-projector`, and\n  `def:tilde-m-measurement`.\n\n### Dependencies\n\n- PR #46 must merge first; these files do not yet exist on main. Re-resolve\n  line numbers after the merge without changing the named targets.\n- #63 must merge for the full-field decoder laws.\n- #119 and #114 must merge for the global-pair witness and expanded point operators.\n- This is the first of two serialized owners of `Extraction/Observables.lean`.\n\n### Acceptance\n\n- All five target declarations are proved with unchanged signatures.\n- `lake env lean` is green for both extraction files and direct consumers.\n- Fully discharged Chapter 16 nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, decoder bridge,\n  projectivity assumption, or basis parameter is introduced.\n- Full build, statement audit, declaration checking, blueprint rendering,\n  exact-head CI, and independent review pass.\n\n### Scope notes\n\nFile targets and locators are against PR #46, not current main. Preserve\npostprocessing projectivity, dot-product projector completeness, heterogeneous\nlocal spaces, and the fixed field model. Own only the five proofs and matching\nblueprint status after PR #46 lands.\n\n---\nStage 4.3 proof packet under #47; blocked by PR #46.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
@@ -9484,8 +9374,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 36,
-   "completed": 15,
-   "percent_completed": 41
+   "completed": 16,
+   "percent_completed": 44
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
@@ -10678,9 +10568,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 431,
+  "comments": 439,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-17T09:59:42Z",
+  "updated_at": "2026-09-17T15:20:24Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -10764,9 +10654,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 73,
+  "comments": 74,
   "created_at": "2026-09-02T08:29:59Z",
-  "updated_at": "2026-09-17T09:19:37Z",
+  "updated_at": "2026-09-17T15:19:53Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
