@@ -671,17 +671,18 @@ def lean_code_line_mask(text: str) -> list[bool]:
     Deliberately naive where Lean's grammar is subtle, because what it feeds is a
     size signal that must above all be cheap and deterministic: only double-quoted
     strings hide comment delimiters (``'`` is an identifier character here far more
-    often than a char-literal quote), and string state does not survive a newline,
-    so one unbalanced quote cannot mislabel the rest of a file.
+    often than a char-literal quote). String and escape state persist across physical
+    lines until the closing quote, as ordinary Lean strings may span lines.
     """
     lines = text.split("\n")
     if lines and lines[-1] == "":
         lines.pop()  # a final newline terminates the last line, it does not add one
     mask: list[bool] = []
     depth = 0
+    in_string = False
+    escaped = False
     for line in lines:
         code = False
-        in_string = False
         index = 0
         while index < len(line):
             character, pair = line[index], line[index:index + 2]
@@ -695,8 +696,13 @@ def lean_code_line_mask(text: str) -> list[bool]:
                     continue
                 index += 2
             elif in_string:
-                in_string = character != '"'
-                index += 2 if character == "\\" else 1
+                if escaped:
+                    escaped = False
+                elif character == "\\":
+                    escaped = True
+                elif character == '"':
+                    in_string = False
+                index += 1
             elif pair == LEAN_LINE_COMMENT:
                 break  # everything after it belongs to the comment
             elif pair == LEAN_BLOCK_OPEN:

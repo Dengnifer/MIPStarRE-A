@@ -1164,10 +1164,10 @@ removed ones from the merge-base blob's, and counts a line only when a
 single-pass scanner calls it code. That scanner tracks nesting block comments —
 `/-`, and the `/--` and `/-!` forms that share its `-/` closer — skips line
 comments, blank and whitespace-only lines, and keeps a line whose code is merely
-trailed by a comment. It is naive by design about the rest of Lean's grammar
-(only double-quoted strings hide delimiters, and string state stops at the
-newline). Added and deleted files count their own code lines; a pure rename
-counts none.
+trailed by a comment. It is naive by design about the rest of Lean's grammar:
+only double-quoted strings hide delimiters, and string and escape state carry
+across physical lines until the closing quote. Added and deleted files count
+their own code lines; a pure rename counts none.
 
 **Scope disposition:** the cosmetic-by-contract rule of issue #557 is unchanged
 and now explicit in the code: the measurement is wrapped so that it returns

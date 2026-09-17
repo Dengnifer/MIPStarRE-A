@@ -1412,6 +1412,9 @@ class MergeSubjectTests(unittest.TestCase):
             pr_merge.lean_code_line_mask(source),
             [False, True, False, False, False, False, False, True,
              False, False, False, True])
+        # An escaped quote in the continuation cannot expose its /- as a comment.
+        continued = 'def s : String := "hello\n\\"/-"\ntheorem t : True := trivial\n'
+        self.assertEqual(pr_merge.lean_code_line_mask(continued), [True, False, True])
 
     def test_delta_counts_only_the_code_lines_a_change_touched(self) -> None:
         # Two code lines leave; five lines arrive of which exactly one is code.
@@ -1420,6 +1423,16 @@ class MergeSubjectTests(unittest.TestCase):
             "\nline 4 changed\n", encoding="utf-8")
         head = self._commit("comment churn around a single changed code line")
         self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (1, 2))
+
+    def test_delta_counts_code_after_a_multiline_string_containing_comment_opener(self) -> None:
+        # Lean accepts this ordinary multiline string; /- on its second line is text.
+        lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
+        prefix = 'def s : String := "hello\n/-"\n'
+        lean.write_text(prefix + "theorem t : True := trivial\n", encoding="utf-8")
+        base = self._commit("add a multiline Lean string")
+        lean.write_text(prefix + "theorem t : True := by trivial\n", encoding="utf-8")
+        head = self._commit("change a theorem after the string")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, base, head), (1, 1))
 
     def test_delta_reads_an_added_file_as_the_code_lines_it_brings(self) -> None:
         qpbt = self.repo / "MIPStarRE" / "QPBT"
