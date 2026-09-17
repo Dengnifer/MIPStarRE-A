@@ -3,10 +3,10 @@ import MIPStarRE.QPBT.Combining.Points.MarginalContraction
 /-!
 # Marginal distances for combined point witnesses
 
-This module applies the generic marginal contraction estimate to the joint
-point measurements of a `CombinedPointsWitness`.  The X marginal uses the
-ordered Z-then-X consistency field, while the Z marginal uses the ordered
-X-then-Z field; no commutation of point effects on one player is assumed.
+This module applies the generic marginal contraction estimate to the combined
+point measurements of `lem:qld-4-10`. The X marginal uses the ordered
+Z-then-X consistency relation, while the Z marginal uses the ordered
+X-then-Z relation; no commutation of point effects on one player is assumed.
 
 ## References
 
@@ -28,7 +28,6 @@ open MIPStarRE.Quantum
 noncomputable section
 
 set_option maxHeartbeats 800000 in
--- Expanding the nested finite sums and projector products exceeds the default limit.
 /-- The X marginal of any joint point witness is within squared distance
 `4 * δQ` of the opposite X point measurement. This is the display
 `eq:qld-qxz-close-to-point`, paper lines 914--917, whose supporting
@@ -68,7 +67,6 @@ theorem CombinedPointsWitness.marginal_X_distance_le
     (S.place p2 ((S.pointMeasExp p2.side .X xz.1).effect a)) S.psiHat
 
 set_option maxHeartbeats 800000 in
--- Expanding the nested finite sums and projector products exceeds the default limit.
 /-- The Z marginal of any joint point witness is within squared distance
 `4 * δQ` of the opposite Z point measurement. This is the symmetric display
 `eq:qld-qxz-close-to-point-2`, paper lines 928--930, which the source states
