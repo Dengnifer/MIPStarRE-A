@@ -43,7 +43,7 @@
   field-valued sandwich POVM, finite-character Parseval, an exact overlap
   identity, and projective rounding with a dimension-independent bound
   $K\varepsilon^{1/8}$.  This replaces the binary-linearity argument; it does
-  does not establish the source's padding assumption. The implementation in
+  not establish the source's padding assumption. The implementation in
   \ghissue{388} comprises roughly 2,400 lines, predominantly project-local
   measurement arguments using Mathlib finite sums, inner products, and real
   powers.
@@ -360,9 +360,10 @@ including self-consistency and both ordered point-product comparisons with
 the same universal error, is the declaration \path{exists_extendedQ} for
 source Lemma~\path{lem:qld-4-12}. It does not establish the subsequent
 extended-line lemma \path{lem:qld-4-13}.
-Other QPBT source obligations are recorded in
-\path{docs/paper-gaps/qpbt-gap-register.md}; its linearity row predates the
-uniform-ancilla result recorded here.
+The complete QPBT audit status is recorded in
+\path{docs/paper-gaps/qpbt-gap-register.md}, whose linearity row records the
+uniform-ancilla result together with the residual zero-state-padding
+assumption.
 
 Issue~\#19 introduced this discrepancy record for the extraction skeleton;
 \ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
