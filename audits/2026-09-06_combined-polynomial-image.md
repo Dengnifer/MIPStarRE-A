@@ -54,7 +54,10 @@ measurement assigns large mass to this locus.
   to a standard basis vector and sets the other point block to zero.
   `recoverCombinedPoly_combinePoly` recovers each component, and
   `combinePoly_recoverCombinedPoly` reconstructs every separated polynomial.
-  `combinePoly_injective` proves uniqueness for actual polynomial pairs.
+  Uniqueness for actual polynomial pairs is the existing
+  `combinePoly_injective` of
+  `MIPStarRE/QPBT/Combining/PairCompletion.lean`, reused here rather than
+  restated.
 - Verdict: exact algebraic encoding of separation and reconstruction. The
   extension from a finite field to a commutative semiring is proved, rather
   than assumed; no nontriviality or positive-dimension restriction is needed.
@@ -120,7 +123,7 @@ On 2026-09-06, the following checks passed:
   without diagnostics.
 - The new module has no matches for proof holes, explicit axiom declarations,
   forbidden kernel bypasses, placeholder tactics, or debug commands.
-- `#print axioms` was run on every one of the sixteen public declarations
+- `#print axioms` was run on every one of the fifteen public declarations
   listed below. Their closures are subsets of `propext`, `Classical.choice`,
   and `Quot.sound`; none contains `sorryAx` or a project axiom.
 - `scripts/install_git_hooks.sh --check` passed for the issue worktree.
@@ -134,7 +137,6 @@ combinePoly_eq_combinePolyTuple
 IsSeparatedCombined
 recoverCombinedPoly
 recoverCombinedPoly_combinePoly
-combinePoly_injective
 isSeparatedCombined_combinePoly
 rename_recoverCombinedPoly
 combinePoly_recoverCombinedPoly

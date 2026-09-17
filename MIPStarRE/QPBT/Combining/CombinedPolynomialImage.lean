@@ -105,16 +105,6 @@ def recoverCombinedPoly {K : Type*} [CommSemiring K] {m : ℕ}
   rw [recoverCombinedPoly, combinePoly_eq_combinePolyTuple,
     splitCombinedPoly_combinePolyTuple, MvPolynomial.killCompl_rename_app]
 
-/-- Combining polynomials is injective as a map on actual pairs, independently
-of degree bounds or assumptions about the coefficient field. -/
-theorem combinePoly_injective {K : Type*} [CommSemiring K] {m : ℕ} :
-    Function.Injective (fun fg : MvPolynomial (Fin m) K × MvPolynomial (Fin m) K =>
-      combinePoly fg.1 fg.2) := by
-  intro fg fg' h
-  apply Prod.ext
-  · simpa using congrArg (fun p => recoverCombinedPoly p 0) h
-  · simpa using congrArg (fun p => recoverCombinedPoly p 1) h
-
 /-- Every combined polynomial satisfies the coefficient and variable support
 conditions defining separation. -/
 theorem isSeparatedCombined_combinePoly {K : Type*} [CommSemiring K] {m : ℕ}

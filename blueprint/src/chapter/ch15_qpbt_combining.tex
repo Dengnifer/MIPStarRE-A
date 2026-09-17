@@ -1628,7 +1628,6 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.combinedBlockVar_injective}
 	\lean{MIPStarRE.QPBT.combinePoly_eq_combinePolyTuple}
 	\lean{MIPStarRE.QPBT.recoverCombinedPoly_combinePoly}
-	\lean{MIPStarRE.QPBT.combinePoly_injective}
 	\lean{MIPStarRE.QPBT.isSeparatedCombined_combinePoly}
 	\lean{MIPStarRE.QPBT.rename_recoverCombinedPoly}
 	\lean{MIPStarRE.QPBT.combinePoly_recoverCombinedPoly}
@@ -1639,12 +1638,13 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.combinedPolynomialImageEquiv}
 	\leanok
 	\uses{def:combine-map, def:combine-map-separated-locus, def:polyfunc,
-		def:ideg-deg-polynomials}
+		def:ideg-deg-polynomials, lem:qld-combined-pair-completion}
 	This formalization-only auxiliary is not a named statement of the paper; it
 	records the algebraic identification of the set $G$ of the proof of
 	Lemma~\ref{lem:qld-4-7} with pairs of bounded-degree polynomials. Each of
 	the two point-block inclusions is injective. The map
-	$(f, g) \mapsto \mathrm{combine}_{f,g}$ is injective. Its image is exactly
+	$(f, g) \mapsto \mathrm{combine}_{f,g}$ is injective, which is recorded in
+	Lemma~\ref{lem:qld-combined-pair-completion}. Its image is exactly
 	the separated locus of
 	Definition~\ref{def:combine-map-separated-locus}, and the two specialization
 	maps invert it there. For every $d$, including $d = 0$, the components
@@ -1670,7 +1670,7 @@ analyzed, together with candidate repairs, in
 	respectively; the two block inclusions are injective. The component
 	splitting of Lemma~\ref{lem:ld-combining-split} then recovers each component
 	from the coefficient of the corresponding combining variable, which gives
-	both round-trip identities and injectivity. If $p$ is separated, the
+	both round-trip identities. If $p$ is separated, the
 	coefficient characterization of
 	Lemma~\ref{lem:ld-combining-exact-linearity} writes $p$ as a combined tuple,
 	and its two coefficients are supported in the respective blocks, so each is
