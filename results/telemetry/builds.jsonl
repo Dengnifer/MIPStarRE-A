@@ -1459,3 +1459,6 @@
 {"ts": "2026-09-17T21:01:41+0900", "kind": "ci-build", "trigger": "ci.sh pr=213", "seconds": 34, "outcome": "success", "sha": "5865b019824b6033d3b152ca24c8053382916726", "note": "branch issue-116-expanded-line-measurements"}
 {"ts": "2026-09-17T21:15:39+0900", "kind": "ci-build", "trigger": "ci.sh pr=573", "seconds": 27, "outcome": "success", "sha": "ecc7cbb75810341d8053478595aaf9e3b3e9a10b", "note": "branch issue-117-preserve-point-foundations-20260917"}
 {"ts": "2026-09-17T21:49:45+0900", "kind": "ci-build", "trigger": "ci.sh pr=578", "seconds": 509, "outcome": "success", "sha": "a9e6c2644ffc3a04e04a4c0fd733b9ee31c0e1f5", "note": "branch issue-575-independent-opus-reviews"}
+{"ts": "2026-09-17T21:57:41+0900", "kind": "ci-build", "trigger": "ci.sh pr=271", "seconds": 499, "outcome": "success", "sha": "68151428cd78769561c0d51a3ac92f7666e5e7a7", "note": "branch issue-267-ideal-point-perfect-consistency"}
+{"ts": "2026-09-17T21:58:07+0900", "kind": "ci-build", "trigger": "ci.sh pr=577", "seconds": 931, "outcome": "success", "sha": "723e2d2ac6783b2cfe2fea78cacd2fc6b0088874", "note": "branch issue-574-merge-title-lean-code-lines"}
+{"ts": "2026-09-17T21:58:12+0900", "kind": "ci-build", "trigger": "ci.sh pr=386", "seconds": 392, "outcome": "success", "sha": "68d85c430571e62d0d6919b2de72afe016ac711d", "note": "branch issue-380-subline-witness"}
