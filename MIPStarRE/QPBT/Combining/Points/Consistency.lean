@@ -81,8 +81,8 @@ theorem norm_applyOperatorToState_proj_effect_le {α ι : Type*} [Fintype α]
   rw [(hM a).isSelfAdjoint.isHermitian.eq, (hM a).isIdempotentElem.eq]
   exact measurement_effect_le_one M a
 
-/-- The effects of a projective measurement are square-summable to the
-identity. -/
+/-- The sum of the squares of the effects of a projective measurement is
+bounded above by the identity. -/
 theorem sum_effect_conjTranspose_mul_self_le_one_of_projective {α ι : Type*}
     [Fintype α] [Fintype ι] [DecidableEq ι] (M : Measurement α ι)
     (hM : MIPStarRE.QPBT.Measurement.IsProjective M) :
