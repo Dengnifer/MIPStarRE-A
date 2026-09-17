@@ -1370,6 +1370,29 @@ assembled by Fourier averaging.
 	placements, so restoring the discarded event costs at most its probability.
 \end{proof}
 
+\begin{theorem}[Formalization support: positivity on two register pairs]
+	\label{thm:qld-specialized-placement-positivity}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_AA'_mul_place_BA''_nonneg}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_AB''_mul_place_BB'_nonneg}
+	\leanok
+	\uses{def:expanded-state, def:symmetric-equivalents}
+	For every projective setting, let $X$ and $Y$ be positive operators on
+	Alice's and Bob's expanded local spaces, respectively. Then
+	\[
+		X_{AA'}Y_{BA''}\geq 0,
+		\qquad X_{AB''}Y_{BB'}\geq 0.
+	\]
+	These are formalization-only consequences of the register placements,
+	not additional hypotheses on the source consistency statements.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:symmetric-equivalents}
+	Placement preserves positivity. On each displayed pair the two operators
+	act on disjoint registers and therefore commute. The product of commuting
+	positive operators is positive.
+\end{proof}
+
 \begin{definition}[The opposite-placement bipartition]
 	\label{def:qld-opposite-bipartition}
 	\lean{MIPStarRE.QPBT.bbAbBipartition}
