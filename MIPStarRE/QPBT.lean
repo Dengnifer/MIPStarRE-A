@@ -47,6 +47,7 @@ import MIPStarRE.QPBT.Combining.Defs
 import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.PassingError
 import MIPStarRE.QPBT.Combining.DirectLowDegree
+import MIPStarRE.QPBT.Combining.BlockSpecialization
 import MIPStarRE.QPBT.Combining.Linearity
 import MIPStarRE.QPBT.Combining.Linearity.Defs
 import MIPStarRE.QPBT.Combining.Linearity.BooleanFourier
