@@ -2138,6 +2138,26 @@ of the paper.
 	Compare $M$ with the zero operator in the quadratic-form order.
 \end{proof}
 
+\begin{lemma}[Formalization support: quadratic-form conjugation]
+	\label{lem:distance-qform-conjugation}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_conjTranspose_mul_mul}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the conjugation step used in the placed-sandwich estimates. Let
+	$\iota$ be a finite index set, let $\ket\psi\in\C^\iota$, and let $W,M$ be
+	arbitrary operators on $\C^\iota$. Then
+	\[
+		q_\psi(W^\dagger M W)=q_{W\psi}(M).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	Move the adjoint action of $W^\dagger$ across the inner product and take real
+	parts.
+\end{proof}
+
 \begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
 	\label{lem:distance-measurement-effect-le-one}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_effect_le_one}

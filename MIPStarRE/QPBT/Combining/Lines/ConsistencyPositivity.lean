@@ -54,6 +54,24 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
   exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
     (S.place_comm p₁ p₂ hopp X Y)
 
+/-- Positive operators placed on `AA'` and on `BA''` have a positive product.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
+blueprint `def:expanded-state`. -/
+theorem place_AA'_mul_place_BA''_nonneg (S : ProjectiveSetting P ε)
+    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
+    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
+    0 ≤ S.place .AA' X * S.place .BA'' Y := by
+  exact S.place_mul_place_nonneg .AA' .BA'' (by simp [Placement.IsOpposite]) hX hY
+
+/-- Positive operators placed on `AB''` and on `BB'` have a positive product.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
+blueprint `def:expanded-state`. -/
+theorem place_AB''_mul_place_BB'_nonneg (S : ProjectiveSetting P ε)
+    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
+    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
+    0 ≤ S.place .AB'' X * S.place .BB' Y := by
+  exact S.place_mul_place_nonneg .AB'' .BB' (by simp [Placement.IsOpposite]) hX hY
+
 end ProjectiveSetting
 
 /-! ## Nonnegativity of the pointwise consistency defect -/
