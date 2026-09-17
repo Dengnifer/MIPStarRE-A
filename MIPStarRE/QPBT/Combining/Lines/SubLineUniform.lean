@@ -11,11 +11,14 @@ representative together with a uniformly random affine parameter along the
 direction: the map sending a pair to the point at that parameter on the line
 through the representative has constant fibers of size `q`, because the
 kernel of the canonical representative map is the span of the direction and
-for the zero direction that map is the identity.  Second, the two coordinate
-blocks of an elementary coordinate direction of the extended space are the
-corresponding elementary direction of the source space in the block that
-carries the coordinate, and zero in the other block and at the two scalar
-coordinates.
+for the zero direction that map is the identity.  In averaged form this is the
+resampling identity used by the line-point samplers: a quantity of the
+canonical representative and of the point may equivalently be averaged over the
+point and an independent uniform affine parameter along the direction.  Second,
+the two coordinate blocks of an elementary coordinate direction of the extended
+space are the corresponding elementary direction of the source space in the
+block that carries the coordinate, and zero in the other block and at the two
+scalar coordinates.
 
 ## References
 
@@ -121,25 +124,29 @@ theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
         exact (directLineRepParameter_spec v x).symm
     rw [himg, Finset.card_image_of_injective _ hinj, Finset.card_univ]
 
-/-- Resampling a uniform affine parameter preserves the joint expectation of
-the canonical representative and the point, including for the zero direction.
-This formalization-only identity supports the conditional sampling in
-`lem:qld-xz-lines`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`;
-blueprint `lem:line-representative-resampling`. -/
-theorem avgOver_lineRepMap_resample_parameter {K : Type*} [Field K]
-    [Fintype K] [DecidableEq K] {m : ℕ} (direction : Fin m → K)
+/-! ## Resampling a uniform point along its canonical line -/
+
+/-- Finite-average form of the parameterization above: a uniformly random
+point may be replaced by a fresh uniform affine parameter on the line through
+its canonical representative, while the representative itself is kept in the
+sampled value.  The zero direction is included, since the parameterization
+has constant fibers there too.  This formalization-only identity is the
+common core of the axis and diagonal line-point resampling identities used at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`;
+the canonical representative map is blueprint `def:line-representative`. -/
+theorem avgOver_uniform_lineRepMap_resample_parameter {K : Type*} [Field K]
+    [Fintype K] [DecidableEq K] {m : ℕ} (v : Fin m → K)
     (value : (Fin m → K) → (Fin m → K) → ℝ) :
     avgOver (uniformDistribution (Fin m → K))
-        (fun point => value (lineRepMap direction point) point) =
+        (fun point => value (lineRepMap v point) point) =
       avgOver (uniformDistribution (Fin m → K)) (fun point =>
         avgOver (uniformDistribution K) (fun param =>
-          value (lineRepMap direction point)
-            (lineRepMap direction point + param • direction))) := by
-  have hmap := uniformDistribution_map_lineRepMap_add_smul direction
+          value (lineRepMap v point) (lineRepMap v point + param • v))) := by
+  have hmap := uniformDistribution_map_lineRepMap_add_smul v
   have havg := congrArg (fun dist => avgOver dist
-    (fun point => value (lineRepMap direction point) point)) hmap
-  rw [Distribution.avgOver_map, uniformDistribution_prod, avgOver_prod] at havg
+    (fun point => value (lineRepMap v point) point)) hmap
+  rw [Distribution.avgOver_map, uniformDistribution_prod,
+    SandwichProduct.avgOver_distribution_prod] at havg
   simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
 
 /-! ## Injectivity of the two block embeddings -/

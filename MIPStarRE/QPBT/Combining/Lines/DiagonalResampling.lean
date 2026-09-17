@@ -39,7 +39,7 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
   rw [← hblock]
   simp only [Distribution.avgOver_map]
   rw [uniformDistribution_prod]
-  simp only [avgOver_prod]
+  simp only [SandwichProduct.avgOver_distribution_prod]
   rw [avgOver_comm, avgOver_comm (uniformDistribution (Fin L.m -> ScalarQ L))]
   apply congrArg
   funext block
@@ -57,7 +57,7 @@ theorem avgOver_dLinePointDist_resample_parameter (L : LdParams)
         value (LineDesc.diagonal (lineRepMap direction point) block.1 direction
           (lineRepMap_apply_self direction point) hprefix,
           lineRepMap direction point + param • direction)))
-  have h := avgOver_lineRepMap_resample_parameter direction
+  have h := avgOver_uniform_lineRepMap_resample_parameter direction
     (fun base point => value (LineDesc.diagonal
       (lineRepMap direction base) block.1 direction
       (lineRepMap_apply_self direction base) hprefix, point))

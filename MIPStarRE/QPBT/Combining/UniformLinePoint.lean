@@ -1,5 +1,5 @@
 import MIPStarRE.QPBT.Combining.DirectLowDegree.Transport.Questions
-import MIPStarRE.QPBT.Combining.Lines.SubLineBind
+import MIPStarRE.QPBT.Combining.Lines.SubLineUniform
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.DistributionMarginals
 import MIPStarRE.LDT.Basic.DistributionAvg
@@ -200,5 +200,12 @@ theorem SubLineWitness.avgOver_projX_projZ (P : AdmissibleParams)
     Distribution.avgOver_map]
 
 end
+
+/-- Compatibility name for the uniform representative--parameter theorem.
+Its proof is now shared with the subline construction in
+`uniformDistribution_map_lineRepMap_add_smul`. -/
+@[deprecated (since := "2026-09-12")]
+alias uniformDistribution_map_lineRepMap_add_smul_current :=
+  uniformDistribution_map_lineRepMap_add_smul
 
 end MIPStarRE.QPBT

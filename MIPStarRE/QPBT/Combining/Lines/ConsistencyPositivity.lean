@@ -11,7 +11,11 @@ opposite registers is a state quadratic form of a positive operator.  Indeed,
 after separating the two placements along the corresponding tensor
 bipartition, the off-diagonal sum is
 `∑_a (place p₁ E_a) (place p₂ (∑_{b ≠ a} F_b))`, a sum of products of
-positive operators supported on complementary registers.
+positive operators supported on complementary registers.  The placement
+algebra itself — additivity, the image of zero, positivity and the commutation
+of opposite placements — is supplied by the placement identities proved in
+`MIPStarRE.QPBT.Combining.Points.PlacementSupport` and
+`MIPStarRE.QPBT.Observables.LineMeasurement.LinePointOverlap`.
 
 ## References
 
@@ -33,30 +37,9 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The state quadratic form of the zero operator vanishes. -/
-private theorem stateQForm_zero_local {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ψ : EuclideanSpace ℂ ι) :
-    DistanceCalculus.stateQForm ψ (0 : Op ι) = 0 := by
-  simp [DistanceCalculus.stateQForm, applyOperatorToState]
-
-/-- Reindexing an operator along an equivalence preserves positivity.
-Formalization-only auxiliary for the placement bipartitions of blueprint
-`def:expanded-state`, paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`. -/
-theorem reindexOp_nonneg {ι κ : Type*} [Finite ι] [Finite κ]
-    (e : ι ≃ κ) {M : Op κ} (hM : 0 ≤ M) :
-    0 ≤ reindexOp e M := by
-  exact MIPStarRE.Quantum.reindex_nonneg e.symm hM
-
 namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
-
-/-- A register placement maps the zero operator to zero. -/
-private theorem place_zero_local (S : ProjectiveSetting P ε) (p : Placement) :
-    S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-  ext i j
-  cases p <;> simp [place]
 
 /-- Positive operators placed on a directed opposite pair of registers have a
 positive product.  Paper
@@ -68,10 +51,8 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
     {Y : Op (S.ExpandedLocalSpace p₂.side)}
     (hX : 0 ≤ X) (hY : 0 ≤ Y) :
     0 ≤ S.place p₁ X * S.place p₂ Y := by
-  have hcomm : Commute (S.place p₁ X) (S.place p₂ Y) :=
-    S.place_comm p₁ p₂ hopp X Y
-  exact hcomm.mul_nonneg
-    (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
+  exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
+    (S.place_comm p₁ p₂ hopp X Y)
 
 /-- Positive operators placed on `AA'` and on `BA''` have a positive product.
 Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
@@ -124,10 +105,10 @@ theorem offDiagonalPlacedProduct_nonneg {P : AdmissibleParams} {ε : ℝ}
       S.place p₁ (M₁.effect a) *
         S.place p₂ (∑ b : α, if a = b then 0 else M₂.effect b) := by
     intro a
-    rw [S.place_finsetSum, Finset.mul_sum]
+    rw [ProjectiveSetting.place_finsetSum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
-    · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero_local, mul_zero]
+    · rw [if_pos h, if_pos h, ProjectiveSetting.place_zero, mul_zero]
     · rw [if_neg h, if_neg h]
   rw [Finset.sum_congr rfl fun a _ => hrow a]
   refine Finset.sum_nonneg fun a _ => ?_
@@ -166,7 +147,7 @@ theorem consistencyDefect_integrand_nonneg {P : AdmissibleParams} {ε : ℝ}
     rw [DistanceCalculus.stateQForm_finset_sum]
     refine Finset.sum_congr rfl fun b _ => ?_
     by_cases h : a = b
-    · rw [if_pos h, if_pos h, stateQForm_zero_local]
+    · rw [if_pos h, if_pos h, DistanceCalculus.stateQForm_zero]
     · rw [if_neg h, if_neg h]
       rfl
   rw [hform]
