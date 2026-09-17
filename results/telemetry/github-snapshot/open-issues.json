@@ -1966,7 +1966,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 2,
    "blocking": 0,
    "total_blocking": 0
@@ -2702,93 +2702,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/466/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/464",
-  "id": 5391279460,
-  "node_id": "I_kwDOUJyJf88AAAABQVhlZA",
-  "number": 464,
-  "title": "feat(QPBT/Combining): restore consistency under restriction",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-08T19:56:06Z",
-  "updated_at": "2026-09-08T19:56:06Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
-  "issue_dependencies_summary": {
-   "blocked_by": 1,
-   "total_blocked_by": 2,
-   "blocking": 1,
-   "total_blocking": 1
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-consistency-discarded-mass-20260909 -->\n### Scope\n\nAdd the formalization-only generic finite-conditioning lemma\n`consistencyDefect_le_restrict_add_discarded_mass` for complete measurement\nfamilies placed on opposite expanded registers.\n\nThe original consistency defect should be bounded by the retained event mass\ntimes the restricted defect, plus the discarded probability mass. Reuse the\npointwise unit bound from #422 / PR #458 and the scalar restricted-average split\nfrom #428 / PR #433.\n\n### Source boundary\n\n- Supporting proof context: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.\n- This is a formalization-only generic finite-conditioning bridge, not a new\n  paper premise.\n- Do not add a global defect-bound hypothesis or specialize to the concrete\n  zero-mass, collision, pasting, or global-pair applications.\n\n### Acceptance\n\n- Exact generic theorem type-checks without proof holes or bypasses.\n- Dependencies remain the published exact heads of PRs #458 and #433.\n- The theorem has exactly the standard three axioms.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/464/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -3945,7 +3858,7 @@
   "issue_dependencies_summary": {
    "blocked_by": 0,
    "total_blocked_by": 0,
-   "blocking": 1,
+   "blocking": 0,
    "total_blocking": 1
   },
   "body": "<!-- mipstarre-issue-key: qpbt-average-split-restoration -->\n### Target\n- Restore `avgOver_restrict_mul_mass` and\n  `avgOver_le_restrict_add_discarded_mass` as generic finite-probability lemmas.\n\n### Source and scope\n- Base: published PR #424 head `1aaabc61488e8793f49f2a291d8094422b7f26fc`.\n- Source context: `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`.\n- Promote the existing local mass identity in `Games/RestrictedAverage.lean`,\n  reuse it in the existing upper conditional-average theorem, and prove the\n  exact discarded-mass restoration inequality.\n\n### Acceptance\n- Preserve the existing public upper-average statement.\n- Add no positivity premise on the restored value beyond the old exact contract.\n- Do not add a concrete pasting theorem, operator unit bound, sampler change,\n  C2 work, global-pair work, or B8 work.\n- Focused Lean, standard-axiom, hooks, and checked publication verification.\n",
@@ -8149,9 +8062,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 107,
+  "comments": 108,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-17T17:35:32Z",
+  "updated_at": "2026-09-17T19:04:56Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -8266,8 +8179,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 27,
-   "completed": 18,
-   "percent_completed": 66
+   "completed": 19,
+   "percent_completed": 70
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -10244,9 +10157,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 443,
+  "comments": 449,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-17T17:25:57Z",
+  "updated_at": "2026-09-17T19:18:18Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
