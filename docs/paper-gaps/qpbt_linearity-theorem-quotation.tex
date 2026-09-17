@@ -22,28 +22,28 @@
   \item \textbf{Difficulty.} Medium.  The source quotes a fiberwise consequence
   of a state-dependent quantum linearity theorem, but suppresses an average,
   inserts an unnecessary bound on the error, appends an identity at the origin,
-  and leaves implicit a compatibility argument for the auxiliary spaces.  The
-  factor of two lost between measurement distance and operator distance is not
-  one of these: it is a defect of the provider's own printed statement, treated
+  and assumes that its ancillary space can be absorbed into zero-state padding
+  of the strategy. The factor of two lost between measurement distance and
+  operator distance is not one of these: it is a defect of the provider's own printed statement, treated
   in a separate note.
   \item \textbf{Estimated weight.} The corrected single-family theorem and its
-  two distance formulations are proved.  The remaining task is a finite
-  common-extension construction that makes the auxiliary space uniform over
-  the outer parameters.
+  two distance formulations are proved. A fixed optional Naimark ancilla now
+  serves all families of the same index length. Absorption of this ancilla
+  into the strategy's original zero-state padding is not proved.
   \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
   operators, and squared norms are standard linear algebra.  The proved
   Fourier--Naimark stability theorem and the two state-dependent distance
   conventions are project-level results.
   \item \textbf{Key mathematical inputs.} Theorem~10 of
   \cite{Natarajan2017Linearity}, the operator BLR identity, finite averaging,
-  and extension by the identity on orthogonal summands.  The remaining
-  common-extension reduction is tracked in \ghissue{19}.
+  and Naimark dilation on a fixed index space. The remaining padding
+  assumption is discussed in \ghissue{19}.
   \item \textbf{Combined points.} A separate, completed argument proves the
   combined-point lemma on the original expanded spaces.  It uses a
   field-valued sandwich POVM, finite-character Parseval, an exact overlap
   identity, and projective rounding with a dimension-independent bound
   $K\varepsilon^{1/8}$.  This replaces the binary-linearity argument; it does
-  not complete the common-extension construction.  The implementation in
+  does not establish the source's padding assumption. The implementation in
   \ghissue{388} comprises roughly 2,400 lines, predominantly project-local
   measurement arguments using Mathlib finite sums, inner products, and real
   powers.
@@ -96,9 +96,10 @@ error is $\delta_{x,z}/2$.  The corrected theorem therefore gives mean squared
 operator distance at most $\delta_{x,z}$, equivalently mean squared binary-
 measurement distance at most $\delta_{x,z}/2$.  Since the theorem accepts the
 actual nonnegative error on each fiber, no assumption that a fiber error is at
-most one, and no good--bad fiber split, is needed.  One must still formulate
-the finite common-extension step that makes the auxiliary space uniform over
-$(x,z)$.
+most one, and no good--bad fiber split, is needed. The Fourier--Naimark
+construction uses the same optional ancillary Hilbert space and unit vector
+for every fiber of fixed index length; it does not identify this extension
+with the strategy's original expanded local spaces.
 
 For the combined-point conclusion, take admissible QPBT parameters
 $q=2^t,m,M$ and a projective strategy on $H_A\otimes H_B$ with unit state
@@ -156,19 +157,19 @@ are the provider's and are treated in
 \path{docs/paper-gaps/qpbt_linearity-distance-normalization.tex}.
 
 Lines~825--832 construct the family $O^{x,z,r,s}$ and establish approximate
-linearity only after averaging over $x,z,r,r',s,s'$.  They then apply the
+linearity only after averaging over $x,z,r,r',s,s'$. They then apply the
 single-family theorem separately for every $(x,z)$ and state that sufficiently
-many zero ancillas avoid a further extension.  The remaining implicit step is
-to make the theorem's possibly fiber-dependent auxiliary spaces uniform.
-
-The finite setting admits a standard repair.  Apply the theorem on each fiber
-with its actual defect, choose one finite auxiliary space large enough for all
-returned spaces, and embed each returned space so that its unit vector maps to
-one fixed vector.  Extend the conjugated observables by the identity on the
-orthogonal complement.  The embeddings may depend on the fiber because the
-observables do.  Averaging then yields the conclusion used later in the
-chapter.  This is an open reduction, not a counterexample to the quoted theorem
-or to the source's eventual combined-measurement conclusion.
+many zero ancillas avoid a further extension. The Fourier--Naimark construction
+actually provides one optional ancillary space, with basis indexed by
+$\mathbb F_2^{2t}\sqcup\{\bot\}$ and ancilla vector at $\bot$, for every
+fiber $(x,z)$. This uniformity does not imply that the fixed state
+$\ket{\hat\psi}$ already contains this ancillary register in its zero state.
+To follow the source's linearity route on the original strategy spaces one
+would still have to justify that padding or prove a state-preserving
+absorption theorem. Simply compressing the Naimark projection-valued
+measurement along the ancillary vector gives the Fourier-square POVM, which
+need not be projective. The completed field-valued proof of the combined-point
+lemma avoids this step entirely.
 
 \section{Direct construction of the combined points}
 \label{sec:direct-combined-points}
@@ -316,11 +317,12 @@ point pairs, or Hilbert-space dimension.
 
 \section{Blueprint and formalization status}
 
-Theorem~\path{thm:linearity} and
-Remark~\path{rem:linearity-import} in
+Theorem~\path{thm:linearity} and Remark~\path{rem:linearity-import} in
 \path{blueprint/src/chapter/ch15_qpbt_combining.tex} record respectively the
 averaged provider theorem with the corrected distance normalization and the
-common-ancilla obligation for its fiberwise use.
+distinction between a uniform optional ancilla and its absorption into a
+fixed strategy. Lemma~\path{lem:linearity-common-ancilla} records the first
+fact as a formalization-only consequence of the Fourier--Naimark construction.
 
 The declaration \path{exists_exactly_linear_observables} in
 \path{MIPStarRE/QPBT/Combining/Linearity.lean} assumes a nonnegative defect, a
@@ -335,8 +337,14 @@ proved.  They neither assume $\delta\leq1$ nor assert pointwise closeness, and
 the first declaration records the correction to the provider's printed
 operator bound.  Both are linked from Theorem~\path{thm:linearity}.  The
 normalization analysis was carried out in \ghissue{124} and the statement
-repair in \ghissue{129}; both are closed.  No Lean declaration yet supplies
-the finite common-extension construction for the family indexed by $(x,z)$.
+repair in \ghissue{129}; both are closed. The additional declaration
+\path{exists_exactly_linear_observables_commonAncilla} selects the ancillary
+space with basis indexed by $\mathbb F_2^t\sqcup\{\bot\}$ and its canonical
+unit vector at $\bot$ before quantifying over the finite Hilbert space, the
+density operator, the error, and the observable family. It returns exact
+linearity for all pairs and mean
+squared operator distance at most $2\delta$ for each eligible family. It
+does not supply zero-state padding on the existing expanded player spaces.
 Independently, \path{exists_combinedPointsWitness} in
 \path{MIPStarRE/QPBT/Combining/Points.lean} proves the combined-point statement
 of blueprint \path{lem:qld-4-10} on the original expanded spaces by
@@ -345,10 +353,16 @@ Section~\ref{sec:direct-combined-points}.  The modules in
 invariance, Parseval commutation transfer, the sandwich POVM, its overlap
 identity and consistency bound, projective rounding, and the final distance
 estimates.  This is a replacement proof of the same statement, not a
-formalization of the source's binary-linearity proof.  It neither invokes nor
-discharges the common-extension obligation of \path{rem:linearity-import}.
-The complete QPBT audit status is recorded in
-\path{docs/paper-gaps/qpbt-gap-register.md}.
+formalization of the source's binary-linearity proof. It neither invokes nor
+discharges the zero-state-padding assumption of \path{rem:linearity-import}.
+The affine coarse-graining of these constructed joint point measurements,
+including self-consistency and both ordered point-product comparisons with
+the same universal error, is the declaration \path{exists_extendedQ} for
+source Lemma~\path{lem:qld-4-12}. It does not establish the subsequent
+extended-line lemma \path{lem:qld-4-13}.
+Other QPBT source obligations are recorded in
+\path{docs/paper-gaps/qpbt-gap-register.md}; its linearity row predates the
+uniform-ancilla result recorded here.
 
 Issue~\#19 introduced this discrepancy record for the extraction skeleton;
 \ghissue{47} owns the Stage~4.3 proof work consumed downstream.  The chapter-16
@@ -362,15 +376,16 @@ unnecessary upper bound on $\delta$, and appends an assertion at the identity
 that is derivable from exact linearity.  It does not reproduce the provider's
 factor-of-two normalization defect, since it states its conclusion in a
 relation that absorbs constant factors; that defect is the provider's own and
-is treated separately.  The single-family theorem is now
-proved with mean squared operator error at most $2\delta$, equivalently mean
-squared binary-measurement error at most $\delta$.  Its use for the family
-indexed by $(x,z)$ still requires an explicit finite common-extension argument;
-that remains an open formal reduction for the linearity route.  The
-combined-point conclusion itself is proved independently on the original
-expanded spaces, with the universal bound $K\varepsilon^{1/8}$ and no
-additional hypotheses.  There is no statement discrepancy in this
-replacement construction.
+is treated separately. The single-family theorem is proved with mean squared
+operator error at most $2\delta$, equivalently mean squared binary-measurement
+error at most $\delta$. Its optional ancillary space and unit vector can be
+chosen uniformly over the fibers indexed by $(x,z)$, but their absorption
+into the fixed strategy's zero-state padding is unproved. The combined-point
+conclusion is proved independently on the original expanded spaces, with
+universal error $K\varepsilon^{1/8}$ and no additional hypotheses; its scalar
+coarse-graining establishes the extended-point lemma with the same error.
+The extended-line lemma remains open. There is no statement discrepancy in
+the replacement point construction.
 
 \bibliographystyle{alpha}
 \bibliography{references}
