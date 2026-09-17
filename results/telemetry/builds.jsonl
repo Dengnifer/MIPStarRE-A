@@ -1475,3 +1475,5 @@
 {"ts": "2026-09-18T00:16:12+0900", "kind": "ci-build", "trigger": "ci.sh pr=294", "seconds": 125, "outcome": "success", "sha": "b873b1c8206d2bc12297c5aa94ebe1ac86cdf7b4", "note": "branch issue-121-swap-extraction"}
 {"ts": "2026-09-18T00:32:55+0900", "kind": "ci-build", "trigger": "ci.sh pr=294", "seconds": 23, "outcome": "success", "sha": "35eee1add2df4edc7d9891a1465af2d9a46a22d4", "note": "branch issue-121-swap-extraction"}
 {"ts": "2026-09-18T00:36:58+0900", "kind": "ci-build", "trigger": "ci.sh pr=579", "seconds": 24, "outcome": "success", "sha": "d418467d6b0b9c786284b6639f22fea8a20f9e0d", "note": "branch issue-576-duplicate-work-guards"}
+{"ts": "2026-09-18T00:41:05+0900", "kind": "ci-build", "trigger": "ci.sh pr=573", "seconds": 150, "outcome": "success", "sha": "0a3c601175f6aa2a8ff8e7417105927e014e087c", "note": "branch issue-117-preserve-point-foundations-20260917"}
+{"ts": "2026-09-18T00:41:52+0900", "kind": "ci-build", "trigger": "ci.sh pr=488", "seconds": 147, "outcome": "success", "sha": "f69adece830830dd30a81264ab38dc9fed2c0759", "note": "branch issue-484-product-weighted-collision"}
