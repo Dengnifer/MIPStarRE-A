@@ -1248,3 +1248,58 @@ lost by the automatic merge are appended verbatim.
 **Expected effect:** refreshing this older policy branch preserves its useful
 duties and evidence without reinstating superseded runtime admission rules,
 losing model-option coverage, or weakening proof, review or merge gates.
+
+## 2026-09-14 - Merge subjects carry the PR's Lean line delta (#557)
+
+**Trigger:** owner decision recorded in issue #557: GitHub's commits page showed
+`Merge pull request #N from Dengnifer/issue-...` and nothing about the size of
+the packet, so reading how much Lean a merge brought meant opening it.
+
+**Change:** `issues-prs.md` records the merge subject
+`Merge PR #N: <PR title> [lean +A -D]`, measured past the gates from
+`git diff --numstat <merge base>...<head> -- '*.lean'`, with `[lean 0]` for a PR
+that changes no Lean line and a one-line body naming the frozen head SHA.
+`pr_merge.py` computes it and `gh_common.merge_pr` forwards it through the REST
+`commit_title` / `commit_message` keys, which stay out of the payload entirely
+when absent. The count is cosmetic by contract: measured after every gate, never
+read back as evidence, and absent rather than wrong when git cannot answer — the
+merge then keeps GitHub's own wording instead of failing. Following PR #558
+review finding F1, closing keywords in the untrusted PR title are defused
+(`closes #900` becomes `closes issue 900`) before they reach the subject, and a
+subject that would still read as a closing reference is dropped in favour of
+GitHub's wording.
+
+**Expected effect:** the owner reads each merged packet's approximate Lean size
+off the commits page without opening the merge, no pull request that cleared the
+seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
+covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - The merge subject's Lean delta counts code lines only (#574)
+
+**Trigger:** owner request recorded in issue #574: the `[lean +A -D]` bracket
+added by issue #557 counted every changed line of every `*.lean` file, so a
+docstring sweep or a commented-out block read on the commits page like a large
+code change and the figure stopped answering the question it was added for.
+
+**Change:** `issues-prs.md` records that A and D count changed Lean **code**
+lines. `pr_merge.lean_line_delta` now takes the changed blobs from
+`git diff --raw -z --find-renames` (blob ids, so renames need no path handling),
+reads the added line numbers from the head blob's `-U0` hunk headers and the
+removed ones from the merge-base blob's, and counts a line only when a
+single-pass scanner calls it code. That scanner tracks nesting block comments —
+`/-`, and the `/--` and `/-!` forms that share its `-/` closer — skips line
+comments, blank and whitespace-only lines, and keeps a line whose code is merely
+trailed by a comment. It is naive by design about the rest of Lean's grammar:
+only double-quoted strings hide delimiters, and string and escape state carry
+across physical lines until the closing quote. Added and deleted files count
+their own code lines; a pure rename counts none.
+
+**Scope disposition:** the cosmetic-by-contract rule of issue #557 is unchanged
+and now explicit in the code: the measurement is wrapped so that it returns
+`None` on any failure and cannot raise, the subject format stays
+`[lean +A -D]` with `[lean 0]` for a PR that changes no Lean code line, and no
+gate, CI step or REST payload key changes.
+
+**Expected effect:** the bracket tracks the Lean code a packet actually moved,
+documentation-only and comment-only work reads as such on the commits page, and
+no pull request that cleared the seven gates can fail on the number.

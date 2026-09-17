@@ -140,7 +140,7 @@ theorem subline_remove_X_factor_at :
         avgOver (uniformDistribution (DirectScalarQ P.extendedDirectLd))
           (fun t => xPointOverlapAt lines first second (sample.2, projX (directPointToPauli P
             (sample.1.base + t • sample.1.direction))))) := by
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun sample => avgOver_congr _ _ _ fun t => ?_
     exact regroup_line_answer_sum_at lines first second sample.2.1 sample.2.2 _ _
       (fun o1 _ => (S.pointMeasExpOption second.side .X (projX (directPointToPauli P
