@@ -562,8 +562,8 @@ Equation `eq:qld-unitary-6` in `lem:v-swap-conjugation`, blueprint
 
 Conjugation translates each Pauli projector and its dot-product constraint.
 The two copies of the decoded label cancel in characteristic two. The final
-identification uses `lowDegreeEnc_eq_dotProduct`, not an unrestricted decoder
-interpolation identity. -/
+identification is the encoding identity h · ind_m(u) = g_h(u) on indicator
+vectors, not an unrestricted decoder interpolation identity. -/
 theorem swapUnitary_conj_tildeM {P : AdmissibleParams}
     {epsilon delta : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S delta) (side : PlayerSide) (W : PauliKind)
