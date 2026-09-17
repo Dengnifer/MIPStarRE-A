@@ -87,6 +87,7 @@ import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.Construction
 import MIPStarRE.QPBT.Extraction.Unitary
+import MIPStarRE.QPBT.Extraction.SourceUnitary
 import MIPStarRE.Quantum.ControlledUnitary
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
