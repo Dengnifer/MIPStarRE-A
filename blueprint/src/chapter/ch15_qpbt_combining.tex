@@ -921,6 +921,85 @@ assembled by Fourier averaging.
 
 \section{Combined line measurements}
 
+\begin{theorem}[Resampling a line parameter]
+	\label{thm:line-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_uniform_lineRepMap_resample_parameter}
+	\leanok
+	\uses{def:line-representative}
+	This auxiliary identity isolates the conditional sampling used in the
+	proof of Lemma~\ref{lem:qld-xz-lines}; it is not a named statement of
+	\cite{Ji2020MIPStar}. Let $K$ be a finite field, $m \geq 0$, and
+	$v \in K^m$, and write $R_v = L^{\mathrm{Ln}}_v$ for the canonical line
+	representative map of Definition~\ref{def:line-representative}.
+	For every $f : K^m \times K^m \to \mathbb{R}$,
+	\[
+		\mathbb{E}_{u \in K^m} f(R_v(u),u)
+		= \mathbb{E}_{u \in K^m}\mathbb{E}_{t \in K}
+		f(R_v(u),R_v(u)+tv),
+	\]
+	where all averages are uniform. The identity includes $v=0$.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative, lem:line-representative-idempotent}
+	The point $R_v(u)+tv$ is uniform on $K^m$: each point has exactly
+	$|K|$ preimages under $(u,t) \mapsto R_v(u)+tv$. Moreover,
+	$R_v(R_v(u)+tv)=R_v(u)$. Applying these two identities to $f$ gives
+	the result. When $v=0$, $R_v$ is the identity and $t$ is free.
+\end{proof}
+
+\begin{corollary}[Resampling a point from the line-point distribution]
+	\label{cor:line-point-parameter-resampling}
+	\lean{MIPStarRE.QPBT.avgOver_aLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_dLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_resample_parameter}
+	\leanok
+	\uses{def:ld-game, def:line-point-dist}
+	This auxiliary identity is not a named statement of
+	\cite{Ji2020MIPStar}; it isolates the line-point resampling used in the
+	proof of Lemma~\ref{lem:qld-xz-lines}. For low-degree parameters
+	$(q,m,d,k)$ as in Definition~\ref{def:ld-game}, let $\widetilde D$ be any
+	of the seed-bearing laws $\widetilde D_{\mathrm{ALine}}$,
+	$\widetilde D_{\mathrm{DLine}}$, or their equal mixture
+	$\widetilde D_{\mathrm{Line}}$ from
+	Definition~\ref{def:line-point-dist}. Write $b_\ell$ and $v_\ell$ for the
+	canonical base and direction of a seed-bearing line. For every real-valued
+	function $f$ on seed-bearing line-point pairs,
+	\[
+		\E_{(\ell,u)\sim \widetilde D} f(\ell,u)
+		= \E_{(\ell,u)\sim \widetilde D}\E_{t\in\F_q}
+		f(\ell,b_\ell+t v_\ell),
+	\]
+	where $t$ is uniform and independent. This includes diagonal lines of
+	direction zero, for which the resampled point is always $b_\ell$.
+	For each choice of $\widetilde D$, let $D$ be the corresponding source law
+	and $\rho$ the corresponding map among
+	$\rho_{\mathrm{ALine}}$, $\rho_{\mathrm{DLine}}$, and
+	$\rho_{\mathrm{Line}}$ from Definition~\ref{def:line-point-dist}. Since
+	$\rho$ preserves the canonical base and direction, substituting
+	$f=g\circ\rho$ gives
+	\[
+		\E_{(\bar\ell,u)\sim D} g(\bar\ell,u)
+		=\E_{(\bar\ell,u)\sim D}\E_{t\in\F_q}
+		g(\bar\ell,b_{\bar\ell}+t v_{\bar\ell}),
+	\]
+	for every real-valued function $g$ on source line-point pairs. Thus the
+	linked declarations prove the refined identity, including functions that
+	depend on the retained seed, and the source identity is its push-forward.
+\end{corollary}
+\begin{proof}
+	\leanok
+	\uses{thm:line-parameter-resampling, def:line-point-dist,
+		lem:uniform-map-equivalence, lem:line-representative-idempotent}
+	In each component, condition on the scalar seed and direction data.
+	The remaining point is uniform in $\F_q^m$, so
+	Theorem~\ref{thm:line-parameter-resampling} applies with that fixed
+	direction. Averaging over these data proves the axis and diagonal
+	identities. Taking their equal mixture proves the mixed identity. Composing
+	the test function with the forgetful map gives the source push-forward
+	identity.
+\end{proof}
+
 \begin{lemma}[Formalization support for coefficient polynomial agreement]
 	\label{lem:coefficient-polynomial-agreement}
 	\lean{MIPStarRE.QPBT.evalCoefficient_collision_card_le}
@@ -1702,8 +1781,14 @@ analyzed, together with candidate repairs, in
 Before proving the lemma we record definitions and estimates concerning
 distributions over lines and points. Recall from
 Definition~\ref{def:line-point-dist} that the line-point distribution over
-$\F_q^m$ is an even mixture of an axis-parallel component $D_{\mathrm{ALine}}$
-and a diagonal component $D_{\mathrm{DLine}}$.
+$\F_q^m$ is an even mixture of source laws $D_{\mathrm{ALine}}$ and
+$D_{\mathrm{DLine}}$, and that their seed-bearing refinements are denoted by
+$\widetilde D_{\mathrm{ALine}}$, $\widetilde D_{\mathrm{DLine}}$, and
+$\widetilde D_{\mathrm{Line}}$. In the auxiliary statements below, tilded
+symbols denote these refined laws and untilded symbols denote the source laws.
+Coordinate indices below are zero-based: at ambient dimension $r$, the index
+$i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
+\cite{Ji2020MIPStar}.
 
 \begin{definition}[Restricted line distributions]
 	\label{def:ith-restricted-line}
@@ -1718,15 +1803,21 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	Definition~\ref{def:ld-question-distribution}. Thus $\bar\chi$ takes
 	values in $\{0,\dots,m-1\}$, and index $i$ here denotes coordinate $i+1$
 	in the one-based notation of \cite{Ji2020MIPStar}.
-	For any such $i$, the \emph{$i$-th restricted
-	axis-parallel line distribution} $D_{\mathrm{ALine},i}$ is the
-	restriction of $D_{\mathrm{ALine}}$ to pairs $(\ell, u)$ where the line
-	$\ell$ is along the direction $e_i$, i.e.\ is of the form
-	$\ell = (u_0, e_i)$. Similarly, the \emph{$i$-th restricted diagonal line
-	distribution} $D_{\mathrm{DLine},i}$ is the restriction of
-	$D_{\mathrm{DLine}}$ to pairs $(\ell, u)$ where the line
-	$\ell = (u_0, s, v)$ satisfies $\bar\chi(s) = i$ and coordinates
+	For any such $i$, the \emph{$i$-th restricted refined
+	axis-parallel line distribution} $\widetilde D_{\mathrm{ALine},i}$ is the
+	restriction of $\widetilde D_{\mathrm{ALine}}$ to seed-bearing pairs
+	$(\ell,u)$ whose retained seed $s$ satisfies $\bar\chi(s)=i$, so the geometric
+	direction of $\ell$ is $e_i$. Similarly, the \emph{$i$-th restricted
+	refined diagonal line distribution} $\widetilde D_{\mathrm{DLine},i}$ is
+	the restriction of $\widetilde D_{\mathrm{DLine}}$ to pairs $(\ell,u)$
+	where $\ell=(u_0,s,v)$ satisfies $\bar\chi(s)=i$ and coordinates
 	$0, \dots, i-1$ of $v$ are $0$, with no such coordinates when $i=0$.
+	Their push-forwards under $\rho_{\mathrm{ALine}}$ and
+	$\rho_{\mathrm{DLine}}$ from
+	Definition~\ref{def:line-point-dist} are the source restrictions
+	$D_{\mathrm{ALine},i}$ and $D_{\mathrm{DLine},i}$ of
+	\cite{Ji2020MIPStar}. Both refined restricted distributions have total
+	mass one.
 \end{definition}
 
 \begin{lemma}[Restricted line distributions and error inflation]
@@ -1738,28 +1829,33 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	% def:ith-restricted-line at lines 1049-1061 of
 	% references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex.
 	\uses{def:ith-restricted-line, def:line-point-dist}
-	The distribution $D_{\mathrm{ALine}}$ is a uniform mixture of the
-	distributions $D_{\mathrm{ALine},i}$ for $i \in \{0, \dots, m-1\}$, and
-	likewise $D_{\mathrm{DLine}}$ is a uniform mixture of the
-	$D_{\mathrm{DLine},i}$. As a consequence:
+	The refined distribution $\widetilde D_{\mathrm{ALine}}$ is a uniform
+	mixture of the distributions $\widetilde D_{\mathrm{ALine},i}$ for
+	$i \in \{0, \dots, m-1\}$, and likewise
+	$\widetilde D_{\mathrm{DLine}}$ is a uniform mixture of the
+	$\widetilde D_{\mathrm{DLine},i}$. For nonnegative real-valued functions
+	on seed-bearing line-point samples, the following bounds hold:
 	\begin{enumerate}
-		\item any approximation that holds on average over the line-point
-		distribution $D_{\mathrm{Line}}$ with error $\delta$ holds over each
-		restricted distribution $D_{\mathrm{ALine},i}$ and
-		$D_{\mathrm{DLine},i}$ with error $2m\delta$;
-		\item any approximation that holds on average over
-			$D_{\mathrm{Line}} \times D_{\mathrm{Line}}$ holds over any product
-			of restricted distributions with error $4m^2\delta$;
+		\item any average over $\widetilde D_{\mathrm{Line}}$ bounded by
+		$\delta$ is bounded over each restricted distribution
+		$\widetilde D_{\mathrm{ALine},i}$ and
+		$\widetilde D_{\mathrm{DLine},i}$ by $2m\delta$;
+		\item any average over
+		$\widetilde D_{\mathrm{Line}}\times\widetilde D_{\mathrm{Line}}$
+		bounded by $\delta$ is bounded over any product of refined restricted
+		distributions by $4m^2\delta$.
 	\end{enumerate}
+	Pulling a source function back along the forgetful maps gives the same
+	mixture identities and bounds for the untilded source laws.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:line-point-dist}
-	The line-point distribution places weight $\tfrac{1}{2}$ on each of the
-	axis-parallel and diagonal components and, within each component, uniform
-	weight on the index $i$, so each restricted distribution carries mixture
-	weight $\tfrac{1}{2m}$ in $D_{\mathrm{Line}}$. A nonnegative average that
-	is at most $\delta$ therefore bounds each mixture component by
+	\uses{def:ith-restricted-line, def:line-point-dist}
+	The refined line-point distribution places weight $\tfrac{1}{2}$ on each of
+	the axis-parallel and diagonal components and, within each component,
+	uniform weight on the index $i$, so each refined restriction carries mixture
+	weight $\tfrac{1}{2m}$ in $\widetilde D_{\mathrm{Line}}$. A nonnegative
+	average that is at most $\delta$ therefore bounds each mixture component by
 	$2m\delta$, and products of two such mixtures give the factor
 	$(2m)^2 = 4m^2$.
 \end{proof}
@@ -1815,13 +1911,18 @@ and a diagonal component $D_{\mathrm{DLine}}$.
 	pair, every $\mathrm{v}_1,\mathrm{v}_2\in\{\mathrm{ALine},\mathrm{DLine}\}$,
 	and every $i,j\in\{0,\dots,m-1\}$, the same evaluated consistency defect,
 	with both line-point variables restricted to
-	$D_{\mathrm{v}_1,i}\times D_{\mathrm{v}_2,j}$, is at most
+	$\widetilde D_{\mathrm{v}_1,i}\times
+	\widetilde D_{\mathrm{v}_2,j}$, is at most
 	$C m^2\delta_P$. Evaluation includes an additional undefined outcome when
 	the affine parameter is not uniquely determined.
 
 	This conditional auxiliary theorem assumes the point and line families,
-	including the unrestricted consistency estimate for the latter. It neither
-	constructs the source line measurement nor certifies
+	including the unrestricted consistency estimate for the latter. Its
+	restrictions retain the line seeds. Passing this bound to the source laws
+	would require the evaluated measurement families to factor through the
+	forgetful maps of Definition~\ref{def:line-point-dist}. No such
+	factorization is asserted here; the theorem neither constructs the source
+	line measurement nor certifies
 	Lemma~\ref{lem:qld-xz-lines-restricted}.
 \end{theorem}
 \begin{proof}
@@ -2157,13 +2258,18 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Sample a triple from $D_{\mathrm{dir}}$ and an independent uniform
 	parameter $t$ on $\ell$. The law of $(\ell_X,\ell_Z,\pi_X(\ell(t)))$
 	is the mixture obtained by sampling $(\ell_X,x)$ from
-	$D_{\mathrm v,i}$ and independently $\ell_Z$ from the line marginal of
-	$D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,x)$.
+	$\widetilde D_{\mathrm v,i}$ and independently $\ell_Z$ from the line
+	marginal of $\widetilde D_{\mathrm v,j}$, and retaining
+	$(\ell_X,\ell_Z,x)$.
 	The law of $(\ell_X,\ell_Z,\pi_Z(\ell(t)))$ is the mixture obtained
-	by retaining $(\ell_X,\ell_Z,z)$ from the corresponding independent
-	samples of $\ell_X$ and $(\ell_Z,z)$. These are separate one-point
-	marginal identities, with the same mixture weights; they impose no
-	joint conditional independence of the two projected points.
+	by sampling $\ell_X$ from the line marginal of
+	$\widetilde D_{\mathrm v,i}$ and independently $(\ell_Z,z)$ from
+	$\widetilde D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,z)$.
+	These are separate one-point marginal identities on the seed-bearing
+	projected lines, with the same mixture weights; they impose no joint
+	conditional independence of the two projected points. The corresponding
+	source marginal identities hold only after applying the forgetful maps
+	of Definition~\ref{def:line-point-dist} to both projected lines.
 	Identification with the source law $D$ is a separate obligation;
 	see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{definition}
@@ -2220,8 +2326,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	This formalization-only auxiliary is not the source sub-line lemma. For every
 	admissible parameter tuple, there exists a probability law on
 	triples $(\ell,\ell_X,\ell_Z)$ satisfying all the incidence, affine
-	compatibility, separate projected-marginal, and axis-closure properties of
-	Definition~\ref{def:direct-subline-law}.
+	compatibility, separate seed-bearing projected-marginal, and axis-closure
+	properties of Definition~\ref{def:direct-subline-law}. The source
+	projected-marginal identities require the componentwise forgetful maps
+	specified there.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -3257,6 +3365,65 @@ projective measurement whose outcomes are pairs of global polynomials.
 	complete, their off-diagonal overlap equals $\|\psi\|^2$ minus their
 	diagonal overlap. Postprocessing groups the latter by the fibers of $e_u$.
 	Apply the resulting inequality and average over $u$.
+\end{proof}
+
+\begin{lemma}[Formalization support for uniform specialization in a block of variables]
+	\label{lem:qpbt-block-specialization}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedCoef_le_totalDegree}
+	\lean{MIPStarRE.QPBT.totalDegree_combinedRestrict_le_totalDegree}
+	\lean{MIPStarRE.QPBT.exists_nonzero_combinedCoef_of_depends_on_block}
+	\lean{MIPStarRE.QPBT.exists_block_specialization_exceptional_coefficient}
+	\lean{MIPStarRE.QPBT.block_specialization_weighted_avg_le}
+	\leanok
+	This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+	specialization estimate between the paper equations labelled
+	\texttt{eq:qld-g-2} and \texttt{eq:qld-g-prime-xpt-bound}, which the source
+	carries out inside its proof of Lemma~\ref{lem:qld-4-7} with
+	$D = (2m+2)d$ and with the weights given by the expectations of a complete
+	measurement.
+
+	Let $p$ be a polynomial on $\F_q^m \times \F_q^k$, written $p(z,x)$, of
+	total degree at most $D$, and assume that $p$ is not a polynomial in $z$
+	alone.  Write $p = \sum_\mu c_\mu(z)\,x^\mu$.  Then there is an exponent
+	$\mu \neq 0$ with $c_\mu \neq 0$ such that $c_\mu$ has total degree at most
+	$D$,
+	\[
+		\Pr_{z \in \F_q^m}[c_\mu(z) = 0] \le \frac{D}{q}\,,
+	\]
+	and, for every $z$ with $c_\mu(z) \neq 0$, simultaneously for every
+	$b \in \F_q$,
+	\[
+		\Pr_{x \in \F_q^k}[p(z,x) = b] \le \frac{D}{q}\,.
+	\]
+	Consequently, for any weights $w(z,b) \ge 0$ with
+	$\sum_{b \in \F_q} w(z,b) = M$ for every $z$,
+	\[
+		\E_{z \in \F_q^m} \sum_{b \in \F_q}
+		\Pr_{x \in \F_q^k}[p(z,x) = b] \, w(z,b)
+		\le \frac{2D}{q} \, M\,.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-total-degree}
+	If $c_\mu = 0$ for every $\mu \neq 0$ then $p = c_0(z)$, contrary to the
+	assumption; fix $\mu \neq 0$ with $c_\mu \neq 0$.  Splitting the exponent
+	of each monomial of $p$ into its $z$-part and its $x$-part shows that
+	neither extracting the coefficient of an $x$-monomial nor substituting a
+	value for $z$ raises the total degree, so $c_\mu$ and every
+	$p(z,\cdot)$ have total degree at most $D$.  Applying
+	Lemma~\ref{lem:schwartz-zippel-total-degree} to $c_\mu$ and the zero
+	polynomial bounds $\Pr_z[c_\mu(z) = 0]$ by $D/q$.  If $c_\mu(z) \neq 0$
+	then $p(z,\cdot)$ differs from the constant polynomial $b$ for every
+	$b$, because its coefficient at $\mu \neq 0$ equals $c_\mu(z)$, so the
+	same lemma bounds $\Pr_x[p(z,x) = b]$ by $D/q$, uniformly in $b$.
+	Hence $\Pr_x[p(z,x) = b] \le \mathbf{1}[c_\mu(z) = 0] + D/q$ for all $z$
+	and $b$.  Multiplying by $w(z,b) \ge 0$, summing over $b$, using
+	$\sum_b w(z,b) = M$ and averaging over $z$ gives
+	$(\Pr_z[c_\mu(z) = 0] + D/q)\,M \le (2D/q)\,M$.  One exceptional set
+	serves every answer, so the answer alphabet contributes no factor.
+	Nonconstancy is used as a property of the polynomial and not of the
+	function it induces, so no bound on $D$ in terms of $q$ is needed.
 \end{proof}
 
 \begin{lemma}[The global polynomial-pair measurement]
