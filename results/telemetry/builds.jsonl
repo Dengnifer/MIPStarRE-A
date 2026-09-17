@@ -1469,3 +1469,4 @@
 {"ts": "2026-09-17T23:36:03+0900", "kind": "ci-build", "trigger": "ci.sh pr=465", "seconds": 28, "outcome": "success", "sha": "a72c8dbb1778288b4297cfb05cb6e0fbda068554", "note": "branch issue-463-conditioned-pasting-defect"}
 {"ts": "2026-09-17T23:38:27+0900", "kind": "ci-build", "trigger": "ci.sh pr=577", "seconds": 27, "outcome": "success", "sha": "3d18d4fe3535b5c05cebe82d7eb1b1ca2c7d34a7", "note": "branch issue-574-merge-title-lean-code-lines"}
 {"ts": "2026-09-17T23:47:56+0900", "kind": "ci-build", "trigger": "ci.sh pr=479", "seconds": 27, "outcome": "success", "sha": "e0cdb452cd7482695c228001409c8820001f9a6a", "note": "branch issue-459-conditional-consistency-defect"}
+{"ts": "2026-09-17T23:51:22+0900", "kind": "ci-build", "trigger": "ci.sh pr=579", "seconds": 28, "outcome": "success", "sha": "e1f09d319413c152ed9d3a0e49f8535cafa4747a", "note": "branch issue-576-duplicate-work-guards"}
