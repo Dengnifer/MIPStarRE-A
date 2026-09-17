@@ -27,10 +27,10 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-/-- The tensor placement of a sum of operators is the sum of the tensor
-placements, in both factors. Formalization-only auxiliary for the convolution
-of `def:expanded-line-measurement`, paper
-`14_analysis_of_the_pauli_basis_test.tex:552-556`. -/
+/-- The Kronecker product of two finite sums is the double sum of the pairwise
+Kronecker products. This bilinearity identity proves completeness of the
+convolution in `def:expanded-line-measurement`, from the construction in the
+proof of the paper's `lem:qld-comm-line-cons`. -/
 private theorem heteroKron_sum_sum {α β ι κ : Type*}
     [Fintype α] [Fintype β] (A : α → Op ι) (B : β → Op κ) :
     heteroKron (∑ x, A x) (∑ y, B y) =
@@ -163,7 +163,7 @@ operators. -/
 
 /-- The fine product measurement underlying the convolution definition of an
 expanded line measurement. Its outcome records the strategy and Pauli line
-polynomials separately. Blueprint `def:line-tau-measurement`, paper
+polynomials separately. Blueprint `def:line-tau-product-measurement`, paper
 `14_analysis_of_the_pauli_basis_test.tex:552-558`. -/
 noncomputable def lineTauMeas (S : ProjectiveSetting P ε) (side : PlayerSide)
     (W : PauliKind) (line : LineDesc P.toLdParams) :

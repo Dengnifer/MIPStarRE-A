@@ -1,4 +1,10 @@
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.PairCompletion
+import MIPStarRE.QPBT.Combining.ExtendedLines.Estimates
+import MIPStarRE.QPBT.Combining.ActualErrorBounds
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
+import MIPStarRE.QPBT.Combining.PointErrorObstruction
+import MIPStarRE.QPBT.Combining.ErrorObstruction
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -9,8 +15,9 @@ combining argument.  Directly indexed combined-line measurements are recorded bo
 with the error form printed in the source and with the weaker estimate established by
 its first proof route.  The final witness consists of a projective measurement of a
 pair of global bounded individual-degree polynomials.  The existence assertions below
-record the measurements and quantitative estimates required by the combining argument;
-their derivations remain open.
+record the measurements and quantitative estimates required by the combining argument.
+The established direct-line constructor and the source global-pair theorem are proved.
+The three stronger or unrestricted supplied-point line assertions remain open.
 
 ## References
 
@@ -24,6 +31,8 @@ paper source
 -/
 
 namespace MIPStarRE.QPBT
+
+open MIPStarRE.LDT
 
 noncomputable section
 
@@ -42,6 +51,15 @@ alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 Their conversion to the source's verifier game remains open. This declaration takes
 an already constructed point witness; the companion obligation below supplies that
 witness existentially.
+
+**Unfaithful:** This auxiliary quantifies over an unrestricted scalar `δQ` but
+omits it from the line error. That domain is not supplied by `lem:qld-4-10` and
+admits deterministic quadratic point answers even at zero strategy error; their
+axis-line defect stays positive as `q` grows. See issue #509 and the extended-line
+supplied-point obstruction in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Elimination requires a separately authorized realignment to the polynomial point
+error supplied by `exists_combinedPointsWitness`, followed by a proof of the
+printed error bound. The present signature and open proof are retained.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -71,6 +89,13 @@ The `_ofPointsWitness` companion assumes a point witness, while this declaration
 supplies one existentially. Both declarations use the directly indexed questions,
 law, and completed answer alphabet, so neither is the source-facing paper statement.
 
+The first proof route's term `m * epsilon ^ (1 / 4)` cannot be absorbed into
+the printed error arguments, even after capping it by one and restricting to
+admissible parameters; `not_exists_combining_quarter_power_bound` proves this
+scalar obstruction. It does not refute this existence assertion, which requires
+a different estimate. See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`
+and issue #510.
+
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
 `f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
@@ -89,18 +114,28 @@ theorem exists_extendedLinesWitness :
                 ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   sorry
 
-/-- Construction of the extended-line measurements with the estimate actually
-delivered by the first proof route, `C * m * poly(epsilon, md / q)`.
+/-- Conditional existence of extended-line measurements with the first-route
+estimate `C * m * poly(epsilon, md / q)`.
 
-This is an established auxiliary form of the argument, not the source-labelled
-`lem:qld-4-13`; it must not be advertised as that theorem. The source discrepancy
-is analyzed in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the
-companion directly indexed declaration, the extended questions use the directly
-indexed line-space construction. This conditional declaration takes an already
-constructed point witness; the obligation below supplies it existentially. Relating
-its game to the source's seed-bearing game requires the transport and soundness
-obligations in
+This conditional auxiliary uses the error form established by the first proof route,
+but its own proof remains open; it is not the source-labelled `lem:qld-4-13` and must
+not be advertised as that theorem. The source discrepancy is analyzed in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the companion directly
+indexed declaration, the extended questions use the directly indexed line-space
+construction. This conditional declaration takes an already constructed point
+witness; the obligation below supplies it existentially. Relating its game to the
+source's seed-bearing game requires the transport and soundness obligations in
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+**Unfaithful:** This helper quantifies over an arbitrary scalar `δQ`, although
+its line error is independent of `δQ`. This assertion is false for arbitrary
+supplied point measurements and does not follow from `lem:qld-4-13`; the
+obstruction is documented in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and tracked by issue #511.
+Elimination: either restrict the supplied point family to the polynomially
+controlled error produced by `exists_combinedPointsWitness`, or remove this
+helper once no proof requires the unrestricted form. Its proof remains open,
+and it must not support a claim that the source lemma is complete.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -139,7 +174,10 @@ closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
 of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
 the two-dimensional strategy that refutes the product form are recorded in
 `docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
-Here `poly(epsilon, md / q)` is read in that sense. -/
+Here `poly(epsilon, md / q)` is read in that sense.
+
+The proof uses the point, line, and subline constructions together with both
+opposite-placement comparisons. -/
 theorem exists_extendedLinesWitness_established :
     ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
       ∃ C : ℝ, 0 < C ∧
@@ -149,7 +187,53 @@ theorem exists_extendedLinesWitness_established :
               Nonempty (ExtendedLinesWitness S points
                 (C * (P.m : ℝ) *
                   deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
-  sorry
+  classical
+  obtain ⟨deltaQ, hdeltaQ, hpoints⟩ := exists_combinedPointsWitness
+  obtain ⟨deltaP, hdeltaP, hlines⟩ :=
+    exists_combinedLinesWitness_ofPointsWitness deltaQ hdeltaQ
+  obtain ⟨constant, hconstant, hnear⟩ := subline_joint_overlap_near_one_at
+  obtain ⟨deltaCombine, hdeltaCombine, hscalar⟩ :=
+    exists_combining_polynomial_bound deltaQ hdeltaQ deltaP hdeltaP constant hconstant.le
+  refine ⟨deltaQ, hdeltaQ, 1, by norm_num, deltaCombine, hdeltaCombine, ?_⟩
+  intro P ε S
+  obtain ⟨points⟩ := hpoints P ε S
+  obtain ⟨lines⟩ := hlines P ε S points
+  obtain ⟨sublines⟩ := exists_subLineWitness P
+  have hplaced (first second : Placement) (hopposite : first.IsOpposite second) :
+      consistencyDefect (directLinePointDist P.extendedDirectLd)
+        (fun sample answer => S.place first
+          (((sublines.extendedMeasurement lines first.side sample.1).postprocess
+            (fun polynomial => (directEvalOpt sample.1 sample.2 polynomial).map
+              (extendedDirectScalarEquiv P))).effect answer))
+        (fun sample answer => S.place second
+          (((points.Q second.side (projX (directPointToPauli P sample.2))
+            (projZ (directPointToPauli P sample.2))).postprocess (fun values => some
+              ((directPointToPauli P sample.2) (alphaVar P.m) * values.1 +
+                (directPointToPauli P sample.2) (betaVar P.m) * values.2))).effect answer))
+        S.psiHat ≤ (P.m : ℝ) * deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)) := by
+    refine (le_min ?_ ?_).trans
+      (hscalar ε ((P.m * P.d : ℕ) / (P.q : ℝ)) (P.m : ℝ)
+        S.eps_nonneg (by positivity) (by exact_mod_cast P.one_le_m))
+    · unfold consistencyDefect
+      calc
+        _ ≤ avgOver (directLinePointDist P.extendedDirectLd) (fun _ => 1) :=
+          avgOver_mono _ _ _ fun sample =>
+            consistencyDefect_integrand_le_one S first second hopposite _ _
+        _ = 1 := avgOver_const_of_isProbability _ (directLinePointDist_isProbability _) 1
+    · refine (sublines.extended_consistencyDefect_le lines first second hopposite).trans ?_
+      exact (le_abs_self _).trans (by
+        simpa only [abs_sub_comm] using
+          hnear P ε (deltaQ ε) (deltaP ε ((P.m * P.d : ℕ) / (P.q : ℝ)))
+            S points lines sublines first second hopposite)
+  refine ⟨points, ⟨{
+    Qline := sublines.extendedMeasurement lines
+    axis_degree := sublines.extendedMeasurement_axis_degree lines
+    consistent_alice := ?_
+    consistent_bob := ?_ }⟩⟩
+  · simp only [one_mul]
+    with_unfolding_all exact hplaced .AA' .BA'' trivial
+  · simp only [one_mul]
+    with_unfolding_all exact hplaced .BB' .AB'' trivial
 
 /-- Construction of the projective global polynomial-pair measurements from
 `lem:qld-4-7`, paper lines 1267--1274.  The statement has the source's universal
@@ -160,21 +244,59 @@ direct carrier realizes the required dimension without assuming
 `2 * m + 2 ∣ q`.  `exists_direct_ld_soundness` proves that soundness statement
 for the directly indexed game by applying `MIPStarRE.LDT.Test.mainFormal` and
 verifying `400 M d <= N` at each LDT application dimension `M`, with sampling
-count `N = 2560000 M^3 d`.  The source import at seed-indexed dimension `M`
-instead chooses `K = M^3 d` for a tensor-code theorem requiring
-`K >= 12 M (d + 1)`.  The direct proof establishes neither that bound nor the
-claimed tensor-code game correspondence.  Both source-import obligations
-remain open and are documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.  Absorption of the established
-combined-lines prefactor into the final universal constants is to use
-`deltaQld_mono` on its stated source parameter domain.
+count `N = 2560000 M^3 d`.  At seed-indexed dimension `M`, the source instead
+chooses `K = M^3 d` while invoking a tensor-code theorem that requires
+`K >= 12 M (d + 1)`, and it asserts a correspondence with the tensor-code game.
+The direct proof establishes neither assertion.  Both remain open and are documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+
+The independent algebraic restriction, projective completion, and retained-overlap
+estimates remain available in `PairCompletion.lean`.
+
+The proof below composes the established direct-line construction with the actual
+rounded polynomial-pair construction. Its four defects are bounded both by one
+and by the constructed error. `exists_actual_rounded_global_pair_error_bound`
+absorbs their minimum, including the eighth-root rounding term and both point
+and line errors, for every nonnegative strategy error. This alternative proof
+does not require an identification with the source's seed-bearing auxiliary game.
 -/
 theorem exists_globalPairWitness :
     ∃ a b : ℝ, 1 < a ∧ 0 < b ∧ b < 1 ∧
-      ∀ (P : AdmissibleParams) (ε : ℝ), 0 < ε →
-        ∀ S : ProjectiveSetting P ε,
-          Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
-  sorry
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+        Nonempty (GlobalPairWitness S (deltaQld a b ε P.m P.d P.q)) := by
+  obtain ⟨pointError, hpoint, C, hC, lineError, hline, hlines⟩ :=
+    exists_extendedLinesWitness_established
+  obtain ⟨a, b, ha, hb, hb1, hpairs⟩ :=
+    ExtendedLineGame.exists_pairWitness_of_points_lines
+  obtain ⟨A, B, hA, hB, hB1, hscalar⟩ :=
+    exists_actual_rounded_global_pair_error_bound pointError hpoint lineError hline
+      C a b hC.le ha hb hb1
+  refine ⟨A, B, hA, hB, hB1, ?_⟩
+  intro P ε S
+  obtain ⟨points, ⟨lines⟩⟩ := hlines P ε S
+  obtain ⟨pair⟩ := hpairs P ε (pointError ε)
+    (C * (P.m : ℝ) * lineError ε ((P.m * P.d : ℕ) / (P.q : ℝ))) S points lines
+  have hbound := hscalar P ε S.eps_nonneg
+  simp only [Nat.cast_mul] at hbound
+  refine ⟨{ pair with point_consistent_alice := ?_, point_consistent_bob := ?_ }⟩
+  · intro W
+    refine (le_min (show _ ≤ (1 : ℝ) from ?_) (pair.point_consistent_alice W)).trans ?_
+    · unfold consistencyDefect
+      calc
+        _ ≤ avgOver (uniformDistribution (Fin P.m → PauliScalar P)) (fun _ => 1) :=
+          avgOver_mono _ _ _ fun u => consistencyDefect_integrand_le_one
+            S .AA' .BA'' (by trivial) _ _
+        _ = 1 := avgOver_const_of_isProbability _ (uniformDistribution_isProbability _) 1
+    · with_unfolding_all simpa only [Nat.cast_mul, Real.rpow_eq_pow] using hbound
+  · intro W
+    refine (le_min (show _ ≤ (1 : ℝ) from ?_) (pair.point_consistent_bob W)).trans ?_
+    · unfold consistencyDefect
+      calc
+        _ ≤ avgOver (uniformDistribution (Fin P.m → PauliScalar P)) (fun _ => 1) :=
+          avgOver_mono _ _ _ fun u => consistencyDefect_integrand_le_one
+            S .BB' .AB'' (by trivial) _ _
+        _ = 1 := avgOver_const_of_isProbability _ (uniformDistribution_isProbability _) 1
+    · with_unfolding_all simpa only [Nat.cast_mul, Real.rpow_eq_pow] using hbound
 
 end
 
