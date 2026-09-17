@@ -1,3 +1,13 @@
+---
+title: "Non-encoding marginal mass (#517)"
+date: 2026-09-12
+purpose: >
+  Records the historical proof and validation of the supplied-witness
+  non-encoding marginal mass bound, including its September 18 preservation.
+issue: "#517"
+pr: "#580"
+---
+
 # Non-encoding marginal mass (#517)
 
 ## Record and scope
