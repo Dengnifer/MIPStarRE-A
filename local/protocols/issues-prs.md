@@ -220,13 +220,19 @@ It rejects skip flags and dirty or moved train
 heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
 cache. Bootstrap and build telemetry are transferred to the primary telemetry
 files after publication, refusal, or an unknown outcome so their appends cannot dirty the primary
-during gating. CI warming uses `--no-build` to avoid a nested build lock, and
+during gating; the transfer and the train event use the canonical
+`telemetry.py` writers, so they obey the locking every other session obeys. CI warming uses `--no-build` to avoid a nested build lock, and
 step execution stops at its first failing command.
 
 Publication uses `checked-push.sh --train-manifest PATH` with one explicit
 train-to-main ref mapping. After preflight, it rechecks the combined CI manifest,
 member gates and heads, primary cleanliness, and frozen main; the existing exact
-remote-tip lease protects the final fast-forward. Hook bypass is forbidden.
+remote-tip lease protects the final fast-forward. Because a recheck only reads
+the member refs, the same atomic transport leases every verified member ref at
+its verified value: an untouched member is already up to date and stays out of
+the transaction, while a member that moved makes the remote reject the whole
+push, main included, and no member branch is ever rewound. Hook bypass is
+forbidden.
 GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
 It posts one idempotent train comment per member, records one merge event,
 fast-forwards local main and its origin alias, and removes only the train branch

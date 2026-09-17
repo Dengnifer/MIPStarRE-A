@@ -16,6 +16,9 @@ Usage: local/bin/checked-push.sh [--repo-root PATH] [--train-manifest PATH] REMO
 
 Run .githooks/pre-push against one explicit branch ref, then push that ref.
 Both refs must use their full refs/heads/... names.
+
+With --train-manifest the push also leases every verified member ref at its
+verified value, so the remote refuses the whole publication if one moved.
 EOF
 }
 
@@ -141,20 +144,56 @@ CURRENT_LOCAL_SHA="$(git -C "$REPO_ROOT" rev-parse --verify "$LOCAL_REF^{commit}
   die "local branch $LOCAL_REF changed during preflight"
 require_validation_checkout
 
+MEMBER_LEASES=()
+MEMBER_SPECS=()
 if [ -n "$TRAIN_MANIFEST" ]; then
+  # The verifier reports the member refs it just confirmed; each one is leased
+  # below so the remote itself refuses the publication when a member branch
+  # moves between verification and the transport.
+  MEMBER_FILE="$(mktemp)" || die "cannot create a temporary file for the member refs"
+  trap 'rm -f "$MEMBER_FILE"' EXIT
   python3 "$SCRIPT_ROOT/local/bin/pr_train.py" --verify-manifest "$TRAIN_MANIFEST" \
     --expected-main "$REMOTE_SHA" --expected-head "$LOCAL_SHA" \
-    --expected-ref "$REMOTE_REF" || die "train changed during preflight"
+    --expected-ref "$REMOTE_REF" --members-out "$MEMBER_FILE" ||
+    die "train changed during preflight"
+  while IFS=' ' read -r member_ref member_sha extra; do
+    [ -n "$member_ref" ] || continue
+    [ -z "$extra" ] || die "unexpected member row for $member_ref"
+    case "$member_ref" in
+      refs/heads/*) ;;
+      *) die "member ref $member_ref must start with refs/heads/" ;;
+    esac
+    [ "$member_ref" != "$REMOTE_REF" ] ||
+      die "member ref $member_ref collides with the published ref"
+    git -C "$REPO_ROOT" check-ref-format "$member_ref" >/dev/null ||
+      die "invalid member ref $member_ref"
+    [[ "$member_sha" =~ ^[0-9a-f]{40}$ ]] ||
+      die "unexpected member object id $member_sha for $member_ref"
+    for seen in ${MEMBER_SPECS[@]+"${MEMBER_SPECS[@]}"}; do
+      [ "${seen#*:}" != "$member_ref" ] || die "member ref $member_ref appears twice"
+    done
+    MEMBER_LEASES+=("--force-with-lease=$member_ref:$member_sha")
+    MEMBER_SPECS+=("$member_sha:$member_ref")
+  done < "$MEMBER_FILE"
+  [ "${#MEMBER_SPECS[@]}" -ge 2 ] ||
+    die "train manifest verified fewer than two member refs"
 fi
 
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
 # Freeze the source object and atomically require the preflight remote tip.  The
 # native hook is only a short defense-in-depth confirmation; the lease keeps the
-# tuple binding intact when that hook is stale or not selected.  Disable implicit
-# annotated-tag expansion so the transport contains only the validated ref.
+# tuple binding intact when that hook is stale or not selected.  A train adds one
+# no-op update per member ref under the same atomic transaction: each member is
+# pushed back at its verified value, so the remote compares the advertised value
+# at transport start and rejects the whole push -- main included -- when a member
+# moved, while a member that did not move is simply already up to date and stays
+# out of both the transaction and the native hook's tuple.  Disable implicit
+# annotated-tag expansion so the transport contains only the validated refs.
 LEASE_SHA="$REMOTE_SHA"
 [ "$LEASE_SHA" != "$ZERO_SHA" ] || LEASE_SHA=""
 MIPSTARRE_SKIP_HOOKS=1 \
   MIPSTARRE_EXPECTED_PUSH_TUPLE="$LOCAL_SHA $LOCAL_SHA $REMOTE_REF $REMOTE_SHA" \
-  git -C "$REPO_ROOT" -c push.followTags=false push --no-follow-tags \
-    --force-with-lease="$REMOTE_REF:$LEASE_SHA" "$REMOTE" "$LOCAL_SHA:$REMOTE_REF"
+  git -C "$REPO_ROOT" -c push.followTags=false push --no-follow-tags --atomic \
+    --force-with-lease="$REMOTE_REF:$LEASE_SHA" \
+    ${MEMBER_LEASES[@]+"${MEMBER_LEASES[@]}"} \
+    "$REMOTE" "$LOCAL_SHA:$REMOTE_REF" ${MEMBER_SPECS[@]+"${MEMBER_SPECS[@]}"}

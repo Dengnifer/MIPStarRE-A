@@ -20,6 +20,7 @@ import tempfile
 
 import gh_common
 import pr_merge
+import telemetry
 from pr_merge import GateFailure, git, git_ok
 from wf_util import LayerError, atomic_write, cache_root, file_lock, utcnow
 
@@ -100,8 +101,14 @@ def check_combined_ci(data: dict) -> None:
         raise GateFailure(f"combined CI did not pass every step: {outcomes}")
 
 
-def verify_manifest(path: Path, expected_main: str, expected_head: str, expected_ref: str) -> None:
-    """Recheck after checked-push's expensive preflight, before transport opens."""
+def verify_manifest(path: Path, expected_main: str, expected_head: str,
+                    expected_ref: str) -> list[dict]:
+    """Recheck after checked-push's expensive preflight, before transport opens.
+
+    Returns the verified members so the caller can lease their refs inside the
+    publishing transport; a read here only proves the refs were current at this
+    moment, and the remote must enforce that they still are when it commits.
+    """
     data = json.loads(path.read_text(encoding="utf-8"))
     repo, worktree = Path(data["repo"]), Path(data["worktree"])
     if (expected_main != data["base"] or expected_head != data["head"]
@@ -127,6 +134,7 @@ def verify_manifest(path: Path, expected_main: str, expected_head: str, expected
     if advertised != refs:
         raise GateFailure("remote main or member refs changed")
     primary_at(repo, data["base"])
+    return current
 
 
 def run_ci(repo: Path, data: dict) -> None:
@@ -168,20 +176,32 @@ def record(repo: Path, data: dict, outcome: str) -> None:
     """Retain publication state and transfer build telemetry only after gating ends."""
     atomic_write(Path(data["worktree"]).parent / "publication.json",
                  json.dumps({"head": data["head"], "outcome": outcome, "ts": utcnow()}) + "\n")
+    # The train lock only serialises trains; both files are written through the
+    # canonical telemetry writers, whose own locking is what other sessions obey.
     with file_lock("train-telemetry"):
-        telemetry = repo / "results/telemetry"
-        telemetry.mkdir(parents=True, exist_ok=True)
+        directory = repo / "results/telemetry"
+        directory.mkdir(parents=True, exist_ok=True)
         spools = [cache_root() / "ci-manifests" / f"train-{data['head']}.builds.jsonl",
                   Path(data["worktree"]).parent / "telemetry/builds.jsonl"]
         for spool in spools:
-            if spool.exists():
-                with (telemetry / "builds.jsonl").open("a", encoding="utf-8") as handle:
-                    handle.write(spool.read_text(encoding="utf-8"))
-                spool.unlink()
+            if not spool.exists():
+                continue
+            try:
+                rows = [json.loads(line) for line
+                        in spool.read_text(encoding="utf-8").splitlines() if line.strip()]
+            except ValueError as exc:
+                # Keep the spool for the operator rather than losing the evidence.
+                print(f"build telemetry spool {spool} is not JSONL: {exc}", file=sys.stderr)
+                continue
+            for row in rows:
+                telemetry.append_jsonl(directory / "builds.jsonl", row)
+            spool.unlink()
         members = ", ".join(f"#{m['number']}@{m['head']}" for m in data["members"])
-        with (telemetry / "events.md").open("a", encoding="utf-8") as handle:
-            handle.write(f"\n- {utcnow()} - Reviewed train {data['head']}: publication {outcome}; "
-                         f"members {members}; conflicting PRs dropped: {data['dropped']}.\n")
+        telemetry.append_event_bullet(
+            directory / "events.md",
+            f"{utcnow()} - Reviewed train {data['head']}: publication {outcome}; "
+            f"members {members}; conflicting PRs dropped: {data['dropped']}.",
+            datetime.now().astimezone().strftime("%Y-%m-%d"))
 
 
 def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
@@ -264,10 +284,16 @@ def main() -> int:
     parser.add_argument("--expected-main", default="")
     parser.add_argument("--expected-head", default="")
     parser.add_argument("--expected-ref", default="")
+    parser.add_argument("--members-out", type=Path)
     args = parser.parse_args()
     try:
         if args.verify_manifest:
-            verify_manifest(args.verify_manifest, args.expected_main, args.expected_head, args.expected_ref)
+            members = verify_manifest(args.verify_manifest, args.expected_main,
+                                      args.expected_head, args.expected_ref)
+            if args.members_out:
+                # A file, not stdout: the gate reports share stdout with this run.
+                atomic_write(args.members_out, "".join(
+                    f"refs/heads/{member['branch']} {member['head']}\n" for member in members))
             return 0
         return run_train(args.repo_root.resolve(), args.prs, set(args.adjudicated))
     except (LayerError, OSError, ValueError, KeyError) as exc:

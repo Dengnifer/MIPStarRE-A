@@ -1189,3 +1189,24 @@ GitHub's wording.
 off the commits page without opening the merge, no pull request that cleared the
 seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
 covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - PR507 review repair: member-ref leases and canonical telemetry
+
+**Trigger:** canonical review `5194195608` on `26ecf158`, findings F1 (blocker)
+and F2; see the issue #502 review-repair entries in
+`results/telemetry/events.md`.
+
+**Change:** the train publication transport is now atomic and leases every
+verified member ref at its verified value alongside the `main` lease, so a
+member branch that moves between verification and transport makes the remote
+refuse the entire push; verification returns the refs it confirmed instead of
+only reading them, and no member branch can be rewound because each is pushed
+back at the value it is expected to hold. Train telemetry is written through the
+canonical `telemetry.py` writers (`events-md` lock and dated section for
+`events.md`, the per-file lock for `builds.jsonl`) rather than a private lock
+and a raw append; an unreadable build spool is kept for the operator instead of
+being dropped. No gate, member evidence, or publication outcome rule changes.
+
+**Expected effect:** publication cannot carry a member head that stopped being
+the member branch's tip at transport start, and a concurrent canonical event
+writer can no longer lose or truncate the train's own event.

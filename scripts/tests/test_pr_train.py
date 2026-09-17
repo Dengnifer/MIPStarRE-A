@@ -40,7 +40,7 @@ class TrainTests(unittest.TestCase):
         _git(self.repo, "init", "-q", "--bare", str(self.remote))
         _git(self.repo, "remote", "add", "github", str(self.remote))
         for name in ("pr_train.py", "pr_merge.py", "gh_common.py", "wf_util.py",
-                     "merge_loss_guard.py", "checked-push.sh", "ci.sh",
+                     "telemetry.py", "merge_loss_guard.py", "checked-push.sh", "ci.sh",
                      "worktree-setup.sh", "lake-root.sh"):
             target = self.repo / "local/bin" / name
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -174,7 +174,11 @@ class TrainTests(unittest.TestCase):
         self.assertEqual(_git(self.repo, "branch", "--list", "train-*"), "")
         posts = [row for row in self.gh.calls() if row["method"] != "GET"]
         self.assertEqual([row["rel"] for row in posts], ["issues/1/comments", "issues/3/comments"])
-        self.assertIn(head, (self.repo / "results/telemetry/events.md").read_text())
+        # The canonical writer keeps the log header and files the bullet under
+        # today's dated section instead of appending a loose line at the end.
+        events = (self.repo / "results/telemetry/events.md").read_text()
+        self.assertRegex(events, r"\A# Incident and observation log")
+        self.assertRegex(events, rf"\n## \d{{4}}-\d{{2}}-\d{{2}}\n\n- [^\n]*Reviewed train {head}")
 
     def test_whole_train_refuses_any_bad_member(self) -> None:
         for fault in ("ci", "review", "closed", "draft", "dependency", "changes"):
@@ -260,6 +264,32 @@ class TrainTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("PR #3", result.stderr)
         self.assertEqual(self.remote_main(), self.base)
+
+    def test_member_moving_at_transport_start_refuses(self) -> None:
+        # Verification cannot bind a ref it only read: move a member the moment
+        # the publishing transport opens, after every preflight check passed.
+        git = shutil.which("git")
+        self.env.update(TRAIN_GIT=str(git), TRAIN_PUSH_RACE_REF="refs/heads/issue-3",
+                        TRAIN_PUSH_RACE_SHA=self.heads[2])
+        self.write_tool("git", '#!/usr/bin/env python3\nimport os, subprocess, sys\n'
+                        'a=sys.argv[1:]\ne=os.environ\n'
+                        'if "push" in a:\n'
+                        ' subprocess.check_call([e["TRAIN_GIT"], "--git-dir", e["TRAIN_REMOTE"],\n'
+                        '  "update-ref", e["TRAIN_PUSH_RACE_REF"], e["TRAIN_PUSH_RACE_SHA"]])\n'
+                        'sys.exit(subprocess.call([e["TRAIN_GIT"], *a]))\n')
+        result = self.train(1, 3)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.remote_main(), self.base)
+        # The member ref keeps the racing value; the lease never rewinds a branch.
+        self.assertEqual(_git(self.repo, "--git-dir", str(self.remote), "rev-parse", "issue-3"),
+                         self.heads[2])
+        self.assertIn("issue-3", result.stderr)
+        self.assertIn("rejected", result.stderr)
+        self.assertIn("train publication refused", result.stderr)
+        directory = next((self.cache / "trains").iterdir())
+        receipt = json.loads((directory / "publication.json").read_text())
+        self.assertEqual(receipt["outcome"], "refused")
+        self.assertFalse([row for row in self.gh.calls() if row["method"] != "GET"])
 
     def test_integration_mode_rejects_skip_flags(self) -> None:
         result = subprocess.run(["bash", str(self.repo / "local/bin/ci.sh"),
