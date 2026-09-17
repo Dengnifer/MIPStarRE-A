@@ -3834,7 +3834,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 3,
    "blocking": 1,
    "total_blocking": 1
@@ -5147,7 +5147,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 3,
    "blocking": 2,
    "total_blocking": 2
@@ -7657,81 +7657,6 @@
   "pinned_comment": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/266",
-  "id": 5363242119,
-  "node_id": "I_kwDOUJyJf88AAAABP6yUhw",
-  "number": 266,
-  "title": "feat(QPBT/Games): preserve consistency under independent convolution",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-06T06:01:05Z",
-  "updated_at": "2026-09-06T06:01:05Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/123",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 0,
-   "total_blocking": 0
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-main-20260906-tensor-consistency-transfer -->\n### Motivation\nProve the generic exact consistency-defect identity for additive convolution with an independently perfectly correlated ancillary POVM pair, using the actual coordinate tensor state and shuffle. The scoped target is described in scout-123-pauli-convolution-20260906-02. Read paper14 lem:qld-construct-the-paulis and expanded point construction first; this is a Lean-only auxiliary, not a new paper hypothesis. Base actual PR238 merge32a32ed. Separate from258 encoded measurement construction,259 collision,261 support mass,113 winning implications and118 B8. No unmerged parent implementation is required. Search existing APIs before proof; preserve all public statements and proof integrity.\n\n### Acceptance\n- Source-faithful auxiliary proof, targeted Lean checks and ordinary-axiom audit.\n- Normal hooks, checked publication, CI and independent review; no merged-result claim before actual merge.\n- No duplicate proofs, extra bridge inputs, new holes or provider probes.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/266/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/259",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/259/labels{/name}",
@@ -8386,9 +8311,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 105,
+  "comments": 106,
   "created_at": "2026-09-04T11:58:10Z",
-  "updated_at": "2026-09-17T14:38:14Z",
+  "updated_at": "2026-09-17T16:08:57Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -8721,8 +8646,8 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 8,
-   "completed": 7,
-   "percent_completed": 87
+   "completed": 8,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/47",
   "issue_dependencies_summary": {
@@ -9113,12 +9038,12 @@
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 7,
-   "completed": 3,
-   "percent_completed": 42
+   "completed": 4,
+   "percent_completed": 57
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
-   "blocked_by": 2,
+   "blocked_by": 1,
    "total_blocked_by": 5,
    "blocking": 0,
    "total_blocking": 0
@@ -9379,7 +9304,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/166",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 4,
    "blocking": 1,
    "total_blocking": 1
@@ -9399,93 +9324,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/118/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/116",
-  "id": 5345144483,
-  "node_id": "I_kwDOUJyJf88AAAABPphuow",
-  "number": 116,
-  "title": "feat(QPBT/Observables): prove expanded line measurements",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 2,
-  "created_at": "2026-09-04T06:46:33Z",
-  "updated_at": "2026-09-15T12:13:56Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 1,
-   "completed": 1,
-   "percent_completed": 100
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/165",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 4,
-   "blocking": 4,
-   "total_blocking": 4
-  },
-  "body": "<!-- mipstarre-issue-key: stage43-unfiled-observables-line-measurements -->\n### Target declarations\n\nIn `MIPStarRE/QPBT/Observables/LineMeasurement.lean` prove:\n\n- line 54 \u2014 `polynomialOnLine_lowDegreeEncoding_natDegree_le`\n- line 102 \u2014 `expLineOp_nonneg`\n- line 110 \u2014 `expLineOp_sum_eq_one`\n- line 129 \u2014 `lineMeasExp_isProjective`\n- line 141 \u2014 `expLineOp_zero_of_not_deg_d`\n- line 250 \u2014 `expLine_self_cons`\n- line 269 \u2014 `expLine_point_cons`\n- line 286 \u2014 `expLine_point_cons'`\n\n### Paper and blueprint references\n\n- Expanded line measurement and its three consistency conclusions:\n  `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:506-679`.\n- `blueprint/src/chapter/ch14_qpbt_observables.tex:1034-1230`,\n  `def:expanded-line-measurement` and `lem:qld-comm-line-cons`.\n\n### Dependencies\n\n- #110, #115, and #106 must merge first for line distributions,\n  expanded point consistency, and low-degree line geometry.\n- #49 supplies the distance calculus used in the consistency estimates.\n- This packet has exclusive ownership of `LineMeasurement.lean`.\n\n### Acceptance\n\n- All eight target declarations are proved with unchanged signatures and constants.\n- `lake env lean MIPStarRE/QPBT/Observables/LineMeasurement.lean` and direct consumers are green.\n- Fully discharged source nodes receive proof-level `\\leanok`.\n- No new `sorry`, `admit`, axiom, prohibited bypass, degree fallback,\n  symmetry shortcut, or omitted placement is introduced.\n- Full build, declaration checking, blueprint rendering, exact-head CI, and\n  independent review pass.\n\n### Scope notes\n\nPreserve the genuine polynomial restriction, zero outside the degree bound,\nprojectivity, all four placement pairs, and both point-consistency\norientations. Own only the listed file and matching blueprint proof status.\nMain locators are from `c1c0af4`.\n\n---\nStage 4.3 proof packet under #47.\n\nPrerequisites are recorded as GitHub issue dependencies (blocked_by); the bullets above are commentary.\n",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/116/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -10568,9 +10406,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 439,
+  "comments": 441,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-17T15:20:24Z",
+  "updated_at": "2026-09-17T16:52:22Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
