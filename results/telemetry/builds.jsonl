@@ -1474,3 +1474,4 @@
 {"ts": "2026-09-18T00:15:40+0900", "kind": "ci-build", "trigger": "ci.sh pr=274", "seconds": 86, "outcome": "success", "sha": "75609918402bae3fb73559f76277655ef1526def", "note": "branch issue-273-expanded-spectator"}
 {"ts": "2026-09-18T00:16:12+0900", "kind": "ci-build", "trigger": "ci.sh pr=294", "seconds": 125, "outcome": "success", "sha": "b873b1c8206d2bc12297c5aa94ebe1ac86cdf7b4", "note": "branch issue-121-swap-extraction"}
 {"ts": "2026-09-18T00:32:55+0900", "kind": "ci-build", "trigger": "ci.sh pr=294", "seconds": 23, "outcome": "success", "sha": "35eee1add2df4edc7d9891a1465af2d9a46a22d4", "note": "branch issue-121-swap-extraction"}
+{"ts": "2026-09-18T00:36:58+0900", "kind": "ci-build", "trigger": "ci.sh pr=579", "seconds": 24, "outcome": "success", "sha": "d418467d6b0b9c786284b6639f22fea8a20f9e0d", "note": "branch issue-576-duplicate-work-guards"}
