@@ -1911,13 +1911,18 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 	pair, every $\mathrm{v}_1,\mathrm{v}_2\in\{\mathrm{ALine},\mathrm{DLine}\}$,
 	and every $i,j\in\{0,\dots,m-1\}$, the same evaluated consistency defect,
 	with both line-point variables restricted to
-	$D_{\mathrm{v}_1,i}\times D_{\mathrm{v}_2,j}$, is at most
+	$\widetilde D_{\mathrm{v}_1,i}\times
+	\widetilde D_{\mathrm{v}_2,j}$, is at most
 	$C m^2\delta_P$. Evaluation includes an additional undefined outcome when
 	the affine parameter is not uniquely determined.
 
 	This conditional auxiliary theorem assumes the point and line families,
-	including the unrestricted consistency estimate for the latter. It neither
-	constructs the source line measurement nor certifies
+	including the unrestricted consistency estimate for the latter. Its
+	restrictions retain the line seeds. Passing this bound to the source laws
+	would require the evaluated measurement families to factor through the
+	forgetful maps of Definition~\ref{def:line-point-dist}. No such
+	factorization is asserted here; the theorem neither constructs the source
+	line measurement nor certifies
 	Lemma~\ref{lem:qld-xz-lines-restricted}.
 \end{theorem}
 \begin{proof}
@@ -2253,13 +2258,18 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	Sample a triple from $D_{\mathrm{dir}}$ and an independent uniform
 	parameter $t$ on $\ell$. The law of $(\ell_X,\ell_Z,\pi_X(\ell(t)))$
 	is the mixture obtained by sampling $(\ell_X,x)$ from
-	$D_{\mathrm v,i}$ and independently $\ell_Z$ from the line marginal of
-	$D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,x)$.
+	$\widetilde D_{\mathrm v,i}$ and independently $\ell_Z$ from the line
+	marginal of $\widetilde D_{\mathrm v,j}$, and retaining
+	$(\ell_X,\ell_Z,x)$.
 	The law of $(\ell_X,\ell_Z,\pi_Z(\ell(t)))$ is the mixture obtained
-	by retaining $(\ell_X,\ell_Z,z)$ from the corresponding independent
-	samples of $\ell_X$ and $(\ell_Z,z)$. These are separate one-point
-	marginal identities, with the same mixture weights; they impose no
-	joint conditional independence of the two projected points.
+	by sampling $\ell_X$ from the line marginal of
+	$\widetilde D_{\mathrm v,i}$ and independently $(\ell_Z,z)$ from
+	$\widetilde D_{\mathrm v,j}$, and retaining $(\ell_X,\ell_Z,z)$.
+	These are separate one-point marginal identities on the seed-bearing
+	projected lines, with the same mixture weights; they impose no joint
+	conditional independence of the two projected points. The corresponding
+	source marginal identities hold only after applying the forgetful maps
+	of Definition~\ref{def:line-point-dist} to both projected lines.
 	Identification with the source law $D$ is a separate obligation;
 	see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{definition}
@@ -2316,8 +2326,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	This formalization-only auxiliary is not the source sub-line lemma. For every
 	admissible parameter tuple, there exists a probability law on
 	triples $(\ell,\ell_X,\ell_Z)$ satisfying all the incidence, affine
-	compatibility, separate projected-marginal, and axis-closure properties of
-	Definition~\ref{def:direct-subline-law}.
+	compatibility, separate seed-bearing projected-marginal, and axis-closure
+	properties of Definition~\ref{def:direct-subline-law}. The source
+	projected-marginal identities require the componentwise forgetful maps
+	specified there.
 \end{lemma}
 \begin{proof}
 	\leanok
