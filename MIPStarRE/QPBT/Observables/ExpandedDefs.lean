@@ -399,7 +399,7 @@ theorem expPointOp_eq_convolution (S : ProjectiveSetting P ε)
             exact heq
 
 /-- Each point fiber is a sum of positive Pauli projectors. -/
-theorem tauPointProj_nonneg (W : PauliKind)
+private theorem tauPointProj_nonneg (W : PauliKind)
     (u : Fin P.m → PauliScalar P) (a : PauliScalar P) :
     0 ≤ tauPointProj W u a := by
   classical
@@ -408,7 +408,7 @@ theorem tauPointProj_nonneg (W : PauliKind)
     Matrix.nonneg_iff_posSemidef.mpr (posSemidef_pauliProj W e)
 
 /-- The point fibers partition the complete family of Pauli eigenspace projectors. -/
-theorem sum_tauPointProj_eq_one (W : PauliKind)
+private theorem sum_tauPointProj_eq_one (W : PauliKind)
     (u : Fin P.m → PauliScalar P) :
     ∑ a, tauPointProj W u a = 1 := by
   classical
