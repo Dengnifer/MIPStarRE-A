@@ -315,6 +315,21 @@ theorem stateQForm_one {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [stateQForm, hone]
   simpa using (inner_self_eq_norm_sq (𝕜 := ℂ) ψ)
 
+/-- The quadratic form of `Wᴴ M W` in `ψ` is the quadratic form of `M` in
+`W ψ`.  This is the conjugation identity behind the placed-sandwich
+rewritings: conjugating transfers the outer operator to the state vector.
+It is formalization-only auxiliary content, shared by the overlap-gap estimate
+and the sandwich self-consistency argument. -/
+theorem stateQForm_conjTranspose_mul_mul {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (ψ : EuclideanSpace ℂ ι) (W M : Op ι) :
+    stateQForm ψ (Wᴴ * M * W) = stateQForm (applyOperatorToState W ψ) M := by
+  unfold stateQForm
+  rw [applyOperatorToState_mul, applyOperatorToState_mul]
+  congr 1
+  change inner ℂ ψ (Matrix.toEuclideanLin Wᴴ _) =
+    inner ℂ (Matrix.toEuclideanLin W ψ) _
+  rw [Matrix.toEuclideanLin_conjTranspose_eq_adjoint, LinearMap.adjoint_inner_right]
+
 /-- Formalization-only auxiliary lemma for the agreement facts (Facts 4.13 and
 4.14): every effect of a complete measurement is bounded by the identity. -/
 theorem measurement_effect_le_one {α ι : Type*} [Fintype α]

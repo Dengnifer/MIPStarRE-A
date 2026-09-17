@@ -1,0 +1,20 @@
+{
+  "pr": 549,
+  "head": "b49709fc44150a070063fc5b4802cdcf429312a0",
+  "review_id": "5212238831",
+  "comment_id": 5683247139,
+  "url": "https://github.com/Dengnifer/MIPStarRE-A/pull/549#issuecomment-5683247139",
+  "reviewed_heads": [
+    "1cdf139e6e06337988dad8b9376a86d8580608f1",
+    "20149b2510f74581fc5e48efbb93f18ab4441676",
+    "4284e4bdfb3a9799f0b59beda0e571c7d598ece4",
+    "438a816c2fcddf2c8bd3cf6c2fce6e865ab73114",
+    "aeaca3aee589ff666c5ab6feb2681e2cb06e8b1d",
+    "aef4744203e113d96d002171ead423d135afada8",
+    "b49709fc44150a070063fc5b4802cdcf429312a0"
+  ],
+  "body": "ADJUDICATION\nhead=b49709fc44150a070063fc5b4802cdcf429312a0\n\nOperator disposition under local/protocols/review.md, round-cap section.\nThis exact head has independent review 5212238831: code APPROVED, blueprint\nCHANGES_REQUESTED, F1-F10 resolved, only F11 unresolved. There are 7\ndistinct exact-head, non-carried review rounds. The new integration review is\ngenuine; the unequal canonical patch hashes did not authorize mechanical carry.\n\n- [x] F11 \u2013 deferred to issue #570: correct the general paired-line X-deficit dependency and the origin of the quarter-power errors; the independently verified Lean estimate and displayed auxiliary statement remain valid, so this bounded exposition correction is tracked outside the round-capped PR.\n\nF11 is a mathematical dependency error, not cosmetic and not fixed by creating\nthe issue. Issue #570 remains open with explicit acceptance criteria. This\ndisposition does not claim completion of source Lemma4.13 or waive the existing\nsource-law, completed-answer, numerical or #509/#510/#511 proof obligations.\n\nAll nine CI contexts are successful on this exact head. The exact-root axiom\naudit has1600 passes, zero failures and four statement-only warnings. The\nindependent review found no integration regression; its full current ledger\nand prior-review reuse are preserved. The adverse review and failing summary\nremain unchanged. This disposition substitutes only for a clean review verdict;\nfreshness, exact-head, CI, dependency, hook and all other merge gates still apply.\n\nOnly the merge daemon may attempt the merge. This is not a manual merge or a\ntemplate authorization for any future head.\n",
+  "template": "/tmp/adjudication-549-template-cpa-b49709fc-20260916.md",
+  "template_sha256": "f52cad5ce84aece1c19425ad351fa00bd8ed4620edc22a0d84743d85bbc6ae75",
+  "daemon_registration": "not performed by this publisher"
+}
