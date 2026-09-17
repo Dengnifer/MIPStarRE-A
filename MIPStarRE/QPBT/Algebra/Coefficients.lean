@@ -28,8 +28,9 @@ def evalCoefficient {K : Type*} [Semiring K] {n : ℕ}
     (c : Fin n → K) (t : K) : K :=
   ∑ i : Fin n, c i * t ^ i.val
 
-/-- The Mathlib polynomial associated to a coefficient tuple has the specified
-evaluation. This formalization-only identity connects the coefficient
+/-- The polynomial determined by a coefficient tuple evaluates at `param` to
+the finite power sum of `coeffs i * param ^ i.val` over `i : Fin size`.
+This formalization-only identity connects the coefficient
 convention to the root bound used at paper
 `14_analysis_of_the_pauli_basis_test.tex:955`. -/
 theorem polynomial_ofFn_eval_eq_evalCoefficient {K : Type*} [CommSemiring K]
@@ -38,9 +39,8 @@ theorem polynomial_ofFn_eval_eq_evalCoefficient {K : Type*} [CommSemiring K]
   simp [Polynomial.ofFn_eq_sum_monomial, Polynomial.eval_finsetSum,
     Polynomial.eval_monomial, evalCoefficient]
 
-/-- Interpret a bounded coefficient list as an ordinary univariate
-polynomial. This helper makes the line-combination definition use Mathlib's
-actual polynomial composition operation. -/
+/-- The univariate polynomial `sum_{i = 0}^c f_i X^i` determined by a bounded
+coefficient list. -/
 noncomputable def linePolynomialOfCoefficients {K : Type*} [Semiring K]
     {c : ℕ} (f : Fin (c + 1) → K) : Polynomial K :=
   ∑ i : Fin (c + 1), Polynomial.C (f i) * Polynomial.X ^ i.val
@@ -56,8 +56,8 @@ theorem linePolynomialOfCoefficients_eval {K : Type*} [Semiring K]
   rw [Polynomial.eval_finsetSum]
   simp
 
-/-- The coefficient polynomial agrees with Mathlib's coefficient-vector
-construction. -/
+/-- The coefficient sum is the polynomial with coefficient `f i` in degree
+`i.val` for `i : Fin (c + 1)` and zero coefficients in degrees greater than `c`. -/
 theorem linePolynomialOfCoefficients_eq_ofFn {K : Type*} [Semiring K]
     [DecidableEq K] {c : ℕ} (f : Fin (c + 1) → K) :
     linePolynomialOfCoefficients f = Polynomial.ofFn (c + 1) f := by
