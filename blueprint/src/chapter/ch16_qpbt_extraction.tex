@@ -155,12 +155,33 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \begin{lemma}[Projectivity and completeness of the pulled-apart measurements]\label{lem:tilde-m-projective}
 	\lean{MIPStarRE.QPBT.tildeM_isProj, MIPStarRE.QPBT.sum_tildeM_eq_one}
 	\leanok
-	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
-		lem:tau-dot-product-projective}
+	\uses{def:tilde-m-measurement}
 	For each $W$ and $\tilde{u}$, every $\tilde{M}^{W,\tilde{u}}_a$ is a projector and
 	$\sum_{a\in\F_q}\tilde{M}^{W,\tilde{u}}_a=\Id$. Thus
 	$\{\tilde{M}^{W,\tilde{u}}_a\}_{a\in\F_q}$ is a projective measurement.
 \end{lemma}
+
+\begin{proof}
+	\leanok
+	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
+		lem:tau-dot-product-projective, lem:sandwich-tensor-projector,
+		lem:distance-tensor-sum-right, lem:distance-tensor-sum-left}
+	For fixed $W$, $\tilde{u}$, and $a$, each summand in \eqref{eq:tilde_M}
+	is a tensor product of two projections, hence is a projection.
+	If $g\ne g'$, then $\hat{S}^W_g\hat{S}^W_{g'}=0$ because
+	$\{\hat{S}^W_g\}_g$ is a projective measurement. Thus distinct summands
+	in \eqref{eq:tilde_M} are orthogonal, and their sum is a projection.
+	For completeness, fix $g$ and put $c_g=\mathrm{Dec}(g)\cdot\tilde{u}$.
+	The map $a\mapsto c_g-a$ is a bijection of $\F_q$, so
+	\[
+		\sum_a\tau^W_{c_g-a}(\tilde{u})=\Id.
+	\]
+	Interchanging the two finite sums in \eqref{eq:tilde_M} gives
+	\[
+		\sum_a\tilde{M}^{W,\tilde{u}}_a
+		=\sum_g\hat{S}^W_g\ot\Id=\Id.
+	\]
+\end{proof}
 
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
 	\lean{MIPStarRE.QPBT.tildeObs}
@@ -383,6 +404,43 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 
 \section{The swap unitaries and the extraction of the Pauli group}
 
+The swap unitaries are controlled operators: a complete projective
+measurement on the polynomial registers selects, outcome by outcome, a product
+of Pauli observables on the register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
+The following algebraic statement is not a named result of the source article;
+it isolates the orthogonality calculation that the source performs inline, and
+the proof of Lemma~\ref{lem:v-swap-conjugation} cites it for both the unitarity
+of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
+
+\begin{lemma}[Formalization support for controlled operator sums]
+	\label{lem:controlled-sum-support}
+	\lean{MIPStarRE.Quantum.sum_heteroKron_mul_sum_heteroKron}
+	\lean{MIPStarRE.Quantum.sum_heteroKron_mul_conjTranspose}
+	\leanok
+	\uses{def:povm-conventions}
+	Let $\{S_o\}_{o \in \mathcal{O}}$ be a projective measurement on a
+	finite-dimensional space, so that the $S_o$ are pairwise orthogonal
+	projectors with $\sum_o S_o = \Id$, and let $A_o$ and $B_o$ be operators on
+	a second finite-dimensional space. Then
+	\[
+		\Bigl(\sum_o S_o \ot A_o\Bigr) \Bigl(\sum_o S_o \ot B_o\Bigr)
+		= \sum_o S_o \ot (A_o B_o)\;.
+	\]
+	If in addition $A_o A_o^\dagger = \Id$ for every $o$, then
+	$\bigl(\sum_o S_o \ot A_o\bigr) \bigl(\sum_o S_o \ot A_o\bigr)^\dagger
+	= \Id$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-conventions}
+	Expanding the product gives the terms $S_o S_{o'} \ot (A_o B_{o'})$, and
+	$S_o S_{o'} = 0$ for $o \ne o'$, so only the diagonal terms
+	$S_o \ot (A_o B_o)$ survive. For the second assertion, each $S_o$ is
+	self-adjoint, so $\bigl(\sum_o S_o \ot A_o\bigr)^\dagger
+	= \sum_o S_o \ot A_o^\dagger$; the first identity then turns the product
+	into $\sum_o S_o \ot (A_o A_o^\dagger) = \sum_o S_o \ot \Id = \Id$.
+\end{proof}
+
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
 	\lean{MIPStarRE.QPBT.swapUnitary}
 	\leanok
@@ -419,7 +477,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, def:v-swap-unitary, def:tilde-m-measurement, def:tau-dot-product-projector, def:indicator-vector, def:decoding-map, def:generalized-pauli}
+	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, lem:pauli-observable-expansion, lem:controlled-sum-support, lem:distance-tensor-sum-left, def:v-swap-unitary, def:tilde-m-measurement, def:s-w-marginals, def:tau-dot-product-projector, def:indicator-vector, def:qld-full-field-decoder, def:generalized-pauli, def:bracket}
+	\leanok
 	Since the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective (Lemma~\ref{lem:qld-4-7}) and the $\tau^X, \tau^Z$ observables are self-inverse,
 	\[
 		V_{\mathrm{A}} V_{\mathrm{A}}^\dagger = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \Id_{\mathrm{A}''} = \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''}\;,

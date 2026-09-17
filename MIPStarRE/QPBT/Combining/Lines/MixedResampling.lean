@@ -24,7 +24,8 @@ noncomputable section
 /-- Resampling a uniform affine parameter on a sampled line preserves the
 unconditional mixed line-point law, including zero-direction diagonal fibers.
 This formalization-only identity combines the axis and diagonal cases of the
-conditional sampling used at paper line 955. -/
+conditional sampling used at paper line 955. It is recorded in blueprint
+`cor:line-point-parameter-resampling`. -/
 theorem avgOver_linePointDist_resample_parameter (L : LdParams)
     (value : (LineDesc L × (Fin L.m → ScalarQ L)) → ℝ) :
     avgOver (linePointDist L) value =
