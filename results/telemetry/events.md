@@ -8703,3 +8703,15 @@ this worktree's private build cache made the unchanged incoming file pass.
 - PR539 bounded supersession scout Cicero completed read-only source/main mapping in 633.160s against600s budget (overrun33.160s for final manifest/receipt, retained in actual accounting). Thread retired, four manifest entries verified, sourceca866da4 clean. Mathematical contributions and source construction are integrated; residual is one supplied-witness docstring correction plus historical audit/two incident records. Main-state fresh transitive axiom probe was not run; historical checks remain labelled historical. Preserve that narrow packet before retiring PR539; issue519 completion is a separate evidence-based decision, no wholesale conflict merge or new proof attempt.
 - PR288 cache-only publication failure resolved by the owning helper: canonical warm lacked branch-only BlockSpecialization.olean; targeted module build passed, then ordinary checked-push and all nine CI contexts/rooted audit1617/0/4 passed without source edits. MAIN verified strict normalized patch d30a088d unchanged from genuine5235946285, actual carry5239473266, clean synchronized25c845f1 and freshness before success; daemon merged da956e72, title [lean +147 -0], issue283closed. Receipts stayed outsideprimary until verified merge. PR481 already-completed fifth independent helper report5239392291 is accepted as final disposition under owner project-review-exception authority: F1-F4 resolved, all gates checked, all five reviews/costs preserved; no additional loop or source/CI waiver. MAIN did not duplicate the helper session, and records the full scope honestly rather than relabelling it as bounded-only.
 - PR543 preservation: Sol/Ultra native Wegener 01a0b099 completed saved nonencodingMarginalMass_le proof reuse at unchanged supplied-witness statement in local 97cfe139. Actual task 18:20:14.563Z-18:31:47.204Z (692.641s), before 18:35Z deadline; thread retired. Fifteen artifact hashes verified, focused Lean/module build/axiom probe/blueprint/sync/gap checks/hooks passed, one unrelated sorry remains. Full CI/publication/independent review deferred after owner467/456 and prioritized299/481. Evidence: native-audits/pr543-preservation-01a0b099/terminal.jsonl. Original branch history and proof-attempt costs preserved.
+
+## 2026-09-12 - Pauli soundness continuation (historical #529 / PR #536)
+
+- Historical session `prover-529-20260912-03` preserved commit `3a269dd8` and PR #536.
+  Its predecessor failed after exhausted HTTP 503 retries (1903 wall seconds,
+  usage unknown); a separate attempt failed after 48 seconds (usage unknown).
+  PR #536 first failed blueprint-sync workflow fixtures when inherited
+  `MIPSTARRE_HARDNESS_REASON` conflicted with routine classification; the retry
+  cleared invoking-model, classification, hardness, and review-model overrides.
+  A later exact-head CI manifest at `b37ebc1f` recorded a build-lock timeout
+  after 30 seconds; its other listed checks passed. These are historical
+  failures, not current-main validation, and prior costs are not reset.

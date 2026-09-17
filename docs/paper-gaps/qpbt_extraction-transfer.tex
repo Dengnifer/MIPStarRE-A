@@ -111,10 +111,25 @@ where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
 uses projectivity and orthogonality to keep the second term under control.
 The same argument is required for each player and each Pauli basis.
 
-This transfer is an open proof obligation for the next extraction stage.  It
-must be a theorem derived from the concrete swap unitaries, transformed-state
-estimate, and operator comparisons.  It must not be stored as a bridge field,
-residual assumption, or hypothesis of the source-labelled soundness theorem.
+The finite-dimensional estimate is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean}. For a complete POVM
+$\{N_h\}$, an orthogonal projection $Q$, and $Q\vartheta=\vartheta$, it gives
+\[
+  \sum_h\|(N_hQ-T_h)\Delta\|^2
+  \le 2\sum_h\|(N_h-T_h)\Delta\|^2+2\|\Delta-\vartheta\|^2.
+\]
+The proof uses $\sum_h N_h^\dagger N_h\le I$, so it also applies when the
+measurement is not projective. The same module proves the isometry form under
+the exact identity $N_h\phi=\phi M_h$ and its two bipartite placements. The
+unit-ancilla embedding and its composition with a unitary, including the
+identity $U(M\ot I\ot I)U^\dagger\phi=\phi M$, are proved in
+\path{MIPStarRE/QPBT/Test/Soundness/Ancilla.lean} for $\phi=UJ$,
+$J\psi=\psi\ot\eta$, $\|\eta\|=1$, and $U^\dagger U=I$.
+
+Applying these general results to the concrete swap unitaries, the
+transformed-state estimate, and the Pauli operator comparisons remains open.
+This step must not be stored as a bridge field, residual assumption, or
+hypothesis of the source-labelled soundness theorem.
 
 \section{Blueprint and formalization status}
 
@@ -150,12 +165,12 @@ self-consistency estimate to it, and replaces their three universal constants
 by their maximum.  Thus Lemma~\path{lem:qld-construct-the-paulis} is proved for
 the stated domain $0\leq\epsilon\leq1$, including the zero-error boundary.
 
-This completion does not establish Lemma~\path{lem:qld-unitary}.  No declaration
+This completion does not establish Lemma~\path{lem:qld-unitary}. No declaration
 yet composes \path{exists_globalPairWitness} with
 \path{exists_extractionWitness_ofGlobalPairWitness} to state the source lemma
-without a witness premise.  The later passage from the concrete swap operators
-to the isometries in the soundness theorem also remains unformalized and still
-requires the range-projection argument of the preceding section.
+without a witness premise. The general range-projection and ancilla results
+above do not yet instantiate the concrete swap operators or prove the final
+isometry comparison for the source soundness theorem.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{123} records the source-facing composition work: the pulled-apart
@@ -163,6 +178,8 @@ consistency composition is complete, while the source-unitary declaration is
 still absent.  \ghissue{47} tracks the separate range-projection transfer needed
 by \path{pauli_soundness}; that theorem must be derived from the concrete data
 rather than stored in the witness.
+\ghissue{529} records the independent general range-projection and ancilla
+results; it does not discharge the remaining extraction or soundness steps.
 
 \section{Conclusion}
 
@@ -170,13 +187,13 @@ The printed triangle calculation has repairable numerical errors, and the
 last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
-the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  The global polynomial-pair witness
+the latter has a proved general estimate but still requires an application to
+the concrete extraction data. The global polynomial-pair witness
 and the three pulled-apart consistency estimates are now composed in a proved
 source-facing theorem, including at zero error.  The subsequent extraction
 witness theorem remains conditional on a supplied global measurement, and no
 source-facing declaration yet establishes Lemma~\path{lem:qld-unitary}; the
-final range-projection transfer remains separate and open.
+final concrete isometry transfer remains separate and open.
 
 \bibliographystyle{alpha}
 \bibliography{references}
