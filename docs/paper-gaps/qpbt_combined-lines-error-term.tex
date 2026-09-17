@@ -291,8 +291,8 @@ This argument does not refute the existential point-witness declarations or the 
 \path{lem:qld-4-13}; neither requires a line approximation to every arbitrarily
 chosen point family.
 
-Two parts of the obstruction are independently verified in Lean: every
-projective joint family admits some finite witness error, and a coefficient
+The first ingredients of the obstruction are independently verified in Lean:
+every projective joint family admits some finite witness error, and a coefficient
 answer with zero quadratic coefficient agrees with a nonzero multiple of the
 square function with probability at most $2/q$.\footnote{The declarations are
 \path{CombinedPointsWitness.exists_error_of_projective} and
@@ -302,11 +302,22 @@ existence of an upper bound for a finite set of real numbers; the second reuses
 \path{directCoefficientCollision_avg_le}, which reduces to Mathlib's
 univariate root count. The complete strategy-level contradiction is the
 mathematical argument above, not a Lean counterexample theorem: the formal
-perfect-strategy construction and the formal integration of the lower bound
-remain to be supplied.}
-The existing auxiliary signatures and their unfinished proofs are preserved
-pending a separately scoped repair. A source-faithful existence proof must
-construct polynomially controlled points internally and retain their error
+integration of the lower bound into the directly indexed line law remains
+to be supplied.}
+The finite POVM calculation is also proved for arbitrary affine-answer
+measurements, including the completed answer alphabet: for nonzero $\alpha$
+the defect is at least $1-2/q$, and averaging $\alpha$ yields
+$(1-1/q)(1-2/q)$. At the admissible tuple $(q,m,d)=(8,1,1)$ the scalar
+average is at least $21/32$. The quadratic joint point family admits a
+finite-error witness on every projective setting.\footnote{See
+\path{MIPStarRE/QPBT/Combining/QuadraticPointObstruction.lean}, preserved from
+PR \#547 in the historical issue-511 audit. Its $21/32$ bound is a scalar
+average; the $21/256$ X-axis contribution has not been transported to the
+full directly indexed line-point law in Lean. The projective completeness
+entry \path{exists_spcc_value_one} is proved on the current branch.}
+The existing unrestricted auxiliary signatures and their unfinished proofs
+are preserved pending a separately scoped repair. A source-faithful existence
+proof must construct polynomially controlled points internally and retain their error
 through the line estimates; it cannot cover arbitrary supplied point
 measurements by discarding their error parameter. Even after that domain
 repair, the separate printed-error estimate discussed below remains open.
