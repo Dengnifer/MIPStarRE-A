@@ -102,34 +102,6 @@ theorem tauPointProj_epr_offDiagonal_eq_zero (W : PauliKind)
   · rfl
   · exact tauPointProj_epr_joint_eq_zero_of_ne W u hab
 
-/-- Completeness and normalization of the actual EPR state put unit mass on
-the diagonal of the ideal point joint measurement. No uniformity of its
-individual outcomes is required. -/
-theorem tauPointProj_epr_diagonal_eq_one (W : PauliKind)
-    (u : Fin P.m → PauliScalar P) :
-    (∑ a : PauliScalar P, stateQForm (eprState (PauliRegister P))
-      (heteroKron (tauPointProj W u a) (tauPointProj W u a))) = 1 := by
-  classical
-  calc
-    _ = ∑ a : PauliScalar P, ∑ b : PauliScalar P,
-        stateQForm (eprState (PauliRegister P))
-          (heteroKron (tauPointProj W u a) (tauPointProj W u b)) := by
-      apply Finset.sum_congr rfl
-      intro a _
-      symm
-      apply Finset.sum_eq_single a
-      · intro b _ hba
-        exact tauPointProj_epr_joint_eq_zero_of_ne W u hba.symm
-      · simp
-    _ = stateQForm (eprState (PauliRegister P))
-        (heteroKron (∑ a, tauPointProj W u a) (∑ b, tauPointProj W u b)) := by
-      simp only [heteroKron_finset_sum_left, heteroKron_finset_sum_right,
-        stateQForm_finset_sum]
-      exact Finset.sum_comm
-    _ = 1 := by
-      rw [sum_tauPointProj_eq_one, heteroKron_one_one, stateQForm_one,
-        eprState_norm, one_pow]
-
 /-- Averaging ideal point measurements over any question distribution preserves
 their zero consistency defect on one EPR pair. This specializes the existing
 `consistencyDefect` functional to the ancillary measurements in
