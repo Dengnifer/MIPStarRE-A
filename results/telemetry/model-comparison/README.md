@@ -25,9 +25,11 @@ or `xhigh` by role, difficulty, quality and latency. Sol is not an active option
 Historical records remain unchanged; `requested_effort` describes the launch
 request, not a new measurement of backend compute.
 
-The [post-merge integration note](astra-effort-integration-20260906.md) links the
-archived API-max/official-Ultra finding without identifying those modes or
-changing the max/xhigh policy. Historical run logs and reports remain unchanged.
+The [post-merge integration note](astra-effort-integration-20260906.md), itself a
+dated 2026-09-06 record whose policy sentences are superseded by
+`local/protocols/issues-prs.md` section 6, links the archived
+API-max/official-Ultra finding without identifying those modes or changing the
+max/xhigh policy. Historical run logs and reports remain unchanged.
 
 ## Re-run
 

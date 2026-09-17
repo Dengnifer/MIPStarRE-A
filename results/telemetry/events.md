@@ -5042,8 +5042,12 @@ and exact-head status rather than treating a launch command as completion.
 
 - **Trigger and authority:** session `orc-247-20260906-04`, issue #247/PR #260,
   receives the policy-alignment task after the owner's decision at
-  **2026-09-06T05:05Z**, recorded at **2026-09-06T05:17:03Z** in
-  `/tmp/qpbt-owner-concurrency-message.txt`. Its operative statement is:
+  **2026-09-06T05:05Z**, recorded at **2026-09-06T05:17:03Z**. The authority
+  cited for this amendment is the committed repository record
+  `results/telemetry/owner-messages/qpbt-owner-access-only-20260906-0505.md`,
+  which carries the same operative statement, the same B8 attempts 11 and 12
+  tranche and the same 25331-second cumulative bound. Its operative statement
+  is:
   “Only ACTUAL ACCESS/PERMISSION blockers go to the human owner”; mathematical
   and internal workflow decisions belong to qpbt-main, “EXPLICITLY INCLUDING
   posted B7/B8.” The same record explicitly withdraws the previous posted-#26
@@ -5051,8 +5055,13 @@ and exact-head status rather than treating a launch command as completion.
   four, and preserves cumulative attempts/time and original anchors. The
   02:55:29Z delegation, 02:58:41Z withdrawal, prior B7/B8 holds and subsequent
   effort-policy observations remain history, not erased or retroactive approval.
-  Source SHA-256 at inspection:
-  `386595c69b2ccd69cb729db1644adeede78db08460c2caad696c25adfcf4b610`.
+  Secondary provenance: the copy inspected at that time was the
+  out-of-repository transcript `/tmp/qpbt-owner-concurrency-message.txt`, whose
+  SHA-256 at inspection was
+  `386595c69b2ccd69cb729db1644adeede78db08460c2caad696c25adfcf4b610`. That path
+  is outside the repository and its current content no longer matches that
+  digest, so the digest verifies nothing a reader can inspect; the committed
+  owner-message record cited above is the verifiable authority.
 - **Bounded main decision:** the assignment record
   `/tmp/qpbt-247-access-only-policy-correction-20260906.md` specifies #118/B8
   attempts 11 and 12, each at most 2700 seconds on primary Astra max, carrying
@@ -5062,7 +5071,9 @@ and exact-head status rather than treating a launch command as completion.
   and not authorization for attempt 13 or unlimited renewal. This session
   records that supplied baseline; it neither dispatches nor verifies a new
   mathematical attempt. Assignment SHA-256:
-  `c7a5f598e11dda9f547bef10e355cba4141184f0fb2dea62f82b909f10e98620`.
+  `c7a5f598e11dda9f547bef10e355cba4141184f0fb2dea62f82b909f10e98620`. That
+  assignment path is likewise outside the repository, so its digest is recorded
+  provenance rather than a check a reader can repeat.
 - **Diagnosis and resolution:** live main/mathfix/orchestrator personas and
   sessions/issues-prs/review/meta/autofix protocols still routed mathematical
   decisions to the human or retained the withdrawn hold. Align these living
@@ -7885,15 +7896,21 @@ not actual commit/publication hooks. No productive session was killed.
   and whitespace checks pass. No Lean file was edited: the staged Lean tree
   and working files match incoming main exactly.
 - A preservation check found 39 nonblank historical line occurrences absent
-  from the automatic event merge. Their original paragraphs follow verbatim;
-  the check is rerun before committing. No raw session or amendment record is
-  rewritten. The merge stays local; the lane owns publication and later gates.
+  from the automatic event merge. Their original paragraphs follow below as a
+  line-level reconstruction, not a verified verbatim block copy (see the
+  2026-09-17 correction at the end of this file); the check is rerun before
+  committing. No raw session or amendment record is rewritten. The merge stays
+  local; the lane owns publication and later gates.
 
 ## 2026-09-12 - Historical PR260 event text retained during main refresh
 
 The following paragraphs from pre-merge commit `428b11cd` were absent from the
-automatic merge result. They are retained verbatim as historical records;
-current dispatch and authority rules remain in the protocols.
+automatic merge result. They are retained here as a line-level reconstruction of
+those historical records, not as a verified verbatim block copy: the preservation
+check compared the multiset of nonblank lines, so a line that occurs more than
+once in the file can be dropped from one occurrence without the check seeing it.
+One such drop is recorded in the 2026-09-17 correction at the end of this file.
+Current dispatch and authority rules remain in the protocols.
 
 ## 2026-09-03 — Operator takeover: owner's Claude session replaces the codex main session
 - **Trigger:** owner decision (2026-09-03, after the eight-hour stall and the
@@ -8992,3 +9009,50 @@ current dispatch and authority rules remain in the protocols.
 - Daemon merged577 at15:09:27Z as7ae0ec71089a9e05b47718a3f2ce43af160cec36 with approved3d18d4fe second parent, issue574closed, title lean0. Service synchronization completed15:10:54Z. Canonical warmer waited for294 full-build lock, then completed7ae0ec71 snapshot at15:12:19Z in9s; no duplicate warmer or direct cache write. Earlier approval receipt/pending events imported only after merge window closed. Native465 terminal assessment now published as5237785898 on a72c8dbb, full actual-record validation and success; allF1-F8 resolved, four prior full rounds preserved, stale after577 and queued for later strictcarry. James completed574.001s within900/deadline and retired; actual3396924input/3211648cached/18933output/7041reasoning delta archived. Fresh sole Sol/Ultra Erdos01a0afee admitted15:13:33.395Z for271 existing fourth-review F1/F2 repair under atomicmain-fix claim and deadline15:25:25Z; mathematics followsworkflow577. Requiredcycle snapshotcompleted/caps0/no lanes.294newpublicb873b1c8 liveCI, strict mathematical patch identity with genuine3338ec82 approval established but no carry before helper release/newheadgates.
 - Owner queue294: helperb873b1c8 allCIgreen but stale after577; MAIN model-free JIT from matching clean local/public head merged currentmain, published35eee1ad, all9CI/rooted1612pass0fail4statement-only warnings. Strict byte equality after removing only index/hunkheaders verified against genuine5236353918/3338ec82, SHA36881cd9e1e9cf4c3b78318e82b1ed04dfd2bbc33634dc0523898f8a37d9f812. Carried5238073693 body/commit/finalverdict/zeroledger verified; successposted without reviewer. Firstdaemonattempt15:39:36 failedgate2 when a helper appendedowner-sessions duringclean check; MAIN had helditsnewreceipts in/tmp. Failedlogpreserved; initialretry probes stoppedondirtybuilds withoutchangingmarker. Afterdaemonpublishedledger, observedclean synchronized1bee6139 at15:53:04, archivedretryblock and letdaemon recheckallgates. It merged2797f1aa at15:54:39 with35eee1ad secondparent, issue121closed, synccomplete15:56:06. Lean0 is accurate: finalLeanchange is a docstring and other changes are blueprint/audit; proofs were alreadyonmain. Canonicalcache2797snapshotcompleted15:56:43 in102s.213 isnow MAIN-ownednextJIT, launchedfrom5865b019 afterverified294merge; no parallelhelperupdate.
 - Native271Erdos completeda03f74e8 after628.779s withinbudget; two-fileF1/F2repair preserves sharedEPRstatement/proof andthreeextractionconsumers, unusedfiberlemmasprivate. Thirteenlabelled hashes verifiedaftersha256sumrejectedonlytheproseformat; allcosts/failurespreserved. Authorretired, claimreleased and model-freeadoption/publicationrequestedafterownerqueue; no newheadCI/reviewclaimed. Native398Boyle completed8a0f5846 after719.213s withinbudget: coefficientrepresentatives, fiveexistingdistance links/raworientation/prose only, original5b204638 untouched. Initialsync236stalegeneratedentries recorded; MAIN ranexactnormalprepush/CI update-lean-decls --ci step, produced1649refs andpassed withouttrackedchange. Sixaxiomclosures/directLean/render/checkdecls/hooks wereauthorverified; nofullCI/publication/review. Originalpapergapsremain. BoyleclosedbeforefreshSol/UltraDewey01a0b011 fourthindependentreview274 at75609918, threepriorfullreviews preserved, trustedc3ac113a, all9CI/rooted1610/0/4/setupverified. Actualstart15:51:50.485 means720scapdeadline16:03:50.485, explicitlycommunicatedas earlierthanlooseabsolute16:04:20. Admissionandterminalrecords stagedoutsideprimarythrough294retry and importedaftermerge.
+
+## 2026-09-17 - Record corrections for the PR260 standing-policy change
+
+Independent Opus review 5236094789 at head `97eece72` raised three record-level
+defects in the PR260 documentation. They are corrected as described below; no
+historical entry above is rewritten.
+
+- **Authority citation (F2).** The 2026-09-06 access-only escalation entry cited
+  only `/tmp/qpbt-owner-concurrency-message.txt` together with a SHA-256 taken at
+  inspection. That path is outside the repository and its content no longer
+  matches the recorded digest, so the digest verifies nothing a reader can check,
+  while `local/protocols/meta.md` principle 2 requires an amendment to cite its
+  trigger as evidence. The entry now cites the committed record
+  `results/telemetry/owner-messages/qpbt-owner-access-only-20260906-0505.md`,
+  which carries the same operative statement, the same B8 attempts 11 and 12
+  tranche and the same 25331-second cumulative bound, and keeps the temporary
+  path with its at-inspection digest only as secondary provenance. The bounded
+  main decision cites `/tmp/qpbt-247-access-only-policy-correction-20260906.md`,
+  which is outside the repository for the same reason and now carries the same
+  caveat.
+- **"Verbatim" claim (F3).** The 2026-09-12 merge-recovery entry and the
+  retained-text block both claimed that the paragraphs absent from the automatic
+  merge were retained verbatim. The preservation check compares the multiset of
+  nonblank lines, which cannot detect a line dropped from one of several
+  identical occurrences, so the claim was stronger than the evidence supports.
+  Concretely, in the retained 2026-09-04 operator-takeover entry the Handover
+  bullet lost its continuation line, which reads `#27 ("Handover to owner
+  session") and exited at 2026-09-04T14:57:57Z. The owner session`; the bullet
+  now shows a blank line between "posted its exact in-flight state to" and
+  "picks up every lane from that report". The exact original bullet is
+  `results/telemetry/events.md` lines 4384-4386 at commit `428b11cd`. The
+  two-line stub directly under the preceding `2026-09-04 — Operator takeover`
+  heading is not a reconstruction artefact: it reproduces a truncated entry that
+  already existed at `428b11cd` lines 2350-2351, and deleting it would discard
+  history rather than repair it. Both claims are corrected to "line-level
+  reconstruction"; under the append-only convention the retained paragraphs are
+  left as they stand and this note records exactly what differs from the source
+  commit.
+- **Superseded comparison note (F1).**
+  `results/telemetry/model-comparison/astra-effort-integration-20260906.md` now
+  carries a dated historical-status header and states its three policy sentences
+  as observations as of 2026-09-06 rather than as standing rules, pointing to
+  `local/protocols/issues-prs.md` section 6 for the governing text: main on Astra
+  Ultra with routine workers on Sol Ultra, admission by the configured account
+  caps in `sessions.md` section 4, and the 2026-09-06T05:05Z withdrawal of the
+  posted-#26 hold including B7 and B8. `results/telemetry/model-comparison/README.md`
+  now marks that link as historical.

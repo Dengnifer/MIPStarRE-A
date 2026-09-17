@@ -1,5 +1,12 @@
 # Effort evidence integration after PR238, September 6, 2026
 
+> **Status as of 2026-09-17: historical, superseded in part.** This note records
+> the state as it stood on 2026-09-06. Its model-selection, worker-allocation and
+> owner-inbox sentences are superseded by `local/protocols/issues-prs.md`
+> section 6, which is the governing text; read that section for the current
+> rules. The measurements, counts and provenance statements here remain valid as
+> dated records.
+
 GitHub reports PR238 merged at **2026-09-06T04:44:46Z**, commit
 `32a32edee16d3932525e4b1da9f84009e1fbb13b`. The assignment recorded the observed
 merge at 04:44:53Z; the former is the API's `merged_at`, not a new event inferred
@@ -24,10 +31,15 @@ effort, server-reported effort and delegation behavior distinct.
 The [original role-overstep correction](../owner-messages/qpbt-meta-20260905-230133/owner-meta-boundary-correction.json)
 is likewise preserved byte-identically from that archival commit, not rewritten
 as a new owner decision. Main owns plans, decisions and assignments; meta only
-guides. Main remains max; workers use primary Astra with main selecting exactly
-max or xhigh and fan-out disabled. The 8–11 useful-worker floor and eleven-worker
-cap do not authorize filler or bypass concrete service limits. All already-posted
-#26 items, including B7 and B8, await the human owner.
+guides. As observed on 2026-09-06, and superseded since: main remained max, with
+workers on primary Astra, main selecting exactly max or xhigh and fan-out
+disabled; the 8–11 useful-worker floor and eleven-worker cap authorized neither
+filler nor a bypass of concrete service limits; and all already-posted #26 items,
+including B7 and B8, awaited the human owner. For the governing rules see
+`local/protocols/issues-prs.md` section 6: main is Astra Ultra with routine
+workers on Sol Ultra, admission uses the configured account caps in
+`sessions.md` section 4, and the owner decision of 2026-09-06T05:05Z withdrew the
+posted-#26 hold, explicitly including B7 and B8.
 
 The README now restricts effort claims to the measured probes rather than
 relabeling unverified historical sessions. The original report's other
