@@ -174,7 +174,32 @@ representing the paper's coordinate $r+1$.
 	% axiom closure.
 	% The refined laws retain data not present in the axis source law.
 	\uses{def:ld-question-distribution, def:ld-line-description}
-	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs $(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs $(\ell=(u_0,s,v),u)$ from $\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is $D_{\mathsf{Line}}$. We also use seed-bearing refinements of these laws. An axis description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to $L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records $(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix condition $v_j=0$ for $j<i$. Mapping the two kinds of description to $(u_0,e_{\chi(s)})$ and $(u_0,s,v)$, respectively, sends the refined laws to the source laws.
+	The source \emph{axis line-point distribution} $D_{\mathsf{ALine}}$ is
+	the law $\mu_{L_{\mathsf{ALine}}, L_{\mathsf{Point}}}$ on pairs
+	$(\ell=(u_0,e_i),u)$, and the source \emph{diagonal line-point
+	distribution} $D_{\mathsf{DLine}}$ is the corresponding law on pairs
+	$(\ell=(u_0,s,v),u)$ from
+	$\mu_{L_{\mathsf{DLine}}, L_{\mathsf{Point}}}$. Their equal mixture is
+	$D_{\mathsf{Line}}$. We write
+	$\widetilde D_{\mathsf{ALine}}$, $\widetilde D_{\mathsf{DLine}}$, and
+	$\widetilde D_{\mathsf{Line}}$ for the seed-bearing refinements and their
+	equal mixture represented by the linked distribution declarations. An axis
+	description records $u_0$ and a seed $s$ selecting $i=\chi(s)$, subject to
+	$L^{\mathrm{Ln}}_{e_i}(u_0)=u_0$. A diagonal description records
+	$(u_0,s,v)$, subject to $L^{\mathrm{Ln}}_v(u_0)=u_0$ and to the prefix
+	condition $v_j=0$ for $j<i$. Define forgetful maps on line-point samples by
+	\[
+		\rho_{\mathsf{ALine}}((u_0,s),u)
+		=((u_0,e_{\chi(s)}),u),
+		\qquad
+		\rho_{\mathsf{DLine}}((u_0,s,v),u)=((u_0,s,v),u).
+	\]
+	Then $(\rho_{\mathsf{ALine}})_*\widetilde D_{\mathsf{ALine}}
+	=D_{\mathsf{ALine}}$ and
+	$(\rho_{\mathsf{DLine}})_*\widetilde D_{\mathsf{DLine}}
+	=D_{\mathsf{DLine}}$. The map $\rho_{\mathsf{Line}}$ acting by the
+	corresponding map in each component likewise sends
+	$\widetilde D_{\mathsf{Line}}$ to $D_{\mathsf{Line}}$.
 \end{definition}
 
 \begin{definition}[Win predicate of the classical low individual degree game]\label{def:ld-win-predicate}
