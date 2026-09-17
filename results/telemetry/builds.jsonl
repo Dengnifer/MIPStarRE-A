@@ -1445,3 +1445,6 @@
 {"ts": "2026-09-17T18:45:59+0900", "kind": "ci-build", "trigger": "ci.sh pr=558", "seconds": 28, "outcome": "success", "sha": "b94fe71233d4f882f14e8d3866312a7734e272f2", "note": "branch issue-557-merge-title-lean-loc"}
 {"ts": "2026-09-17T19:00:51+0900", "kind": "ci-build", "trigger": "ci.sh pr=289", "seconds": 29, "outcome": "success", "sha": "b2547508db659ec5c3742cbf6792cad83ae455c5", "note": "branch issue-284-combined-polynomial-image"}
 {"ts": "2026-09-17T19:06:01+0900", "kind": "ci-build", "trigger": "ci.sh pr=288", "seconds": 26, "outcome": "success", "sha": "be4aff93fc10ac94be89e075da2b6654e8c339ec", "note": "branch issue-283-block-specialization"}
+{"ts": "2026-09-17T19:37:49+0900", "kind": "ci-build", "trigger": "ci.sh pr=272", "seconds": 33, "outcome": "success", "sha": "7d5a9d5aaca624943482468dc71bc35c25f4db22", "note": "branch issue-266-tensor-consistency-transfer"}
+{"ts": "2026-09-17T19:54:58+0900", "kind": "ci-build", "trigger": "ci.sh pr=558", "seconds": 23, "outcome": "success", "sha": "ee3b0b976d36a4f8ae00d5647d2457b0e686d0cb", "note": "branch issue-557-merge-title-lean-loc"}
+{"ts": "2026-09-17T19:56:32+0900", "kind": "ci-build", "trigger": "ci.sh pr=299", "seconds": 32, "outcome": "success", "sha": "6d417606d5b2d17a61114caa45841bf7559e230b", "note": "branch issue-156-honest-pauli-current"}
