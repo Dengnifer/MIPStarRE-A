@@ -1497,3 +1497,4 @@
 {"ts": "2026-09-18T04:58:14+0900", "kind": "ci-build", "trigger": "ci.sh pr=271", "seconds": 36, "outcome": "success", "sha": "5840bcbb342f3cf646f1a2c38c0565ea464245b6", "note": "branch issue-267-ideal-point-perfect-consistency"}
 {"ts": "2026-09-18T05:40:57+0900", "kind": "ci-build", "trigger": "ci.sh pr=456", "seconds": 36, "outcome": "success", "sha": "d9bd07927083965375696006dd7eb52a9dffcc33", "note": "branch issue-452-mixed-line-resampling"}
 {"ts": "2026-09-18T06:04:22+0900", "kind": "ci-build", "trigger": "ci.sh pr=580", "seconds": 154, "outcome": "success", "sha": "73674f5e3576fc8f2d8778bd3087d8747303c2c1", "note": "branch issue-517-preserve-mass-bound-20260918"}
+{"ts": "2026-09-18T06:23:05+0900", "kind": "ci-build", "trigger": "ci.sh pr=456", "seconds": 25, "outcome": "success", "sha": "bcddef5e9bfb84fc69bf6a11b3e5cb25ccddd794", "note": "branch issue-452-mixed-line-resampling"}
