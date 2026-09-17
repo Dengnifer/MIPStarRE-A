@@ -32,7 +32,10 @@ private theorem avgOver_uniform_eq_indicator {K : Type*}
   rw [avgOver_uniform_eq_inv_card_mul_sum]
   simp
 
-private theorem affine_collision_average {K : Type*}
+/-- The uniform affine check accepts a distinct pair with probability `1/q`.
+This also supplies `eq:qld-g-separable`, supporting blueprint `lem:qld-4-7`.
+The proof is the existing affine coarse-graining calculation of this module. -/
+theorem affine_collision_average {K : Type*}
     [Field K] [Fintype K] [DecidableEq K]
     (p p' : K × K) :
     avgOver (uniformDistribution (K × K)) (fun coefficients =>
