@@ -1,0 +1,64 @@
+{
+  "recorded_at": "2026-09-08T11:49:15.677268+00:00",
+  "owner_question": "High concurrency but stalled progress; provider dashboard usually6-8 including main.",
+  "measurement_correction": "Active worker lifecycle counts are not simultaneous provider API requests. Earlier nine-worker snapshots did not verify sustained API saturation.",
+  "two_hour_worker_checks": {
+    "from": "2026-09-08T09:46:26.147247+00:00",
+    "to": "2026-09-08T11:46:04.575572+00:00",
+    "counts": {
+      "8": 40,
+      "9": 11,
+      "7": 61,
+      "6": 33,
+      "5": 20,
+      "4": 4,
+      "3": 1
+    },
+    "at_floor": 51,
+    "total": 170,
+    "unit": "recorded checks; not time percentage and not API requests"
+  },
+  "work_mix_at": "2026-09-08T11:42Z",
+  "work_mix": {
+    "CI_validation_of_completed_packets": 4,
+    "preserve_refresh_existing_PR296": 1,
+    "consume_approved_PR359_review_blocked_by_dead_publisher": 1,
+    "repair_missing_review_publication_resume_path": 1,
+    "primary_integration_and_telemetry_waiting_for_CI_writer_boundary": 1,
+    "replenishment_coordination": 1
+  },
+  "one_CI_owner_stale": true,
+  "fresh_new_proof_construction_observed": 0,
+  "six_hour_main_progress": {
+    "baseline": "578ec420",
+    "head": "93f0ae4",
+    "mathematical_PRs": [
+      310,
+      344
+    ],
+    "blueprint_PRs": [
+      356
+    ],
+    "telemetry_only_first_parent_commits": 6,
+    "QPBT_sorry_tokens_excluding_comments_and_strings": {
+      "before": 47,
+      "after": 47
+    },
+    "tracked_site_estimates_0402_and_1003": {
+      "open": 49,
+      "total": 197
+    },
+    "metric_denominators_distinct": true
+  },
+  "known_publication_blockers": {
+    "PR358": "missing supported continuation after canonical review publisher exits",
+    "PR359": "review approved but waiter absent and canonical response/publication incomplete"
+  },
+  "new_validation_results": {
+    "PR365": "success11:35:37Z",
+    "PR299": "success11:43:24Z",
+    "PR361": "success11:44:45Z"
+  },
+  "scope": "Meta read-only diagnosis and guidance; main selects tasks and owns changes/publication. No new build, key change, capacity change or primary write.",
+  "adoption": "Primary should record this measurement correction, throughput diagnosis and follow-up decision in normal telemetry; helper proof_progress_readback audited source/debt read-only, per-helper token/time totals unavailable."
+}

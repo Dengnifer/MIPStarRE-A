@@ -218,16 +218,20 @@ The next lemma shows that the pulled-apart measurements are consistent with the 
 Each displayed construction estimate below has its own universal constant $C_E \geq 1$, quantified independently, and its own scale $\delta_P^E=C_EB$. The source uses one enlarged error $\delta_S$ for all of these estimates. The two presentations agree: after the finitely many estimates have been established, take $C_* = \max_E C_E$ and $\delta_P=C_*B$. Since $B\geq0$, every bound remains valid at this common scale. In the proof paragraphs, $\delta_P$ denotes this common enlargement. It has the same asymptotic form as $\delta_G$: after shrinking $b$ to at most $1/2$, the term $\eps^b$ dominates $\sqrt{\eps}$ for $0 \leq \eps \leq 1$, while $(md)^a q^{-b}$ dominates $md/q$.
 
 \begin{lemma}[Consistency and self-consistency of the pulled-apart measurements]\label{lem:qld-construct-the-paulis}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas}
-	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'}
-	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent}
+	\lean{MIPStarRE.QPBT.exists_pulled_apart_consistency}
 	\lean{MIPStarRE.QPBT.deltaConstructPaulis}
 	\leanok
 	\uses{def:tilde-m-measurement, def:tilde-w-observables,
 		lem:projective-strategy-setup, def:expanded-state, def:consistency,
 		def:approx-question-indexed-operators, lem:qld-4-7,
 		def:indicator-vector}
-	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables $\tilde{W}^j(\tilde{u})$ satisfy the following properties.
+	There are universal constants $a>1$, $0<b<1$, and $C_*\geq1$ such that,
+	for every admissible parameter tuple and projective strategy in the setting
+	above with $0\leq\eps\leq1$, there is a pair of global projective measurements
+	satisfying Lemma~\ref{lem:qld-4-7} at error $\delta_G(\eps,m,d,q)$.
+	The measurements $\{\tilde{M}^{W,\tilde{u}}_a\}_{a \in \F_q}$ and observables
+	$\tilde{W}^j(\tilde{u})$ constructed from this same pair satisfy the following
+	properties, with all three constants taken to be $C_*$.
 	% The paper's statement also quantifies item 1 over j, but j does not occur
 	% in item 1; the vacuous quantifier is dropped here.
 	\begin{enumerate}
@@ -245,7 +249,45 @@ Each displayed construction estimate below has its own universal constant $C_E \
 			\tilde{W}^j(\tilde{u}) \ot \Id_{\mathrm{B}\mathrm{B}'\mathrm{B}''} \approx_{\delta_P^{\mathrm{obs}}} \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \ot \tilde{W}^j(\tilde{u})\;.
 		\]
 	\end{enumerate}
+	The construction above does not assume a supplied global measurement. Its
+	proof chooses the global polynomial-pair measurements supplied by
+	Lemma~\ref{lem:qld-4-7}, applies the three estimates of
+	Example~\ref{lem:qld-construct-the-paulis-given-global-pair} to the same
+	witness, and replaces their universal constants by their maximum. The
+	separate numerical and isometry-transfer questions arising later in the
+	extraction argument are recorded in \cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-7, lem:qld-construct-the-paulis-given-global-pair}
+	Choose the global polynomial-pair measurements from
+	Lemma~\ref{lem:qld-4-7}. Example~\ref{lem:qld-construct-the-paulis-given-global-pair}
+	provides universal constants for the two point-consistency estimates and the
+	observable self-consistency estimate for this same witness. Let $C_*$ be their
+	maximum. Since $B=\delta_G+\sqrt\eps+md/q$ is nonnegative, replacing each
+	constant by $C_*$ only enlarges its allowed error. The three conclusions
+	therefore hold simultaneously at the common scale $C_*B$.
+\end{proof}
+
+\begin{example}[Conditional estimates given a global polynomial-pair witness]
+	\label{lem:qld-construct-the-paulis-given-global-pair}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
+	\lean{MIPStarRE.QPBT.tildeObs_selfConsistent_ofGlobalPairWitness}
+	\leanok
+	\uses{def:tilde-m-measurement, def:tilde-w-observables, lem:qld-4-7,
+		lem:projective-strategy-setup, def:expanded-state, def:consistency,
+		def:approx-question-indexed-operators, def:indicator-vector}
+	For each of the three estimates in Lemma~\ref{lem:qld-construct-the-paulis},
+	there is a universal constant $C_E\geq1$ such that the estimate holds for
+	every admissible tuple, every $0\leq\eps\leq1$, every projective strategy at
+	error $\eps$, every $\delta_G\geq0$, and every supplied pair of projective
+	polynomial-pair measurements satisfying both point-consistency estimates of
+	Lemma~\ref{lem:qld-4-7} at error $\delta_G$.
+	The global measurement and its consistency estimates are hypotheses of this
+	statement. Consequently, this auxiliary does not assert their construction
+	or the unrestricted conclusion of Lemma~\ref{lem:qld-construct-the-paulis}.
+\end{example}
 \begin{proof}
 	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, def:tilde-m-measurement, def:tau-dot-product-projector, lem:qld-decoder-evaluation, lem:qld-decoder-linearity, def:indicator-vector, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:triangle, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
 	% Support restriction added: the source (line 1492 of
@@ -404,6 +446,7 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	together with the analogous identity for $V_{\mathrm{A}}$ on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, def:v-swap-unitary, def:tilde-m-measurement, def:tau-dot-product-projector, def:indicator-vector, def:decoding-map, def:generalized-pauli}
 	Since the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective (Lemma~\ref{lem:qld-4-7}) and the $\tau^X, \tau^Z$ observables are self-inverse,
 	\[
@@ -456,9 +499,157 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
 \end{proof}
 
+\begin{theorem}[EPR projection estimates]\label{thm:qld-epr-projection-estimates}
+	\lean{MIPStarRE.QPBT.Extraction.pauliCorrelation_mul_eq_epr}
+	\lean{MIPStarRE.QPBT.Extraction.norm_sub_eprProjection_le}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.idealExpState_extractionAux0}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_unit_aux_near_eprProjection}
+	\leanok
+	\uses{def:generalized-pauli, def:EPR, lem:projective-strategy-setup}
+	This auxiliary statement isolates the projection and normalization
+	calculations in the proof of Lemma~\ref{lem:qld-unitary}.
+	Write $E=\ket{\mathrm{EPR}_q}^{\ot M}$ and
+	\[
+		H_W=\frac{1}{q^M}\sum_{u\in\F_q^M}\tau^W(u)\ot\tau^W(u).
+	\]
+	Then $H_XH_Z=\ket{E}\bra{E}$. Let $R$ be an auxiliary register and
+	$\vartheta$ a unit vector on $R\ot A''\ot B''$. If $\delta\geq0$ and
+	\[
+		\Re\langle\vartheta,(\Id_R\ot H_W)\vartheta\rangle
+		\geq1-\delta/2\qquad(W\in\{X,Z\}),
+	\]
+	then, writing $\Pi=\Id_R\ot\ket{E}\bra{E}$, one has
+	\[
+		\|\vartheta-\Pi\vartheta\|\leq2\sqrt\delta.
+	\]
+	In the projective setting of Lemma~\ref{lem:projective-strategy-setup},
+	take $R=AA'BB'$. For every vector $\vartheta$ on the six registers, set
+	$\mathrm{aux}_0=(\Id_R\ot\bra{E})\vartheta$. Then
+	$\mathrm{aux}_0\ot E=\Pi\vartheta$. If $\vartheta$ is a unit vector, there is
+	a unit vector $\mathrm{aux}$ on $R$ such that
+	\[
+		\|\vartheta-\mathrm{aux}\ot E\|
+		\leq2\|\vartheta-\Pi\vartheta\|.
+	\]
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:pauli-observable-expansion, def:generalized-pauli, def:EPR}
+	Fourier inversion shows that $H_Z$ keeps precisely the equal computational
+	labels. Averaging the simultaneous shifts gives $H_XH_Z=\ket{E}\bra{E}$.
+	Each $\Id_R\ot H_W$ is an average of unitaries, hence is a contraction.
+	Expanding the squared distance gives
+	$\|\vartheta-(\Id_R\ot H_W)\vartheta\|^2\leq\delta$.
+	The product identity and the triangle inequality now bound
+	$\|\vartheta-\Pi\vartheta\|$ by $2\sqrt\delta$.
+	The partial-inner-product formula gives
+	$\mathrm{aux}_0\ot E=\Pi\vartheta$. Normalizing $\mathrm{aux}_0$
+	at most doubles its distance from $\vartheta$, by the reverse triangle
+	inequality. If $\mathrm{aux}_0=0$, the projection error is one; the
+	original strategy state tensored with one EPR pair supplies a unit
+	reference vector on $R$, and the required distance is at most two.
+\end{proof}
+
+\begin{example}[State extraction from a supplied global witness]
+	\label{lem:qld-state-extraction-given-global-pair}
+	\lean{MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness}
+	\leanok
+	\uses{lem:qld-construct-the-paulis-given-global-pair, def:v-swap-unitary,
+		thm:qld-epr-projection-estimates}
+	Assume the global polynomial-pair measurement and both consistency estimates
+	of Lemma~\ref{lem:qld-4-7} as supplied data at error $\delta_G\geq0$.
+	There is a universal constant $C\geq1$ such that, for every admissible
+	projective setting with $0\leq\eps\leq1$, a normalized auxiliary state satisfies
+	\[
+	  \|V_{\mathrm A}\ot V_{\mathrm B}\ket{\hat\psi}
+	      -\ket{\mathrm{aux}}\ot\ket{\mathrm{EPR}_q}^{\ot M}\|^2
+	  \leq16C(\delta_G+\sqrt\eps+md/q).
+	\]
+	This statement assumes the global measurement and therefore does not assert
+	its construction or the unconditional extraction conclusion.
+\end{example}
+
+\begin{example}[Evaluated Pauli consistency from a supplied global witness]
+  \label{lem:qld-evaluated-pauli-given-global-pair}
+  \lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas_ofGlobalPairWitness}
+  \lean{MIPStarRE.QPBT.tildeM_consistent_pointMeas'_ofGlobalPairWitness}
+  \lean{MIPStarRE.QPBT.evaluated_pauli_tilde_consistency_ofGlobalPairWitness}
+  \leanok
+  \uses{lem:qld-construct-the-paulis-given-global-pair, lem:qld-win-implications}
+  Assume the global polynomial-pair witness at error $\delta_G\geq0$ as data.
+  Each of the two point comparisons in Item 1 of
+  Lemma~\ref{lem:qld-construct-the-paulis} has a universal bound $CB$, where
+  $B=\delta_G+\sqrt\eps+md/q$ and $0\leq\eps\leq1$.
+  After enlarging the universal constant, the two consistency defects between
+  the evaluated total-Pauli measurement of one player and the pulled-apart
+  measurement of the other player are also at most $CB$ on $\ket{\hat\psi}$.
+  The constants precede all parameters, strategies, and supplied witnesses.
+  No construction of the global witness is asserted.
+\end{example}
+
+\begin{lemma}[Pauli comparison after a change of state]
+  \label{lem:qld-pauli-overlap-state-transfer}
+  \lean{MIPStarRE.QPBT.pauli_overlap_transfer}
+  \lean{MIPStarRE.QPBT.pauli_distance_on_ideal_le}
+  \lean{MIPStarRE.QPBT.extraction_small_error_absorption}
+  \leanok
+  \uses{def:generalized-pauli, def:EPR, def:povm-distance}
+  Let $A=\{A_h\}$ and $B=\{B_h\}$ be arbitrary local POVMs, and let
+  $\vartheta$ and $\Phi$ be unit vectors on the associated bipartite space.
+  Write
+  \[
+    E_{A,B}(\vartheta)=\mathbb E_u\sum_a
+      \langle\vartheta,A_{[g_h(u)=a]}\ot B_{[g_h(u)=a]}\vartheta\rangle.
+  \]
+  Then
+  \[
+    E_{A,B}(\vartheta)
+    \leq \sum_h\langle\Phi,A_h\ot B_h\Phi\rangle
+      +md/q+2\|\vartheta-\Phi\|.
+  \]
+  In particular, let $A$ act on
+  $\mathcal H_A\ot\mathbb C^{q^M}$, take $B$ to be the canonical Pauli
+  projectors on $\mathcal H_B\ot\mathbb C^{q^M}$, and set
+  $\Delta=\mathrm{aux}\ot\mathrm{EPR}_q^{\ot M}$ in local player order for a
+  unit auxiliary vector. For either Pauli basis,
+  \[
+    \sum_h\|((A_h-\Id_{\mathcal H_A}\ot\tau^W_h)\ot\Id)\Delta\|^2
+    \leq 2(1-E_{A,B}(\vartheta))+2md/q+4\|\vartheta-\Delta\|.
+  \]
+  These bounds are independent of the dimensions and the number of answers.
+  Finally, for $0\leq\delta\leq1$ and $C\geq18$, both $16\delta$ and
+  $2\delta+2md/q+16\sqrt\delta$ are at most $C(\delta^{1/4}+md/q)$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:sandwich-evaluated-diagonal-overlap,
+    lem:schwartz-zippel-total-degree, fact:agreement,
+    lem:pauli-observable-expansion}
+  A selected sum of effects of the product POVM is a positive contraction.
+  Its expectation changes by at most twice the distance between unit vectors.
+  Schwartz--Zippel bounds the unequal-encoding contribution by $md/q$.
+  Symmetry of the Pauli projectors moves their action across the EPR pair,
+  and the agreement inequality bounds the full distance by twice the overlap
+  deficit. The scalar bounds follow from $\delta,\sqrt\delta\leq\delta^{1/4}$.
+\end{proof}
+
+\begin{example}[Extraction with allowed error at least four]
+	\label{lem:qld-large-error-extraction-given-global-pair}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness_of_four_le}
+	\leanok
+	\uses{def:v-swap-unitary, def:EPR, lem:projective-strategy-setup}
+	For any supplied global polynomial-pair witness and any allowed squared
+	error $\delta\geq4$, there exists a conditional extraction witness.
+	The auxiliary vector is the original strategy state tensored with EPR on
+	the auxiliary registers. Unitarity bounds the state distance by four;
+	completeness bounds the summed Pauli measurement distance by four, for
+	each player and each basis. No restriction on a projection norm is needed.
+\end{example}
+
 \begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
+	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state,
 		lem:projective-strategy-setup, def:generalized-pauli, def:EPR,
 		def:povm-distance}
@@ -478,18 +669,38 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	$\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'$ for which items 1 and 2 of
 	Lemma~\ref{lem:qld-unitary} hold at the scale $\delta_{\mathrm{qld}}$ of that
 	lemma, computed from $\eps$ and the assumed $\delta_G$.
-	The assumed measurement is proof debt rather than a faithful boundary
-	hypothesis: Lemma~\ref{lem:qld-unitary} obtains it from
-	Lemma~\ref{lem:qld-4-7} before constructing the swap unitaries. Eliminating
-	the assumption requires carrying out that construction first; this missing
-	composition is recorded in \cite{gap:qpbt_extraction-transfer}.
-	The corresponding proof obligation repeats the argument of
-	Lemma~\ref{lem:qld-unitary} above, using the assumed
-	measurement in place of the appeal to Lemma~\ref{lem:qld-4-7}.
+	This statement assumes the global measurement and therefore does not assert
+	its construction or the unconditional conclusion of
+	Lemma~\ref{lem:qld-unitary}. The required composition is recorded in
+	\cite{gap:qpbt_extraction-transfer}.
 \end{example}
+\begin{proof}
+	\uses{lem:qld-state-extraction-given-global-pair,
+		lem:qld-evaluated-pauli-given-global-pair, lem:v-swap-conjugation,
+		lem:qld-pauli-overlap-state-transfer,
+		lem:qld-large-error-extraction-given-global-pair}
+	Let $C_S,C_E$ be the universal constants in the auxiliary-state and
+	evaluated-consistency estimates. Choose
+	$C_{\mathrm{ext}}=\max\{C_S,C_E,18\}$ before fixing any parameters or
+	strategy, and put $\delta=C_{\mathrm{ext}}(\delta_G+\sqrt\eps+md/q)$.
+	The normalized auxiliary state has squared extraction error at most
+	$16\delta$. For each player and either Pauli basis, simultaneous swap
+	conjugation and \eqref{eq:qld-unitary-6} identify the evaluated overlap
+	on the swapped state with one minus the corresponding consistency defect
+	on $\ket{\hat\psi}$. That defect is at most $\delta$.
+	Lemma~\ref{lem:qld-pauli-overlap-state-transfer} therefore bounds the
+	full Pauli distance on the ideal state by
+	$2\delta+2md/q+16\sqrt\delta$.
+	When $\delta\leq1$, both errors are at most
+	$C_{\mathrm{ext}}(\delta^{1/4}+md/q)$ by the scalar estimate in that lemma.
+	When $\delta>1$, the allowed error is at least four, so the complete
+	large-error construction applies. The exact swap identities give both
+	unitarity equations in either case.
+\end{proof}
 
 \begin{lemma}[Preservation of the robustness error family]\label{lem:qld-extraction-error-form}
 	\lean{MIPStarRE.QPBT.deltaExtract_le_deltaQld}
+	\leanok
 	\uses{def:admissible, lem:qld-unitary}
 	Let $C\geq1$, $a>1$, and $0<b<1$. Suppose that
 	\[
@@ -505,6 +716,30 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		\leq a'(md)^{a'}\bigl(\eps^{b'}+q^{-b'}+2^{-b'md}\bigr).
 	\]
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Write $D=md$, and set $\beta=b/8$, $A=4C^2a$, $H=aD^a$, and
+	$R=\eps^\beta+q^{-\beta}+2^{-\beta D}$.
+	Admissibility gives $D,q\geq1$, so $H\geq D\geq1$, $A\geq a>1$,
+	and $0<\beta<1$. Fourth-root subadditivity and monotonicity of real
+	powers, using $0\leq\eps\leq1$ and $\beta\leq b/4$, give
+	\[
+		\delta_G^{1/4}\leq HR,\qquad
+		\eps^{1/8}\leq HR,\qquad
+		(D/q)^{1/4}\leq HR,\qquad D/q\leq HR.
+	\]
+	Indeed, the fourth root of the sum defining $\delta_G/H$ is at most
+	$R$, while $H^{1/4}\leq H$, $D^{1/4}\leq D\leq H$,
+	$\eps^{1/8}\leq\eps^\beta$, and $q^{-1/4},q^{-1}\leq q^{-\beta}$.
+	Since $C^{1/4}\leq C$, subadditivity also gives
+	$\delta_P^{1/4}\leq3CHR$. Consequently,
+	\[
+		\delta_{\mathrm{ext}}
+		\leq C(3C+1)HR\leq4C^2HR=AD^aR\leq AD^AR.
+	\]
+	Thus $a'=A$ and $b'=\beta$ have the required properties.
+\end{proof}
 
 \begin{remark}[Two steps in the source proof of the extraction lemma]\label{rem:qld-unitary-triangle-slip}
 	In the source proof of Lemma~\ref{lem:qld-unitary}, the triangle inequality gives $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq \| (\Id - H_X)\ket{\vartheta} \| + \| (\Id - H_Z)\ket{\vartheta} \| \leq 2\sqrt{\delta_P}$, so that $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \|^2 \leq 4\delta_P$; the source instead asserts the bound $2\sqrt{\delta_P}$ for the \emph{squared} norm, which holds only when $\sqrt{\delta_P} \leq 1/2$, and consequently carries the term $\sqrt{\delta_P}$ into an overlap bound of $1 - 2\delta_P - \sqrt{\delta_P}$. The proof above uses the corrected bound $4\delta_P$, which gives the overlap bound $1 - 4\delta_P$ and leaves the final bound $\delta_{\mathrm{qld}} = O(\delta_P^{1/4} + md/q)$ unchanged. The source proof also normalizes the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ without ensuring that it is nonzero; the case distinction on $\delta_P$ in the proof above supplies this, the conclusions of the lemma being trivial when $\delta_P$ exceeds a universal constant.

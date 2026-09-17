@@ -13,7 +13,9 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 
 1. the PR is open, unmerged, not a draft;
 2. the primary worktree is clean and on the base, and the local branch tip is that
-   SHA — the merge must be of the bytes that were built here;
+   SHA — the merge must be of the bytes that were built here.  The current base
+   tip must be its ancestor, or have advanced from their merge base only through
+   passive telemetry records allowed by ``head_is_fresh``;
 3. the eight ``local-ci/<step>`` contexts (ci.sh:70) and ``local-ci/summary`` are
    ``success`` on it.  A missing context blocks: GitHub's combined state reads
    "success" for a commit carrying no statuses at all;
@@ -31,6 +33,14 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 ``--adjudicated`` waives gate 4's adverse verdict — nothing else — when an
 ``ADJUDICATION`` comment names this exact head (review.md 12).  GitHub merges and
 closes the linked issues itself, so no local bookkeeping can double-count.  The
+merge commit's subject is ``Merge PR #N: <title> [lean +A -D]``: the PR's approximate
+Lean line delta against its merge base, so the commits page shows each packet's size
+without opening it (issue #557).  That count is cosmetic — it is measured after the
+gates, it is never evidence, and an unmeasurable delta leaves GitHub's own wording
+in place rather than refusing anything.  Closing keywords in that title are defused
+(``closes #900`` -> ``closes issue 900``) because gate 7 scanned the body and the
+branch commits, not the subject, and a merge commit that closes an unchecked issue
+would bypass it.  The
 best-effort tail then fast-forwards local ``main``, refreshes the
 ``refs/remotes/origin/main`` alias the hooks and diff-based audits need in order not
 to self-disable (DESIGN.md:83-85), warms the cache and drops the branch.
@@ -58,6 +68,11 @@ CI_STEPS = ("build", "blueprint-render", "paper-gaps", "blueprint-sync",
 CI_CONTEXTS = tuple(f"local-ci/{step}" for step in CI_STEPS) + ("local-ci/summary",)
 REVIEW_CONTEXT = "local-review/summary"
 
+#: Issue #557 — the merge subject carries the PR's Lean line delta so the commits page
+#: shows the size of each packet without opening the merge.  The PR title is truncated
+#: to this many characters so the subject stays readable beside the ``[lean …]`` bracket.
+MERGE_TITLE_PR_LIMIT = 80
+
 #: Findings are task-list items; an unticked box is an open finding.  Kept compatible
 #: with review.sh's tally and autofix.sh's ledger read.
 UNCHECKED_FINDING_RE = re.compile(r"^\s*[-*]\s*\[ \]", re.MULTILINE)
@@ -74,11 +89,36 @@ DISPOSITION_RE = re.compile(
 #: prefixes; gate 6 reports how many such commits the PR carries.
 FIX_COMMIT_PREFIXES = ("[codex-auto-fix]", "[codex-review-fix]")
 
+#: Gate 2b tolerates only passive telemetry records.  Git tree modes are part of
+#: the policy: executable regular files, symlinks, submodules and unknown types
+#: remain freshness-relevant even when their path has a data-looking suffix.
+NONEXECUTABLE_FILE_MODE = b"100644"
+MISSING_FILE_MODE = b"000000"
+TELEMETRY_PATH_PARTS = ("results", "telemetry")
+GITHUB_SNAPSHOT_PATH_PARTS = TELEMETRY_PATH_PARTS + ("github-snapshot",)
+
 #: GitHub's nine auto-closing keywords, exactly (close/closes/closed, fix/fixes/fixed,
 #: resolve/resolves/resolved) — the gate must see every issue GitHub will close on
 #: merge.  ``Addresses`` keeps an issue open and imposes no dependency
 #: (CONTRIBUTING.md:61-62).  Keep in sync with pr_open.py CLOSES_RE.
 CLOSES_RE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+#(\d+)", re.IGNORECASE)
+
+
+def neutralize_closing_keywords(text: str) -> str:
+    """Defuse GitHub's closing keywords in text bound for the merge commit.
+
+    Gate 7 (``check_dependencies``) scans the PR body and the branch commits, the
+    two surfaces that existed when it ran.  The merge subject adds a third — the
+    PR title, untrusted text that reaches the default branch only here — and
+    GitHub honors closing keywords in a merge commit message just as it does in a
+    body.  A title reading ``closes #900`` would therefore close an issue whose
+    open sub-issues and deferred status nobody checked.  ``closes #900`` becomes
+    ``closes issue 900``: the sentence still reads, the reference no longer fires.
+
+    Applied before any truncation, which could otherwise forge a *different*
+    reference by cutting ``#9001`` down to ``#900``.
+    """
+    return CLOSES_RE.sub(lambda m: m.group(0).replace("#", "issue "), text)
 
 
 class GateFailure(LayerError):
@@ -87,9 +127,18 @@ class GateFailure(LayerError):
 
 # --------------------------------------------------------------- small helpers
 
+def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["git", *args], cwd=str(repo_root),
+                          capture_output=True, text=True, check=False)
+
+
+def _run_git_raw(repo_root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(["git", *args], cwd=str(repo_root),
+                          capture_output=True, check=False)
+
+
 def git(repo_root: Path, *args: str, check: bool = True) -> str:
-    result = subprocess.run(["git", *args], cwd=str(repo_root),
-                            capture_output=True, text=True, check=False)
+    result = _run_git(repo_root, *args)
     if check and result.returncode != 0:
         raise LayerError(f"git {' '.join(args)} failed ({result.returncode}): "
                          f"{result.stderr.strip() or result.stdout.strip()}")
@@ -97,8 +146,104 @@ def git(repo_root: Path, *args: str, check: bool = True) -> str:
 
 
 def git_ok(repo_root: Path, *args: str) -> bool:
-    return subprocess.run(["git", *args], cwd=str(repo_root), capture_output=True,
-                          text=True, check=False).returncode == 0
+    return _run_git(repo_root, *args).returncode == 0
+
+
+def _is_tolerated_telemetry_path(path: str) -> bool:
+    """Return whether *path* is an allowlisted passive telemetry data path."""
+    if any(ord(char) < 32 or ord(char) == 127 for char in path):
+        return False
+    parts = tuple(path.split("/"))
+    if (len(parts) < 3 or parts[:2] != TELEMETRY_PATH_PARTS
+            or any(part in ("", ".", "..") for part in parts)):
+        return False
+    suffix = Path(parts[-1]).suffix
+    if suffix in (".md", ".jsonl"):
+        return True
+    return (len(parts) >= 4 and parts[:3] == GITHUB_SNAPSHOT_PATH_PARTS
+            and suffix == ".json")
+
+
+def _is_tolerated_telemetry_change(header: bytes, raw_path: bytes) -> bool:
+    """Classify one ``git diff --raw -z --no-renames`` record."""
+    try:
+        path = raw_path.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    fields = header.split()
+    if len(fields) != 5 or not fields[0].startswith(b":"):
+        return False
+    old_mode, new_mode = fields[0][1:], fields[1]
+    old_object, new_object = fields[2], fields[3]
+    status = fields[4]
+    hex_digits = b"0123456789abcdef"
+    if (len(old_object) != len(new_object) or len(old_object) not in (40, 64)
+            or any(byte not in hex_digits for byte in old_object + new_object)):
+        return False
+    expected_modes = {
+        b"A": (MISSING_FILE_MODE, NONEXECUTABLE_FILE_MODE),
+        b"D": (NONEXECUTABLE_FILE_MODE, MISSING_FILE_MODE),
+        b"M": (NONEXECUTABLE_FILE_MODE, NONEXECUTABLE_FILE_MODE),
+    }
+    return (expected_modes.get(status) == (old_mode, new_mode)
+            and _is_tolerated_telemetry_path(path))
+
+
+def _base_advance_is_tolerated(repo_root: Path, merge_base: str, base_ref: str) -> bool:
+    """Check every base-side tree change against the passive telemetry policy."""
+    result = _run_git_raw(repo_root, "diff", "--raw", "-z", "--no-renames",
+                          "--ignore-submodules=none", "--no-abbrev", merge_base,
+                          base_ref, "--")
+    if result.returncode != 0:
+        return False
+    if not result.stdout:
+        return True
+    records = result.stdout.split(b"\0")
+    if records[-1] != b"":
+        return False
+    records.pop()
+    if len(records) % 2 != 0:
+        return False
+    paths: list[str] = []
+    for index in range(0, len(records), 2):
+        if not _is_tolerated_telemetry_change(records[index], records[index + 1]):
+            return False
+        try:
+            paths.append(records[index + 1].decode("utf-8"))
+        except UnicodeDecodeError:
+            return False
+
+    # A file/directory replacement appears in a recursive raw diff as a deletion
+    # plus additions below the deleted path, rather than as one mode-changing row.
+    path_set = set(paths)
+    if len(path_set) != len(paths):
+        return False
+    for path in paths:
+        parts = path.split("/")
+        if any("/".join(parts[:end]) in path_set for end in range(1, len(parts))):
+            return False
+    return True
+
+
+def head_is_fresh(repo_root: Path, base_ref: str, head_sha: str) -> bool:
+    """Return whether ``head_sha`` is fresh enough to merge against ``base_ref``.
+
+    Ancestry is the fast path.  Otherwise every base-side change must be a regular,
+    non-executable ``.md`` or ``.jsonl`` file below ``results/telemetry``, or a
+    generated ``.json`` file below ``results/telemetry/github-snapshot``.  Every
+    failed Git command, malformed record and unknown path or mode fails closed.
+    This is the daemon-facing predicate used by gate 2b.
+    """
+    ancestor = _run_git(repo_root, "merge-base", "--is-ancestor", base_ref, head_sha)
+    if ancestor.returncode == 0:
+        return True
+    if ancestor.returncode != 1:
+        return False
+    merge_base_result = _run_git(repo_root, "merge-base", base_ref, head_sha)
+    merge_base = merge_base_result.stdout.strip()
+    if merge_base_result.returncode != 0 or not merge_base:
+        return False
+    return _base_advance_is_tolerated(repo_root, merge_base, base_ref)
 
 
 def _pid_alive(pid: int) -> bool:
@@ -331,19 +476,21 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
                           f"ref={branch!r} base={base!r}; all three are required.")
     passed(f"gate 1 open, not a draft: {branch} @ {head_sha[:12]} -> {base}")
     ensure_mergeable_worktree(repo_root, branch, base, head_sha)
-    # Gate 2b — the head must CONTAIN the current base tip: CI and review bind
-    # to the head alone, so a branch behind the base would merge a base/head
-    # combination nothing ever tested (round 3, F2).  Fetch first so "current"
-    # means GitHub's tip, not a stale local remote-tracking ref.
+    # Gate 2b — the head must contain the current base tip unless the base has
+    # advanced only through allowlisted passive telemetry records.  CI and review
+    # remain bound to the exact head.  Fetch first so "current" means GitHub's
+    # tip, not a stale local remote-tracking ref.
     if not git_ok(repo_root, "fetch", "github", base):
         raise GateFailure(f"gate 2b (fresh base): 'git fetch github {base}' failed; cannot "
                           "verify the branch is up to date with the base.")
-    if not git_ok(repo_root, "merge-base", "--is-ancestor", f"github/{base}", head_sha):
+    if not head_is_fresh(repo_root, f"github/{base}", head_sha):
         base_tip = git(repo_root, "rev-parse", "--short", f"github/{base}", check=False)
         raise GateFailure(f"gate 2b (fresh base): {base} is at {base_tip} and the PR head "
-                          f"{head_sha[:12]} does not contain it. Merge or rebase the base "
-                          "into the branch, re-run CI and review on the new head, then merge.")
-    passed(f"gate 2b head contains the current {base} tip")
+                          f"{head_sha[:12]} neither contains it nor predates only tolerated "
+                          "passive telemetry changes. Merge or rebase the base into the "
+                          "branch, re-run CI and review on the new head, then merge.")
+    passed(f"gate 2b head is fresh against current {base} "
+           "(ancestry or passive-telemetry-only move)")
     statuses = gh_common.latest_statuses(head_sha)  # one read; gates 3 and 4 share it
     reviews = gh_common.pr_reviews(number)
     check_ci(statuses, head_sha)
@@ -361,7 +508,11 @@ def run_gate(repo_root: Path, number: int, *, adjudicated: bool) -> dict:
     merge_base = check_fix_gates(repo_root, branch, base, head_sha)
     check_dependencies(repo_root, number, str(pr.get("body") or ""), merge_base, head_sha,
                        deferred_issues)
-    return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base}
+    # The merge base travels out with the facts: the merge subject's Lean line delta
+    # is measured from it, and re-deriving it in the caller could pick a different
+    # commit if the base moved between the two reads.
+    return {"pr": pr, "head_sha": head_sha, "branch": branch, "base": base,
+            "merge_base": merge_base}
 
 
 # ------------------------------------- post-merge tail: best effort, non-fatal
@@ -486,6 +637,66 @@ def post_merge(repo_root: Path, base: str, branch: str, *, warm_cache: bool) -> 
     remove_branch_and_worktree(repo_root, branch)
 
 
+# ------------------------------------- the merge subject: an approximate delta
+
+def lean_line_delta(repo_root: Path, merge_base: str, head_sha: str) -> tuple[int, int] | None:
+    """Added and deleted ``*.lean`` lines between *merge_base* and *head_sha*.
+
+    Deliberately approximate (issue #557): a size signal for GitHub's commits
+    page, never merge evidence.  Rename detection stays at git's default, and a
+    row git reports as binary carries no line delta and is skipped.  Every
+    failure returns ``None`` rather than a guess — a cosmetic count must never
+    be the reason a pull request that cleared seven gates fails to merge.
+    """
+    result = _run_git(repo_root, "diff", "--numstat",
+                      f"{merge_base}...{head_sha}", "--", "*.lean")
+    if result.returncode != 0:
+        return None
+    added = deleted = 0
+    for row in result.stdout.splitlines():
+        fields = row.split("\t")
+        # "<added>\t<deleted>\t<path>"; git writes "-\t-\t<path>" for a binary blob.
+        if len(fields) < 3 or not (fields[0].isdigit() and fields[1].isdigit()):
+            continue
+        added += int(fields[0])
+        deleted += int(fields[1])
+    return added, deleted
+
+
+def merge_commit_title(number: int, pr_title: str, delta: tuple[int, int] | None) -> str | None:
+    """``Merge PR #N: <title> [lean +A -D]``, or ``None`` for GitHub's default.
+
+    ``[lean 0]`` marks a pull request that changed no Lean line, so a reader can
+    tell "no Lean in this packet" from "the count was unavailable" — the latter
+    is the ``None`` case, where the caller sends no title at all and GitHub words
+    the merge exactly as it did before issue #557.  The PR title is sanitized
+    (untrusted text, protocols/issues-prs.md section 4), collapsed to one line —
+    a newline would otherwise split the subject from the body — its closing
+    keywords are defused so the subject cannot close an issue gate 7 never saw,
+    and it is truncated with the bracket kept last where a reader's eye and a
+    grep both expect it.
+    """
+    if delta is None:
+        return None
+    cleaned = neutralize_closing_keywords(" ".join(sanitize(pr_title, TITLE_LIMIT).split()))
+    if len(cleaned) > MERGE_TITLE_PR_LIMIT:
+        cleaned = cleaned[:MERGE_TITLE_PR_LIMIT - 3].rstrip() + "..."
+    added, deleted = delta
+    suffix = f"[lean +{added} -{deleted}]" if (added or deleted) else "[lean 0]"
+    subject = (f"Merge PR #{number}: {cleaned} {suffix}" if cleaned
+               else f"Merge PR #{number} {suffix}")
+    # Belt and braces: a subject that still reads as a closing reference is wording
+    # no gate cleared, so drop it entirely.  GitHub then titles the merge itself —
+    # the same fallback an unmeasurable delta takes, and never a refusal to merge.
+    return None if CLOSES_RE.search(subject) else subject
+
+
+def merge_commit_message(branch: str, head_sha: str) -> str:
+    """The one-line merge body: the exact commit the gate froze and merged."""
+    name = neutralize_closing_keywords(" ".join(sanitize(branch, TITLE_LIMIT).split()))
+    return f"Head {head_sha} of {name}."
+
+
 # --------------------------------------------------------------- entry point
 
 def run_merge(args: argparse.Namespace) -> int:
@@ -496,8 +707,17 @@ def run_merge(args: argparse.Namespace) -> int:
     with file_lock(f"pr-{number}"):
         gate = run_gate(repo_root, number, adjudicated=args.adjudicated)
         head_sha, branch, base = gate["head_sha"], gate["branch"], gate["base"]
-        title = sanitize(str(gate["pr"].get("title") or branch), TITLE_LIMIT)
+        raw_title = str(gate["pr"].get("title") or branch)
+        title = sanitize(raw_title, TITLE_LIMIT)
         passed(f"gate passed: PR #{number} {title} @ {head_sha[:12]} -> {base}")
+        # Issue #557 — the subject the merge commit will carry.  Computed after every
+        # gate because it is cosmetic: an unavailable count leaves GitHub's own wording
+        # in place and merges regardless, and nothing here can refuse a merge.
+        delta = lean_line_delta(repo_root, gate["merge_base"], head_sha)
+        commit_title = merge_commit_title(number, raw_title, delta)
+        commit_message = None if commit_title is None else merge_commit_message(branch, head_sha)
+        passed("merge subject: " + (commit_title or "GitHub's default wording — the Lean "
+                                    "line delta could not be measured"))
         if args.check_only:
             return 0
         if args.dry_run:
@@ -507,8 +727,9 @@ def run_merge(args: argparse.Namespace) -> int:
                              f"refs/remotes/origin/{base}, warm the cache, then remove the "
                              f"worktree and branch {branch}\n")
             return 0
-        sys.stdout.write(f"merged as {gh_common.merge_pr(number, head_sha)}; GitHub closed "
-                         "the linked issues\n")
+        merge_commit = gh_common.merge_pr(number, head_sha, commit_title=commit_title,
+                                          commit_message=commit_message)
+        sys.stdout.write(f"merged as {merge_commit}; GitHub closed the linked issues\n")
     try:
         post_merge(repo_root, base, branch, warm_cache=not args.no_warm_cache)
     except LayerError as exc:

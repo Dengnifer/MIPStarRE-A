@@ -1,0 +1,65 @@
+{
+  "schema": "qpbt-review-resume-publication-status-v1",
+  "recorded_at": "2026-09-08T13:16:34Z",
+  "status": "ROUND1_FINDINGS_FIXED_CHECKED_PUBLISHED_CI_AND_ROUND2_PENDING",
+  "issue": 366,
+  "pr": 371,
+  "branch": "issue-366-resume-native-review-publication",
+  "worktree": "/home/drx/MIPStarRE-qpbt/.worktrees/issue-366-resume-native-review-publication",
+  "merged_main": "d3f10b429adbcd7b7090b747ead00f28a83ef148",
+  "head": "50ac5b73e4f0c893da2dec9c6de9170352a6010b",
+  "implementation_commit": "70e89fbd1a2cbdf86d74dc986e9eba57377bbcfc",
+  "review_repair_commit": "4b8b8039c6d8a33c426eeac34763afd2ce4c2ef4",
+  "round1_review": 5141950701,
+  "round1_review_head": "dfb56d98002e61e4bdabbd0c9b8e979743222139",
+  "round1_findings_fixed": ["F1", "F2"],
+  "remote_head_exact": true,
+  "worktree_clean": true,
+  "file_ownership": [
+    "local/bin/native_review.py",
+    "local/bin/review.sh",
+    "local/briefs/366-resume-native-review-publication.md",
+    "local/protocols/EVOLUTION.md",
+    "local/protocols/review.md",
+    "scripts/tests/test_github_workflow.py",
+    "scripts/tests/test_native_workflow.py"
+  ],
+  "tests": {
+    "focused_native_workflow": "14 passed",
+    "focused_review_workflow": "8 passed",
+    "full_offline_suite": "612 passed twice (pre-commit 134.860s; merge head 109.223s)",
+    "static": [
+      "bash -n local/bin/review.sh",
+      "python3 -m py_compile local/bin/native_review.py scripts/tests/test_native_workflow.py scripts/tests/test_github_workflow.py",
+      "scripts/install_git_hooks.sh --check",
+      "git diff --check"
+    ],
+    "checked_publish": "passed after sanctioned worktree cache refresh"
+  },
+  "budget": {
+    "wall_ceiling_s": 7200,
+    "elapsed_at_receipt_s": 6126,
+    "changed_line_ceiling": 500,
+    "insertions": 476,
+    "deletions": 11,
+    "changed_lines": 487
+  },
+  "ownership": {
+    "implementation": "/root/sol_resume_native_review_publication",
+    "sole_primary_writer": "/root/space_sol_publication_finish",
+    "independent_review_allocator": "main/Astra refill coordinator",
+    "primary_source_edits": 0,
+    "manual_telemetry_writes": 0,
+    "ci_invocations": 0,
+    "reviewer_dispatches": 0
+  },
+  "gates": {
+    "pr371_exact_head_statuses": {},
+    "pr371_local_ci": "pending one sole-primary invocation",
+    "pr371_independent_review_round2": "pending HARD Astra policy review",
+    "pr371_service_merge": "pending",
+    "production_resume_invocation": false,
+    "pr358_request_consumed_by_new_code": false,
+    "pr358_review_rows_changed": false
+  }
+}

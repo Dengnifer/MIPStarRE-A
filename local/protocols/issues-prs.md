@@ -143,7 +143,17 @@ that refuse by default:
 1. the PR is open, unmerged and not a draft (`draft is False`, not merely
    falsy), and reports a head SHA, a head ref and a base ref;
 2. the primary worktree is clean and on the base, and the local branch tip
-   equals the GitHub head SHA — the merge must be of the bytes built here;
+   equals the GitHub head SHA — the merge must be of the bytes built here. After
+   fetching the current GitHub base, the head is fresh when that base is its
+   ancestor, or when every raw tree change from their merge base to the base is
+   allowlisted passive telemetry: a regular non-executable (`100644`) `.md` or
+   `.jsonl` file below `results/telemetry/`, or a generated regular
+   non-executable `.json` file below the exact
+   `results/telemetry/github-snapshot/` subtree. The check uses
+   `git diff --raw -z --no-renames` so additions, deletions and both sides of a
+   rename retain their paths and modes. Executable files, executable-mode
+   changes, symlinks, code or unknown suffixes, malformed records, paths outside
+   those boundaries, a missing merge base and every failed Git command block;
 3. all eight `local-ci/<step>` contexts plus `local-ci/summary` are `success` on
    that exact SHA; a **missing** context blocks, because GitHub's combined state
    reads `success` for a commit carrying no statuses at all;
@@ -161,6 +171,23 @@ that refuse by default:
 `--adjudicated` waives gate 4's adverse verdict and nothing else, and only when
 an exact-head `ADJUDICATION` comment backs it; gate 5 is never adjudicable.
 
+**Merge subject.** Past the gates, the merge is given the subject
+`Merge PR #N: <PR title> [lean +A -D]`, where A and D sum the added and deleted
+lines of `git diff --numstat <merge base>...<head> -- '*.lean'` and a PR that
+changes no Lean line reads `[lean 0]`; the title is sanitized, collapsed to one
+line and truncated to 80 characters, and the one-line body names the frozen head
+SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
+`gh_common.merge_pr` omits entirely when its optional arguments are absent. The
+count is an **approximate** size signal for GitHub's commits page (issue #557),
+never evidence: it is measured after every gate, nothing reads it back, and a
+failed measurement sends no wording at all — GitHub then titles the merge as it
+always did, and the merge still happens. Closing keywords in the title are
+defused first (`closes #900` reads `closes issue 900` in the subject): gate 7
+checked the PR body and the branch commits, never the subject, so a merge commit
+must not be able to close an issue whose open sub-issues nobody examined.
+`pr_merge.py --check-only` prints the subject it would use, so the operator can
+read it before the merge.
+
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
@@ -171,7 +198,8 @@ The active owner service records, at each bounded tick, the local `main` SHA,
 the readable remote `refs/heads/main` SHA, primary cleanliness, transport
 result, and the age and exact head of the oldest CI-and-review-eligible open
 PR. A dirty primary, remote mismatch, unavailable transport, active fix or
-transaction lock, missing space-cap5/external-zero gate, or stale candidate is
+transaction lock, missing configured Space allocation or external-zero gate, or a stale
+candidate is
 a HOLD reason; it is never silently converted into a merge attempt. After a
 successful daemon-owned merge, the service re-reads remote `main` and records
 the new SHA before the next tick. The service may invoke `pr_merge.py` only as
@@ -179,7 +207,8 @@ its daemon-owned final action after these checks; workers never merge directly.
 Each tick has bounded Git/GitHub reads and records failures as HOLD rather than
 exiting the loop. The cadence is monotonic: work time is subtracted from the
 configured interval (default 300 seconds). Candidate records distinguish stale
-exact-head PRs from fresh actionable PRs; `pr_age_s` is PR creation age, while
+exact-head PRs from fresh actionable PRs using `pr_merge.head_is_fresh`, the
+same conservative predicate as gate 2b; `pr_age_s` is PR creation age, while
 eligibility onset remains unknown unless separately observed.
 
 ## 4. Untrusted text
@@ -226,8 +255,7 @@ Pinned issue #26 is the owner inbox: it receives only decisions that require
 the human owner. A source statement found to be mathematically false does not
 go there first. Following the availability report on #26 and the September 6
 owner decision, main selects Astra Ultra for the mathematical-gap lane through
-`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`
-or the shared native protocol in `sessions.md`.
+`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and

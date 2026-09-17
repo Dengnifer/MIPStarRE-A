@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-09-07T11:50:05.687705+00:00",
+  "owner_task": "01a07ad2-aef9-7531-9c16-b35d2f2fffa3",
+  "main_thread": "01a076bc-f4ad-7813-805b-c8b4dac71a14",
+  "key_label": "relay-3",
+  "space_authorized": false,
+  "previous_capacity": 5,
+  "key_capacity": 11,
+  "native_descendant_cap": 9,
+  "native_active_target": 9,
+  "native_active_floor": 8,
+  "external_cli_admission": 0,
+  "other_counted_slot": "existing VS Code app-server",
+  "model": "gpt-6-astra",
+  "requested_effort": "ultra",
+  "credential_match_verified_without_disclosure": true,
+  "phase": "runtime and cap9 lease verified; checkpoint hold explicitly released",
+  "note": "Actual credential is relay-3. The canonical router's historical space label does not select the Space key. Root and worker budgets must survive restart.",
+  "merge_service": {
+    "previous_pid": 2178864,
+    "pid": 1089067,
+    "script": "/tmp/merge-service-relay3-cap11-20260907.py",
+    "capacity": 11,
+    "native_descendants": 9,
+    "shared_lock_preserved": true,
+    "shared_log_preserved": true,
+    "proof_review_merge_gates_unchanged": true
+  },
+  "activated_at": "2026-09-07T12:11:54.903382+00:00",
+  "previous_pid": 3789161,
+  "pid": 1101986,
+  "native_lease": {
+    "pid": 1101986,
+    "start": "180727558",
+    "slots": 9,
+    "key_label": "space"
+  },
+  "occupancy_accounting": [
+    [
+      10,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "goal_counters_before": {
+    "tokens_used": 18567736,
+    "time_used_seconds": 39032
+  },
+  "checkpoint_receipt": "/tmp/qpbt-cap11-ready-20260907.json",
+  "released_at": "2026-09-07T12:14:10.229885+00:00",
+  "release_note": "/tmp/qpbt-cap11-release-20260907.md"
+}
