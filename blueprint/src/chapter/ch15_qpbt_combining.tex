@@ -1332,6 +1332,29 @@ assembled by Fourier averaging.
 	so it contributes neither to a marginal nor to the squared distance.
 \end{proof}
 
+\begin{lemma}[Formalization support: joint point self-consistency on line-point samples]
+	\label{lem:qld-point-self-consistency-transport}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
+		lem:qld-line-point-marginal-identities}
+	These auxiliary estimates are not named statements of the paper. Fix a
+	supplied family of projective joint point measurements whose squared
+	distance across every directed opposite placement is at most $\delta_Q$
+	when $(x,z)$ is uniform. Its consistency defect on the same uniform point
+	pairs is at most $\delta_Q$. The defect has the same bound when two
+	line-point samples are drawn independently and their point coordinates
+	are used as $(x,z)$. The source uses these estimates in the second
+	pasting hypothesis after Equation~\ref{eq:qld-q-self-cons}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-line-point-marginal-identities, fact:agreement}
+	Projectivity bounds the defect by squared distance. The product of the
+	two uniform point marginals of the line-point law gives the second bound.
+\end{proof}
+
 \begin{lemma}[Formalization support: point-to-line marginal estimates]
 	\label{lem:qld-point-line-marginal-bounds}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
@@ -1416,6 +1439,7 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
 	\lean{MIPStarRE.QPBT.exists_combinedPoints_conditioned_line_marginal_defect_le}
 	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_mass}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_discarded_mass}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
 	\leanok
 	\uses{def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
@@ -1424,7 +1448,11 @@ assembled by Fourier averaging.
 	$D_{\mathrm{nd}}^L$ for the conditioned law. For arbitrary complete
 	measurements on directed opposite placements, conditioning on nonzero $X$ direction
 	increases the consistency defect by at most a factor $1/\mu$, while restoring
-	the original law gives
+	the original law gives the exact bound
+	$\operatorname{defect}_{\mathrm{all}}\leq
+	\mu\operatorname{defect}_{\mathrm{cond}}+
+	\Pr_{(\ell_X,x),(\ell_Z,z)}[\operatorname{dir}(\ell_X)=0]$.
+	Bounding that discarded probability gives
 	\[
 		\operatorname{defect}_{\mathrm{all}}
 		\leq \mu\operatorname{defect}_{\mathrm{cond}}+\frac1{2q}.
