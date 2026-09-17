@@ -35,7 +35,9 @@ Every piece of evidence lives on GitHub, bound to the head SHA (issues-prs.md; t
 closes the linked issues itself, so no local bookkeeping can double-count.  The
 merge commit's subject is ``Merge PR #N: <title> [lean +A -D]``: the PR's approximate
 Lean line delta against its merge base, so the commits page shows each packet's size
-without opening it (issue #557).  That count is cosmetic — it is measured after the
+without opening it (issue #557).  Only *code* lines count — a line lying wholly inside
+a comment and a blank line do not, so a docstring sweep no longer reads as a large
+change (issue #574).  That count is cosmetic — it is measured after the
 gates, it is never evidence, and an unmeasurable delta leaves GitHub's own wording
 in place rather than refusing anything.  Closing keywords in that title are defused
 (``closes #900`` -> ``closes issue 900``) because gate 7 scanned the body and the
@@ -72,6 +74,24 @@ REVIEW_CONTEXT = "local-review/summary"
 #: shows the size of each packet without opening the merge.  The PR title is truncated
 #: to this many characters so the subject stays readable beside the ``[lean …]`` bracket.
 MERGE_TITLE_PR_LIMIT = 80
+
+#: Issue #574 — that delta counts changed Lean *code*.  Lean opens a line comment with
+#: ``--`` and a block comment with ``/-``; the doc (``/--``) and module-doc (``/-!``)
+#: forms are that same opener plus one character, they close with the same ``-/``, and
+#: all of them nest, so one depth counter serves every form.
+LEAN_LINE_COMMENT = "--"
+LEAN_BLOCK_OPEN = "/-"
+LEAN_BLOCK_CLOSE = "-/"
+
+#: A ``-U0`` hunk header, ``@@ -<old>[,<count>] +<new>[,<count>] @@``.  Without context
+#: lines every number it spans is a line git actually removed or actually added.
+HUNK_HEADER_RE = re.compile(rb"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+#: Blob modes a Lean source file can carry in a ``git diff --raw`` record.  Any other
+#: mode — the absent side of an add or a delete, a symlink, a submodule — contributes
+#: no countable line from that side.
+LEAN_SOURCE_MODES = (b"100644", b"100755")
+BLOB_ID_RE = re.compile(rb"^[0-9a-f]{40,64}$")
 
 #: Findings are task-list items; an unticked box is an open finding.  Kept compatible
 #: with review.sh's tally and autofix.sh's ledger read.
@@ -639,28 +659,180 @@ def post_merge(repo_root: Path, base: str, branch: str, *, warm_cache: bool) -> 
 
 # ------------------------------------- the merge subject: an approximate delta
 
-def lean_line_delta(repo_root: Path, merge_base: str, head_sha: str) -> tuple[int, int] | None:
-    """Added and deleted ``*.lean`` lines between *merge_base* and *head_sha*.
+def lean_code_line_mask(text: str) -> list[bool]:
+    """Per line of *text*, whether that line carries Lean **code** (issue #574).
 
-    Deliberately approximate (issue #557): a size signal for GitHub's commits
-    page, never merge evidence.  Rename detection stays at git's default, and a
-    row git reports as binary carries no line delta and is skipped.  Every
-    failure returns ``None`` rather than a guess — a cosmetic count must never
-    be the reason a pull request that cleared seven gates fails to merge.
+    One left-to-right scan carrying a block-comment nesting depth.  A line is code
+    when at least one non-whitespace character on it sits outside every comment, so
+    a blank line, a whitespace-only line and a line lying wholly inside a line,
+    block, doc or module-doc comment are all ``False``, while code trailed by a
+    ``--`` comment is ``True``.
+
+    Deliberately naive where Lean's grammar is subtle, because what it feeds is a
+    size signal that must above all be cheap and deterministic: only double-quoted
+    strings hide comment delimiters (``'`` is an identifier character here far more
+    often than a char-literal quote). String and escape state persist across physical
+    lines until the closing quote, as ordinary Lean strings may span lines.
     """
-    result = _run_git(repo_root, "diff", "--numstat",
-                      f"{merge_base}...{head_sha}", "--", "*.lean")
+    lines = text.split("\n")
+    if lines and lines[-1] == "":
+        lines.pop()  # a final newline terminates the last line, it does not add one
+    mask: list[bool] = []
+    depth = 0
+    in_string = False
+    escaped = False
+    for line in lines:
+        code = False
+        index = 0
+        while index < len(line):
+            character, pair = line[index], line[index:index + 2]
+            if depth:
+                if pair == LEAN_BLOCK_OPEN:
+                    depth += 1
+                elif pair == LEAN_BLOCK_CLOSE:
+                    depth -= 1
+                else:
+                    index += 1
+                    continue
+                index += 2
+            elif in_string:
+                if escaped:
+                    escaped = False
+                elif character == "\\":
+                    escaped = True
+                elif character == '"':
+                    in_string = False
+                index += 1
+            elif pair == LEAN_LINE_COMMENT:
+                break  # everything after it belongs to the comment
+            elif pair == LEAN_BLOCK_OPEN:
+                depth += 1
+                index += 2
+            else:
+                code = code or not character.isspace()
+                in_string = character == '"'
+                index += 1
+        mask.append(code)
+    return mask
+
+
+def _raw_diff_blob_pairs(stdout: bytes) -> list[tuple[bytes, bytes, bytes, bytes]] | None:
+    """``(old mode, new mode, old blob, new blob)`` per ``git diff --raw -z`` record.
+
+    Blob ids rather than paths: the two sides of a rename then need no quoting rule
+    and no second lookup, and no pathological filename can derail the scan.  A
+    record that does not parse abandons the whole count rather than guessing.
+    """
+    if not stdout:
+        return []
+    fields = stdout.split(b"\0")
+    if fields[-1] != b"":
+        return None
+    fields.pop()
+    pairs: list[tuple[bytes, bytes, bytes, bytes]] = []
+    index = 0
+    while index < len(fields):
+        header = fields[index]
+        if not header.startswith(b":"):
+            return None
+        parts = header[1:].split()
+        if len(parts) != 5:
+            return None
+        old_mode, new_mode, old_blob, new_blob, status = parts
+        # R and C carry a source and a destination path; every other status one path.
+        index += 3 if status[:1] in (b"R", b"C") else 2
+        if index > len(fields):
+            return None
+        pairs.append((old_mode, new_mode, old_blob, new_blob))
+    return pairs
+
+
+def _blob_code_mask(repo_root: Path, mode: bytes, blob: bytes) -> list[bool] | None:
+    """One blob's code mask; ``[]`` where the side holds no readable Lean source."""
+    if mode not in LEAN_SOURCE_MODES or not BLOB_ID_RE.match(blob):
+        return []
+    result = _run_git_raw(repo_root, "cat-file", "blob", blob.decode("ascii"))
     if result.returncode != 0:
         return None
-    added = deleted = 0
+    if b"\0" in result.stdout:
+        return []  # binary, which git reports no line delta for either
+    return lean_code_line_mask(result.stdout.decode("utf-8", errors="replace"))
+
+
+def _changed_line_numbers(repo_root: Path, old_blob: bytes,
+                          new_blob: bytes) -> tuple[list[int], list[int]] | None:
+    """Removed old-side and added new-side line numbers of a ``-U0`` blob diff."""
+    result = _run_git_raw(repo_root, "diff", "--no-ext-diff", "--no-textconv", "-U0",
+                          old_blob.decode("ascii"), new_blob.decode("ascii"))
+    if result.returncode not in (0, 1):
+        return None
+    removed: list[int] = []
+    added: list[int] = []
     for row in result.stdout.splitlines():
-        fields = row.split("\t")
-        # "<added>\t<deleted>\t<path>"; git writes "-\t-\t<path>" for a binary blob.
-        if len(fields) < 3 or not (fields[0].isdigit() and fields[1].isdigit()):
+        match = HUNK_HEADER_RE.match(row)
+        if match is None:
             continue
-        added += int(fields[0])
-        deleted += int(fields[1])
+        old_start, old_count = int(match.group(1)), int(match.group(2) or 1)
+        new_start, new_count = int(match.group(3)), int(match.group(4) or 1)
+        removed.extend(range(old_start, old_start + old_count))
+        added.extend(range(new_start, new_start + new_count))
+    return removed, added
+
+
+def _code_lines_among(mask: list[bool], numbers: list[int]) -> int:
+    """How many of the 1-based *numbers* name a code line of *mask*."""
+    return sum(1 for number in numbers
+               if 1 <= number <= len(mask) and mask[number - 1])
+
+
+def _lean_code_line_delta(repo_root: Path, merge_base: str,
+                          head_sha: str) -> tuple[int, int] | None:
+    """The measurement behind :func:`lean_line_delta`, free to fail by returning ``None``."""
+    result = _run_git_raw(repo_root, "diff", "--raw", "-z", "--find-renames",
+                          "--no-abbrev", f"{merge_base}...{head_sha}", "--", "*.lean")
+    if result.returncode != 0:
+        return None
+    pairs = _raw_diff_blob_pairs(result.stdout)
+    if pairs is None:
+        return None
+    added = deleted = 0
+    for old_mode, new_mode, old_blob, new_blob in pairs:
+        if old_blob == new_blob:
+            continue  # a pure rename or a mode change moves no line
+        old_mask = _blob_code_mask(repo_root, old_mode, old_blob)
+        new_mask = _blob_code_mask(repo_root, new_mode, new_blob)
+        if old_mask is None or new_mask is None:
+            return None
+        if not old_mask:  # an added (or empty) file: every code line of it is new
+            added += sum(new_mask)
+            continue
+        if not new_mask:  # a deleted file: every code line of it goes
+            deleted += sum(old_mask)
+            continue
+        numbers = _changed_line_numbers(repo_root, old_blob, new_blob)
+        if numbers is None:
+            return None
+        deleted += _code_lines_among(old_mask, numbers[0])
+        added += _code_lines_among(new_mask, numbers[1])
     return added, deleted
+
+
+def lean_line_delta(repo_root: Path, merge_base: str, head_sha: str) -> tuple[int, int] | None:
+    """Added and deleted ``*.lean`` **code** lines between *merge_base* and *head_sha*.
+
+    Deliberately approximate (issues #557 and #574): a size signal for GitHub's
+    commits page, never merge evidence.  Comment-only and blank lines do not count,
+    an added line is judged in the head blob and a removed line in the merge-base
+    blob, added, deleted and renamed files are all handled, and a blob git reports
+    as binary carries no line delta.  Every failure — an unresolvable revision, an
+    unreadable blob, a record that does not parse, an exception from anywhere below
+    — returns ``None`` rather than a guess, because a cosmetic count must never be
+    the reason a pull request that cleared seven gates fails to merge.
+    """
+    try:
+        return _lean_code_line_delta(repo_root, merge_base, head_sha)
+    except Exception:  # noqa: BLE001 — cosmetic by contract: it may not raise, ever
+        return None
 
 
 def merge_commit_title(number: int, pr_title: str, delta: tuple[int, int] | None) -> str | None:
