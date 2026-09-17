@@ -402,6 +402,203 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	and bounding the right-hand side by $O(\delta_G + \eps)$ using the two approximations above yields \eqref{eq:qld-sg-cons2} at scale $\delta_P$. The symmetric equivalents follow by the same argument with the register bipartitions interchanged.
 \end{proof}
 
+	\section{Formalization support for the encoding-supported reference measurement}
+
+	% Internal auxiliary constructions for eq:qld-nonencoding-mass. They are not
+	% the quantitative support estimate of lem:qld-nonencoding-mass-bound, and
+	% they neither use a winning premise nor construct a global polynomial-pair
+	% measurement.
+
+	\begin{definition}[The ideal Pauli register measurement]
+		\label{def:qld-pauli-register-measurement}
+		\lean{MIPStarRE.QPBT.pauliRegisterMeas}
+		\leanok
+		This measurement is not named in the source article. For a fixed Pauli
+		basis it is the measurement of the ancillary Pauli register in that basis,
+		assembled from the positivity and completeness of the Pauli projectors.
+	\end{definition}
+
+	\begin{lemma}[Bounded encodings lie in the decoder's image]
+		\label{lem:qld-is-encoding-encoding-poly}
+		\lean{MIPStarRE.QPBT.isEncoding_encodingPoly}
+		\leanok
+		\uses{def:low-degree-encoding, def:qld-full-field-decoder}
+		The low-degree encoding of Definition~\ref{def:low-degree-encoding} of any
+		Pauli register value lies in the encoding image of the full-field decoder
+		of Definition~\ref{def:qld-full-field-decoder}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-decoder-linearity}
+		Decoding the encoding of a register value returns that value.
+	\end{proof}
+
+	\begin{definition}[The encoding-supported Pauli reference measurement]
+		\label{def:qld-encoding-pauli-measurement}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas}
+		\leanok
+		\uses{def:qld-pauli-register-measurement, def:low-degree-encoding,
+			def:post-processing}
+		This measurement is not named in the source article; it is the internal
+		reference measurement underlying Equation~\eqref{eq:qld-nonencoding-mass}.
+		For a player and a Pauli basis, measure the strategy's Pauli answer
+		together with the ideal Pauli answer of
+		Definition~\ref{def:qld-pauli-register-measurement} on the ancillary
+		register, and return the low-degree encoding of the sum of the two answers.
+		This is not the global polynomial-pair measurement whose existence
+		Lemma~\ref{lem:qld-4-7} asserts.
+	\end{definition}
+
+	\begin{lemma}[The reference effects are sums over encoding fibers]
+		\label{lem:qld-encoding-pauli-effect}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement}
+		The effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} at a polynomial is the
+		sum of the product effects over the pairs of Pauli answers whose sum
+		encodes that polynomial.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		This is the definition of the relabeled product measurement.
+	\end{proof}
+
+	\begin{lemma}[The reference measurement is a complete POVM]
+		\label{lem:qld-encoding-pauli-complete}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect_nonneg}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.sum_encodingPauliMeas_effect_eq_one}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement}
+		Every effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} is positive
+		semidefinite, and the effects sum to the identity on the strategy and
+		ancillary registers.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Positivity and completeness are inherited from the product measurement and
+		are preserved by relabeling of the outcomes.
+	\end{proof}
+
+	\begin{lemma}[Exact encoding support of the reference measurement]
+		\label{lem:qld-encoding-pauli-support}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect_eq_zero_of_not_isEncoding}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:qld-full-field-decoder}
+		The effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} vanishes at every
+		polynomial outside the encoding image of the full-field decoder of
+		Definition~\ref{def:qld-full-field-decoder}. This is exact support of the
+		auxiliary measurement; it is not a bound on the non-encoding marginal mass
+		of Lemma~\ref{lem:qld-nonencoding-mass-bound}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-encoding-pauli-effect, lem:qld-is-encoding-encoding-poly}
+		By Lemma~\ref{lem:qld-encoding-pauli-effect} the effect is a sum over the
+		pairs of Pauli answers whose sum encodes the given polynomial. By
+		Lemma~\ref{lem:qld-is-encoding-encoding-poly} every such polynomial lies in
+		the encoding image, so outside that image the index set is empty.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-point-mass}
+		\lean{MIPStarRE.QPBT.mass_outside_support_le_point_defect}
+		\leanok
+		\uses{def:povm-conventions, def:distance-state-quadratic-form}
+		This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+		support comparison used in Equation~\eqref{eq:qld-nonencoding-mass}. Let
+		$M=\{M_a\}_{a\in\mathcal A}$ and $R=\{R_a\}_{a\in\mathcal A}$ be
+		complete measurements on two finite-dimensional spaces, let
+		$E\subseteq\mathcal A$, and suppose $R_a=0$ for every $a\notin E$.
+		For every vector $\ket\psi$ in the tensor product, without a normalization
+		assumption,
+		\[
+			\sum_{a\notin E}q_\psi(M_a\ot\Id)
+			\leq \sum_{a\ne b}q_\psi(M_a\ot R_b).
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Use completeness of $R$ to expand each term on the left as a sum over its
+		outcomes. When $a\notin E$, the diagonal term vanishes by the support
+		hypothesis. Every remaining quadratic form is nonnegative, so restricting
+		the first outcome to $a\notin E$ can only decrease the full off-diagonal
+		sum.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for averaged mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-average-mass}
+		\lean{MIPStarRE.QPBT.avg_mass_outside_support_le_consistency_defect}
+		\leanok
+		\uses{def:consistency, def:distance-state-quadratic-form}
+		Let $\mu$ be any finite-support nonnegative weighting on a finite question
+		set, not necessarily of total mass one. For each question $x$, let $M^x$
+		and $R^x$ be complete measurements with common finite outcome set
+		$\mathcal A$, and suppose $(R^x)_a=0$ for every $a\notin E$. Then, for
+		every vector $\ket\psi$ and without a normalization assumption,
+		\[
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\notin E}q_\psi(M^x_a\ot\Id)\right)
+			\leq
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\ne b}q_\psi(M^x_a\ot R^x_b)\right).
+		\]
+		The right-hand side is the bipartite consistency defect of the two
+		measurement families.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-supported-reference-point-mass}
+		Apply Lemma~\ref{lem:qld-supported-reference-point-mass} at each question
+		and average the resulting inequalities with the nonnegative weights of
+		$\mu$.
+	\end{proof}
+
+	\begin{lemma}[Evaluation splits over the two Pauli answers]
+		\label{lem:qld-encoding-pauli-eval}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_postprocess_eval}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:low-degree-encoding,
+			def:post-processing}
+		Evaluating the polynomial outcome of
+		Definition~\ref{def:qld-encoding-pauli-measurement} at a point is the same
+		as evaluating the two Pauli answers separately at that point and adding the
+		two values.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-tensor-measurement-postprocess}
+		Composing the two relabelings and moving them through the product
+		measurement with Lemma~\ref{lem:qld-tensor-measurement-postprocess} reduces
+		the claim to additivity of the low-degree encoding of
+		Definition~\ref{def:low-degree-encoding} in its register argument, which
+		holds because that encoding is a scalar product with the point.
+	\end{proof}
+
+	\begin{lemma}[The evaluated reference effects are the Pauli-answer convolution]
+		\label{lem:qld-encoding-pauli-convolution}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_eval_effect_eq_convolution}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:expanded-point-measurement}
+		The effect at a field value of the evaluated measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} is the sum, over the
+		pairs of field values adding to that value, of the products of the
+		evaluated strategy effect and the ideal point projector. This is the
+		convolution used in the proof of
+		Equation~\eqref{eq:qld-nonencoding-mass}; it asserts neither an
+		approximation nor consistency with the strategy's point measurement.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-encoding-pauli-eval}
+		Expand the relabeled product measurement of
+		Lemma~\ref{lem:qld-encoding-pauli-eval} at the given field value; the
+		ancillary factor is the ideal point projector by definition of the
+		low-degree encoding.
+	\end{proof}
+
 \section{The swap unitaries and the extraction of the Pauli group}
 
 The swap unitaries are controlled operators: a complete projective

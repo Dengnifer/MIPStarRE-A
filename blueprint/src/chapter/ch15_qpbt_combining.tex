@@ -919,6 +919,65 @@ assembled by Fourier averaging.
 	\cite{gap:qpbt_linearity-theorem-quotation}.
 \end{proof}
 
+\begin{lemma}[Formalization support for the $X$ marginal of the combined point measurement]
+	\label{lem:qld-combined-point-x-marginal-distance}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_distance_le}
+	\leanok
+	\uses{lem:qld-4-10, def:povm-distance, def:expanded-point-measurement,
+		def:expanded-state, def:symmetric-equivalents}
+	This is not a named statement of \cite{Ji2020MIPStar}; it isolates
+	Equation~\eqref{eq:qld-qxz-close-to-point}. Fix an admissible parameter
+	tuple, a projective setting, a real number $\delta_Q$, and any combined point
+	measurements satisfying the conclusions of Lemma~\ref{lem:qld-4-10} with
+	error $\delta_Q$. For every directed opposite pair of placements $p_1,p_2$,
+	on average over independent uniform $x,z\in\F_q^m$,
+	\[
+		\E_{x,z}\sum_a \left\|
+		\left(\sum_b (\hat Q^{x,z}_{a,b})_{p_1}
+			- (\hat M^{(\mathrm{Point},X),x}_a)_{p_2}\right)
+		\ket{\hat\psi}\right\|^2 \leq 4\delta_Q.
+		\label{eq:qld-qxz-close-to-point}
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10}
+	For fixed $x,z,a$, contract the projective refinement over the $Z$ outcome.
+	The ordered $Z$-then-$X$ consistency relation bounds the resulting sum of
+	squared distances by $\delta_Q$; the squared triangle estimate in the
+	contraction contributes the factor four. Sum over $a$ and average over
+	$x,z$.
+\end{proof}
+
+\begin{lemma}[Formalization support for the $Z$ marginal of the combined point measurement]
+	\label{lem:qld-combined-point-z-marginal-distance}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_Z_distance_le}
+	\leanok
+	\uses{lem:qld-4-10, def:povm-distance, def:expanded-point-measurement,
+		def:expanded-state, def:symmetric-equivalents}
+	This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+	symmetric Equation~\eqref{eq:qld-qxz-close-to-point-2}. Fix an admissible
+	parameter tuple, a projective setting, a real number $\delta_Q$, and any
+	combined point measurements satisfying the conclusions of
+	Lemma~\ref{lem:qld-4-10} with error $\delta_Q$. For every directed opposite
+	pair of placements $p_1,p_2$,
+	\[
+		\E_{x,z}\sum_b \left\|
+		\left(\sum_a (\hat Q^{x,z}_{a,b})_{p_1}
+			- (\hat M^{(\mathrm{Point},Z),z}_b)_{p_2}\right)
+		\ket{\hat\psi}\right\|^2 \leq 4\delta_Q,
+		\label{eq:qld-qxz-close-to-point-2}
+	\]
+	where $x,z\in\F_q^m$ are independent and uniform.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10}
+	Contract the projective refinement over the $X$ outcome and apply the ordered
+	$X$-then-$Z$ consistency relation. The same squared triangle estimate gives
+	the factor four, after summing over $b$ and averaging over $x,z$.
+\end{proof}
+
 \section{Combined line measurements}
 
 \begin{theorem}[Resampling a line parameter]
@@ -1265,6 +1324,152 @@ assembled by Fourier averaging.
 	error, a $\poly(\eps, md/q)$ function, and the identical argument with
 	the registers modified gives all symmetric equivalents.
 \end{proof}
+
+	\begin{definition}[Retained mass of the nondegenerate-line restriction]
+		\label{def:qld-nondegenerate-pasting-mass}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+		\leanok
+		\uses{def:line-point-dist}
+		This quantity is not named in the source article; it is the normalization
+		constant of the first-line conditioning used in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Draw two independent samples from the
+		line-point distribution of Definition~\ref{def:line-point-dist}. The
+		\emph{retained mass} is the probability that the line of the first sample
+		has nonzero direction.
+	\end{definition}
+
+	\begin{lemma}[The retained mass lies between one half and one]
+		\label{lem:qld-nondegenerate-pasting-mass-bounds}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-mass, def:line-point-dist}
+		The retained mass of Definition~\ref{def:qld-nondegenerate-pasting-mass} is
+		at least $1/2$ and at most $1$.
+	\end{lemma}
+
+	\begin{lemma}[The first-line nondegeneracy event has positive mass]
+		\label{lem:qld-nondegenerate-pasting-mass-pos}
+		\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-mass, def:line-point-dist}
+		Under two independent samples from the line-point distribution of
+		Definition~\ref{def:line-point-dist}, the event that the line of the first
+		sample has nonzero direction has positive probability.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-nondegenerate-pasting-mass-bounds}
+		That probability is the retained mass of
+		Definition~\ref{def:qld-nondegenerate-pasting-mass}, which is at least
+		$1/2$ by Lemma~\ref{lem:qld-nondegenerate-pasting-mass-bounds}.
+	\end{proof}
+
+	\begin{definition}[Nondegenerate-line pasting distribution]
+		\label{def:qld-nondegenerate-pasting-dist}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+		\leanok
+		\uses{def:line-point-dist, lem:qld-nondegenerate-pasting-mass-pos}
+		This law is not named in the source article; it is the proof-only question
+		law of the first-line conditioning in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Condition two independent samples from the
+		line-point distribution of Definition~\ref{def:line-point-dist} on the
+		event that the line of the first sample has nonzero direction, which is
+		legitimate by Lemma~\ref{lem:qld-nondegenerate-pasting-mass-pos}, and
+		present the outcome as the pair of the two lines, followed by the second
+		line-point sample and then the first.
+	\end{definition}
+
+	\begin{lemma}[The nondegenerate-line pasting law is normalized]
+		\label{lem:qld-nondegenerate-pasting-dist-prob}
+		\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-dist}
+		The law of Definition~\ref{def:qld-nondegenerate-pasting-dist} has total
+		mass one.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-nondegenerate-pasting-mass-pos}
+		Conditioning on an event of positive mass yields a normalized law by
+		Lemma~\ref{lem:qld-nondegenerate-pasting-mass-pos}, and the relabeling of
+		the sample preserves the total mass.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for conditioning a nonnegative finite average]
+		\label{lem:qld-restricted-average-le-div-mass}
+		\lean{MIPStarRE.QPBT.avgOver_restrict_le_div_mass}
+		\leanok
+		Let $\mu$ be a finite-support nonnegative weighting on a finite set $\Omega$,
+		let $G\subseteq\Omega$, and put
+		$\rho=\sum_{\omega\in\operatorname{supp}(\mu)\cap G}\mu(\omega)$.
+		If $\rho>0$ and $f\colon\Omega\to\R$ is nonnegative, then the normalized
+		restriction of $\mu$ to $G$ satisfies
+		\[
+			\operatorname{Avg}_{\mu|G}(f)
+			\leq \frac{\operatorname{Avg}_{\mu}(f)}{\rho}.
+		\]
+		No assumption that $\mu$ has total mass one is required.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Multiplying the left-hand side by the positive number $\rho$ gives the
+		weighted sum over $G$. This is at most the full weighted sum because every
+		weight and every value of $f$ is nonnegative.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for positivity of the consistency integrand]
+		\label{lem:qld-consistency-integrand-nonnegative}
+		\lean{MIPStarRE.QPBT.consistencyDefect_integrand_nonneg}
+		\leanok
+		\uses{def:consistency, def:expanded-state,
+			def:distance-state-quadratic-form, def:symmetric-equivalents}
+		Fix a projective setting, a directed opposite pair of placements $p_1,p_2$,
+		and two complete measurements $M^1,M^2$ with the same finite outcome set,
+		acting on the corresponding expanded local spaces. Then
+		\[
+			0\leq \sum_{a\ne b}
+			q_{\hat\psi}\!\left((M^1_a)_{p_1}(M^2_b)_{p_2}\right).
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:distance-qform-nonnegative}
+		For each fixed $a$, sum the positive effects $M^2_b$ over $b\ne a$.
+		Opposite placements commute, so its product with the positive effect
+		$M^1_a$ is positive. Sum over $a$ and apply positivity of the state
+		quadratic form.
+	\end{proof}
+
+	\begin{lemma}[Conditioning inflates the consistency defect by the inverse retained mass]
+		\label{lem:qld-conditioned-pasting-defect}
+		\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
+		\leanok
+		\uses{def:qld-nondegenerate-pasting-dist, def:qld-nondegenerate-pasting-mass,
+			def:consistency, def:line-point-dist}
+		This estimate is not a named statement of the source article; it quantifies
+		the cost of the first-line conditioning used in the proof of
+		Lemma~\ref{lem:qld-xz-lines}. Fix admissible parameters, an error
+		parameter, and two \emph{opposite} placements of the two players. Let two
+		families of measurements on the corresponding expanded local spaces be
+		indexed by a pair of line-point samples. Then the consistency defect of
+		Definition~\ref{def:consistency} measured under the conditioned law of
+		Definition~\ref{def:qld-nondegenerate-pasting-dist} is at most the
+		consistency defect measured under two independent line-point samples,
+		divided by the retained mass of
+		Definition~\ref{def:qld-nondegenerate-pasting-mass}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-restricted-average-le-div-mass,
+			lem:qld-consistency-integrand-nonnegative}
+		The relabeling built into
+		Definition~\ref{def:qld-nondegenerate-pasting-dist} only restores the
+		original order of the two samples, so both sides average the same
+		integrand. It is nonnegative at every sample by
+		Lemma~\ref{lem:qld-consistency-integrand-nonnegative}. Apply
+		Lemma~\ref{lem:qld-restricted-average-le-div-mass} to the first-line
+		nondegeneracy event and its positive retained mass.
+	\end{proof}
 
 \begin{definition}[The concrete paired-line POVM]
 	\label{def:concrete-paired-line-measurement}
