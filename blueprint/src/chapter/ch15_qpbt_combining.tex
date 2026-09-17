@@ -2143,6 +2143,62 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 	immediate from the sampling procedure in the proof.
 \end{remark}
 
+\begin{lemma}[Auxiliary sub-line distribution with directly sampled indices]
+	\label{lem:qld-sublines-direct}
+	\lean{MIPStarRE.QPBT.SubLineWitness, MIPStarRE.QPBT.exists_subLineWitness}
+	\leanok
+	\uses{def:line, def:line-point-dist, def:ith-restricted-line,
+		def:combine-map}
+	This formalization-only variant of Lemma~\ref{lem:qld-sublines} uses
+	uniformly sampled coordinate indices on the extended space. Throughout
+	this lemma, coordinate $i\in\{1,\ldots,n\}$ corresponds to Lean index
+	$i-1$ in \texttt{Fin n}, for $n=m$ or $n=2m+2$. Thus the unit vector
+	$e_i$ is represented by \texttt{coordinateDirection} at index $i-1$,
+	and vanishing coordinates $1,\ldots,i-1$ means vanishing at Lean indices
+	$k<i-1$. The restricted law $D_{\mathrm{v},i}$ likewise uses Lean
+	index $i-1$ in \texttt{Fin m}. For every
+	admissible $(q,m,d)$, there is a probability distribution $D_{\rm dir}$
+	on triples $(\ell,\ell_X,\ell_Z)$ with the following properties:
+	\begin{enumerate}
+		\item Its extended-line marginal is obtained by choosing the line
+		type with equal probabilities and its coordinate index uniformly in
+		$\{1,\ldots,2m+2\}$. In the axis case the direction is the
+		corresponding unit vector; in the diagonal case preceding coordinates
+		vanish and the remaining coordinates are uniform. In both cases the
+		base is the canonical representative of an independent uniform point.
+		\item Every point $u=(u_X,u_Z,\alpha,\beta)$ on a supported extended
+		line satisfies $u_X\in\ell_X$ and $u_Z\in\ell_Z$. The affine
+		parameterizations are compatible: there are scalars $a_X,b_X,a_Z,b_Z$
+		such that, writing $\ell=(v,w)$ and
+		$\ell_W=(v_W,w_W)$ for $W\in\{X,Z\}$,
+		$(v+tw)_W=v_W+(a_W+b_Wt)w_W$ for every $t\in\F_q$.
+		The $\alpha$ and $\beta$ coordinates are affine functions of $t$,
+		as required by Definition~\ref{def:combine-map}.
+		\item For a uniform affine parameter on $\ell$, the two laws of
+		$(\ell_X,\ell_Z,u_X)$ and $(\ell_X,\ell_Z,u_Z)$ are separate
+		mixtures with the same probability weights over
+		$(\mathrm{v},i,j)\in\{\mathrm{ALine},\mathrm{DLine}\}
+		\times\{1,\ldots,m\}^2$. Their components are respectively
+		$D_{\mathrm{v},i}$ times the line marginal of $D_{\mathrm{v},j}$,
+		and the line marginal of $D_{\mathrm{v},i}$ times
+		$D_{\mathrm{v},j}$. No joint conditional law of $(u_X,u_Z)$ is asserted.
+		\item If $\ell$ is axis-parallel, both projected lines are axis-parallel.
+	\end{enumerate}
+	Identification with the source's seed-indexed extended-line law remains
+	open; see \cite{gap:qpbt_subline-claims-line-marginal} and
+	\cite{gap:qpbt_ld-dimension-divisibility}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-representative, def:ith-restricted-line, def:combine-map}
+	Apply the subline sampling construction with the extended coordinate
+	index chosen directly. Its sampling law has mass one and the prescribed
+	extended-line marginal. The inherited direction blocks and the fresh
+	auxiliary directions give incidence, affine compatibility, and axis-line
+	closure. Separating the independent X and Z sampling data within each
+	index case gives the two marginal mixtures with common weights.
+\end{proof}
+
 The proof of Lemma~\ref{lem:qld-4-13} rests on three scalar estimates, stated
 next. In all three, $D$ is the distribution
 of Lemma~\ref{lem:qld-sublines},
@@ -2175,8 +2231,10 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.abs_overlap_gap_le_sqrt_of_opFamilyDistSq}
 	\leanok
 	\uses{def:povm-distance, def:expanded-state}
-	A complete measurement weights the real part of the overlap gap between operator families by
-	at most the square root of their state-dependent squared distance.
+	For a probability distribution and a unit state, the difference of the
+	real parts of overlaps weighted by a complete measurement is at most
+	the square root of the state-dependent squared distance of the two
+	operator families.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -2358,8 +2416,11 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{proof}
 	\leanok
 	\uses{def:direct-subline-law, def:line-representative, def:combine-map}
-	The representative--parameter map has constant fibers of size $q$; the
-	coordinate split and scalar identification are bijections.
+	For fixed direction $v$, the map $(u,t)\mapsto L_v(u)+tv$ on
+	ambient-point--parameter pairs has fibers of size $q$. If $v\ne0$,
+	$u$ varies over a coset, while its canonical representative and $t$ are
+	fixed; if $v=0$, $u$ is fixed and $t$ is free. The coordinate split and
+	scalar identification are bijections.
 \end{proof}
 
 \begin{lemma}[Formalization support: real-part replacement under the directly indexed law]
@@ -2431,19 +2492,26 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	is a mixture of restricted laws. Error inflation and $m\ge1$ give the bound.
 \end{proof}
 
-\begin{lemma}[Formalization obligation: complex X-factor removal under the directly indexed law]
+\begin{lemma}[Formalization support: complex X-factor removal under the directly indexed law]
 	\label{lem:claim-17-2-direct}
 	\lean{MIPStarRE.QPBT.subline_remove_X_factor_direct}
+	\leanok
 	\uses{lem:concrete-X-deficit-direct}
 	For the concrete X-Z-X measurement and the directly indexed law
 	$D_{\mathrm{dir}}$, with partial evaluation in $\F_q \cup \{\bot\}$ and
 	zero point effects for undefined outcomes, the complex
 	modulus of the difference in Lemma~\ref{lem:claim-17-2} is at most
 	$C m\sqrt{\delta_{\mathrm{Line}}(\eps)}$ for a universal $C>0$.
-	The remaining obligation is the complex weighted Cauchy--Schwarz step.
 	Transport to the source law is separate; see
 	\cite{gap:qpbt_subline-claims-line-marginal,gap:qpbt_ld-dimension-divisibility}.
 \end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:concrete-X-deficit-direct}
+	Complex weighted Cauchy--Schwarz bounds the difference by the square root
+	of the X-overlap deficit. The deficit estimate gives $K m^2
+	\delta_{\mathrm{Line}}(\eps)$, so $C=\sqrt K$ suffices.
+\end{proof}
 
 \begin{lemma}[Formalization support: the real Z overlap under the directly indexed law]
 	\label{lem:claim-17-3-re-direct}
@@ -2749,11 +2817,14 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	of $\F_q^{2m+2}$, so the coordinates $x, z$ are independent and uniform
 	in $\F_q^m$; hence
 	$\E_{x,z} \sum_{a,b}
-	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^\dagger W^{x,z}_{a,b} \ket{\hat\psi}
-	\le 4\delta_Q$
-	using Lemma~\ref{lem:qld-4-10-same-placement}. The resulting error is
-	$2\sqrt{\delta_Q}$, which has the stated asymptotic scale. The adjoint
-	is necessary since $W$ need not be Hermitian; the source writes $W^2$.
+	\bra{\hat\psi} \Id \ot (W^{x,z}_{a,b})^\dagger W^{x,z}_{a,b}
+	\ket{\hat\psi}\le4\delta_Q$
+	by Lemma~\ref{lem:qld-4-10-same-placement}. The total error is therefore
+	at most $2\sqrt{\delta_Q}$, with the same asymptotic order as the
+	source claim. The adjoint is necessary because the ordered product need
+	not be Hermitian. The complex modulus estimate and source-distribution
+	transport remain separate obligations; the proved auxiliary real-part
+	estimate is stated below.
 \end{proof}
 
 \begin{lemma}[Removing the $X$-point factor]
@@ -2887,6 +2958,59 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	$O(m(\sqrt{\delta_P} + \sqrt{\delta_Q}) + \sqrt{\eps})$, and taking the
 	square root gives the claim.
 \end{proof}
+
+The following auxiliary real-part estimate uses the directly indexed
+extended-line law $D_{\rm dir}$ of Lemma~\ref{lem:qld-sublines-direct} and
+Definition~\ref{def:direct-subline-law}. Fix admissible parameters and a
+projective setting with error $\eps$.
+
+For the concrete paired-line measurement $T$ of
+Definition~\ref{def:concrete-paired-line-measurement}, write $A_{ZX}(T)$ and
+$A_Z(T)$ for the ordered-product and Z-point overlap averages displayed in
+Lemmas~\ref{lem:claim-17-1}--\ref{lem:claim-17-3}, with $D_{\rm dir}$ in place
+of $D$ and a uniform affine parameter on each extended line. Line answers are
+polynomial representatives of degree at most $md$, evaluations take values in
+$\F_q\cup\{\perp\}$, and completed point effects vanish at undefined
+evaluations. The placements remain $\mathsf{A}\mathsf{A}'$ and
+$\mathsf{B}\mathsf{A}''$. No joint-point or paired-line consistency hypothesis
+enters this estimate: it uses only the concrete sandwich.
+
+\begin{lemma}[Formalization support: real-part X-factor removal under the
+	directly indexed law]
+	\label{lem:claim-17-2-direct-real}
+	\lean{MIPStarRE.QPBT.subline_remove_X_factor_re_direct}
+	\leanok
+	\uses{def:concrete-paired-line-measurement, lem:qld-sublines-direct,
+		def:expanded-point-measurement}
+	There is a universal $C>0$ such that, for every projective setting and
+	every directly indexed subline law above,
+	\[
+	 |\operatorname{Re}A_{ZX}(T)-\operatorname{Re}A_Z(T)|
+	 \le C m\sqrt{\delta_{\mathrm{Line}}(\eps)}.
+	\]
+	This is the real-part analogue of Lemma~\ref{lem:claim-17-2-direct}; it
+	asserts neither a complex-modulus bound nor transport to the source
+	distribution.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:concrete-line-X-marginal, lem:concrete-X-deficit-direct}
+	The concrete X marginal identity and the concrete X-overlap deficit bound
+	the deficit by $K m^2\delta_{\mathrm{Line}}(\eps)$, and projective
+	Cauchy--Schwarz bounds the real-part difference by its square root, so
+	$C=\sqrt K$ suffices. The setup and this deficit bound are shared with
+	Lemma~\ref{lem:claim-17-2-direct}, which applies the complex
+	Cauchy--Schwarz estimate to the same data. No paired-line consistency
+	hypothesis is used in this calculation.
+\end{proof}
+
+The real-part estimates of Lemmas~\ref{lem:claim-17-1-re-direct},
+\ref{lem:claim-17-2-direct-real} and~\ref{lem:claim-17-3-re-direct} are proved
+on the auxiliary law, as is the complex second estimate in
+Lemma~\ref{lem:claim-17-2-direct}. The remaining source complex estimates and
+the carrier transport remain separate obligations recorded in
+\cite{gap:qpbt_subline-claims-line-marginal}. None of the three
+source-labelled claims is certified by these auxiliary entries.
 
 \begin{proof}[Proof of Lemma~\ref{lem:qld-4-13}]
 	\proves{lem:qld-4-13}
