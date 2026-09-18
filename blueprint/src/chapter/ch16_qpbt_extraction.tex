@@ -1547,6 +1547,46 @@ final soundness argument. The omitted step in the source is discussed in
   equalities are the exact compression identities for the pulled-back witness.
 \end{proof}
 
+\begin{theorem}[Pauli isometry bounds for arbitrary strategies]
+  \label{thm:pauli-arbitrary-strategy-isometry-support}
+  \lean{MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds}
+  \leanok
+  \uses{def:strategy-observables, def:povm-distance, def:expanded-state,
+    thm:pauli-projective-setting-isometry-support,
+    thm:pauli-naimark-reduction-support,
+    thm:pauli-naimark-operator-transfer-support,
+    lem:delta-qld-scalar-absorption-support}
+  This formalization-only result removes the projectivity restriction of
+  Theorem~\ref{thm:pauli-projective-setting-isometry-support} and keeps the
+  error restriction $0\leq\eps\leq1$.  There are universal constants $a\geq1$
+  and $0<b<1$, chosen before the parameters, the error and the strategy, such
+  that for every admissible $(q,m,d)$, every $0\leq\eps\leq1$ and every
+  strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ succeeding with
+  probability at least $1-\eps$, there are local isometries and a unit
+  auxiliary state whose state norm distance and whose two complete squared
+  Pauli-family distances, for every $W\in\{X,Z\}$ and summed over all
+  $h\in\F_q^M$, are bounded by $a(md)^a(\eps^b+q^{-b}+2^{-bmd})$.  Neither
+  projectivity nor extraction data is assumed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-projective-setting-isometry-support,
+    thm:pauli-naimark-reduction-support,
+    thm:pauli-naimark-operator-transfer-support,
+    lem:delta-qld-scalar-absorption-support,
+    lem:delta-qld-mono-support}
+  Dilate the strategy questionwise by the Naimark reduction.  The dilation is
+  projective and has exactly the same value, so it is a projective setting at
+  the same error, and the projective-setting bounds apply to it.  Pull the
+  resulting witness back along the two ground embeddings.  The state distance
+  is unchanged by that pullback, so monotonicity in the universal constants
+  brings it to the enlarged scale.  Each operator-family distance is at most
+  three times the dilated family distance plus six times the squared state
+  distance; both of those are bounded by the same error, and the scalar
+  absorption returns $3\delta+6\delta^2$ to the robustness form with prefactor
+  $21a^2$ and the same exponent.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
@@ -1558,6 +1598,15 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		thm:pauli-naimark-operator-transfer-support,
 		thm:pauli-isometry-transfer-alice-support,
 		thm:pauli-isometry-transfer-bob-support}
+	The account below is the route the source prints.  The Lean proof of
+	Theorem~\ref{thm:pauli} performs the same Naimark reduction and is
+	assembled from the formalization-support node
+	Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support} together with
+	the extension of the error domain past one; it is complete under the
+	standard axioms, which is what the statement-level formalization mark on
+	Theorem~\ref{thm:pauli} records.  No proof-level mark is placed on this
+	account, because the divisibility obligation disclosed below is neither
+	discharged nor altered by that closure.
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
