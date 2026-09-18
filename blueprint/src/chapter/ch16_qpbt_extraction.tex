@@ -1666,3 +1666,29 @@ brought to a common scale.
 	\uses{def:admissible}
 	Admissibility gives $md \ge 1$ and $q \ge 1$, so $a(md)^a \le a'(md)^{a'}$. In the bracket, $\eps^b \le \eps^{b'}$ because $0 \le \eps \le 1$ and $0 < b' \le b$; $q^{-b} \le q^{-b'}$ because $q \ge 1$ and $-b \le -b'$; and $2^{-bmd} \le 2^{-b'md}$ because $md \ge 0$ and $-bmd \le -b'md$. Both factors are nonnegative, so the two products compare factorwise.
 \end{proof}
+
+The next statement is likewise not a named result of the source article.  It
+records the constant bookkeeping that returns the operator-transfer bound of
+the Naimark reduction, which has the shape $3\delta + 6\delta^2$, to the
+robustness form of Theorem~\ref{thm:pauli}.  The source performs the same
+absorption inline when it records that $\delta_{\mathrm{qld}}$ has the stated
+form.
+
+\begin{lemma}[Scalar absorption of the transfer constants]\label{lem:delta-qld-scalar-absorption-support}
+	\lean{MIPStarRE.QPBT.three_add_six_sq_deltaQld_le}
+	\leanok
+	\uses{thm:pauli, lem:delta-qld-mono-support}
+	Write $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)$ as in Lemma~\ref{lem:delta-qld-mono-support}, and abbreviate $\delta = \delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)$.  Let $(q,m,d)$ be an admissible parameter tuple (Definition~\ref{def:admissible}), let $a \ge 1$, let $b > 0$, and let $0 \le \eps \le 1$.  Then
+	\[
+		3\delta + 6\delta^2 \le \delta_{\mathrm{qld}}^{21a^2,\,b}(\eps,m,d,q)\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Admissibility gives $md \ge 1$ and $q \ge 1$.  Since $0 \le \eps \le 1$ and $b > 0$ we have $\eps^b \le 1$; since $q \ge 1$ and $-b \le 0$ we have $q^{-b} \le 1$; and since $bmd \ge 0$ we have $2^{-bmd} \le 1$.  The bracket $T = \eps^b + q^{-b} + 2^{-bmd}$ therefore satisfies $0 \le T \le 3$.  Writing $K = a(md)^a$, admissibility and $a \ge 1$ give $K \ge 1$, and $\delta = KT$ satisfies $0 \le \delta \le 3K$.  Hence
+	\[
+		21K\delta - 3\delta - 6\delta^2 = 6\,\delta(3K - \delta) + 3\,\delta(K - 1) \ge 0,
+	\]
+	so $3\delta + 6\delta^2 \le 21K\delta = 21a^2 (md)^{2a} T$.  Finally $md \ge 1$ and $2a \le 21a^2$ give $(md)^{2a} \le (md)^{21a^2}$, and the right-hand side is exactly $\delta_{\mathrm{qld}}^{21a^2,b}(\eps,m,d,q)$.
+\end{proof}
