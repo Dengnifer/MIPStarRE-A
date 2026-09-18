@@ -200,6 +200,34 @@ dirt defers it with a warning).
 
 ### Reviewed merge trains
 
+**Daemon admission (#593).** The active model-free daemon may schedule one
+operator-approved JSON batch of at least two pinned PR numbers and exact head
+SHAs, using `local/bin/daemon_train.py` and the deployment recipe in
+`local/deploy/issue-593-daemon-reviewed-trains.md`. Its existing complete scan
+must report each member `clean` at that SHA; a fresh head stays on the ordinary
+single-PR path, and a claimed member is held. The scan is only a routing hint:
+the adapter passes the operator's PR-to-SHA pins to `pr_train.py`. With its
+member claims held, the train compares every authoritative gate result to the
+requested pin and records the pins in the manifest; the publication verifier
+rechecks them, including conflict-dropped members. A changed pin refuses the
+batch even if its replacement head has independent green CI and review. The
+train repeats every member's current-head, dependency and frozen-base gate
+before combined CI and publication. The daemon blocks its own ordinary merges
+and hourly/pre-merge telemetry commits
+while the train runs synchronously. Before invocation, the adapter commits
+pending telemetry and uses the existing `github-sync.sh main` to publish any
+telemetry-only local main lead (including record snapshots), then checks exact
+primary cleanliness. Every unpublished commit must change only allowlisted
+passive telemetry paths and modes; a later reversal of a nontelemetry change
+cannot make that history publishable. It refuses nontelemetry dirt or history,
+or divergence; it does not reset or discard local commits. The owner coordinates
+other primary telemetry
+writers, including the required main status snapshot, during the train's
+clean-primary publication window; their records must be retained outside the
+primary until that window ends. A refusal, conflict or uncertain post-push
+outcome holds the approved batch for manual reconciliation, never as a merged
+PR. Hourly and pre-merge batching resume after the train; PAR=0 remains binding.
+
 After independent review and deployment, the daemon/operator may invoke
 `local/bin/pr_train.py N M [K ...]` from the clean primary checkout at
 `github/main`. Development and tests use fixture repositories exclusively.

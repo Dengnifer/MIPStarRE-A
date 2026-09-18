@@ -1326,3 +1326,40 @@ manifests and publication checks are unchanged.
 **Expected effect:** each merge commit published by a reviewed train carries
 the same approximate Lean code-line signal as an ordinary merge, with no
 cumulative count or spurious deletion of newer main-only content.
+
+## 2026-09-18 - Schedule reviewed trains in the model-free daemon (#593)
+
+**Trigger:** Owner issue #593 and the 2026-09-18 daemon scan: the merged train
+and member-title policy had no caller in `/tmp/merge-daemon-v9k-cpa.sh`, leaving
+approved stale heads idle at PAR=0.
+
+**Change:** `issues-prs.md` records daemon admission, telemetry preparation,
+primary quiet-window coordination and refusal handling. `daemon_train.py`
+routes one pinned clean/stale batch and delegates all publication gates to the
+existing `pr_train.py`. The reviewed runtime patch and deployment instructions
+are under `local/deploy/`; no running daemon is changed by this commit.
+
+**Expected effect:** after independent review and controlled deployment, one
+daemon process can submit a reviewed batch without replacing its ordinary
+single-PR path, overlapping telemetry commits, or silently losing a local
+telemetry lead. A refused or uncertain train remains held for reconciliation.
+
+## 2026-09-18 - Preserve approved train pins and inspect unpublished history (#595)
+
+**Trigger:** Independent review 5244965776 at `00e2079f` found that a green
+replacement head could pass the train after the adapter had scanned the
+operator's pinned head, and that changed-then-reverted nontelemetry commits
+could pass the adapter's net-tree test (see the PR595 entry in
+`results/telemetry/events.md`).
+
+**Change:** The daemon passes approved PR-to-SHA pins to the train. Under the
+existing member claims, gate results must match the requested pins; the train
+manifest retains those pins for the publication verifier, including members
+dropped for conflicts. Standalone number-only trains remain available. During
+daemon preparation, every unpublished commit must satisfy the existing passive
+telemetry path-and-mode policy before `github-sync.sh main` runs. The accepted
+claim, lease, atomic transport and post-push verification contract is unchanged.
+
+**Expected effect:** A later independently approved but unrequested head never
+enters the batch, and reversed nontelemetry local history stays available for
+operator reconciliation rather than being published by the adapter.
