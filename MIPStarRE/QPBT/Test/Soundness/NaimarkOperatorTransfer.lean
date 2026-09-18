@@ -21,7 +21,7 @@ The omitted range-projection calculation is documented in
 `docs/paper-gaps/qpbt_extraction-transfer.tex` and issue #604.
 -/
 
-open scoped BigOperators Matrix MatrixOrder ComplexOrder Classical
+open scoped BigOperators Matrix MatrixOrder ComplexOrder
 
 namespace MIPStarRE.QPBT
 
@@ -58,9 +58,10 @@ private theorem naimark_isProj_conjIsometry {ι κ : Type}
     simp [conjIsometry_eq, Matrix.star_eq_conjTranspose, Matrix.conjTranspose_mul,
       hQ.isSelfAdjoint.isHermitian.eq, Matrix.mul_assoc]
 
-private theorem naimark_left_isProj {ι κ : Type} [Fintype ι] [DecidableEq ι]
+private theorem naimark_left_isProj {ι κ : Type} [Fintype ι]
     [Fintype κ] [DecidableEq κ] {Q : Op ι} (hQ : IsProj Q) :
     IsProj (heteroKron Q (1 : Op κ)) := by
+  classical
   constructor
   · change heteroKron Q 1 * heteroKron Q 1 = heteroKron Q 1
     rw [heteroKron_mul, hQ.isIdempotentElem.eq, Matrix.one_mul]
@@ -69,8 +70,9 @@ private theorem naimark_left_isProj {ι κ : Type} [Fintype ι] [DecidableEq ι]
       hQ.isSelfAdjoint.isHermitian.eq]
 
 private theorem naimark_right_isProj {ι κ : Type} [Fintype ι] [DecidableEq ι]
-    [Fintype κ] [DecidableEq κ] {Q : Op κ} (hQ : IsProj Q) :
+    [Fintype κ] {Q : Op κ} (hQ : IsProj Q) :
     IsProj (heteroKron (1 : Op ι) Q) := by
+  classical
   constructor
   · change heteroKron 1 Q * heteroKron 1 Q = heteroKron 1 Q
     rw [heteroKron_mul, hQ.isIdempotentElem.eq, Matrix.one_mul]
@@ -127,7 +129,7 @@ private theorem naimark_sum_conjIsometry_adjoint_mul_le_one {α ι κ : Type}
       exact isometryMatrix_mul_conjTranspose_le_one φ
 
 private theorem liftedA_sum_adjoint_mul_le_one {P : AdmissibleParams} {G : Game}
-    {α : Type} [Fintype α] [DecidableEq α] (S : Strategy G)
+    {α : Type} [Fintype α] (S : Strategy G)
     {ιA' ιB' : Type} [Fintype ιA'] [DecidableEq ιA']
     [Fintype ιB'] [DecidableEq ιB']
     (φ : EuclideanSpace ℂ S.ιA →ₗᵢ[ℂ]
@@ -135,13 +137,14 @@ private theorem liftedA_sum_adjoint_mul_le_one {P : AdmissibleParams} {G : Game}
     (M : Measurement α S.ιA) :
     ∑ a, (liftedAEffect S (ιB' := ιB') φ (M.effect a))ᴴ *
       liftedAEffect S φ (M.effect a) ≤ 1 := by
+  classical
   simp only [liftedAEffect_eq_tensor]
   exact naimark_left_sum_adjoint_mul_le_one _
     (naimark_sum_conjIsometry_adjoint_mul_le_one φ M.effect
       (measurement_sum_adjoint_mul_le_one M))
 
 private theorem liftedB_sum_adjoint_mul_le_one {P : AdmissibleParams} {G : Game}
-    {α : Type} [Fintype α] [DecidableEq α] (S : Strategy G)
+    {α : Type} [Fintype α] (S : Strategy G)
     {ιA' ιB' : Type} [Fintype ιA'] [DecidableEq ιA']
     [Fintype ιB'] [DecidableEq ιB']
     (φ : EuclideanSpace ℂ S.ιB →ₗᵢ[ℂ]
@@ -149,6 +152,7 @@ private theorem liftedB_sum_adjoint_mul_le_one {P : AdmissibleParams} {G : Game}
     (M : Measurement α S.ιB) :
     ∑ a, (liftedBEffect S (ιA' := ιA') φ (M.effect a))ᴴ *
       liftedBEffect S φ (M.effect a) ≤ 1 := by
+  classical
   simp only [liftedBEffect_eq_tensor]
   exact naimark_right_sum_adjoint_mul_le_one _
     (naimark_sum_conjIsometry_adjoint_mul_le_one φ M.effect
@@ -396,6 +400,8 @@ private theorem naimark_lifted_compression_bob
   exact hh
 
 set_option maxHeartbeats 800000 in
+-- Finite-register matrix algebra and nested finite sums make this proof
+-- expensive to elaborate.
 /-- Alice's complete Pauli operator-family distance after Naimark pullback is
 at most three times the dilated distance plus six times the squared state error.
 This is a Lean-only support theorem for the source proof; its witness is an
@@ -461,6 +467,8 @@ theorem pauli_naimark_operator_distanceA_le
   convert hsub using 1; rfl
 
 set_option maxHeartbeats 800000 in
+-- The symmetric finite-register matrix calculation likewise requires extra
+-- elaboration heartbeats.
 /-- Bob's complete Pauli operator-family distance after Naimark pullback has
 the same dimension-independent bound as Alice's. -/
 theorem pauli_naimark_operator_distanceB_le
