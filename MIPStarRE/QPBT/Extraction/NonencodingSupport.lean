@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Extraction.EncodingSupport
 import MIPStarRE.QPBT.Extraction.PolynomialCollision
+import MIPStarRE.QPBT.Observables.IdealPointConsistency
 import MIPStarRE.QPBT.Games.SupportMass
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorConsistency
 import MIPStarRE.QPBT.Combining.Lines.PairStateConsistencyTransport
@@ -78,19 +79,6 @@ theorem mass_outside_encoding_le_evaluated_defect {P : AdmissibleParams}
 
 namespace ProjectiveSetting
 
-/-- The ideal point measurement has zero off-diagonal mass on its EPR pair.
-This follows from the existing unit diagonal-overlap calculation. -/
-private theorem tauPoint_offDiagonal_eq_zero {P : AdmissibleParams}
-    (W : PauliKind) (u : Fin P.m → PauliScalar P) :
-    (∑ a : PauliScalar P, ∑ b : PauliScalar P, if a = b then 0 else
-      stateQForm (eprState (PauliRegister P))
-        (heteroKron (tauPointProj W u a) (tauPointProj W u b))) = 0 := by
-  have h := point_defect_eq (leftPlacedMeasurement (tauPointMeas W u))
-    (rightPlacedMeasurement (tauPointMeas W u)) (eprState (PauliRegister P))
-  simpa only [leftPlacedMeasurement, rightPlacedMeasurement, Measurement.ofSumEqOne,
-    placed_product_stateQForm_eq, tauPointMeas, eprState_norm, one_pow,
-    sum_tauPointProj_pair_stateQForm_eprState, sub_self] using h
-
 /-- Adjoining the ideal point outcomes preserves the Pauli-basis check on the
 two-player expanded state, in the point--Pauli orientation. -/
 theorem point_encodingPauli_consistency_eq {P : AdmissibleParams} {epsilon : ℝ}
@@ -108,7 +96,7 @@ theorem point_encodingPauli_consistency_eq {P : AdmissibleParams} {epsilon : ℝ
     (S.pointMeas .alice W) (S.pauliEvalMeas .bob W)
     (tauPointMeas W) (tauPointMeas W) S.toStrategy.ψ
     (eprState (PauliRegister P)) (eprState_norm _)
-    (tauPoint_offDiagonal_eq_zero W)
+    (tauPointProj_epr_offDiagonal_eq_zero W)
   simpa only [pointMeasExp, Measurement.ofSumEqOne, expPointOp_eq_convolution,
     encodingPauliMeas_eval_effect_eq_convolution, tauPointMeas,
     ExtendedLineGame.pairState] using h
@@ -130,7 +118,7 @@ theorem encodingPauli_point_consistency_eq {P : AdmissibleParams} {epsilon : ℝ
     (S.pauliEvalMeas .alice W) (S.pointMeas .bob W)
     (tauPointMeas W) (tauPointMeas W) S.toStrategy.ψ
     (eprState (PauliRegister P)) (eprState_norm _)
-    (tauPoint_offDiagonal_eq_zero W)
+    (tauPointProj_epr_offDiagonal_eq_zero W)
   simpa only [pointMeasExp, Measurement.ofSumEqOne, expPointOp_eq_convolution,
     encodingPauliMeas_eval_effect_eq_convolution, tauPointMeas,
     ExtendedLineGame.pairState] using h
@@ -152,7 +140,7 @@ theorem expanded_point_consistency_eq {P : AdmissibleParams} {epsilon : ℝ}
     (S.pointMeas .alice W) (S.pointMeas .bob W)
     (tauPointMeas W) (tauPointMeas W) S.toStrategy.ψ
     (eprState (PauliRegister P)) (eprState_norm _)
-    (tauPoint_offDiagonal_eq_zero W)
+    (tauPointProj_epr_offDiagonal_eq_zero W)
   simpa only [pointMeasExp, Measurement.ofSumEqOne, expPointOp_eq_convolution,
     tauPointMeas, ExtendedLineGame.pairState] using h
 
