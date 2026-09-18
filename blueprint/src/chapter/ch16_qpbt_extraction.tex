@@ -714,6 +714,7 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness_fourth_root_rate}
 	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
 	There are universal constants $a>1$, $0<b<1$ as in
@@ -747,6 +748,14 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	measurement is fixed; it is not an additional hypothesis here. The subsequent
 	range-projection transfer to isometries remains separate, as recorded in
 	\cite{gap:qpbt_extraction-transfer}.
+	Moreover, the universal constants can be chosen so that the same global
+	measurement has consistency error at most $\delta_G$ and both extraction
+	conclusions hold at the source's fourth-root scale
+	$C_{\mathrm{ext}}(\delta_G^{1/4}+md/q)$, with the \emph{same} $\delta_G$
+	in both bounds. This stronger numerical assertion is separate from the
+	nested construction/extraction estimate displayed above. It retains the
+	directly indexed low-degree carrier of Lemma~\ref{lem:qld-4-7}; the
+	seed-indexed correspondence is not established by this assertion.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -758,6 +767,14 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	pair and yields the concrete swap unitaries and the normalized auxiliary state
 	at the displayed scale. In particular, the global measurement is an output
 	of the argument, not an assumed input.
+	For the fourth-root form, first bound the nested error by a second member
+	of the $\delta_G$ family, then increase its leading constant and decrease
+	its exponent so it also bounds the original global-measurement error.
+	Weaken only the two consistency certificates, leaving the measurements
+	and swap maps unchanged. When the enlarged error $x$ is at most one,
+	$\delta_{\mathrm{ext}}\leq x\leq x^{1/4}$; when $x>1$, completeness and
+	unitarity give both extraction estimates at error four, which is at most
+	$C_{\mathrm{ext}}(x^{1/4}+md/q)$ after enlarging $C_{\mathrm{ext}}$.
 \end{proof}
 
 \begin{theorem}[EPR projection estimates]\label{thm:qld-epr-projection-estimates}
