@@ -1281,6 +1281,44 @@ final soundness argument. The omitted step in the source is discussed in
   the original and dilated strategies.
 \end{proof}
 
+\begin{theorem}[Pauli operator-family transfer through Naimark compression]
+  \label{thm:pauli-naimark-operator-transfer-support}
+  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceA_le,
+    MIPStarRE.QPBT.pauli_naimark_operator_distanceB_le}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  Let $S$ be any strategy for the Pauli basis test, let $T$ be its
+  questionwise Naimark dilation, and let $w$ be a soundness witness for $T$.
+  For every $W\in\{X,Z\}$, write
+  \[
+    \Delta = (\phi_{\mathrm A}\ot\phi_{\mathrm B})\ket{\psi_T}
+      \quad\text{and}\quad
+    \Theta = \ket{\mathrm{aux}}\ot\ket{\mathrm{EPR}_q}^{\ot M}.
+  \]
+  The witness obtained by composing its local isometries with the two ground
+  embeddings satisfies
+  \begin{align*}
+    d_{\mathrm A}(S) &\leq 3d_{\mathrm A}(T)+6\|\Delta-\Theta\|^2,\\
+    d_{\mathrm B}(S) &\leq 3d_{\mathrm B}(T)+6\|\Delta-\Theta\|^2.
+  \end{align*}
+  Here each $d_w$ is the complete Pauli operator-family distance, summed over
+  all answers.  This is a formalization-only support result: it has no
+  outcome-cardinality factor and adds no consistency, projectivity, range, or
+  producer hypothesis to the source theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  The range projection of each composed ground embedding fixes the dilated
+  state.  The complete Pauli projector family on the opposite register gives
+  the required mirror identity on the ideal EPR state.  The range-projection
+  estimate therefore bounds the compressed family by three times the dilated
+  family distance and six times the squared state distance.  The two final
+  equalities are the exact compression identities for the pulled-back witness.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
@@ -1289,6 +1327,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
 		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
 		thm:pauli-naimark-reduction-support,
+		thm:pauli-naimark-operator-transfer-support,
 		thm:pauli-isometry-transfer-alice-support,
 		thm:pauli-isometry-transfer-bob-support}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by

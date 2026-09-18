@@ -4,6 +4,7 @@ import MIPStarRE.QPBT.Test.Soundness.Ancilla
 import MIPStarRE.QPBT.Test.Soundness.OperatorTransfer
 import MIPStarRE.QPBT.Test.Soundness.ProjectiveSetting
 import MIPStarRE.QPBT.Test.Soundness.NaimarkReduction
+import MIPStarRE.QPBT.Test.Soundness.NaimarkOperatorTransfer
 
 /-!
 # Pauli basis test soundness
