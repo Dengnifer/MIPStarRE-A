@@ -21,6 +21,7 @@ import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.Symmetrization
 import MIPStarRE.QPBT.Games.MeasurementCompression
 import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorConsistency
@@ -35,9 +36,11 @@ import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.Setup
 import MIPStarRE.QPBT.Observables.Defs
 import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Observables.IdealPointConsistency
 import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement
 import MIPStarRE.QPBT.Observables.WinImplications
+import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.Completeness
@@ -64,6 +67,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SpectatorExpectation
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.MixedLinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PointPointRejection
@@ -79,6 +83,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PolynomialConsistency
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.QuadraticPointObstruction
 import MIPStarRE.QPBT.Combining.Apply
 import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Extraction.Defs

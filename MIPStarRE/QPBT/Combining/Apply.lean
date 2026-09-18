@@ -16,8 +16,9 @@ with the error form printed in the source and with the weaker estimate establish
 its first proof route.  The final witness consists of a projective measurement of a
 pair of global bounded individual-degree polynomials.  The existence assertions below
 record the measurements and quantitative estimates required by the combining argument.
-The established direct-line constructor and the source global-pair theorem are proved.
-The three stronger or unrestricted supplied-point line assertions remain open.
+The established direct-line constructor, its conditional supplied-point companion,
+and the source global-pair theorem are proved.  The printed error form of the
+combined-line lemma remains an open source gap, tracked by issue #598.
 
 ## References
 
@@ -36,65 +37,37 @@ open MIPStarRE.LDT
 
 noncomputable section
 
-/-- Conditional directly indexed construction of the extended-line measurements with
-the error expression `poly(m^2 * epsilon, md / q)` printed in `lem:qld-4-13`, paper
-lines 1020--1034. This is an auxiliary obligation, not the source-facing statement.
-
-The printed proof does not establish this error form: its first route gives
-`m * poly(epsilon, md / q)`, while its second route gives a different bound and
-uses a joint-law decomposition absent from the subline lemma.  The discrepancy is
-documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex` and
-`rem:qld-4-13-source-defects` in the blueprint. `ExtendedLinesWitness` uses the
-directly indexed question carrier and line-point law documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, and the completed answer
-alphabet documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
-Their conversion to the source's verifier game remains open. This declaration takes
-an already constructed point witness; the companion obligation below supplies that
-witness existentially.
-
-**Unfaithful:** This auxiliary quantifies over an unrestricted scalar `δQ` but
-omits it from the line error. That domain is not supplied by `lem:qld-4-10` and
-admits deterministic quadratic point answers even at zero strategy error; their
-axis-line defect stays positive as `q` grows. See issue #509 and the extended-line
-supplied-point obstruction in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
-Elimination requires a separately authorized realignment to the polynomial point
-error supplied by `exists_combinedPointsWitness`, followed by a proof of the
-printed error bound. The present signature and open proof are retained.
-
-**Error contract:** the polynomial bound printed in the source is carried
-by `IsPolyErr₂`, which states the corrected sum form
-`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
-closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
-of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
-the two-dimensional strategy that refutes the product form are recorded in
-`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
-Here `poly(m^2 * epsilon, md / q)` is read in that sense.
--/
-theorem exists_extendedLinesWitness_ofPointsWitness :
-    ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
-      ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
-        (points : CombinedPointsWitness S δQ),
-        Nonempty (ExtendedLinesWitness S points
-          (deltaCombine ((P.m : ℝ) ^ 2 * ε)
-            ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
-  sorry
-
-/-! The following directly indexed obligation supplies the point witness from
-`lem:qld-4-10` rather than taking it as an external hypothesis. -/
+/-! The directly indexed obligations below share the extended-line carrier.
+The first keeps the error expression printed in the source and supplies its
+point witness existentially; it is a source-gap declaration with an open proof.
+The second is the conditional auxiliary for a polynomially controlled supplied
+point family, carrying the error the first proof route establishes; the third
+supplies that family existentially. -/
 
 /-- Directly indexed extended-line obligation with the numerical error expression
 printed in `lem:qld-4-13`, paper lines 1020--1034.
 
-The `_ofPointsWitness` companion assumes a point witness, while this declaration
-supplies one existentially. Both declarations use the directly indexed questions,
-law, and completed answer alphabet, so neither is the source-facing paper statement.
+Both this declaration and the established forms below use the directly indexed
+questions, law, and completed answer alphabet, so neither is the source-facing
+paper statement.
 
 The first proof route's term `m * epsilon ^ (1 / 4)` cannot be absorbed into
 the printed error arguments, even after capping it by one and restricting to
 admissible parameters; `not_exists_combining_quarter_power_bound` proves this
 scalar obstruction. It does not refute this existence assertion, which requires
 a different estimate. See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`
-and issue #510.
+and issues #510 and #598.
+
+**Open source gap, carried deliberately:** the printed error form is
+established by neither source route, and no route to it is known here. This
+declaration is retained so that the source assertion stays visible and is
+neither marked proved nor removed; its `sorry` records the gap and must not be
+read as a proof. No Lean argument depends on it. Every consumer, in particular
+`exists_globalPairWitness`, routes through `exists_extendedLinesWitness_established`,
+whose error `C * m * poly(epsilon, md / q)` is the form the first route actually
+delivers. What remains open is tracked by issue #598; the earlier issues #509
+and #510 were closed by their obstruction pull requests without a proof of the
+printed assertion, and are not reopened.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -115,57 +88,34 @@ theorem exists_extendedLinesWitness :
   sorry
 
 /-- Conditional existence of extended-line measurements with the first-route
-estimate `C * m * poly(epsilon, md / q)`.
+estimate `C * m * poly(epsilon, md / q)`, for a polynomially controlled supplied
+point family.
 
-This conditional auxiliary uses the error form established by the first proof route,
-but its own proof remains open; it is not the source-labelled `lem:qld-4-13` and must
-not be advertised as that theorem. The source discrepancy is analyzed in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. As in the companion directly
-indexed declaration, the extended questions use the directly indexed line-space
-construction. This conditional declaration takes an already constructed point
-witness; the obligation below supplies it existentially. Relating its game to the
-source's seed-bearing game requires the transport and soundness obligations in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`.
+This conditional auxiliary uses the error form established by the first proof
+route. It is not the source-labelled `lem:qld-4-13` and must not be advertised as
+that theorem; the source discrepancy is analyzed in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and tracked by issue #598.
+As in the companion directly indexed declarations, the extended questions use the
+directly indexed line-space construction and the comparisons use the completed
+answer alphabet. Relating its game to the source's seed-bearing game requires the
+transport and soundness obligations in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. The conditional blueprint
+entry is `lem:qld-4-13-established-given-points`.
 
-**Unfaithful:** This helper quantifies over an arbitrary scalar `δQ`, although
-its line error is independent of `δQ`. This assertion is false for arbitrary
-supplied point measurements and does not follow from `lem:qld-4-13`; the
-obstruction is documented in
-`docs/paper-gaps/qpbt_combined-lines-error-term.tex` and tracked by issue #511.
-Elimination: either restrict the supplied point family to the polynomially
-controlled error produced by `exists_combinedPointsWitness`, or remove this
-helper once no proof requires the unrestricted form. Its proof remains open,
-and it must not support a claim that the source lemma is complete.
-
-**Error contract:** the polynomial bound printed in the source is carried
-by `IsPolyErr₂`, which states the corrected sum form
-`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
-closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
-of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
-the two-dimensional strategy that refutes the product form are recorded in
-`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
-Here `poly(epsilon, md / q)` is read in that sense.
--/
-theorem exists_extendedLinesWitness_established_ofPointsWitness :
-    ∃ C : ℝ, 0 < C ∧
-      ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
-        ∀ (P : AdmissibleParams) (ε δQ : ℝ) (S : ProjectiveSetting P ε)
-          (points : CombinedPointsWitness S δQ),
-          Nonempty (ExtendedLinesWitness S points
-            (C * (P.m : ℝ) *
-              deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
-  sorry
-
-/-- Directly indexed construction for the auxiliary estimate
-`C * m * poly(epsilon, md / q)`. This has the same directly indexed estimate as
-`exists_extendedLinesWitness_established_ofPointsWitness`, with the point witness
-existentially supplied rather than assumed.
-
-Its question carrier and line-point law are documented in
-`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; its `Option`-completed answer
-alphabet is documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
-Transport to `lem:qld-4-13` must convert this completed comparison to the source's
-sum over field answers, including degenerate zero-direction singleton lines.
+**Domain repair (issue #511):** the former statement quantified over an arbitrary
+scalar point error `δQ` after choosing the line error, although that line error
+must depend on the supplied point error. As stated it was false: the supplied
+family may answer deterministically with a quadratic in the point coordinates at
+zero strategy error, whose axis-line defect stays bounded below as `q` grows,
+while any `IsPolyErr₂` bound tends to zero there. The repaired domain takes the
+point-error function `deltaQ` with its control hypothesis `IsPolyErr deltaQ`
+before choosing the line error, and assumes a point witness at `deltaQ ε`, which
+is exactly the family supplied by `exists_combinedPointsWitness`. This repeats one
+level up the issue #389 repair of `exists_combinedLinesWitness_ofPointsWitness`.
+The refutation of the former domain, and the provenance of the removed printed-form
+companion `exists_extendedLinesWitness_ofPointsWitness` of issue #509, are preserved in
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`. The established dimension
+factor `C * m` is kept explicit in the conclusion rather than absorbed.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -178,25 +128,23 @@ Here `poly(epsilon, md / q)` is read in that sense.
 
 The proof uses the point, line, and subline constructions together with both
 opposite-placement comparisons. -/
-theorem exists_extendedLinesWitness_established :
-    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
-      ∃ C : ℝ, 0 < C ∧
-        ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
-          ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
-            ∃ points : CombinedPointsWitness S (deltaQ ε),
-              Nonempty (ExtendedLinesWitness S points
-                (C * (P.m : ℝ) *
-                  deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+theorem exists_extendedLinesWitness_established_ofPointsWitness
+    (deltaQ : ℝ → ℝ) (hdeltaQ : IsPolyErr deltaQ) :
+    ∃ C : ℝ, 0 < C ∧
+      ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+        ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
+          (points : CombinedPointsWitness S (deltaQ ε)),
+          Nonempty (ExtendedLinesWitness S points
+            (C * (P.m : ℝ) *
+              deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
   classical
-  obtain ⟨deltaQ, hdeltaQ, hpoints⟩ := exists_combinedPointsWitness
   obtain ⟨deltaP, hdeltaP, hlines⟩ :=
     exists_combinedLinesWitness_ofPointsWitness deltaQ hdeltaQ
   obtain ⟨constant, hconstant, hnear⟩ := subline_joint_overlap_near_one_at
   obtain ⟨deltaCombine, hdeltaCombine, hscalar⟩ :=
     exists_combining_polynomial_bound deltaQ hdeltaQ deltaP hdeltaP constant hconstant.le
-  refine ⟨deltaQ, hdeltaQ, 1, by norm_num, deltaCombine, hdeltaCombine, ?_⟩
-  intro P ε S
-  obtain ⟨points⟩ := hpoints P ε S
+  refine ⟨1, by norm_num, deltaCombine, hdeltaCombine, ?_⟩
+  intro P ε S points
   obtain ⟨lines⟩ := hlines P ε S points
   obtain ⟨sublines⟩ := exists_subLineWitness P
   have hplaced (first second : Placement) (hopposite : first.IsOpposite second) :
@@ -225,15 +173,57 @@ theorem exists_extendedLinesWitness_established :
         simpa only [abs_sub_comm] using
           hnear P ε (deltaQ ε) (deltaP ε ((P.m * P.d : ℕ) / (P.q : ℝ)))
             S points lines sublines first second hopposite)
-  refine ⟨points, ⟨{
+  refine ⟨{
     Qline := sublines.extendedMeasurement lines
     axis_degree := sublines.extendedMeasurement_axis_degree lines
     consistent_alice := ?_
-    consistent_bob := ?_ }⟩⟩
+    consistent_bob := ?_ }⟩
   · simp only [one_mul]
     with_unfolding_all exact hplaced .AA' .BA'' trivial
   · simp only [one_mul]
     with_unfolding_all exact hplaced .BB' .AB'' trivial
+
+/-- Directly indexed construction for the auxiliary estimate
+`C * m * poly(epsilon, md / q)`. This has the same directly indexed estimate as
+`exists_extendedLinesWitness_established_ofPointsWitness`, with the point witness
+existentially supplied rather than assumed.
+
+Its question carrier and line-point law are documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`; its `Option`-completed answer
+alphabet is documented in `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+Transport to `lem:qld-4-13` must convert this completed comparison to the source's
+sum over field answers, including degenerate zero-direction singleton lines. The
+printed error form of `lem:qld-4-13` is not claimed here and remains an open
+source gap, tracked by issue #598.
+
+**Error contract:** the polynomial bound printed in the source is carried
+by `IsPolyErr₂`, which states the corrected sum form
+`f x y ≤ C * (x ^ r + y ^ s)` with `1 ≤ C` and positive exponents on the
+closed nonnegative quadrant, in place of the product form `C * (x * y) ^ C`
+of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
+the two-dimensional strategy that refutes the product form are recorded in
+`docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
+Here `poly(epsilon, md / q)` is read in that sense.
+
+The proof constructs the polynomially controlled point family of `lem:qld-4-10`
+and applies the conditional companion above to that same family. -/
+theorem exists_extendedLinesWitness_established :
+    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
+      ∃ C : ℝ, 0 < C ∧
+        ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+          ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+            ∃ points : CombinedPointsWitness S (deltaQ ε),
+              Nonempty (ExtendedLinesWitness S points
+                (C * (P.m : ℝ) *
+                  deltaCombine ε ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
+  classical
+  obtain ⟨deltaQ, hdeltaQ, hpoints⟩ := exists_combinedPointsWitness
+  obtain ⟨C, hC, deltaCombine, hdeltaCombine, hlines⟩ :=
+    exists_extendedLinesWitness_established_ofPointsWitness deltaQ hdeltaQ
+  refine ⟨deltaQ, hdeltaQ, C, hC, deltaCombine, hdeltaCombine, ?_⟩
+  intro P ε S
+  obtain ⟨points⟩ := hpoints P ε S
+  exact ⟨points, hlines P ε S points⟩
 
 /-- Construction of the projective global polynomial-pair measurements from
 `lem:qld-4-7`, paper lines 1267--1274.  The statement has the source's universal
