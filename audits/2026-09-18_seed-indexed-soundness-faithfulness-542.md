@@ -1,6 +1,6 @@
 # Declaration-level faithfulness audit — preserved seed-indexed low-degree soundness
 
-Preservation of the PR #542 packet (`issue-527-proof-exists-ld-soundness`,
+Published as PR #600. Preservation of the PR #542 packet (`issue-527-proof-exists-ld-soundness`,
 head `ac7cd808af2db7204ca2f056e38298f3b647d950`, authored 2026-09-12, never
 reviewed) onto current `github/main` `2e25304971b70661bc990bbcddefbcde6edd0bd6`.
 
