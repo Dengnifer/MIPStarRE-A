@@ -88,7 +88,7 @@ For the actual direct soundness application take both `etaA` and `etaB` to be
 `deltaLd a b (directPassingErrorEnvelope (deltaQ + deltaL) (m*d/q)) q (2*m+2) d 1`.
 The two errors in this envelope must both be retained. This operator estimate
 supports `lem:qld-4-7`, paper lines 1278--1288; the remaining ordered-correlation
-and separation obligations are tracked by issue #513. -/
+and separation obligations are tracked by issues #515 and #598. -/
 theorem compressed_polynomial_consistency_le
     (lines : ExtendedLinesWitness setting points deltaL)
     (A : DirectPolyMeasTuple P.extendedDirectLd (projectiveStrategy lines).ιA)

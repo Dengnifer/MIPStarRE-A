@@ -16,7 +16,10 @@ You do not dispatch another session or contact the owner. The operator owns the
 aggregate attempt budget, adoption record, #27 updates, and any exceptional
 permissions-only blocker on owner inbox #500. Such a blocker is allowed only
 when risk extends beyond project development and uses the at-most-ten-line
-plain-language format in `local/protocols/issues-prs.md` section 6.
+plain-language format in `local/protocols/issues-prs.md` section 6. Main
+decides mathematical and internal workflow questions (owner decision
+2026-09-06T05:05Z). Historical posted B7/B8 holds are superseded, not erased;
+issue #26 is archived and receives no new comments.
 
 ## Operating rules
 
@@ -47,22 +50,29 @@ plain-language format in `local/protocols/issues-prs.md` section 6.
    conclusion, constants, and domain whenever the defect does not force a
    change. Do not add convenient hypotheses merely because downstream Lean
    already has them.
-7. Do not change a mathematical definition or game specification on your own.
-   If every sufficient correction requires such a change, stop and return the
-   evidence to main. Main decides and records that project outcome; it is not
-   an owner blocker merely because the project might fail without the change.
-   Do not spend the ordinary convergence budget implementing that change.
+7. Do not change a mathematical definition or game specification. If every
+   sufficient correction requires such a change, stop immediately and return
+   a decision packet to main, not a human-owner escalation. Do not spend the
+   ordinary convergence budget implementing that change. A separately recorded
+   main decision and scoped task are required before implementation; the
+   source-correction and independent-review requirements still bind.
 8. Iterate the mathematical candidate with Lean. The corrected declaration must
    type-check, and all affected downstream consumers must compile. Update the
    paper-gap note with the counterexample, corrected statement, source-grounded
    proof sketch, use analysis, and current verdict before treating a signature
    change as adopted.
-9. The shared limit is ten `mathfix` sessions or about one and a half working
+9. The ordinary shared limit is ten `mathfix` sessions or about one and a half working
    days for the gap, whichever comes first. The request or dispatch context must
    state the cumulative count and start time. Report missing budget data; never
    reset or extend the count yourself. At the limit, stop with all attempts and
    failures organized for main to decide and record, not for automatic owner
-   escalation.
+   escalation. The explicit #118/B8 tranche in `issues-prs.md`
+   §6 alone authorizes attempts 11 and 12, at most 2700 seconds each, carrying
+   ten completed attempts, 19931 completed seconds and the original
+   2026-09-05T19:24:00Z anchor. Attempt 12 requires main's evaluation of 11.
+   Charge every attempt's actual time, including failures and interruptions;
+   reserved time is not completed time. No automatic renewal or fresh budget
+   follows from a new thread, model, route or effort selection.
 10. Follow the validation ladder: `lake env lean <changed-file>`, then
     `rg -n "sorry|axiom" <changed-file>`, then a full build only when stable and
     only through the machine-wide lock in `local/protocols/build-cache.md`.
@@ -107,10 +117,10 @@ Edit only files named by the task under `MIPStarRE/`, `blueprint/`,
 ## Lean evidence
 <changed declarations; per-file checks; downstream checks; full build status>
 ## Budget
-<attempt number, elapsed working time and whether a main decision is now required>
+<cumulative attempts/time, original anchor, tranche authority and main decision needed>
 ## Operator record
-<one-line #27 announcement and paper-gap/event/design-decision entries; #500
-only for a separately established permission blocker>
+<one-line #27 announcement, paper-gap/event/design-decision entries, or main packet;
+ #500 only for a separately established permission blocker>
 ```
 
 ## Quality bar

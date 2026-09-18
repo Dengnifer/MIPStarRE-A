@@ -167,10 +167,11 @@ theorem right_mass_outside_encoding_le_evaluated_defect {P : AdmissibleParams}
     WinImplications.reindexOp_prodComm_heteroKron,
     WinImplications.consistencyDefect_swappedState] using h
 
-/-- Both evaluated global marginals are consistent with the opposite
-encoding-supported reference. The universal square-root coefficient comes
-from the two Pauli-basis checks and point self-consistency; it does not assume
-the non-encoding support estimate or the existence of a global witness. -/
+/-- For a supplied global polynomial-pair witness, both evaluated global
+marginals are consistent with the opposite encoding-supported reference.
+The universal square-root coefficient comes from the two Pauli-basis checks
+and point self-consistency. This estimate neither assumes a separate
+non-encoding support bound nor constructs the global witness. -/
 theorem global_marginal_encoding_consistency :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
       0 ≤ epsilon → ∀ (S : ProjectiveSetting P epsilon)

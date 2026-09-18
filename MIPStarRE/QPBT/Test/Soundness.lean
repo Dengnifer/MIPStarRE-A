@@ -1,14 +1,17 @@
 import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness.RangeProjection
 import MIPStarRE.QPBT.Test.Soundness.Ancilla
+import MIPStarRE.QPBT.Test.Soundness.OperatorTransfer
+import MIPStarRE.QPBT.Test.Soundness.ProjectiveSetting
 
 /-!
 # Pauli basis test soundness
 
 This module states the source-shaped soundness theorem and provides auxiliary
-range-projection estimates and ancilla isometries for its final transfer.
+range-projection estimates, ancilla isometries, and the transfer of supplied
+extraction data to the three soundness estimates.
 The scalar square-root error bound is in `MIPStarRE.QPBT.Combining.RootErrorBounds`.
-The construction and application of the final soundness witness remain open.
+Unrestricted soundness and the transfer from arbitrary strategies remain open.
 
 ## References
 
