@@ -56,7 +56,7 @@ Slater/strong-duality argument.  The feasible primal variables in the canonical
 SDP remain submeasurements; this statement stores the selected saturated
 optimal witness as a complete matrix measurement.
 
-Grounded by: #1230. -/
+Grounded by: upstream issue 1230 (historical). -/
 structure MatrixSdpStatementWithSlackness (params : Parameters) [FieldModel params.q]
     (model : MatrixSdpRealization params) : Prop where
   witness :

@@ -14,7 +14,7 @@ These are finite-dimensional auxiliary results for blueprint
 `lem:qld-construct-the-paulis`, Item 2, and paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1542-1551`.
 They do not assert the preceding pulled-apart measurement comparison
-`eq:qld-pulling-cons`, which remains an obligation of issue #520.
+`eq:qld-pulling-cons`, which remains an obligation of issue #529.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -127,7 +127,7 @@ theorem basis_character_opDistSq_le_four_consistencyDefect
 `lem:qld-construct-the-paulis`, Item 2, on the original six-register state.
 The measurement consistency defect is an explicit quantity, not an assumed
 bound. Proving its construction-scale bound remains the obligation
-`eq:qld-pulling-cons` of issue #520. -/
+`eq:qld-pulling-cons` of issue #529. -/
 theorem tildeObs_opDistSq_le_four_consistencyDefect
     {P : AdmissibleParams} {epsilon deltaG : ℝ}
     {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
