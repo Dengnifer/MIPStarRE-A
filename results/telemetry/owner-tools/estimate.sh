@@ -8,9 +8,39 @@
 # stacked PRs.
 set -u
 export PATH="$HOME/.local/bin:$PATH"
+
+# --- real sorry-site rule (issue #168) -------------------------------------
+# Count only lines that carry an actual `sorry` tactic/term.  An unanchored
+# `grep -c sorry` also matches prose: MIPStarRE/QPBT/Games/StrategyClasses.lean
+# and MIPStarRE/QPBT/Combining/Apply.lean each explain their hole in a
+# docstring, so the open-obligation number posted on the tracker issue used to
+# be larger than the number of real sites.
+#
+# Source of truth for "does this line still hold a sorry": the comment-stripping
+# rule of scripts/audit_stale_issues.py (`line_is_sorry` with `_SORRY_LINE_RE`),
+# which drops `--` line comments before matching.  This script scans whole files
+# instead of issue-cited lines, so it additionally anchors the token to the
+# tactic/term positions it can occupy: a bare `sorry` line (optionally after a
+# `·` bullet), `:= sorry`, `by sorry`, and `(sorry)`.  Keep the two in sync.
+SORRY_SITE_RE='^[[:space:]]*(·[[:space:]]*)?sorry[[:space:]]*$|:=[[:space:]]*sorry[[:space:]]*\)?[[:space:]]*$|(^|[[:space:]])by[[:space:]]+sorry[[:space:]]*\)?[[:space:]]*$|\(sorry\)'
+
+# Reads Lean source on stdin, prints the number of real sorry sites.
+count_sorry_sites() { sed 's/--.*$//' | grep -c -E "$SORRY_SITE_RE"; }
+
+# Offline entry point used by scripts/tests/test_estimate_sorry_count.py: print
+# the site count of the given files and exit without touching git, gh, or the
+# telemetry log.  The normal run below is unaffected.
+if [ "${1:-}" = "--count-sorry-sites" ]; then
+  shift
+  total=0
+  for f in "$@"; do total=$((total + $(count_sorry_sites < "$f"))); done
+  echo "$total"
+  exit 0
+fi
+
 cd "$HOME/MIPStarRE-qpbt" || exit 1
 git fetch -q github
-count_at() { git ls-tree -r --name-only "$1" -- MIPStarRE/QPBT | grep '\.lean$' | while read -r f; do git show "$1:$f" | grep -c 'sorry'; done | awk '{s+=$1} END {print s+0}'; }
+count_at() { git ls-tree -r --name-only "$1" -- MIPStarRE/QPBT | grep '\.lean$' | while read -r f; do git show "$1:$f" | count_sorry_sites; done | awk '{s+=$1} END {print s+0}'; }
 DENOM=197
 NOW=$(count_at github/main)
 PREV_REF=$(git rev-list -1 --before="24 hours ago" github/main)
@@ -21,7 +51,15 @@ if [ "$RATE" -gt 0 ]; then DAYS=$(python3 -c "print(round($NOW/$RATE,1))"); else
 : > /tmp/estimate-removed.txt
 for n in $(gh pr list --state open --limit 100 --json number --jq '.[].number'); do
   B=$(gh pr view "$n" --json headRefName --jq .headRefName); git fetch -q github "$B" 2>/dev/null || continue
-  git diff -U0 "github/main...FETCH_HEAD" -- 'MIPStarRE/QPBT/*.lean' 2>/dev/null | awk '/^--- a\//{f=$2} /^-.*sorry/{print f":"$0}' >> /tmp/estimate-removed.txt
+  # Same anchored rule as count_sorry_sites: the cheap `sorry` match only
+  # pre-filters, the removed line itself must be a real site.
+  git diff -U0 "github/main...FETCH_HEAD" -- 'MIPStarRE/QPBT/*.lean' 2>/dev/null \
+    | awk '/^--- a\//{f=$2; next} /^-.*sorry/{print f":"$0}' \
+    | while IFS= read -r rec; do
+        body=${rec#*:}
+        [ "$(printf '%s\n' "${body#-}" | count_sorry_sites)" -gt 0 ] || continue
+        printf '%s\n' "$rec"
+      done >> /tmp/estimate-removed.txt
 done
 INPR=$(sort -u /tmp/estimate-removed.txt | wc -l)
 TS=$(date -u +"%Y-%m-%d %H:%MZ"); MAIN=$(git rev-parse --short github/main)
