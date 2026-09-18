@@ -13,10 +13,12 @@
 \newcommand{\strategy}{\mathcal{S}}
 \renewcommand{\ghissue}[1]{%
   \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+\renewcommand{\ghpr}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/pull/#1}{PR \##1}}
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
-\date{2026-09-12}
+\date{2026-09-12, realignment section added 2026-09-18}
 
 \begin{document}
 \maketitle
@@ -253,6 +255,43 @@ remains open.  The given-strategy
 support node, has the same hypothesis, exact value equality, and projective
 symmetric conclusion as that node, and its proof is complete.
 
+\section{Realignment of the Lean statements (2026-09-18)}
+
+This realignment is published as \ghpr{601}.  Following the disposition
+recorded for \ghissue{524}, the formalization keeps
+the source-labelled statement as printed and adds the approximate form beside
+it as a separate, proved Lean declaration.  Three points fix the record.
+
+First, the printed attainment form remains an \emph{open source gap}.  The
+declaration \leanid{exists\_symmetric\_projective\_strategy} keeps the source
+shape, keeps its proof hole, and keeps its unfaithfulness marker; the blueprint
+node \path{lem:symmetric-strat} is still stated as printed and still carries no
+proof-level \texttt{leanok} flag.  Nothing in this realignment proves the
+printed statement, and the weaker result is not renamed as it.
+
+Second, the approximate form listed under ``Key theorem forms'' above is now
+formalized and proved as
+\leanid{exists\_symmetric\_projective\_strategy\_approx}, with the equivalent
+slack form \leanid{exists\_symmetric\_projective\_strategy\_of\_lt\_value}
+beside it, against a new formalization-only blueprint node
+\path{lem:symmetric-strat-approx}.  The Lean proof is the source argument
+unchanged: the supremum property of $\val^*(\game)$ supplies a strategy above
+the strict lower bound, and the already proved value-preserving construction
+\leanid{exists\_symmetric\_projective\_strategy\_of\_strategy} symmetrizes it.
+The auxiliary facts added for it --- that every strategy value is at most one,
+that the set of strategy values is bounded above, and that a nonempty answer
+alphabet admits a strategy --- are formalization-only support for
+\path{def:tensor-product-value}.
+
+Third, the nonempty answer alphabet appears as an explicit hypothesis of both
+approximate declarations.  This is the boundary condition of the formal-domain
+obstruction: with an empty answer alphabet the Lean game has no strategy at
+all, while $\val^*(\game)$ is still defined, as the totalized supremum of the
+empty set, so the statement as printed is false there.  That obstruction and
+its checked Lean witness are the subject of the separate documentation packet
+for \ghissue{524}; the present section does not restate or re-audit its
+evidence.
+
 \section{Conclusion}
 
 For games with nonempty answer alphabets, the verdict remains a proof-level
@@ -266,7 +305,10 @@ strict lower bound on the value, for which the value-preserving construction
 suffices.  Stage~4 has carried out the recommendation of this note: the
 given-strategy symmetrization lemma is formalized and proved as the workhorse
 statement, while the source-labelled lemma keeps its source shape with the
-attainment step an explicit, tracked proof obligation.  If a later
+attainment step an explicit, tracked proof obligation.  The 2026-09-18
+realignment adds the approximate form as a proved Lean declaration under an
+explicit nonempty-answer hypothesis and leaves the attainment assertion open
+and tracked.  If a later
 investigation settles the counterexample question for symmetric games with
 nonempty answer alphabets, the statement should then be reclassified from
 an unproved step to a documented

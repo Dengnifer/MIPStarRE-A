@@ -1,16 +1,19 @@
+import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
 import MIPStarRE.QPBT.Combining.Lines.SubLineExtended
 
 /-!
 # Uniform points of a line and the blocks of a coordinate direction
 
 This module records the two elementary geometric inputs of the sampling
-procedure of the sub-line lemma.  First, a uniformly random point of the
-coordinate space is the same thing as a uniformly random canonical
-representative together with a uniformly random affine parameter along the
-direction: the map sending a pair to the point at that parameter on the line
-through the representative has constant fibers of size `q`, because the
-kernel of the canonical representative map is the span of the direction and
-for the zero direction that map is the identity.  Second, the two coordinate
+procedure of the sub-line lemma. First, for independent uniform inputs `u` in
+the ambient coordinate space and `t` in the scalar field, the point
+`lineRepMap v u + t • v` is uniform. This map on ambient-point--parameter pairs
+has fibers of size `q`: for nonzero `v`, `u` varies over a coset of the span of
+`v`, while its canonical representative and `t` are fixed; for zero `v`, `u`
+is fixed and `t` is free. In averaged form this is the resampling identity used
+by the line-point samplers: a quantity of the canonical representative and of
+the point may equivalently be averaged over the point and an independent
+uniform affine parameter along the direction. Second, the two coordinate
 blocks of an elementary coordinate direction of the extended space are the
 corresponding elementary direction of the source space in the block that
 carries the coordinate, and zero in the other block and at the two scalar
@@ -53,10 +56,10 @@ theorem lineRepMap_zero_apply {K : Type*} [Field K] {m : ℕ}
 /-- The point at a uniformly random affine parameter on the line through the
 canonical representative of a uniformly random point is uniformly random on
 the whole coordinate space.  Every fiber of the parameterization has exactly
-`q` elements: for a nonzero direction the parameter is determined and the
-representative varies over a coset of the span of the direction, and for the
-zero direction the representative is the point itself and the parameter is
-free.  Blueprint `lem:qld-sublines`, paper
+`q` elements in the ambient-point--parameter domain: for a nonzero direction
+the parameter and canonical representative are fixed, while the input point
+varies over a coset of the span of the direction. For the zero direction the
+input point is fixed and the parameter is free. Blueprint `lem:qld-sublines`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1063-1116`. -/
 theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
     [Fintype K] [DecidableEq K] {m : ℕ} (v : Fin m → K) :
@@ -119,6 +122,31 @@ theorem uniformDistribution_map_lineRepMap_add_smul {K : Type*} [Field K]
         rw [lineRepMap_add_smul, lineRepMap_apply_self]
         exact (directLineRepParameter_spec v x).symm
     rw [himg, Finset.card_image_of_injective _ hinj, Finset.card_univ]
+
+/-! ## Resampling a uniform point along its canonical line -/
+
+/-- Finite-average form of the parameterization above: a uniformly random
+point may be replaced by a fresh uniform affine parameter on the line through
+its canonical representative, while the representative itself is kept in the
+sampled value.  The zero direction is included, since the parameterization
+has constant fibers there too.  This formalization-only identity is the
+common core of the axis and diagonal line-point resampling identities used at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-963`;
+the canonical representative map is blueprint `def:line-representative`. -/
+theorem avgOver_uniform_lineRepMap_resample_parameter {K : Type*} [Field K]
+    [Fintype K] [DecidableEq K] {m : ℕ} (v : Fin m → K)
+    (value : (Fin m → K) → (Fin m → K) → ℝ) :
+    avgOver (uniformDistribution (Fin m → K))
+        (fun point => value (lineRepMap v point) point) =
+      avgOver (uniformDistribution (Fin m → K)) (fun point =>
+        avgOver (uniformDistribution K) (fun param =>
+          value (lineRepMap v point) (lineRepMap v point + param • v))) := by
+  have hmap := uniformDistribution_map_lineRepMap_add_smul v
+  have havg := congrArg (fun dist => avgOver dist
+    (fun point => value (lineRepMap v point) point)) hmap
+  rw [Distribution.avgOver_map, uniformDistribution_prod,
+    SandwichProduct.avgOver_distribution_prod] at havg
+  simpa only [lineRepMap_add_smul, lineRepMap_apply_self] using havg.symm
 
 /-! ## Injectivity of the two block embeddings -/
 
