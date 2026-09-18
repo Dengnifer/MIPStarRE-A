@@ -33,10 +33,13 @@
   decomposition that the stated sub-line lemma does not supply.  The
   correction is to state the first route's established error form and confirm
   that the sole consumer tolerates it.
-  The unrestricted supplied-point domain of the current extended-line helper
-  has a separate obstruction: deterministic quadratic point answers force a
+  The unrestricted supplied-point domain of the former extended-line helpers
+  had a separate obstruction: deterministic quadratic point answers force a
   positive axis-line error even on a perfect strategy. This does not refute
   the paper statement, which uses its previously constructed point family.
+  Section~\ref{sec:supplied-point-realignment} records the realignment of
+  those helpers to the polynomially controlled point family, which removes
+  that obstruction without touching the printed-error question.
   \item \textbf{Key Mathlib inputs:} the
   Cauchy--Schwarz inequality for state-dependent operator distances
   (project-local, blueprint Chapter 12), mixture decompositions of
@@ -214,16 +217,18 @@ signature audit, axiom closure, and cumulative cost accounting.}
 
 \subsection{The extended-line supplied-point obstruction}
 
-The same quantitative omission remains in the auxiliary
+The same quantitative omission appeared in the auxiliary
 \path{exists_extendedLinesWitness_ofPointsWitness}: a single polynomial error
 function is chosen before an arbitrary scalar $\delta_Q$ and every point witness
 at that error. Passing from paired points to the extended scalar answer does
 not remove this obstruction. The first-route estimate
 $C m g(\eps,md/q)$ in
-\path{exists_extendedLinesWitness_established_ofPointsWitness} has the same
+\path{exists_extendedLinesWitness_established_ofPointsWitness} had the same
 problem: it still tends to zero at $\eps=0$ with fixed $m,d$ and increasing $q$.
-These unrestricted auxiliaries are tracked by \ghissue{509} and \ghissue{511},
-respectively. The source instead uses the family constructed by its point lemma,
+These unrestricted auxiliaries were tracked by \ghissue{509} and \ghissue{511},
+respectively; neither signature survives, and the argument of this subsection is
+the reason why. Section~\ref{sec:supplied-point-realignment} records what
+replaced them. The source instead uses the family constructed by its point lemma,
 with $\delta_Q=\poly(\eps)$, and defines the scalar answer by
 $c=\alpha a+\beta b$. Claim~17-1 explicitly retains the point error.
 \footnote{The source passages are \path{lem:qld-4-10}, \path{lem:qld-4-12}, and
@@ -495,6 +500,57 @@ exponents.  No derivation along these lines is known here, and the
 direction may be infeasible; in that case the corrected error form of
 the first direction stands.
 
+\section{The 2026-09-18 supplied-point realignment}
+\label{sec:supplied-point-realignment}
+
+The refutation above applies to the domain of the two supplied-point
+auxiliaries, not to the printed error form and not to the existential
+declarations. Accordingly the domain was repaired and the printed-error
+question was left untouched and open.
+
+\paragraph{The repaired conditional auxiliary.}
+\path{exists_extendedLinesWitness_established_ofPointsWitness} now takes a
+point-error function $\delta_Q$ together with its control hypothesis
+\path{IsPolyErr}~$\delta_Q$ before the line error is chosen, and assumes a
+point witness at $\delta_Q(\eps)$. This is exactly the family produced by
+\path{exists_combinedPointsWitness}, so the counterexample of the previous
+subsection no longer lies in the domain: a deterministic quadratic point family
+at $\eps=0$ is not polynomially controlled in the required sense. The
+established dimension factor is kept explicit, so the conclusion carries
+$C\,m\,\delta_{\mathrm{combine}}(\eps,md/q)$ rather than an absorbed constant.
+The declaration is now proved along the first route, reusing the estimates that
+already carried \path{exists_extendedLinesWitness_established}; no new estimate
+was introduced. This repeats one level up the \ghissue{389} repair of
+\path{exists_combinedLinesWitness_ofPointsWitness}, whose conditional blueprint
+entry is \path{lem:combined-lines-given-points}.
+\path{exists_extendedLinesWitness_established} is now derived from the repaired
+conditional form by supplying the point family; its statement is unchanged, so
+its consumer \path{exists_globalPairWitness} is unaffected.
+
+\paragraph{The removed printed-form auxiliary.}
+\path{exists_extendedLinesWitness_ofPointsWitness}, the supplied-point companion
+carrying the printed error expression $\poly(m^2\eps,md/q)$, was removed. Under
+the same domain repair its statement becomes the repaired conditional auxiliary
+with a different error expression, and the printed expression is already carried
+by the existential declaration \path{exists_extendedLinesWitness}; no Lean
+declaration and no blueprint node consumed it, as a search across
+\path{MIPStarRE} and \path{blueprint} confirmed before its removal. Its
+obstruction and provenance are the subject of the preceding subsection and of
+\path{audits/2026-09-12_issue509-extended-line-point-error.md}, both retained.
+It was \ghissue{509}, closed with the obstruction pull request that did not
+prove the printed form.
+
+\paragraph{What stays open.}
+The printed error form itself. \path{exists_extendedLinesWitness} keeps the
+printed expression and keeps an open proof; it is a source-gap declaration, not
+a proof obligation of any Lean consumer, and it is neither marked proved nor
+removed. The scalar obstruction \path{not_exists_combining_quarter_power_bound}
+still blocks absorbing the first route's $m\eps^{1/4}$ term into
+$\poly(m^2\eps,md/q)$, so a different estimate would be required. Because
+\ghissue{509} and \ghissue{510} were closed by their obstruction pull requests
+without proving the printed assertion, live tracking of this gap is restored by
+\ghissue{598}; the closed issues are not reopened.
+
 \section{Comparison with the blueprint}
 
 The blueprint \cite{MIPStarREBlueprint} keeps the combined-lines lemma in
@@ -525,11 +581,16 @@ established error form is linked from the separate formalization-support node
 $C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
 convention that constants are absorbed into $\poly$.  The two declarations now
 have different statuses.  The printed error form is still unproved: the proof of
-\path{exists_extendedLinesWitness} is the tracked obligation, and
+\path{exists_extendedLinesWitness} is the tracked obligation, tracked by
+\ghissue{598}, and
 \path{lem:qld-4-13} carries no formalization mark.  The established error form
 is proved: \path{exists_extendedLinesWitness_established} has a complete proof,
 and the support node \path{lem:qld-4-13-established} carries both a
-statement-level and a proof-level mark.
+statement-level and a proof-level mark.  Its conditional companion
+\path{exists_extendedLinesWitness_established_ofPointsWitness}, repaired as in
+Section~\ref{sec:supplied-point-realignment}, is linked from the conditional
+node \path{lem:qld-4-13-established-given-points}, which carries a
+statement-level and a proof-level mark for that conditional assertion only.
 
 Neither declaration is source-shaped beyond its error form, and this note does
 not claim otherwise.  Both return the carrier \path{ExtendedLinesWitness},
@@ -568,9 +629,11 @@ the corrected first-route form in the proof and in the sequel, and cites this
 note; strengthening the sub-line lemma to license the second route is
 optional, and no route to the printed form is currently known.  We do not
 assert that the printed form is false.
-The unrestricted supplied-point auxiliary is false for the independent
-quadratic-answer reason above; its quantifiers must not be substituted for
-those of the source statement.
+The unrestricted supplied-point auxiliaries were false for the independent
+quadratic-answer reason above; their quantifiers must not be substituted for
+those of the source statement.  Their domain has since been repaired or
+removed, as recorded in Section~\ref{sec:supplied-point-realignment}, which
+leaves the printed-error question exactly where this note found it.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -1948,7 +1948,8 @@ analyzed, together with candidate repairs, in
 	% routes delivers that form, and the route retained below establishes
 	% m * poly(eps, md/q), which is the form the sequel uses. See
 	% rem:qld-4-13-source-defects and the analysis in
-	% docs/paper-gaps/qpbt_combined-lines-error-term.tex. The line-point
+	% docs/paper-gaps/qpbt_combined-lines-error-term.tex; the open printed-error
+	% form is tracked by GitHub issue 598. The line-point
 	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
@@ -3311,6 +3312,12 @@ source-labelled claims is certified by these auxiliary entries.
 	deficit assertion in the proof of Lemma~\ref{lem:claim-17-2}, and the
 	candidate repairs with their open obligations --- is given in
 	\cite{gap:qpbt_combined-lines-error-term}.
+	The printed error form is therefore an open source gap and not a Lean proof
+	obligation of any consumer: its declaration keeps an open proof, every
+	formalized consumer uses the established form of
+	Lemma~\ref{lem:qld-4-13-established}, and the gap is tracked by GitHub issue
+	598 after the obstruction pull requests of the earlier issues closed those
+	issues without proving the printed assertion.
 \end{remark}
 
 \begin{example}[The paired-line construction given a joint point family]
@@ -3490,6 +3497,58 @@ source-labelled claims is certified by these auxiliary entries.
 	$\min\{1,m_n\eps_n^{1/4}\}=1$ for every $n$, a contradiction.
 \end{proof}
 
+\begin{example}[The extended-line construction given a joint point family]
+	\label{lem:qld-4-13-established-given-points}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established_ofPointsWitness}
+	\leanok
+	\uses{lem:qld-4-10, lem:combined-lines-given-points, def:line,
+		def:line-point-dist, def:consistency, def:bracket, def:expanded-state,
+		def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper, and it
+	does not claim the printed error form of Lemma~\ref{lem:qld-4-13}, which remains
+	an open source gap tracked by GitHub issue 598.
+	Fix a function $\delta_Q(\eps)=\poly(\eps)$. There are a constant $C>0$ and a
+	function $\delta_{\mathrm{combine}}(\eps,md/q)=\poly(\eps,md/q)$ with the
+	following property. Let a projective setting with error $\eps$ be given,
+	together with a complete projective joint point family satisfying all the
+	conclusions of Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$. Then,
+	relative to that same point family, there is an extended-line witness whose
+	axis-degree property and both completed-answer consistency bounds hold with
+	error
+	\[
+		C m\,\delta_{\mathrm{combine}}\!\left(\eps,\frac{md}{q}\right).
+	\]
+	The point family is an explicit hypothesis, so this auxiliary is separate from
+	Lemma~\ref{lem:qld-4-13} and does not prove that source lemma. It shares the
+	three replacements described in Lemma~\ref{lem:qld-4-13-established}: the
+	directly indexed question carrier, the directly indexed line-point law, and the
+	comparison on the completed answer alphabet $\F_q\cup\{\bot\}$.
+	The hypothesis is the polynomially controlled family, not an arbitrary supplied
+	point measurement at an arbitrary error: the unrestricted form is false, by the
+	deterministic quadratic point answers exhibited in
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{example}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-lines-given-points,
+		lem:direct-subline-witness-exists,
+		def:qld-conditional-extended-line-measurement,
+		lem:qld-combined-polynomial-axis-degree,
+		lem:qld-extended-line-overlap-comparison,
+		thm:qld-direct-line-real-overlap,
+		lem:consistency-defect-integrand-le-one,
+		thm:qld-combining-polynomial-bound}
+	Apply Lemma~\ref{lem:combined-lines-given-points} to the supplied point family.
+	The direct subline witness of Lemma~\ref{lem:direct-subline-witness-exists}
+	supplies the conditional extended-line measurement. Its axis-degree theorem
+	proves that no outcome above degree $d$ occurs on an axis-parallel extended
+	line, while the extended-overlap comparison and
+	Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
+	consistency estimates. The independent unit bound handles large errors, and
+	Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms
+	into $m\cdot\poly(\eps,md/q)$.
+\end{proof}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
@@ -3538,26 +3597,11 @@ source-labelled claims is certified by these auxiliary entries.
 \end{lemma}
 \begin{proof}
 \leanok
-\uses{lem:qld-4-10, lem:combined-lines-given-points,
-	  lem:direct-subline-witness-exists,
-	  def:qld-conditional-extended-line-measurement,
-	  lem:qld-combined-polynomial-axis-degree,
-	  lem:qld-extended-line-overlap-comparison,
-	  thm:qld-direct-line-real-overlap,
-	  lem:consistency-defect-integrand-le-one,
-	  thm:qld-combining-polynomial-bound}
+\uses{lem:qld-4-10, lem:qld-4-13-established-given-points}
 Construct the polynomially controlled joint point family of
 Lemma~\ref{lem:qld-4-10}, and apply
-Lemma~\ref{lem:combined-lines-given-points} to that same family. The direct
-subline witness of Lemma~\ref{lem:direct-subline-witness-exists} supplies the
-conditional extended-line measurement. Its axis-degree theorem proves that no
-outcome above degree $d$ occurs on an axis-parallel extended line, while the
-extended-overlap comparison and
-Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
-consistency estimates. The independent unit bound handles large errors, and
-Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms
-into $m\cdot\poly(\eps,md/q)$. This proves the stated directly indexed
-auxiliary. Its comparison with the printed source formulation remains subject
+Lemma~\ref{lem:qld-4-13-established-given-points} to that same family. This
+proves the stated directly indexed auxiliary. Its comparison with the printed source formulation remains subject
 to the separate question-law and completed-answer issues in
 \cite{gap:qpbt_ld-dimension-divisibility} and
 \cite{gap:qpbt_combined-lines-error-term}.
