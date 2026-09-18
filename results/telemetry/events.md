@@ -8716,3 +8716,15 @@ this worktree's private build cache made the unchanged incoming file pass.
 - PR #583 independent native review task 01a0b19f-3cf5-7440-9344-4b8181d601d6 exceeded its 360-second envelope during receipt completion. Actual task_started 2026-09-17T23:06:38.265Z through task_complete 23:13:25.333Z is 407.068 seconds (47.068 seconds over); full token delta and rollout provenance are retained in native-reviews/pr583-2168cc4b-01a0b19f/terminal.jsonl. Exact-head review 5242315909 was published and verified, five artifact hashes passed, and the thread was retired. No resumed assignment or budget reset. Follow-up: keep publication and receipt inside the stated final reserve and retire the task at completion.
 - Post-merge PR #465 cache warm for b89f5896 published a partial snapshot after168s: SupportMass.lean failed reading shared Mathlib AlgebraicGeometry/Morphisms/OpenImmersion.ir with invalid header. The package file remained read-only and its inspected header indicated4.32.0. One canonical cache-warmer retry, with no source or shared-package changes, completed in101s and published snap-20260917T235718Z-b89f5896245d. The invalid-header read did not recur; root cause is not established. Logs and exact command are archived in native-reviews/pr465-287ddbc2-01a0b1bc/cache-recovery.jsonl.
 - PR #584 native F1 repair01a0b1c7 finished its complete receipt/verification at 2026-09-17T23:56:56.149Z, with 380.869s actual task time against360s (20.869s over). All1 recorded task turns belong to the same assignment and original deadline; full token delta is charged in native-audits/pr584-f1-prose-01a0b1c7/terminal.jsonl. The one-file repair is locally committed, native retired, no publication/review or budget reset claimed.
+
+## 2026-09-12 - Pauli soundness continuation (historical #529 / PR #536)
+
+- Historical session `prover-529-20260912-03` preserved commit `3a269dd8` and PR #536.
+  Its predecessor failed after exhausted HTTP 503 retries (1903 wall seconds,
+  usage unknown); a separate attempt failed after 48 seconds (usage unknown).
+  PR #536 first failed blueprint-sync workflow fixtures when inherited
+  `MIPSTARRE_HARDNESS_REASON` conflicted with routine classification; the retry
+  cleared invoking-model, classification, hardness, and review-model overrides.
+  A later exact-head CI manifest at `b37ebc1f` recorded a build-lock timeout
+  after 30 seconds; its other listed checks passed. These are historical
+  failures, not current-main validation, and prior costs are not reset.

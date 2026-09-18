@@ -111,10 +111,34 @@ where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
 uses projectivity and orthogonality to keep the second term under control.
 The same argument is required for each player and each Pauli basis.
 
-This transfer is an open proof obligation for the next extraction stage.  It
-must be a theorem derived from the concrete swap unitaries, transformed-state
-estimate, and operator comparisons.  It must not be stored as a bridge field,
-residual assumption, or hypothesis of the source-labelled soundness theorem.
+The finite-dimensional estimate is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean}. For a complete POVM
+$\{N_h\}$, an orthogonal projection $Q$, and $Q\vartheta=\vartheta$, it gives
+\[
+  \sum_h\|(N_hQ-T_h)\Delta\|^2
+  \le 2\sum_h\|(N_h-T_h)\Delta\|^2+2\|\Delta-\vartheta\|^2.
+\]
+The proof uses $\sum_h N_h^\dagger N_h\le I$, so it also applies when the
+measurement is not projective. The same module proves the isometry form under
+the exact identity $N_h\phi=\phi M_h$ and its two bipartite placements. The
+unit-ancilla embedding and its composition with a unitary, including the
+identity $U(M\ot I\ot I)U^\dagger\phi=\phi M$, are proved in
+\path{MIPStarRE/QPBT/Test/Soundness/Ancilla.lean} for $\phi=UJ$,
+$J\psi=\psi\ot\eta$, $\|\eta\|=1$, and $U^\dagger U=I$.
+
+The supplied-data transfer is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/StateTransfer.lean} and
+\path{MIPStarRE/QPBT/Test/Soundness/OperatorTransfer.lean}. Given an actual
+\path{ExtractionWitness}, the local maps adjoin a normalized EPR state and
+apply its swap unitaries. Register reassociation identifies their tensor
+action with the witness's transformed state, so its squared distance from
+the ideal state is at most $\delta$. The existing swapped total-Pauli POVMs
+intertwine with these maps; the two bipartite range-projection estimates
+bound each full squared operator-family sum by $4\delta$. Thus the same
+\path{PauliSoundnessWitness} satisfies all three soundness estimates at
+$\max\{\sqrt\delta,4\delta\}$. This is an auxiliary result with supplied
+extraction data, not a new bridge field or a proof of soundness for arbitrary
+strategies.
 
 \section{Blueprint and formalization status}
 
@@ -161,8 +185,9 @@ and two concrete swap unitaries satisfying the state and both players'
 Pauli-family distances at the nested construction/extraction scale. This is
 the existence claim of Lemma~\path{lem:qld-unitary}; its proof does not
 require a supplied global measurement. The subsequent passage from the
-concrete swap operators to the isometries in the soundness theorem remains
-unformalized and still requires the range-projection argument above.
+concrete swap operators to local isometries is now justified by the
+supplied-data transfer and the range-projection argument above; it does not
+extend the construction to arbitrary strategies.
 
 The stronger theorem \path{exists_extractionWitness_fourth_root_rate}
 normalizes the numerical rate of this concrete conclusion to the same
@@ -176,8 +201,8 @@ most $x\leq x^{1/4}$; if $x>1$, the universal four-error construction gives
 both estimates. Enlarging the extraction constant to at least four yields
 $C(x^{1/4}+md/q)$ in both cases. This normalization concerns the concrete
 swap maps only: it neither identifies the seed-indexed low-degree game with
-the direct carrier nor supplies the subsequent isometry range-projection
-transfer. It does not complete the unrestricted Pauli-test soundness claim.
+the direct carrier nor establishes soundness for arbitrary strategies. The
+separate supplied-data isometry transfer above applies to its witness.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{123} records the source-facing composition work: both the pulled-apart
@@ -189,6 +214,9 @@ seed-indexed correspondence and direct-law restrictions documented in
 \ghissue{47} tracks the separate range-projection transfer needed
 by \path{pauli_soundness}; that theorem must be derived from the concrete data
 rather than stored in the witness.
+\ghissue{529} records the independent general range-projection and ancilla
+results. \ghissue{586} applies them to the extracted swap maps and both Pauli
+operator families; neither result establishes unrestricted soundness.
 
 \section{Conclusion}
 
@@ -196,14 +224,16 @@ The printed triangle calculation has repairable numerical errors, and the
 last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
-the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  The global polynomial-pair witness
+the latter has a proved general estimate and an application to the concrete
+extraction data. The global polynomial-pair witness
 and the three pulled-apart consistency estimates are now composed in a proved
 source-facing theorem, including at zero error. The conditional extraction
 theorem remains useful for a supplied global measurement, and its composition
 with the proved global constructor establishes the source-facing existence
-claim of Lemma~\path{lem:qld-unitary} for projective strategies. The final
-range-projection transfer remains separate and open.
+claim of Lemma~\path{lem:qld-unitary} for projective strategies. Its concrete
+isometry transfer, including the state and both operator estimates, is proved
+for supplied extraction data. The unrestricted source theorem still requires
+the separate arbitrary-strategy and game-law steps.
 
 \bibliographystyle{alpha}
 \bibliography{references}
