@@ -275,13 +275,12 @@ assembled by Fourier averaging.
 	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
 	Definition~\ref{def:povm-distance} bounds the associated expectation
 	only by $O(\delta)$ and so absorbs a constant factor. These three
-	discrepancies, together with the common-extension obligation recorded
+	discrepancies, together with the ancillary-padding obligation recorded
 	below, are analyzed in
 	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
 	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
-	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
-	conversion obligations, discharged in the proof of
-	Lemma~\ref{lem:qld-4-10}: the theorem is
+	\cite{gap:qpbt_linearity-distance-normalization}. The source's
+	linearity-based argument also calls for two conversions: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -290,13 +289,44 @@ assembled by Fourier averaging.
 	Definition~\ref{def:povm-distance} by expanding the square, using
 	unitarity of the observables, and relabelling the averaged index
 	pair, at the cost of the constant factors absorbed by that
-	definition. One obligation remains open and is flagged where it
-	arises: the ancilla register $\hilb'$ and its state
-	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
-	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
-	zero-state padding of the strategy state, padding that the source
-	assumes present without construction.
+	definition. This source route is not the formal proof of
+	Lemma~\ref{lem:qld-4-10}. The optional ancilla can be chosen uniformly
+	in $(x,z)$ from its fixed index length (Lemma~\ref{lem:linearity-common-ancilla}).
+	The separate absorption of this ancilla into zero-state padding of the
+	fixed strategy state remains open: the source assumes that padding without
+	a construction, and the direct proof of Lemma~\ref{lem:qld-4-10} does not
+	use it.
 \end{remark}
+
+\begin{lemma}[Formalization support for Theorem~\ref{thm:linearity}: common ancilla]
+	\label{lem:linearity-common-ancilla}
+	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables_commonAncilla}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Natarajan2017Linearity}; it records that the optional ancilla of
+	Theorem~\ref{thm:linearity} depends only on the index length. For every
+	positive integer $t$ there are a finite-dimensional complex Hilbert space
+	$\hilb'_t$ and a unit vector $\ket{\mathrm{anc}_t} \in \hilb'_t$ such that,
+	for every finite-dimensional complex Hilbert space $\hilb$, every density
+	operator $\rho$ on $\hilb$, every $\delta \ge 0$, and every family of binary
+	observables $\{\mathcal{O}^u\}_{u \in \F_2^t}$ on $\hilb$ satisfying
+	the averaged correlation hypothesis of Theorem~\ref{thm:linearity}, there
+	are binary observables $\{\mathcal{L}^u\}$ on $\hilb \ot \hilb'_t$ with
+	$\mathcal{L}^u\mathcal{L}^{u'}=\mathcal{L}^{u+u'}$ for all $u,u'$ and
+	$\E_u d_{\rho'}(\mathcal{L}^u,\mathcal{O}^u\ot\Id)^2 \le 2\delta$,
+	where $\rho'=\rho\ot\ket{\mathrm{anc}_t}\bra{\mathrm{anc}_t}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:naimark-rounding, lem:boolean-representation-stability,
+		lem:blr-defect-identity}
+	The Naimark space has an orthonormal basis indexed by
+	$\F_2^t\sqcup\{\bot\}$ and the ancilla is the basis vector at $\bot$,
+	independently of $\hilb$, $\rho$, $\delta$, and the family. Apply the
+	Fourier--Naimark rounding construction to each family, followed by the
+	averaged BLR estimate.
+\end{proof}
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
@@ -1880,9 +1910,8 @@ analyzed, together with candidate repairs, in
 
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
-	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
-	\lean{MIPStarRE.QPBT.extendedQ_spec}
-	\notready
+	\lean{MIPStarRE.QPBT.exists_extendedQ}
+	\leanok
 	\uses{lem:qld-4-10, def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	For all $x, z \in \F_q^m$, $\alpha, \beta \in \F_q$, and
@@ -1922,6 +1951,9 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
+	\lean{MIPStarRE.QPBT.extendedQ_spec}
+	\leanok
 	\uses{lem:qld-4-10, fact:data-processing}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
