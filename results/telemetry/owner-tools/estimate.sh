@@ -64,7 +64,26 @@ done
 INPR=$(sort -u /tmp/estimate-removed.txt | wc -l)
 TS=$(date -u +"%Y-%m-%d %H:%MZ"); MAIN=$(git rev-parse --short github/main)
 ISSUE=$(cat "$HOME/.cache/mipstarre-dev/watchdog/estimate-issue" 2>/dev/null)
-printf '%s\n' "**$TS — implemented ≈ ${PCT}% · days to go ≈ $DAYS**" "<sub>$NOW of $DENOM sites open on main ($MAIN); $INPR proved in open PRs; trailing-24h rate $RATE sites/day.</sub>" > /tmp/estimate-body.md
+
+# --- total QPBT Lean code lines (owner request 2026-09-18) ------------------
+# The owner asked that every update also say how big the QPBT development is.
+# Counted with the SAME rule as the merge-title Lean delta
+# (pr_merge.lean_code_line_mask: blank and comment-only lines do not count),
+# through results/telemetry/owner-tools/lean-loc.py, which imports that rule
+# rather than copying it.  Cosmetic by contract, like the merge-title delta:
+# if the helper fails, the clause is dropped and the record keeps JSON nulls.
+LEAN_LOC_PY=results/telemetry/owner-tools/lean-loc.py
+LEAN_CLAUSE=""; LEAN_FILES=null; LEAN_CODE=null
+if LEAN_LOC=$(python3 "$LEAN_LOC_PY" --rev github/main 2>/dev/null); then
+  read -r LF LC _ <<< "$LEAN_LOC"
+  case "$LF$LC" in
+    ''|*[!0-9]*) ;;
+    *) LEAN_FILES=$LF; LEAN_CODE=$LC
+       CLAUSE=$(python3 "$LEAN_LOC_PY" --format-clause "$LF" "$LC" 2>/dev/null) || CLAUSE=""
+       [ -n "$CLAUSE" ] && LEAN_CLAUSE="; $CLAUSE" ;;
+  esac
+fi
+printf '%s\n' "**$TS — implemented ≈ ${PCT}% · days to go ≈ $DAYS**" "<sub>$NOW of $DENOM sites open on main ($MAIN); $INPR proved in open PRs; trailing-24h rate $RATE sites/day$LEAN_CLAUSE.</sub>" > /tmp/estimate-body.md
 [ -n "$ISSUE" ] && gh api "repos/Dengnifer/MIPStarRE-A/issues/$ISSUE/comments" -F body=@/tmp/estimate-body.md --jq .html_url
-printf '{"ts":"%s","main":"%s","denominator":%s,"open_sites":%s,"closed_sites":%s,"percent":%s,"open_sites_24h_ago":%s,"rate_per_day":%s,"days_to_go":"%s","sites_in_open_prs_dedup":%s}\n' "$(date -u +%FT%TZ)" "$MAIN" "$DENOM" "$NOW" "$CLOSED" "$PCT" "$PREV" "$RATE" "$DAYS" "$INPR" >> results/telemetry/estimates.jsonl
+printf '{"ts":"%s","main":"%s","denominator":%s,"open_sites":%s,"closed_sites":%s,"percent":%s,"open_sites_24h_ago":%s,"rate_per_day":%s,"days_to_go":"%s","sites_in_open_prs_dedup":%s,"lean_code_lines":%s,"lean_files":%s}\n' "$(date -u +%FT%TZ)" "$MAIN" "$DENOM" "$NOW" "$CLOSED" "$PCT" "$PREV" "$RATE" "$DAYS" "$INPR" "$LEAN_CODE" "$LEAN_FILES" >> results/telemetry/estimates.jsonl
 echo "estimate posted: ${PCT}% / $DAYS days ($NOW open, rate $RATE/day, $INPR in PRs)"
