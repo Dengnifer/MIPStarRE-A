@@ -1,3 +1,14 @@
+---
+title: "Issue 524: obstruction to exact symmetrization"
+date: 2026-09-12
+purpose: >
+  Records the checked empty-answer obstruction to exact symmetrization at the
+  audited base ae124f8f09ee002444ac5b9711822c0f1daae142. This is historical
+  evidence, not a new proof or a replacement theorem.
+issue: "#524"
+pr: "#540"
+---
+
 # Issue 524: obstruction to exact symmetrization
 
 The requested theorem cannot be proved at its current signature. In addition
