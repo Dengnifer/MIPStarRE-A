@@ -11,7 +11,7 @@
 
 \title{The Decoding Identity in the Pauli Extraction Argument}
 \author{}
-\date{2026-09-03}
+\date{2026-09-15}
 
 \begin{document}
 \maketitle
@@ -22,9 +22,11 @@
   \item \textbf{Difficulty.} Medium.  The source applies a decoder--encoder
   identity to every bounded individual-degree polynomial, although the identity
   is guaranteed for encoded polynomials and can fail outside the encoding image.
-  \item \textbf{Estimated weight.} One restricted algebraic identity and one
-  probabilistic estimate showing that the constructed measurement assigns
-  little state-dependent mass to outcomes outside the encoding image.
+  \item \textbf{Estimated weight.} The restricted algebraic identity and the
+  probabilistic non-encoding-mass estimate required algebraic and
+  project-specific consistency arguments; both are now proved. No work
+  remains on this support estimate. The separate source-facing consistency
+  construction is also complete.
   \item \textbf{Mathlib/project split.} Evaluation of the multilinear
   interpolant is elementary polynomial algebra.  The non-encoding-mass bound
   uses project-specific consistency estimates and Schwartz--Zippel.
@@ -93,11 +95,17 @@ justifies the substitution.  On the complement, the proof must bound
   \sum_{g\ \mathrm{not\ an\ encoding}}
   \langle\widehat\psi,\widehat S_g^W\widehat\psi\rangle.
 \]
-The blueprint derives an $O(\delta_S)+md/q$ bound from point consistency and
-the combined point measurement.  A non-encoding polynomial differs from every
-encoded polynomial, so Schwartz--Zippel bounds the probability that their
-evaluations coincide.  This estimate is the open reduction; it must be proved
-from the paper hypotheses rather than inserted as an extraction hypothesis.
+For a supplied global polynomial-pair witness with point-consistency error
+$\delta_G$, the formal proof derives an
+$O(\delta_G+\sqrt\eps)+md/q$ bound. Measure the original Pauli answer $h$ and
+the ancillary ideal Pauli answer $h'$ and return $g_{h+h'}$. This reference
+measurement is supported on encodings. Perfect ancillary consistency and the
+Pauli-basis check bound its evaluated inconsistency with the marginal.
+A non-encoding polynomial differs from every encoded polynomial, so
+Schwartz--Zippel bounds the probability that their evaluations coincide.
+Completeness and positivity bound the non-encoding mass by the full polynomial
+inconsistency. This uniform estimate holds for both player sides; it is not
+inserted as an extraction hypothesis.
 
 The printed reindexing at lines~1805--1822 replaces
 $g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
@@ -129,28 +137,45 @@ $g_{\operatorname{Dec}(g)}=g$ of polynomial representatives, and
 of that predicate.  It therefore matches the corrected evaluation lemma and
 does not assert the false unrestricted identity.  Finally,
 \path{nonencodingMarginalMass_le} in
-\path{MIPStarRE/QPBT/Extraction/Consistency.lean} concludes the complementary
-mass bound from the projective strategy and global polynomial-pair witness; it
-does not add the bound as a witness field or theorem hypothesis.
+\path{MIPStarRE/QPBT/Extraction/Consistency.lean} states one uniform theorem for
+the complementary mass bound on either player side.  It derives the bound from
+the projective strategy and global polynomial-pair witness rather than adding it
+as a witness field or theorem hypothesis.
 
 The decoder calculations are proved.  \path{lowDegreeEncoding_mem_poly},
 \path{decodeFq_add}, \path{decodeFq_smul}, \path{decodeFq_lowDegreeEncoding},
 and \path{decodeFq_dotProduct_indicatorVec} carry complete proofs: the degree
 side-condition on $g_h$, the two linearity laws, the inversion
 $\operatorname{Dec}_{\mathbb F_q}(g_h)=h$, and the evaluation identity under the
-explicit \path{IsEncoding} hypothesis.  The complementary estimate
-\path{nonencodingMarginalMass_le} is the remaining open proof of this note.
-Issue~\#19 owns the Stage~4.2 statements and this discrepancy record;
-\ghissue{47} owns the Stage~4.3 decoder calculations, now discharged, and the
-non-encoding support estimate.  No unrestricted theorem, residual assumption, or
-additional witness field was introduced.
+explicit \path{IsEncoding} hypothesis.  The declarations
+\path{tildeM_consistent_pointMeas_ofGlobalPairWitness} and
+\path{tildeM_consistent_pointMeas'_ofGlobalPairWitness} prove the two specialized
+non-encoding estimates used by the pulled-apart point comparisons.  Each combines
+an encoding-supported reference comparison with the corresponding
+Schwartz--Zippel estimate, and \path{exists_pulled_apart_consistency} applies both
+results to one constructed global witness.  The uniform auxiliary theorem
+\path{nonencodingMarginalMass_le} is proved at its unchanged
+supplied-witness statement. Its proof uses the reference comparison and
+Schwartz--Zippel from
+\path{MIPStarRE/QPBT/Extraction/NonencodingSupport.lean}; it is not called by that
+source-facing composition. The global witness constructor
+\path{exists_globalPairWitness} and the source-facing
+\path{exists_pulled_apart_consistency} are separately proved, including at
+zero error. This does not remove the witness premise from the auxiliary
+theorem. Issue~\#19 owns the Stage~4.2 statements and this discrepancy
+record; \ghissue{47} tracks the non-encoding support theorem, completed for a
+supplied witness by issue~\#517.
+No unrestricted decoder identity, residual assumption, or additional witness
+field was introduced.
 
 \section{Conclusion}
 
 The decoding identity is false for a general polynomial outcome.  Restricting
-it to the encoding image is a necessary local correction.  Recovering the
-source's measurement-consistency conclusion then requires the separate
-non-encoding-mass estimate, which remains an open proof obligation.
+it to the encoding image is a necessary local correction.  The two specialized
+non-encoding-mass estimates required for the pulled-apart point-consistency
+conclusion are proved and used in the source-facing construction. The uniform
+auxiliary estimate is also proved for a supplied global witness, but the
+source-facing construction does not depend on it.
 
 \bibliographystyle{alpha}
 \bibliography{references}

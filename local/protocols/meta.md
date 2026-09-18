@@ -11,7 +11,10 @@ change, and the telemetry duties that make the project usable as research data.
    `results/telemetry/events.md`, and proposes an amendment — a dispatched
    worker proposes it to the operator; the operator amends directly under the
    procedure below, an `events.md` incident being a sufficient trigger.  Owner
-   sign-off is needed only for the escalations named in the standing briefing.
+   action is needed only for actual access/permission blockers under
+   `issues-prs.md` §6 (2026-09-06T05:05Z); main owns mathematical/internal
+   workflow decisions, including previously posted B7/B8. This does not waive
+   proof integrity, normal gates or the requirement to record bounded authority.
 2. **Amendments are evidence-driven.** Every change to a file under
    `local/protocols/` or to `AGENTS.md` must append an entry to
    `local/protocols/EVOLUTION.md` citing its trigger: an `events.md` incident,

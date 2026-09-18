@@ -25,7 +25,7 @@ noncomputable section
 
 /-- An unnormalized collision estimate on every first-question fiber implies
 the positive-mass conditional collision predicate of `lem:pasting`. This is a
-formalization-only normalization adapter for paper lines 504--525. -/
+formalization-only normalization lemma for paper lines 504--525. -/
 theorem collision_bound_of_fiber_averages {X Y₁ Y₂ R₂ Γ₂ : Type*}
     [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
     [Fintype Y₂] [DecidableEq Y₂] [Fintype R₂] [DecidableEq R₂]

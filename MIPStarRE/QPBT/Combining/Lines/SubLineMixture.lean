@@ -58,7 +58,7 @@ theorem subLineBranchDist_eq_bind (P : AdmissibleParams) (kind : LineKind) :
               (subLineSeedDist P (subLineZIndex P k)))).map
           fun w => subLineTripleOf P kind k w := by
   classical
-  rw [subLineBranchDist, subLineRawDist, Distribution.bind_map]
+  rw [subLineBranchDist, subLineSamplingDist, Distribution.bind_map]
   refine Distribution.bind_congr_support _ _ _ fun k _ => ?_
   rw [Distribution.map_map]
 
@@ -78,7 +78,7 @@ theorem subLineBranchDist_map_subLineXProjection_at (P : AdmissibleParams)
   classical
   unfold subLinePointDist
   rw [Distribution.prod_map_left, Distribution.map_map, Distribution.map_map]
-  exact subLineBranchRaw_map_projX P kind k
+  exact subLineBranchSamplingData_map_projX P kind k
 
 /-- The `Z` marginal of a uniform point of the extended line of one branch at
 one extended coordinate is the `Z` component law of the pair of indices of
@@ -96,7 +96,7 @@ theorem subLineBranchDist_map_subLineZProjection_at (P : AdmissibleParams)
   classical
   unfold subLinePointDist
   rw [Distribution.prod_map_left, Distribution.map_map, Distribution.map_map]
-  exact subLineBranchRaw_map_projZ P kind k
+  exact subLineBranchSamplingData_map_projZ P kind k
 
 /-! ## The mixing law of the two indices -/
 

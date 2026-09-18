@@ -285,8 +285,8 @@ Since the point measurement is complete and
 `polynomialEvaluationFamily params H` has the same total as `H`, the averaged
 total-overlap term in `final_fields_point_consistency_totalGap_natural` is
 independent of the point `u`.  This theorem records the corresponding reduction
-of the issue #1226 obstruction to the scalar difference between the totals of
-the two right-register submeasurements. -/
+of the upstream issue 1226 (historical) obstruction to the scalar difference
+between the totals of the two right-register submeasurements. -/
 theorem final_fields_point_consistency_totalGap_natural_of_total_difference
     (params : Parameters) [FieldModel params.q]
     (strategy : SymStrat params ι)

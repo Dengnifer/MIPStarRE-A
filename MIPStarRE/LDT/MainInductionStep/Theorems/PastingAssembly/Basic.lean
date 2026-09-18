@@ -709,7 +709,7 @@ residual estimate and the paper domination condition
 `E_u A^{u,x}_{g(u)} <= Z^x`.
 
 **Lean-only:** This is an internal adapter for the induction-section pasting
-interface, tracked in issue #1507.  Paper origin:
+interface, tracked in upstream issue 1507 (historical).  Paper origin:
 `references/ldt-paper/inductive_step.tex:461-551`.  Discharge: proved here by
 averaging the slice-wise boundedness estimates and the domination condition. -/
 lemma idxPolyFamily_sliceBoundednessInput_of_slice_bounds
