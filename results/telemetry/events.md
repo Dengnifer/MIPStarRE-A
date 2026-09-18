@@ -7733,7 +7733,6 @@ this worktree's private build cache made the unchanged incoming file pass.
   The remote-tracking main has advanced beyond the pinned incoming parent;
   the lane remains responsible for publication and freshness checks.
 
-## 2026-09-12 - PR532 CI inherited an orphaned escalation reason
 ## 2026-09-12 - Proof-packet CI inherits an escalation reason
 - Session `prover-513-20260912-01`, PR #535, head `fccdd5a12ce1f460dd3155f2e69296b11a0a7240`:
   the build and Lean audits passed, but `blueprint-sync` failed in

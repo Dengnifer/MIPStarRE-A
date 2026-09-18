@@ -234,10 +234,51 @@ train-to-main ref mapping. After preflight, it rechecks the combined CI manifest
 member gates and heads, primary cleanliness, and frozen main; the existing exact
 remote-tip lease protects the final fast-forward. Because a recheck only reads
 the member refs, the same atomic transport leases every verified member ref at
-its verified value: an untouched member is already up to date and stays out of
-the transaction, while a member that moved makes the remote reject the whole
-push, main included, and no member branch is ever rewound. Hook bypass is
-forbidden.
+its verified value: a member that moved before the remote's ref advertisement
+aborts the whole push, main included, and no member branch is ever rewound,
+while a member that still matches is already up to date and sends no update
+command. Hook bypass is forbidden.
+
+**The publication contract (owner-authorized, 2026-09-18).** State it exactly,
+because the guarantees differ from one another:
+
+1. *Content.* Main only ever advances to an integration of the exact reviewed
+   member SHAs, after every member gate, the combined CI and the frozen-base
+   and cleanliness checks passed at the verified heads. This is enforced by the
+   gates and by the atomic transaction's old-value comparison on `main`.
+2. *Server-side atomicity covers the refs in the transaction.* That is `main`,
+   plus any member ref the client actually sends. A member whose advertised
+   value still equals its verified SHA is up to date, so Git sends no command
+   for it and the remote holds no predicate for it. A lease is likewise a
+   client-side comparison against the ref advertisement, not a server predicate.
+3. *Residual window, accepted.* A member ref can therefore advance after the ref
+   advertisement and before the remote commits `main`, and the transport still
+   reports success. Publication then carries that member's earlier, reviewed
+   head while the PR's tip has moved on; main is unharmed, and GitHub does not
+   show such a PR as merged. The 2026-09-17 adjudication reproduced this
+   ordering against a real `receive-pack`. Closing it would need server-enforced
+   comparison of every member inside the same transaction, which this transport
+   does not offer; the owner authorized the narrower contract on 2026-09-18
+   instead of leaving the train unusable.
+4. *Claims cover the window.* Every writer in this project — the main session,
+   the daemon, and each Opus helper — claims a PR on the shared atomic claim
+   list (`local/bin/claim.sh`, the repository copy of the meta session's
+   `qpbt-claim.sh`) before touching it. The train claims every member with kind
+   `train` and party `main` before the first gate reads it, refuses to start
+   when a member is held by another writer (printing the holder line), and
+   releases the claims once the transport and its re-verification have ended,
+   on success, on failure and on every abort path. A claim is not a remote
+   predicate; it is what keeps this project's own writers out of the window.
+5. *Post-push re-verification detects a violation after the fact.* Immediately
+   after a successful transport, the train re-reads every member ref from the
+   remote and compares it with the verified SHA. A member that moved is a
+   CONTRACT VIOLATION: the member, its verified SHA, the observed SHA and any
+   claim-list holder line are printed and recorded in `publication.json` and in
+   the train event, the train comment for that member is not posted — nothing in
+   this tooling may mark a PR merged that this train did not merge — and the
+   train run exits non-zero so the operator sees it. Main stays as published; it
+   carries only verified content.
+
 GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
 It posts one idempotent train comment per member, records one merge event,
 fast-forwards local main and its origin alias, and removes only the train branch

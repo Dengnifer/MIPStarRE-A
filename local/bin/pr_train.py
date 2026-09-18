@@ -9,7 +9,7 @@ evidence and never manufactures an independent review of the integration head.
 from __future__ import annotations
 
 import argparse
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 import json
 import os
@@ -23,6 +23,50 @@ import pr_merge
 import telemetry
 from pr_merge import GateFailure, git, git_ok
 from wf_util import LayerError, atomic_write, cache_root, file_lock, utcnow
+
+
+CLAIM_PARTY, CLAIM_KIND = "main", "train"
+
+
+def claim_script(repo: Path) -> Path:
+    """The shared atomic claim list every writer in this project uses."""
+    local = repo / "local/bin/claim.sh"
+    return local if local.exists() else Path.home() / ".cache/mipstarre-dev/owner-bin/qpbt-claim.sh"
+
+
+def claim_call(repo: Path, *args: str) -> tuple[int, str]:
+    result = subprocess.run(["bash", str(claim_script(repo)), *args], cwd=repo,
+                            text=True, capture_output=True)
+    return result.returncode, (result.stdout + result.stderr).strip()
+
+
+@contextmanager
+def member_claims(repo: Path, numbers: list[int]):
+    """Hold the shared claim on every member for the whole gating and transport.
+
+    A claim adds no predicate to the remote transaction. It keeps this project's
+    own writers off the member PRs while the train verifies and publishes, which
+    is what makes the residual advertisement-to-commit window of the authorized
+    publication contract safe in practice (see `issues-prs.md`). A member held by
+    another writer refuses the train before it starts, naming the holder.
+    """
+    held, receipt = [], {"note": "train ended before publication"}
+    try:
+        for number in sorted(numbers):
+            code, output = claim_call(repo, "claim", CLAIM_PARTY, CLAIM_KIND, str(number),
+                                      "reviewed merge train")
+            if code == 3:
+                raise GateFailure(f"PR #{number} is claimed by another writer: {output}")
+            if code:
+                raise LayerError(f"claim of PR #{number} failed ({code}): {output}")
+            held.append(number)
+        yield receipt
+    finally:
+        for number in held:
+            code, output = claim_call(repo, "release", CLAIM_PARTY, CLAIM_KIND, str(number),
+                                      receipt["note"])
+            if code:
+                print(f"claim release of PR #{number} failed ({code}): {output}", file=sys.stderr)
 
 
 def command(repo: Path, *args: str, env: dict | None = None) -> None:
@@ -106,8 +150,12 @@ def verify_manifest(path: Path, expected_main: str, expected_head: str,
     """Recheck after checked-push's expensive preflight, before transport opens.
 
     Returns the verified members so the caller can lease their refs inside the
-    publishing transport; a read here only proves the refs were current at this
-    moment, and the remote must enforce that they still are when it commits.
+    publishing transport. A lease is compared against the remote's ref
+    advertisement, so it catches a member that moved before the transport
+    started; a member that still matches sends no update command and the remote
+    therefore holds no predicate for it while it commits. Under the contract
+    authorized on 2026-09-18 that residual window is covered by the member
+    claims and detected afterwards by `moved_members` (see `issues-prs.md`).
     """
     data = json.loads(path.read_text(encoding="utf-8"))
     repo, worktree = Path(data["repo"]), Path(data["worktree"])
@@ -135,6 +183,28 @@ def verify_manifest(path: Path, expected_main: str, expected_head: str,
         raise GateFailure("remote main or member refs changed")
     primary_at(repo, data["base"])
     return current
+
+
+def moved_members(repo: Path, members: list[dict]) -> list[dict]:
+    """Re-read every member ref from the remote once the transport committed.
+
+    This cannot prevent a member from advancing inside the residual window; it
+    detects it afterwards. A member that moved is a CONTRACT VIOLATION: main
+    still carries only verified content, but this train did not merge that PR,
+    so nothing here may mark it merged.
+    """
+    refs = {f"refs/heads/{member['branch']}": member for member in members}
+    observed = {ref: sha for sha, ref in
+                (line.split() for line in git(repo, "ls-remote", "github", *refs).splitlines())}
+    violations = []
+    for ref, member in refs.items():
+        if observed.get(ref) == member["head"]:
+            continue
+        code, holders = claim_call(repo, "check", str(member["number"]))
+        violations.append({"number": member["number"], "ref": ref, "verified": member["head"],
+                           "observed": observed.get(ref, "absent"),
+                           "claims": holders if code == 3 else "none"})
+    return violations
 
 
 def run_ci(repo: Path, data: dict) -> None:
@@ -174,8 +244,10 @@ def publication_outcome(repo: Path, head: str) -> str:
 
 def record(repo: Path, data: dict, outcome: str) -> None:
     """Retain publication state and transfer build telemetry only after gating ends."""
+    violations = data.get("violations", [])
     atomic_write(Path(data["worktree"]).parent / "publication.json",
-                 json.dumps({"head": data["head"], "outcome": outcome, "ts": utcnow()}) + "\n")
+                 json.dumps({"head": data["head"], "outcome": outcome, "ts": utcnow(),
+                             "violations": violations}) + "\n")
     # The train lock only serialises trains; both files are written through the
     # canonical telemetry writers, whose own locking is what other sessions obey.
     with file_lock("train-telemetry"):
@@ -197,10 +269,14 @@ def record(repo: Path, data: dict, outcome: str) -> None:
                 telemetry.append_jsonl(directory / "builds.jsonl", row)
             spool.unlink()
         members = ", ".join(f"#{m['number']}@{m['head']}" for m in data["members"])
+        moved = ", ".join(f"#{row['number']} {row['verified']} -> {row['observed']}"
+                          for row in violations)
         telemetry.append_event_bullet(
             directory / "events.md",
             f"{utcnow()} - Reviewed train {data['head']}: publication {outcome}; "
-            f"members {members}; conflicting PRs dropped: {data['dropped']}.",
+            f"members {members}; conflicting PRs dropped: {data['dropped']}"
+            + (f"; CONTRACT VIOLATION, member refs moved during publication: {moved}."
+               if moved else "."),
             datetime.now().astimezone().strftime("%Y-%m-%d"))
 
 
@@ -215,6 +291,9 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
         stack.enter_context(file_lock("pr-train"))
         for number in sorted(numbers):
             stack.enter_context(file_lock(f"pr-{number}"))
+        # Claim every member on the shared list before the first gate reads it,
+        # and keep the claims until the transport and its re-verification end.
+        receipt = stack.enter_context(member_claims(repo, numbers))
         git(repo, "fetch", "github", "main")
         base = git(repo, "rev-parse", "github/main")
         primary_at(repo, base)
@@ -247,6 +326,13 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
                 raise
             outcome = "published"
             print(f"published train {data['head']}", flush=True)
+            violations = moved_members(repo, members)
+            data["violations"] = violations
+            for row in violations:
+                print(f"CONTRACT VIOLATION: PR #{row['number']} {row['ref']} was verified at "
+                      f"{row['verified']} and is now {row['observed']}; claim list: "
+                      f"{row['claims']}", flush=True)
+            moved = {row["number"] for row in violations}
             # Preserve existing developer branches/worktrees, including conflicting members.
             git(repo, "fetch", "github", "main")
             if not pr_merge.fast_forward_base(repo, "main"):
@@ -254,6 +340,8 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
             pr_merge.update_origin_alias(repo, "main")
             errors = []
             for member in members:
+                if member["number"] in moved:
+                    continue  # this train did not merge that PR; never say it did
                 try:
                     gh_common.ensure_pr_comment(
                         member["number"], f"mipstarre-train head={data['head']}",
@@ -264,14 +352,23 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
             if os.environ.get("MIPSTARRE_LAKE_ROOT"):
                 command(repo, str(repo / "local/bin/lake-root.sh"), "cleanup", str(repo), branch)
             git(repo, "branch", "-d", branch)
+            failures = []
+            if violations:
+                failures.append("CONTRACT VIOLATION: member refs moved during publication: "
+                                + ", ".join(f"#{row['number']} {row['verified']} -> "
+                                            f"{row['observed']}" for row in violations))
             if errors:
-                raise LayerError("train published; comment publication incomplete: " + "; ".join(errors))
+                failures.append("comment publication incomplete: " + "; ".join(errors))
+            if failures:
+                raise LayerError("train published; " + "; ".join(failures))
             return 0
         except (LayerError, OSError, ValueError) as exc:
             print(f"train publication {outcome}; evidence: {directory}", file=sys.stderr)
             raise LayerError(str(exc)) from exc
         finally:
             if data is not None:
+                receipt["note"] = (f"train {data['head']} {outcome}"
+                                   + ("; CONTRACT VIOLATION" if data.get("violations") else ""))
                 record(repo, data, outcome)
 
 

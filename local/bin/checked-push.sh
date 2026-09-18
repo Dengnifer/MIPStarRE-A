@@ -18,7 +18,11 @@ Run .githooks/pre-push against one explicit branch ref, then push that ref.
 Both refs must use their full refs/heads/... names.
 
 With --train-manifest the push also leases every verified member ref at its
-verified value, so the remote refuses the whole publication if one moved.
+verified value. A lease is compared against the remote's ref advertisement, so
+a member that moved before the transport opened refuses the whole publication;
+a member that still matches sends no update command and the transaction holds
+no predicate for it. local/protocols/issues-prs.md states the contract and the
+claims and post-push re-verification that cover the remaining window.
 EOF
 }
 
@@ -148,8 +152,8 @@ MEMBER_LEASES=()
 MEMBER_SPECS=()
 if [ -n "$TRAIN_MANIFEST" ]; then
   # The verifier reports the member refs it just confirmed; each one is leased
-  # below so the remote itself refuses the publication when a member branch
-  # moves between verification and the transport.
+  # below so the transport itself refuses the publication when a member branch
+  # moved between verification and the remote's ref advertisement.
   MEMBER_FILE="$(mktemp)" || die "cannot create a temporary file for the member refs"
   trap 'rm -f "$MEMBER_FILE"' EXIT
   python3 "$SCRIPT_ROOT/local/bin/pr_train.py" --verify-manifest "$TRAIN_MANIFEST" \
@@ -182,13 +186,18 @@ fi
 printf '%s: gate passed before opening the push transport.\n' "$PROG" >&2
 # Freeze the source object and atomically require the preflight remote tip.  The
 # native hook is only a short defense-in-depth confirmation; the lease keeps the
-# tuple binding intact when that hook is stale or not selected.  A train adds one
-# no-op update per member ref under the same atomic transaction: each member is
-# pushed back at its verified value, so the remote compares the advertised value
-# at transport start and rejects the whole push -- main included -- when a member
-# moved, while a member that did not move is simply already up to date and stays
-# out of both the transaction and the native hook's tuple.  Disable implicit
-# annotated-tag expansion so the transport contains only the validated refs.
+# tuple binding intact when that hook is stale or not selected.  A train pushes
+# each member back at its verified value under the same atomic transaction.  Git
+# compares a lease against the remote's ref ADVERTISEMENT, on the client: a
+# member that moved before the advertisement aborts the whole push -- main
+# included -- and no member branch is ever rewound, while a member that still
+# matches is already up to date, sends no update command, and therefore stays
+# out of the transaction, out of the native hook's tuple, and out of the
+# remote's own old-value comparisons.  A member can still advance between that
+# advertisement and the remote's commit; pr_train.py claims every member for
+# this window and re-reads the refs afterwards (owner-authorized contract,
+# 2026-09-18; local/protocols/issues-prs.md).  Disable implicit annotated-tag
+# expansion so the transport contains only the validated refs.
 LEASE_SHA="$REMOTE_SHA"
 [ "$LEASE_SHA" != "$ZERO_SHA" ] || LEASE_SHA=""
 MIPSTARRE_SKIP_HOOKS=1 \

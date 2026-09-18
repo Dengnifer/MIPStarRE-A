@@ -41,7 +41,7 @@ class TrainTests(unittest.TestCase):
         _git(self.repo, "remote", "add", "github", str(self.remote))
         for name in ("pr_train.py", "pr_merge.py", "gh_common.py", "wf_util.py",
                      "telemetry.py", "merge_loss_guard.py", "checked-push.sh", "ci.sh",
-                     "worktree-setup.sh", "lake-root.sh"):
+                     "worktree-setup.sh", "lake-root.sh", "claim.sh"):
             target = self.repo / "local/bin" / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(LOCAL_BIN / name, target)
@@ -151,6 +151,15 @@ class TrainTests(unittest.TestCase):
 
     def remote_main(self) -> str:
         return _git(self.repo, "--git-dir", str(self.remote), "rev-parse", "main")
+
+    def claim_cli(self, *args: str) -> subprocess.CompletedProcess:
+        # The fixture cache root keeps this claim list private to the test.
+        return subprocess.run(["bash", str(self.repo / "local/bin/claim.sh"), *args],
+                              env=self.env, text=True, capture_output=True)
+
+    def claim_lines(self) -> list[str]:
+        path = self.cache / "watchdog/meta-dispatched.txt"
+        return path.read_text(encoding="utf-8").splitlines() if path.exists() else []
 
     def test_train_drops_only_conflict_and_publishes_combined_commit(self) -> None:
         developer = self.tmp / "developer"
@@ -290,6 +299,79 @@ class TrainTests(unittest.TestCase):
         receipt = json.loads((directory / "publication.json").read_text())
         self.assertEqual(receipt["outcome"], "refused")
         self.assertFalse([row for row in self.gh.calls() if row["method"] != "GET"])
+
+    def test_member_claimed_by_another_writer_refuses_to_start(self) -> None:
+        # Every writer claims a PR before touching it; the train is no exception.
+        held = self.claim_cli("claim", "opus", "fix", "3", "helper repair")
+        self.assertEqual(held.returncode, 0, held.stderr)
+        result = self.train()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PR #3 is claimed by another writer", result.stderr)
+        self.assertIn("HELD: opus-fix 3 claimed", result.stderr)
+        self.assertEqual(self.remote_main(), self.base)
+        self.assertFalse((self.tmp / "build.log").exists())
+        self.assertFalse((self.cache / "trains").exists())
+        # The members claimed before the refusal are released again.
+        self.assertEqual(self.claim_cli("check", "1").stdout.strip(), "free")
+        self.assertEqual(self.claim_cli("check", "2").stdout.strip(), "free")
+        self.assertEqual(self.claim_cli("check", "3").returncode, 3)
+
+    def test_member_claims_are_released_after_publication(self) -> None:
+        result = self.train()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        head = self.remote_main()
+        for number in (1, 2, 3):
+            self.assertEqual(self.claim_cli("check", str(number)).stdout.strip(), "free")
+            self.assertTrue(any(line.startswith(f"main-train {number} claimed")
+                                for line in self.claim_lines()), self.claim_lines())
+        # The release records the outcome the claim window covered.
+        self.assertTrue(any(line.startswith(f"main-train 1 released train {head} published")
+                            for line in self.claim_lines()), self.claim_lines())
+
+    def test_member_claims_are_released_when_the_train_fails(self) -> None:
+        self.env["TRAIN_FAIL_BUILD"] = "1"
+        result = self.train()
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.remote_main(), self.base)
+        for number in (1, 2, 3):
+            self.assertEqual(self.claim_cli("check", str(number)).stdout.strip(), "free")
+
+    def test_member_moving_after_the_commit_is_a_contract_violation(self) -> None:
+        # The accepted residual of the authorized contract: a member that still
+        # matched at the ref advertisement sends no update command, so nothing
+        # on the remote stops it from advancing before main is committed.
+        git = shutil.which("git")
+        self.env.update(TRAIN_GIT=str(git), TRAIN_PUSH_RACE_REF="refs/heads/issue-3",
+                        TRAIN_PUSH_RACE_SHA=self.heads[2],
+                        TRAIN_PUSH_MARKER=str(self.tmp / "pushed"))
+        self.write_tool("git", '#!/usr/bin/env python3\nimport os, subprocess, sys\n'
+                        'from pathlib import Path\na=sys.argv[1:]\ne=os.environ\n'
+                        'rc=subprocess.call([e["TRAIN_GIT"], *a])\n'
+                        'marker=Path(e["TRAIN_PUSH_MARKER"])\n'
+                        'if "push" in a and rc==0 and not marker.exists():\n'
+                        ' marker.touch()\n'
+                        ' subprocess.check_call([e["TRAIN_GIT"], "--git-dir", e["TRAIN_REMOTE"],\n'
+                        '  "update-ref", e["TRAIN_PUSH_RACE_REF"], e["TRAIN_PUSH_RACE_SHA"]])\n'
+                        'sys.exit(rc)\n')
+        result = self.train(1, 3)
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        # Main carried the verified content; the violation is reported, not hidden.
+        self.assertNotEqual(self.remote_main(), self.base)
+        self.assertIn(f"CONTRACT VIOLATION: PR #3 refs/heads/issue-3 was verified at "
+                      f"{self.heads[3]} and is now {self.heads[2]}", result.stdout)
+        self.assertIn("CONTRACT VIOLATION: member refs moved during publication", result.stderr)
+        receipt = json.loads(
+            (next((self.cache / "trains").iterdir()) / "publication.json").read_text())
+        self.assertEqual(receipt["outcome"], "published")
+        self.assertEqual([(row["number"], row["verified"], row["observed"])
+                          for row in receipt["violations"]],
+                         [(3, self.heads[3], self.heads[2])])
+        self.assertIn("CONTRACT VIOLATION, member refs moved during publication",
+                      (self.repo / "results/telemetry/events.md").read_text())
+        # Nothing marks the moved PR merged by this train.
+        posts = [row["rel"] for row in self.gh.calls() if row["method"] != "GET"]
+        self.assertEqual(posts, ["issues/1/comments"])
+        self.assertEqual(self.claim_cli("check", "3").stdout.strip(), "free")
 
     def test_integration_mode_rejects_skip_flags(self) -> None:
         result = subprocess.run(["bash", str(self.repo / "local/bin/ci.sh"),

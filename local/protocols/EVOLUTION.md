@@ -1272,3 +1272,40 @@ gate, CI step or REST payload key changes.
 **Expected effect:** the bracket tracks the Lean code a packet actually moved,
 documentation-only and comment-only work reads as such on the commits page, and
 no pull request that cleared the seven gates can fail on the number.
+
+## 2026-09-18 - PR507: the train's publication contract, claims and post-push check
+
+**Trigger:** the 2026-09-17 independent adjudication of PR #507
+(`/tmp/pr507-publication-adjudication-20260917-report.md`, archived under
+`native-audits/pr507-publication-adjudication-01a0afd6/`) reproduced, against a
+real `receive-pack`, a member ref advancing after the ref advertisement and
+before the remote committed `main`, with the transport still reporting success.
+Finding F1 of review `5194195608` therefore stayed open: the member leases added
+on 2026-09-17 are client-side comparisons against the advertisement, and a member
+that still matches sends no update command, so the transaction holds no
+server-side predicate for it. The owner authorized a narrower contract on
+2026-09-18 rather than leaving the reviewed train unusable.
+
+**Change:** `issues-prs.md` now states the contract in four parts instead of
+implying an atomic guard over every member: main only ever advances to an
+integration of the exact reviewed member SHAs; server-side atomicity covers the
+refs the transaction carries; the advertisement-to-commit window for an unmoved
+member is an accepted residual; and two mechanisms bound it. First, `pr_train.py`
+claims every member on the shared atomic claim list (`local/bin/claim.sh` when
+the checkout has it, otherwise the meta session's `qpbt-claim.sh`) with kind
+`train` and party `main` before the first gate reads a member, refuses to start
+and prints the holder line when another writer holds one, and releases the claims
+after the transport and its re-verification end — on success, on failure and on
+every abort path. Second, immediately after a successful transport the train
+re-reads every member ref from the remote; a member that moved is recorded as a
+CONTRACT VIOLATION on stdout, in `publication.json` and in the train event with
+the verified SHA, the observed SHA and any claim-list holder line, its train
+comment is not posted, and the run exits non-zero. The overclaiming wording in
+`pr_train.py`, `checked-push.sh` and the protocol is corrected to say what Git
+actually compares and when. No gate, member evidence, publication outcome rule,
+or `pr_merge.py` behaviour changes, and the train remains undeployed.
+
+**Expected effect:** the documented guarantee matches the mechanism; the only
+writers that could exercise the residual window are held off it by a claim they
+must take anyway; and a violation by anything else is detected, recorded and
+visible in the exit status instead of passing as a clean publication.
