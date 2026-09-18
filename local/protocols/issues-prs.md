@@ -364,9 +364,11 @@ keeps its path-traversal rejection for externally sourced citations.
 location); `MIPSTARRE_GITHUB_REPO` overrides the `owner/name` otherwise read
 from the `github` remote; `MIPSTARRE_FIX_CAP` (default 5) bounds `autofix.sh`'s
 own loop only — the merge gate does not read it — and is operator-tunable with
-the reason recorded in `results/telemetry/events.md`, unlike
-`MIPSTARRE_INFRA_OVERRIDE` (the pre-commit budget), the one owner-gated control
-in the layer. `MIPSTARRE_LLM_ENABLED` and
+the reason recorded in `results/telemetry/events.md`. The pre-commit budget
+guard remains mandatory; main may authorize `MIPSTARRE_INFRA_OVERRIDE=1` only
+through a recorded project-scope decision. Neither control creates an owner
+blocker unless the proposed action independently crosses the permissions
+boundary in section 6. `MIPSTARRE_LLM_ENABLED` and
 `LOCAL_REVIEW_ENABLED` keep kill-switch semantics (DESIGN.md:73-75).
 
 `github-sync.sh` pushes explicit refs and writes an atomic, paginated read-only
@@ -381,16 +383,51 @@ c8f1999): read-only research data, never edited or read as active input.
 
 ## 6. Access-only owner inbox and main mathematical decisions
 
-Pinned issue #26 is the owner inbox: it receives only **actual access or
-permission blockers requiring human action**, such as an owner-only GitHub
-operation or CLI permission change. Main decides mathematical and internal
-workflow questions, including definition/game proposals, review disposition and
-exhausted budgets, with rationale and evidence recorded before further work.
+Pinned issue #500 is the permissions-only owner inbox: it receives only **actual
+access or permission blockers requiring human action**, such as changing the
+owner's files, the machine or its accounts, spending money, an owner-only GitHub
+operation or CLI permission change, or acting outside this repository. Changing
+the stated project goal also requires an owner decision there. Main decides
+mathematical and internal workflow questions, including definition/game
+proposals, review disposition and exhausted budgets, with rationale and evidence
+recorded in `results/telemetry/design-decisions.md` and on #27 before further
+work; a decision whose only risk is failing to finish the project is never a
+blocker. Routine reports, watchdog and poller notes, and progress also go to #27.
 Main owns plans, task selection, decomposition, dispatch order, individual
 worker assignments and pipeline execution; meta provides guidance only.
 Neither main nor a worker may bypass permissions, proof integrity, CI, review or
 merge gates. Internal security questions belong to main; a credential/access
 change that actually requires the human is an owner blocker, never a workaround.
+Issue #26 is archived and receives no new comments.
+
+Use one #500 comment per blocker. The visible part is at most ten lines in
+plain words and has this form; ids continue after B11, so the next id is B12.
+
+```markdown
+<!-- owner-inbox id=B<n> -->
+<!-- owner-inbox-status=open -->
+### BLOCKER B<n> — <five-word title>
+What is stuck: one line.
+Options: A one line. B one line. (C one line.)
+Recommendation: one line.
+Reply: DECISION B<n>: <letter>
+```
+
+The reply letter must be one of the offered alternatives (`A`, `B`, or `C`).
+Put any additional detail in a folded `<details>` block. The first HTML comment
+is an immutable identity marker; pass it unchanged as the marker argument on
+both creation and resolution:
+
+```bash
+python3 local/bin/gh_common.py ensure-pr-comment 500 \
+  "<!-- owner-inbox id=B<n> -->" --body-file BLOCKER.md
+```
+
+`BLOCKER.md` starts with the separate `<!-- owner-inbox-status=open -->` line,
+not the identity marker. After an owner reply, update that same body file to
+`<!-- owner-inbox-status=closed -->`, add `RESOLVED B<n>`, and rerun the command
+with the unchanged identity marker. This PATCHes the original comment instead
+of creating a second comment for the blocker.
 
 The owner decision at **2026-09-06T05:05Z**, recorded at **05:17:03Z**, explicitly
 withdraws the posted-#26 human hold, **including B7 and B8** (issue #247/PR #260).
@@ -420,10 +457,10 @@ effort. Preserve the historical max/xhigh observations, raw provenance, sample
 counts and unknowns in `results/telemetry/model-comparison/`; no benchmark,
 probe, filler session or gate/budget relaxation follows from this guidance.
 
-A source statement found to be mathematically false goes to main, not #26,
-unless actual access or permission requires human action. Following the
-availability report on #26 and the September 6 owner decision, main selects
-Astra Ultra for the mathematical-gap lane through
+A source statement found to be mathematically false goes to main, not the owner
+inbox, unless actual access or permission requires human action. Astra
+availability has been reported, so main selects Astra Ultra for the
+mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
@@ -455,14 +492,16 @@ is shared across the historical owner-launched Fable lane and the Astra lane; a
 model or telemetry change does not reset it. If a correction requires changing
 a mathematical definition or game, the worker stops and returns it to main
 immediately. Main decides source-semantic corrections with the preceding evidence
-and independent review; changing the project goal is outside that authority.
+and independent review; changing the stated project goal is outside main's
+authority and requires an owner decision on #500.
 At budget exhaustion, stop that lane and record attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
 note. Main decides whether to stop, rescope or record a separately bounded tranche
 within existing authority. Workers never self-extend or reset attempts or time.
-Owner-only permission, credential, access or scope/resource grants go to #26;
-mathematical difficulty alone is not an owner decision. Already-posted items
-await the owner unless explicitly returned to main, as B7/B8 were above.
+Owner-only permission, credential, access or scope/resource grants go to #500;
+mathematical difficulty alone is not an owner decision, and recording a main
+decision never substitutes for that owner decision on the goal. Already-posted
+items await the owner unless explicitly returned to main, as B7/B8 were above.
 
 **Recorded #118/B8 tranche (September 6 amendment):** main authorized
 attempts **11 and 12**, each at most **2700 seconds**, on primary Astra **max**.

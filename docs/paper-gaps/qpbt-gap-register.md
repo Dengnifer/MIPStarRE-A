@@ -40,8 +40,14 @@ notes for three source corrections that had previously appeared only in Lean
 docstrings or blueprint remarks: anticommuting-tuple probability, the binary
 Pauli factor index, and the winning implications. The Magic Square rigidity
 correction, held at the time of that audit, has since been adopted (owner
-decision B5 on #26, packet #172) and is recorded in the table above. No other source-paper discrepancy discussed in
-those records lacked a note.
+decision B5 on archived owner inbox #26, packet #172) and is recorded in the
+table above. These #26 citations are historical provenance, not live routing.
+The current owner inbox is #500 and is permissions-only: main decides and
+records outcomes whose only risk is failure to finish the project. Any genuine
+owner blocker uses one comment with at most ten visible plain-language lines,
+lettered options, a recommendation, and the literal
+`DECISION B<n>: <letter>` reply; ids continue after B11 and details are folded.
+No other source-paper discrepancy discussed in those records lacked a note.
 
 Future QPBT paper-gap packets should add a row here when they add a note and
 should update the correction and Lean columns when either layer changes.
