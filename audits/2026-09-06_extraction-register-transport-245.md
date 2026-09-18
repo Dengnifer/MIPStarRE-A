@@ -12,9 +12,11 @@ pr: "#253"
 
 ## Scope and source
 
-This packet adds only `MIPStarRE/QPBT/Extraction/RegisterTransport.lean` and
-this audit. The starting revision is `a61ee557b33a`. No paper-labelled theorem,
-existing definition, blueprint entry, or shared import file is changed.
+This packet adds `MIPStarRE/QPBT/Extraction/RegisterTransport.lean`, this audit,
+a formalization-support section in
+`blueprint/src/chapter/ch16_qpbt_extraction.tex`, and the re-export of the new
+leaf from `MIPStarRE/QPBT.lean`. The starting revision is `a61ee557b33a`. No
+paper-labelled theorem and no existing definition is changed.
 
 The mathematical source is `lem:qld-unitary` in
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1666-1858`,
@@ -150,17 +152,17 @@ two independently existing operations; it does not redefine a paper claim.
   this worktree's private build directory.
 - `rg -n 'sorry|axiom' MIPStarRE/QPBT/Extraction/RegisterTransport.lean`
   has no matches. The broader forbidden-token scan also has no matches.
-- A scratch import checks all 28 new declarations with `#print axioms`:
+- A scratch import checks all 26 new declarations with `#print axioms`:
   only `propext`, `Classical.choice`, and `Quot.sound` occur. The same check
   succeeds for the existing `MagicSquareRigidity.exists_unit_residual`.
   Two compile-time examples verify the concrete bundled-isometry action
   and its ideal-state distance interface.
-- The project import closure contains 122 modules and no cycle. Its only
-  extraction modules are `Extraction.Defs` and `Extraction.RegisterTransport`;
-  neither `Unitary.lean` nor another future extraction consumer is imported.
-- No full `lake build` is run: the machine-wide full-build lock is occupied
-  when inspected at 11:10:20 UTC+08 on September 6, 2026. The new leaf is not
-  added to shared re-export files, as required by this packet's scope.
+- The module's own project imports are exactly `Extraction.Defs` and
+  `Test.MagicSquareTheorems.Rigidity.GroundSlice`, and the import graph has no
+  cycle. No extraction consumer such as `Unitary.lean` is imported.
+- `lake build MIPStarRE.QPBT.Extraction.RegisterTransport` succeeds at the exact
+  head. The machine-wide full build is left to the pull-request check rather
+  than run by hand.
 - Hook installation and verification succeed. Runtime checks and logs are
   under `~/.cache/mipstarre-dev/scratch/prover-245-register-transport/`.
 
@@ -172,3 +174,34 @@ documented in `docs/paper-gaps/qpbt_extraction-transfer.tex` are not needed
 for these exact coordinate identities. Downstream work should import this
 leaf explicitly and discharge its concrete unitary equations using the
 separately owned algebra results.
+
+## Amendment — 2026-09-18, review round of 2026-09-14
+
+This amendment records the state of the packet at the exact head published
+after the marked review of 2026-09-14, which the statements above now describe.
+
+- Scope. The diff touches `MIPStarRE/QPBT/Extraction/RegisterTransport.lean`,
+  this audit, `blueprint/src/chapter/ch16_qpbt_extraction.tex`,
+  `MIPStarRE/QPBT.lean` (one re-export line), and the append-only telemetry
+  record. The earlier claim that no blueprint entry and no shared import file
+  changed described the first packet only and has been corrected above.
+- Declaration count. The module defines 26 declarations, 3 definitions and 23
+  theorems. The earlier count of 28 predates the withdrawal of the duplicated
+  `psiHat_norm` and of `stateQForm_reindexState`; `ProjectiveSetting.psiHat_norm`
+  now lives only in `MIPStarRE/QPBT/Observables/ExpandedPlacement.lean`, and this
+  module defines the distinct `extractionAuxReference_norm`.
+- Warnings. The stale transitive import of `Observables.ExpandedPlacement` and
+  the unused `BigOperators` scope were removed, and the file-wide
+  `open scoped Classical` was narrowed to the six declarations that need
+  classical decidability, each with a declaration-scoped `open scoped Classical
+  in`. The module now builds with no warning of its own; in particular the
+  `style.openClassical` warning reported by the review is gone.
+- Build. `lake build MIPStarRE.QPBT.Extraction.RegisterTransport` succeeds at
+  the exact head.
+- Blueprint. The section now carries a definition node for the block
+  reassociation `sixRegExtractionEquiv` and one for the public
+  `extractionAuxReference`; the placement lemma states its placement identity
+  for an arbitrary operator, as the Lean statement does; and the statement and
+  proof dependencies name the block reassociation, the operator-family
+  distance, the EPR pair and the transport-support lemma actually used, with
+  the swap-unitary definition removed from the dependencies.

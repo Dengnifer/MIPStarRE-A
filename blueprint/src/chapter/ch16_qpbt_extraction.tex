@@ -1582,12 +1582,26 @@ brought to a common scale.
 
 The statements of this section are not named results of the source article.  They isolate, as exact identities, the register bookkeeping that relates the six-register presentation used in Lemma~\ref{lem:qld-unitary} to the two local extraction blocks $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and $\mathrm{B}\mathrm{B}'\mathrm{B}''$, and to the register order in which the auxiliary state is already known to be normalized.  Nothing here constructs an extraction isometry, and nothing here proves an approximation estimate: every identity below holds for arbitrary operators and arbitrary vectors, and the only hypotheses that appear are explicit isometry or unitarity equations for the operators involved.
 
+\begin{definition}[Block order on the extraction registers]\label{def:extraction-block-order}
+	\lean{MIPStarRE.QPBT.sixRegExtractionEquiv}
+	\leanok
+	\uses{def:expanded-state}
+	Reassociating the six registers into the two local blocks rewrites the register order $\mathrm{A}\mathrm{A}'\mathrm{A}'' \mid \mathrm{B}\mathrm{B}'\mathrm{B}''$ as the pair of blocks $(\mathrm{A}\mathrm{A}')\mathrm{A}'' \mid (\mathrm{B}\mathrm{B}')\mathrm{B}''$.  This is a bijection between the index sets of the two presentations: it moves no register from one player to the other and permutes no register inside a block, so it is the identity on coordinates and only changes their grouping.
+\end{definition}
+
 \begin{definition}[EPR-first order on the extraction registers]\label{def:extraction-epr-first-order}
 	\lean{MIPStarRE.QPBT.extractionEprFirstEquiv}
 	\lean{MIPStarRE.QPBT.extractionEprFirstIsometry}
 	\leanok
-	\uses{def:expanded-state}
+	\uses{def:extraction-block-order, def:expanded-state}
 	Moving the extracted register of each player to the front of that player's own block rewrites the register order $\mathrm{A}\mathrm{A}'\mathrm{A}'' \mid \mathrm{B}\mathrm{B}'\mathrm{B}''$ as $\mathrm{A}''\mathrm{A}\mathrm{A}' \mid \mathrm{B}''\mathrm{B}\mathrm{B}'$.  This is a bijection between the index sets of the two presentations, and the induced permutation of coordinates is a linear isometric equivalence of the corresponding finite-dimensional Hilbert spaces.  It identifies neither player's original space with any other register.
+\end{definition}
+
+\begin{definition}[The reference auxiliary vector]\label{def:extraction-aux-reference}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.extractionAuxReference}
+	\leanok
+	\uses{def:expanded-state, def:EPR}
+	The reference vector on the auxiliary registers $\mathrm{A}\mathrm{A}' \mid \mathrm{B}\mathrm{B}'$ is the strategy state on the two original registers together with one EPR pair on the two first Pauli registers, written in the auxiliary register order.  It is the concrete vector supplied to the residual-distance statement for the auxiliary state of Lemma~\ref{lem:qld-unitary}, and it selects no basis vector on either player's original space.
 \end{definition}
 
 \begin{lemma}[Formalization support for the transport of states, operators and distances]\label{lem:extraction-register-transport-support}
@@ -1599,12 +1613,12 @@ The statements of this section are not named results of the source article.  The
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.idealExpState_norm}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.extractionAuxReference_norm}
 	\leanok
-	\uses{def:extraction-epr-first-order, def:povm-distance, def:EPR}
+	\uses{def:extraction-epr-first-order, def:extraction-aux-reference, def:povm-distance, def:EPR}
 	Let $\pi$ be a bijection between two finite register index sets.  Transport of vectors along $\pi$ is covariant and transport of operators is contravariant, and the two intertwine: transporting a vector and then applying an operator agrees with applying the transported operator and then transporting.  Consequently the distance between two vectors, and the averaged squared distance between two families of operators indexed by a question and an answer, are unchanged by simultaneous transport.  Applied to the order of Definition~\ref{def:extraction-epr-first-order}, this says that the distance from a vector on the six registers to the ideal state built from an auxiliary vector and one EPR pair equals the corresponding distance after reordering; that the ideal state has the norm of its auxiliary vector; and that the auxiliary vector obtained from the strategy state together with one EPR pair is a unit vector.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:extraction-epr-first-order, def:expanded-state}
+	\uses{def:extraction-epr-first-order, def:expanded-state, def:povm-distance, def:EPR}
 	A permutation of coordinates is a linear isometric equivalence, so it preserves norms and inner products and is inverted by the transport along the inverse bijection; the intertwining identity is this inversion together with the definition of the transported operator.  The two distance statements follow by applying the intertwining identity to differences of vectors and to differences of operator families term by term.  The two normalization statements follow from the norm of a tensor product, from the normalization of one EPR pair, and, for the reference vector, from the normalization of the strategy state.
 \end{proof}
 
@@ -1621,11 +1635,11 @@ The statements of this section are not named results of the source article.  The
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.applyBoth_eq_isometryTensor}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.applyBoth_norm}
 	\leanok
-	\uses{def:extraction-epr-first-order, def:v-swap-unitary}
-	Write a pair of operators, one on $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and one on $\mathrm{B}\mathrm{B}'\mathrm{B}''$, for their simultaneous placement on the six registers.  Simultaneous placement is multiplicative, commutes with taking adjoints, sends the pair of identities to the identity, and therefore turns conjugation by a pair into conjugation on each block separately.  A measurement operator of one player, placed on that player's original registers, is the placement on that player's block of the operator extended by the identity on that player's two Pauli registers, and the crossed placement of an operator on an extracted register is the placement on that block of the identity tensored with that operator.  Hence conjugating a one-sided placement by a simultaneous placement whose operators satisfy $UU^\dagger = \Id$ on each block only involves the operator of that same side.  Finally, the action of a simultaneous placement is the tensor action of the two block operators after reordering, it agrees with the tensor action of two linear isometries, and it preserves the norm of every vector as soon as each block operator satisfies $U^\dagger U = \Id$.  These are the placements used in the proof of Lemma~\ref{lem:qld-unitary}; no property of the swap operators of Definition~\ref{def:v-swap-unitary} is assumed here.
+	\uses{def:extraction-block-order}
+	Write a pair of operators, one on $\mathrm{A}\mathrm{A}'\mathrm{A}''$ and one on $\mathrm{B}\mathrm{B}'\mathrm{B}''$, for their simultaneous placement on the six registers.  Simultaneous placement is multiplicative, commutes with taking adjoints, sends the pair of identities to the identity, and therefore turns conjugation by a pair into conjugation on each block separately.  An arbitrary operator on one player's original register, placed on the six registers, is the placement on that player's block of the operator extended by the identity on that player's two Pauli registers, and the crossed placement of an operator on an extracted register is the placement on that block of the identity tensored with that operator.  Hence conjugating a one-sided placement by a simultaneous placement whose operators satisfy $UU^\dagger = \Id$ on each block only involves the operator of that same side.  Finally, the action of a simultaneous placement is the tensor action of the two block operators after the block reassociation of Definition~\ref{def:extraction-block-order}, it agrees with the tensor action of two linear isometries, and it preserves the norm of every vector as soon as each block operator satisfies $U^\dagger U = \Id$.  These are the placements used in the proof of Lemma~\ref{lem:qld-unitary}; no property of the swap operators of Definition~\ref{def:v-swap-unitary} is assumed here.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:extraction-epr-first-order}
+	\uses{lem:extraction-register-transport-support}
 	Each placement is a permutation of coordinates applied to a heterogeneous tensor product of the two block operators, so the multiplicative, adjoint and unit identities reduce to the corresponding identities for tensor products, and conjugation splits accordingly.  The two comparisons between player placements and block placements are proved entrywise, after inserting the identity on the registers that the coarser placement leaves untouched.  The one-sided conjugation identity follows from the split form of conjugation, because conjugating the identity by an operator with $UU^\dagger = \Id$ returns the identity on the other block.  The last three statements follow from the intertwining identity of Lemma~\ref{lem:extraction-register-transport-support} together with the existing norm statement for matrices satisfying $U^\dagger U = \Id$.
 \end{proof}

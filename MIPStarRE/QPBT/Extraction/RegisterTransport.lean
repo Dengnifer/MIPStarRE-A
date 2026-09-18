@@ -1,5 +1,4 @@
 import MIPStarRE.QPBT.Extraction.Defs
-import MIPStarRE.QPBT.Observables.ExpandedPlacement
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
@@ -25,7 +24,7 @@ especially the auxiliary-state construction at lines 1769-1784 and the register
 placements in Equations `eq:qld-unitary-6` through `eq:qld-unitary-9`.
 -/
 
-open scoped BigOperators Matrix
+open scoped Matrix
 
 namespace MIPStarRE.QPBT
 
@@ -141,10 +140,9 @@ def extractionEprFirstIsometry (params : AdmissibleParams) (ιA ιB : Type*)
 
 namespace ProjectiveSetting
 
-open scoped Classical
-
 variable {params : AdmissibleParams} {epsilon : ℝ} (setting : ProjectiveSetting params epsilon)
 
+open scoped Classical in
 /-- In EPR-first local coordinates, the ideal extraction state is exactly the
 target used by the existing auxiliary-state normalization theorem. -/
 theorem reindexState_idealExpState
@@ -159,6 +157,7 @@ theorem reindexState_idealExpState
     eprState (PauliRegister params) (index.1.1, index.2.1) * aux (index.1.2, index.2.2)
   exact mul_comm _ _
 
+open scoped Classical in
 /-- The distance to an ideal extraction state is precisely the residual
 distance in EPR-first coordinates. This permits reuse of
 `MagicSquareRigidity.exists_unit_residual` in either direction. -/
@@ -172,6 +171,7 @@ theorem norm_sub_idealExpState_eq
         reindexState prodShuffle (vecTensor (eprState (PauliRegister params)) aux)‖ := by
   rw [← setting.reindexState_idealExpState, reindexState_norm_sub]
 
+open scoped Classical in
 /-- Tensoring an auxiliary vector with the extracted EPR state preserves its
 norm, even when the auxiliary vector is not normalized. -/
 theorem idealExpState_norm
@@ -333,6 +333,7 @@ theorem conjBy_placeBoth_placeSide
       rw [other]
       rfl
 
+open scoped Classical in
 /-- Applying the two block operators in six-register coordinates is exactly
 their tensor action after reassociation to the two extraction blocks. -/
 theorem reindexState_applyBoth
@@ -346,6 +347,7 @@ theorem reindexState_applyBoth
           state) :=
   reindexState_applyOperatorToState _ _ _
 
+open scoped Classical in
 /-- The six-register block action of two local isometries agrees with the
 already established heterogeneous tensor-isometry action. -/
 theorem applyBoth_eq_isometryTensor
@@ -364,6 +366,7 @@ theorem applyBoth_eq_isometryTensor
   rw [MagicSquareRigidity.isometryTensor_eq_toEuclideanLin]
   exact applyOperatorToState_reindexOp _ _ _
 
+open scoped Classical in
 /-- Applying local matrix isometries to the two extraction blocks preserves
 the state norm. The rectangular matrix-isometry norm theorem is reused; the
 unitarity of the concrete swap operators is a separate calculation. -/
