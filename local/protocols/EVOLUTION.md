@@ -1059,6 +1059,37 @@ source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
 
+## 2026-09-09 - Reviewed merge trains (issue #502)
+
+**Trigger:** the 09:05Z meta decision in `results/telemetry/design-decisions.md`
+(D1, issue #502) records that each single-PR merge invalidates other refreshed
+heads. See the issue #502 development entry in `results/telemetry/events.md`.
+
+**Change:** add `pr_train.py`, a non-publishing integration mode in `ci.sh`,
+and a train-manifest check after `checked-push.sh` preflight. Reuse the existing
+member gates and CI steps; replace only individual-head base ancestry with
+mandatory combined-commit validation. Preserve exact-head independent review,
+dependency gates, checked fast-forward publication, and the full-build lock.
+CI step bodies stop on command failure; cache warming cannot start a nested
+full build. `issues-prs.md` documents the operator-owned invocation and recovery.
+
+**Expected effect:** two or more ready PRs share one integration build and CI
+run without losing a member's evidence or silently discarding accepted work.
+Activation remains subject to independent review and daemon-owner deployment.
+
+## 2026-09-09 - PR507 review repair: build coverage and publication outcomes
+
+**Trigger:** Canonical review `5154118210` on `e1dd7bb0`, findings F1-F3;
+see the issue #502 review-repair entry in `results/telemetry/events.md`.
+**Change:** Combined CI builds the full library and axiom audit in one locked
+invocation. Train names satisfy the external Lake-root validator. Ambiguous
+pushes retain unknown outcomes when reconciliation fails and recognize remote
+descendants containing the train. Outcomes are retained in runtime and telemetry.
+**Expected effect:** Cold publication has its root artifact, untouched downstream
+failures block publication, and operators receive no false refusal after an
+unresolved push. This is the authorized bounded repair of the original episode;
+deployment and independent review remain separate.
+
 ## 2026-09-09 - Simplify dispatcher worker reservations (#505)
 
 **Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
@@ -1124,6 +1155,16 @@ symlink, unknown-path or other non-allowlisted base change still requires
 refresh, exact-head CI and independent review; all other merge gates are
 unchanged.
 
+## 2026-09-09 - PR507 bounded refresh composition
+
+**Trigger:** main's priority recovery instruction for issue #502; see the
+`orc-502-20260909-03` entry in `results/telemetry/events.md`.
+**Change:** preserve the train's exact frozen-base condition while composing
+the reviewed ordinary-PR telemetry freshness predicate and PR506's step-failure
+explanation. No allowlist, member gate, publication, or cleanup rule changes.
+**Expected effect:** ordinary telemetry movement remains tolerated; any train
+base movement still refuses. Independent verification follows genuine green CI.
+
 ## 2026-09-14 - Merge subjects carry the PR's Lean line delta (#557)
 
 **Trigger:** owner decision recorded in issue #557: GitHub's commits page showed
@@ -1148,6 +1189,27 @@ GitHub's wording.
 off the commits page without opening the merge, no pull request that cleared the
 seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
 covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - PR507 review repair: member-ref leases and canonical telemetry
+
+**Trigger:** canonical review `5194195608` on `26ecf158`, findings F1 (blocker)
+and F2; see the issue #502 review-repair entries in
+`results/telemetry/events.md`.
+
+**Change:** the train publication transport is now atomic and leases every
+verified member ref at its verified value alongside the `main` lease, so a
+member branch that moves between verification and transport makes the remote
+refuse the entire push; verification returns the refs it confirmed instead of
+only reading them, and no member branch can be rewound because each is pushed
+back at the value it is expected to hold. Train telemetry is written through the
+canonical `telemetry.py` writers (`events-md` lock and dated section for
+`events.md`, the per-file lock for `builds.jsonl`) rather than a private lock
+and a raw append; an unreadable build spool is kept for the operator instead of
+being dropped. No gate, member evidence, or publication outcome rule changes.
+
+**Expected effect:** publication cannot carry a member head that stopped being
+the member branch's tip at transport start, and a concurrent canonical event
+writer can no longer lose or truncate the train's own event.
 
 ## 2026-09-17 - Model-free duplicate-work guards before dispatch (#576)
 
@@ -1210,3 +1272,57 @@ gate, CI step or REST payload key changes.
 **Expected effect:** the bracket tracks the Lean code a packet actually moved,
 documentation-only and comment-only work reads as such on the commits page, and
 no pull request that cleared the seven gates can fail on the number.
+
+## 2026-09-18 - PR507: the train's publication contract, claims and post-push check
+
+**Trigger:** the 2026-09-17 independent adjudication of PR #507
+(`/tmp/pr507-publication-adjudication-20260917-report.md`, archived under
+`native-audits/pr507-publication-adjudication-01a0afd6/`) reproduced, against a
+real `receive-pack`, a member ref advancing after the ref advertisement and
+before the remote committed `main`, with the transport still reporting success.
+Finding F1 of review `5194195608` therefore stayed open: the member leases added
+on 2026-09-17 are client-side comparisons against the advertisement, and a member
+that still matches sends no update command, so the transaction holds no
+server-side predicate for it. The owner authorized a narrower contract on
+2026-09-18 rather than leaving the reviewed train unusable.
+
+**Change:** `issues-prs.md` now states the contract in four parts instead of
+implying an atomic guard over every member: main only ever advances to an
+integration of the exact reviewed member SHAs; server-side atomicity covers the
+refs the transaction carries; the advertisement-to-commit window for an unmoved
+member is an accepted residual; and two mechanisms bound it. First, `pr_train.py`
+claims every member on the shared atomic claim list (`local/bin/claim.sh` when
+the checkout has it, otherwise the meta session's `qpbt-claim.sh`) with kind
+`train` and party `main` before the first gate reads a member, refuses to start
+and prints the holder line when another writer holds one, and releases the claims
+after the transport and its re-verification end — on success, on failure and on
+every abort path. Second, immediately after a successful transport the train
+re-reads every member ref from the remote; a member that moved is recorded as a
+CONTRACT VIOLATION on stdout, in `publication.json` and in the train event with
+the verified SHA, the observed SHA and any claim-list holder line, its train
+comment is not posted, and the run exits non-zero. The overclaiming wording in
+`pr_train.py`, `checked-push.sh` and the protocol is corrected to say what Git
+actually compares and when. No gate, member evidence, publication outcome rule,
+or `pr_merge.py` behaviour changes, and the train remains undeployed.
+
+**Expected effect:** the documented guarantee matches the mechanism; the only
+writers that could exercise the residual window are held off it by a claim they
+must take anyway; and a violation by anything else is detected, recorded and
+visible in the exit status instead of passing as a clean publication.
+
+## 2026-09-18 - Lean-delta subjects for train members (#590)
+
+**Trigger:** The owner requires a Lean delta in every first-parent merge subject
+on main (issue #590); the reviewed train still used bare member subjects even
+though ordinary merges already followed the policy from issues #557 and #574.
+
+**Change:** `pr_train.py` uses `pr_merge.lean_line_delta` on each committed merge
+against its immediately preceding accepted train commit, then applies
+`pr_merge.merge_commit_title` with the gated member title. Zero deltas retain
+`[lean 0]`; an unavailable count or unusable title retains the train's existing
+subject without blocking integration. Gated titles remain transient, so member
+manifests and publication checks are unchanged.
+
+**Expected effect:** each merge commit published by a reviewed train carries
+the same approximate Lean code-line signal as an ordinary merge, with no
+cumulative count or spurious deletion of newer main-only content.
