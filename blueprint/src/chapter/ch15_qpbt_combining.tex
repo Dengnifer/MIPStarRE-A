@@ -50,8 +50,16 @@ notation of Definition~\ref{def:bracket}; for instance
 $T^{\ell_X,\ell_Z}_{[\mathrm{eval}_x(\cdot)=a,\ \mathrm{eval}_z(\cdot)=b]}
 = \sum_{f_X,f_Z \,:\, f_X(x)=a,\ f_Z(z)=b} T^{\ell_X,\ell_Z}_{f_X,f_Z}$.
 For a line $\ell$ (Definition~\ref{def:line}) and $k \in \N$ we write
-$\deg_k(\ell)$ for the set of polynomial functions on $\ell$ of degree at most
-$k$ in the line parameter, and
+$\deg_k(\ell)$ for the univariate polynomial representatives of degree at most
+$k$ in the line parameter, each given by its $k+1$ coefficients, with the
+parameterization and evaluation convention of
+Definition~\ref{def:ideg-deg-polynomials}. Distinct representatives remain
+distinct outcomes even when they induce the same function on $\F_q$; for
+example, $0$ and $t^q-t$ are distinct when $k\geq q$. The source describes
+these polynomials as functions defined on the line, while the coefficient-list
+answer format retains their representatives
+(Remark~\ref{rem:deg-line-representatives}). In particular, admissibility
+does not require $md<q$. We write
 $\mathrm{ideg}_{d,m}(\F_q) = \polyfunc{m}{q}{d}$
 (Definition~\ref{def:polyfunc}) for the $m$-variate polynomial representatives
 over $\F_q$ of individual degree at most $d$. Elements of
@@ -275,13 +283,12 @@ assembled by Fourier averaging.
 	$\mathcal{L}^u \approx_\delta \mathcal{O}^u$, which by
 	Definition~\ref{def:povm-distance} bounds the associated expectation
 	only by $O(\delta)$ and so absorbs a constant factor. These three
-	discrepancies, together with the common-extension obligation recorded
+	discrepancies, together with the ancillary-padding obligation recorded
 	below, are analyzed in
 	\cite{gap:qpbt_linearity-theorem-quotation}, while the normalization defect
 	in \cite[Theorem~10]{Natarajan2017Linearity} is analyzed in
-	\cite{gap:qpbt_linearity-distance-normalization}. The import carries two
-	conversion obligations, discharged in the proof of
-	Lemma~\ref{lem:qld-4-10}: the theorem is
+	\cite{gap:qpbt_linearity-distance-normalization}. The source's
+	linearity-based argument also calls for two conversions: the theorem is
 	instantiated with $\rho$ the reduced density operator of
 	$\ket{\hat\psi}$ on the registers carrying the observables, so that
 	traces against $\rho$ are expectation values in $\ket{\hat\psi}$; and
@@ -290,13 +297,44 @@ assembled by Fourier averaging.
 	Definition~\ref{def:povm-distance} by expanding the square, using
 	unitarity of the observables, and relabelling the averaged index
 	pair, at the cost of the constant factors absorbed by that
-	definition. One obligation remains open and is flagged where it
-	arises: the ancilla register $\hilb'$ and its state
-	$\ket{\mathrm{anc}}$ produced by the theorem, which may depend on the
-	pair $(x,z)$, must be absorbed --- uniformly in $(x,z)$ --- into
-	zero-state padding of the strategy state, padding that the source
-	assumes present without construction.
+	definition. This source route is not the formal proof of
+	Lemma~\ref{lem:qld-4-10}. The optional ancilla can be chosen uniformly
+	in $(x,z)$ from its fixed index length (Lemma~\ref{lem:linearity-common-ancilla}).
+	The separate absorption of this ancilla into zero-state padding of the
+	fixed strategy state remains open: the source assumes that padding without
+	a construction, and the direct proof of Lemma~\ref{lem:qld-4-10} does not
+	use it.
 \end{remark}
+
+\begin{lemma}[Formalization support for Theorem~\ref{thm:linearity}: common ancilla]
+	\label{lem:linearity-common-ancilla}
+	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables_commonAncilla}
+	\leanok
+	\uses{def:povm-conventions}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Natarajan2017Linearity}; it records that the optional ancilla of
+	Theorem~\ref{thm:linearity} depends only on the index length. For every
+	positive integer $t$ there are a finite-dimensional complex Hilbert space
+	$\hilb'_t$ and a unit vector $\ket{\mathrm{anc}_t} \in \hilb'_t$ such that,
+	for every finite-dimensional complex Hilbert space $\hilb$, every density
+	operator $\rho$ on $\hilb$, every $\delta \ge 0$, and every family of binary
+	observables $\{\mathcal{O}^u\}_{u \in \F_2^t}$ on $\hilb$ satisfying
+	the averaged correlation hypothesis of Theorem~\ref{thm:linearity}, there
+	are binary observables $\{\mathcal{L}^u\}$ on $\hilb \ot \hilb'_t$ with
+	$\mathcal{L}^u\mathcal{L}^{u'}=\mathcal{L}^{u+u'}$ for all $u,u'$ and
+	$\E_u d_{\rho'}(\mathcal{L}^u,\mathcal{O}^u\ot\Id)^2 \le 2\delta$,
+	where $\rho'=\rho\ot\ket{\mathrm{anc}_t}\bra{\mathrm{anc}_t}$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:naimark-rounding, lem:boolean-representation-stability,
+		lem:blr-defect-identity}
+	The Naimark space has an orthonormal basis indexed by
+	$\F_2^t\sqcup\{\bot\}$ and the ancilla is the basis vector at $\bot$,
+	independently of $\hilb$, $\rho$, $\delta$, and the family. Apply the
+	Fourier--Naimark rounding construction to each family, followed by the
+	averaged BLR estimate.
+\end{proof}
 
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
@@ -848,6 +886,81 @@ assembled by Fourier averaging.
 	the proof of item~2 of Lemma~\ref{lem:qld-comm-cons}.
 \end{proof}
 
+\begin{lemma}[Formalization support for combined-point distances]
+	\label{lem:combined-point-distance-support}
+	\lean{MIPStarRE.QPBT.opFamilyDistSq_uniform_le_four}
+	\lean{MIPStarRE.QPBT.sum_mul_conjTranspose_mul_self_eq_one}
+	\lean{MIPStarRE.QPBT.sum_mul_conjTranspose_mul_self_eq_one'}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.chain_bounds}
+	\lean{MIPStarRE.QPBT.error_terms_le_rpow_eighth}
+	\leanok
+	\uses{def:povm-distance, def:povm-conventions,
+		def:expanded-point-measurement, def:expanded-state,
+		def:symmetric-equivalents}
+	These formalization-only auxiliary estimates support the direct proof
+	of Lemma~\ref{lem:qld-4-10}; they are not separately named source results.
+	For a nonempty finite question set $\Omega$, finite outcome set $I$,
+	operator families $A,B$ on a finite-dimensional Hilbert space, and a
+	unit vector $\psi$, write
+	$D_\psi(A,B)=\E_{\omega\in\Omega}\sum_{a\in I}
+	\|(A^\omega_a-B^\omega_a)\psi\|^2$.
+	\begin{enumerate}
+		\item If $\sum_a(A^\omega_a)^\dagger A^\omega_a\leq\Id$ and
+		$\sum_a(B^\omega_a)^\dagger B^\omega_a\leq\Id$ for every
+		$\omega$, then $D_\psi(A,B)\leq4$.
+		\item For any two finite projective measurements $\{A_a\}$ and
+		$\{B_b\}$ on a common finite-dimensional space,
+		\[
+			\sum_{a,b}(A_aB_b)^\dagger(A_aB_b)=\Id,
+			\qquad
+			\sum_{a,b}(B_bA_a)^\dagger(B_bA_a)=\Id.
+		\]
+		No commutation between the measurements is required.
+		\item In the chapter's setting, let $Q^{x,z}$ be any family of
+		POVMs on each player's expanded local space, and let $Q_i$ denote
+		its effects at placement $i$. In the following bounds, $D$ denotes
+		$D_{\hat\psi}$ with uniform question $(x,z)$ and outcome $(a,b)$;
+		write $X_iZ_i$ for the family $X_{i,a}Z_{i,b}$, and similarly for
+		$Z_iX_i$. Let $R_i$ be the $Z$--$X$--$Z$ sandwich POVM formed from
+		the expanded point measurements at placement $i$. Suppose real
+		numbers $\eta,C_1,C_2,C_3$ satisfy, for every placement $i$ and
+		every placement $j$ opposite to $i$,
+		\begin{align*}
+			D(Q_i,R_i)&\leq\eta,& D(R_i,Z_iX_i)&\leq C_1\sqrt\eps,\\
+			D(X_iZ_i,Z_iX_i)&\leq C_2\sqrt\eps,&
+			D(Z_iX_i,X_jZ_j)&\leq C_3\eps.
+		\end{align*}
+		Then, for every such directed pair $i,j$,
+		\begin{align*}
+			D(Q_i,X_jZ_j)&\leq2\eta+4C_1\sqrt\eps+4C_3\eps,\\
+			D(Q_i,Z_jX_j)&\leq4\eta+8C_1\sqrt\eps+8C_3\eps+2C_2\sqrt\eps,\\
+			D(Q_i,Q_j)&\leq12\eta+20C_1\sqrt\eps+16C_3\eps+4C_2\sqrt\eps.
+		\end{align*}
+		\item If $0\leq\eps\leq1$ and $C_0\geq1$, then
+		\[
+			\eps\leq\eps^{1/8},\qquad \sqrt\eps\leq\eps^{1/8},\qquad
+			\bigl(C_0(\eps+\sqrt\eps)\bigr)^{1/4}
+			\leq2C_0\eps^{1/8}.
+		\]
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{fact:triangle}
+	For the first bound, use
+	$\|(A_a-B_a)\psi\|^2\leq2\|A_a\psi\|^2+2\|B_a\psi\|^2$,
+	sum over outcomes, and average. For the second, projectivity gives
+	$(A_aB_b)^\dagger(A_aB_b)=B_bA_aB_b$; sum first over $a$ and then
+	over $b$. Interchanging the measurements proves the other identity.
+	For the third, repeatedly apply the squared triangle inequality
+	$D(A,C)\leq2D(A,B)+2D(B,C)$ along the indicated comparisons, using
+	symmetry to compare $Z_jX_j$ with $Q_j$.
+	For the last, the case $\eps=0$ is immediate. For $0<\eps\leq1$,
+	monotonicity in the exponent gives the first two inequalities and
+	$\eps+\sqrt\eps\leq2\sqrt\eps$. Taking fourth roots and using
+	$(2C_0)^{1/4}\leq2C_0$ proves the final bound.
+\end{proof}
+
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
@@ -895,7 +1008,7 @@ assembled by Fourier averaging.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-comm-cons, lem:expanded-point-field-commutation,
-		lem:ortho, fact:triangle,
+		lem:ortho, fact:triangle, lem:combined-point-distance-support,
 		def:expanded-point-measurement, def:symmetric-equivalents,
 		def:povm-distance}
 	The formal proof works with field-valued outcomes directly. On each
@@ -1479,7 +1592,9 @@ assembled by Fourier averaging.
 	\uses{def:expanded-line-measurement, def:povm-conventions,
 		def:ideg-deg-polynomials}
 	For any projective setting, either player, and any two source lines,
-	define the POVM on the expanded local space by
+	define the POVM on the expanded local space, with each outcome a pair
+	of coefficient representatives as in
+	Definition~\ref{def:ideg-deg-polynomials}, by
 	\[
 		T^{\ell_X,\ell_Z}_{f_X,f_Z}
 		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
@@ -1493,19 +1608,27 @@ assembled by Fourier averaging.
 	Lemma~\ref{lem:qld-xz-lines} in \cite{Ji2020MIPStar}.
 \end{definition}
 
-\begin{lemma}[Axis-degree support of the concrete paired-line POVM]
+\begin{lemma}[Orientation and axis-degree support of the concrete paired-line POVM]
 	\label{lem:concrete-paired-line-degree-support}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_effect_eq_pastedMeasurement}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_X}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_axis_degree_Z}
 	\leanok
 	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
-	For either player and $W\in\{X,Z\}$, if $\ell_W$ is axis-parallel
+	For either player and any pair of line outcomes, the one-sided pasted
+	effect $J$ of \eqref{eq:pasting-2a} with
+	$G_1=\hat M^{(\mathrm{Line},Z),\ell_Z}$ and
+	$G_2=\hat M^{(\mathrm{Line},X),\ell_X}$ has the exchanged outcome order
+	$T^{\ell_X,\ell_Z}_{f_X,f_Z}=J_{f_Z,f_X}$.
+	For $W\in\{X,Z\}$, if $\ell_W$ is axis-parallel
 	and $f_W$ does not have degree at most $d$, then
 	$T^{\ell_X,\ell_Z}_{f_X,f_Z}=0$.
 \end{lemma}
 \begin{proof}
 	\leanok
 	\uses{def:concrete-paired-line-measurement, def:expanded-line-measurement}
+	The pasting identity follows by expanding the two sandwich products with
+	$G_1=Z$ and $G_2=X$; it asserts no point-consistency estimate.
 	The corresponding expanded line effect vanishes outside degree $d$.
 	It is a factor of the defining sandwich, so the sandwich vanishes.
 \end{proof}
@@ -1537,27 +1660,31 @@ assembled by Fourier averaging.
 	so it contributes neither to a marginal nor to the squared distance.
 \end{proof}
 
-\begin{lemma}[Formalization support: joint point self-consistency on line-point samples]
-	\label{lem:qld-point-self-consistency-transport}
+\begin{lemma}[Formalization support: point self-consistency defect]
+	\label{lem:qld-point-self-consistency-defect}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_defect_le}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
 	\leanok
-	\uses{lem:qld-4-10, def:line-point-dist, def:consistency,
-		lem:qld-line-point-marginal-identities}
-	These auxiliary estimates are not named statements of the paper. Fix a
-	supplied family of projective joint point measurements whose squared
-	distance across every directed opposite placement is at most $\delta_Q$
-	when $(x,z)$ is uniform. Its consistency defect on the same uniform point
-	pairs is at most $\delta_Q$. The defect has the same bound when two
-	line-point samples are drawn independently and their point coordinates
-	are used as $(x,z)$. The source uses these estimates in the second
-	pasting hypothesis after Equation~\ref{eq:qld-q-self-cons}.
+	\uses{lem:qld-4-10, def:consistency, def:povm-distance,
+		def:line-point-dist, lem:qld-line-point-marginal-identities}
+	Let $\{\hat Q^{x,z}_{a,b}\}$ be the joint point measurements of
+	Lemma~\ref{lem:qld-4-10}, placed on two opposite placements. Their
+	self-consistency estimate, stated there as a state-dependent squared
+	distance, also holds in the consistency-defect convention of
+	Definition~\ref{def:consistency}, with the same bound $\delta_Q$, on
+	average over uniformly random $x,z$. The same bound holds when the pair
+	$(x,z)$ is instead read off as the point coordinates of two independent
+	samples from the line-point distribution.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-line-point-marginal-identities, fact:agreement}
-	Projectivity bounds the defect by squared distance. The product of the
-	two uniform point marginals of the line-point law gives the second bound.
+	\uses{lem:qld-4-10, def:consistency, def:povm-distance,
+		def:line-point-dist, lem:qld-line-point-marginal-identities}
+	The two placed families are projective, so the consistency defect is bounded
+	by the state-dependent squared distance, which is the hypothesis. The point
+	marginal of the line-point distribution is uniform and the two samples are
+	independent, so the average defining the defect is unchanged by reading
+	$(x,z)$ off the two line-point samples.
 \end{proof}
 
 \begin{lemma}[Formalization support: point-to-line marginal estimates]
@@ -1906,11 +2033,100 @@ analyzed, together with candidate repairs, in
 	multiplied by an affine factor of degree at most one.
 \end{definition}
 
+\begin{definition}[Formalization support for Definition~\ref{def:combine-map}: the separated locus]
+	\label{def:combine-map-separated-locus}
+	\lean{MIPStarRE.QPBT.combinedBlockVar}
+	\lean{MIPStarRE.QPBT.IsSeparatedCombined}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.SeparatedCombinedPoly}
+	\leanok
+	\uses{def:combine-map, def:polyfunc, def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a step used in the Lean proof of Lemma~\ref{lem:qld-4-7}, where the
+	set of combined polynomials is written $G$ and is then reindexed by pairs
+	$(f, g)$. Separation itself carries no degree bound and no restriction on
+	the coefficients: call a polynomial $p$ in the $2m+2$ coordinates, over an
+	arbitrary commutative semiring, \emph{separated} when, viewed as a
+	polynomial in $\alpha$ and $\beta$ over the point variables, every
+	coefficient of $p$ vanishes except those of $\alpha$ and of $\beta$, the
+	coefficient of $\alpha$ involves only the $x$ variables, and the
+	coefficient of $\beta$ involves only the $z$ variables. The recovery map is
+	likewise defined for every such $p$, with no degree parameter: setting
+	$(\alpha, \beta) = (1, 0)$ and $z = 0$ returns the first component, and
+	setting $(\alpha, \beta) = (0, 1)$ and $x = 0$ returns the second. The
+	\emph{bounded separated locus} is the intersection of this unrestricted
+	condition with the individual-degree class, that is, the set of separated
+	$p \in \mathrm{ideg}_{d,2m+2}(\F_q)$; only this second object depends on
+	$d$. The condition is stated by coefficient vanishing and variable
+	containment, not by assuming a pair $(f, g)$ with
+	$p = \mathrm{combine}_{f,g}$.
+\end{definition}
+
+\begin{lemma}[Formalization support for Definition~\ref{def:combine-map}: the separated image]
+	\label{lem:combine-map-separated-image}
+	\lean{MIPStarRE.QPBT.combinedBlockVar_injective}
+	\lean{MIPStarRE.QPBT.combinePoly_eq_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly_combinePoly}
+	\lean{MIPStarRE.QPBT.isSeparatedCombined_combinePoly}
+	\lean{MIPStarRE.QPBT.rename_recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.combinePoly_recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.isSeparatedCombined_iff_exists_combinePoly}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly_mem_polyFunc}
+	\lean{MIPStarRE.QPBT.combinePoly_mem_polyFunc_iff}
+	\lean{MIPStarRE.QPBT.existsUnique_bounded_combinePoly}
+	\lean{MIPStarRE.QPBT.combinedPolynomialImageEquiv}
+	\leanok
+	\uses{def:combine-map, def:combine-map-separated-locus, def:polyfunc,
+		def:ideg-deg-polynomials, lem:qld-combined-pair-completion}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the algebraic identification of the set $G$ of the proof of
+	Lemma~\ref{lem:qld-4-7} with pairs of bounded-degree polynomials. Each of
+	the two point-block inclusions is injective. The map
+	$(f, g) \mapsto \mathrm{combine}_{f,g}$ is injective, which is recorded in
+	Lemma~\ref{lem:qld-combined-pair-completion}. Its image is exactly
+	the separated locus of
+	Definition~\ref{def:combine-map-separated-locus}, and the two specialization
+	maps invert it there. For every $d$, including $d = 0$, the components
+	recovered from a separated $p \in \mathrm{ideg}_{d,2m+2}(\F_q)$ again lie in
+	$\mathrm{ideg}_{d,m}(\F_q)$, and they form the only pair of components of
+	$p$ in $\mathrm{ideg}_{d,m}(\F_q)$; neither statement needs $d \ge 1$. That
+	hypothesis enters only in the forward degree bound: for $d \ge 1$, a
+	combined polynomial lies in $\mathrm{ideg}_{d,2m+2}(\F_q)$ if and only if
+	both components lie in $\mathrm{ideg}_{d,m}(\F_q)$, and together with the
+	preceding statements this gives a bijection between pairs of
+	bounded-degree polynomials and the bounded separated locus. The
+	statements hold over an arbitrary commutative semiring of coefficients. No
+	bound on the mass the strategy places on the separated image is asserted
+	here; that estimate belongs to the proof of Lemma~\ref{lem:qld-4-7}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:combine-map, def:combine-map-separated-locus,
+		def:ld-combining-map, lem:ld-combining-split,
+		lem:ld-combining-exact-linearity}
+	Write $\mathrm{combine}_{f,g}$ as the tuple combining map applied to $f$ and
+	to $g$ after renaming their variables into the $x$ block and the $z$ block
+	respectively; the two block inclusions are injective. The component
+	splitting of Lemma~\ref{lem:ld-combining-split} then recovers each component
+	from the coefficient of the corresponding combining variable, which gives
+	both round-trip identities. If $p$ is separated, the
+	coefficient characterization of
+	Lemma~\ref{lem:ld-combining-exact-linearity} writes $p$ as a combined tuple,
+	and its two coefficients are supported in the respective blocks, so each is
+	the renaming of a polynomial in $m$ variables and recombining the two
+	returns $p$; this argument uses no bound on $d$. Individual degrees are
+	unchanged by renaming along an injection, so each component inherits the
+	bound of $p$ from the bound on the coefficients of $p$, again for every $d$;
+	conversely the degree bound of the tuple combining map of
+	Definition~\ref{def:ld-combining-map} supplies the bound for
+	$\mathrm{combine}_{f,g}$ when $d \ge 1$, which is the hypothesis that also
+	bounds the two fresh variables $\alpha$ and $\beta$.
+\end{proof}
+
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
-	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
-	\lean{MIPStarRE.QPBT.extendedQ_spec}
-	\notready
+	\lean{MIPStarRE.QPBT.exists_extendedQ}
+	\leanok
 	\uses{lem:qld-4-10, def:expanded-state, def:expanded-point-measurement,
 		def:povm-distance, def:symmetric-equivalents}
 	For all $x, z \in \F_q^m$, $\alpha, \beta \in \F_q$, and
@@ -1950,6 +2166,9 @@ analyzed, together with candidate repairs, in
 	Furthermore, all symmetric equivalents of these approximations also hold.
 \end{lemma}
 \begin{proof}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.extendedQ}
+	\lean{MIPStarRE.QPBT.extendedQ_spec}
+	\leanok
 	\uses{lem:qld-4-10, fact:data-processing}
 	Define
 	$\hat{Q}^{x,z,\alpha,\beta}_{c}
@@ -1976,7 +2195,8 @@ analyzed, together with candidate repairs, in
 	% routes delivers that form, and the route retained below establishes
 	% m * poly(eps, md/q), which is the form the sequel uses. See
 	% rem:qld-4-13-source-defects and the analysis in
-	% docs/paper-gaps/qpbt_combined-lines-error-term.tex. The line-point
+	% docs/paper-gaps/qpbt_combined-lines-error-term.tex; the open printed-error
+	% form is tracked by GitHub issue 598. The line-point
 	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
@@ -3339,6 +3559,12 @@ source-labelled claims is certified by these auxiliary entries.
 	deficit assertion in the proof of Lemma~\ref{lem:claim-17-2}, and the
 	candidate repairs with their open obligations --- is given in
 	\cite{gap:qpbt_combined-lines-error-term}.
+	The printed error form is therefore an open source gap and not a Lean proof
+	obligation of any consumer: its declaration keeps an open proof, every
+	formalized consumer uses the established form of
+	Lemma~\ref{lem:qld-4-13-established}, and the gap is tracked by GitHub issue
+	598 after the obstruction pull requests of the earlier issues closed those
+	issues without proving the printed assertion.
 \end{remark}
 
 \begin{example}[The paired-line construction given a joint point family]
@@ -3518,6 +3744,58 @@ source-labelled claims is certified by these auxiliary entries.
 	$\min\{1,m_n\eps_n^{1/4}\}=1$ for every $n$, a contradiction.
 \end{proof}
 
+\begin{example}[The extended-line construction given a joint point family]
+	\label{lem:qld-4-13-established-given-points}
+	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established_ofPointsWitness}
+	\leanok
+	\uses{lem:qld-4-10, lem:combined-lines-given-points, def:line,
+		def:line-point-dist, def:consistency, def:bracket, def:expanded-state,
+		def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper, and it
+	does not claim the printed error form of Lemma~\ref{lem:qld-4-13}, which remains
+	an open source gap tracked by GitHub issue 598.
+	Fix a function $\delta_Q(\eps)=\poly(\eps)$. There are a constant $C>0$ and a
+	function $\delta_{\mathrm{combine}}(\eps,md/q)=\poly(\eps,md/q)$ with the
+	following property. Let a projective setting with error $\eps$ be given,
+	together with a complete projective joint point family satisfying all the
+	conclusions of Lemma~\ref{lem:qld-4-10} with error $\delta_Q(\eps)$. Then,
+	relative to that same point family, there is an extended-line witness whose
+	axis-degree property and both completed-answer consistency bounds hold with
+	error
+	\[
+		C m\,\delta_{\mathrm{combine}}\!\left(\eps,\frac{md}{q}\right).
+	\]
+	The point family is an explicit hypothesis, so this auxiliary is separate from
+	Lemma~\ref{lem:qld-4-13} and does not prove that source lemma. It shares the
+	three replacements described in Lemma~\ref{lem:qld-4-13-established}: the
+	directly indexed question carrier, the directly indexed line-point law, and the
+	comparison on the completed answer alphabet $\F_q\cup\{\bot\}$.
+	The hypothesis is the polynomially controlled family, not an arbitrary supplied
+	point measurement at an arbitrary error: the unrestricted form is false, by the
+	deterministic quadratic point answers exhibited in
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{example}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-lines-given-points,
+		lem:direct-subline-witness-exists,
+		def:qld-conditional-extended-line-measurement,
+		lem:qld-combined-polynomial-axis-degree,
+		lem:qld-extended-line-overlap-comparison,
+		thm:qld-direct-line-real-overlap,
+		lem:consistency-defect-integrand-le-one,
+		thm:qld-combining-polynomial-bound}
+	Apply Lemma~\ref{lem:combined-lines-given-points} to the supplied point family.
+	The direct subline witness of Lemma~\ref{lem:direct-subline-witness-exists}
+	supplies the conditional extended-line measurement. Its axis-degree theorem
+	proves that no outcome above degree $d$ occurs on an axis-parallel extended
+	line, while the extended-overlap comparison and
+	Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
+	consistency estimates. The independent unit bound handles large errors, and
+	Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms
+	into $m\cdot\poly(\eps,md/q)$.
+\end{proof}
+
 \begin{lemma}[Formalization support for Lemma~\ref{lem:qld-4-13}]
 	\label{lem:qld-4-13-established}
 	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness_established}
@@ -3566,26 +3844,11 @@ source-labelled claims is certified by these auxiliary entries.
 \end{lemma}
 \begin{proof}
 \leanok
-\uses{lem:qld-4-10, lem:combined-lines-given-points,
-	  lem:direct-subline-witness-exists,
-	  def:qld-conditional-extended-line-measurement,
-	  lem:qld-combined-polynomial-axis-degree,
-	  lem:qld-extended-line-overlap-comparison,
-	  thm:qld-direct-line-real-overlap,
-	  lem:consistency-defect-integrand-le-one,
-	  thm:qld-combining-polynomial-bound}
+\uses{lem:qld-4-10, lem:qld-4-13-established-given-points}
 Construct the polynomially controlled joint point family of
 Lemma~\ref{lem:qld-4-10}, and apply
-Lemma~\ref{lem:combined-lines-given-points} to that same family. The direct
-subline witness of Lemma~\ref{lem:direct-subline-witness-exists} supplies the
-conditional extended-line measurement. Its axis-degree theorem proves that no
-outcome above degree $d$ occurs on an axis-parallel extended line, while the
-extended-overlap comparison and
-Theorem~\ref{thm:qld-direct-line-real-overlap} give both opposite-placement
-consistency estimates. The independent unit bound handles large errors, and
-Theorem~\ref{thm:qld-combining-polynomial-bound} collects the remaining terms
-into $m\cdot\poly(\eps,md/q)$. This proves the stated directly indexed
-auxiliary. Its comparison with the printed source formulation remains subject
+Lemma~\ref{lem:qld-4-13-established-given-points} to that same family. This
+proves the stated directly indexed auxiliary. Its comparison with the printed source formulation remains subject
 to the separate question-law and completed-answer issues in
 \cite{gap:qpbt_ld-dimension-divisibility} and
 \cite{gap:qpbt_combined-lines-error-term}.

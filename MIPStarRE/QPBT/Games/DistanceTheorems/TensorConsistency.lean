@@ -149,7 +149,7 @@ This is a generic auxiliary for the expanded point construction in paper
 `14_analysis_of_the_pauli_basis_test.tex:367-438` and
 `lem:qld-construct-the-paulis`, not the latter paper theorem. Its ancillary
 perfection hypothesis must be established for the concrete ideal measurements
-before specialization; that application is tracked in issue #267. -/
+before specialization; that application was completed under issue #267. -/
 theorem consistencyDefect_convolution_eq_of_perfect
     {X G ιA ιB κA κB : Type*}
     [Fintype X] [DecidableEq X] [Fintype G] [DecidableEq G] [AddCommGroup G]

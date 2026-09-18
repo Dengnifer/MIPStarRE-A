@@ -280,6 +280,13 @@ worktree writes into the shared snapshot, so it does not.
 4. `lake build`, then `lake build MIPStarRE.LDT.Test.AxiomAudit`, then the
    comparator drift check.
 
+For reviewed trains, `--integration-head SHA --worktree PATH --base SHA` runs
+every step without publishing PR evidence. Its single locked Lake invocation is
+`lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit`: the complete library,
+including its root and downstream modules, plus the axiom audit. No warm project
+artifacts may be assumed by publication's dynamic `checkdecls` import. Skip flags
+are rejected; the exact head, base ancestry, and clean worktree are checked.
+
 Every `lake` and `python3` invocation goes through a subshell that unsets
 `git rev-parse --local-env-vars` first. Inherited `GIT_DIR`/`GIT_INDEX_FILE`
 make Lake resolve nested package repositories against the wrong repository;

@@ -21,6 +21,7 @@ import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.Symmetrization
 import MIPStarRE.QPBT.Games.MeasurementCompression
 import MIPStarRE.QPBT.Games.DistanceTheorems
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorConsistency
@@ -39,12 +40,14 @@ import MIPStarRE.QPBT.Observables.IdealPointConsistency
 import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement
 import MIPStarRE.QPBT.Observables.WinImplications
+import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.Completeness
 import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Combining.CombinedPolynomialImage
 import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.PassingError
 import MIPStarRE.QPBT.Combining.DirectLowDegree
@@ -81,10 +84,12 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PolynomialConsistency
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.QuadraticPointObstruction
 import MIPStarRE.QPBT.Combining.Apply
 import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Extraction.Defs
 import MIPStarRE.QPBT.Extraction.EncodingSupport
+import MIPStarRE.QPBT.Extraction.PolynomialCollision
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.Construction

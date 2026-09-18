@@ -22,9 +22,11 @@
   \item \textbf{Difficulty.} Medium.  The source applies a decoder--encoder
   identity to every bounded individual-degree polynomial, although the identity
   is guaranteed for encoded polynomials and can fail outside the encoding image.
-  \item \textbf{Estimated weight.} One restricted algebraic identity and one
-  probabilistic estimate showing that the constructed measurement assigns
-  little state-dependent mass to outcomes outside the encoding image.
+  \item \textbf{Estimated weight.} The restricted algebraic identity and the
+  probabilistic non-encoding-mass estimate required algebraic and
+  project-specific consistency arguments; both are now proved. No work
+  remains on this support estimate. The separate source-facing consistency
+  construction is also complete.
   \item \textbf{Mathlib/project split.} Evaluation of the multilinear
   interpolant is elementary polynomial algebra.  The non-encoding-mass bound
   uses project-specific consistency estimates and Schwartz--Zippel.
@@ -93,13 +95,17 @@ justifies the substitution.  On the complement, the proof must bound
   \sum_{g\ \mathrm{not\ an\ encoding}}
   \langle\widehat\psi,\widehat S_g^W\widehat\psi\rangle.
 \]
-The blueprint derives an $O(\delta_S)+md/q$ bound from point consistency and
-the combined point measurement.  A non-encoding polynomial differs from every
-encoded polynomial, so Schwartz--Zippel bounds the probability that their
-evaluations coincide.  The two player-specific estimates needed for the
-pulled-apart point comparisons are now proved from these ingredients.  The
-single theorem packaging the estimate uniformly over either player remains an
-open proof obligation; the bound is not inserted as an extraction hypothesis.
+For a supplied global polynomial-pair witness with point-consistency error
+$\delta_G$, the formal proof derives an
+$O(\delta_G+\sqrt\eps)+md/q$ bound. Measure the original Pauli answer $h$ and
+the ancillary ideal Pauli answer $h'$ and return $g_{h+h'}$. This reference
+measurement is supported on encodings. Perfect ancillary consistency and the
+Pauli-basis check bound its evaluated inconsistency with the marginal.
+A non-encoding polynomial differs from every encoded polynomial, so
+Schwartz--Zippel bounds the probability that their evaluations coincide.
+Completeness and positivity bound the non-encoding mass by the full polynomial
+inconsistency. This uniform estimate holds for both player sides; it is not
+inserted as an extraction hypothesis.
 
 The printed reindexing at lines~1805--1822 replaces
 $g_{\operatorname{Dec}(g_W)}$ by $g_W$, which is the invalid reverse identity
@@ -147,10 +153,18 @@ explicit \path{IsEncoding} hypothesis.  The declarations
 non-encoding estimates used by the pulled-apart point comparisons.  Each combines
 an encoding-supported reference comparison with the corresponding
 Schwartz--Zippel estimate, and \path{exists_pulled_apart_consistency} applies both
-results to one constructed global witness.  The more general packaged theorem
-\path{nonencodingMarginalMass_le} remains open, but it is not used by that
-source-facing composition.  Issue~\#19 owns the Stage~4.2 statements and this
-discrepancy record; \ghissue{47} owns the general non-encoding support theorem.
+results to one constructed global witness.  The uniform auxiliary theorem
+\path{nonencodingMarginalMass_le} is proved at its unchanged
+supplied-witness statement. Its proof uses the reference comparison and
+Schwartz--Zippel from
+\path{MIPStarRE/QPBT/Extraction/NonencodingSupport.lean}; it is not called by that
+source-facing composition. The global witness constructor
+\path{exists_globalPairWitness} and the source-facing
+\path{exists_pulled_apart_consistency} are separately proved, including at
+zero error. This does not remove the witness premise from the auxiliary
+theorem. Issue~\#19 owns the Stage~4.2 statements and this discrepancy
+record; \ghissue{47} tracks the non-encoding support theorem, completed for a
+supplied witness by issue~\#517.
 No unrestricted decoder identity, residual assumption, or additional witness
 field was introduced.
 
@@ -159,8 +173,9 @@ field was introduced.
 The decoding identity is false for a general polynomial outcome.  Restricting
 it to the encoding image is a necessary local correction.  The two specialized
 non-encoding-mass estimates required for the pulled-apart point-consistency
-conclusion are proved and used.  The single theorem packaging the same estimate
-uniformly over either player remains an open proof obligation.
+conclusion are proved and used in the source-facing construction. The uniform
+auxiliary estimate is also proved for a supplied global witness, but the
+source-facing construction does not depend on it.
 
 \bibliographystyle{alpha}
 \bibliography{references}

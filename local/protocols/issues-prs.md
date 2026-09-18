@@ -134,8 +134,9 @@ webhook redelivery); an ambiguous write stays pending for adoption.
 
 ## 3. The merge gate
 
-`pr_merge.py <number>` is the only path to `main`: never `git merge` to main,
-never push `main`. The merge is a REST `PUT …/pulls/{n}/merge` with the exact
+Single-PR merges use `pr_merge.py <number>`; reviewed batches use `pr_train.py`
+as described below. Workers never merge or publish main directly. A single-PR
+merge is a REST `PUT …/pulls/{n}/merge` with the exact
 `sha` guard, issued by `gh_common.merge_pr` and verified against the merge
 commit's topology (two parents, the frozen head second), behind seven gates
 that refuse by default:
@@ -197,6 +198,130 @@ Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
 
+### Reviewed merge trains
+
+**Daemon admission (#593).** The active model-free daemon may schedule one
+operator-approved JSON batch of at least two pinned PR numbers and exact head
+SHAs, using `local/bin/daemon_train.py` and the deployment recipe in
+`local/deploy/issue-593-daemon-reviewed-trains.md`. Its existing complete scan
+must report each member `clean` at that SHA; a fresh head stays on the ordinary
+single-PR path, and a claimed member is held. The scan is only a routing hint:
+the adapter passes the operator's PR-to-SHA pins to `pr_train.py`. With its
+member claims held, the train compares every authoritative gate result to the
+requested pin and records the pins in the manifest; the publication verifier
+rechecks them, including conflict-dropped members. A changed pin refuses the
+batch even if its replacement head has independent green CI and review. The
+train repeats every member's current-head, dependency and frozen-base gate
+before combined CI and publication. The daemon blocks its own ordinary merges
+and hourly/pre-merge telemetry commits
+while the train runs synchronously. Before invocation, the adapter commits
+pending telemetry and uses the existing `github-sync.sh main` to publish any
+telemetry-only local main lead (including record snapshots), then checks exact
+primary cleanliness. Every unpublished commit must change only allowlisted
+passive telemetry paths and modes; a later reversal of a nontelemetry change
+cannot make that history publishable. It refuses nontelemetry dirt or history,
+or divergence; it does not reset or discard local commits. The owner coordinates
+other primary telemetry
+writers, including the required main status snapshot, during the train's
+clean-primary publication window; their records must be retained outside the
+primary until that window ends. A refusal, conflict or uncertain post-push
+outcome holds the approved batch for manual reconciliation, never as a merged
+PR. Hourly and pre-merge batching resume after the train; PAR=0 remains binding.
+
+After independent review and deployment, the daemon/operator may invoke
+`local/bin/pr_train.py N M [K ...]` from the clean primary checkout at
+`github/main`. Development and tests use fixture repositories exclusively.
+Every member passes the existing open, local-tip, exact-head CI, independent
+review, changes-requested, fix-lock, and dependency gates. Repeat
+`--adjudicated N` only for members with the existing exact-head adjudication
+record. A precondition failure refuses the entire batch and names the member.
+The individual-head base-ancestry requirement is replaced by mandatory CI of
+the combined commit; member review evidence is neither copied nor rewritten.
+
+The tool creates `train-<UTC-stamp>` and a private worktree under the runtime
+cache, merging frozen member SHAs with two-parent merge commits in argument
+order. A conflict aborts only that merge, verifies restoration of the accepted
+train, and drops that member; fewer than two accepted members refuses the batch.
+The primary merge-loss guard checks each accepted merge. Existing developer
+branches and worktrees are preserved. Failed train worktrees remain for diagnosis.
+
+`ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
+against the combined commit, using one locked build of the complete `MIPStarRE`
+library and `MIPStarRE.LDT.Test.AxiomAudit`. This includes the root artifact
+needed by publication's dynamic `checkdecls` import and all downstream modules.
+It rejects skip flags and dirty or moved train
+heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
+cache. Bootstrap and build telemetry are transferred to the primary telemetry
+files after publication, refusal, or an unknown outcome so their appends cannot dirty the primary
+during gating; the transfer and the train event use the canonical
+`telemetry.py` writers, so they obey the locking every other session obeys. CI warming uses `--no-build` to avoid a nested build lock, and
+step execution stops at its first failing command.
+
+Publication uses `checked-push.sh --train-manifest PATH` with one explicit
+train-to-main ref mapping. After preflight, it rechecks the combined CI manifest,
+member gates and heads, primary cleanliness, and frozen main; the existing exact
+remote-tip lease protects the final fast-forward. Because a recheck only reads
+the member refs, the same atomic transport leases every verified member ref at
+its verified value: a member that moved before the remote's ref advertisement
+aborts the whole push, main included, and no member branch is ever rewound,
+while a member that still matches is already up to date and sends no update
+command. Hook bypass is forbidden.
+
+**The publication contract (owner-authorized, 2026-09-18).** State it exactly,
+because the guarantees differ from one another:
+
+1. *Content.* Main only ever advances to an integration of the exact reviewed
+   member SHAs, after every member gate, the combined CI and the frozen-base
+   and cleanliness checks passed at the verified heads. This is enforced by the
+   gates and by the atomic transaction's old-value comparison on `main`.
+2. *Server-side atomicity covers the refs in the transaction.* That is `main`,
+   plus any member ref the client actually sends. A member whose advertised
+   value still equals its verified SHA is up to date, so Git sends no command
+   for it and the remote holds no predicate for it. A lease is likewise a
+   client-side comparison against the ref advertisement, not a server predicate.
+3. *Residual window, accepted.* A member ref can therefore advance after the ref
+   advertisement and before the remote commits `main`, and the transport still
+   reports success. Publication then carries that member's earlier, reviewed
+   head while the PR's tip has moved on; main is unharmed, and GitHub does not
+   show such a PR as merged. The 2026-09-17 adjudication reproduced this
+   ordering against a real `receive-pack`. Closing it would need server-enforced
+   comparison of every member inside the same transaction, which this transport
+   does not offer; the owner authorized the narrower contract on 2026-09-18
+   instead of leaving the train unusable.
+4. *Claims cover the window.* Every writer in this project — the main session,
+   the daemon, and each Opus helper — claims a PR on the shared atomic claim
+   list (`local/bin/claim.sh`, the repository copy of the meta session's
+   `qpbt-claim.sh`) before touching it. The train claims every member with kind
+   `train` and party `main` before the first gate reads it, refuses to start
+   when a member is held by another writer (printing the holder line), and
+   releases the claims once the transport and its re-verification have ended,
+   on success, on failure and on every abort path. A claim is not a remote
+   predicate; it is what keeps this project's own writers out of the window.
+5. *Post-push re-verification detects a violation after the fact.* Immediately
+   after a successful transport, the train re-reads every member ref from the
+   remote and compares it with the verified SHA. A member that moved is a
+   CONTRACT VIOLATION: the member, its verified SHA, the observed SHA and any
+   claim-list holder line are printed and recorded in `publication.json` and in
+   the train event, the train comment for that member is not posted — nothing in
+   this tooling may mark a PR merged that this train did not merge — and the
+   train run exits non-zero so the operator sees it. Main stays as published; it
+   carries only verified content.
+
+GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
+It posts one idempotent train comment per member, records one merge event,
+fast-forwards local main and its origin alias, and removes only the train branch
+and worktree. A failure after publication is reported as such and requires
+operator reconciliation; it must not be retried as a new merge. An ambiguous
+push is reconciled against remote main: equality or verified ancestry containing
+the train establishes publication. Failed reads, unavailable ancestry, and
+negative ancestry in a shallow repository retain an explicit `unknown` outcome.
+An unknown outcome is never a refusal or permission to retry. The runtime
+`publication.json`, stderr, and telemetry retain that distinction; unresolved
+worktrees and manifests remain available for operator reconciliation. Generated
+branch names are single components accepted by external Lake-root bootstrap.
+Deployment and
+daemon wiring remain separate from development of this tool (issue #502).
+
 ### Main-cycle integration checkpoint
 
 The active owner service records, at each bounded tick, the local `main` SHA,
@@ -254,12 +379,51 @@ issue endpoint) — audit and recovery telemetry, never lifecycle input. The
 retired trees stay archived under `results/telemetry/registry-archive/` (commit
 c8f1999): read-only research data, never edited or read as active input.
 
-## 6. Owner inbox and mathematical-gap escalation
+## 6. Access-only owner inbox and main mathematical decisions
 
-Pinned issue #26 is the owner inbox: it receives only decisions that require
-the human owner. A source statement found to be mathematically false does not
-go there first. Following the availability report on #26 and the September 6
-owner decision, main selects Astra Ultra for the mathematical-gap lane through
+Pinned issue #26 is the owner inbox: it receives only **actual access or
+permission blockers requiring human action**, such as an owner-only GitHub
+operation or CLI permission change. Main decides mathematical and internal
+workflow questions, including definition/game proposals, review disposition and
+exhausted budgets, with rationale and evidence recorded before further work.
+Main owns plans, task selection, decomposition, dispatch order, individual
+worker assignments and pipeline execution; meta provides guidance only.
+Neither main nor a worker may bypass permissions, proof integrity, CI, review or
+merge gates. Internal security questions belong to main; a credential/access
+change that actually requires the human is an owner blocker, never a workaround.
+
+The owner decision at **2026-09-06T05:05Z**, recorded at **05:17:03Z**, explicitly
+withdraws the posted-#26 human hold, **including B7 and B8** (issue #247/PR #260).
+The 02:55:29Z delegation and its 02:58:41Z withdrawal remain historical records;
+neither is the current rule. This new explicit decision, not quotas or role
+guidance, transfers mathematical and internal workflow decisions to main.
+B7 terminal disposition requires exact-head evidence and `review.md` §12: no
+fifth full review, fabricated carry-forward or CI/proof/merge/access bypass.
+An unresolved evidence requirement stays blocked internally, not automatically
+escalated to the human. No mathematical result is declared solved without proof.
+
+Under the owner's 2026-09-06T05:56Z guidance, main autonomously reassesses
+useful parallelism every cycle, after completion/failure, newly unblocked work
+or compaction, and before waiting or ending, without owner/meta prompts.
+Main selects useful, disjoint successors, rechecks dependencies, ownership,
+account capacity, service evidence and cumulative budgets, and reports concrete
+constraints and the next admission condition. Idle reservations, duplicate
+writers, completed sessions and filler do not qualify. The September 6
+eight-to-eleven allocation is historical; current admission uses the configured
+account caps in `sessions.md` section 4. Issue #505 retired queue #257 and native
+leases; replenishment uses external `dispatch.sh` assignments.
+
+Main remains Astra Ultra; routine workers use Sol Ultra and hard assignments use
+Astra Ultra with an explicit reason under `local/model-policy.json`. Record
+selection, rationale and observed outcomes separately from provider-measured
+effort. Preserve the historical max/xhigh observations, raw provenance, sample
+counts and unknowns in `results/telemetry/model-comparison/`; no benchmark,
+probe, filler session or gate/budget relaxation follows from this guidance.
+
+A source statement found to be mathematically false goes to main, not #26,
+unless actual access or permission requires human action. Following the
+availability report on #26 and the September 6 owner decision, main selects
+Astra Ultra for the mathematical-gap lane through
 `MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
 Historical owner-launched Fable measurements remain unchanged. Every request or
 dispatch carries the exact source path, label and line range; the counterexample
@@ -277,25 +441,42 @@ A correction is adopted only when it meets all four conditions below.
    insufficient.
 3. **Minimality:** the correction is the closest sufficient statement to the
    source, with no unnecessary hypothesis or weakened conclusion and no change
-   to the source semantics; definition or game corrections require an explicit
-   faithfulness audit and independent mathematical review.
+   to the source semantics. A necessary definition/game correction first
+   returns to main for a separately recorded decision and scoped task, with an
+   explicit faithfulness audit and independent mathematical review. It is never
+   silently adopted as the printed theorem or exempted from consumer analysis.
 4. **Lean convergence:** the corrected statement type-checks and all affected
    downstream consumers compile. Lean success alone does not establish the
    preceding three conditions.
 
-The operator iterates mathematics and Lean for at most ten `mathfix` sessions
+The ordinary budget is at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
 is shared across the historical owner-launched Fable lane and the Astra lane; a
-model or telemetry change does not reset it. Main decides mathematical
-corrections with the preceding evidence and independent review, including
-definition/game corrections that preserve the intended source semantics;
-changing the project goal is outside that authority. If the current authorized
-budget expires, stop that lane and record the attempted statements,
+model or telemetry change does not reset it. If a correction requires changing
+a mathematical definition or game, the worker stops and returns it to main
+immediately. Main decides source-semantic corrections with the preceding evidence
+and independent review; changing the project goal is outside that authority.
+At budget exhaustion, stop that lane and record attempted statements,
 counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Do not reset attempts or working time. Use #26 only for an owner-only
-permission, credential, access or scope/resource grant; mathematical difficulty
-alone is not an owner decision. An already-posted #26 item waits for the owner
-unless the owner explicitly returns it to main.
+note. Main decides whether to stop, rescope or record a separately bounded tranche
+within existing authority. Workers never self-extend or reset attempts or time.
+Owner-only permission, credential, access or scope/resource grants go to #26;
+mathematical difficulty alone is not an owner decision. Already-posted items
+await the owner unless explicitly returned to main, as B7/B8 were above.
+
+**Recorded #118/B8 tranche (September 6 amendment):** main authorized
+attempts **11 and 12**, each at most **2700 seconds**, on primary Astra **max**.
+The carried baseline is **10 completed attempts / 19931 completed seconds**,
+with original anchor **2026-09-05T19:24:00Z**. Attempt 12 is conditional on
+main's recorded evaluation of attempt 11; it is not an automatic dispatch.
+The maximum additional allocation is 5400 seconds, not time already spent.
+Maintain a cumulative ledger of actual attempt times, failures, interruptions
+and original session links. This exception is confined to that recorded tranche;
+it does not grant attempt 13, a new anchor or unlimited renewals. Any later work
+requires a new explicit main decision with evidence and a finite bound, not
+another owner budget question unless actual access/permission is blocked.
+See `sessions.md` §4.1 for unchanged continuation validation; this amendment
+does not authorize editing historical limits or bypassing a dispatcher refusal.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
 operator announces it in one line on progress log #27 and records it in the

@@ -130,12 +130,29 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	\]
 	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Note that this construction preserves the value of the strategy it is applied to exactly.
 
-	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}.
+	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}. The approximate form that the argument does establish is stated separately, with its nonempty-answer boundary hypothesis displayed, as Lemma~\ref{lem:symmetric-strat-approx}; the exact form printed above stays an open source gap and is therefore not marked as formalized here.
 \end{proof}
 
 \begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
 	The proof of Lemma~\ref{lem:symmetric-strat} yields, for each $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$. The conclusion as stated, at $\eps' = \eps$, does not follow from this: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The symmetrization construction itself is value-preserving, so the conclusion does hold whenever the hypothesis supplies an actual strategy of value at least $1-\eps$ rather than only the value of the game; every use of the lemma in the source proceeds from such a strategy, or from a strict lower bound on the value, and therefore consumes only what the proof establishes. The gap and the available repairs are documented in \cite{gap:qpbt_symmetrization-attainment}.
 \end{remark}
+
+\begin{lemma}[Approximate symmetrization for symmetric games]
+	\label{lem:symmetric-strat-approx}
+	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx}
+	\leanok
+	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general, lem:symmetric-strat-given-strategy}
+	This formalization-only node is not a named statement of the paper; it is the approximate form that the proof of Lemma~\ref{lem:symmetric-strat} establishes, isolated in Remark~\ref{rem:symmetric-strat-limit}, with the source's nonempty answer alphabet displayed as an explicit hypothesis. Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game whose answer alphabet $\mathcal A$ is nonempty, and suppose $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then for every $\eps' > \eps$ there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ with
+	\[
+		\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps'\,.
+	\]
+	Equivalently, for every slack $\delta > 0$ there is a symmetric projective strategy of value at least $\operatorname{val}^*(\mathfrak G) - \delta$; that slack form is the Lean declaration \texttt{exists\_symmetric\_projective\_strategy\_of\_lt\_value}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:naimark, lem:symmetric-strat-given-strategy}
+	Fix $\eps' > \eps$. Since $\mathcal A$ is nonempty, the one-dimensional strategy answering a fixed answer deterministically is a strategy for $\mathfrak G$, so the set of strategy values is nonempty; it is bounded above by $1$, so $\operatorname{val}^*(\mathfrak G)$ is the least upper bound of that set. The supremum property therefore supplies a strategy $\mathcal S'$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') > 1-\eps'$, which is the step the source proof states as ``by definition''. Applying Lemma~\ref{lem:symmetric-strat-given-strategy} to $\mathcal S'$ produces a symmetric projective strategy of exactly the value of $\mathcal S'$, hence at least $1-\eps'$. The nonemptiness hypothesis is load-bearing in the formalization: with an empty answer alphabet no strategy exists at all, while the value is still defined as the totalized supremum of the empty set, so the conclusion fails there. No attainment step is used and none is claimed at $\eps' = \eps$; that step is the open source gap of Lemma~\ref{lem:symmetric-strat}, documented in \cite{gap:qpbt_symmetrization-attainment}.
+\end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:symmetric-strat}]
 	\label{lem:symmetric-strat-given-strategy}

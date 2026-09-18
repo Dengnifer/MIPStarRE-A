@@ -29,9 +29,14 @@ source theorem nor its original error-scale interpretation is certified here.
 
 Two adverse findings on PR #534 concerned old prose in `Lines.lean` and
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` that has already changed
-on main. Those reviews were not approvals. This preservation retains only
-three missing supplied-witness auxiliary contracts and this historical record;
-it does not revive old prose, stale blueprint status, or historical validation.
+on main. Those reviews were not approvals. Against the head that is actually
+merged, this preservation retains one supplied-witness auxiliary contract,
+`consistencyDefect_le_nondegenerateLinePastingDist_add_discarded_mass`, together
+with this historical record. The two point self-consistency contracts it
+originally also carried are already declared on main in
+`MIPStarRE/QPBT/Combining/Lines/PointComparison.lean`, so this branch no longer
+adds them. It does not revive old prose, stale blueprint status, or historical
+validation.
 The separate 17-line CI incident is archived in
 `audits/2026-09-18_issue515-ci-fixture-event-history.md`.
 

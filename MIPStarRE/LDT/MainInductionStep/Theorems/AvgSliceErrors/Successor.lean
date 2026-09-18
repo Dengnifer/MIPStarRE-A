@@ -27,7 +27,8 @@ resulting measurements `G^x` and proves the displayed bound
 `\mathbb E_x \sigma_x \leq \sigma`.
 
 **Lean-only:** This is an internal construction theorem for the simultaneous
-answer-valued successor route tracked in issue #1507; it does not add a
+answer-valued successor route tracked in upstream issue 1507 (historical); it
+does not add a
 predecessor conclusion as an assumption to any source-facing theorem.
 Discharge: proved here from the restricted-probabilities theorem and the
 answer-valued predecessor induction hypothesis. -/
@@ -99,7 +100,8 @@ answer-valued point measurement.  The proof invokes only the
 axis-parallel/self-consistency form of self-improvement, and therefore does not
 claim that the carrier's dummy diagonal measurement is a good diagonal
 realization of the answer-valued strategy.  This internal construction is
-tracked in issue #1507.  Discharge: proved here from the recursive slice
+tracked in upstream issue 1507 (historical).  Discharge: proved here from the
+recursive slice
 measurements and the formal self-improvement theorem. -/
 theorem answerSuccessorSelfImprovementOutputs_ofMainInductionHypothesis
     (params : Parameters)

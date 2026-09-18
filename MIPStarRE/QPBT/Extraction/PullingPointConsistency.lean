@@ -15,7 +15,9 @@ The resulting point overlaps are the ones supplied by the global witness.
   especially `eq:qld-pulling-2b` and `eq:qld-pulling-12`.
 - The point-placement and convolution identities identify these overlaps with
   the two consistency relations of the supplied global measurement.
-- Issue #520. These identities do not construct the global witness.
+- Issue #123 tracks the extraction obligations of this chapter. These
+  identities do not construct the global witness. This module was
+  originally filed under issue #520, now closed.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder Classical

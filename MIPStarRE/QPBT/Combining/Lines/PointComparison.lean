@@ -63,7 +63,7 @@ theorem avgOver_prod_linePointDist_points (L : LdParams)
 
 /-- The first postprocessed joint-point effect is its X marginal sum.
 This is the definition preceding `eq:qld-qxz-close-to-point`, paper
-`14_analysis_of_the_pauli_basis_test.tex:917-932`, not a witness assumption. -/
+`14_analysis_of_the_pauli_basis_test.tex:914-926`, not a witness assumption. -/
 theorem CombinedPointsWitness.postprocess_fst_effect
     {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δQ) (side : PlayerSide)
@@ -79,7 +79,7 @@ theorem CombinedPointsWitness.postprocess_fst_effect
 
 /-- The second postprocessed joint-point effect is its Z marginal sum.
 Source: `eq:qld-qxz-close-to-point-2`, paper
-`14_analysis_of_the_pauli_basis_test.tex:933-935`. -/
+`14_analysis_of_the_pauli_basis_test.tex:928-930`. -/
 theorem CombinedPointsWitness.postprocess_snd_effect
     {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
     (points : CombinedPointsWitness S δQ) (side : PlayerSide)
@@ -384,6 +384,64 @@ theorem exists_combinedPoints_line_marginal_defect_le :
         (SandwichProduct.postprocess_isProjective _ (S.lineMeasExp_isProjective _ _ _) _))
   exact ⟨(hcompare Prod.fst Prod.fst .X).trans (hbound P ε δQ S points p1 p2 hopp).1,
     (hcompare Prod.snd Prod.snd .Z).trans (hbound P ε δQ S points p1 p2 hopp).2⟩
+
+
+/-- Convert the joint point witness's projective squared-distance estimate into
+the consistency-defect convention used by the pasting argument. The estimate is
+`eq:qld-q-self-cons`, paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:693-697`, which
+enters the pasting lemma as its second hypothesis at lines 955-961; the
+conversion itself is formalization-only. Blueprint
+`lem:qld-point-self-consistency-defect`. -/
+theorem CombinedPointsWitness.self_consistency_defect_le
+    {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
+    (points : CombinedPointsWitness S δQ)
+    (p1 p2 : Placement) (hopp : p1.IsOpposite p2) :
+    consistencyDefect
+      (uniformDistribution
+        ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)))
+      (fun xz ab => S.place p1 ((points.Q p1.side xz.1 xz.2).effect ab))
+      (fun xz ab => S.place p2 ((points.Q p2.side xz.1 xz.2).effect ab))
+      S.psiHat ≤ δQ := by
+  exact le_trans (consistencyDefect_le_opFamilyDistSq_of_projective _
+    (fun xz : (Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P) =>
+      S.placedMeasurement p1 (points.Q p1.side xz.1 xz.2))
+    (fun xz : (Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P) =>
+      S.placedMeasurement p2 (points.Q p2.side xz.1 xz.2)) S.psiHat
+    (fun xz => S.placedMeasurement_isProjective p1 _
+      (points.projective _ xz.1 xz.2))
+    (fun xz => S.placedMeasurement_isProjective p2 _
+      (points.projective _ xz.1 xz.2)))
+    (points.self_consistent p1 p2 hopp)
+
+/-- Transport joint point self-consistency to the point coordinates of two
+independent line-point samples. The underlying estimate `eq:qld-q-self-cons`,
+paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:693-697`,
+is an average over uniform $x,z$, whereas the pasting argument at lines 955-961
+averages over the two independent line-point samples introduced at lines
+931-935. Since the point marginal of the line-point law is uniform, the two
+averages agree; this sampling step is formalization-only. Blueprint
+`lem:qld-point-self-consistency-defect`. -/
+theorem CombinedPointsWitness.self_consistency_linePoint_defect_le
+    {P : AdmissibleParams} {ε δQ : ℝ} {S : ProjectiveSetting P ε}
+    (points : CombinedPointsWitness S δQ)
+    (p1 p2 : Placement) (hopp : p1.IsOpposite p2) :
+    consistencyDefect (Distribution.prod (linePointDist P.toLdParams)
+      (linePointDist P.toLdParams))
+      (fun sample ab =>
+        S.place p1 ((points.Q p1.side sample.1.2 sample.2.2).effect ab))
+      (fun sample ab =>
+        S.place p2 ((points.Q p2.side sample.1.2 sample.2.2).effect ab))
+      S.psiHat ≤ δQ := by
+  classical
+  have htransport := avgOver_prod_linePointDist_points P.toLdParams (fun xz =>
+    ∑ ab, ∑ cd, if ab = cd then 0 else
+      (inner ℂ S.psiHat ((EuclideanSpace.equiv _ ℂ).symm
+        ((S.place p1 ((points.Q p1.side xz.1 xz.2).effect ab) *
+          S.place p2 ((points.Q p2.side xz.1 xz.2).effect cd)) *ᵥ S.psiHat.ofLp))).re)
+  unfold consistencyDefect
+  rw [htransport]
+  exact points.self_consistency_defect_le p1 p2 hopp
 
 
 end
