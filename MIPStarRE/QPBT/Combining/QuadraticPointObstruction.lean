@@ -16,7 +16,8 @@ assertion in `Apply.lean`.
 ## References
 
 * `docs/paper-gaps/qpbt_combined-lines-error-term.tex`, subsection
-  "Unrestricted point witnesses in the extended-line assertion".
+  "The extended-line supplied-point obstruction" (the quadratic material
+  is at lines 255-320).
 * `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1020-1034`
   (`lem:qld-4-13`) and 1140-1173 (`claim:17-1`). The source retains the
   error of its constructed points; the unrestricted auxiliary does not.
