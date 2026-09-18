@@ -164,6 +164,21 @@ require a supplied global measurement. The subsequent passage from the
 concrete swap operators to the isometries in the soundness theorem remains
 unformalized and still requires the range-projection argument above.
 
+The stronger theorem \path{exists_extractionWitness_fourth_root_rate}
+normalizes the numerical rate of this concrete conclusion to the same
+global-measurement parameter. Starting with the global error
+$\delta_G^{a_0,b_0}$, the scalar absorption theorem bounds the nested
+extraction error by another family member $\delta_G^{a_1,b_1}$. Choose
+$a\geq\max\{a_0,a_1+1\}$ and $b=\min\{b_0,b_1\}$. Monotonicity permits the
+\emph{same} global measurements to carry the larger consistency certificate
+$x=\delta_G^{a,b}$. If $x\leq1$, their established extraction error is at
+most $x\leq x^{1/4}$; if $x>1$, the universal four-error construction gives
+both estimates. Enlarging the extraction constant to at least four yields
+$C(x^{1/4}+md/q)$ in both cases. This normalization concerns the concrete
+swap maps only: it neither identifies the seed-indexed low-degree game with
+the direct carrier nor supplies the subsequent isometry range-projection
+transfer. It does not complete the unrestricted Pauli-test soundness claim.
+
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{123} records the source-facing composition work: both the pulled-apart
 consistency and the source-unitary existence compositions are proved. Other
