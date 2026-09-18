@@ -413,9 +413,10 @@ The theorem assumes a nonnegative error parameter, as in the source, and uses
 only `P.model` and its stored basis dimension.
 
 **Proof dependency:** The coordinate change and all three error identities are
-proved, but the source theorem `pauli_soundness` remains an open proof obligation
-(issue #529). Completing that theorem from `thm:pauli`'s hypotheses is required
-to certify this corollary; no proof-completeness claim is made here. -/
+proved, and the source theorem `pauli_soundness` is proved as well, so this
+corollary is complete: its axiom closure is `propext`, `Classical.choice` and
+`Quot.sound`. The composition that closed `pauli_soundness` is recorded in
+issue #614, under the umbrella issue #529. -/
 theorem pauli_soundness_qubit :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧
       ∀ (P : AdmissibleParams) (ε : ℝ), 0 ≤ ε →

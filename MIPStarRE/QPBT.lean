@@ -11,6 +11,7 @@ import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
 import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.Soundness.EpsReduction
 import MIPStarRE.QPBT.State
 import MIPStarRE.QPBT.Algebra.SubspacesTheorems
 import MIPStarRE.QPBT.Algebra.SelfDualBasis
@@ -97,6 +98,7 @@ import MIPStarRE.QPBT.Extraction.Unitary
 import MIPStarRE.QPBT.Extraction.RegisterTransport
 import MIPStarRE.QPBT.Extraction.SourceUnitary
 import MIPStarRE.Quantum.ControlledUnitary
+import MIPStarRE.QPBT.Test.Soundness.ScalarAbsorption
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false

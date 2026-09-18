@@ -1460,6 +1460,133 @@ final soundness argument. The omitted step in the source is discussed in
   robustness family.
 \end{proof}
 
+\begin{theorem}[Questionwise Pauli Naimark reduction]
+  \label{thm:pauli-naimark-reduction-support}
+  \lean{MIPStarRE.QPBT.pauliNaimarkEmbeddingA,
+    MIPStarRE.QPBT.pauliNaimarkEmbeddingB,
+    MIPStarRE.QPBT.pauliNaimarkStrategy,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_isProjective,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_value,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_state,
+    MIPStarRE.QPBT.pauliNaimarkSetting,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_compressA,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_compressB,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressA,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressB,
+    MIPStarRE.QPBT.pauliNaimarkWitness,
+    MIPStarRE.QPBT.pauli_naimark_witness_state_eq,
+    MIPStarRE.QPBT.pauli_naimark_witness_state_distance_eq}
+  \leanok
+  \uses{thm:naimark}
+  Let $S$ be any finite-dimensional strategy for the Pauli basis test,
+  with possibly distinct local spaces. There is a projective strategy $T$
+  on separately enlarged local spaces with $\operatorname{val}(T)
+  =\operatorname{val}(S)$, and fixed question-independent local isometries
+  $i_{\mathrm A},i_{\mathrm B}$ such that
+  $\ket{\psi_T}=(i_{\mathrm A}\otimes i_{\mathrm B})\ket{\psi_S}$.
+  Compression to the ground coordinates recovers both entire original
+  question-indexed measurement families, including their full
+  $\mathsf{Pauli}$-answer postprocessings (which fold wrong-form answers into
+  the zero outcome). Thus $\operatorname{val}(S)\geq1-\eps$ constructs a
+  projective setting for $T$ at the same error. For any soundness witness on
+  $T$, composing its two local isometries with $i_{\mathrm A}$ and
+  $i_{\mathrm B}$ gives a witness on $S$ with the same auxiliary state:
+  the extracted state vectors, and hence their distances from the common
+  ideal state, agree exactly. This is formalization-only support for the
+  dilation at the start of the proof of Theorem~\ref{thm:pauli}; it does not
+  identify compression with operator conjugation, transfer either complete
+  operator-family estimate, or handle the unrestricted error domain.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:naimark}
+  Apply the completed one-measurement Naimark dilation for every question,
+  with one fixed ground coordinate on each player's enlarged local space.
+  Ground-slice compression recovers every POVM effect, and commutes with
+  answer postprocessing. The padded state is the tensor image of the two
+  ground embeddings, so all game correlations and the value are unchanged.
+  Composition of local isometries gives equality of extracted states for
+  the original and dilated strategies.
+\end{proof}
+
+\begin{theorem}[Pauli operator-family transfer through Naimark compression]
+  \label{thm:pauli-naimark-operator-transfer-support}
+  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceA_le,
+    MIPStarRE.QPBT.pauli_naimark_operator_distanceB_le}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  Let $S$ be any strategy for the Pauli basis test, let $T$ be its
+  questionwise Naimark dilation, and let $w$ be a soundness witness for $T$.
+  For every $W\in\{X,Z\}$, write
+  \[
+    \Delta = (\phi_{\mathrm A}\ot\phi_{\mathrm B})\ket{\psi_T}
+      \quad\text{and}\quad
+    \Theta = \ket{\mathrm{aux}}\ot\ket{\mathrm{EPR}_q}^{\ot M}.
+  \]
+  The witness obtained by composing its local isometries with the two ground
+  embeddings satisfies
+  \begin{align*}
+    d_{\mathrm A}(S) &\leq 3d_{\mathrm A}(T)+6\|\Delta-\Theta\|^2,\\
+    d_{\mathrm B}(S) &\leq 3d_{\mathrm B}(T)+6\|\Delta-\Theta\|^2.
+  \end{align*}
+  Here each $d_w$ is the complete Pauli operator-family distance, summed over
+  all answers.  This is a formalization-only support result: it has no
+  outcome-cardinality factor and adds no consistency, projectivity, range, or
+  producer hypothesis to the source theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  The range projection of each composed ground embedding fixes the dilated
+  state.  The complete Pauli projector family on the opposite register gives
+  the required mirror identity on the ideal EPR state.  The range-projection
+  estimate therefore bounds the compressed family by three times the dilated
+  family distance and six times the squared state distance.  The two final
+  equalities are the exact compression identities for the pulled-back witness.
+\end{proof}
+
+\begin{theorem}[Pauli isometry bounds for arbitrary strategies]
+  \label{thm:pauli-arbitrary-strategy-isometry-support}
+  \lean{MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds}
+  \leanok
+  \uses{def:strategy-observables, def:povm-distance, def:expanded-state,
+    thm:pauli-projective-setting-isometry-support,
+    thm:pauli-naimark-reduction-support,
+    thm:pauli-naimark-operator-transfer-support,
+    lem:delta-qld-scalar-absorption-support}
+  This formalization-only result removes the projectivity restriction of
+  Theorem~\ref{thm:pauli-projective-setting-isometry-support} and keeps the
+  error restriction $0\leq\eps\leq1$.  There are universal constants $a\geq1$
+  and $0<b<1$, chosen before the parameters, the error and the strategy, such
+  that for every admissible $(q,m,d)$, every $0\leq\eps\leq1$ and every
+  strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ succeeding with
+  probability at least $1-\eps$, there are local isometries and a unit
+  auxiliary state whose state norm distance and whose two complete squared
+  Pauli-family distances, for every $W\in\{X,Z\}$ and summed over all
+  $h\in\F_q^M$, are bounded by $a(md)^a(\eps^b+q^{-b}+2^{-bmd})$.  Neither
+  projectivity nor extraction data is assumed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-projective-setting-isometry-support,
+    thm:pauli-naimark-reduction-support,
+    thm:pauli-naimark-operator-transfer-support,
+    lem:delta-qld-scalar-absorption-support,
+    lem:delta-qld-mono-support}
+  Dilate the strategy questionwise by the Naimark reduction.  The dilation is
+  projective and has exactly the same value, so it is a projective setting at
+  the same error, and the projective-setting bounds apply to it.  Pull the
+  resulting witness back along the two ground embeddings.  The state distance
+  is unchanged by that pullback, so monotonicity in the universal constants
+  brings it to the enlarged scale.  Each operator-family distance is at most
+  three times the dilated family distance plus six times the squared state
+  distance; both of those are bounded by the same error, and the scalar
+  absorption returns $3\delta+6\delta^2$ to the robustness form with prefactor
+  $21a^2$ and the same exponent.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
@@ -1467,8 +1594,19 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\uses{lem:qld-unitary, lem:qld-extraction-error-form, lem:pauli-completeness,
 		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
 		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
+		thm:pauli-naimark-reduction-support,
+		thm:pauli-naimark-operator-transfer-support,
 		thm:pauli-isometry-transfer-alice-support,
 		thm:pauli-isometry-transfer-bob-support}
+	The account below is the route the source prints.  The Lean proof of
+	Theorem~\ref{thm:pauli} performs the same Naimark reduction and is
+	assembled from the formalization-support node
+	Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support} together with
+	the extension of the error domain past one; it is complete under the
+	standard axioms, which is what the statement-level formalization mark on
+	Theorem~\ref{thm:pauli} records.  No proof-level mark is placed on this
+	account, because the divisibility obligation disclosed below is neither
+	discharged nor altered by that closure.
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
@@ -1576,6 +1714,32 @@ brought to a common scale.
 	\leanok
 	\uses{def:admissible}
 	Admissibility gives $md \ge 1$ and $q \ge 1$, so $a(md)^a \le a'(md)^{a'}$. In the bracket, $\eps^b \le \eps^{b'}$ because $0 \le \eps \le 1$ and $0 < b' \le b$; $q^{-b} \le q^{-b'}$ because $q \ge 1$ and $-b \le -b'$; and $2^{-bmd} \le 2^{-b'md}$ because $md \ge 0$ and $-bmd \le -b'md$. Both factors are nonnegative, so the two products compare factorwise.
+\end{proof}
+
+The next statement is likewise not a named result of the source article.  It
+records the constant bookkeeping that returns the operator-transfer bound of
+the Naimark reduction, which has the shape $3\delta + 6\delta^2$, to the
+robustness form of Theorem~\ref{thm:pauli}.  The source performs the same
+absorption inline when it records that $\delta_{\mathrm{qld}}$ has the stated
+form.
+
+\begin{lemma}[Scalar absorption of the transfer constants]\label{lem:delta-qld-scalar-absorption-support}
+	\lean{MIPStarRE.QPBT.three_add_six_sq_deltaQld_le}
+	\leanok
+	\uses{thm:pauli, lem:delta-qld-mono-support}
+	Write $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)$ as in Lemma~\ref{lem:delta-qld-mono-support}, and abbreviate $\delta = \delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)$.  Let $(q,m,d)$ be an admissible parameter tuple (Definition~\ref{def:admissible}), let $a \ge 1$, let $b > 0$, and let $0 \le \eps \le 1$.  Then
+	\[
+		3\delta + 6\delta^2 \le \delta_{\mathrm{qld}}^{21a^2,\,b}(\eps,m,d,q)\;.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:admissible}
+	Admissibility gives $md \ge 1$ and $q \ge 1$.  Since $0 \le \eps \le 1$ and $b > 0$ we have $\eps^b \le 1$; since $q \ge 1$ and $-b \le 0$ we have $q^{-b} \le 1$; and since $bmd \ge 0$ we have $2^{-bmd} \le 1$.  The bracket $T = \eps^b + q^{-b} + 2^{-bmd}$ therefore satisfies $0 \le T \le 3$.  Writing $K = a(md)^a$, admissibility and $a \ge 1$ give $K \ge 1$, and $\delta = KT$ satisfies $0 \le \delta \le 3K$.  Hence
+	\[
+		21K\delta - 3\delta - 6\delta^2 = 6\,\delta(3K - \delta) + 3\,\delta(K - 1) \ge 0,
+	\]
+	so $3\delta + 6\delta^2 \le 21K\delta = 21a^2 (md)^{2a} T$.  Finally $md \ge 1$ and $2a \le 21a^2$ give $(md)^{2a} \le (md)^{21a^2}$, and the right-hand side is exactly $\delta_{\mathrm{qld}}^{21a^2,b}(\eps,m,d,q)$.
 \end{proof}
 
 \section{Formalization support for the register transport}
