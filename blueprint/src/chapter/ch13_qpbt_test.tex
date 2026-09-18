@@ -1578,6 +1578,7 @@ so the SPCC and value-one conclusions of the lemma are unaffected.
 We now state the main soundness property of the Pauli basis test; the statement is an adaptation of the self-testing theorem of~\cite{Natarajan2018NEEXP} (Theorem~6.4 there). Unlike Theorem~\ref{lem:ld-soundness}, no projectivity assumption is made on the strategy.
 
 \begin{theorem}[Soundness of the Pauli basis test]\label{thm:pauli}
+	\lean{MIPStarRE.QPBT.pauli_soundness}
 	\uses{def:pauli-question-distribution, def:pauli-win-predicate, def:admissible, def:tensor-product-value, def:EPR, lem:pauli-observable-expansion, def:povm-distance}
 	There exists a function
 	\[

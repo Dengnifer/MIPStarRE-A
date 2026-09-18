@@ -19,7 +19,9 @@ restriction on the original marginal.
   `eq:qld-pulling-11`, `eq:qld-pulling-12`, and the following symmetry argument.
 - `docs/paper-gaps/qpbt_decoding-identity.tex`; only decoder linearity and its
   left-inverse identity are used here.
-- Issue #520; these auxiliary results do not assert `eq:qld-pulling-cons`.
+- Issue #123 tracks the `eq:qld-pulling-cons` extraction obligation; these
+  auxiliary results do not assert it. This module was originally filed
+  under issue #520, now closed.
 - The collision estimate compares unequal difference polynomials under uniform
   evaluation.
 -/

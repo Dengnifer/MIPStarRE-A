@@ -11,7 +11,9 @@ player's point measurement with the consistency supplied by the global witness.
 
 - Blueprint `lem:qld-construct-the-paulis`, Item 2.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1495-1545`.
-- Issue #520; the global witness is supplied, not constructed.
+- Issue #123 tracks the extraction obligations of this chapter; the global
+  witness is supplied here, not constructed. This module was originally
+  filed under issue #520, now closed.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder Classical
