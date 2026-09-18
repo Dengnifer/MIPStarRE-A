@@ -134,8 +134,9 @@ webhook redelivery); an ambiguous write stays pending for adoption.
 
 ## 3. The merge gate
 
-`pr_merge.py <number>` is the only path to `main`: never `git merge` to main,
-never push `main`. The merge is a REST `PUT …/pulls/{n}/merge` with the exact
+Single-PR merges use `pr_merge.py <number>`; reviewed batches use `pr_train.py`
+as described below. Workers never merge or publish main directly. A single-PR
+merge is a REST `PUT …/pulls/{n}/merge` with the exact
 `sha` guard, issued by `gh_common.merge_pr` and verified against the merge
 commit's topology (two parents, the frozen head second), behind seven gates
 that refuse by default:
@@ -172,15 +173,20 @@ that refuse by default:
 an exact-head `ADJUDICATION` comment backs it; gate 5 is never adjudicable.
 
 **Merge subject.** Past the gates, the merge is given the subject
-`Merge PR #N: <PR title> [lean +A -D]`, where A and D sum the added and deleted
-lines of `git diff --numstat <merge base>...<head> -- '*.lean'` and a PR that
-changes no Lean line reads `[lean 0]`; the title is sanitized, collapsed to one
-line and truncated to 80 characters, and the one-line body names the frozen head
-SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
+`Merge PR #N: <PR title> [lean +A -D]`, where A and D count the added and deleted
+**code** lines of the `*.lean` files the PR changed against its merge base, and a
+PR that changes no Lean code line reads `[lean 0]`. Comment-only lines — line
+comments, and block, doc and module-doc comments, which nest — and blank or
+whitespace-only lines are not counted; a line of code trailed by a comment is.
+An added line is classified in the head blob and a removed line in the merge-base
+blob, and added, deleted and renamed files all count (issue #574). The title is
+sanitized, collapsed to one line and truncated to 80 characters, and the one-line
+body names the frozen head SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
 `gh_common.merge_pr` omits entirely when its optional arguments are absent. The
 count is an **approximate** size signal for GitHub's commits page (issue #557),
-never evidence: it is measured after every gate, nothing reads it back, and a
-failed measurement sends no wording at all — GitHub then titles the merge as it
+never evidence: it is measured after every gate, nothing reads it back, its
+comment scanner is deliberately simple and raises nothing, and a failed
+measurement sends no wording at all — GitHub then titles the merge as it
 always did, and the merge still happens. Closing keywords in the title are
 defused first (`closes #900` reads `closes issue 900` in the subject): gate 7
 checked the PR body and the branch commits, never the subject, so a merge commit
@@ -191,6 +197,130 @@ read it before the merge.
 Afterwards a best-effort, non-fatal tail fast-forwards local `main` to the
 remote merge commit; branch and worktree cleanup keeps its safeguards (local
 dirt defers it with a warning).
+
+### Reviewed merge trains
+
+**Daemon admission (#593).** The active model-free daemon may schedule one
+operator-approved JSON batch of at least two pinned PR numbers and exact head
+SHAs, using `local/bin/daemon_train.py` and the deployment recipe in
+`local/deploy/issue-593-daemon-reviewed-trains.md`. Its existing complete scan
+must report each member `clean` at that SHA; a fresh head stays on the ordinary
+single-PR path, and a claimed member is held. The scan is only a routing hint:
+the adapter passes the operator's PR-to-SHA pins to `pr_train.py`. With its
+member claims held, the train compares every authoritative gate result to the
+requested pin and records the pins in the manifest; the publication verifier
+rechecks them, including conflict-dropped members. A changed pin refuses the
+batch even if its replacement head has independent green CI and review. The
+train repeats every member's current-head, dependency and frozen-base gate
+before combined CI and publication. The daemon blocks its own ordinary merges
+and hourly/pre-merge telemetry commits
+while the train runs synchronously. Before invocation, the adapter commits
+pending telemetry and uses the existing `github-sync.sh main` to publish any
+telemetry-only local main lead (including record snapshots), then checks exact
+primary cleanliness. Every unpublished commit must change only allowlisted
+passive telemetry paths and modes; a later reversal of a nontelemetry change
+cannot make that history publishable. It refuses nontelemetry dirt or history,
+or divergence; it does not reset or discard local commits. The owner coordinates
+other primary telemetry
+writers, including the required main status snapshot, during the train's
+clean-primary publication window; their records must be retained outside the
+primary until that window ends. A refusal, conflict or uncertain post-push
+outcome holds the approved batch for manual reconciliation, never as a merged
+PR. Hourly and pre-merge batching resume after the train; PAR=0 remains binding.
+
+After independent review and deployment, the daemon/operator may invoke
+`local/bin/pr_train.py N M [K ...]` from the clean primary checkout at
+`github/main`. Development and tests use fixture repositories exclusively.
+Every member passes the existing open, local-tip, exact-head CI, independent
+review, changes-requested, fix-lock, and dependency gates. Repeat
+`--adjudicated N` only for members with the existing exact-head adjudication
+record. A precondition failure refuses the entire batch and names the member.
+The individual-head base-ancestry requirement is replaced by mandatory CI of
+the combined commit; member review evidence is neither copied nor rewritten.
+
+The tool creates `train-<UTC-stamp>` and a private worktree under the runtime
+cache, merging frozen member SHAs with two-parent merge commits in argument
+order. A conflict aborts only that merge, verifies restoration of the accepted
+train, and drops that member; fewer than two accepted members refuses the batch.
+The primary merge-loss guard checks each accepted merge. Existing developer
+branches and worktrees are preserved. Failed train worktrees remain for diagnosis.
+
+`ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
+against the combined commit, using one locked build of the complete `MIPStarRE`
+library and `MIPStarRE.LDT.Test.AxiomAudit`. This includes the root artifact
+needed by publication's dynamic `checkdecls` import and all downstream modules.
+It rejects skip flags and dirty or moved train
+heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
+cache. Bootstrap and build telemetry are transferred to the primary telemetry
+files after publication, refusal, or an unknown outcome so their appends cannot dirty the primary
+during gating; the transfer and the train event use the canonical
+`telemetry.py` writers, so they obey the locking every other session obeys. CI warming uses `--no-build` to avoid a nested build lock, and
+step execution stops at its first failing command.
+
+Publication uses `checked-push.sh --train-manifest PATH` with one explicit
+train-to-main ref mapping. After preflight, it rechecks the combined CI manifest,
+member gates and heads, primary cleanliness, and frozen main; the existing exact
+remote-tip lease protects the final fast-forward. Because a recheck only reads
+the member refs, the same atomic transport leases every verified member ref at
+its verified value: a member that moved before the remote's ref advertisement
+aborts the whole push, main included, and no member branch is ever rewound,
+while a member that still matches is already up to date and sends no update
+command. Hook bypass is forbidden.
+
+**The publication contract (owner-authorized, 2026-09-18).** State it exactly,
+because the guarantees differ from one another:
+
+1. *Content.* Main only ever advances to an integration of the exact reviewed
+   member SHAs, after every member gate, the combined CI and the frozen-base
+   and cleanliness checks passed at the verified heads. This is enforced by the
+   gates and by the atomic transaction's old-value comparison on `main`.
+2. *Server-side atomicity covers the refs in the transaction.* That is `main`,
+   plus any member ref the client actually sends. A member whose advertised
+   value still equals its verified SHA is up to date, so Git sends no command
+   for it and the remote holds no predicate for it. A lease is likewise a
+   client-side comparison against the ref advertisement, not a server predicate.
+3. *Residual window, accepted.* A member ref can therefore advance after the ref
+   advertisement and before the remote commits `main`, and the transport still
+   reports success. Publication then carries that member's earlier, reviewed
+   head while the PR's tip has moved on; main is unharmed, and GitHub does not
+   show such a PR as merged. The 2026-09-17 adjudication reproduced this
+   ordering against a real `receive-pack`. Closing it would need server-enforced
+   comparison of every member inside the same transaction, which this transport
+   does not offer; the owner authorized the narrower contract on 2026-09-18
+   instead of leaving the train unusable.
+4. *Claims cover the window.* Every writer in this project — the main session,
+   the daemon, and each Opus helper — claims a PR on the shared atomic claim
+   list (`local/bin/claim.sh`, the repository copy of the meta session's
+   `qpbt-claim.sh`) before touching it. The train claims every member with kind
+   `train` and party `main` before the first gate reads it, refuses to start
+   when a member is held by another writer (printing the holder line), and
+   releases the claims once the transport and its re-verification have ended,
+   on success, on failure and on every abort path. A claim is not a remote
+   predicate; it is what keeps this project's own writers out of the window.
+5. *Post-push re-verification detects a violation after the fact.* Immediately
+   after a successful transport, the train re-reads every member ref from the
+   remote and compares it with the verified SHA. A member that moved is a
+   CONTRACT VIOLATION: the member, its verified SHA, the observed SHA and any
+   claim-list holder line are printed and recorded in `publication.json` and in
+   the train event, the train comment for that member is not posted — nothing in
+   this tooling may mark a PR merged that this train did not merge — and the
+   train run exits non-zero so the operator sees it. Main stays as published; it
+   carries only verified content.
+
+GitHub recognizes included PRs by ancestry; the tool closes no issue by hand.
+It posts one idempotent train comment per member, records one merge event,
+fast-forwards local main and its origin alias, and removes only the train branch
+and worktree. A failure after publication is reported as such and requires
+operator reconciliation; it must not be retried as a new merge. An ambiguous
+push is reconciled against remote main: equality or verified ancestry containing
+the train establishes publication. Failed reads, unavailable ancestry, and
+negative ancestry in a shallow repository retain an explicit `unknown` outcome.
+An unknown outcome is never a refusal or permission to retry. The runtime
+`publication.json`, stderr, and telemetry retain that distinction; unresolved
+worktrees and manifests remain available for operator reconciliation. Generated
+branch names are single components accepted by external Lake-root bootstrap.
+Deployment and
+daemon wiring remain separate from development of this tool (issue #502).
 
 ### Main-cycle integration checkpoint
 
@@ -297,3 +427,70 @@ operator announces it in one line on progress log #27 and records it in the
 paper-gap note, `results/telemetry/events.md`, and
 `results/telemetry/design-decisions.md`. That announcement informs the owner; it
 is not a request for a decision.
+
+## 7. Duplicate-work guards
+
+Two tasks covering the same mathematics, dispatched weeks apart, cost a prover
+run, reviews, repairs and refresh attempts each before anyone noticed that
+`main` already had the result (issue #576: PRs 212, 296, 398, 488, 539, 289 and
+274 were the examples). Three model-free guards close that hole; all of them
+read the local `github/main` ref and the registry, none calls a model.
+
+**Before proof work.** `local/bin/dup_check.py check` searches a reference for
+a declaration by exact fully qualified name, by last name component inside the
+`MIPStarRE` namespace, and by statement after a cheap normalisation (comments
+stripped, the proof cut at the top-level `:=`/`by`/`where`, binder names
+renamed positionally, whitespace collapsed). It takes `--name`, a blueprint
+node label with `--node` (its `\lean{...}` names), or a whole branch or open PR
+with `--branch`/`--pr`, whose declarations *new against the merge base* are
+checked. Exit 0 is clean, 3 means duplicates were printed as `file:line`, 2 is
+a usage or environment error, and 4 is advisory — the reference is absent
+locally, so nothing was checked and the run must not be read as clean. Every
+subcommand that searches a reference (`check`, `sweep`, `claim`,
+`claims-check`, `predispatch`) reports that case the same way. `--json` is the
+machine form.
+
+Every native delegate and every Opus helper runs it before starting or
+repairing proof work on a declaration, and records the result in the session
+note. A `statement` match is a signal to read both declarations, never by
+itself a verdict — the tool compares text, not terms.
+
+**Declaration claims.** `local/registry/declaration-claims.jsonl` is an
+append-only registry binding declaration names to the issue producing them
+(`local/registry/README.md` has the row format). `dup_check.py claim --issue N
+--name X` records a claim and refuses (exit 3) when another issue's open claim
+holds the name or when `main` already declares it; `claims-check` is the
+read-only form, `claims-release` closes a claim once its PR merges, and
+`claims-list` prints what is open. **Issue creation records the claim** for the
+declarations the packet will produce, and **dispatch checks it**, so two open
+issues cannot target the same declaration unnoticed. `--force` records a
+refused claim anyway and still exits 3, so an accepted overlap stays visible in
+the log rather than disappearing.
+
+`dispatch.sh` runs `dup_check.py predispatch --issue N` for the `prover`,
+`mathfix` and `simplifier` roles before the session starts. It is advisory by
+default: exit 3 (`main` already has a claimed name) and exit 4 (nothing claimed
+for that issue, or `github/main` is absent locally) both print a warning and
+let the dispatch through. `MIPSTARRE_DUP_CHECK=fatal` turns exit 3 into a
+refusal, and `=off` skips the check; a non-numeric `--issue` scope word has no
+claim to check and is skipped with that explanation.
+
+**Superseded-PR sweep.** `dup_check.py sweep` walks every open PR, parses only
+the Lean files that PR touches at its head and at its merge base, and reports
+the declarations new at the head that `main` already contains by name or by
+normalised statement. It writes the Markdown report of `audits/` with
+`--out`, exits 3 when any PR is flagged, and takes its PR list from a JSON file
+with `--prs-file` instead of the GitHub read. The main session runs it before a
+merge-train pass, so a superseded PR is closed or shrunk early instead of
+repaired. A head branch not present locally is reported as skipped rather than
+silently clean: the sweep never fetches on its own.
+
+**Worker claims are separate.** `local/bin/claim.sh` is the atomic list that
+stops two *workers* touching the same PR at once (the main session and a helper
+both repaired PR 577 on 2026-09-17). It claims a PR or issue number for one
+party and kind, refuses a second claim while one is open, and appends its
+release line; the file is
+`${MIPSTARRE_CLAIM_FILE:-${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/watchdog/meta-dispatched.txt}`,
+append-only, in the format the meta session's copy writes. `dup_check.py`
+answers "has this mathematics already been done"; `claim.sh` answers "is
+somebody else doing this right now". Both are cheap and both are run first.
