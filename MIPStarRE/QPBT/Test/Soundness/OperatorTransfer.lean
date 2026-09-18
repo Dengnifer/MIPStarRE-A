@@ -103,7 +103,8 @@ private theorem full_pauli_distance_bob (v : ExtractionWitness S w delta)
 
 /-- Alice's isometry-conjugated Pauli family has squared distance at most
 `4 * delta` on the ideal state. Both the full-unitary comparison and the
-squared state error are read from the supplied extraction witness. -/
+squared state error are read from the supplied extraction witness.
+This is blueprint `thm:pauli-extraction-alice-distance-support`. -/
 theorem ExtractionWitness.pauli_distance_alice_le (v : ExtractionWitness S w delta)
     (W : PauliKind) :
     pauliOperatorDistanceA P S.toStrategy v.toPauliSoundnessWitness W ≤ 4 * delta := by
@@ -137,7 +138,8 @@ theorem ExtractionWitness.pauli_distance_alice_le (v : ExtractionWitness S w del
     (idealState P v.toPauliSoundnessWitness.aux)‖ ^ 2) (hlift _)
 
 /-- Bob's isometry-conjugated Pauli family satisfies the same bound on the
-same ideal state, without identifying the two original local spaces. -/
+same ideal state, without identifying the two original local spaces.
+This is blueprint `thm:pauli-extraction-bob-distance-support`. -/
 theorem ExtractionWitness.pauli_distance_bob_le (v : ExtractionWitness S w delta)
     (W : PauliKind) :
     pauliOperatorDistanceB P S.toStrategy v.toPauliSoundnessWitness W ≤ 4 * delta := by
@@ -173,8 +175,12 @@ theorem ExtractionWitness.pauli_distance_bob_le (v : ExtractionWitness S w delta
 /-- Isometry transfer bounds for supplied extraction data in a projective
 setting. The common bound is `max (sqrt delta) (4 * delta)`: the state norm
 is unsquared and both operator distances sum squared norms over all outcomes.
-This is blueprint `ex:pauli-supplied-extraction-support`, a conditional
-support theorem for `thm:pauli`, not the source theorem.
+This is blueprint `thm:pauli-concrete-isometry-transfer-support`, a
+conditional support theorem for `thm:pauli`, not the source theorem.
+The separate component bounds are blueprint
+`lem:pauli-extraction-state-distance-support`,
+`thm:pauli-extraction-alice-distance-support`, and
+`thm:pauli-extraction-bob-distance-support`.
 Discharging the supplied-data premise requires the global-pair construction
 and extraction; see `docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #529. -/
 theorem ExtractionWitness.isometry_transfer_bounds (v : ExtractionWitness S w delta) :
@@ -193,7 +199,8 @@ theorem ExtractionWitness.isometry_transfer_bounds (v : ExtractionWitness S w de
     exact (v.pauli_distance_bob_le W).trans (le_max_right _ _)
 
 /-- The actual transformed state lies in both local isometry ranges. These
-identities impose no range condition on the ideal comparison state. -/
+identities impose no range condition on the ideal comparison state.
+This is blueprint `thm:pauli-extraction-transferred-range-support`. -/
 theorem ExtractionWitness.transformed_state_in_ranges (v : ExtractionWitness S w delta) :
     applyOperatorToState (heteroKron (conjIsometry v.toPauliSoundnessWitness.φA 1) 1)
         (isometryTensor v.toPauliSoundnessWitness.φA v.toPauliSoundnessWitness.φB
@@ -234,8 +241,8 @@ private theorem four_mul_deltaQld_le {a b epsilon : ℝ}
 enlarging the universal prefactor and halving the extraction exponent. This
 theorem assumes the actual extraction data in a projective setting; it does
 not construct the global-pair witness or assert unrestricted soundness.
-It supports blueprint `ex:pauli-supplied-extraction-error-support` and the
-constant adjustment at paper
+This is blueprint `lem:pauli-supplied-extraction-error-form-support`; it
+also records the constant adjustment at paper
 `14_analysis_of_the_pauli_basis_test.tex:1868-1876`. The remaining source
 obligations are documented in `docs/paper-gaps/qpbt_extraction-transfer.tex`. -/
 theorem pauli_soundness_deltaQld_ofExtractionWitness
