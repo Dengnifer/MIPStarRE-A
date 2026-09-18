@@ -1544,3 +1544,5 @@
 {"ts": "2026-09-18T21:01:20+0900", "kind": "ci-build", "trigger": "ci.sh pr=605", "seconds": 45, "outcome": "success", "sha": "8ed3b0519c8197a7882baf4be72eacb4bfdfd367", "note": "branch issue-602-projective-setting-soundness"}
 {"ts": "2026-09-18T22:00:55+0900", "kind": "ci-build", "trigger": "ci.sh pr=503", "seconds": 27, "outcome": "success", "sha": "14df31c4d7c03527a125e98ea33b642c431301f1", "note": "branch issue-501-owner-inbox-500"}
 {"ts": "2026-09-18T22:06:35+0900", "kind": "ci-build", "trigger": "ci.sh pr=479", "seconds": 30, "outcome": "success", "sha": "b3d5f6daf03b716b679e2dd5236b08d37acdefb3", "note": "branch issue-459-conditional-consistency-defect"}
+{"ts": "2026-09-18T22:19:10+0900", "kind": "ci-build", "trigger": "ci.sh pr=608", "seconds": 133, "outcome": "success", "sha": "8ce2f2cb9a84e001f29bccb6e3055718271b128f", "note": "branch issue-407-self-consistency-remainder-20260918"}
+{"ts": "2026-09-18T22:24:49+0900", "kind": "ci-build", "trigger": "ci.sh pr=train-3b2212b2cd03f58f6637b56da2723a6834486175", "seconds": 107, "outcome": "success", "sha": "3b2212b2cd03f58f6637b56da2723a6834486175", "note": "branch train-20260918T131004741781Z"}
