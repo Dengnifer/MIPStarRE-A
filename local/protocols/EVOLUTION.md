@@ -1309,3 +1309,20 @@ or `pr_merge.py` behaviour changes, and the train remains undeployed.
 writers that could exercise the residual window are held off it by a claim they
 must take anyway; and a violation by anything else is detected, recorded and
 visible in the exit status instead of passing as a clean publication.
+
+## 2026-09-18 - Lean-delta subjects for train members (#590)
+
+**Trigger:** The owner requires a Lean delta in every first-parent merge subject
+on main (issue #590); the reviewed train still used bare member subjects even
+though ordinary merges already followed the policy from issues #557 and #574.
+
+**Change:** `pr_train.py` uses `pr_merge.lean_line_delta` on each committed merge
+against its immediately preceding accepted train commit, then applies
+`pr_merge.merge_commit_title` with the gated member title. Zero deltas retain
+`[lean 0]`; an unavailable count or unusable title retains the train's existing
+subject without blocking integration. Gated titles remain transient, so member
+manifests and publication checks are unchanged.
+
+**Expected effect:** each merge commit published by a reviewed train carries
+the same approximate Lean code-line signal as an ordinary merge, with no
+cumulative count or spurious deletion of newer main-only content.

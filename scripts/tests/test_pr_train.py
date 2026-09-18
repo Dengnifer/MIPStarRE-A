@@ -11,8 +11,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts.tests.test_github_workflow import FakeGitHub, LOCAL_BIN, _git
+import pr_train
 
 
 class TrainTests(unittest.TestCase):
@@ -120,7 +122,8 @@ class TrainTests(unittest.TestCase):
         target.write_text(text, encoding="utf-8")
         target.chmod(0o755)
 
-    def arm(self, bad: str = "", member: int = 3) -> None:
+    def arm(self, bad: str = "", member: int = 3,
+            titles: dict[int, str] | None = None) -> None:
         self.gh.reset()
         steps = ("build", "blueprint-render", "paper-gaps", "blueprint-sync", "file-length",
                  "proof-debt", "proof-evasion", "statement-origin", "summary")
@@ -128,7 +131,8 @@ class TrainTests(unittest.TestCase):
             fault = bad if number == member else ""
             self.gh.route(rf"^pulls/{number}$", {
                 "number": number, "state": "closed" if fault == "closed" else "open",
-                "draft": fault == "draft", "merged": False, "title": f"member {number}",
+                "draft": fault == "draft", "merged": False,
+                "title": (titles or {}).get(number, f"member {number}"),
                 "body": "Closes #9" if fault == "dependency" else "Addresses #502",
                 "head": {"sha": sha, "ref": f"issue-{number}"}, "base": {"ref": "main"}})
             statuses = [{"context": f"local-ci/{step}", "state": "success"} for step in steps]
@@ -152,6 +156,10 @@ class TrainTests(unittest.TestCase):
     def remote_main(self) -> str:
         return _git(self.repo, "--git-dir", str(self.remote), "rev-parse", "main")
 
+    def train_commits(self) -> list[str]:
+        return _git(self.repo, "rev-list", "--first-parent", "--reverse",
+                    f"{self.base}..{self.remote_main()}").splitlines()
+
     def claim_cli(self, *args: str) -> subprocess.CompletedProcess:
         # The fixture cache root keeps this claim list private to the test.
         return subprocess.run(["bash", str(self.repo / "local/bin/claim.sh"), *args],
@@ -171,6 +179,10 @@ class TrainTests(unittest.TestCase):
         head = self.remote_main()
         self.assertEqual(_git(self.repo, "rev-parse", "main"), head)
         self.assertEqual(_git(self.repo, "rev-list", "--count", "--first-parent", f"{self.base}..{head}"), "2")
+        self.assertEqual([_git(self.repo, "show", "-s", "--format=%s", sha)
+                          for sha in self.train_commits()],
+                         ["Merge PR #1: member 1 [lean 0]",
+                          "Merge PR #3: member 3 [lean 0]"])
         for number in (1, 3):
             _git(self.repo, "merge-base", "--is-ancestor", self.heads[number], head)
         excluded = subprocess.run(["git", "merge-base", "--is-ancestor", self.heads[2], head], cwd=self.repo)
@@ -188,6 +200,57 @@ class TrainTests(unittest.TestCase):
         events = (self.repo / "results/telemetry/events.md").read_text()
         self.assertRegex(events, r"\A# Incident and observation log")
         self.assertRegex(events, rf"\n## \d{{4}}-\d{{2}}-\d{{2}}\n\n- [^\n]*Reviewed train {head}")
+
+    def test_member_titles_count_only_each_merged_lean_delta(self) -> None:
+        _git(self.repo, "switch", "-q", "issue-1")
+        self.write("MIPStarRE/QPBT.lean", "def trainValue : Nat := 2\n"
+                   "def trainExtra : Nat := 3\n/-- Documentation only. -/\n")
+        _git(self.repo, "add", ".")
+        _git(self.repo, "commit", "-qm", "edit upstream Lean")
+        self.heads[1] = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "switch", "-q", "issue-3")
+        self.write("MIPStarRE/LDT/Test/SurfaceVsPoint.lean",
+                   "import MIPStarRE.QPBT\ndef downstreamValue : Nat := trainValue + 1\n")
+        _git(self.repo, "add", ".")
+        _git(self.repo, "commit", "-qm", "edit downstream Lean")
+        self.heads[3] = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "switch", "-q", "main")
+        self.write("MIPStarRE/MainOnly.lean", "def mainOnly : Nat := 9\n")
+        _git(self.repo, "add", ".")
+        _git(self.repo, "commit", "-qm", "add newer main Lean unrelated to members")
+        self.base = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "push", "-q", "github", "main", "issue-1", "issue-3")
+        self.arm(titles={1: "feat: closes #900 in train\nmember", 3: "fix: downstream"})
+
+        result = self.train(1, 3)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        commits = self.train_commits()
+        self.assertEqual(len(commits), 2)
+        self.assertEqual([_git(self.repo, "show", "-s", "--format=%s", sha)
+                          for sha in commits],
+                         ["Merge PR #1: feat: closes issue 900 in train member [lean +2 -1]",
+                          "Merge PR #3: fix: downstream [lean +1 -1]"])
+        for before, number, sha in zip([self.base, commits[0]], [1, 3], commits):
+            self.assertEqual(_git(self.repo, "rev-list", "--parents", "-n", "1", sha).split(),
+                             [sha, before, self.heads[number]])
+        self.assertEqual(_git(self.repo, "show", f"{commits[-1]}:MIPStarRE/MainOnly.lean"),
+                         "def mainOnly : Nat := 9")
+
+    def test_unavailable_member_delta_keeps_existing_subject(self) -> None:
+        worktree = self.tmp / "integration-fallback"
+        _git(self.repo, "worktree", "add", "-qb", "train-fallback", str(worktree), self.base)
+        member = {"number": 1, "head": self.heads[1], "branch": "issue-1",
+                  "adjudicated": False}
+        with mock.patch.object(pr_train.pr_merge, "lean_line_delta", return_value=None):
+            accepted, dropped = pr_train.integrate(
+                self.repo, worktree, [member], {1: "closes #900 in title"})
+        self.assertEqual((accepted, dropped), ([member], []))
+        self.assertEqual(_git(worktree, "show", "-s", "--format=%s", "HEAD"),
+                         "Merge PR #1 into reviewed train")
+        self.assertEqual(_git(worktree, "rev-list", "--parents", "-n", "1", "HEAD").split()[1:],
+                         [self.base, self.heads[1]])
+        _git(self.repo, "worktree", "remove", "--force", str(worktree))
 
     def test_whole_train_refuses_any_bad_member(self) -> None:
         for fault in ("ci", "review", "closed", "draft", "dependency", "changes"):

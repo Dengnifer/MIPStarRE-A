@@ -87,7 +87,8 @@ def primary_at(repo: Path, base: str) -> None:
         raise GateFailure("remote main changed")
 
 
-def members_at(repo: Path, numbers: list[int], base: str, adjudicated: set[int]) -> list[dict]:
+def members_at(repo: Path, numbers: list[int], base: str, adjudicated: set[int],
+               titles: dict[int, str] | None = None) -> list[dict]:
     members, failures = [], []
     for number in numbers:
         try:
@@ -95,6 +96,8 @@ def members_at(repo: Path, numbers: list[int], base: str, adjudicated: set[int])
                                     integration_base=base)
             members.append({"number": number, "head": row["head_sha"],
                             "branch": row["branch"], "adjudicated": number in adjudicated})
+            if titles is not None:
+                titles[number] = str(row["pr"].get("title") or row["branch"])
         except LayerError as exc:
             failures.append(f"PR #{number}: {exc}")
     if failures:
@@ -102,7 +105,8 @@ def members_at(repo: Path, numbers: list[int], base: str, adjudicated: set[int])
     return members
 
 
-def integrate(repo: Path, worktree: Path, members: list[dict]) -> tuple[list[dict], list[int]]:
+def integrate(repo: Path, worktree: Path, members: list[dict],
+              titles: dict[int, str]) -> tuple[list[dict], list[int]]:
     accepted, dropped = [], []
     for member in members:
         head, number = member["head"], member["number"]
@@ -124,6 +128,12 @@ def integrate(repo: Path, worktree: Path, members: list[dict]) -> tuple[list[dic
         command(worktree, sys.executable, str(repo / "local/bin/merge_loss_guard.py"),
                 "--repo", str(worktree))
         git(worktree, "commit", "-m", f"Merge PR #{number} into reviewed train")
+        # The merge commit's tree includes any resolution; its first parent is the
+        # immediately preceding accepted train state, even after a dropped member.
+        delta = pr_merge.lean_line_delta(worktree, before, git(worktree, "rev-parse", "HEAD"))
+        title = pr_merge.merge_commit_title(number, titles[number], delta)
+        if title is not None:
+            git(worktree, "commit", "--amend", "-m", title)
         parents = git(worktree, "rev-list", "--parents", "-n", "1", "HEAD").split()[1:]
         if parents != [before, head]:
             raise GateFailure(f"PR #{number}: unexpected merge topology")
@@ -297,7 +307,8 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
         git(repo, "fetch", "github", "main")
         base = git(repo, "rev-parse", "github/main")
         primary_at(repo, base)
-        members = members_at(repo, numbers, base, adjudicated)
+        titles: dict[int, str] = {}
+        members = members_at(repo, numbers, base, adjudicated, titles)
         runtime = cache_root() / "trains"
         runtime.mkdir(parents=True, exist_ok=True)
         directory = Path(tempfile.mkdtemp(prefix="train-", dir=runtime))
@@ -307,7 +318,7 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
         print(f"train worktree: {worktree}", flush=True)
         data, outcome = None, "refused"
         try:
-            members, dropped = integrate(repo, worktree, members)
+            members, dropped = integrate(repo, worktree, members, titles)
             if len(members) < 2:
                 raise GateFailure(f"fewer than two members remain; conflicts: {dropped}")
             data = {"repo": str(repo), "worktree": str(worktree), "base": base,
