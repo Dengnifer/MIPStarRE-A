@@ -12,7 +12,10 @@ stored in the canonical `FixedFieldModel`.
 three `qubit_*_to_qubit` identities preserve its comparison quantities exactly.
 These are Lean-only transport results, not soundness existence theorems. This
 module derives `pauli_soundness_qubit` from `pauli_soundness` using those identities.
-The corollary still depends on the unfinished proof of `pauli_soundness` (issue #529).
+`pauli_soundness` itself is now proved, so the corollary is complete: its
+axiom closure is `propext`, `Classical.choice` and `Quot.sound`. The
+composition that discharged it is recorded in issue #614, under the
+umbrella issue #529.
 
 ## References
 
