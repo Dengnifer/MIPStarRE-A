@@ -538,16 +538,13 @@ theorem opDistSq_eq_avgOver {X ι : Type*} [Fintype X] [DecidableEq X]
   unfold opDistSq opFamilyDistSq
   simp
 
-/-- Every strategy value is at most one. Formalization-only support for
-`def:tensor-product-value`, blueprint `ch12_qpbt_games.tex:71-82`. -/
-theorem strategy_value_le_one {G : Game} (S : Strategy G) : S.value ≤ 1 := by
-  have h := rejectionEventAverage_eq_one_sub_value S
-  have hnn : (0 : ℝ) ≤ avgOver G.μ (fun questions =>
-      outcomeEventWeight S questions.1 questions.2 fun a b =>
-        G.decide questions.1 questions.2 a b = false) :=
-    avgOver_nonneg _ _ (fun _ => outcome_event_weight_nonneg S _ _ _)
-  rw [h] at hnn
-  linarith
+/-- Every strategy value is at most one. This is an alias of the Games-layer
+`MIPStarRE.QPBT.Strategy.value_le_one`, which carries the single proof; the name
+is kept here so the existing callers of this layer resolve unchanged.
+Formalization-only support for `def:tensor-product-value`, blueprint
+`ch12_qpbt_games.tex:71-82`. -/
+theorem strategy_value_le_one {G : Game} (S : Strategy G) : S.value ≤ 1 :=
+  Strategy.value_le_one S
 
 /-- The Magic Square value defect of a tuple is nonnegative and admissible as
 an error parameter for the rigidity input. Formalization-only support for

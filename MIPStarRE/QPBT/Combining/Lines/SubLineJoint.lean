@@ -40,7 +40,7 @@ def subLineJointProjection {P : AdmissibleParams} (sample : SubLinePointSample P
 
 /-- At a fixed kind and extended coordinate, the two projected line-point pairs
 are independent restricted samples. This reuses the joint sampling identity
-`subLineBranchRaw_map_joint`, including zero directions and singleton lines. -/
+`subLineBranchSamplingData_map_joint`, including zero directions and singleton lines. -/
 theorem subLineBranchDist_map_joint_at (P : AdmissibleParams)
     (kind : LineKind) (k : Fin (2 * P.m + 2)) :
     (subLinePointDist P
@@ -54,7 +54,7 @@ theorem subLineBranchDist_map_joint_at (P : AdmissibleParams)
   have h := congrArg (fun μ => μ.map
     (fun w : (LineDesc P.toLdParams × LineDesc P.toLdParams) ×
         ((Fin P.m → PauliScalar P) × (Fin P.m → PauliScalar P)) =>
-      ((w.1.1, w.2.1), (w.1.2, w.2.2)))) (subLineBranchRaw_map_joint P kind k)
+      ((w.1.1, w.2.1), (w.1.2, w.2.2)))) (subLineBranchSamplingData_map_joint P kind k)
   simp only [Distribution.map_map] at h
   unfold subLinePointDist
   rw [Distribution.prod_map_left, Distribution.map_map, Distribution.map_map]

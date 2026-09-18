@@ -32,7 +32,8 @@ scalar estimates for `κ` and `ζ`.
 typed for ordinary strategies.  This theorem does not invoke
 `ldPastingInInductionSection`, and does not assert that the carrier's dummy
 diagonal measurement satisfies the answer-valued diagonal-line test.  This
-internal construction is tracked in issue #1507.  Discharge: proved here from
+internal construction is tracked in upstream issue 1507 (historical).
+Discharge: proved here from
 the recursive answer-valued slice measurements and the answer-valued
 self-improvement construction. -/
 theorem answerSuccessorAveragedFamilyFields_ofMainInductionHypothesis.{uι', uF}

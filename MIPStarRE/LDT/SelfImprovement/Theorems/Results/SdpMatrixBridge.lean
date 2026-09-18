@@ -252,7 +252,7 @@ part of the expected strong-duality output.  The matrix statement
 `matrixSdpPointRealization_statementWithSlackness` follows by extracting the
 diagonal polynomial blocks.
 
-Tracked by issue #1230 and documented in
+Tracked by upstream issue 1230 (historical) and documented in
 `docs/paper-gaps/issue-1230-self-improvement-sdp-usage.tex`. -/
 theorem matrixSdpPointRealization_canonicalOptimalPair
     (params : Parameters)
