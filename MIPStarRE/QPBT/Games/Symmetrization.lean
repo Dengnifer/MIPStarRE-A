@@ -33,23 +33,6 @@ namespace MIPStarRE.QPBT
 
 noncomputable section
 
-/-- Every strategy value is at most one.  Formalization-only support for
-blueprint `def:tensor-product-value`, paper
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:40-57`. -/
-theorem Strategy.value_le_one {G : Game} (S : Strategy G) : S.value ≤ 1 := by
-  have hnn :
-      (0 : ℝ) ≤ avgOver G.μ (fun questions =>
-        ∑ a, ∑ b,
-          if G.decide questions.1 questions.2 a b then 0
-          else outcomeWeight S questions.1 questions.2 a b) :=
-    avgOver_nonneg _ _ fun questions =>
-      Finset.sum_nonneg fun a _ => Finset.sum_nonneg fun b _ => by
-        split_ifs
-        · exact le_rfl
-        · exact outcomeWeight_nonneg S _ _ _ _
-  rw [rejectionMass_eq_one_sub_value S] at hnn
-  linarith
-
 /-- The set of strategy values of a game is bounded above by one, so the
 supremum in `Game.value` is a genuine least upper bound.  Formalization-only
 support for blueprint `def:tensor-product-value`. -/
