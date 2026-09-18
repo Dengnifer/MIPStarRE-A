@@ -150,17 +150,28 @@ self-consistency estimate to it, and replaces their three universal constants
 by their maximum.  Thus Lemma~\path{lem:qld-construct-the-paulis} is proved for
 the stated domain $0\leq\epsilon\leq1$, including the zero-error boundary.
 
-This completion does not establish Lemma~\path{lem:qld-unitary}.  No declaration
-yet composes \path{exists_globalPairWitness} with
-\path{exists_extractionWitness_ofGlobalPairWitness} to state the source lemma
-without a witness premise.  The later passage from the concrete swap operators
-to the isometries in the soundness theorem also remains unformalized and still
-requires the range-projection argument of the preceding section.
+The source-facing theorem \path{exists_extractionWitness} now composes
+\path{exists_globalPairWitness} with
+\path{exists_extractionWitness_ofGlobalPairWitness}: the universal error
+constants for the global measurement and extraction are chosen before the
+parameters and strategy. For every admissible parameter tuple and projective
+strategy with $0\leq\epsilon\leq1$, it constructs the global pair of
+projective measurements internally and obtains a normalized auxiliary state
+and two concrete swap unitaries satisfying the state and both players'
+Pauli-family distances at the nested construction/extraction scale. This is
+the existence claim of Lemma~\path{lem:qld-unitary}; its proof does not
+require a supplied global measurement. The subsequent passage from the
+concrete swap operators to the isometries in the soundness theorem remains
+unformalized and still requires the range-projection argument above.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
-\ghissue{123} records the source-facing composition work: the pulled-apart
-consistency composition is complete, while the source-unitary declaration is
-still absent.  \ghissue{47} tracks the separate range-projection transfer needed
+\ghissue{123} records the source-facing composition work: both the pulled-apart
+consistency and the source-unitary existence compositions are proved. Other
+issue~\#123 targets remain unfinished; the earlier attempt history is unchanged.
+The direct-carrier proof of the global constructor does not discharge the
+seed-indexed correspondence and direct-law restrictions documented in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+\ghissue{47} tracks the separate range-projection transfer needed
 by \path{pauli_soundness}; that theorem must be derived from the concrete data
 rather than stored in the witness.
 
@@ -173,10 +184,11 @@ is corrected by positive-contraction inequalities and a small-error split;
 the latter remains a named downstream proof obligation whose hypotheses are
 already supplied by the extraction lemma.  The global polynomial-pair witness
 and the three pulled-apart consistency estimates are now composed in a proved
-source-facing theorem, including at zero error.  The subsequent extraction
-witness theorem remains conditional on a supplied global measurement, and no
-source-facing declaration yet establishes Lemma~\path{lem:qld-unitary}; the
-final range-projection transfer remains separate and open.
+source-facing theorem, including at zero error. The conditional extraction
+theorem remains useful for a supplied global measurement, and its composition
+with the proved global constructor establishes the source-facing existence
+claim of Lemma~\path{lem:qld-unitary} for projective strategies. The final
+range-projection transfer remains separate and open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -690,8 +690,13 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness}
+	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
-	There is a universal constant $C_{\mathrm{ext}}\geq1$. Set
+	There are universal constants $a>1$, $0<b<1$ as in
+	Lemma~\ref{lem:qld-4-7}, and $C_{\mathrm{ext}}\geq1$, all chosen before
+	the parameters and strategy. Write $\delta_G=a(md)^a
+	(\eps^b+q^{-b}+2^{-bmd})$ and set
 	\[
 		\delta_P^{\mathrm{ext}}=C_{\mathrm{ext}}B,
 		\qquad
@@ -712,19 +717,24 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
 	\end{enumerate}
 	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
-	The conditional result below assumes the global polynomial-pair measurement
-	of Lemma~\ref{lem:qld-4-7}, whereas the present proof obtains that measurement
-	from the lemma. It therefore establishes the extraction conclusions only
-	after the measurement and its consistency estimates are supplied, not the
-	existence claim above. The missing composition and the range-projection
-	transfer are recorded in \cite{gap:qpbt_extraction-transfer}.
+	For every admissible $(q,m,d)$, every $0\leq\eps\leq1$, and every projective
+	strategy with success probability at least $1-\eps$, the global measurement
+	of Lemma~\ref{lem:qld-4-7} and the above extraction data exist together.
+	The conditional result below proves the extraction estimates once that
+	measurement is fixed; it is not an additional hypothesis here. The subsequent
+	range-projection transfer to isometries remains separate, as recorded in
+	\cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
-	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}
-	For the first item, the self-consistency of the observables $\tilde{W}^j$ (Item~2 of Lemma~\ref{lem:qld-construct-the-paulis}) is equivalent, since these observables are Hermitian involutions (Lemma~\ref{lem:tildew-product-form}), to $\E_{j \in \{0,\ldots,t-1\}} \E_{\tilde{u} \in \F_q^M} \bra{\hat\psi} \tilde{W}^j(\tilde{u}) \ot \tilde{W}^j(\tilde{u}) \ket{\hat\psi} \geq 1 - \delta_P/2$; setting $\ket{\vartheta} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$ and using the exact conjugation identities of Lemma~\ref{lem:v-swap-conjugation}, this becomes $\bra{\vartheta} H_W \ket{\vartheta} \geq 1 - \delta_P/2$ for $W \in \{X,Z\}$, where $H_W = \E_j \E_{\tilde{u}} \, \tau^W(e_j \tilde{u}) \ot \tau^W(e_j \tilde{u}) = \bigl( \E_{s \in \F_q} \tau^W(s) \ot \tau^W(s) \bigr)^{\ot M}$ by the tensor factorization of $\tau^W(\tilde{u})$ and the invariance of the uniform average over $s$ under $s \mapsto e_j s$. By Lemma~\ref{lem:cancellation}, $\E_{s,s'} \tau^X(s)\tau^Z(s') \ot \tau^X(s)\tau^Z(s') = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}$ on each pair of qudits, whence $H_X H_Z = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}$. The bounds $\| (\Id - H_W)\ket{\vartheta} \|^2 \leq \delta_P$ and $\bra{\vartheta} H_W^2 \ket{\vartheta} \geq 1 - 2\delta_P$, combined through the triangle inequality $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq 2\sqrt{\delta_P}$ (see Remark~\ref{rem:qld-unitary-triangle-slip}), give $\bra{\vartheta} \Id_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot (\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta} \geq 1 - 4\delta_P$.
-	% Case distinction added: the source normalizes the projected vector
-	% without ensuring that it is nonzero; see Remark rem:qld-unitary-triangle-slip.
-	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
+	\leanok
+	\uses{lem:qld-4-7, lem:qld-unitary-given-global-pair}
+	Choose the universal constants in Lemma~\ref{lem:qld-4-7} and the
+	conditional extraction estimate below before fixing the parameters and
+	strategy. The former supplies both projective polynomial-pair measurements
+	at error $\delta_G$. Since $\delta_G\geq0$, the latter applies to this same
+	pair and yields the concrete swap unitaries and the normalized auxiliary state
+	at the displayed scale. In particular, the global measurement is an output
+	of the argument, not an assumed input.
 \end{proof}
 
 \begin{theorem}[EPR projection estimates]\label{thm:qld-epr-projection-estimates}
@@ -899,7 +909,8 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	lemma, computed from $\eps$ and the assumed $\delta_G$.
 	This statement assumes the global measurement and therefore does not assert
 	its construction or the unconditional conclusion of
-	Lemma~\ref{lem:qld-unitary}. The required composition is recorded in
+	Lemma~\ref{lem:qld-unitary}. The source-facing composition uses this
+	conditional result after constructing the measurement; see
 	\cite{gap:qpbt_extraction-transfer}.
 \end{example}
 \begin{proof}
