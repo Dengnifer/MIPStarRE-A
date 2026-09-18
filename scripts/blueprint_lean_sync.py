@@ -358,9 +358,17 @@ def _set_proof_has_leanok(entries: list[BlueprintEntry], start: int, end: int) -
 # Parse Lean source tree
 # ---------------------------------------------------------------------------
 
-def collect_file_lean_decls(lean_file: Path, lean_root: Path) -> list[LeanDecl]:
-    """Parse one Lean file and return its declarations with approximate spans."""
-    text = lean_file.read_text(errors="replace")
+def collect_file_lean_decls(lean_file: Path, lean_root: Path, *,
+                            text: str | None = None) -> list[LeanDecl]:
+    """Parse one Lean file and return its declarations with approximate spans.
+
+    *text* supplies the contents when the caller already has them — for example
+    a blob read with ``git show`` by ``local/bin/dup_check.py`` — so a ref can
+    be parsed without a checkout.  *lean_file* and *lean_root* then only decide
+    the relative path each declaration reports.
+    """
+    if text is None:
+        text = lean_file.read_text(errors="replace")
     lines = strip_lean_comments_preserve_lines(text)
     rel = str(lean_file.relative_to(lean_root.parent))
 

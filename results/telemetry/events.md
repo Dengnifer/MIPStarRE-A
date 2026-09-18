@@ -2613,6 +2613,7 @@ This file is the raw feed for `local/protocols/EVOLUTION.md`.
 - exists_pasting_error is sorry-free with error (3C+19)(eta^(1/4) + delta^(1/8)), C the constant of the coarse commutator bound; the adopted statement (with eq:pasting-1-sym) stands. Two Fable math-fix sessions and eight Opus prover sessions over about ten hours, following the constant-explicit proof written into the paper-gap note. Commit e1289bd on the #201 branch (PR 205); publication tail launched.
 ## 2026-09-05T12:15Z — prop:ld-simultaneous-general-k proved (packet #210 complete)
 - exists_direct_ld_soundness is sorry-free: the general-k low-degree soundness via the NEEXP combining reduction (combined strategy, question law, value transport with constant 10, exact linearity m d / q, recovery (m+k) d / q, scalar absorption with a = 1e23 and b = 1/80000). Ten Opus sessions after the #196 math-fix refuted the coordinatewise sandwich route for k at least 2. Commit e1d8eaa on the #210 branch; publication tail launched (base #134 merged as PR 191).
+
 ## 2026-09-05T12:42Z — lane runner v17: post-merge silent-loss guard (issue #222 task 2)
 - After merging github/main the lane now lists every path present on main but absent in the result; unless a non-merge branch commit deleted it, the lane stops with needs-attention naming the paths. Merge daemon v8 and stack-watch v3 use v17; lanes already running on v16 finish on v16.
 ## 2026-09-05T12:52Z — lem:qld-sublines proved (sub-line witness, packet #118)
@@ -5849,6 +5850,28 @@ not actual commit/publication hooks. No productive session was killed.
   remain null rather than being inferred as zero latency. These are read-only
   cache artifacts, not selected-window occupancy, API-utilization, or runtime
   acceptance claims.
+
+## 2026-09-09 - PR213 historical-worktree merge repair
+
+Session `orc-116-20260909-01` inherited a pending merge of `a111c34ab3ca`
+into the historical preservation branch at `f1dc47039573`. PR213 already
+publishes `b04ced12caec` on its canonical branch and targets main; PR207 and
+PR298 are merged. The initial index and all conflicted working files are
+archived under `~/.cache/mipstarre-dev/sessions/orc-116-20260909-01-repair/`.
+The resolution preserves the completed expanded-line proofs, the published
+restriction module, incoming imports, and both incident-log additions.
+The owner-session conflict retains the incoming clock-reanchored records;
+the superseded rows remain in the archived index and original history, not
+as duplicate charges. No historical mathematical budget is reset.
+
+The first normal commit hook ran 616 tests and failed one model-policy
+fixture because this session's routing variables leaked into the fixture.
+That test passes with `MIPSTARRE_CODEX_MODEL`, `MIPSTARRE_JOB_CLASS`, and
+`MIPSTARRE_HARDNESS_REASON` unset for the command. Subsequent validation uses
+that process-local isolation, without changing account or service settings.
+An initial direct SeedFiber check also saw stale State artifacts; refreshing
+this worktree's private build cache made the unchanged incoming file pass.
+
 ## 2026-09-09 — Meta intervention: stalled "Space" main session replaced; detached-worker architecture reinstated (2026-09-09T03:15:13Z)
 - Owner report 2026-09-09 03:00Z: concurrency low and main without progress for five hours. Findings: last daemon/service merge
   PR 308 at 2026-09-08 04:53Z; forty-one open PRs; zero worker sessions; the main session (relay1 home, fan-out on, native worker
@@ -6557,7 +6580,9 @@ not actual commit/publication hooks. No productive session was killed.
 - No new DECISION lines were found on26. The PR359 refresh regenerated Closes348;
   main repeats only the owner-authorized non-closing metadata repair. Approved
   refreshes and merges remain daemon-owned; no main telemetry push occurs.
+
 ### 2026-09-09T08:42Z - Daemon exclusively owns main commits and pushes
+
 - Owner08:32Z hard rule: main never commits or pushes main, including telemetry.
   Write the files and leave them uncommitted; the daemon batches after merges or
   hourly without a merge. Issue27 comments are only for merges/stage boundaries.
@@ -6575,7 +6600,9 @@ not actual commit/publication hooks. No productive session was killed.
 - Telemetry append verification raced a concurrent rewrite, then one constructed
   patch was malformed; neither failure changed files. Retried against current
   content. No main commit/push, manual merge or routine27 comment was made.
+
 ### 2026-09-09T08:46Z - PR359 verified merged by the daemon
+
 - GitHub confirms PR359 merged2026-09-09T08:42:16Z as
   e67dda95abf6cb6b02946c2530c1a1fcd464065b from reviewed head
   bf0c33a13d50359824498535b63c85b8257edfd5. All ten CI/review statuses are
@@ -6593,7 +6620,9 @@ not actual commit/publication hooks. No productive session was killed.
 - This cycle is verified progress through the daemon merge and independent
   approval. Main records the required merge report on27 and leaves these new
   telemetry edits uncommitted; no main commit/push or manual merge occurred.
+
 ### 2026-09-09T08:51Z - Main dispositions for B8-B10 under new owner authority
+
 - Owner comment5599043067, posted08:45:54Z, delegates all three decisions to main.
   Only risks beyond project development require the owner inbox; no Fable subagents
   are available or authorized. Main retains proof integrity, budget histories and
@@ -6621,7 +6650,9 @@ not actual commit/publication hooks. No productive session was killed.
   explicit RESOLVED lines on26. Implementation/review work remains unfinished.
   Worker census08:51:14Z is18. No main commit/push, manual merge or native worker.
 - PR478 bounded realignment finished at clean local head d04d00b3f41ec9de10d36ebfce00eec36167fe91, following substantive repair 1e2fddccbdbf8b6b1036c63f2ce1f48d970abcf3. The first canonical partial CI run passed all applicable gates, including the 9195-job full build. The final commit changes comments only and passes focused Lean with just the tracked hole warning; its repeat partial CI passed every applicable non-build gate but returned build=error because the machine-wide lock was held. Both manifests are under ~/.cache/mipstarre-dev/ci-manifests/pr478-<head>.partial.json and publish no statuses. Whole-blueprint axiom audit: 1380 pass, zero fail, 14 existing statement-only warnings; 1433 declaration links resolve. The guarded-publication multiple-merge-base blocker remains unchanged and GitHub head remains 25fa5893. An exact-local-head review handoff was posted on PR478, blocked until authorized publication and green exact-head CI; no reviewer, subagent, merge, refresh, service change, or main commit/push was launched. B8 budgets and all saved work remain unchanged.
+
 ### 2026-09-09T08:59Z - Persona amendment and completed publication handoff
+
 - Owner corrected the earlier PR359 failure attribution: gate7 dependencies, not
   a telemetry push. Main re-read the PR body through gh_common: Part of348 remains,
   merge08:42:16Z is confirmed, and pr359.failed is absent. The daemon-only rule
@@ -6641,6 +6672,42 @@ not actual commit/publication hooks. No productive session was killed.
   successor; partial CI is not claimed as published CI, and B8 remains parked.
 - Snapshot08:54:15Z showed17 live workers and final census18. No main commit/push,
   manual merge or native worker was used; new telemetry stays uncommitted.
+
+- 2026-09-09 - Issue #502 development, session `orc-502-20260909-01`:
+  the 09:05Z D1 decision identified repeated invalidation of ready PRs by
+  single-PR merges. Added a reviewed-member train with combined-commit CI and
+  post-preflight freshness checks. Fixture tests exercise conflict exclusion,
+  failed member gates, build failure, live build lock, dirty primary, and moved
+  main/member refs. Early CI command failure must stop the step; warming inside
+  the CI lock must use `--no-build`. No live train, publication, independent
+  review, or child session was invoked. Development retains the original
+  11:38:45Z deadline; deployment and daemon wiring remain operator-owned.
+  Implementation froze before that deadline. The already-running commit hook
+  finished afterward: 626 Python tests, one error in
+  `ModelPolicyTests.test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra`
+  (`test_dispatch.py:238`, fixture `dispatch.sh --dry-run` exited 4). All ten
+  new train tests and the targeted 36 publication/workflow tests passed.
+  The hook refused the commit; changes are preserved for the operator, with
+  no hook bypass or model-policy repair attempted in this episode.
+
+- 2026-09-09 - Issue #502 review repair, session `orc-502-20260909-02`:
+  main authorized 60 minutes of actual work to repair canonical PR507 review
+  `5154118210` at `e1dd7bb0`. This necessary review repair retains the original
+  episode history, costs, and 1000-line total ceiling; it is not a new
+  implementation episode. F1 now builds the complete library and axiom audit in
+  one locked invocation. F2 records published, refused, and unknown outcomes,
+  including remote descendants and failed reconciliation. F3 uses single-component
+  train branches accepted by the real external Lake-root bootstrap.
+  All endpoints in train tests are isolated fixtures. The installed Lean
+  toolchain and production publication hook passed a cold-project-artifact
+  publication with dynamic `checkdecls`; separate downstream and axiom-audit
+  failures blocked publication. Initial negative tests exceeded their old
+  45-second timeout while waiting for the machine build lock; the fixture now
+  allows the existing lock wait to finish. The external-root fixture needed
+  the production `.lake` ignore convention for symlinks. Corrected targeted
+  reruns passed. No live train, deployment, main publication, child session,
+  or independent review is performed by this author; checked branch publication
+  and canonical CI precede handoff to a different reviewer session.
 ## 2026-09-09 — Primary codex account out of balance; pipeline moved to the second account (2026-09-09T09:22:57Z)
 - relay-us7 (primary key) returned 403 INSUFFICIENT_BALANCE for astra and sol from about 09:15Z; the main session's goal loop stalled
   on it and five lane logs carry the error. The second key (api.finite-dimensional.space) answers. Meta actions: B11 posted on #500
@@ -7387,6 +7454,32 @@ not actual commit/publication hooks. No productive session was killed.
   1898883 waits for fewer than3 orcs, leaving room for pending483 admission,
   and fewer than9 workers before starting. No duplicate449 assignment.
 - Existing router-doc fix, train repair and other review/CI owners continue.
+
+- 2026-09-09 - PR507 bounded refresh recovery, session `orc-502-20260909-03`:
+  preserve approved parent `80089187ed563085a5a603ec31bdd98dac579027` and incoming
+  parent `b3b84fbb8eeb0296ca493ad34e945a66a594e2c3`; refresh process3962513 is
+  terminal. Compose step-local errexit with PR506's explanation, retain the
+  unchanged train frozen-base validation, and use the reviewed `head_is_fresh`
+  predicate for ordinary PRs with distinct accurate messages. Both append-only
+  histories retain their original line order and multiplicities, including
+  first-parent blank lines removed by the automatic merge. Existing fixtures
+  verify ordinary telemetry versus source movement, unchanged train bases,
+  rejection of any post-freeze movement, and non-main train rejection.
+  Preserve review rounds5154118210,5155171427,5155750523 and all episode costs
+  and decisions. Test and CI parents omit invoking-model metadata and
+  MIPSTARRE_REVIEW_* / MIPSTARRE_PROSE_MODEL while preserving credentials.
+  Main authorizes one independent verification after genuine green CI; this
+  author neither launches a reviewer nor fabricates carry-forward. No live
+  train, deployment, main publication, PR merge, or descendant is authorized.
+  The exact merge, gates, publication state, elapsed time, and handoff will be
+  checkpointed in the session's final capture by15:05Z.
+  Initial full hook validation ran659 tests and failed9 train cases: the old
+  fixture created neither the new compiler working directory `blueprint/src`
+  nor a PDF from `latexmk`. Updated only the fake renderer and directory to
+  match the incoming reviewed interface, retaining all existing assertions;
+  added a train refusal case for failed compilation with a partial PDF.
+  Production compiler, train publication, and cleanup checks are unchanged.
+
 ### 2026-09-09T14:16:27Z - Merge506 and refill with reviews
 - Required snapshot completed. PR506 merged at14:05:33Z as
   2d038ed7e7bee491f52b35cbdfe1fd1ad3439eb7 from
@@ -7620,6 +7713,26 @@ not actual commit/publication hooks. No productive session was killed.
   and the empty pipe went into `crontab -`, which wiped the crontab. Restored from the 2026-09-06 record (estimate-six-hourly-...md, the full
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
+
+- 2026-09-12 - PR #507 merge-conflict recovery, session `orc-pr507-20260912-02`:
+  resolved the pending merge of `ae124f8f09ee002444ac5b9711822c0f1daae142`
+  into `f427e121` by retaining both sides of the EVOLUTION.md and events.md
+  additions. Verified that every original line of both histories remains in
+  order. Lean, blueprint, and reference sources match the incoming parent;
+  the PR's train implementation and tests match its pre-merge head.
+  The first Lean check failed on a missing OrderedPoints artifact. Automatic
+  approval review rejected an external Lake-directory build because its stream
+  hit an account concurrency limit. Validation instead used a temporary Lake
+  configuration and artifact tree under `/tmp/pr507-merge-validation`, with
+  links to unchanged cached artifacts after the initial temporary import root
+  lacked them. All 22 incoming Lean files and 23 affected dependencies passed
+  `lake env lean` with this configuration. The only warnings in those checks
+  were the unchanged sorry sites in Claims.lean and Lines.lean; no theorem,
+  proof, or source statement was edited. The pending-index merge-loss guard
+  and whitespace check passed. No full build, subagent, review, or push ran.
+  The remote-tracking main has advanced beyond the pinned incoming parent;
+  the lane remains responsible for publication and freshness checks.
+
 ## 2026-09-12 - Proof-packet CI inherits an escalation reason
 - Session `prover-513-20260912-01`, PR #535, head `fccdd5a12ce1f460dd3155f2e69296b11a0a7240`:
   the build and Lean audits passed, but `blueprint-sync` failed in
@@ -8667,3 +8780,44 @@ not actual commit/publication hooks. No productive session was killed.
 - Owner merge-queue resume: completed required snapshot14:38:38Z with caps0/no external workers or lanes and seven approved stale candidates including the six named by the owner. Ordered model-free update requests294,213,272,288,467,456 now precede other assignments; each follows the preceding merge to avoid repeated freshness work.294 atomically claimed by Opus14:47:35Z. MAIN reserves strict section13 carries and statuses, daemon merges. Atomic main-fix577 claim returned3 because the later helper publication claim was still live, so MAIN made no conflicting mutation. The14:45:50Z release then verified public3d18d4fe, all9CIgreen, rooted1610pass/0fail/4statement-only warnings and authorized force/no-build refresh from511cdeda. Native6d6128db and later merge checkpoints are preserved; stopped-helper edits remain in stashe9320c17. Fresh Opus reviewer claimed577 at14:47:39Z. No duplicate recovery run or erased failed-publication cost.
 - Mathematical296 preservation author Avicenna completed at14:25:02.714Z after850.630s, within900s/deadline14:25:51Z. The later MAIN notification/adoption clock is not a worker overrun. Clean cd2275db preserves five absent completed theorem statements/proofs verbatim, accurate auxiliary blueprint links and provenance plus the ordered-operator terminology correction. Seven manifest entries verified; actual rollout task delta and raw receipts archived in native-audits/pr296-preservation-port-01a0afb4/terminal.jsonl. Target Lean/module build, fresh five-declaration axiom checks, blueprint/declaration checks and ordinary hooks passed; no fullCI/publication/review yet. Original296 remains intact, B8 stays13attempts/26509s,21-public-declaration criterion remains open. Author retired before next task.
 - Fresh sole native Gauss01a0afd6-0333-7a43-9942-4b8740fc2828 admitted14:47:13.526Z for PR507 read-only technical adjudication at55e57394; atomic main-review claim held, trusted published-main ancestor d6caa66c. Astra/xhigh exception reason: contested original exact-member publication-control invariant after reviewer disagreement, requiring original-contract comparison and an isolated after-advertisement Git race fixture.600s budget with absolute14:57:05Z deadline, final120s reserved for report. No new full-review round, live-ref/branch edits, status/review publication or merge by delegate.507 operator failure remains in place pending concrete disposition. Admission carries actual observed per-task token delta/model/effort/times/path; no second delegate or lane.
+- Cycle1455 progressed from owner queue scheduling and publication/review adoption: required snapshot completed with caps0/no external workers or lanes;294 checked-push/prepush processes verified live at localb873b1c8, no restart or premature carry.507 fresh Gauss adjudication reproduced a fast-forward member change after advertisement and before main commit while publication succeeded; originalF1 and prior MAIN disposition5660459454 retain the exact-member transaction requirement, so F1 remains open, F2fixed, failure verified and comment5716586574 published.57manifest entries hash-verified and archived, actual566.243s within deadline, delta1486511input/1359616cached/13690output/3374reasoning; author retired. No new transport/scope waiver or repeated same-head review loop.
+- Released465/a72c8dbb retargeted from obsolete issue455 base to main only after recordedbase dcc1adb8 ancestry and mergedparent24906961 inclusion verified; clean/public/fresh, all9CIgreen and rooted1638pass/0fail/4statement-only warnings. Six-file690+/15- support blueprint/prose contribution differs under strict patch hashes from all4genuine prior reviews; no automatic carry. Fresh sole Sol/Ultra James01a0afe2 admitted15:00:29.175Z, deadline15:15:15Z,900s including180sreport, trustedbff096a9 and atomicmain-review465. Bounded F1-F8 final assessment, not fifthfullround; existing proofs/source gaps preserved and stalePRmetadata draft requested. No branch edits by MAIN.
+- FreshOpus577review5237547785 approved3d18d4fe with0unchecked/3checkedminor cosmetic observations and originalblocking multiline-stringF1independentlyfixed. Actual marker/commit/latestrecord/finalVERDICT/narrative/all9CI checked; freshness and clean local/public7cc6575f verified before summarysuccess. Receipt /tmp/pr577-approved-adoption-20260917.json deliberately held outsideprimary through pending daemon merge to avoid386gate2timingincident. No new repair loop, no manual merge; claims released after adoption. Preserve stoppedhelperstashe9320c17 and priorfailedpublicationcost.
+- Daemon merged577 at15:09:27Z as7ae0ec71089a9e05b47718a3f2ce43af160cec36 with approved3d18d4fe second parent, issue574closed, title lean0. Service synchronization completed15:10:54Z. Canonical warmer waited for294 full-build lock, then completed7ae0ec71 snapshot at15:12:19Z in9s; no duplicate warmer or direct cache write. Earlier approval receipt/pending events imported only after merge window closed. Native465 terminal assessment now published as5237785898 on a72c8dbb, full actual-record validation and success; allF1-F8 resolved, four prior full rounds preserved, stale after577 and queued for later strictcarry. James completed574.001s within900/deadline and retired; actual3396924input/3211648cached/18933output/7041reasoning delta archived. Fresh sole Sol/Ultra Erdos01a0afee admitted15:13:33.395Z for271 existing fourth-review F1/F2 repair under atomicmain-fix claim and deadline15:25:25Z; mathematics followsworkflow577. Requiredcycle snapshotcompleted/caps0/no lanes.294newpublicb873b1c8 liveCI, strict mathematical patch identity with genuine3338ec82 approval established but no carry before helper release/newheadgates.
+- Owner queue294: helperb873b1c8 allCIgreen but stale after577; MAIN model-free JIT from matching clean local/public head merged currentmain, published35eee1ad, all9CI/rooted1612pass0fail4statement-only warnings. Strict byte equality after removing only index/hunkheaders verified against genuine5236353918/3338ec82, SHA36881cd9e1e9cf4c3b78318e82b1ed04dfd2bbc33634dc0523898f8a37d9f812. Carried5238073693 body/commit/finalverdict/zeroledger verified; successposted without reviewer. Firstdaemonattempt15:39:36 failedgate2 when a helper appendedowner-sessions duringclean check; MAIN had helditsnewreceipts in/tmp. Failedlogpreserved; initialretry probes stoppedondirtybuilds withoutchangingmarker. Afterdaemonpublishedledger, observedclean synchronized1bee6139 at15:53:04, archivedretryblock and letdaemon recheckallgates. It merged2797f1aa at15:54:39 with35eee1ad secondparent, issue121closed, synccomplete15:56:06. Lean0 is accurate: finalLeanchange is a docstring and other changes are blueprint/audit; proofs were alreadyonmain. Canonicalcache2797snapshotcompleted15:56:43 in102s.213 isnow MAIN-ownednextJIT, launchedfrom5865b019 afterverified294merge; no parallelhelperupdate.
+- Native271Erdos completeda03f74e8 after628.779s withinbudget; two-fileF1/F2repair preserves sharedEPRstatement/proof andthreeextractionconsumers, unusedfiberlemmasprivate. Thirteenlabelled hashes verifiedaftersha256sumrejectedonlytheproseformat; allcosts/failurespreserved. Authorretired, claimreleased and model-freeadoption/publicationrequestedafterownerqueue; no newheadCI/reviewclaimed. Native398Boyle completed8a0f5846 after719.213s withinbudget: coefficientrepresentatives, fiveexistingdistance links/raworientation/prose only, original5b204638 untouched. Initialsync236stalegeneratedentries recorded; MAIN ranexactnormalprepush/CI update-lean-decls --ci step, produced1649refs andpassed withouttrackedchange. Sixaxiomclosures/directLean/render/checkdecls/hooks wereauthorverified; nofullCI/publication/review. Originalpapergapsremain. BoyleclosedbeforefreshSol/UltraDewey01a0b011 fourthindependentreview274 at75609918, threepriorfullreviews preserved, trustedc3ac113a, all9CI/rooted1610/0/4/setupverified. Actualstart15:51:50.485 means720scapdeadline16:03:50.485, explicitlycommunicatedas earlierthanlooseabsolute16:04:20. Admissionandterminalrecords stagedoutsideprimarythrough294retry and importedaftermerge.
+- Owner telemetry-spool instruction adopted: helpers write runtime opus-sessions-spool.jsonl; MAIN folded 5 new complete rows and skipped 0 exact duplicates at a safe point before213review approval. Canonical append writer used, no direct main commit/push. Source retained append-only to avoid racing unknown helper appenders; future folds deduplicate entire records, not reused names. 1 helper-reported future timestamp(s) preserved and flagged for correction; no runtime inferred or rewritten.294 failedmarker had already been archived15:53:04 and service merge2797f1aa verified15:54:39; no new retry was necessary.
+- PR213 model-free refresh: initial checked-push stopped before transport on unknown imported declaration after integrating main. Preserved merged4127d4f0 and failed logs; canonical warm-worktree --force --no-build repaired stale .lake artifacts without tracked edits. Ordinary checked-push, all nine CI statuses and rooted audit1612/0/4 then passed. Exact whitespace-sensitive patch9a51a2a0 matched genuine approval5236308390; carried5238660586 and verified clean synchronized primary before success. Daemon merged b87ecde1 at16:34:21Z, closed116, title [lean +7 -35]. All new receipts stayed outsideprimary during merge gate; archived only after verified merge. Opus spool fold now imports only complete unseen records and never truncates an uncoordinated concurrent source; helper timings remain reported, not inferred.
+- After verified PR213 merge, github-sync confirmed local/public main b87ecde1 but warned that the read-only GitHub record snapshot failed; authoritative PR/commit/issue API evidence and parent topology are intact. Snapshot failure remains an observation, not a reason to repeat the merge or warm. New Opus spool503 fixer row has future UTC start/end while already observed onSep17; preserved source, recorded warning and requested actual timing correction. Eight complete source rows verified present exactly once in owner-sessions.
+- PR503 actual independent review5238753474 on efce10eb passed marker/head/final-verdict/zero-unchecked/all-CI checks and resolves the owner goal-authority finding. MAIN adopted success on the stale head and replaced misleading proof-packet metadata with accurate policy/testing prose. All prior rounds remain recorded; owner authorization for fresh-session Opus independence does not reset the review cap. PR260 now has five genuine prior reviewed heads; its released d2f00e69 needs only a bounded terminal F1-F3 assessment, not a sixth full round.
+- PR539 bounded supersession scout Cicero completed read-only source/main mapping in 633.160s against600s budget (overrun33.160s for final manifest/receipt, retained in actual accounting). Thread retired, four manifest entries verified, sourceca866da4 clean. Mathematical contributions and source construction are integrated; residual is one supplied-witness docstring correction plus historical audit/two incident records. Main-state fresh transitive axiom probe was not run; historical checks remain labelled historical. Preserve that narrow packet before retiring PR539; issue519 completion is a separate evidence-based decision, no wholesale conflict merge or new proof attempt.
+- PR288 cache-only publication failure resolved by the owning helper: canonical warm lacked branch-only BlockSpecialization.olean; targeted module build passed, then ordinary checked-push and all nine CI contexts/rooted audit1617/0/4 passed without source edits. MAIN verified strict normalized patch d30a088d unchanged from genuine5235946285, actual carry5239473266, clean synchronized25c845f1 and freshness before success; daemon merged da956e72, title [lean +147 -0], issue283closed. Receipts stayed outsideprimary until verified merge. PR481 already-completed fifth independent helper report5239392291 is accepted as final disposition under owner project-review-exception authority: F1-F4 resolved, all gates checked, all five reviews/costs preserved; no additional loop or source/CI waiver. MAIN did not duplicate the helper session, and records the full scope honestly rather than relabelling it as bounded-only.
+- PR543 preservation: Sol/Ultra native Wegener 01a0b099 completed saved nonencodingMarginalMass_le proof reuse at unchanged supplied-witness statement in local 97cfe139. Actual task 18:20:14.563Z-18:31:47.204Z (692.641s), before 18:35Z deadline; thread retired. Fifteen artifact hashes verified, focused Lean/module build/axiom probe/blueprint/sync/gap checks/hooks passed, one unrelated sorry remains. Full CI/publication/independent review deferred after owner467/456 and prioritized299/481. Evidence: native-audits/pr543-preservation-01a0b099/terminal.jsonl. Original branch history and proof-attempt costs preserved.
+- PR536 preservation completed locally at78624dcf: twelve range-projection/ancilla support declarations (two module blobs byte-identical to b37ebc1f), all twelve fresh axiom closures standard-only; scalar module/node duplication omitted, five auxiliary nodes retained. Focused Lean/module builds/render/sync/gap checks/ordinary hooks pass; full CI/publication/review deferred, final pauli_soundness remains open. Sol/Ultra Carson01a0b0b5 task18:51:25.303Z-19:05:37.737Z (852.434s), within19:06deadline, retired. Actual task token delta and31 verified artifacts recorded in native-audits/pr536-preservation-01a0b0b5/terminal.jsonl; original checkpoints/costs preserved.
+- Daemon merged PR467 as c68d3e9b at19:26:30Z, approved4975ce06 secondparent, issue464closed, merge title [lean +34 -0]. Actual native review5240411293 APPROVED/zero-unchecked and all9CI, clean synchronizedmain/freshness checked before summarysuccess; receipts held outsideprimary until merge. Sol/Ultra Heisenberg01a0b0cc ran19:16:07.975Z-19:22:04.317Z (356.342s):4.317s past the earlier outer deadline but within480s maximum, fully charged; no budget reset. Three hashes verified, third genuine reviewedhead, native retired. Canonical evidence native-reviews/pr467-4975ce06-01a0b0cc/. Cache c68d3e9b complete97s;456 now has the sole Opus updater, then299/481.
+- Correction to the preceding PR467 merge-event timestamp: the authoritative GitHub merged_at is 2026-09-17T19:26:16Z (19:26:16Z), as recorded in native-reviews/pr467-4975ce06-01a0b0cc/merge.jsonl. The prior event's19:26:30Z was a transcription error; commit, parents, review, statuses and all native runtime/usage figures are unchanged.
+- Issue123 source-unitary author completed local6390706c with exists_extractionWitness deriving its witness internally. Producer proof bodies unchanged; three fresh axiom closures standard-only, focused Lean/aggregate/render/sync/gap/hook checks passed,14 hashes verified. Sol/Ultra Boole01a0b0e3 task2026-09-17T19:41:03.134Z-2026-09-17T19:53:47.596Z (764.462s), retired; actual token delta in native-audits/issue123-source-unitary-01a0b0e3/terminal.jsonl. Full CI/publication and independent source-domain/error-scale/marker review deferred; parent123 and finalsoundness remain open. No old proof-attempt reset.
+- PR456 released d9bd0792 with all exact-head CI and rooted audit green. MAIN admitted fresh Sol/Ultra native Averroes01a0b120 for bounded terminal integration assessment; four full reviewed heads retained, strict carry rejected on unequal patch bytes, deadline20:58:08.045Z. No fifth full-proof review or attempt-budget reset; native admission archives actual delta and trusted policy.
+- PR456 terminal review5241348222 atd9bd0792 requested changes for two inherited blueprint distribution-domain mismatches in the integrated context. MAIN verified exact marker/verdict/two unchecked findings and posted failure; old ledgers preserved. Fresh Sol/Ultra Averroes01a0b120 completed20:48:08.045Z-20:58:36.591Z,628.546s,28.546s over600 fully charged (not just receipt overrun); task delta6853621input/6627968cached/25517output/8476reasoning. Six hashes verified; thread retired. MAIN selects bounded same-PR auxiliary-prose correction because the PR changes surrounding seed/source definitions, with unchanged source theorem gaps.
+- PR456 domain repair committed locally asbcddef5e, only ch15 23+/11-, ordinary hooks/render/strict sync/citations/checkdecls pass. Initial236 stale ignored-index errors retained; normal generated-index refresh resolved them. Source statements remain open and Lean unchanged. Descartes01a0b12d Sol/Ultra completed2026-09-17T21:02:07.536Z-2026-09-17T21:10:30.193Z, 502.657s with22.657s over480 fullycharged; delta3806028input/3683968cached/17279output/7289reasoning. Seventeen hashes verified; native retired. MAIN guardedpublication/CI/rootedaudit starting, independent boundedrecheck pending.
+- Daemon merged PR456 as34efa0c0 at2026-09-17T21:35:37Z, approvedbcddef5e secondparent, issue452closed, title ends[lean 0]. Independent bounded5241678033 resolvedF1/F2; all exacthead/CI/clean synchronizedprimary/freshness checks passed before summarysuccess. Einstein01a0b143 Sol/Ultra completed2026-09-17T21:26:10.192Z-2026-09-17T21:31:46.866Z,336.674s within360; delta3391769input/3245440cached/12451output/2517reasoning,9hashesverified, retired. Terminalheld/tmpduringmerge, archivednow. Allsix ownerstaleapproved candidates294/213/272/288/467/456 nowmerged. Opus updater299 claimed21:35:56Z;481 next. Source restricted-consistency/subline gaps remain open.
+- PR545 historical audit preserved locally asc5bc5867 on NEW issue513-preserve tree; one194line file, original172line body byte-identical with historical YAML/preface and failed-handoff qualification. Eight hashes/YAML/links/diff/hooks/clean tree verified. Dirac01a0b15a Sol/Ultra completed2026-09-17T21:51:59.969Z-2026-09-17T21:56:55.872Z,295.903s with0s over360; delta987752input/914304cached/13872output/4730reasoning; retired. Oldsession usage stays unknown, not zero. No Lean/blueprint rollback, newproof, originalPR/issueclosure or budgetreset. Publication/CI/review queued after299/481.
+- Daemon merged PR299 as3331dc3f at2026-09-17T22:09:57Z, approvedd00bbcee secondparent, issue156closed, title[lean +2019 -7]. This completes exists_spcc_value_one at its unchanged statement. Genuine fourthreview5238578023/b79f4bb0 carried as5241928486 after strict164366byte patch identity/SHAa05d6818, actualverdict/ledger/actor and exactCI303s/rooted1626PASS0FAIL3WARN verification; no new modelreview or reviewround. Clean synchronizedprimary/freshness checked before summarysuccess. Receiptsheld/tmpduringmerge, archivedafter. Opus updater481 claimed22:10:10Z, ownsnext. Native545 auditrestoration c5bc5867 complete locally, publication/review pending; no open native.
+- PR #583 independent native review task 01a0b19f-3cf5-7440-9344-4b8181d601d6 exceeded its 360-second envelope during receipt completion. Actual task_started 2026-09-17T23:06:38.265Z through task_complete 23:13:25.333Z is 407.068 seconds (47.068 seconds over); full token delta and rollout provenance are retained in native-reviews/pr583-2168cc4b-01a0b19f/terminal.jsonl. Exact-head review 5242315909 was published and verified, five artifact hashes passed, and the thread was retired. No resumed assignment or budget reset. Follow-up: keep publication and receipt inside the stated final reserve and retire the task at completion.
+- Post-merge PR #465 cache warm for b89f5896 published a partial snapshot after168s: SupportMass.lean failed reading shared Mathlib AlgebraicGeometry/Morphisms/OpenImmersion.ir with invalid header. The package file remained read-only and its inspected header indicated4.32.0. One canonical cache-warmer retry, with no source or shared-package changes, completed in101s and published snap-20260917T235718Z-b89f5896245d. The invalid-header read did not recur; root cause is not established. Logs and exact command are archived in native-reviews/pr465-287ddbc2-01a0b1bc/cache-recovery.jsonl.
+- PR #584 native F1 repair01a0b1c7 finished its complete receipt/verification at 2026-09-17T23:56:56.149Z, with 380.869s actual task time against360s (20.869s over). All1 recorded task turns belong to the same assignment and original deadline; full token delta is charged in native-audits/pr584-f1-prose-01a0b1c7/terminal.jsonl. The one-file repair is locally committed, native retired, no publication/review or budget reset claimed.
+- 2026-09-18 META 01:47Z OWNER DECISION on PR 507 (merge train): accepted the meta's narrower contract (claim all members on the atomic claim list during the train; leased atomic push unchanged; post-push member re-verification with violation reporting; contract stated in the protocol). Relayed to the main; Opus helper implements on 507, fresh review follows.
+
+## 2026-09-18
+
+- PR507 owner contract adopted (2026-09-18T01:47:51Z ruling): shared main/train claims held for all members from before manifest verification through transport, leased atomic push, immediate post-push member-ref verification, explicit violation attribution and no tooling merged mark for moved members. Residual advertisement-to-commit window is authorized; no server-side predicate required. MAIN superseded the old hold in comment5724224745, replaced obsoleteF1 failure with pending at02:28:05Z on55e57394, and removed the empty Sep12 failure marker. PR579 prerequisite is merged3094094f. Active Opus fixer retained; tests, fresh independent review, exact-head gates and daemon merge still required. Protocol/EVOLUTION amendment requested on507; standing internal-development decisions delegated to meta. Evidence: native-audits/pr507-owner-contract-20260918/adoption.jsonl.
+- Issue586 local integration completed at77ccfa23 with9f58154b/78624dcf parents. Concrete StateTransfer/OperatorTransfer proofs were recovered from saved536 checkpoint8d63d8a7, then adapted; all three transfer estimates remain auxiliary to supplied witnesses, and public pauli_soundness statement/sorry is unchanged. First commit was rejected by the conditional-blueprint naming guard; bounded hygiene renamed the auxiliary to ExtractionWitness.isometry_transfer_bounds and localized Classical opens, preserving proof scope. Both authors retired. Russell actual969.869s (69.869 over900); Mill actual545.906s (185.906 over360), including the same-task stop/receipt-correction second turn. Combined1515.775s and earlier123/241/529 history retained. MAIN QPBT rebuild9288jobs and checkdecls1700/1700 resolved two missing compiled SourceUnitary declarations; prior failed check remains in receipt. Twenty-one manifest and four supplemental hashes, clean final HEAD and ordered parents verified. Terminal delta/session archived after584 merge; no fullCI/publication/review yet. Evidence: native-audits/issue586-commit-hygiene-01a0b238/terminal.jsonl.
+- 2026-09-18 META 02:45Z merge daemon v9i-cpa -> v9j-cpa: telemetry batch commits limited to one per hour (guard read a retired log and fired every cycle: 222 telemetry commits in 24 h vs 16 merges; owner complaint that they bury real progress on the commits page).
+- PR536 preservation refresh completed locally at5441c560 after helper publication aborted on one gap-note status-prose conflict. Both parents78624dcf and pinnedaea00a9f retained; generic RangeProjection/Ancilla, root Soundness and historical audit blobs unchanged. Note now includes main source-unitary composition while retaining concrete Pauli application/source-domain/final-soundness obligations; pending585/586 children not imported. Normal hooks passed699script tests with9skips, note/blueprint/merge-loss checks passed. Sol/Ultra Poincare01a0b260 actual02:37:33.409Z-02:46:11.492Z,518.083s,38.083over480; one task/turn including queued budget reminder, actual delta and rollout archived. Receipt02:45:10Z is commit observation, not full task end. Fourteen manifest artifacts plus manifest hash verified, seven-path contribution preserved; native retired and publication-only handoff returned. Original529/536 costs retained, no new proof budget. Evidence: native-audits/pr536-gap-note-refresh-01a0b260/terminal.jsonl.
+- 2026-09-18 META 03:06Z merge daemon v9k: pending telemetry committed right before each merge attempt (gate 2 clean-tree requirement); hourly batch kept.
+- Owner-priority507 merged byv9k daemon at04:08:02Z as7bc9bf88, reviewed7927d7aa secondparent, issue502closed, merge title[lean0]. The authorized claims/leased-transport/post-push-check contract remains intact. Normalprepush and exact6122lease publication were verified; all9CI393s/rooted1659PASS0FAIL3statementWARN and genuine bounded5244106797 yielded summarysuccess04:05:26Z. Daemon committed pendingtelemetry beforegate and all7gates passed. Completecache9s, snap-20260918T040829Z-7bc9bf889712. Deferredstatus/merge/cache evidence archived aftermerge. ReviewerBeauvoir actual380.052s including20.052over360 and twoactualturns; late deadline/receipt-time clarification retained, actualtaskdelta and all artifacts canonical. No fullworkflowreview reset or manualmerge. Followup589 records nonblocking claim recovery/diagnostics.
+- Post-507 deployment check found the train member commits use bare Merge PR #N into reviewed train (pr_train.py:125) and bypass owner557/558 Lean-delta title policy. No commit-msg hook supplies the suffix. New590 tracks a narrow reuse of pr_merge.lean_line_delta/merge_commit_title with incremental member deltas, zero/failure behavior and sanitization; fix/review/merge required before first live train. MAIN has not invoked the publishing CLI.580 and587 exact-head approvals are now published and claims released after507merge, but they are stale and queued for the subsequent daemon-owned batch. Accepted transport contract is unchanged; no server-predicate requirement added.
+- Issue590 train member title integration completed locally at d18e4e76. Sol/Ultra Lorentz retired after806.525s, one actual turn within effective863.444s; task delta4886077 input,4776576 cached,23594 output,11710 reasoning. Four artifact hashes, scoped clean three-file commit, focused26 tests and normal729-test hook (9 skipped) verified from actual rollout. Receipt first-shell start corrected in canonical terminal; no live train or independent review. Publication/CI remain MAIN operations. Evidence: native-audits/issue590-train-titles-01a0b2c4/terminal.jsonl.
+- PR592 merged by v9k at05:26:03Z as b6c09eb0 (parents134e4945/d18e4e76), subject ends[lean0]; all three landed files match the independently reviewed head. Exactreview5244483811, zero findings, all9CI421s and rooted1659PASS0FAIL3statementWARN verified; summarysuccess05:22:15Z, pendingtelemetry batched beforegate. Huygens retired506.075s/oneactualturn within599.877s, taskdelta3297086input/3150720cached/14446output/4972reasoning. Nine artifact hashes and actual6-test offline exit0 verified. Issue590 closed after checking the completed requirements and no open children; cachecomplete7s. Deferredstatus/merge/cache evidence archived aftermerge in native-reviews/pr592-d18e4e76-01a0b2ec/. First live train remains a daemon scheduling task; MAIN did not invoke publishingCLI.
+- Issue593 Tesla01a0b30a stopped at an uncommitted six-file/403-line checkpoint. Focused26 tests and exact runtime patch preview passed; normal commit hook was interrupted at deadline with exit130 and is not claimed green. Actual task05:43:46.627Z-05:59:31.241Z,944.614s,44.695over effective899.919s across one actual turn including the deadline reminder/receipt correction; delta4714264input/4584320cached/31075output/13695reasoning. Thread retired, nine manifest entries verified. MAIN is finishing only the normal mechanical commit against unchanged staged bytes; no source edits or runtime activation. Native evidence and interrupted outcome retained in native-audits/issue593-daemon-trains-01a0b30a/terminal.jsonl.
+- 2026-09-18 META 07:21Z OWNER: space-1 key renamed space-3, one dispatched-subagent slot (keyrot/space-3 limit 1, codex-home-space-3, probe 200); caps 1/0/1; key-watch v6 maps and retires it by name; main told.

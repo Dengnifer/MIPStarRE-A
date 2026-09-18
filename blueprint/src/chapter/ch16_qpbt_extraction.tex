@@ -155,12 +155,33 @@ The measurement $\{\hat{S}_{g_X,g_Z}\}$ reads out an $X$-polynomial and a $Z$-po
 \begin{lemma}[Projectivity and completeness of the pulled-apart measurements]\label{lem:tilde-m-projective}
 	\lean{MIPStarRE.QPBT.tildeM_isProj, MIPStarRE.QPBT.sum_tildeM_eq_one}
 	\leanok
-	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
-		lem:tau-dot-product-projective}
+	\uses{def:tilde-m-measurement}
 	For each $W$ and $\tilde{u}$, every $\tilde{M}^{W,\tilde{u}}_a$ is a projector and
 	$\sum_{a\in\F_q}\tilde{M}^{W,\tilde{u}}_a=\Id$. Thus
 	$\{\tilde{M}^{W,\tilde{u}}_a\}_{a\in\F_q}$ is a projective measurement.
 \end{lemma}
+
+\begin{proof}
+	\leanok
+	\uses{def:tilde-m-measurement, lem:s-w-marginals-projective,
+		lem:tau-dot-product-projective, lem:sandwich-tensor-projector,
+		lem:distance-tensor-sum-right, lem:distance-tensor-sum-left}
+	For fixed $W$, $\tilde{u}$, and $a$, each summand in \eqref{eq:tilde_M}
+	is a tensor product of two projections, hence is a projection.
+	If $g\ne g'$, then $\hat{S}^W_g\hat{S}^W_{g'}=0$ because
+	$\{\hat{S}^W_g\}_g$ is a projective measurement. Thus distinct summands
+	in \eqref{eq:tilde_M} are orthogonal, and their sum is a projection.
+	For completeness, fix $g$ and put $c_g=\mathrm{Dec}(g)\cdot\tilde{u}$.
+	The map $a\mapsto c_g-a$ is a bijection of $\F_q$, so
+	\[
+		\sum_a\tau^W_{c_g-a}(\tilde{u})=\Id.
+	\]
+	Interchanging the two finite sums in \eqref{eq:tilde_M} gives
+	\[
+		\sum_a\tilde{M}^{W,\tilde{u}}_a
+		=\sum_g\hat{S}^W_g\ot\Id=\Id.
+	\]
+\end{proof}
 
 \begin{definition}[Pulled-apart Pauli observables]\label{def:tilde-w-observables}
 	\lean{MIPStarRE.QPBT.tildeObs}
@@ -381,7 +402,241 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	and bounding the right-hand side by $O(\delta_G + \eps)$ using the two approximations above yields \eqref{eq:qld-sg-cons2} at scale $\delta_P$. The symmetric equivalents follow by the same argument with the register bipartitions interchanged.
 \end{proof}
 
+	\section{Formalization support for the encoding-supported reference measurement}
+
+	% Internal auxiliary constructions for eq:qld-nonencoding-mass. They are not
+	% the quantitative support estimate of lem:qld-nonencoding-mass-bound, and
+	% they neither use a winning premise nor construct a global polynomial-pair
+	% measurement.
+
+	\begin{definition}[The ideal Pauli register measurement]
+		\label{def:qld-pauli-register-measurement}
+		\lean{MIPStarRE.QPBT.pauliRegisterMeas}
+		\leanok
+		This measurement is not named in the source article. For a fixed Pauli
+		basis it is the measurement of the ancillary Pauli register in that basis,
+		assembled from the positivity and completeness of the Pauli projectors.
+	\end{definition}
+
+	\begin{lemma}[Bounded encodings lie in the decoder's image]
+		\label{lem:qld-is-encoding-encoding-poly}
+		\lean{MIPStarRE.QPBT.isEncoding_encodingPoly}
+		\leanok
+		\uses{def:low-degree-encoding, def:qld-full-field-decoder}
+		The low-degree encoding of Definition~\ref{def:low-degree-encoding} of any
+		Pauli register value lies in the encoding image of the full-field decoder
+		of Definition~\ref{def:qld-full-field-decoder}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-decoder-linearity}
+		Decoding the encoding of a register value returns that value.
+	\end{proof}
+
+	\begin{definition}[The encoding-supported Pauli reference measurement]
+		\label{def:qld-encoding-pauli-measurement}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas}
+		\leanok
+		\uses{def:qld-pauli-register-measurement, def:low-degree-encoding,
+			def:post-processing}
+		This measurement is not named in the source article; it is the internal
+		reference measurement underlying Equation~\eqref{eq:qld-nonencoding-mass}.
+		For a player and a Pauli basis, measure the strategy's Pauli answer
+		together with the ideal Pauli answer of
+		Definition~\ref{def:qld-pauli-register-measurement} on the ancillary
+		register, and return the low-degree encoding of the sum of the two answers.
+		This is not the global polynomial-pair measurement whose existence
+		Lemma~\ref{lem:qld-4-7} asserts.
+	\end{definition}
+
+	\begin{lemma}[The reference effects are sums over encoding fibers]
+		\label{lem:qld-encoding-pauli-effect}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement}
+		The effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} at a polynomial is the
+		sum of the product effects over the pairs of Pauli answers whose sum
+		encodes that polynomial.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		This is the definition of the relabeled product measurement.
+	\end{proof}
+
+	\begin{lemma}[The reference measurement is a complete POVM]
+		\label{lem:qld-encoding-pauli-complete}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect_nonneg}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.sum_encodingPauliMeas_effect_eq_one}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement}
+		Every effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} is positive
+		semidefinite, and the effects sum to the identity on the strategy and
+		ancillary registers.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Positivity and completeness are inherited from the product measurement and
+		are preserved by relabeling of the outcomes.
+	\end{proof}
+
+	\begin{lemma}[Exact encoding support of the reference measurement]
+		\label{lem:qld-encoding-pauli-support}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_effect_eq_zero_of_not_isEncoding}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:qld-full-field-decoder}
+		The effect of the measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} vanishes at every
+		polynomial outside the encoding image of the full-field decoder of
+		Definition~\ref{def:qld-full-field-decoder}. This is exact support of the
+		auxiliary measurement; it is not a bound on the non-encoding marginal mass
+		of Lemma~\ref{lem:qld-nonencoding-mass-bound}.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-encoding-pauli-effect, lem:qld-is-encoding-encoding-poly}
+		By Lemma~\ref{lem:qld-encoding-pauli-effect} the effect is a sum over the
+		pairs of Pauli answers whose sum encodes the given polynomial. By
+		Lemma~\ref{lem:qld-is-encoding-encoding-poly} every such polynomial lies in
+		the encoding image, so outside that image the index set is empty.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-point-mass}
+		\lean{MIPStarRE.QPBT.mass_outside_support_le_point_defect}
+		\leanok
+		\uses{def:povm-conventions, def:distance-state-quadratic-form}
+		This is not a named statement of \cite{Ji2020MIPStar}; it isolates the
+		support comparison used in Equation~\eqref{eq:qld-nonencoding-mass}. Let
+		$M=\{M_a\}_{a\in\mathcal A}$ and $R=\{R_a\}_{a\in\mathcal A}$ be
+		complete measurements on two finite-dimensional spaces, let
+		$E\subseteq\mathcal A$, and suppose $R_a=0$ for every $a\notin E$.
+		For every vector $\ket\psi$ in the tensor product, without a normalization
+		assumption,
+		\[
+			\sum_{a\notin E}q_\psi(M_a\ot\Id)
+			\leq \sum_{a\ne b}q_\psi(M_a\ot R_b).
+		\]
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Use completeness of $R$ to expand each term on the left as a sum over its
+		outcomes. When $a\notin E$, the diagonal term vanishes by the support
+		hypothesis. Every remaining quadratic form is nonnegative, so restricting
+		the first outcome to $a\notin E$ can only decrease the full off-diagonal
+		sum.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for averaged mass outside a supported reference measurement]
+		\label{lem:qld-supported-reference-average-mass}
+		\lean{MIPStarRE.QPBT.avg_mass_outside_support_le_consistency_defect}
+		\leanok
+		\uses{def:consistency, def:distance-state-quadratic-form}
+		Let $\mu$ be any finite-support nonnegative weighting on a finite question
+		set, not necessarily of total mass one. For each question $x$, let $M^x$
+		and $R^x$ be complete measurements with common finite outcome set
+		$\mathcal A$, and suppose $(R^x)_a=0$ for every $a\notin E$. Then, for
+		every vector $\ket\psi$ and without a normalization assumption,
+		\[
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\notin E}q_\psi(M^x_a\ot\Id)\right)
+			\leq
+			\operatorname{Avg}_{x\sim\mu}
+			\left(\sum_{a\ne b}q_\psi(M^x_a\ot R^x_b)\right).
+		\]
+		The right-hand side is the bipartite consistency defect of the two
+		measurement families.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-supported-reference-point-mass}
+		Apply Lemma~\ref{lem:qld-supported-reference-point-mass} at each question
+		and average the resulting inequalities with the nonnegative weights of
+		$\mu$.
+	\end{proof}
+
+	\begin{lemma}[Evaluation splits over the two Pauli answers]
+		\label{lem:qld-encoding-pauli-eval}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_postprocess_eval}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:low-degree-encoding,
+			def:post-processing}
+		Evaluating the polynomial outcome of
+		Definition~\ref{def:qld-encoding-pauli-measurement} at a point is the same
+		as evaluating the two Pauli answers separately at that point and adding the
+		two values.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-tensor-measurement-postprocess}
+		Composing the two relabelings and moving them through the product
+		measurement with Lemma~\ref{lem:qld-tensor-measurement-postprocess} reduces
+		the claim to additivity of the low-degree encoding of
+		Definition~\ref{def:low-degree-encoding} in its register argument, which
+		holds because that encoding is a scalar product with the point.
+	\end{proof}
+
+	\begin{lemma}[The evaluated reference effects are the Pauli-answer convolution]
+		\label{lem:qld-encoding-pauli-convolution}
+		\lean{MIPStarRE.QPBT.ProjectiveSetting.encodingPauliMeas_eval_effect_eq_convolution}
+		\leanok
+		\uses{def:qld-encoding-pauli-measurement, def:expanded-point-measurement}
+		The effect at a field value of the evaluated measurement of
+		Definition~\ref{def:qld-encoding-pauli-measurement} is the sum, over the
+		pairs of field values adding to that value, of the products of the
+		evaluated strategy effect and the ideal point projector. This is the
+		convolution used in the proof of
+		Equation~\eqref{eq:qld-nonencoding-mass}; it asserts neither an
+		approximation nor consistency with the strategy's point measurement.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-encoding-pauli-eval}
+		Expand the relabeled product measurement of
+		Lemma~\ref{lem:qld-encoding-pauli-eval} at the given field value; the
+		ancillary factor is the ideal point projector by definition of the
+		low-degree encoding.
+	\end{proof}
+
 \section{The swap unitaries and the extraction of the Pauli group}
+
+The swap unitaries are controlled operators: a complete projective
+measurement on the polynomial registers selects, outcome by outcome, a product
+of Pauli observables on the register $\mathrm{A}''$ (resp.\ $\mathrm{B}''$).
+The following algebraic statement is not a named result of the source article;
+it isolates the orthogonality calculation that the source performs inline, and
+the proof of Lemma~\ref{lem:v-swap-conjugation} cites it for both the unitarity
+of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
+
+\begin{lemma}[Formalization support for controlled operator sums]
+	\label{lem:controlled-sum-support}
+	\lean{MIPStarRE.Quantum.sum_heteroKron_mul_sum_heteroKron}
+	\lean{MIPStarRE.Quantum.sum_heteroKron_mul_conjTranspose}
+	\leanok
+	\uses{def:povm-conventions}
+	Let $\{S_o\}_{o \in \mathcal{O}}$ be a projective measurement on a
+	finite-dimensional space, so that the $S_o$ are pairwise orthogonal
+	projectors with $\sum_o S_o = \Id$, and let $A_o$ and $B_o$ be operators on
+	a second finite-dimensional space. Then
+	\[
+		\Bigl(\sum_o S_o \ot A_o\Bigr) \Bigl(\sum_o S_o \ot B_o\Bigr)
+		= \sum_o S_o \ot (A_o B_o)\;.
+	\]
+	If in addition $A_o A_o^\dagger = \Id$ for every $o$, then
+	$\bigl(\sum_o S_o \ot A_o\bigr) \bigl(\sum_o S_o \ot A_o\bigr)^\dagger
+	= \Id$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-conventions}
+	Expanding the product gives the terms $S_o S_{o'} \ot (A_o B_{o'})$, and
+	$S_o S_{o'} = 0$ for $o \ne o'$, so only the diagonal terms
+	$S_o \ot (A_o B_o)$ survive. For the second assertion, each $S_o$ is
+	self-adjoint, so $\bigl(\sum_o S_o \ot A_o\bigr)^\dagger
+	= \sum_o S_o \ot A_o^\dagger$; the first identity then turns the product
+	into $\sum_o S_o \ot (A_o A_o^\dagger) = \sum_o S_o \ot \Id = \Id$.
+\end{proof}
 
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
 	\lean{MIPStarRE.QPBT.swapUnitary}
@@ -419,7 +674,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, def:v-swap-unitary, def:tilde-m-measurement, def:tau-dot-product-projector, def:indicator-vector, def:decoding-map, def:generalized-pauli}
+	\uses{lem:qld-4-7, lem:tildew-product-form, lem:twisted-commutation, lem:pauli-observable-expansion, lem:controlled-sum-support, lem:distance-tensor-sum-left, def:v-swap-unitary, def:tilde-m-measurement, def:s-w-marginals, def:tau-dot-product-projector, def:indicator-vector, def:qld-full-field-decoder, def:generalized-pauli, def:bracket}
+	\leanok
 	Since the measurement $\{\hat{S}_{g_X,g_Z}\}$ is projective (Lemma~\ref{lem:qld-4-7}) and the $\tau^X, \tau^Z$ observables are self-inverse,
 	\[
 		V_{\mathrm{A}} V_{\mathrm{A}}^\dagger = \sum_{g_X,g_Z} (\hat{S}_{g_X,g_Z})_{\mathrm{A}\mathrm{A}'} \ot \Id_{\mathrm{A}''} = \Id_{\mathrm{A}\mathrm{A}'\mathrm{A}''}\;,
@@ -434,8 +690,13 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 \begin{lemma}[Extraction of the EPR state and the Pauli observables]\label{lem:qld-unitary}
 	\lean{MIPStarRE.QPBT.ExtractionWitness}
 	\lean{MIPStarRE.QPBT.deltaExtract}
+	\lean{MIPStarRE.QPBT.exists_extractionWitness}
+	\leanok
 	\uses{lem:qld-4-7, def:v-swap-unitary, def:expanded-state, lem:projective-strategy-setup, def:generalized-pauli, def:EPR, def:povm-distance}
-	There is a universal constant $C_{\mathrm{ext}}\geq1$. Set
+	There are universal constants $a>1$, $0<b<1$ as in
+	Lemma~\ref{lem:qld-4-7}, and $C_{\mathrm{ext}}\geq1$, all chosen before
+	the parameters and strategy. Write $\delta_G=a(md)^a
+	(\eps^b+q^{-b}+2^{-bmd})$ and set
 	\[
 		\delta_P^{\mathrm{ext}}=C_{\mathrm{ext}}B,
 		\qquad
@@ -456,19 +717,24 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 		where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A}''\mathrm{B}''}$, with the answer summation over $h \in \F_q^{M}$ and no average over questions.
 	\end{enumerate}
 	The unitaries may be taken to be $V_{\mathrm{A}}$ and $V_{\mathrm{B}}$ of Definition~\ref{def:v-swap-unitary}.
-	The conditional result below assumes the global polynomial-pair measurement
-	of Lemma~\ref{lem:qld-4-7}, whereas the present proof obtains that measurement
-	from the lemma. It therefore establishes the extraction conclusions only
-	after the measurement and its consistency estimates are supplied, not the
-	existence claim above. The missing composition and the range-projection
-	transfer are recorded in \cite{gap:qpbt_extraction-transfer}.
+	For every admissible $(q,m,d)$, every $0\leq\eps\leq1$, and every projective
+	strategy with success probability at least $1-\eps$, the global measurement
+	of Lemma~\ref{lem:qld-4-7} and the above extraction data exist together.
+	The conditional result below proves the extraction estimates once that
+	measurement is fixed; it is not an additional hypothesis here. The subsequent
+	range-projection transfer to isometries remains separate, as recorded in
+	\cite{gap:qpbt_extraction-transfer}.
 \end{lemma}
 \begin{proof}
-	\uses{def:v-swap-unitary, lem:v-swap-conjugation, lem:tildew-product-form, lem:qld-construct-the-paulis, lem:qld-win-implications, fact:triangle-for-simeq, def:bracket, lem:cancellation, lem:schwartz-zippel-total-degree, lem:qld-4-7}
-	For the first item, the self-consistency of the observables $\tilde{W}^j$ (Item~2 of Lemma~\ref{lem:qld-construct-the-paulis}) is equivalent, since these observables are Hermitian involutions (Lemma~\ref{lem:tildew-product-form}), to $\E_{j \in \{0,\ldots,t-1\}} \E_{\tilde{u} \in \F_q^M} \bra{\hat\psi} \tilde{W}^j(\tilde{u}) \ot \tilde{W}^j(\tilde{u}) \ket{\hat\psi} \geq 1 - \delta_P/2$; setting $\ket{\vartheta} = V_{\mathrm{A}} \ot V_{\mathrm{B}} \ket{\hat\psi}$ and using the exact conjugation identities of Lemma~\ref{lem:v-swap-conjugation}, this becomes $\bra{\vartheta} H_W \ket{\vartheta} \geq 1 - \delta_P/2$ for $W \in \{X,Z\}$, where $H_W = \E_j \E_{\tilde{u}} \, \tau^W(e_j \tilde{u}) \ot \tau^W(e_j \tilde{u}) = \bigl( \E_{s \in \F_q} \tau^W(s) \ot \tau^W(s) \bigr)^{\ot M}$ by the tensor factorization of $\tau^W(\tilde{u})$ and the invariance of the uniform average over $s$ under $s \mapsto e_j s$. By Lemma~\ref{lem:cancellation}, $\E_{s,s'} \tau^X(s)\tau^Z(s') \ot \tau^X(s)\tau^Z(s') = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}$ on each pair of qudits, whence $H_X H_Z = \ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}$. The bounds $\| (\Id - H_W)\ket{\vartheta} \|^2 \leq \delta_P$ and $\bra{\vartheta} H_W^2 \ket{\vartheta} \geq 1 - 2\delta_P$, combined through the triangle inequality $\| H_X \ket{\vartheta} - H_Z \ket{\vartheta} \| \leq 2\sqrt{\delta_P}$ (see Remark~\ref{rem:qld-unitary-triangle-slip}), give $\bra{\vartheta} \Id_{\mathrm{A}\mathrm{A}'\mathrm{B}\mathrm{B}'} \ot (\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta} \geq 1 - 4\delta_P$.
-	% Case distinction added: the source normalizes the projected vector
-	% without ensuring that it is nonzero; see Remark rem:qld-unitary-triangle-slip.
-	If $\delta_P > 1/8$, then, after enlarging the universal constant in $\delta_{\mathrm{qld}}$, both items of the lemma hold with $\ket{\mathrm{aux}}$ an arbitrary unit state, since their left-hand sides never exceed $4$; assume therefore $\delta_P \leq 1/8$. Then the vector $(\bra{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}''\mathrm{B}''} \ket{\vartheta}$ has squared norm at least $1 - 4\delta_P \geq 1/2 > 0$, and $\ket{\mathrm{aux}}$ may be defined as its normalization; the overlap of $\ket{\vartheta}$ with $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ equals the norm of that vector and is at least $\sqrt{1 - 4\delta_P} \geq 1 - 4\delta_P$, which yields the first item with a bound of $8\delta_P = O(\sqrt{\delta_P})$. For the second item, Lemma~\ref{lem:qld-win-implications} gives, on average over $u \in \F_q^m$, $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_\eps \Id \ot M^{(\mathrm{Point},W),u}_a$ and $\Id \ot M^{(\mathrm{Point},W),u}_a \simeq_\eps M^{(\mathrm{Point},W),u}_a \ot \Id$, where $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} = \sum_{h : g_h(u) = a} M^{(\mathrm{Pauli},W)}_h$; combining these with Item~1 of Lemma~\ref{lem:qld-construct-the-paulis} by Lemma~\ref{fact:triangle-for-simeq}, using $\eps \leq \sqrt{\eps} \leq \delta_P$, yields $M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \Id \simeq_{\sqrt{\delta_P}} \Id \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a$. Writing $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$, the quantity to be bounded for the $\mathrm{A}$-side relation equals $2 - 2\sum_h \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_h V_{\mathrm{A}}^\dagger \ot (\tau^W_h)_{\mathrm{B}''} \ket{\Delta}$, since $(\tau^W_h)_{\mathrm{A}''} \ket{\mathrm{EPR}_q}^{\ot M} = (\tau^W_h)_{\mathrm{B}''} \ket{\mathrm{EPR}_q}^{\ot M}$. Replacing $(\tau^W_h)_{\mathrm{B}''}$ by the averaged coarse-graining $\E_u \sum_{h' : g_{h'}(u) = g_h(u)} (\tau^W_{h'})_{\mathrm{B}''}$ costs at most $md/q$ by Lemma~\ref{lem:schwartz-zippel-total-degree} (distinct $h \neq h'$ have distinct encodings $g_h \neq g_{h'}$, of total degree at most $md$), and by \eqref{eq:qld-unitary-6} the resulting sum equals $\E_u \sum_{a} \bra{\Delta} V_{\mathrm{A}} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} V_{\mathrm{A}}^\dagger \ot V_{\mathrm{B}} \tilde{M}^{W,\mathrm{ind}_m(u)}_a V_{\mathrm{B}}^\dagger \ket{\Delta}$. Exchanging $\ket{\Delta}$ for $\ket{\vartheta}$ costs $O(\delta_P^{1/4})$ by the first item, and the resulting expression $\E_u \sum_a \bra{\hat\psi} M^{(\mathrm{Pauli},W)}_{[g_h(u)=a]} \ot \tilde{M}^{W,\mathrm{ind}_m(u)}_a \ket{\hat\psi}$ is at least $1 - O(\sqrt{\delta_P})$ by the $\simeq_{\sqrt{\delta_P}}$ relation above. Altogether the distance is $O(\delta_P^{1/4} + md/q)$; the $\mathrm{B}$-side relation is proved identically.
+	\leanok
+	\uses{lem:qld-4-7, lem:qld-unitary-given-global-pair}
+	Choose the universal constants in Lemma~\ref{lem:qld-4-7} and the
+	conditional extraction estimate below before fixing the parameters and
+	strategy. The former supplies both projective polynomial-pair measurements
+	at error $\delta_G$. Since $\delta_G\geq0$, the latter applies to this same
+	pair and yields the concrete swap unitaries and the normalized auxiliary state
+	at the displayed scale. In particular, the global measurement is an output
+	of the argument, not an assumed input.
 \end{proof}
 
 \begin{theorem}[EPR projection estimates]\label{thm:qld-epr-projection-estimates}
@@ -643,7 +909,8 @@ Lemmas~\ref{lem:qld-4-7} and~\ref{lem:qld-comm-cons} imply the following two est
 	lemma, computed from $\eps$ and the assumed $\delta_G$.
 	This statement assumes the global measurement and therefore does not assert
 	its construction or the unconditional conclusion of
-	Lemma~\ref{lem:qld-unitary}. The required composition is recorded in
+	Lemma~\ref{lem:qld-unitary}. The source-facing composition uses this
+	conditional result after constructing the measurement; see
 	\cite{gap:qpbt_extraction-transfer}.
 \end{example}
 \begin{proof}
