@@ -81,6 +81,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PolynomialConsistency
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.QuadraticPointObstruction
 import MIPStarRE.QPBT.Combining.Apply
 import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Extraction.Defs
