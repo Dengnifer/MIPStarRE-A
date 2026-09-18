@@ -22,9 +22,9 @@
   \item \textbf{Difficulty.} Medium.  The extraction proof contains two
   incorrect numerical steps and later suppresses the range projection when
   passing from unitary conjugation to isometry conjugation.
-  \item \textbf{Estimated weight.} A corrected positive-contraction estimate,
-  a small-error case split for normalization, and one range-projection transfer
-  lemma for a projective measurement family.
+  \item \textbf{Estimated weight.} The corrected positive-contraction estimate,
+  small-error normalization split, and general range-projection transfer are
+  available; the concrete Pauli soundness application remains to be proved.
   \item \textbf{Mathlib/project split.} Positivity, contraction inequalities,
   isometry range projections, and norm estimates belong to finite-dimensional
   Hilbert-space algebra.  The state-dependent family distance and register
@@ -111,10 +111,25 @@ where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
 uses projectivity and orthogonality to keep the second term under control.
 The same argument is required for each player and each Pauli basis.
 
-This transfer is an open proof obligation for the next extraction stage.  It
-must be a theorem derived from the concrete swap unitaries, transformed-state
-estimate, and operator comparisons.  It must not be stored as a bridge field,
-residual assumption, or hypothesis of the source-labelled soundness theorem.
+The finite-dimensional estimate is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean}. For a complete POVM
+$\{N_h\}$, an orthogonal projection $Q$, and $Q\vartheta=\vartheta$, it gives
+\[
+  \sum_h\|(N_hQ-T_h)\Delta\|^2
+  \le 2\sum_h\|(N_h-T_h)\Delta\|^2+2\|\Delta-\vartheta\|^2.
+\]
+The proof uses $\sum_h N_h^\dagger N_h\le I$, so it also applies when the
+measurement is not projective. The same module proves the isometry form under
+the exact identity $N_h\phi=\phi M_h$ and its two bipartite placements. The
+unit-ancilla embedding and its composition with a unitary, including the
+identity $U(M\ot I\ot I)U^\dagger\phi=\phi M$, are proved in
+\path{MIPStarRE/QPBT/Test/Soundness/Ancilla.lean} for $\phi=UJ$,
+$J\psi=\psi\ot\eta$, $\|\eta\|=1$, and $U^\dagger U=I$.
+
+Applying these general results to the concrete swap unitaries, the
+transformed-state estimate, and the Pauli operator comparisons remains open.
+This step must not be stored as a bridge field, residual assumption, or
+hypothesis of the source-labelled soundness theorem.
 
 \section{Blueprint and formalization status}
 
@@ -160,9 +175,11 @@ projective measurements internally and obtains a normalized auxiliary state
 and two concrete swap unitaries satisfying the state and both players'
 Pauli-family distances at the nested construction/extraction scale. This is
 the existence claim of Lemma~\path{lem:qld-unitary}; its proof does not
-require a supplied global measurement. The subsequent passage from the
-concrete swap operators to the isometries in the soundness theorem remains
-unformalized and still requires the range-projection argument above.
+require a supplied global measurement. The general range-projection and
+unit-ancilla lemmas above prove the transfer under their stated POVM,
+intertwining, and state-closeness hypotheses. Their instantiation with the
+concrete swap operators and Pauli measurements, and the final isometry
+comparison for the source soundness theorem, remain open.
 
 The stronger theorem \path{exists_extractionWitness_fourth_root_rate}
 normalizes the numerical rate of this concrete conclusion to the same
@@ -189,6 +206,8 @@ seed-indexed correspondence and direct-law restrictions documented in
 \ghissue{47} tracks the separate range-projection transfer needed
 by \path{pauli_soundness}; that theorem must be derived from the concrete data
 rather than stored in the witness.
+\ghissue{529} records the independent general range-projection and ancilla
+results; it does not discharge the concrete soundness transfer.
 
 \section{Conclusion}
 
@@ -196,14 +215,15 @@ The printed triangle calculation has repairable numerical errors, and the
 last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
-the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  The global polynomial-pair witness
+the latter has a proved general estimate but still requires an application to
+the concrete extraction data. The global polynomial-pair witness
 and the three pulled-apart consistency estimates are now composed in a proved
 source-facing theorem, including at zero error. The conditional extraction
 theorem remains useful for a supplied global measurement, and its composition
 with the proved global constructor establishes the source-facing existence
-claim of Lemma~\path{lem:qld-unitary} for projective strategies. The final
-range-projection transfer remains separate and open.
+claim of Lemma~\path{lem:qld-unitary} for projective strategies. The generic
+range-projection and ancilla transfer is proved, but its concrete application
+and the source-domain and final soundness obligations remain open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

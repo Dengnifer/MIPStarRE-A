@@ -1028,18 +1028,164 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 
 \section{Proof of the soundness of the Pauli basis test}
 
+\subsection{Range projections and isometry conjugation}
+
+The following formalization-only auxiliary results are not named theorems of
+the source article. They justify the insertion of range projections in the
+final soundness argument. The omitted step in the source is discussed in
+\cite{gap:qpbt_extraction-transfer}.
+
+\begin{theorem}[Range-projection estimate]\label{thm:pauli-range-projection-support}
+  \lean{MIPStarRE.QPBT.sum_norm_mul_projection_sub_sq_le}
+  \leanok
+  Let $\{N_a\}_{a\in A}$ be a complete POVM on a finite-dimensional complex
+  Hilbert space $\mathcal H$, with $A$ finite, and let $\{T_a\}_{a\in A}$ be
+  any operator family on $\mathcal H$. Let $Q$ be an orthogonal projection
+  and let $\theta,\Delta\in\mathcal H$ satisfy $Q\theta=\theta$. Then
+  \[
+    \sum_a\|(N_aQ-T_a)\Delta\|^2
+    \le 2\sum_a\|(N_a-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:sandwich-povm-square-sum}
+  \leanok
+  Since $I-Q$ is a contraction and annihilates $\theta$,
+  $\|(I-Q)\Delta\|\le\|\Delta-\theta\|$.
+  Decompose $(N_aQ-T_a)\Delta=(N_a-T_a)\Delta-N_a(I-Q)\Delta$
+  and use $\|x-y\|^2\le2\|x\|^2+2\|y\|^2$, a consequence of the
+  parallelogram identity. Summing the second terms uses
+  $\sum_a N_a^\dagger N_a\le I$ and gives the asserted estimate.
+\end{proof}
+
+\begin{theorem}[Isometry transfer]\label{thm:pauli-isometry-transfer-support}
+  \lean{MIPStarRE.QPBT.sum_norm_conjIsometry_sub_sq_le}
+  \leanok
+  Let $\phi\colon\mathcal H\to\mathcal K$ be a linear isometry between
+  finite-dimensional complex Hilbert spaces. Let $\{M_a\}_{a\in A}$ be
+  operators on $\mathcal H$, let $\{N_a\}_{a\in A}$ be a complete POVM on
+  $\mathcal K$, and let $\{T_a\}_{a\in A}$ be arbitrary operators on
+  $\mathcal K$, with $A$ finite. Suppose $N_a\phi=\phi M_a$ for every $a$.
+  For all $\psi\in\mathcal H$ and $\Delta\in\mathcal K$,
+  \[
+    \sum_a\|(\phi M_a\phi^\dagger-T_a)\Delta\|^2
+    \le2\sum_a\|(N_a-T_a)\Delta\|^2+2\|\Delta-\phi\psi\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Set $Q=\phi\phi^\dagger$. It is an orthogonal projection fixing
+  $\phi\psi$, and the intertwining identity gives
+  $N_aQ=\phi M_a\phi^\dagger$. Apply
+  Theorem~\ref{thm:pauli-range-projection-support}.
+\end{proof}
+
+\begin{theorem}[Alice's bipartite isometry transfer]
+  \label{thm:pauli-isometry-transfer-alice-support}
+  \lean{MIPStarRE.QPBT.sum_norm_leftTensor_conjIsometry_sub_sq_le}
+  \leanok
+  Let $\phi_{\mathrm A}\colon\mathcal H_{\mathrm A}\to\mathcal K_{\mathrm A}$
+  and $\phi_{\mathrm B}\colon\mathcal H_{\mathrm B}\to\mathcal K_{\mathrm B}$
+  be linear isometries between finite-dimensional complex Hilbert spaces.
+  Let $A$ be finite, let $\{M_a\}_{a\in A}$ be operators on
+  $\mathcal H_{\mathrm A}$, and let $\{N_a\}_{a\in A}$ be a complete POVM
+  on $\mathcal K_{\mathrm A}$ satisfying $N_a\phi_{\mathrm A}=\phi_{\mathrm A}M_a$.
+  For any operators $T_a$ on $\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$
+  and vectors $\psi\in\mathcal H_{\mathrm A}\ot\mathcal H_{\mathrm B}$,
+  $\Delta\in\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$, writing
+  $\theta=(\phi_{\mathrm A}\ot\phi_{\mathrm B})\psi$, we have
+  \[
+    \sum_a\|((\phi_{\mathrm A}M_a\phi_{\mathrm A}^\dagger)\ot I-T_a)\Delta\|^2
+    \le2\sum_a\|(N_a\ot I-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Apply Theorem~\ref{thm:pauli-range-projection-support} to the complete POVM
+  $\{N_a\ot I\}$ and projection $Q=(\phi_{\mathrm A}\phi_{\mathrm A}^\dagger)\ot I$.
+  The projection fixes $\theta$, and
+  $(N_a\ot I)Q=(\phi_{\mathrm A}M_a\phi_{\mathrm A}^\dagger)\ot I$.
+\end{proof}
+
+\begin{theorem}[Bob's bipartite isometry transfer]
+  \label{thm:pauli-isometry-transfer-bob-support}
+  \lean{MIPStarRE.QPBT.sum_norm_rightTensor_conjIsometry_sub_sq_le}
+  \leanok
+  Let $\phi_{\mathrm A}\colon\mathcal H_{\mathrm A}\to\mathcal K_{\mathrm A}$
+  and $\phi_{\mathrm B}\colon\mathcal H_{\mathrm B}\to\mathcal K_{\mathrm B}$
+  be linear isometries between finite-dimensional complex Hilbert spaces.
+  Let $A$ be finite, let $\{M_a\}_{a\in A}$ be operators on
+  $\mathcal H_{\mathrm B}$, and let $\{N_a\}_{a\in A}$ be a complete POVM
+  on $\mathcal K_{\mathrm B}$ satisfying
+  $N_a\phi_{\mathrm B}=\phi_{\mathrm B}M_a$ for every $a$.
+  For arbitrary operators $T_a$ on
+  $\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$ and vectors
+  $\psi\in\mathcal H_{\mathrm A}\ot\mathcal H_{\mathrm B}$,
+  $\Delta\in\mathcal K_{\mathrm A}\ot\mathcal K_{\mathrm B}$,
+  write $\theta=(\phi_{\mathrm A}\ot\phi_{\mathrm B})\psi$. Then
+  \[
+    \sum_a\|(I\ot(\phi_{\mathrm B}M_a\phi_{\mathrm B}^\dagger)-T_a)\Delta\|^2
+    \le2\sum_a\|(I\ot N_a-T_a)\Delta\|^2+2\|\Delta-\theta\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:pauli-range-projection-support}
+  \leanok
+  Apply Theorem~\ref{thm:pauli-range-projection-support} to $\{I\ot N_a\}$ and
+  $Q=I\ot(\phi_{\mathrm B}\phi_{\mathrm B}^\dagger)$, which fixes $\theta$.
+  Intertwining gives $(I\ot N_a)Q=I\ot(\phi_{\mathrm B}M_a\phi_{\mathrm B}^\dagger)$.
+\end{proof}
+
+\begin{theorem}[Ancilla isometry and intertwining]
+  \label{thm:pauli-ancilla-intertwining-support}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry_matrix_apply}
+  \lean{MIPStarRE.QPBT.ancillaBlockIsometry_intertwines}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry_matrix}
+  \lean{MIPStarRE.QPBT.unitaryAncillaIsometry_intertwines}
+  \leanok
+  Let $\eta\in\mathcal K\ot\mathcal L$ be a unit vector, and define
+  $J\colon\mathcal H\to(\mathcal H\ot\mathcal K)\ot\mathcal L$ by
+  $J\psi=\psi\ot\eta$, with the indicated reassociation of factors.
+  Then $J$ is an isometry and, for every operator $M$ on $\mathcal H$,
+  $(M\ot I\ot I)J=JM$.
+  If $U^\dagger U=I$ on the enlarged space, then $\phi=UJ$ is an isometry
+  and
+  \[
+    \bigl(U(M\ot I\ot I)U^\dagger\bigr)\phi=\phi M.
+  \]
+  These identities hold for arbitrary finite-dimensional spaces. They give
+  the exact intertwining relation used in the final soundness proof when
+  $\eta$ is the local EPR state and $U$ is the swap unitary.
+\end{theorem}
+\begin{proof}
+  \leanok
+  The tensor norm gives $\|J\psi\|=\|\psi\|\|\eta\|=\|\psi\|$.
+  The operator $M$ acts on the first tensor factor, so
+  $(M\ot I\ot I)J\psi=J(M\psi)$.
+  Finally, $\phi^\dagger\phi=J^\dagger U^\dagger UJ=I$, and
+  $U(M\ot I\ot I)U^\dagger UJ=UJM$.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
 	\proves{thm:pauli}
 	\uses{lem:qld-unitary, lem:qld-extraction-error-form, lem:pauli-completeness,
 		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
-		def:EPR, def:povm-distance}
+		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
+		thm:pauli-isometry-transfer-alice-support,
+		thm:pauli-isometry-transfer-bob-support}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
 	\]
 	define $\phi_{\mathrm{B}}$ analogously.
+	Theorem~\ref{thm:pauli-ancilla-intertwining-support} gives the isometry and
+	exact intertwining identities for these unit-ancilla embeddings.
 	% Reliance disclosure added: the proof chain of thm:pauli passes through
 	% lem:qld-4-7, whose source proof (lines 1277--1413 of
 	% 14_analysis_of_the_pauli_basis_test.tex) instantiates the classical low
@@ -1092,7 +1238,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		= V_{\mathrm{A}} \, \Bigl( (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \ot \bigl(\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}\bigr)_{\mathrm{A}'\mathrm{A}''} \Bigr) \, V_{\mathrm{A}}^\dagger
 		= N^W_h \, Q_{\mathrm{A}} = Q_{\mathrm{A}} \, N^W_h\;.
 	\]
-	The estimates transfer from $N^W_h$ to $\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger$ as follows. Write $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and $\ket{\vartheta} = \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}$. Since $\phi_{\mathrm{A}}^\dagger \phi_{\mathrm{A}} = \Id$, the projection $\Id - Q_{\mathrm{A}}$ annihilates $\ket{\vartheta}$, so the displayed bound above gives
+	The estimates transfer from $N^W_h$ to $\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger$ by Theorem~\ref{thm:pauli-isometry-transfer-alice-support}, whose range-projection step is as follows. Write $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and $\ket{\vartheta} = \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}$. Since $\phi_{\mathrm{A}}^\dagger \phi_{\mathrm{A}} = \Id$, the projection $\Id - Q_{\mathrm{A}}$ annihilates $\ket{\vartheta}$, so the displayed bound above gives
 	\[
 		\bigl\| (\Id - Q_{\mathrm{A}}) \ket{\Delta} \bigr\|^2
 		= \bigl\| (\Id - Q_{\mathrm{A}}) (\ket{\Delta} - \ket{\vartheta}) \bigr\|^2
@@ -1110,7 +1256,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		\qquad \text{and, by the identical argument,} \qquad
 		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
 	\]
-	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
+	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. The Bob comparison is the corresponding application of Theorem~\ref{thm:pauli-isometry-transfer-bob-support}. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
 	The range-projection transfer just used, which is omitted in the source,
 	is documented in \cite{gap:qpbt_extraction-transfer}.
 \end{proof}
