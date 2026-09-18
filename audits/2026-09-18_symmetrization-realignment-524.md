@@ -143,6 +143,12 @@ approximate one would have silently retired a source statement that the
 project still tracks, and would have contradicted the register's existing
 "source statement kept as printed" entry.
 
+The new declarations live in a new module,
+`MIPStarRE/QPBT/Games/Symmetrization.lean`, rather than at the end of
+`MIPStarRE/QPBT/Games/StrategyClasses.lean`: appending them there would have
+pushed that file past the repository's 1000-line guard. The new module is
+imported from `MIPStarRE/QPBT.lean` next to `StrategyClasses`.
+
 Changes to the record:
 
 - `blueprint/src/chapter/ch12_qpbt_games.tex`: new node
@@ -163,7 +169,9 @@ Changes to the record:
 - `lake env lean MIPStarRE/QPBT/Games/StrategyClasses.lean`: succeeds; the
   only warning is the pre-existing "declaration uses `sorry`" on
   `exists_symmetric_projective_strategy`.
-- `lake build MIPStarRE.QPBT.Games.StrategyClasses`: succeeds.
+- `lake env lean MIPStarRE/QPBT/Games/Symmetrization.lean`: succeeds with no
+  warning.
+- `lake build MIPStarRE.QPBT.Games.Symmetrization`: succeeds.
 - `#print axioms` from a probe file outside the worktree: the six new
   declarations depend only on `propext`, `Classical.choice` and `Quot.sound`.
   `exists_symmetric_projective_strategy` still depends on `sorryAx`, as
