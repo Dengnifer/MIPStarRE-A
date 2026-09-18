@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Extraction.Defs
+import MIPStarRE.QPBT.Extraction.EPRState
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
@@ -118,17 +119,6 @@ theorem opFamilyDistSq_reindexState {questions answers : Type*} [Fintype answers
 
 end Reindex
 
-/-- Move the extracted registers to the front of their respective local blocks:
-`AA'A'' | BB'B''` becomes `A''AA' | B''BB'`. This is the concrete permutation
-needed to use `MagicSquareRigidity.exists_unit_residual` for the auxiliary state
-of `lem:qld-unitary`, without identifying the players' original spaces. -/
-def extractionEprFirstEquiv (params : AdmissibleParams) (ιA ιB : Type*) :
-    SixReg params ιA ιB ≃
-      (PauliRegister params × (ιA × PauliRegister params)) ×
-        (PauliRegister params × (ιB × PauliRegister params)) :=
-  (sixRegExtractionEquiv params ιA ιB).trans
-    (Equiv.prodCongr (Equiv.prodComm _ _) (Equiv.prodComm _ _))
-
 /-- The extraction-register permutation as a linear isometric equivalence.
 This is a coordinate isometry, not the local swap unitary of the paper. -/
 def extractionEprFirstIsometry (params : AdmissibleParams) (ιA ιB : Type*)
@@ -143,21 +133,6 @@ namespace ProjectiveSetting
 variable {params : AdmissibleParams} {epsilon : ℝ} (setting : ProjectiveSetting params epsilon)
 
 open scoped Classical in
-/-- In EPR-first local coordinates, the ideal extraction state is exactly the
-target used by the existing auxiliary-state normalization theorem. -/
-theorem reindexState_idealExpState
-    (aux : EuclideanSpace ℂ
-      (ExtractionAuxRegisters params setting.toStrategy.ιA setting.toStrategy.ιB)) :
-    reindexState (extractionEprFirstEquiv params setting.toStrategy.ιA setting.toStrategy.ιB)
-        (setting.idealExpState aux) =
-      reindexState prodShuffle (vecTensor (eprState (PauliRegister params)) aux) := by
-  ext index
-  change aux ((index.1.2.1, index.1.2.2), (index.2.2.1, index.2.2.2)) *
-      eprState (PauliRegister params) (index.1.1, index.2.1) =
-    eprState (PauliRegister params) (index.1.1, index.2.1) * aux (index.1.2, index.2.2)
-  exact mul_comm _ _
-
-open scoped Classical in
 /-- The distance to an ideal extraction state is precisely the residual
 distance in EPR-first coordinates. This permits reuse of
 `MagicSquareRigidity.exists_unit_residual` in either direction. -/
@@ -170,28 +145,6 @@ theorem norm_sub_idealExpState_eq
           (extractionEprFirstEquiv params setting.toStrategy.ιA setting.toStrategy.ιB) state -
         reindexState prodShuffle (vecTensor (eprState (PauliRegister params)) aux)‖ := by
   rw [← setting.reindexState_idealExpState, reindexState_norm_sub]
-
-open scoped Classical in
-/-- Tensoring an auxiliary vector with the extracted EPR state preserves its
-norm, even when the auxiliary vector is not normalized. -/
-theorem idealExpState_norm
-    (aux : EuclideanSpace ℂ
-      (ExtractionAuxRegisters params setting.toStrategy.ιA setting.toStrategy.ιB)) :
-    ‖setting.idealExpState aux‖ = ‖aux‖ := by
-  rw [idealExpState, reindexState_norm_eq, vecTensor_norm_eq, eprState_norm, mul_one]
-
-/-- A concrete normalized vector on `AA'BB'`, obtained from the original
-strategy state and one EPR pair. It supplies the reference vector required by
-`MagicSquareRigidity.exists_unit_residual`, including its zero-residual case. -/
-def extractionAuxReference : EuclideanSpace ℂ
-    (ExtractionAuxRegisters params setting.toStrategy.ιA setting.toStrategy.ιB) :=
-  reindexState prodShuffle (vecTensor setting.toStrategy.ψ (eprState (PauliRegister params)))
-
-/-- The reference auxiliary vector is a unit vector, without any choice of a
-basis vector on either player's original space. -/
-theorem extractionAuxReference_norm : ‖setting.extractionAuxReference‖ = 1 := by
-  rw [extractionAuxReference, reindexState_norm_eq, vecTensor_norm_eq, eprState_norm,
-    setting.toStrategy.ψ_norm, one_mul]
 
 /-- Simultaneous block placement respects multiplication. This identity is
 independent of the construction of the local swap operators. -/
