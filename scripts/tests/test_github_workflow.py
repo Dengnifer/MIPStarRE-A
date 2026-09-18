@@ -18,7 +18,8 @@ An unmatched route fails the call: a test that forgets to declare one sees it.
 Coverage mirrors the layer's failure modes, one test each: status reduction and
 posting, comment/review idempotency and post-failure adoption, prerequisite
 edge creation and adoption, reviewer-round history, the merge topology check,
-the optional merge subject and its approximate Lean line delta (issue #557),
+the optional merge subject and its approximate Lean code-line delta (issues
+#557 and #574),
 label validation and key-marker adoption, the ``pr_merge.py`` gate ladder
 (fail-closed on missing CI evidence and on an adverse verdict), the audit
 snapshot, and a hygiene check that no live tool still reaches for the retired
@@ -1125,6 +1126,43 @@ class MergeGateTests(LayerTestCase):
             with self.subTest(path=path):
                 self.assertFalse(pr_merge._is_tolerated_telemetry_path(path))
 
+    def test_train_accepts_frozen_base_with_combined_ci_required(self) -> None:
+        self._advance_main("local/train-base.py", "source before the train freezes")
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        self._arm()
+        output = io.StringIO()
+        with mock.patch.object(pr_merge, "head_is_fresh") as ordinary_freshness, \
+                mock.patch("sys.stdout", output):
+            gate = pr_merge.run_gate(self.repo, 7, adjudicated=False,
+                                     integration_base=frozen)
+        self.assertEqual(gate["head_sha"], self.head)
+        ordinary_freshness.assert_not_called()
+        self.assertIn("frozen integration base unchanged; combined-commit CI required",
+                      output.getvalue())
+        self.assertNotIn("ancestry or passive-telemetry-only move", output.getvalue())
+        self.assertFalse(any(call["method"] != "GET" for call in self.gh.calls()))
+
+    def test_train_rejects_telemetry_and_source_movement_after_freeze(self) -> None:
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        self._arm()
+        for path in ("results/telemetry/events.md", "local/train-base.py"):
+            with self.subTest(path=path):
+                self._advance_main(path, "base moved after the train froze")
+                with self.assertRaisesRegex(pr_merge.GateFailure,
+                                             "main changed from the frozen integration base"):
+                    pr_merge.run_gate(self.repo, 7, adjudicated=False,
+                                      integration_base=frozen)
+
+    def test_train_rejects_non_main_base(self) -> None:
+        frozen = _git(self.repo, "rev-parse", "github/main")
+        _git(self.repo, "checkout", "-q", "-b", "release")
+        self.gh.route(r"^pulls/7$", {
+            "number": 7, "state": "open", "draft": False, "merged": False,
+            "head": {"sha": self.head, "ref": self.BRANCH}, "base": {"ref": "release"}})
+        with self.assertRaisesRegex(pr_merge.GateFailure,
+                                     "main changed from the frozen integration base"):
+            pr_merge.run_gate(self.repo, 7, adjudicated=False, integration_base=frozen)
+
     def test_freshness_rejects_mixed_telemetry_data_and_code(self) -> None:
         (self.repo / "results/telemetry/events.md").write_text(
             "allowed record\n", encoding="utf-8")
@@ -1312,13 +1350,24 @@ class MergeGateTests(LayerTestCase):
             pr_merge.check_review(self.repo, 7, self.head, reviews[:-1], statuses, adjudicated=True)
 
 
+#: Issue #574 fixture: seven lines of which exactly two — the theorems — are code.
+DOC_MODULE = """/-!
+# Module doc
+-/
+
+-- a line comment
+theorem doc_a : True := trivial
+theorem doc_b : True := trivial  -- code with a trailing comment
+"""
+
+
 class MergeSubjectTests(unittest.TestCase):
-    """Issue #557 — the merge subject's approximate Lean line delta.
+    """Issues #557 and #574 — the merge subject's approximate Lean code delta.
 
     The owner reads this number off GitHub's commits page, so what matters is
-    that it is right when git can answer, that only Lean lines reach it, and
-    that it is *absent* rather than wrong or fatal when git cannot: the count is
-    cosmetic, and the merge gate must not acquire a new way to fail.  No GitHub
+    that it is right when git can answer, that only Lean *code* lines reach it,
+    and that it is *absent* rather than wrong or fatal when git cannot: the count
+    is cosmetic, and the merge gate must not acquire a new way to fail.  No GitHub
     call is involved, so this case needs neither the fake ``gh`` nor its env.
     """
 
@@ -1338,6 +1387,9 @@ class MergeSubjectTests(unittest.TestCase):
         lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
         lean.parent.mkdir(parents=True)
         lean.write_text("".join(f"line {n}\n" for n in range(1, 6)), encoding="utf-8")
+        # A second base-side module mixing comments with code, so the delete and the
+        # rename cases have a file whose comment lines must stay out of the count.
+        (lean.parent / "Doc.lean").write_text(DOC_MODULE, encoding="utf-8")
         (self.repo / "README.md").write_text("base\n", encoding="utf-8")
         _git(self.repo, "add", "-A")
         _git(self.repo, "commit", "-q", "--no-verify", "-m", "base commit")
@@ -1371,6 +1423,87 @@ class MergeSubjectTests(unittest.TestCase):
         self.assertIsNone(pr_merge.lean_line_delta(self.tmp / "no-templates",
                                                    self.merge_base, head),
                           "a directory that is no repository must yield no count either")
+
+    def test_code_mask_sees_code_through_comments_and_blank_lines(self) -> None:
+        """Issue #574 — what the delta is willing to call a line of Lean code.
+
+        The nested block comment is the load-bearing case: a scanner that closed on
+        the inner ``-/`` would call the tail of that line code and, worse, carry the
+        wrong depth into every line after it.  The string on the last line is the
+        other one: the delimiters inside it are text, not comment openers.
+        """
+        source = (
+            "-- a line comment\n"
+            "import Mathlib\n"
+            "\n"
+            "/-- A doc comment\n"
+            "spanning two lines. -/\n"
+            "/- outer /- inner -/ still inside -/\n"
+            "   \n"
+            "def f : Nat := 1  -- a trailing comment\n"
+            "/-!\n"
+            "module doc\n"
+            "-/\n"
+            'def g := "a string holding /- and -- and -/"\n')
+        self.assertEqual(
+            pr_merge.lean_code_line_mask(source),
+            [False, True, False, False, False, False, False, True,
+             False, False, False, True])
+        # An escaped quote in the continuation cannot expose its /- as a comment.
+        continued = 'def s : String := "hello\n\\"/-"\ntheorem t : True := trivial\n'
+        self.assertEqual(pr_merge.lean_code_line_mask(continued), [True, False, True])
+
+    def test_delta_counts_only_the_code_lines_a_change_touched(self) -> None:
+        # Two code lines leave; five lines arrive of which exactly one is code.
+        (self.repo / "MIPStarRE" / "QPBT" / "Base.lean").write_text(
+            "line 1\nline 2\nline 3\n-- a line comment\n/- block\n   comment -/\n"
+            "\nline 4 changed\n", encoding="utf-8")
+        head = self._commit("comment churn around a single changed code line")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (1, 2))
+
+    def test_delta_counts_code_after_a_multiline_string_containing_comment_opener(self) -> None:
+        # Lean accepts this ordinary multiline string; /- on its second line is text.
+        lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
+        prefix = 'def s : String := "hello\n/-"\n'
+        lean.write_text(prefix + "theorem t : True := trivial\n", encoding="utf-8")
+        base = self._commit("add a multiline Lean string")
+        lean.write_text(prefix + "theorem t : True := by trivial\n", encoding="utf-8")
+        head = self._commit("change a theorem after the string")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, base, head), (1, 1))
+
+    def test_delta_reads_an_added_file_as_the_code_lines_it_brings(self) -> None:
+        qpbt = self.repo / "MIPStarRE" / "QPBT"
+        (qpbt / "Notes.lean").write_text("/-!\n# Only prose\n-/\n\n-- and a remark\n",
+                                         encoding="utf-8")
+        (qpbt / "New.lean").write_text("-- header\ntheorem new : True := trivial\n\n",
+                                       encoding="utf-8")
+        head = self._commit("add a prose-only module beside a one-theorem module")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (1, 0))
+
+    def test_delta_reads_a_deleted_file_as_the_code_lines_it_takes(self) -> None:
+        (self.repo / "MIPStarRE" / "QPBT" / "Doc.lean").unlink()
+        head = self._commit("drop the doc module")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (0, 2))
+
+    def test_delta_follows_a_rename_and_counts_only_the_code_it_added(self) -> None:
+        qpbt = self.repo / "MIPStarRE" / "QPBT"
+        moved = qpbt / "Renamed.lean"
+        (qpbt / "Doc.lean").rename(moved)
+        moved.write_text(DOC_MODULE + "-- one more remark\ntheorem doc_c : True := trivial\n",
+                         encoding="utf-8")
+        head = self._commit("rename the doc module and extend it")
+        self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (1, 0))
+
+    def test_delta_never_raises_whatever_git_does(self) -> None:
+        """A cosmetic count that raised would fail a merge that cleared every gate."""
+        with mock.patch.object(pr_merge, "_run_git_raw", side_effect=OSError("no git")):
+            self.assertIsNone(pr_merge.lean_line_delta(self.repo, self.merge_base,
+                                                       self.merge_base))
+        malformed = subprocess.CompletedProcess([], 0, stdout=b":100644 100644 x y M",
+                                                stderr=b"")
+        with mock.patch.object(pr_merge, "_run_git_raw", return_value=malformed):
+            self.assertIsNone(pr_merge.lean_line_delta(self.repo, self.merge_base,
+                                                       self.merge_base))
 
     def test_title_carries_the_delta_and_marks_a_lean_free_pr(self) -> None:
         self.assertEqual(

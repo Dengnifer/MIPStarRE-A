@@ -38,10 +38,10 @@
   \item \textbf{Estimated weight:} the directly indexed game, its soundness
   theorem, the reduction from general simultaneity to one, the correlated
   residue lift from the seed-indexed game, and the compression of the two
-  mixed consistency conclusions are formalized. For $k=1$, the global
+  mixed consistency conclusions are formalized. For every $k$, the global
   relation is recovered from point agreement and Schwartz--Zippel, completing
-  seed-indexed soundness. The general-$k$ seed-indexed theorem and the
-  downstream use at dimension $2m+2$ remain open. Independently, discharging
+  seed-indexed soundness. The downstream use at dimension $2m+2$ remains
+  separate from this transport. Independently, discharging
   the original import obligations of
   Section~\ref{sec:import-obligations} adds the pair-measurement
   construction with its distributional matching, the branch-weight value
@@ -110,10 +110,10 @@ theorem forms.
   Theorem~4.7 of \cite{Ji2021Quantum} or verify that theorem's distinct
   condition $K \ge 12m'(d+1)$.  Thus it avoids rather than discharges the
   two source-import obligations of Section~\ref{sec:import-obligations}.
-  For $k=1$, transport to the seed-indexed game is established: the two
+  For every $k$, transport to the seed-indexed game is established: the two
   mixed relations compress exactly and the global relation is recovered
-  from point agreement on the original Hilbert spaces. The general-$k$
-  seed-indexed source theorem remains open.
+  from point agreement on the original Hilbert spaces and the
+  Schwartz--Zippel bound for polynomial tuples.
 \end{enumerate}
 
 \section{The source assertion and the obstruction}
@@ -368,32 +368,42 @@ residues.  Neither quantity bounds the other in general.  For example, on a
 two-element residue register, if both deterministic measurements report the
 residue, the equal-residue disagreement is zero while the independent-residue
 disagreement is $1/2$.  If Alice reports the residue and Bob reports its
-complement, the corresponding disagreements are $1$ and $1/2$. For $k=1$,
+complement, the corresponding disagreements are $1$ and $1/2$. For every $k$,
 the third relation is instead recovered on the original Hilbert spaces.
 The point-agreement branch has weight $1/9$, so the two point measurements
 have consistency defect at most $9\eps$. The triangle inequality combines
 this with the two compressed mixed relations to give agreement of evaluated
-polynomials; Schwartz--Zippel then gives global polynomial agreement with
-an additional error $m'd/q$. Absorption into $\delta_{\mathrm{ld}}$ completes
-the seed-indexed theorem for $k=1$.%
+polynomial tuples. Distinct tuples differ in at least one coordinate, so
+their evaluations can agree only where those two coordinate polynomials
+agree. Schwartz--Zippel therefore gives the same collision bound $m'd/q$
+for every $k$, without a union bound over the coordinates.
+Writing $E=\delta_{\mathrm{ld}}(\eps,q,m',d,k)$ for the direct error, the
+global defect after compression is at most
+\[
+  E+2\sqrt{9\eps+E}+\frac{m'd}{q}.
+\]
+For $\eps\leq1$ the direct error dominates both $\eps$ and $m'd/q$.
+If also $E\leq1$, the displayed expression is at most $10\sqrt E$.
+Replacing the direct constants $(a,b)$ by $(10a,b/2)$ absorbs this bound:
+the square root of a sum is at most the sum of its square roots, and the
+prefactor $a(dm'k)^a$ is at least one. When $E>1$ or $\eps>1$, the unit
+bound on bipartite consistency defects suffices. This proves seed-indexed
+soundness for every $k$.%
 \footnote{The point-agreement estimates are proved in
 \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/PointAgreement.lean}.
-The resulting theorem is \leanid{exists\_ld\_soundness\_of\_k\_eq\_one} in
-\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean};
-its direct specialization is
-\leanid{exists\_direct\_ld\_soundness\_of\_k\_eq\_one} in
-\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}.}
+The resulting theorem is \leanid{exists\_ld\_soundness} in
+\doclink{MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean}; the scalar estimate is
+\leanid{ten\_sqrt\_deltaLd\_le} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/SeedError.lean}.}
 
 The combining reduction has now been formalized with the direct distribution
 and the directly indexed game, so it is well defined at dimension
 $m'+\kappa$ for
 all positive parameters.  Its proof uses the sampled geometric data and then
 applies the low individual degree theorem at the combined dimension.  This
-establishes soundness of the directly indexed game, but it does not change the
-source-shaped sub-line and polynomial-pair statements or prove the
-general-$k$ seed-indexed soundness theorem. It already supplies the first two
-consistency conclusions after correlated-residue compression; for $k=1$ the
-third is recovered as described above. The downstream use at dimension
+establishes soundness of the directly indexed game and, by the compression
+and recovery argument above, of the seed-indexed game. It does not change the
+source-shaped sub-line and polynomial-pair statements. The downstream use at dimension
 $2m+2$ still requires verification. Completing that application must respect
 the subtree protocol
 for a definition-level mismatch rather than adding a divisibility hypothesis
@@ -443,8 +453,9 @@ Theorem~4.7 --- and enumerates the two obligations of
 Section~\ref{sec:import-obligations} as open, citing this note for the
 detailed comparison and the case arithmetic.  The separate support node for
 general simultaneity records the established directly indexed theorem and its
-proof through the low individual degree theorem; it does not mark the
-seed-indexed source theorem as proved.  An earlier revision had
+proof through the low individual degree theorem. The seed-indexed theorem
+is now proved by compression and global recovery for arbitrary $k$.
+An earlier revision had
 instead added the hypothesis $2m+2 \mid q$ to the three lemmas; that was
 statement drift in the sense of the proof-gap protocol, since the hypothesis
 excludes all admissible $m \ge 2$ and does not appear in the source.
@@ -467,10 +478,10 @@ condition $400Md \le N$ for $M=m'+\kappa$ and $N=2560000M^3d$.  It neither
 applies the tensor-code theorem nor verifies its bound on $K$, so it bypasses
 rather than discharges both source-import obligations.  The correlated-residue
 lift now transports projectivity, game value, and the two mixed consistency
-conclusions from this direct proof. For $k=1$, point agreement and
+conclusions from this direct proof. For every $k$, point agreement and
 Schwartz--Zippel recover the global relation on the original Hilbert spaces,
 completing the seed-indexed soundness theorem without asserting a false
-double-compression identity. The general-$k$ seed-indexed theorem remains open.
+double-compression identity.
 Separately, the source-shaped polynomial-pair construction
 still has its declared construction and carrier-transport obligations; repairing
 the original tensor-code import would provide another route to soundness.  We

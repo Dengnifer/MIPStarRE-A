@@ -86,8 +86,10 @@ patterns and blueprint desynchronisation — exactly the failures whose "fix" is
 a mathematical judgement about faithfulness to `references/ldt-paper/`.  An
 agent told to make such a guard pass will make it pass, and the cheapest way to
 do that is to weaken the statement.  Excluding them is not a limitation of the
-tooling; it is the tooling refusing to automate the decision that
-`AGENTS.md` reserves for a human.
+tooling; it is the tooling refusing to auto-fix a mathematical decision. Main
+owns that decision under `issues-prs.md` §6 (2026-09-06T05:05Z), with the
+faithfulness requirements unchanged. Only actual access/permission blockers
+requiring human action go to #26; sync and audit failures remain excluded.
 
 One local refinement: `ci.sh` distinguishes `failure` (the step ran and the
 code is wrong) from `error` (the step could not run — a missing tool, or a
