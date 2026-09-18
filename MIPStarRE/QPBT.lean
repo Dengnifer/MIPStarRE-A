@@ -96,6 +96,7 @@ import MIPStarRE.QPBT.Extraction.Construction
 import MIPStarRE.QPBT.Extraction.Unitary
 import MIPStarRE.QPBT.Extraction.SourceUnitary
 import MIPStarRE.Quantum.ControlledUnitary
+import MIPStarRE.QPBT.Test.Soundness.ScalarAbsorption
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
