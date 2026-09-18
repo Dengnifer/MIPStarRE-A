@@ -42,17 +42,13 @@ theorem ProjectiveSetting.opFamilyDistSq_postprocess_some
     opFamilyDistSq law (fun sample answer => S.place p1 ((first sample).effect answer))
       (fun sample answer => S.place p2 ((second sample).effect answer)) S.psiHat := by
   classical
-  have hplace_zero (p : Placement) :
-      S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-    ext i j
-    cases p <;> simp [ProjectiveSetting.place]
   unfold opFamilyDistSq
   congr 1
   funext sample
   rw [Fintype.sum_option]
   simp [MIPStarRE.Quantum.Measurement.postprocess,
     MIPStarRE.Quantum.Submeasurement.postprocess, Finset.sum_filter,
-    hplace_zero, applyOperatorToState]
+    S.place_zero, applyOperatorToState]
 
 end
 

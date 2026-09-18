@@ -8,8 +8,8 @@ to this principal submatrix. Compression commutes with finite outcome
 postprocessing and preserves bipartite consistency exactly on `padState`.
 The two players' spaces and their ancilla spaces may all be different.
 
-These are Lean-only auxiliaries for the two Naimark steps in the proof of
-`lem:qld-4-7`, tracked by issue #277. They allow measurements on the enlarged
+These are formalization-only auxiliaries for the two Naimark steps in the proof of
+`lem:qld-4-7`, constructed under issue #277 (closed). They allow measurements
 spaces to be compared on the original spaces, including after polynomial
 evaluation. Compression does not in general preserve projectivity; obtaining
 projective measurements on the original spaces requires a separate rounding

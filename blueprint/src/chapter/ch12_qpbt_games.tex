@@ -130,12 +130,29 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	\]
 	and let each player measure $M$ on their pair of registers. Because the decision predicate $D$ of the symmetric game treats the two players symmetrically, the resulting symmetric projective strategy $\mathcal S = (\ket{\psi}, M)$ satisfies $\operatorname{val}^*(\mathfrak G, \mathcal S) = \operatorname{val}^*(\mathfrak G, \mathcal S') \ge 1-\eps'$. Note that this construction preserves the value of the strategy it is applied to exactly.
 
-	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}.
+	The statement asserts more, namely a single symmetric projective strategy of value at least $1-\eps$ itself. Passing from the family of strategies constructed above to one attaining the bound $1-\eps$ is an attainment step which the argument does not supply: the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} ranges over strategies of unbounded dimension and need not be attained. This step remains unproved; the obstruction, and the forms of the lemma that the argument does prove, are documented in \cite{gap:qpbt_symmetrization-attainment}. See also Remark~\ref{rem:symmetric-strat-limit}. The approximate form that the argument does establish is stated separately, with its nonempty-answer boundary hypothesis displayed, as Lemma~\ref{lem:symmetric-strat-approx}; the exact form printed above stays an open source gap and is therefore not marked as formalized here.
 \end{proof}
 
 \begin{remark}[Attainment in the symmetrization lemma]\label{rem:symmetric-strat-limit}
 	The proof of Lemma~\ref{lem:symmetric-strat} yields, for each $\eps' > \eps$, a symmetric projective strategy of value at least $1-\eps'$. The conclusion as stated, at $\eps' = \eps$, does not follow from this: the dilated dimension $d$ may grow as $\eps' \downarrow \eps$, and the supremum defining $\operatorname{val}^*(\mathfrak G)$ in Definition~\ref{def:tensor-product-value} need not be attained by any strategy. The symmetrization construction itself is value-preserving, so the conclusion does hold whenever the hypothesis supplies an actual strategy of value at least $1-\eps$ rather than only the value of the game; every use of the lemma in the source proceeds from such a strategy, or from a strict lower bound on the value, and therefore consumes only what the proof establishes. The gap and the available repairs are documented in \cite{gap:qpbt_symmetrization-attainment}.
 \end{remark}
+
+\begin{lemma}[Approximate symmetrization for symmetric games]
+	\label{lem:symmetric-strat-approx}
+	\lean{MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx}
+	\leanok
+	\uses{def:symmetric-game, def:tensor-product-value, def:projective-strategy-general, lem:symmetric-strat-given-strategy}
+	This formalization-only node is not a named statement of the paper; it is the approximate form that the proof of Lemma~\ref{lem:symmetric-strat} establishes, isolated in Remark~\ref{rem:symmetric-strat-limit}, with the source's nonempty answer alphabet displayed as an explicit hypothesis. Let $\mathfrak G = (\mathcal X, \mathcal A, \mu, D)$ be a symmetric game whose answer alphabet $\mathcal A$ is nonempty, and suppose $\operatorname{val}^*(\mathfrak G) = 1-\eps$ for some $\eps \ge 0$. Then for every $\eps' > \eps$ there exists a symmetric and projective strategy $\mathcal S = (\ket{\psi}, M)$ with
+	\[
+		\operatorname{val}^*(\mathfrak G, \mathcal S) \ge 1-\eps'\,.
+	\]
+	Equivalently, for every slack $\delta > 0$ there is a symmetric projective strategy of value at least $\operatorname{val}^*(\mathfrak G) - \delta$; that slack form is the Lean declaration \texttt{exists\_symmetric\_projective\_strategy\_of\_lt\_value}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{thm:naimark, lem:symmetric-strat-given-strategy}
+	Fix $\eps' > \eps$. Since $\mathcal A$ is nonempty, the one-dimensional strategy answering a fixed answer deterministically is a strategy for $\mathfrak G$, so the set of strategy values is nonempty; it is bounded above by $1$, so $\operatorname{val}^*(\mathfrak G)$ is the least upper bound of that set. The supremum property therefore supplies a strategy $\mathcal S'$ with $\operatorname{val}^*(\mathfrak G, \mathcal S') > 1-\eps'$, which is the step the source proof states as ``by definition''. Applying Lemma~\ref{lem:symmetric-strat-given-strategy} to $\mathcal S'$ produces a symmetric projective strategy of exactly the value of $\mathcal S'$, hence at least $1-\eps'$. The nonemptiness hypothesis is load-bearing in the formalization: with an empty answer alphabet no strategy exists at all, while the value is still defined as the totalized supremum of the empty set, so the conclusion fails there. No attainment step is used and none is claimed at $\eps' = \eps$; that step is the open source gap of Lemma~\ref{lem:symmetric-strat}, documented in \cite{gap:qpbt_symmetrization-attainment}.
+\end{proof}
 
 \begin{lemma}[Formalization support for Lemma~\ref{lem:symmetric-strat}]
 	\label{lem:symmetric-strat-given-strategy}
@@ -1400,7 +1417,7 @@ postprocessing, and operator-contraction steps used to formalize
 		(G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]} \ot \Id
 		\simeq_\delta \Id \ot A^{x,y_1,y_2}_{a_2}.
 	\end{equation}
-	Then its conclusion holds. This is a conditional Lean-only result, not the
+	Then its conclusion holds. This is a conditional auxiliary result, not the
 	printed theorem. The additional comparison holds on a swap-invariant state,
 	but that property is not an explicit assumption of the source operator lemma.
 	The discrepancy and the plan to eliminate this restriction from the source
@@ -2138,6 +2155,26 @@ of the paper.
 	Compare $M$ with the zero operator in the quadratic-form order.
 \end{proof}
 
+\begin{lemma}[Formalization support: quadratic-form conjugation]
+	\label{lem:distance-qform-conjugation}
+	\lean{MIPStarRE.QPBT.DistanceCalculus.stateQForm_conjTranspose_mul_mul}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates the conjugation step used in the placed-sandwich estimates. Let
+	$\iota$ be a finite index set, let $\ket\psi\in\C^\iota$, and let $W,M$ be
+	arbitrary operators on $\C^\iota$. Then
+	\[
+		q_\psi(W^\dagger M W)=q_{W\psi}(M).
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:distance-state-quadratic-form}
+	Move the adjoint action of $W^\dagger$ across the inner product and take real
+	parts.
+\end{proof}
+
 \begin{lemma}[Formalization support for Fact~\ref{fact:agreement}]
 	\label{lem:distance-measurement-effect-le-one}
 	\lean{MIPStarRE.QPBT.DistanceCalculus.measurement_effect_le_one}
@@ -2593,6 +2630,282 @@ of the paper.
 	\leanok
 	The coordinate exchange is an involution.
 \end{proof}
+
+	\begin{lemma}[Relabeling commutes with the product measurement]
+		\label{lem:qld-tensor-measurement-postprocess}
+		\lean{MIPStarRE.QPBT.tensorMeasurement_postprocess}
+		\leanok
+		\uses{def:post-processing}
+		This formalization-only auxiliary is not a named statement of the source
+		article. Let two measurements act on two spaces, and relabel their outcomes
+		by two maps, one for each factor. Post-processing each measurement
+		separately and then forming the product measurement gives the same
+		measurement as forming the product first and then relabeling by the induced
+		map on pairs.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{def:post-processing}
+		At a fixed pair of labels, both sides are the product of the two fiber
+		sums, since the fiber of the induced map over a pair of labels is the
+		product of the two fibers and the product of operators is bilinear.
+	\end{proof}
+
+	\subsection{Ground-coordinate compression}
+
+	% Formalization-only auxiliaries for the two Naimark steps in the proof of
+	% lem:qld-4-7, tracked by issue #277. They do not formalize any statement of
+	% lem:qld-4-7 itself, and compression does not preserve projectivity.
+
+	\begin{definition}[Ground-coordinate compression of a measurement]
+		\label{def:ground-compress-measurement}
+		\lean{MIPStarRE.QPBT.groundCompressMeasurement}
+		\leanok
+		This construction is not named in the source article; it undoes, on the
+		level of operators, the enlargement performed by the Naimark dilation of
+		Theorem~\ref{thm:naimark} in the two dilation steps of the proof of
+		Lemma~\ref{lem:qld-4-7}. Let a measurement act on a space $I \ot K$ and fix
+		a coordinate $k_0$ of $K$. Its \emph{ground-coordinate compression} at
+		$k_0$ is the measurement on $I$ whose effect at each outcome is the
+		principal submatrix of the original effect indexed by the pairs
+		$(i, k_0)$. Positivity descends to principal submatrices, and completeness
+		descends because the coordinate inclusion is injective.
+	\end{definition}
+
+	\begin{lemma}[The compressed effects are principal submatrices]
+		\label{lem:ground-compress-effect}
+		\lean{MIPStarRE.QPBT.ground_compress_measurement_effect}
+		\leanok
+		\uses{def:ground-compress-measurement}
+		The entry of the compressed effect at $(i, j)$ equals the entry of the
+		original effect at $\bigl((i, k_0), (j, k_0)\bigr)$.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		This is the definition of the submatrix.
+	\end{proof}
+
+	\begin{lemma}[Compression commutes with outcome relabeling]
+		\label{lem:ground-compress-postprocess}
+		\lean{MIPStarRE.QPBT.ground_compress_measurement_postprocess}
+		\leanok
+		\uses{def:ground-compress-measurement, def:post-processing}
+		Compressing a measurement at $k_0$ and then relabeling its outcomes gives
+		the same measurement as relabeling first and then compressing, for every
+		map of finite outcome sets.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:ground-compress-effect}
+		Both sides have, at each entry, the sum of the original entries over the
+		fiber of the relabeling map, because passing to a principal submatrix
+		commutes with each fiber sum.
+	\end{proof}
+
+	\begin{lemma}[Formalization support for quadratic forms of padded states]
+		\label{lem:padded-state-quadratic-form}
+		\lean{MIPStarRE.QPBT.stateQForm_padState}
+		\leanok
+		\uses{def:distance-state-quadratic-form}
+		This is not a named statement of the source article; it isolates the
+		coordinate calculation used in the two Naimark steps of the proof of
+		Lemma~\ref{lem:qld-4-7}. Let $I,J,K,L$ be finite coordinate sets, fix
+		$k_0\in K$ and $l_0\in L$, and let $\ket\psi\in\C^{I\times J}$. Form
+		$\ket{\psi_{k_0,l_0}}\in\C^{(I\times K)\times(J\times L)}$ by placing
+		$\ket\psi$ at the two distinguished ancilla coordinates and setting every
+		other coordinate to zero. If operators $A,A',B,B'$ satisfy
+		\[
+			A'_{(i,k_0),(i',k_0)}=A_{i,i'},\qquad
+			B'_{(j,l_0),(j',l_0)}=B_{j,j'},
+		\]
+		then
+		\[
+			q_{\psi_{k_0,l_0}}(A'\ot B')=q_\psi(A\ot B).
+		\]
+		No normalization of $\ket\psi$ is required.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		Expand the two quadratic forms in coordinates. Every term involving an
+		ancilla coordinate other than $k_0$ or $l_0$ vanishes, and the remaining
+		entries agree by the two hypotheses.
+	\end{proof}
+
+	\begin{lemma}[Compression preserves bipartite correlations on a padded state]
+		\label{lem:ground-compress-correlation}
+		\lean{MIPStarRE.QPBT.vector_qform_ground_compress_measurement}
+		\leanok
+		\uses{def:ground-compress-measurement}
+		Let a bipartite vector on $I \ot J$ be padded to $(I \ot K) \ot (J \ot L)$
+		by adjoining the basis vectors at $k_0$ and at $l_0$ in the two ancillas.
+		For measurements on $I \ot K$ and on $J \ot L$, every outcome correlation
+		in the padded vector equals the corresponding correlation of the two
+		compressed measurements in the original vector. Neither normalization of
+		the vector nor equality of the two local spaces is required.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:padded-state-quadratic-form}
+		Apply Lemma~\ref{lem:padded-state-quadratic-form} to the two effects and
+		their principal submatrices. The required coordinate identities hold by
+		the definition of ground-coordinate compression.
+	\end{proof}
+
+	\begin{lemma}[Compression preserves the consistency defect exactly]
+		\label{lem:ground-compress-consistency-defect}
+		\lean{MIPStarRE.QPBT.consistency_defect_ground_compress_measurement}
+		\leanok
+		\uses{def:ground-compress-measurement, def:consistency}
+		For every finite question distribution and every pair of measurement
+		families on $I \ot K$ and on $J \ot L$ sharing one outcome set, the
+		consistency defect of Definition~\ref{def:consistency} in the padded vector
+		equals the consistency defect of the two compressed families in the
+		original vector.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:ground-compress-correlation}
+		The defect is an average over questions of a sum over pairs of outcomes.
+		The diagonal terms cancel on both sides, and each off-diagonal term is
+		matched by Lemma~\ref{lem:ground-compress-correlation}.
+	\end{proof}
+
+	\begin{lemma}[Compression preserves consistency bounds]
+		\label{lem:ground-compress-consistency-iff}
+		\lean{MIPStarRE.QPBT.is_consistent_within_ground_compress_measurement_iff}
+		\leanok
+		\uses{def:ground-compress-measurement, def:consistency}
+		A pair of measurement families is consistent to within a given error in the
+		padded vector if and only if the two compressed families are consistent to
+		within the same error in the original vector.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:ground-compress-consistency-defect}
+		The two defects are equal by
+		Lemma~\ref{lem:ground-compress-consistency-defect}.
+	\end{proof}
+
+	\begin{lemma}[Compression preserves the consistency defect after relabeling]
+		\label{lem:ground-compress-consistency-postprocess}
+		\lean{MIPStarRE.QPBT.consistency_defect_ground_compress_measurement_postprocess}
+		\leanok
+		\uses{def:ground-compress-measurement, def:consistency, def:post-processing}
+		The same exact preservation holds after question-dependent relabeling of
+		the outcomes. The two original outcome sets and the two relabeling maps may
+		differ; only the final outcome set is shared. In the application to
+		Lemma~\ref{lem:qld-4-7} these maps are the evaluations of the polynomial
+		outcomes.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:ground-compress-consistency-defect, lem:ground-compress-postprocess}
+		Apply Lemma~\ref{lem:ground-compress-consistency-defect} to the relabeled
+		families and move the relabeling through the compression using
+		Lemma~\ref{lem:ground-compress-postprocess}.
+	\end{proof}
+
+	\subsection{Projective rounding through outcome relabeling}
+
+	% Formalization-only auxiliaries for the compression and rounding argument
+	% preceding the polynomial-support argument in the proof of lem:qld-4-7,
+	% tracked by issue #278. They do not construct the global polynomial-pair
+	% measurement, and no statement of lem:qld-4-7 is formalized here.
+
+	\begin{lemma}[Question-dependent form of data processing]
+		\label{lem:qld-consistency-defect-postprocess-question}
+		\lean{MIPStarRE.QPBT.consistencyDefect_postprocess_question_le}
+		\leanok
+		\uses{def:consistency, def:post-processing, fact:data-processing}
+		This is the question-dependent form of Lemma~\ref{fact:data-processing}.
+		Applying the same outcome map to both players at each question does not
+		increase their consistency defect. Neither the question distribution nor
+		the state needs to be normalized.
+	\end{lemma}
+
+	\begin{lemma}[Exchanging the two local spaces preserves the consistency defect]
+		\label{lem:qld-consistency-defect-prodcomm}
+		\lean{MIPStarRE.QPBT.consistencyDefect_prodComm}
+		\leanok
+		\uses{def:consistency}
+		Reindexing the state by the exchange of the two local spaces, and
+		exchanging the two operator families accordingly, leaves the consistency
+		defect unchanged.
+	\end{lemma}
+
+	\begin{lemma}[Exchanging the two local spaces preserves the operator-family distance]
+		\label{lem:qld-opfamilydistsq-prodcomm}
+		\lean{MIPStarRE.QPBT.opFamilyDistSq_left_prodComm}
+		\leanok
+		\uses{def:povm-distance}
+		The same exchange leaves the state-dependent distance of
+		Definition~\ref{def:povm-distance} between two operator families acting on
+		the first space unchanged.
+	\end{lemma}
+
+	\begin{lemma}[Rounding the first player and transporting through relabeling]
+		\label{lem:qld-projective-rounding-transport-left}
+		\lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency_left}
+		\leanok
+		\uses{def:povm-distance, def:consistency, def:post-processing, lem:ortho}
+		Let a unit vector on $\iota_A \ot \iota_B$ and two complete measurements on
+		$\iota_A$ and on $\iota_B$ with a common outcome set be consistent to
+		within $\delta \geq 0$. Then there is a complete projective measurement on
+		$\iota_A$ at distance at most $220\,\delta^{1/4}$ from the first
+		measurement, such that for every finite question type, every probability
+		distribution on it, every question-dependent outcome map, and every
+		comparison family on $\iota_B$ consistent to within $\eta$ with the
+		relabeled first measurement, the relabeled projective measurement is
+		consistent with that comparison family to within
+		$\delta + \sqrt{220\,\delta^{1/4}} + 2\sqrt{\delta + \eta}$. The estimate
+		is independent of both local dimensions and of the number of outcomes.
+	\end{lemma}
+
+	\begin{lemma}[Rounding the second player and transporting through relabeling]
+		\label{lem:qld-projective-rounding-transport-right}
+		\lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency_right}
+		\leanok
+		\uses{def:povm-distance, def:consistency, def:post-processing, lem:ortho}
+		The statement of
+		Lemma~\ref{lem:qld-projective-rounding-transport-left} with the roles of
+		the two local spaces exchanged.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-projective-rounding-transport-left,
+			lem:qld-consistency-defect-prodcomm, lem:qld-opfamilydistsq-prodcomm}
+		Reindex the state by the exchange of the two local spaces, apply
+		Lemma~\ref{lem:qld-projective-rounding-transport-left}, and transport the
+		two conclusions back with
+		Lemmas~\ref{lem:qld-consistency-defect-prodcomm}
+		and~\ref{lem:qld-opfamilydistsq-prodcomm}.
+	\end{proof}
+
+	\begin{lemma}[Simultaneous projective rounding of both players]
+		\label{lem:qld-projective-rounding-transport}
+		\lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency}
+		\leanok
+		\uses{def:povm-distance, def:consistency, def:post-processing, lem:ortho}
+		Under the hypotheses of
+		Lemma~\ref{lem:qld-projective-rounding-transport-left}, a single pair of
+		complete projective measurements on the two original spaces satisfies both
+		distance bounds and both transported consistency estimates simultaneously,
+		for every finite question type, every probability distribution on it, and
+		every question-dependent outcome map. Each comparison family needs only its
+		own consistency bound against the corresponding unrounded measurement; no
+		range restriction on the comparison error and no factor depending on the
+		number of outcomes is imposed.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:qld-projective-rounding-transport-left,
+			lem:qld-projective-rounding-transport-right}
+		Take the measurement produced by
+		Lemma~\ref{lem:qld-projective-rounding-transport-left} on the first space
+		and the one produced by
+		Lemma~\ref{lem:qld-projective-rounding-transport-right} on the second, and
+		pair their conclusions.
+	\end{proof}
 
 \section{Conditionally linear functions and distributions}
 % Paper subsection label sec:cl kept for cross-reference fidelity.

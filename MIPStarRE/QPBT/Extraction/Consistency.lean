@@ -1,25 +1,27 @@
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
+import MIPStarRE.QPBT.Combining.Points.Placement
 import MIPStarRE.QPBT.Extraction.Observables
+import MIPStarRE.QPBT.Extraction.NonencodingSupport
 
 /-!
 # Consistency of the pulled-apart Pauli measurements
 
 This module records the two estimates by which the polynomial marginals absorb
 the expanded point measurements, with all heterogeneous placements written
-explicitly. It also states the consistency of the pulled-apart
-measurements with the original point measurements and the self-consistency of
-the corresponding observables.
+explicitly. It also defines the mass of non-encoding marginal outcomes and
+states the support estimate needed by the corrected decoder calculation.
 
-The direct marginal agreement estimates and the reverse-placement correlation
-transports are developed from the given global polynomial-pair witness.
+The marginal agreement estimates and reverse-placement correlation transports
+are developed from a supplied global polynomial-pair witness.
 
 ## References
 
 The marginal estimates formalize blueprint
 `lem:qld-constructing-the-paulis-helper`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1609-1664`.
-The remaining declarations formalize blueprint `lem:qld-construct-the-paulis`,
-from paper lines 1458-1608.
+The non-encoding support obligation contributes to blueprint
+`lem:qld-construct-the-paulis`, from paper lines 1458-1608; see
+`docs/paper-gaps/qpbt_decoding-identity.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -28,91 +30,11 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum DistanceCalculus
+open ProjectiveSetting
 
 noncomputable section
 
 /-! ## Absorption of expanded point measurements -/
-
-section PlacementMeasurements
-
-open scoped Classical
-
-/-- The original-player register not acted on by a placement. This only
-indexes the identity factors in the definition of `ProjectiveSetting.place`. -/
-private def complementSide : Placement → PlayerSide
-  | .AA' | .AB'' => .bob
-  | .BA'' | .BB' => .alice
-
-/-- Separate the two acted-on registers from the four identity registers.
-This is a coordinate decomposition of the placements in paper
-`14_analysis_of_the_pauli_basis_test.tex:420-450`, not a transfer of operators
-between registers in the expanded state. -/
-private def placementEquiv {P : AdmissibleParams} {epsilon : ℝ}
-    (S : ProjectiveSetting P epsilon) (placement : Placement) :
-    SixReg P S.toStrategy.ιA S.toStrategy.ιB ≃
-      (S.ExpandedLocalSpace placement.side ×
-        (S.LocalSpace (complementSide placement) ×
-          (PauliRegister P × (PauliRegister P × PauliRegister P)))) := by
-  cases placement
-  · exact
-      { toFun := fun index => ((index.1.1, index.1.2.1),
-          (index.2.1, (index.1.2.2, (index.2.2.1, index.2.2.2))))
-        invFun := fun index => ((index.1.1, (index.1.2, index.2.2.1)),
-          (index.2.1, (index.2.2.2.1, index.2.2.2.2)))
-        left_inv := fun _ => rfl
-        right_inv := fun _ => rfl }
-  · exact
-      { toFun := fun index => ((index.2.1, index.1.2.2),
-          (index.1.1, (index.1.2.1, (index.2.2.1, index.2.2.2))))
-        invFun := fun index => ((index.2.1, (index.2.2.1, index.1.2)),
-          (index.1.1, (index.2.2.2.1, index.2.2.2.2)))
-        left_inv := fun _ => rfl
-        right_inv := fun _ => rfl }
-  · exact
-      { toFun := fun index => ((index.2.1, index.2.2.1),
-          (index.1.1, (index.1.2.1, (index.1.2.2, index.2.2.2))))
-        invFun := fun index => ((index.2.1, (index.2.2.1, index.2.2.2.1)),
-          (index.1.1, (index.1.2, index.2.2.2.2)))
-        left_inv := fun _ => rfl
-        right_inv := fun _ => rfl }
-  · exact
-      { toFun := fun index => ((index.1.1, index.2.2.2),
-          (index.2.1, (index.1.2.1, (index.1.2.2, index.2.2.1))))
-        invFun := fun index => ((index.1.1, (index.2.2.1, index.2.2.2.1)),
-          (index.2.1, (index.2.2.2.2, index.1.2)))
-        left_inv := fun _ => rfl
-        right_inv := fun _ => rfl }
-
-/-- The entrywise placement agrees with tensoring by the identity and changing
-coordinates. No invariance property of the expanded state enters this equality. -/
-private theorem place_eq_reindex {P : AdmissibleParams} {epsilon : ℝ}
-    (S : ProjectiveSetting P epsilon) (placement : Placement)
-    (operator : Op (S.ExpandedLocalSpace placement.side)) :
-    S.place placement operator =
-      reindexOp (placementEquiv S placement) (heteroKron operator 1) := by
-  cases placement <;> ext row col <;>
-    simp [ProjectiveSetting.place, placementEquiv, reindexOp, heteroKron,
-      Matrix.kronecker, Matrix.one_apply, Prod.ext_iff, ite_and, mul_ite, ite_mul] <;>
-    split_ifs <;> simp_all
-
-/-- Tensoring a measurement with the identity and reindexing gives its
-six-register placement, with completeness and positivity retained. This is
-finite-dimensional support for blueprint `lem:qld-constructing-the-paulis-helper`. -/
-private noncomputable def placedMeasurement {P : AdmissibleParams} {epsilon : ℝ}
-    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
-    (placement : Placement) (measurement : Measurement Outcome
-      (S.ExpandedLocalSpace placement.side)) :
-    Measurement Outcome (SixReg P S.toStrategy.ιA S.toStrategy.ιB) :=
-  reindexMeasurement (placementEquiv S placement) (leftPlacedMeasurement measurement)
-
-/-- The transported POVM has exactly the effects in the entrywise placement. -/
-private theorem placedMeasurement_effect {P : AdmissibleParams} {epsilon : ℝ}
-    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
-    (placement : Placement) (measurement : Measurement Outcome
-      (S.ExpandedLocalSpace placement.side)) (answer : Outcome) :
-    (placedMeasurement S placement measurement).effect answer =
-      S.place placement (measurement.effect answer) :=
-  (place_eq_reindex S placement (measurement.effect answer)).symm
 
 /-- A placed measurement effect is Hermitian. -/
 private theorem placedMeasurement_effect_hermitian
@@ -138,36 +60,6 @@ private theorem stateQForm_mul_comm_of_hermitian
     LinearMap.adjoint_inner_right]
   simpa using (inner_re_symm (𝕜 := ℂ)
     ((Matrix.toEuclideanLin (B * A)) psi) psi)
-
-/-- Tensoring with an identity and changing finite coordinates preserve
-projectivity, as needed to apply `lem:cool-closeness-fact` to a placed POVM. -/
-private theorem placedMeasurement_isProjective {P : AdmissibleParams} {epsilon : ℝ}
-    {Outcome : Type*} [Fintype Outcome] (S : ProjectiveSetting P epsilon)
-    (placement : Placement) (measurement : Measurement Outcome
-      (S.ExpandedLocalSpace placement.side))
-    (projective : MIPStarRE.QPBT.Measurement.IsProjective measurement) :
-    MIPStarRE.QPBT.Measurement.IsProjective (placedMeasurement S placement measurement) := by
-  letI : Fintype (S.LocalSpace (complementSide placement) ×
-      (PauliRegister P × (PauliRegister P × PauliRegister P))) := inferInstance
-  apply reindexMeasurement_isProjective
-  intro answer
-  have hOne : IsProj (1 : Op (S.LocalSpace (complementSide placement) ×
-      (PauliRegister P × (PauliRegister P × PauliRegister P)))) :=
-    IsStarProjection.one (Op (S.LocalSpace (complementSide placement) ×
-      (PauliRegister P × (PauliRegister P × PauliRegister P))))
-  exact MIPStarRE.LDT.MakingMeasurementsProjective.isProj_kronecker
-    (projective answer) hOne
-
-end PlacementMeasurements
-
-/-- The entrywise register placement commutes with a finite sum of effects. -/
-private theorem place_finset_sum {P : AdmissibleParams} {epsilon : ℝ}
-    {Index : Type*} (S : ProjectiveSetting P epsilon) (placement : Placement)
-    (indices : Finset Index) (family : Index → Op (S.ExpandedLocalSpace placement.side)) :
-    S.place placement (∑ index ∈ indices, family index) =
-      ∑ index ∈ indices, S.place placement (family index) := by
-  cases placement <;> ext row col <;>
-    simp [ProjectiveSetting.place, Matrix.sum_apply, Finset.sum_mul, Finset.mul_sum]
 
 namespace GlobalPairWitness
 
@@ -200,7 +92,7 @@ theorem sum_marginalPoly_eval_mul {P : AdmissibleParams} {epsilon deltaG : ℝ}
       ∑ poly : Poly P, S.place placement ((w.marginalPoly placement.side W).effect poly) *
         family (MvPolynomial.eval point poly.1) := by
   classical
-  simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, place_finset_sum,
+  simp only [MIPStarRE.Quantum.Measurement.postprocess_effect, place_finsetSum,
     Finset.sum_mul]
   calc
     _ = ∑ answer : PauliScalar P,
@@ -726,6 +618,86 @@ theorem sum_marginalPoly_pointMeas_approx_id :
   have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
   nlinarith
 
+/-- Each polynomial marginal effect absorbs the fiber of its own coarse
+graining at the evaluated answer. Projectivity of the placed marginal reduces
+the fiber sum to the single matching polynomial outcome. This is the
+coarse-graining step in the proof of blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1637-1646`. -/
+private theorem place_marginalPoly_mul_postprocess_effect
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (p : Placement) (W : PauliKind) (u : Fin P.m → PauliScalar P)
+    (g : Poly P) :
+    S.place p ((w.marginalPoly p.side W).effect g) *
+        S.place p (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval u poly.1)).effect
+            (MvPolynomial.eval u g.1)) =
+      S.place p ((w.marginalPoly p.side W).effect g) := by
+  classical
+  have hproj : Measurement.IsProjective
+      (placedMeasurement S p (w.marginalPoly p.side W)) :=
+    placedMeasurement_isProjective S p _ (w.marginalPoly_isProjective p.side W)
+  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, place_finsetSum,
+    Finset.mul_sum]
+  rw [Finset.sum_eq_single g]
+  · simpa only [placedMeasurement_effect] using (hproj g).isIdempotentElem.eq
+  · intro other _ hother
+    simpa only [placedMeasurement_effect] using
+      projective_effect_mul_effect_eq_zero _ hproj hother.symm
+  · intro hg
+    exact (hg (Finset.mem_filter.mpr ⟨Finset.mem_univ g, rfl⟩)).elim
+
+/-- The coarse-grained polynomial marginal at one placement stays consistent
+with the expanded point measurement at the opposite placement. Quantification
+over the directed opposite-placement relation gives all four instances of the
+source's symmetric-equivalents clause.
+
+This is the coarse-grained point-consistency input of blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`. -/
+private theorem marginalPoly_pointMeas_consistent_opposite
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) (p q : Placement) (hopp : p.IsOpposite q) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place q
+        ((S.pointMeasExp q.side W point).effect answer)) S.psiHat ≤ deltaG := by
+  cases p <;> cases q <;> simp only [Placement.IsOpposite] at hopp
+  · exact marginalPoly_pointMeas_consistent_alice w W
+  · exact marginalPoly_pointMeas_consistent_bob_reversed w W
+  · exact marginalPoly_pointMeas_consistent_bob w W
+  · exact marginalPoly_pointMeas_consistent_alice_reversed w W
+
+/-- The agreement estimate between the coarse-grained polynomial marginal and
+the opposite placement's expanded point measurement, on every directed
+opposite-placement pair. The factor two makes blueprint `fact:agreement`
+explicit; paper `14_analysis_of_the_pauli_basis_test.tex:1626-1637`. -/
+private theorem marginalPoly_pointMeas_approx_opposite
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) (p q : Placement) (hopp : p.IsOpposite q) :
+    opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place q
+        ((S.pointMeasExp q.side W point).effect answer)) S.psiHat ≤
+        2 * deltaG := by
+  have hAgreement := opFamilyDistSq_le_two_mul_consistencyDefect
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun point => placedMeasurement S p
+      ((w.marginalPoly p.side W).postprocess
+        (fun poly => MvPolynomial.eval point poly.1)))
+    (fun point => placedMeasurement S q (S.pointMeasExp q.side W point))
+    S.psiHat
+  simp only [placedMeasurement_effect] at hAgreement
+  exact hAgreement.trans (mul_le_mul_of_nonneg_left
+    (marginalPoly_pointMeas_consistent_opposite w W p q hopp) (by norm_num))
+
 /-- Each polynomial marginal annihilates the complement of the corresponding
 same-side expanded point effect on average. The answer summation is over the
 polynomial outcome, and quantification over `Placement` gives all four
@@ -739,9 +711,12 @@ blueprint
 The explicit `deltaConstructPaulis` bound retains the point-measurement error
 which the source absorbs into its adjusted `deltaS`.
 
-**Proof obligation:** issue #47 tracks the projection-contraction and expanded
-point self-consistency calculation on every placement at paper lines
-1637-1662. -/
+The source's three steps are followed exactly. The coarse-grained marginal
+agrees with the opposite placement's expanded point measurement at scale
+`2 * deltaG`; moving that point measurement onto the marginal's own registers
+costs the self-consistency error of `lem:qld-comm-cons`; and the left
+projective marginal factor is absorbed by blueprint `fact:add-a-proj2`, using
+that a marginal effect is fixed by the fiber of its own coarse graining. -/
 theorem marginalPoly_sub_pointMeas_approx_zero :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -755,7 +730,87 @@ theorem marginalPoly_sub_pointMeas_approx_zero :
                     (MvPolynomial.eval u g.1))))
               (fun _ _ => 0) S.psiHat ≤
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  classical
+  obtain ⟨C₀, hC₀one, hC₀⟩ := expPoint_self_cons
+  refine ⟨4 + 2 * C₀, by linarith, ?_⟩
+  intro P epsilon deltaG hepsilon0 hepsilon1 hdeltaG S w W p
+  obtain ⟨q, hopp⟩ : ∃ q : Placement, p.IsOpposite q := by
+    cases p
+    · exact ⟨.BA'', trivial⟩
+    · exact ⟨.AA', trivial⟩
+    · exact ⟨.AB'', trivial⟩
+    · exact ⟨.BB', trivial⟩
+  have hpoint : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun u a => S.place q ((S.pointMeasExp q.side W u).effect a))
+      (fun u a => S.place p ((S.pointMeasExp p.side W u).effect a))
+      S.psiHat ≤ C₀ * epsilon := by
+    rw [opFamilyDistSq_symm]
+    exact hC₀ P epsilon S p q hopp W
+  have hsame : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun u a => S.place p ((S.pointMeasExp p.side W u).effect a))
+      S.psiHat ≤ 2 * (2 * deltaG) + 2 * (C₀ * epsilon) :=
+    opFamilyDistSq_le_of_le_of_le _ _ _ _ _ _ _
+      (marginalPoly_pointMeas_approx_opposite w W p q hopp) hpoint
+  have hproj : Measurement.IsProjective
+      (placedMeasurement S p (w.marginalPoly p.side W)) :=
+    placedMeasurement_isProjective S p _ (w.marginalPoly_isProjective p.side W)
+  have hterm : ∀ g : Poly P,
+      (S.place p ((w.marginalPoly p.side W).effect g))ᴴ *
+          S.place p ((w.marginalPoly p.side W).effect g) =
+        S.place p ((w.marginalPoly p.side W).effect g) := by
+    intro g
+    have hhermitian : (S.place p ((w.marginalPoly p.side W).effect g))ᴴ =
+        S.place p ((w.marginalPoly p.side W).effect g) := by
+      simpa only [placedMeasurement_effect] using
+        (hproj g).isSelfAdjoint.isHermitian.eq
+    rw [hhermitian]
+    simpa only [placedMeasurement_effect] using (hproj g).isIdempotentElem.eq
+  have hcontract : ∀ _u : Fin P.m → PauliScalar P,
+      (1 - ∑ g : Poly P,
+        (S.place p ((w.marginalPoly p.side W).effect g))ᴴ *
+          S.place p ((w.marginalPoly p.side W).effect g)).PosSemidef := by
+    intro _u
+    have hsum : ∑ g : Poly P,
+        S.place p ((w.marginalPoly p.side W).effect g) = 1 := by
+      simpa only [placedMeasurement_effect] using
+        (placedMeasurement S p (w.marginalPoly p.side W)).sum_eq_one
+    simp only [hterm, hsum, sub_self]
+    exact Matrix.PosSemidef.zero
+  have habsorb := opFamilyDistSq_mul_funIndexed_le
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun u => placedMeasurement S p ((w.marginalPoly p.side W).postprocess
+      (fun poly => MvPolynomial.eval u poly.1)))
+    (fun u => placedMeasurement S p (S.pointMeasExp p.side W u))
+    (fun (g : Poly P) (u : Fin P.m → PauliScalar P) => MvPolynomial.eval u g.1)
+    (fun (_u : Fin P.m → PauliScalar P) (g : Poly P) =>
+      S.place p ((w.marginalPoly p.side W).effect g))
+    S.psiHat (2 * (2 * deltaG) + 2 * (C₀ * epsilon)) hcontract
+    (by simpa only [placedMeasurement_effect] using hsame)
+  simp only [placedMeasurement_effect,
+    place_marginalPoly_mul_postprocess_effect w p W] at habsorb
+  refine le_trans (le_of_eq ?_) (habsorb.trans ?_)
+  · unfold opFamilyDistSq
+    apply avgOver_congr
+    intro u
+    apply Finset.sum_congr rfl
+    intro g _
+    simp only [sub_zero, mul_sub, mul_one]
+  · unfold deltaConstructPaulis
+    have hsqrtnonneg : 0 ≤ Real.sqrt epsilon := Real.sqrt_nonneg epsilon
+    have hsqrtle : Real.sqrt epsilon ≤ 1 := by
+      simpa using Real.sqrt_le_sqrt hepsilon1
+    have hsquare : Real.sqrt epsilon * Real.sqrt epsilon = epsilon :=
+      Real.mul_self_sqrt hepsilon0
+    have hepsle : epsilon ≤ Real.sqrt epsilon := by
+      nlinarith [mul_nonneg hsqrtnonneg (sub_nonneg.2 hsqrtle)]
+    have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
+    have hC₀pos : (0 : ℝ) < C₀ := lt_of_lt_of_le zero_lt_one hC₀one
+    nlinarith [mul_nonneg hC₀pos.le hdeltaG,
+      mul_nonneg hC₀pos.le (sub_nonneg.2 hepsle),
+      mul_nonneg hC₀pos.le hratio]
 
 /-! ## Non-encoding support -/
 
@@ -767,8 +822,8 @@ arbitrary polynomial representative.
 This is the left-hand side of blueprint
 `eq:qld-nonencoding-mass`, from
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1458-1602`.
-The bound remains a proposition-valued proof obligation, as required by
-`docs/paper-gaps/qpbt_decoding-identity.tex:87-123`. -/
+The support estimate is proved separately from the decoder identity; see
+`docs/paper-gaps/qpbt_decoding-identity.tex`. -/
 noncomputable def nonencodingMarginalMass {P : AdmissibleParams}
     {epsilon deltaS : ℝ} {S : ProjectiveSetting P epsilon}
     (w : GlobalPairWitness S deltaS) (side : PlayerSide) (W : PauliKind) : ℝ := by
@@ -793,7 +848,11 @@ The estimate is intentionally not folded into a decoder identity; its proof
 must use the point-consistency hypotheses and Schwartz--Zippel. See
 `docs/paper-gaps/qpbt_decoding-identity.tex:87-123`.
 
-**Proof obligation:** issue #47 tracks this support estimate. -/
+The encoding-supported reference measurement and collision comparison are
+proved in `NonencodingSupport`. This formalization-only auxiliary estimate
+discharges the support obligation of issues #47 and #517 for a supplied
+`GlobalPairWitness`. The source-facing construction obtains its witness
+separately in `exists_pulled_apart_consistency`. -/
 theorem nonencodingMarginalMass_le :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -803,90 +862,46 @@ theorem nonencodingMarginalMass_le :
             (side : PlayerSide) (W : PauliKind),
             nonencodingMarginalMass w side W ≤
               deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-! ## Consistency of the pulled-apart measurements -/
-
-/-- Alice's original point measurement is consistent with Bob's pulled-apart
-measurement on average over uniformly random points. This is the first display
-of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-The source reuses `deltaS` after absorbing the non-encoding and game-error
-terms. The bound keeps the global polynomial-pair witness error `deltaG`
-separate in `deltaConstructPaulis`.
-
-**Proof obligation:** issue #47 tracks the non-encoding-mass estimate required
-by the restricted decoder identity; see
-`docs/paper-gaps/qpbt_decoding-identity.tex`. -/
-theorem tildeM_consistent_pointMeas :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind),
-            consistencyDefect
-              (uniformDistribution (Fin P.m → PauliScalar P))
-              (fun u a =>
-                S.placePlayer .alice ((S.pointMeas .alice W u).effect a))
-              (fun u a => S.placeSide .bob
-                (tildeM w .bob W (indicatorVec u) a))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-- Alice's pulled-apart measurement is consistent with Bob's original point
-measurement on average over uniformly random points. This is the
-register-interchanged display of Item 1 in blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1463-1492`.
-
-The conclusion uses the same explicit construction scale as the first player
-ordering.
-
-**Proof obligation:** issue #47 tracks the player-interchanged
-non-encoding-mass argument. -/
-theorem tildeM_consistent_pointMeas' :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind),
-            consistencyDefect
-              (uniformDistribution (Fin P.m → PauliScalar P))
-              (fun u a => S.placeSide .alice
-                (tildeM w .alice W (indicatorVec u) a))
-              (fun u a =>
-                S.placePlayer .bob ((S.pointMeas .bob W u).effect a))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
-
-/-- The pulled-apart observables on Alice's and Bob's extraction blocks are
-self-consistent on average over the uniformly random Pauli register. This is
-Item 2 of blueprint
-`lem:qld-construct-the-paulis`, paper
-`14_analysis_of_the_pauli_basis_test.tex:1476-1605`.
-
-The construction scale exposes the square-root game error and
-Schwartz--Zippel loss that the source absorbs into `deltaS`.
-
-**Proof obligation:** issue #47 tracks the pulling-consistency calculation and
-the final trace postprocessing from measurements to observables. -/
-theorem tildeObs_selfConsistent :
-    ∃ C : ℝ, 1 ≤ C ∧
-      ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
-        0 ≤ epsilon → epsilon ≤ 1 → 0 ≤ deltaG →
-          ∀ (S : ProjectiveSetting P epsilon)
-            (w : GlobalPairWitness S deltaG) (W : PauliKind)
-            (j : Fin P.model.basisDim),
-            opDistSq (uniformDistribution (PauliRegister P))
-              (fun u => S.placeSide .alice (tildeObs w .alice W u j))
-              (fun u => S.placeSide .bob (tildeObs w .bob W u j))
-              S.psiHat ≤
-                deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  classical
+  obtain ⟨C, hC, hreference⟩ := global_marginal_encoding_consistency
+  refine ⟨C, hC, ?_⟩
+  intro P epsilon deltaG hepsilon _ hdeltaG S w side W
+  have hscalar : deltaG + C * Real.sqrt epsilon + (P.m * P.d : ℝ) / P.q ≤
+      deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
+    unfold deltaConstructPaulis
+    rw [Nat.cast_mul]
+    have hratio : 0 ≤ (P.m * P.d : ℝ) / P.q := by positivity
+    nlinarith
+  have href := hreference P epsilon deltaG hepsilon S w W
+  cases side with
+  | alice =>
+      have hmass := mass_outside_encoding_le_evaluated_defect
+        (w.marginalPoly .alice W) (S.encodingPauliMeas .bob W)
+        (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+        (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .bob W)
+      have hbound := hmass.trans
+        ((add_le_add href.1 le_rfl).trans hscalar)
+      unfold nonencodingMarginalMass
+      change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+        stateQForm S.psiHat (S.placeSide .alice
+          (heteroKron ((w.marginalPoly .alice W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+      simp_rw [stateQForm_placeSide_alice_tensor_one S _
+        (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .alice W).pos _)).isHermitian]
+      exact hbound
+  | bob =>
+      have hmass := right_mass_outside_encoding_le_evaluated_defect
+        (S.encodingPauliMeas .alice W) (w.marginalPoly .bob W)
+        (ExtendedLineGame.pairState S) (ExtendedLineGame.pairState_norm S)
+        (S.encodingPauliMeas_effect_eq_zero_of_not_isEncoding .alice W)
+      have hbound := hmass.trans
+        ((add_le_add href.2 le_rfl).trans hscalar)
+      unfold nonencodingMarginalMass
+      change (∑ g ∈ Finset.univ.filter (fun g : Poly P => ¬ IsEncoding g),
+        stateQForm S.psiHat (S.placeSide .bob
+          (heteroKron ((w.marginalPoly .bob W).effect g) (1 : Op (PauliRegister P))))) ≤ _
+      simp_rw [stateQForm_placeSide_bob_tensor_one S _
+        (Matrix.nonneg_iff_posSemidef.mp ((w.marginalPoly .bob W).pos _)).isHermitian]
+      exact hbound
 
 end
 

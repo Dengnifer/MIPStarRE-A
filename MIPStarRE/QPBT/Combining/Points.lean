@@ -1,11 +1,11 @@
-import MIPStarRE.QPBT.Combining.Points.MarginalContraction
+import MIPStarRE.QPBT.Combining.Points.WitnessMarginals
 import MIPStarRE.QPBT.Combining.PointsDataProcessing
 
 /-!
 # Combining the point measurements
 
-This module states the construction obligation for the joint X/Z point
-measurements and defines their scalar linear coarse-graining.  The latter is
+This module constructs the projective joint X/Z point measurements and defines
+their scalar linear coarse-graining. The latter is
 the genuine postprocessing of a complete measurement on each heterogeneous
 player space.
 
@@ -58,11 +58,11 @@ close to the ordered product by the field-valued commutation estimate
 (`sandwich_offDiagonal_le_sandwichDefectBound`), and is made projective for
 each point pair by the orthonormalization lemma
 (`exists_projective_close_sandwich`); the three consistency conclusions follow
-by the triangle inequality (`chain_bounds`).  The source's route through the
-binary refinements and the quantum linearity theorem is not used, because
-that route needs zero-state padding of the strategy, which is not part of the
-setting; see `rem:linearity-import` and
-`docs/paper-gaps/qpbt_combined-points-direct.tex`.  The error is
+by the triangle inequality (`chain_bounds`).  This replacement for the source's
+binary-refinement and quantum-linearity argument is explained in
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`.  It uses no additional
+ancillary space and does not require the common-extension construction of
+`rem:linearity-import`.  The error is
 `K ε^{1/8}` for a universal constant `K`. -/
 theorem exists_combinedPointsWitness :
     ∃ deltaQ : ℝ -> ℝ, IsPolyErr deltaQ ∧
@@ -224,8 +224,10 @@ private theorem place_finset_sum {P : AdmissibleParams} {ε : ℝ}
 
 set_option maxHeartbeats 1600000 in
 /-- Projectivity and the three data-processed consistency guarantees for
-`CombinedPointsWitness.extendedQ`.  This is `lem:qld-4-12`, paper lines
-993--1011; the `XZ` and `ZX` source products remain separate. -/
+`CombinedPointsWitness.extendedQ`, given a joint point measurement. This is
+the coarse-graining specification used by `exists_extendedQ` to prove
+`lem:qld-4-12`, paper lines 993--1018; the `XZ` and `ZX` source products
+remain separate. -/
 theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
     {S : ProjectiveSetting P ε} (points : CombinedPointsWitness S δ) :
     (∀ side x z alpha beta,
@@ -309,6 +311,57 @@ theorem extendedQ_spec {P : AdmissibleParams} {ε δ : ℝ}
         (S.pointMeasExp p2.side .Z xz.2) (S.pointMeasExp p2.side .X xz.1)
       rw [Fintype.sum_prod_type, Finset.sum_comm] at htotal
       simpa only [B, Fintype.sum_prod_type] using htotal.symm
+
+/-- Existence of joint point measurements and their projective scalar
+coarse-grainings with one universal polynomial error. This proves
+`lem:qld-4-12` in blueprint `blueprint/src/chapter/ch15_qpbt_combining.tex`,
+paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:993-1018`.
+The joint measurement is constructed from the strategy by
+`exists_combinedPointsWitness`, not supplied as an additional hypothesis;
+`extendedQ_spec` then gives both ordered-product comparisons and all directed
+opposite-placement comparisons with the same error. -/
+theorem exists_extendedQ :
+    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+        ∃ points : CombinedPointsWitness S (deltaQ ε),
+          (∀ side x z alpha beta,
+            Measurement.IsProjective (points.extendedQ side x z alpha beta)) ∧
+          (∀ p1 p2 : Placement, p1.IsOpposite p2 →
+            opFamilyDistSq (uniformDistribution (ExtendedPointQuestion P))
+              (fun question c => S.place p1
+                ((points.extendedQ p1.side question.1.1 question.1.2
+                  question.2.1 question.2.2).effect c))
+              (fun question c => S.place p2
+                ((points.extendedQ p2.side question.1.1 question.1.2
+                  question.2.1 question.2.2).effect c))
+              S.psiHat ≤ deltaQ ε) ∧
+          (∀ p1 p2 : Placement, p1.IsOpposite p2 →
+            opFamilyDistSq (uniformDistribution (ExtendedPointQuestion P))
+              (fun question c => S.place p1
+                ((points.extendedQ p1.side question.1.1 question.1.2
+                  question.2.1 question.2.2).effect c))
+              (fun question c => S.place p2
+                (∑ ab ∈ Finset.univ.filter (fun ab : PauliScalar P × PauliScalar P =>
+                    question.2.1 * ab.1 + question.2.2 * ab.2 = c),
+                  (S.pointMeasExp p2.side .X question.1.1).effect ab.1 *
+                    (S.pointMeasExp p2.side .Z question.1.2).effect ab.2))
+              S.psiHat ≤ deltaQ ε) ∧
+          ∀ p1 p2 : Placement, p1.IsOpposite p2 →
+            opFamilyDistSq (uniformDistribution (ExtendedPointQuestion P))
+              (fun question c => S.place p1
+                ((points.extendedQ p1.side question.1.1 question.1.2
+                  question.2.1 question.2.2).effect c))
+              (fun question c => S.place p2
+                (∑ ab ∈ Finset.univ.filter (fun ab : PauliScalar P × PauliScalar P =>
+                    question.2.1 * ab.1 + question.2.2 * ab.2 = c),
+                  (S.pointMeasExp p2.side .Z question.1.2).effect ab.2 *
+                    (S.pointMeasExp p2.side .X question.1.1).effect ab.1))
+              S.psiHat ≤ deltaQ ε := by
+  obtain ⟨deltaQ, hpoly, hpoints⟩ := exists_combinedPointsWitness
+  refine ⟨deltaQ, hpoly, ?_⟩
+  intro P ε S
+  obtain ⟨points⟩ := hpoints P ε S
+  exact ⟨points, extendedQ_spec points⟩
 
 end
 

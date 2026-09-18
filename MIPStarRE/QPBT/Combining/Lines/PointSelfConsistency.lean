@@ -28,33 +28,6 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
-private theorem avgOver_mix_noFinite {α : Type*} [DecidableEq α]
-    (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
-    (μ ν : Distribution α) (f : α → ℝ) :
-    avgOver (Distribution.mix t ht0 ht1 μ ν) f =
-      t * avgOver μ f + (1 - t) * avgOver ν f := by
-  classical
-  unfold avgOver
-  have hsplit : (∑ a ∈ μ.support ∪ ν.support,
-        (t * μ.weight a + (1 - t) * ν.weight a) * f a) =
-      t * (∑ a ∈ μ.support ∪ ν.support, μ.weight a * f a) +
-        (1 - t) * (∑ a ∈ μ.support ∪ ν.support, ν.weight a * f a) := by
-    rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-    exact Finset.sum_congr rfl fun a _ => by ring
-  have hμ : (∑ a ∈ μ.support ∪ ν.support, μ.weight a * f a) =
-      ∑ a ∈ μ.support, μ.weight a * f a := by
-    refine (Finset.sum_subset Finset.subset_union_left ?_).symm
-    intro a _ ha
-    rw [μ.outsideSupport a ha, zero_mul]
-  have hν : (∑ a ∈ μ.support ∪ ν.support, ν.weight a * f a) =
-      ∑ a ∈ ν.support, ν.weight a * f a := by
-    refine (Finset.sum_subset Finset.subset_union_right ?_).symm
-    intro a _ ha
-    rw [ν.outsideSupport a ha, zero_mul]
-  change (∑ a ∈ μ.support ∪ ν.support,
-    (t * μ.weight a + (1 - t) * ν.weight a) * f a) = _
-  rw [hsplit, hμ, hν]
-
 /-- Convert the joint point witness's projective squared-distance estimate to
 the consistency-defect convention required by the pasting argument. This is a
 formalization-only consequence of `eq:qld-q-self-cons`, used at paper lines
@@ -87,7 +60,7 @@ theorem avgOver_linePointDist_point (L : LdParams)
     (value : (Fin L.m → ScalarQ L) → ℝ) :
     avgOver (linePointDist L) (fun sample => value sample.2) =
       avgOver (uniformDistribution (Fin L.m → ScalarQ L)) value := by
-  rw [linePointDist, avgOver_mix_noFinite]
+  rw [linePointDist, avgOver_mix]
   rw [← Distribution.avgOver_map (aLinePointDist L) Prod.snd value,
     ← Distribution.avgOver_map (dLinePointDist L) Prod.snd value,
     (aLinePointDist_point_marginal_uniform L).1,

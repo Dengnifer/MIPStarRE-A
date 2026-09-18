@@ -52,6 +52,8 @@
 #   LOCAL_REVIEW_ENABLED.
 #   MIPSTARRE_CODEX_ACCOUNT (auto|primary|second), MIPSTARRE_ACCOUNT_WAIT
 #   (seconds, default 1800), MIPSTARRE_CODEX_HOME_SECOND (second account home).
+#   MIPSTARRE_DUP_CHECK (warn|fatal|off, default warn): the duplicate-work guard
+#   run for prover/mathfix/simplifier roles before the session starts.
 
 set -euo pipefail
 
@@ -59,6 +61,9 @@ PROG="${0##*/}"
 
 ROLES="orc prover reviewer simplifier blueprint splitter scout mathfix"
 READ_ONLY_ROLES="reviewer scout"
+# Roles that produce or repair proofs, and so must be checked against the
+# declarations `main` already has before the session starts (issue #576).
+DUP_CHECK_ROLES="prover mathfix simplifier"
 
 # Prompt-size guards. The study fleet lost a session to an oversized prompt
 # (results/telemetry/events.md, 2026-08-30 "Workflow critic stalled on
@@ -303,6 +308,55 @@ git -C "$WORKTREE_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die 4 "worktree '$WORKTREE_ABS' is not a git work tree; codex exec needs one"
 
 mkdir -p "$CAPTURE_DIR" "$PUBLISHED_CAPTURE_DIR" "$LOCK_DIR"
+
+# ---------------------------------------------------------------------------
+# Duplicate-work guard (issue #576)
+#
+# Before a session that produces or repairs proofs, ask local/bin/dup_check.py
+# whether `main` already declares what the issue claims to produce.  Model-free
+# and network-free: it reads the local `github/main` ref and the declaration
+# claims registry only.  Advisory by default (MIPSTARRE_DUP_CHECK=warn); `fatal`
+# refuses the dispatch, `off` skips the check entirely.
+# ---------------------------------------------------------------------------
+
+DUP_CHECK_MODE="${MIPSTARRE_DUP_CHECK:-warn}"
+case "$DUP_CHECK_MODE" in
+  warn|fatal|off) ;;
+  *) die 2 "MIPSTARRE_DUP_CHECK must be warn, fatal or off (got '$DUP_CHECK_MODE')" ;;
+esac
+
+case " $DUP_CHECK_ROLES " in
+  *" $ROLE "*)
+    if [ "$DUP_CHECK_MODE" = off ]; then
+      note "duplicate-work check skipped (MIPSTARRE_DUP_CHECK=off)"
+    elif [ ! -f "$SCRIPT_DIR/dup_check.py" ]; then
+      note "WARNING: $SCRIPT_DIR/dup_check.py is missing; duplicate-work check skipped"
+    else
+      case "$ISSUE" in
+        ''|*[!0-9]*)
+          note "duplicate-work check skipped: --issue '$ISSUE' is a scope word,
+  not a GitHub issue number, so it has no declaration claim to check." ;;
+        *)
+          DUP_OUT="$(python3 "$SCRIPT_DIR/dup_check.py" predispatch \
+            --repo "$REPO_ROOT" --issue "$ISSUE" 2>&1)" && DUP_RC=0 || DUP_RC=$?
+          case "$DUP_RC" in
+            0) note "duplicate-work check: $DUP_OUT" ;;
+            3)
+              note "WARNING: issue #$ISSUE claims declarations that github/main
+  already has. Confirm the task is not a repeat before paying for it:
+$DUP_OUT"
+              [ "$DUP_CHECK_MODE" != fatal ] ||
+                die 3 "MIPSTARRE_DUP_CHECK=fatal and github/main already has the
+  claimed declarations; resolve the overlap or set MIPSTARRE_DUP_CHECK=warn." ;;
+            4)
+              note "WARNING: $DUP_OUT" ;;
+            *)
+              note "WARNING: duplicate-work check failed (exit $DUP_RC); continuing:
+$DUP_OUT" ;;
+          esac ;;
+      esac
+    fi ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Sandbox default by role (reviewer/scout read-only, others workspace-write)

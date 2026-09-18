@@ -174,14 +174,70 @@ theorem expLine_self_cons :
       (by simpa only [Placement.side] using
         ProjectiveSetting.expLineDist_abBb_le_four S W)
 
+/-- The linear-error assertion in the proof of `lem:qld-comm-line-cons`, at
+`eq:qld-comm-line-pt-cons-eps`, for all four directed opposite placements.
+This is stronger than the common polynomial-error statement of the source
+lemma. Blueprint `lem:expanded-line-point-linear-error`; paper
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:560-595`.
+
+Projective refinement bounds this distance by the expanded evaluation-class
+distance. The exact Pauli overlap identity bounds the latter by twice the
+strategy's line-point consistency defect. The forward and reversed winning
+implications bound those defects by universal constants times `ε`; no
+square-root estimate is used. -/
+theorem expLine_point_cons_linear :
+    ∃ C : ℝ, 1 ≤ C ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
+        (p₁ p₂ : Placement), p₁.IsOpposite p₂ → ∀ W : PauliKind,
+        opFamilyDistSq (linePointDist P.toLdParams)
+          (fun sample f => S.place p₁
+            ((S.lineMeasExp p₁.side W sample.1).effect f))
+          (fun sample f =>
+            S.place p₁ ((S.lineMeasExp p₁.side W sample.1).effect f) *
+              S.place p₂ (S.expPointEffectAtLineAnswer p₂.side W
+                sample.1 sample.2 f))
+          S.psiHat ≤ C * ε := by
+  obtain ⟨C₁, hC₁, h₁⟩ := win_low_degree
+  obtain ⟨C₂, hC₂, h₂⟩ := WinImplications.win_low_degree_interchanged_proof
+  refine ⟨2 * (C₁ + C₂), by linarith, ?_⟩
+  intro P ε S p₁ p₂ hopp W
+  have hε : 0 ≤ ε := S.eps_nonneg
+  have key : ∀ (x a : ℝ), a ≤ C₁ + C₂ → x ≤ 2 * (a * ε) →
+      x ≤ (2 * (C₁ + C₂)) * ε := by
+    intro x a ha hx
+    calc
+      x ≤ 2 * (a * ε) := hx
+      _ = (2 * a) * ε := (mul_assoc _ _ _).symm
+      _ ≤ (2 * (C₁ + C₂)) * ε :=
+        mul_le_mul_of_nonneg_right (by linarith) hε
+  have htwo : (0 : ℝ) ≤ 2 := by norm_num
+  cases p₁ <;> cases p₂ <;> simp only [Placement.IsOpposite] at hopp
+  · have hb := ((ProjectiveSetting.linePointDist_aaBa_le S W).trans
+      (ProjectiveSetting.evalClassDist_aaBa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ (by linarith) hb
+  · have hb := ((ProjectiveSetting.linePointDist_baAa_le S W).trans
+      (ProjectiveSetting.evalClassDist_baAa_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ (by linarith) hb
+  · have hb := ((ProjectiveSetting.linePointDist_bbAb_le S W).trans
+      (ProjectiveSetting.evalClassDist_bbAb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₂ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₂ (by linarith) hb
+  · have hb := ((ProjectiveSetting.linePointDist_abBb_le S W).trans
+      (ProjectiveSetting.evalClassDist_abBb_le S W)).trans
+      (mul_le_mul_of_nonneg_left (h₁ P ε S hε W) htwo)
+    simpa only [Placement.side] using key _ C₁ (by linarith) hb
+
 /-- An expanded line effect is consistent with itself followed by the expanded
 point effect selected by its value at the sampled point. This is item 2 of
 `lem:qld-comm-line-cons`, paper
 `14_analysis_of_the_pauli_basis_test.tex:534-539`, blueprint
 `eq:qld-comm-line-pt-cons`.
 
-The estimate established below is linear in `ε`, matching the error `ε` with
-which the source states this item. Combined with the universal bound `4` on the
+The intermediate estimate is linear in `ε`, as asserted in the source proof at
+`eq:qld-comm-line-pt-cons-eps` and exposed by `expLine_point_cons_linear`.
+Combined with the universal bound `4` on the
 distance between two placed complete measurements, it is weakened by
 `le_mul_sqrt_of_le_mul_of_le_four` to the square-root form `C * √ε`, so that the
 three items of the lemma share the single error function `deltaLine ε = √ε`
