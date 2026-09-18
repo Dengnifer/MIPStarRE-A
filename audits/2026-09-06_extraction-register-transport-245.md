@@ -202,7 +202,7 @@ after the marked review of 2026-09-14, which the statements above now describe.
   declarations on `main`.
 - Warnings. The stale transitive import of `Observables.ExpandedPlacement` and
   the unused `BigOperators` scope were removed, and the file-wide
-  `open scoped Classical` was narrowed to the six declarations that need
+  `open scoped Classical` was narrowed to the four declarations that need
   classical decidability, each with a declaration-scoped `open scoped Classical
   in`. The module now builds with no warning of its own; in particular the
   `style.openClassical` warning reported by the review is gone.
