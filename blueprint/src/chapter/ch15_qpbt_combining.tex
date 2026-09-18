@@ -1908,6 +1908,96 @@ analyzed, together with candidate repairs, in
 	multiplied by an affine factor of degree at most one.
 \end{definition}
 
+\begin{definition}[Formalization support for Definition~\ref{def:combine-map}: the separated locus]
+	\label{def:combine-map-separated-locus}
+	\lean{MIPStarRE.QPBT.combinedBlockVar}
+	\lean{MIPStarRE.QPBT.IsSeparatedCombined}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.SeparatedCombinedPoly}
+	\leanok
+	\uses{def:combine-map, def:polyfunc, def:ideg-deg-polynomials}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	isolates a step used in the Lean proof of Lemma~\ref{lem:qld-4-7}, where the
+	set of combined polynomials is written $G$ and is then reindexed by pairs
+	$(f, g)$. Separation itself carries no degree bound and no restriction on
+	the coefficients: call a polynomial $p$ in the $2m+2$ coordinates, over an
+	arbitrary commutative semiring, \emph{separated} when, viewed as a
+	polynomial in $\alpha$ and $\beta$ over the point variables, every
+	coefficient of $p$ vanishes except those of $\alpha$ and of $\beta$, the
+	coefficient of $\alpha$ involves only the $x$ variables, and the
+	coefficient of $\beta$ involves only the $z$ variables. The recovery map is
+	likewise defined for every such $p$, with no degree parameter: setting
+	$(\alpha, \beta) = (1, 0)$ and $z = 0$ returns the first component, and
+	setting $(\alpha, \beta) = (0, 1)$ and $x = 0$ returns the second. The
+	\emph{bounded separated locus} is the intersection of this unrestricted
+	condition with the individual-degree class, that is, the set of separated
+	$p \in \mathrm{ideg}_{d,2m+2}(\F_q)$; only this second object depends on
+	$d$. The condition is stated by coefficient vanishing and variable
+	containment, not by assuming a pair $(f, g)$ with
+	$p = \mathrm{combine}_{f,g}$.
+\end{definition}
+
+\begin{lemma}[Formalization support for Definition~\ref{def:combine-map}: the separated image]
+	\label{lem:combine-map-separated-image}
+	\lean{MIPStarRE.QPBT.combinedBlockVar_injective}
+	\lean{MIPStarRE.QPBT.combinePoly_eq_combinePolyTuple}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly_combinePoly}
+	\lean{MIPStarRE.QPBT.isSeparatedCombined_combinePoly}
+	\lean{MIPStarRE.QPBT.rename_recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.combinePoly_recoverCombinedPoly}
+	\lean{MIPStarRE.QPBT.isSeparatedCombined_iff_exists_combinePoly}
+	\lean{MIPStarRE.QPBT.recoverCombinedPoly_mem_polyFunc}
+	\lean{MIPStarRE.QPBT.combinePoly_mem_polyFunc_iff}
+	\lean{MIPStarRE.QPBT.existsUnique_bounded_combinePoly}
+	\lean{MIPStarRE.QPBT.combinedPolynomialImageEquiv}
+	\leanok
+	\uses{def:combine-map, def:combine-map-separated-locus, def:polyfunc,
+		def:ideg-deg-polynomials, lem:qld-combined-pair-completion}
+	This formalization-only auxiliary is not a named statement of the paper; it
+	records the algebraic identification of the set $G$ of the proof of
+	Lemma~\ref{lem:qld-4-7} with pairs of bounded-degree polynomials. Each of
+	the two point-block inclusions is injective. The map
+	$(f, g) \mapsto \mathrm{combine}_{f,g}$ is injective, which is recorded in
+	Lemma~\ref{lem:qld-combined-pair-completion}. Its image is exactly
+	the separated locus of
+	Definition~\ref{def:combine-map-separated-locus}, and the two specialization
+	maps invert it there. For every $d$, including $d = 0$, the components
+	recovered from a separated $p \in \mathrm{ideg}_{d,2m+2}(\F_q)$ again lie in
+	$\mathrm{ideg}_{d,m}(\F_q)$, and they form the only pair of components of
+	$p$ in $\mathrm{ideg}_{d,m}(\F_q)$; neither statement needs $d \ge 1$. That
+	hypothesis enters only in the forward degree bound: for $d \ge 1$, a
+	combined polynomial lies in $\mathrm{ideg}_{d,2m+2}(\F_q)$ if and only if
+	both components lie in $\mathrm{ideg}_{d,m}(\F_q)$, and together with the
+	preceding statements this gives a bijection between pairs of
+	bounded-degree polynomials and the bounded separated locus. The
+	statements hold over an arbitrary commutative semiring of coefficients. No
+	bound on the mass the strategy places on the separated image is asserted
+	here; that estimate belongs to the proof of Lemma~\ref{lem:qld-4-7}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:combine-map, def:combine-map-separated-locus,
+		def:ld-combining-map, lem:ld-combining-split,
+		lem:ld-combining-exact-linearity}
+	Write $\mathrm{combine}_{f,g}$ as the tuple combining map applied to $f$ and
+	to $g$ after renaming their variables into the $x$ block and the $z$ block
+	respectively; the two block inclusions are injective. The component
+	splitting of Lemma~\ref{lem:ld-combining-split} then recovers each component
+	from the coefficient of the corresponding combining variable, which gives
+	both round-trip identities. If $p$ is separated, the
+	coefficient characterization of
+	Lemma~\ref{lem:ld-combining-exact-linearity} writes $p$ as a combined tuple,
+	and its two coefficients are supported in the respective blocks, so each is
+	the renaming of a polynomial in $m$ variables and recombining the two
+	returns $p$; this argument uses no bound on $d$. Individual degrees are
+	unchanged by renaming along an injection, so each component inherits the
+	bound of $p$ from the bound on the coefficients of $p$, again for every $d$;
+	conversely the degree bound of the tuple combining map of
+	Definition~\ref{def:ld-combining-map} supplies the bound for
+	$\mathrm{combine}_{f,g}$ when $d \ge 1$, which is the hypothesis that also
+	bounds the two fresh variables $\alpha$ and $\beta$.
+\end{proof}
+
 \begin{lemma}[Combined point measurement on the extended coordinates]
 	\label{lem:qld-4-12}
 	\lean{MIPStarRE.QPBT.exists_extendedQ}
