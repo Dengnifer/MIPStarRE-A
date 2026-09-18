@@ -11,6 +11,7 @@ import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
 import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.Soundness.EpsReduction
 import MIPStarRE.QPBT.State
 import MIPStarRE.QPBT.Algebra.SubspacesTheorems
 import MIPStarRE.QPBT.Algebra.SelfDualBasis
