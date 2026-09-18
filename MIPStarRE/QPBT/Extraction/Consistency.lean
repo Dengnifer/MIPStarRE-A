@@ -617,6 +617,86 @@ theorem sum_marginalPoly_pointMeas_approx_id :
   have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
   nlinarith
 
+/-- Each polynomial marginal effect absorbs the fiber of its own coarse
+graining at the evaluated answer. Projectivity of the placed marginal reduces
+the fiber sum to the single matching polynomial outcome. This is the
+coarse-graining step in the proof of blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1637-1646`. -/
+private theorem place_marginalPoly_mul_postprocess_effect
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (p : Placement) (W : PauliKind) (u : Fin P.m → PauliScalar P)
+    (g : Poly P) :
+    S.place p ((w.marginalPoly p.side W).effect g) *
+        S.place p (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval u poly.1)).effect
+            (MvPolynomial.eval u g.1)) =
+      S.place p ((w.marginalPoly p.side W).effect g) := by
+  classical
+  have hproj : Measurement.IsProjective
+      (placedMeasurement S p (w.marginalPoly p.side W)) :=
+    placedMeasurement_isProjective S p _ (w.marginalPoly_isProjective p.side W)
+  rw [MIPStarRE.Quantum.Measurement.postprocess_effect, place_finsetSum,
+    Finset.mul_sum]
+  rw [Finset.sum_eq_single g]
+  · simpa only [placedMeasurement_effect] using (hproj g).isIdempotentElem.eq
+  · intro other _ hother
+    simpa only [placedMeasurement_effect] using
+      projective_effect_mul_effect_eq_zero _ hproj hother.symm
+  · intro hg
+    exact (hg (Finset.mem_filter.mpr ⟨Finset.mem_univ g, rfl⟩)).elim
+
+/-- The coarse-grained polynomial marginal at one placement stays consistent
+with the expanded point measurement at the opposite placement. Quantification
+over the directed opposite-placement relation gives all four instances of the
+source's symmetric-equivalents clause.
+
+This is the coarse-grained point-consistency input of blueprint
+`lem:qld-constructing-the-paulis-helper`, paper
+`14_analysis_of_the_pauli_basis_test.tex:1626-1637`. -/
+private theorem marginalPoly_pointMeas_consistent_opposite
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) (p q : Placement) (hopp : p.IsOpposite q) :
+    consistencyDefect (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place q
+        ((S.pointMeasExp q.side W point).effect answer)) S.psiHat ≤ deltaG := by
+  cases p <;> cases q <;> simp only [Placement.IsOpposite] at hopp
+  · exact marginalPoly_pointMeas_consistent_alice w W
+  · exact marginalPoly_pointMeas_consistent_bob_reversed w W
+  · exact marginalPoly_pointMeas_consistent_bob w W
+  · exact marginalPoly_pointMeas_consistent_alice_reversed w W
+
+/-- The agreement estimate between the coarse-grained polynomial marginal and
+the opposite placement's expanded point measurement, on every directed
+opposite-placement pair. The factor two makes blueprint `fact:agreement`
+explicit; paper `14_analysis_of_the_pauli_basis_test.tex:1626-1637`. -/
+private theorem marginalPoly_pointMeas_approx_opposite
+    {P : AdmissibleParams} {epsilon deltaG : ℝ}
+    {S : ProjectiveSetting P epsilon} (w : GlobalPairWitness S deltaG)
+    (W : PauliKind) (p q : Placement) (hopp : p.IsOpposite q) :
+    opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun point answer => S.place q
+        ((S.pointMeasExp q.side W point).effect answer)) S.psiHat ≤
+        2 * deltaG := by
+  have hAgreement := opFamilyDistSq_le_two_mul_consistencyDefect
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun point => placedMeasurement S p
+      ((w.marginalPoly p.side W).postprocess
+        (fun poly => MvPolynomial.eval point poly.1)))
+    (fun point => placedMeasurement S q (S.pointMeasExp q.side W point))
+    S.psiHat
+  simp only [placedMeasurement_effect] at hAgreement
+  exact hAgreement.trans (mul_le_mul_of_nonneg_left
+    (marginalPoly_pointMeas_consistent_opposite w W p q hopp) (by norm_num))
+
 /-- Each polynomial marginal annihilates the complement of the corresponding
 same-side expanded point effect on average. The answer summation is over the
 polynomial outcome, and quantification over `Placement` gives all four
@@ -630,9 +710,12 @@ blueprint
 The explicit `deltaConstructPaulis` bound retains the point-measurement error
 which the source absorbs into its adjusted `deltaS`.
 
-**Proof obligation:** issue #47 tracks the projection-contraction and expanded
-point self-consistency calculation on every placement at paper lines
-1637-1662. -/
+The source's three steps are followed exactly. The coarse-grained marginal
+agrees with the opposite placement's expanded point measurement at scale
+`2 * deltaG`; moving that point measurement onto the marginal's own registers
+costs the self-consistency error of `lem:qld-comm-cons`; and the left
+projective marginal factor is absorbed by blueprint `fact:add-a-proj2`, using
+that a marginal effect is fixed by the fiber of its own coarse graining. -/
 theorem marginalPoly_sub_pointMeas_approx_zero :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (epsilon deltaG : ℝ),
@@ -646,7 +729,87 @@ theorem marginalPoly_sub_pointMeas_approx_zero :
                     (MvPolynomial.eval u g.1))))
               (fun _ _ => 0) S.psiHat ≤
                 deltaConstructPaulis C epsilon deltaG P.m P.d P.q := by
-  sorry
+  classical
+  obtain ⟨C₀, hC₀one, hC₀⟩ := expPoint_self_cons
+  refine ⟨4 + 2 * C₀, by linarith, ?_⟩
+  intro P epsilon deltaG hepsilon0 hepsilon1 hdeltaG S w W p
+  obtain ⟨q, hopp⟩ : ∃ q : Placement, p.IsOpposite q := by
+    cases p
+    · exact ⟨.BA'', trivial⟩
+    · exact ⟨.AA', trivial⟩
+    · exact ⟨.AB'', trivial⟩
+    · exact ⟨.BB', trivial⟩
+  have hpoint : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun u a => S.place q ((S.pointMeasExp q.side W u).effect a))
+      (fun u a => S.place p ((S.pointMeasExp p.side W u).effect a))
+      S.psiHat ≤ C₀ * epsilon := by
+    rw [opFamilyDistSq_symm]
+    exact hC₀ P epsilon S p q hopp W
+  have hsame : opFamilyDistSq (uniformDistribution (Fin P.m → PauliScalar P))
+      (fun point answer => S.place p
+        (((w.marginalPoly p.side W).postprocess
+          (fun poly => MvPolynomial.eval point poly.1)).effect answer))
+      (fun u a => S.place p ((S.pointMeasExp p.side W u).effect a))
+      S.psiHat ≤ 2 * (2 * deltaG) + 2 * (C₀ * epsilon) :=
+    opFamilyDistSq_le_of_le_of_le _ _ _ _ _ _ _
+      (marginalPoly_pointMeas_approx_opposite w W p q hopp) hpoint
+  have hproj : Measurement.IsProjective
+      (placedMeasurement S p (w.marginalPoly p.side W)) :=
+    placedMeasurement_isProjective S p _ (w.marginalPoly_isProjective p.side W)
+  have hterm : ∀ g : Poly P,
+      (S.place p ((w.marginalPoly p.side W).effect g))ᴴ *
+          S.place p ((w.marginalPoly p.side W).effect g) =
+        S.place p ((w.marginalPoly p.side W).effect g) := by
+    intro g
+    have hhermitian : (S.place p ((w.marginalPoly p.side W).effect g))ᴴ =
+        S.place p ((w.marginalPoly p.side W).effect g) := by
+      simpa only [placedMeasurement_effect] using
+        (hproj g).isSelfAdjoint.isHermitian.eq
+    rw [hhermitian]
+    simpa only [placedMeasurement_effect] using (hproj g).isIdempotentElem.eq
+  have hcontract : ∀ _u : Fin P.m → PauliScalar P,
+      (1 - ∑ g : Poly P,
+        (S.place p ((w.marginalPoly p.side W).effect g))ᴴ *
+          S.place p ((w.marginalPoly p.side W).effect g)).PosSemidef := by
+    intro _u
+    have hsum : ∑ g : Poly P,
+        S.place p ((w.marginalPoly p.side W).effect g) = 1 := by
+      simpa only [placedMeasurement_effect] using
+        (placedMeasurement S p (w.marginalPoly p.side W)).sum_eq_one
+    simp only [hterm, hsum, sub_self]
+    exact Matrix.PosSemidef.zero
+  have habsorb := opFamilyDistSq_mul_funIndexed_le
+    (uniformDistribution (Fin P.m → PauliScalar P))
+    (fun u => placedMeasurement S p ((w.marginalPoly p.side W).postprocess
+      (fun poly => MvPolynomial.eval u poly.1)))
+    (fun u => placedMeasurement S p (S.pointMeasExp p.side W u))
+    (fun (g : Poly P) (u : Fin P.m → PauliScalar P) => MvPolynomial.eval u g.1)
+    (fun (_u : Fin P.m → PauliScalar P) (g : Poly P) =>
+      S.place p ((w.marginalPoly p.side W).effect g))
+    S.psiHat (2 * (2 * deltaG) + 2 * (C₀ * epsilon)) hcontract
+    (by simpa only [placedMeasurement_effect] using hsame)
+  simp only [placedMeasurement_effect,
+    place_marginalPoly_mul_postprocess_effect w p W] at habsorb
+  refine le_trans (le_of_eq ?_) (habsorb.trans ?_)
+  · unfold opFamilyDistSq
+    apply avgOver_congr
+    intro u
+    apply Finset.sum_congr rfl
+    intro g _
+    simp only [sub_zero, mul_sub, mul_one]
+  · unfold deltaConstructPaulis
+    have hsqrtnonneg : 0 ≤ Real.sqrt epsilon := Real.sqrt_nonneg epsilon
+    have hsqrtle : Real.sqrt epsilon ≤ 1 := by
+      simpa using Real.sqrt_le_sqrt hepsilon1
+    have hsquare : Real.sqrt epsilon * Real.sqrt epsilon = epsilon :=
+      Real.mul_self_sqrt hepsilon0
+    have hepsle : epsilon ≤ Real.sqrt epsilon := by
+      nlinarith [mul_nonneg hsqrtnonneg (sub_nonneg.2 hsqrtle)]
+    have hratio : 0 ≤ ((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ) := by positivity
+    have hC₀pos : (0 : ℝ) < C₀ := lt_of_lt_of_le zero_lt_one hC₀one
+    nlinarith [mul_nonneg hC₀pos.le hdeltaG,
+      mul_nonneg hC₀pos.le (sub_nonneg.2 hepsle),
+      mul_nonneg hC₀pos.le hratio]
 
 /-! ## Non-encoding support -/
 
