@@ -65,6 +65,7 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SpectatorExpectation
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.MixedLinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PointPointRejection
