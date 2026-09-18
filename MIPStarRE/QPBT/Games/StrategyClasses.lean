@@ -875,10 +875,16 @@ The attainment defect is `rem:symmetric-strat-limit` and is tracked in
 `Game.value` is a supremum over unbounded finite dimensions, whereas the cited
 argument, `06_nonlocal_games_and_mipstar.tex:101-132`, constructs a strategy
 only above every strict lower bound. What is proved is the value-preserving
-given-strategy form `exists_symmetric_projective_strategy_of_strategy`, hence
-the approximate form; what remains is the passage from that family to a single
-strategy of value at least `1 - ε`. Documented in
-`docs/paper-gaps/qpbt_symmetrization-attainment.tex` and issue `#98`.
+given-strategy form `exists_symmetric_projective_strategy_of_strategy` and,
+on top of it, the approximate form
+`exists_symmetric_projective_strategy_approx`; what remains is the passage
+from that family to a single strategy of value at least `1 - ε`. Documented in
+`docs/paper-gaps/qpbt_symmetrization-attainment.tex` and issue `#524` (the
+earlier tracker `#98` is closed). A second, independent defect is recorded in
+the same note: on an empty answer alphabet this Lean domain has no strategy at
+all while `Game.value` is the totalized supremum of the empty set, so the
+statement as printed is false there; the approximate form therefore carries
+`Nonempty G.Answer` as an explicit boundary hypothesis.
 Elimination: prove an independent finite-dimensional attainment theorem for
 `Game.value` and discharge the `sorry` with it. The source statement is kept
 as printed; it may be weakened only by a future documented statement
@@ -914,6 +920,7 @@ theorem exists_symmetric_projective_strategy_of_strategy (G : SymmetricGame)
       _ = S₀.value := projectiveDilation_value S₀ a₀ a₀
   exact ⟨S, symmetrizedStrategy_isProjective T hT_proj,
     hvalue, h.trans_eq hvalue.symm⟩
+
 
 end
 

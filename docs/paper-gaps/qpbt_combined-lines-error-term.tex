@@ -33,6 +33,13 @@
   decomposition that the stated sub-line lemma does not supply.  The
   correction is to state the first route's established error form and confirm
   that the sole consumer tolerates it.
+  The unrestricted supplied-point domain of the former extended-line helpers
+  had a separate obstruction: deterministic quadratic point answers force a
+  positive axis-line error even on a perfect strategy. This does not refute
+  the paper statement, which uses its previously constructed point family.
+  Section~\ref{sec:supplied-point-realignment} records the realignment of
+  those helpers to the polynomially controlled point family, which removes
+  that obstruction without touching the printed-error question.
   \item \textbf{Key Mathlib inputs:} the
   Cauchy--Schwarz inequality for state-dependent operator distances
   (project-local, blueprint Chapter 12), mixture decompositions of
@@ -169,9 +176,9 @@ declaration \path{exists_combinedLinesWitness} preserves its original statement:
 it existentially obtains $\delta_Q$ and its point witnesses from the preceding
 point construction, then applies the conditional helper.
 
-The remaining construction target is
+The construction theorem is
 \path{combined_line_measurement_consistency}. For a joint point family
-with error $\delta_Q(\eps)=\poly(\eps)$, it asks for evaluated consistency
+with error $\delta_Q(\eps)=\poly(\eps)$, it proves evaluated consistency
 of the explicit unconditioned measurement
 \[
  T^{\ell_X,\ell_Z}_{f_X,f_Z}
@@ -180,43 +187,62 @@ of the explicit unconditioned measurement
 under the original product of line-point distributions, with error
 $\delta_P(\eps,md/q)=\poly(\eps,md/q)$ and every directed opposite
 placement. The point-to-line comparisons at source lines 900--941 and the
-pasting argument at lines 942--961 are the intended discharge. The POVM,
+pasting argument at lines 942--961 supply the proof. The POVM,
 axis-degree properties, and X marginal of this same measurement are proved.
 
-A bound for a measurement conditioned on nondegenerate lines would not by
-itself discharge this target. It would also require a defined conditioning
-event, its probability, an estimate for the discarded contribution, and a
-transfer of the defect back to the unconditioned measurement above under the
-original product law. No such transfer is asserted here. In particular,
-the preserved conditioned construction is not identified with
-\path{combinedLineMeasurement}; its saved proof remains historical work.
-The current target retains its explicit unfinished proof, without assuming
-any conditioning or transfer result in a source theorem.
+The proof conditions the sampling law on the event that the X direction
+is nonzero, whose probability lies between $1/2$ and $1$. It leaves the
+measurement unchanged. On this event, the polynomial root bound gives the
+conditional collision estimate needed for pasting. Multiplication by the
+retained probability and addition of the discarded contribution, at most
+$1/(2q)$, restore the original product law. Thus the result concerns the
+unconditioned X-Z-X measurement, with no conditioning premise in its
+statement. The current heterogeneous pasting theorem requires only the two
+forward marginal comparisons, both supplied by the point-to-line estimates.
 
-\subsection{Unrestricted point witnesses in the extended-line assertion}
+The directly indexed auxiliary
+\path{exists_extendedLinesWitness_established} then constructs the point
+witness internally, conditions the subline law on each extended line, and
+averages the polynomial combination of these actual paired-line effects.
+The real-part overlap estimates for both opposite placements give the
+corrected bound $C m\,\poly(\eps,md/q)$. This construction retains the
+completed answer alphabet and the directly indexed question law; it does not
+discharge their comparison with the printed source theorem.\footnote{The
+proof and its necessary dependencies were selectively recovered for
+\ghissue{512} from commit
+\path{6e8d67ef8ba22de69a0c166adcdf23ba6e7a33aa}, retained at
+\path{0f4ef05370350f4017439ebd839ef0561f13130f}. See
+\path{audits/2026-09-12_issue512-saved-proof-recovery.md} for the
+signature audit, axiom closure, and cumulative cost accounting.}
 
-The same obstruction applies to the auxiliary extended-line assertion when
-its input point error is an arbitrary scalar.  The first-route estimate
-$C m g(\eps,md/q)$ does not remove this obstruction: it still tends to zero
-at $\eps=0$ with fixed $m,d$ and increasing $q$.
-The source instead uses the points constructed in its preceding lemmas,
-with $\delta_Q=\poly(\eps)$; Claim~17-1 explicitly retains this error.
-\footnote{The unrestricted auxiliary is
-\path{exists_extendedLinesWitness_established_ofPointsWitness} in
-\path{MIPStarRE/QPBT/Combining/Apply.lean}, tracked by \ghissue{511}.
-The source passages are \path{lem:qld-4-10}, \path{lem:qld-4-12}, and
+\subsection{The extended-line supplied-point obstruction}
+
+The same quantitative omission appeared in the auxiliary
+\path{exists_extendedLinesWitness_ofPointsWitness}: a single polynomial error
+function is chosen before an arbitrary scalar $\delta_Q$ and every point witness
+at that error. Passing from paired points to the extended scalar answer does
+not remove this obstruction. The first-route estimate
+$C m g(\eps,md/q)$ in
+\path{exists_extendedLinesWitness_established_ofPointsWitness} had the same
+problem: it still tends to zero at $\eps=0$ with fixed $m,d$ and increasing $q$.
+These unrestricted auxiliaries were tracked by \ghissue{509} and \ghissue{511},
+respectively; neither signature survives, and the argument of this subsection is
+the reason why. Section~\ref{sec:supplied-point-realignment} records what
+replaced them. The source instead uses the family constructed by its point lemma,
+with $\delta_Q=\poly(\eps)$, and defines the scalar answer by
+$c=\alpha a+\beta b$. Claim~17-1 explicitly retains the point error.
+\footnote{The source passages are \path{lem:qld-4-10}, \path{lem:qld-4-12}, and
 \path{claim:17-1} in
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
 lines~689--709, 993--1018, and 1140--1173.}
 
-For an explicit example, set $m=d=1$ and let $q=2^{2k+1}>2$ increase.
-These parameters are admissible.  Use the perfect projective strategy from
-the completeness lemma for the Pauli basis test in \cite{Ji2020MIPStar}, and
-let $\hat\psi$ be its normalized expanded state.
-\footnote{The source is \path{lem:pauli-completeness} in
+Take $m=d=1$, $\eps=0$, and let $q=2^{2k+1}>2$ tend to infinity.
+These parameters are admissible. The Pauli basis test has a perfect projective strategy by
+\path{lem:pauli-completeness}.\footnote{See
 \path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
-lines~1229--1421.}
-On each player's expanded
+lines~1229--1421, for the construction; the statement and its projective Pauli
+measurements appear at lines~1232--1255.}
+Let $\hat\psi$ be its normalized expanded state. On each player's expanded
 local space, define the supplied joint point measurement by
 \[
  Q^{x,z}_{a,b}=
@@ -225,51 +251,81 @@ local space, define the supplied joint point measurement by
    0,&\text{otherwise}.
  \end{cases}
 \]
-This is a projective measurement and is exactly self-consistent in every
-opposite placement.  The finitely many averaged squared distances from the
-two ordered expanded point products are finite real numbers.  Taking their
+This is a complete projective measurement and is exactly self-consistent in
+every opposite placement. The finitely many averaged squared distances from the
+two ordered expanded point products are finite real numbers. Taking their
 maximum and zero gives a scalar $\delta_Q$ satisfying all the fields of the
-point witness.  No smallness of this scalar is required by the unrestricted
-assertion.  The combined point answer at $(x,z,\alpha,\beta)$ is
-deterministically $\alpha x^2$.
+point witness. No estimate of this scalar in terms of $\eps$ is required.
 
-The directly indexed law in dimension four chooses the axis component with
-probability $1/2$, and then chooses each coordinate with probability $1/4$.
-Restrict to its X-axis lines, of total mass $1/8$.  Such a line has fixed
-$(z,\alpha,\beta)$ and uniform coordinate $x$.  When $\alpha\ne0$, every
-line outcome with nonzero effect has degree at most one by the axis-degree
-requirement.  Consequently the polynomial $f(X)-\alpha X^2$ is nonzero of
-degree two, so it vanishes at at most two field elements.  Averaging over a
-POVM does not increase the agreement bound $2/q$: for a fixed line its
-outcome weights are the nonnegative expectations of the placed effects in
-$\hat\psi$, sum to one, and do not depend on the subsequently sampled $x$.
-Since the opposite point effect is either the identity or zero, these
-weights give exactly the evaluated agreement probabilities.  On these
-nondegenerate axis lines every evaluation is determined, so the completed
-answer symbol causes no additional case.
+The extended point answer is $\alpha x^2$. In dimension $2m+2=4$, the directly
+indexed line-point law assigns weight $1/2$ to axis lines and then chooses one
+of the four coordinates uniformly. Its X-axis branch therefore has mass $1/8$.
+On that branch, $z,\alpha,\beta$ are fixed along the line, while $x$ is uniform
+in the field. The canonical base has X coordinate zero, so the affine line
+parameter is exactly $x$. For $\alpha\ne0$, every permitted line answer $p$
+has degree at most one, and $p(X)-\alpha X^2$ is a nonzero polynomial of degree
+two. It has at most two roots, hence its agreement with the point answer is at
+most $2/q$.
 
-The coefficient $\alpha$ is uniform and independent of $x$ on this part of
-the law.  All remaining consistency contributions are nonnegative.  Thus
-either orientation of an extended-line witness must have error at least
+This bound also holds for any line POVM. Indeed, for a fixed line let $w_p$
+be the expectation of its effect for $p$ in the expanded state, at the line
+player's placement. Positivity and completeness give $w_p\ge0$ and
+$\sum_p w_p=1$; the axis-degree field makes $w_p=0$ for higher-degree answers.
+The opposite point effect is deterministically the identity at $\alpha x^2$,
+so the agreement is precisely the $w_p$-weighted average of those root-count
+fractions. These weights depend on the line but not on $x$ along it. Averaging
+over the fixed coordinates, and using nonnegativity of the defect on the
+remaining question branches, gives for either player orientation
 \[
- \frac18\left(1-\frac1q\right)\left(1-\frac2q\right)
- \longrightarrow \frac18.
+ \operatorname{defect}\ \ge\
+ \frac18\left(1-\frac1q\right)\left(1-\frac2q\right).
 \]
-On the other hand, the polynomial-error bound on $g$ supplies fixed constants
-$K\ge1$ and $r,s>0$ with
-$C g(0,1/q)\le CKq^{-s}\longrightarrow0$.  This contradicts the
-unrestricted auxiliary assertion, independently of the printed-error
-discrepancy and the diagonal-line degeneracy.
+There is no undefined evaluation on these nonzero axis directions, so the
+completed answer alphabet does not change this calculation. The scalar field
+identification preserves the polynomial evaluations and their root counts.
 
-This is a mathematical counterexample to the auxiliary quantifiers, not to
-the source theorem with its constructed points.  It is not claimed as a
-kernel-checked refutation: the formal perfect-strategy construction and
-the formal integration of this lower bound remain to be supplied.
-The existing auxiliary statement is preserved pending a separately scoped
-repair.  A source-faithful existence proof must construct polynomially
-controlled points internally and retain their error through the line
-estimates; it cannot cover arbitrary supplied point measurements by
-discarding their error parameter.
+The lower bound tends to $1/8$. In contrast, the predicate
+\path{IsPolyErr}\textsubscript{2} bounds the proposed error at these parameters by
+$\delta_{\mathrm{combine}}(0,1/q)\le Cq^{-s}$ with $s>0$, which tends to zero.
+For the first-route estimate, the polynomial-error bound on $g$ likewise gives
+fixed constants $K\ge1$ and $r,s>0$ with
+$C g(0,1/q)\le CKq^{-s}\longrightarrow0$.
+Consequently both unrestricted supplied-point auxiliaries are false,
+independently of the printed-error discrepancy and the diagonal-line degeneracy.
+This argument does not refute the existential point-witness declarations or the source
+\path{lem:qld-4-13}; neither requires a line approximation to every arbitrarily
+chosen point family.
+
+The first ingredients of the obstruction are independently verified in Lean:
+every projective joint family admits some finite witness error, and a coefficient
+answer with zero quadratic coefficient agrees with a nonzero multiple of the
+square function with probability at most $2/q$.\footnote{The declarations are
+\path{CombinedPointsWitness.exists_error_of_projective} and
+\path{linear_quadratic_agreement_le} in
+\path{MIPStarRE/QPBT/Combining/PointErrorObstruction.lean}. The first uses the
+existence of an upper bound for a finite set of real numbers; the second reuses
+\path{directCoefficientCollision_avg_le}, which reduces to Mathlib's
+univariate root count. The complete strategy-level contradiction is the
+mathematical argument above, not a Lean counterexample theorem: the formal
+integration of the lower bound into the directly indexed line law remains
+to be supplied.}
+The finite POVM calculation is also proved for arbitrary affine-answer
+measurements, including the completed answer alphabet: for nonzero $\alpha$
+the defect is at least $1-2/q$, and averaging $\alpha$ yields
+$(1-1/q)(1-2/q)$. At the admissible tuple $(q,m,d)=(8,1,1)$ the scalar
+average is at least $21/32$. The quadratic joint point family admits a
+finite-error witness on every projective setting.\footnote{See
+\path{MIPStarRE/QPBT/Combining/QuadraticPointObstruction.lean}, preserved from
+PR \#547 in the historical issue-511 audit. Its $21/32$ bound is a scalar
+average; the $21/256$ X-axis contribution has not been transported to the
+full directly indexed line-point law in Lean. The projective completeness
+entry \path{exists_spcc_value_one} is proved on the current branch.}
+The existing unrestricted auxiliary signatures and their unfinished proofs
+are preserved pending a separately scoped repair. A source-faithful existence
+proof must construct polynomially controlled points internally and retain their error
+through the line estimates; it cannot cover arbitrary supplied point
+measurements by discarding their error parameter. Even after that domain
+repair, the separate printed-error estimate discussed below remains open.
 
 \section{The source assertion and the two routes}
 
@@ -362,6 +418,20 @@ first-route bound is not dominated by any such function: along the
 scaling $\eps = m^{-4}$ with $q/(md) \to \infty$, both $m^2\eps = m^{-2}$
 and $md/q$ tend to $0$, while the term $m\,\eps^{1/4} = 1$ does not.
 Hence the established derivation supports no bound of the claimed form.
+This obstruction persists on the admissible numerical domain, even if the
+first-route term is capped by the independent unit bound on consistency.
+Indeed, set $m_n=2^{2n+1}$, $d_n=1$, $q_n=m_n^3$, and
+$\eps_n=m_n^{-4}$. The field-size exponent $6n+3$ is odd and
+$m_n\mid q_n$, so these parameters are admissible. Both $m_n^2\eps_n$
+and $m_nd_n/q_n$ equal $m_n^{-2}$ and tend to zero, whereas
+$\min\{1,m_n\eps_n^{1/4}\}=1$. Thus no bound of the corrected sum form
+$C((m^2\eps)^r+(md/q)^s)$ with positive exponents can dominate this
+capped term uniformly.%
+\footnote{This numerical obstruction is proved by
+\leanid{MIPStarRE.QPBT.not\_exists\_combining\_quarter\_power\_bound} in
+\path{MIPStarRE/QPBT/Combining/ErrorObstruction.lean}, tracked by
+\ghissue{510}. It does not construct a strategy attaining the first-route
+upper bound and does not refute the extended-line existence statement.}
 The second-route bound, even granting the missing decomposition, carries
 the separate prefactor $m^2$: writing $\delta_P = \poly(\eps, md/q)$
 with some fixed positive exponents, the contribution
@@ -430,6 +500,57 @@ exponents.  No derivation along these lines is known here, and the
 direction may be infeasible; in that case the corrected error form of
 the first direction stands.
 
+\section{The 2026-09-18 supplied-point realignment}
+\label{sec:supplied-point-realignment}
+
+The refutation above applies to the domain of the two supplied-point
+auxiliaries, not to the printed error form and not to the existential
+declarations. Accordingly the domain was repaired and the printed-error
+question was left untouched and open.
+
+\paragraph{The repaired conditional auxiliary.}
+\path{exists_extendedLinesWitness_established_ofPointsWitness} now takes a
+point-error function $\delta_Q$ together with its control hypothesis
+\path{IsPolyErr}~$\delta_Q$ before the line error is chosen, and assumes a
+point witness at $\delta_Q(\eps)$. This is exactly the family produced by
+\path{exists_combinedPointsWitness}, so the counterexample of the previous
+subsection no longer lies in the domain: a deterministic quadratic point family
+at $\eps=0$ is not polynomially controlled in the required sense. The
+established dimension factor is kept explicit, so the conclusion carries
+$C\,m\,\delta_{\mathrm{combine}}(\eps,md/q)$ rather than an absorbed constant.
+The declaration is now proved along the first route, reusing the estimates that
+already carried \path{exists_extendedLinesWitness_established}; no new estimate
+was introduced. This repeats one level up the \ghissue{389} repair of
+\path{exists_combinedLinesWitness_ofPointsWitness}, whose conditional blueprint
+entry is \path{lem:combined-lines-given-points}.
+\path{exists_extendedLinesWitness_established} is now derived from the repaired
+conditional form by supplying the point family; its statement is unchanged, so
+its consumer \path{exists_globalPairWitness} is unaffected.
+
+\paragraph{The removed printed-form auxiliary.}
+\path{exists_extendedLinesWitness_ofPointsWitness}, the supplied-point companion
+carrying the printed error expression $\poly(m^2\eps,md/q)$, was removed. Under
+the same domain repair its statement becomes the repaired conditional auxiliary
+with a different error expression, and the printed expression is already carried
+by the existential declaration \path{exists_extendedLinesWitness}; no Lean
+declaration and no blueprint node consumed it, as a search across
+\path{MIPStarRE} and \path{blueprint} confirmed before its removal. Its
+obstruction and provenance are the subject of the preceding subsection and of
+\path{audits/2026-09-12_issue509-extended-line-point-error.md}, both retained.
+It was \ghissue{509}, closed with the obstruction pull request that did not
+prove the printed form.
+
+\paragraph{What stays open.}
+The printed error form itself. \path{exists_extendedLinesWitness} keeps the
+printed expression and keeps an open proof; it is a source-gap declaration, not
+a proof obligation of any Lean consumer, and it is neither marked proved nor
+removed. The scalar obstruction \path{not_exists_combining_quarter_power_bound}
+still blocks absorbing the first route's $m\eps^{1/4}$ term into
+$\poly(m^2\eps,md/q)$, so a different estimate would be required. Because
+\ghissue{509} and \ghissue{510} were closed by their obstruction pull requests
+without proving the printed assertion, live tracking of this gap is restored by
+\ghissue{598}; the closed issues are not reopened.
+
 \section{Comparison with the blueprint}
 
 The blueprint \cite{MIPStarREBlueprint} keeps the combined-lines lemma in
@@ -458,7 +579,18 @@ established error form is linked from the separate formalization-support node
 \path{lem:qld-4-13-established}, whose declaration
 \path{exists_extendedLinesWitness_established} has the explicit form
 $C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
-convention that constants are absorbed into $\poly$.  Both proofs are open.
+convention that constants are absorbed into $\poly$.  The two declarations now
+have different statuses.  The printed error form is still unproved: the proof of
+\path{exists_extendedLinesWitness} is the tracked obligation, tracked by
+\ghissue{598}, and
+\path{lem:qld-4-13} carries no formalization mark.  The established error form
+is proved: \path{exists_extendedLinesWitness_established} has a complete proof,
+and the support node \path{lem:qld-4-13-established} carries both a
+statement-level and a proof-level mark.  Its conditional companion
+\path{exists_extendedLinesWitness_established_ofPointsWitness}, repaired as in
+Section~\ref{sec:supplied-point-realignment}, is linked from the conditional
+node \path{lem:qld-4-13-established-given-points}, which carries a
+statement-level and a proof-level mark for that conditional assertion only.
 
 Neither declaration is source-shaped beyond its error form, and this note does
 not claim otherwise.  Both return the carrier \path{ExtendedLinesWitness},
@@ -470,9 +602,13 @@ distribution instantiated at dimension $2m+2$, and compares both sides of its
 two consistency displays on the completed answer alphabet
 $\F_q\cup\{\bot\}$, whose extra outcome collects the line polynomials that
 admit no evaluation at the sampled point, in place of the source's answer
-summation over $a\in\F_q$.  Neither blueprint node therefore carries a
-statement-level formalization mark, and relating the two formulations is the
-transport obligation of that note.
+summation over $a\in\F_q$.  The source-labelled node \path{lem:qld-4-13}
+therefore carries no formalization mark.  The support node
+\path{lem:qld-4-13-established} does carry one, because its blueprint statement
+displays all three replacements --- the directly indexed question carrier and
+law, the completed answer comparison, and the established error form --- so what
+is marked there is the auxiliary assertion and not the source lemma.  Relating
+the two formulations remains the transport obligation of that note.
 
 \section{Conclusion}
 
@@ -493,6 +629,11 @@ the corrected first-route form in the proof and in the sequel, and cites this
 note; strengthening the sub-line lemma to license the second route is
 optional, and no route to the printed form is currently known.  We do not
 assert that the printed form is false.
+The unrestricted supplied-point auxiliaries were false for the independent
+quadratic-answer reason above; their quantifiers must not be substituted for
+those of the source statement.  Their domain has since been repaired or
+removed, as recorded in Section~\ref{sec:supplied-point-realignment}, which
+leaves the printed-error question exactly where this note found it.
 
 \bibliographystyle{alpha}
 \bibliography{references}

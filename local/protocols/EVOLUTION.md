@@ -751,6 +751,48 @@ with #26 reserved for human decisions.
 advances in parallel, failed lanes receive prompt recovery, and merge authority
 and owner escalation stay unambiguous.
 
+## 2026-09-06 — Align the useful-worker floor and posted owner decisions
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Standing worker floor
+and posted-inbox policy drift (#247)", and the owner correction recorded at
+2026-09-06T02:58:41Z, withdrawing the 02:55:29Z delegation.
+
+**Change:** `local/personas/main.md` assigns plans and execution to main, with
+meta guidance-only, and states the 8–11 useful-live-worker floor excluding main,
+completion anticipation, prompt replenishment and honest constraint reporting.
+It aligns session guidance with primary/gpt-6-astra/max and fan-out disabled.
+`issues-prs.md` §6 distinguishes routine decisions before escalation from every
+already-posted #26 item, including B7, which must await the human owner.
+Mandatory escalations, proof budgets, account limits and all gates remain intact.
+
+**Expected effect:** sustain useful parallel work without filler or inferred
+owner approval. This is a documentation-only proposal on the issue branch, not
+an unreviewed installation into main; the owner correction already applies via
+standing guidance. Normal publication, CI, independent review and merge remain
+required outside this session.
+
+## 2026-09-06 — Select worker effort from useful-work observations
+
+**Trigger:** `results/telemetry/events.md` 2026-09-06, "Owner-selected effort
+and bounded initial comparison (#247)", the 03:26:22Z effort correction and
+03:36:00Z research priority in
+`results/telemetry/model-comparison/owner-priority-20260906.md`.
+
+**Change:** `local/personas/main.md` and `issues-prs.md` retain main at `max`
+while main selects `max` or `xhigh` for new/resumed primary Astra workers.
+They preserve the useful-worker allocation with honest temporary service
+constraints and require evidence-led, normally reviewed refinement. The initial
+`results/telemetry/model-comparison/astra-effort-20260906.md` and JSON dataset
+separate two useful review attempts from six historical configuration probes;
+neither project attempt has server-verified effort. No historical row is changed.
+
+**Expected effect:** preserve auditable effort/quality observations without
+inferring causal effects, inventing missing usage, or relaxing proof/review
+budgets. This supersedes only the earlier mandatory-max worker clause, not the
+main/meta, floor or posted-inbox authority boundaries. Issue #237 retains its
+README/runtime work; reconcile overlapping policy edits through normal
+integration only after PR #238 actually merges, never by installing this draft.
+
 ## 2026-09-06 — Normalize astra effort requests to xhigh
 
 **Trigger:** `results/telemetry/events.md` 2026-09-05, "Incident: astra sessions
@@ -806,6 +848,70 @@ sessions, and no budget reset or provenance loss across resumes or append failur
 omitted/legacy ultra map to max, other values fail. Shared history parsing tolerates
 non-record damage but validates relevant continuation metadata; budget rules persist.
 **Expected effect:** ordinary resumes recover, explicit xhigh survives, verification stays honest.
+
+## 2026-09-06 — Integrate standing policy after the routing merge
+
+**Trigger:** `results/telemetry/events.md`, "Issue247 integration after actual
+PR238 merge", and the assignment following GitHub merge `32a32ede`.
+
+**Change:** the issue branch preserves both parents' amendment histories and
+reconciles `issues-prs.md` with the now-active Astra mathfix lane. Main retains
+max/xhigh worker selection, the eleven-worker cap, useful-floor constraints and
+human authority over every posted #26 item, explicitly including B7 and B8.
+The comparison README restricts historical claims to the six recorded probes;
+an integration note links the byte-preserved API/Ultra finding and original
+meta role correction without changing policy or research sample counts.
+
+**Expected effect:** a normal PR can review the standing-owner alignment against
+the actual routing merge without importing private primary history, changing
+runtime code, inferring server effort or bypassing CI/independent review.
+
+## 2026-09-06 — Access-only escalation and bounded main authority
+
+**Trigger:** `results/telemetry/events.md`, “Access-only owner escalation
+supersedes posted B7/B8 holds”, records the owner decision at 05:05Z, received
+at 05:17:03Z, and the explicit main tranche supplied to `orc-247-20260906-04`
+for issue #247/PR #260. This supersedes the 02:58:41Z posted-inbox hold; earlier
+entries remain historical evidence, not current policy or retroactive consent.
+
+**Change:** main/mathfix/orchestrator personas and issues-prs/sessions/review/
+meta/autofix protocols route mathematical and internal workflow decisions to
+main, including posted B7/B8; only actual access/permission blockers needing
+human action go to #26. Main records rationale and evidence; workers do not
+self-extend. The ordinary ten-attempt/about-one-and-a-half-working-day limit
+remains. The explicit #118 exception is attempts 11/12 at most 2700 seconds
+each, with 12 conditional on main's evaluation of 11, preserving the supplied
+ten attempts/19931 completed seconds and 2026-09-05T19:24:00Z anchor. No new
+tranche or reset is automatic. Unchanged continuation checks still reject
+changed historical limits; authorized new dispatches carry the complete ledger.
+B7 disposition still requires exact-head CI/review/finding evidence, with no
+fifth full review or forged carry-forward. Definition/game proposals return to
+main without weakening the mathematical correction and independent-review bar.
+
+**Expected effect:** obsolete human holds no longer stall internal decisions,
+while normal hooks, proof integrity, review caps and exact-head merge gates
+remain binding. No runtime routing changes, primary-main installation,
+subagents, new research samples, proof claims or merges are part of this
+amendment; the useful-worker floor/cap and effort-selection history are retained.
+
+## 2026-09-06 - Make useful-parallelism reassessment a standing main duty
+
+**Trigger:** `results/telemetry/events.md`, "Standing autonomous
+useful-parallelism reassessment", records the 05:56Z owner guidance supplied to
+`orc-247-20260906-06` for #247/PR #260.
+
+**Change:** `local/personas/main.md` integrates reassessment into every cycle,
+completion/failure, newly unblocked work, compaction and pre-wait/end decision;
+`issues-prs.md` states the same responsibility. Main acts without owner/meta
+prompts, targets eleven useful workers plus main with floor eight, and keeps
+bounded useful assignments available to the durable replenisher. Below target
+or floor, report current count, concrete constraint and next admission condition.
+Queue #257 remains an implementation issue whose operation requires evidence.
+
+**Expected effect:** timely useful replenishment and explicit admission
+constraints without duplicate work, idle filler or repeated reflective messages.
+The 05:05Z access-only authority, historical records, primary/Astra policy,
+fan-out prohibition, budgets, caps and exact-head gates remain binding.
 
 ## 2026-09-06 — Main-selected useful-work queue with adoption holds
 
@@ -1078,6 +1184,63 @@ source, and released the old reviewer and source holds. PR #400 remains
 ineligible to merge until its isolated repair proceeds through normal checked
 publication, CI, and fresh independent review.
 
+## 2026-09-09 - Move the permissions-only owner inbox to #500
+
+**Trigger:** the owner's 2026-09-09 08:40Z design decision, recorded by pinned
+issue #500 and implemented through issue #501.
+
+**Change:** `AGENTS.md`, `local/DESIGN.md`, the main, orchestrator, and mathfix
+personas, the issue/PR and session protocols, the pre-commit guidance, and the
+paper-gap policy and register now route live owner-inbox traffic to #500. The
+inbox accepts only permissions whose risk extends beyond project development;
+main decides and records project-outcome questions, including workflow-budget
+overrides and consecutive workflow-only episodes. Changing the stated project
+goal stays outside main's authority and needs an owner decision on #500. The
+budget guard remains enforced. Each blocker is one comment with at most ten
+visible plain-language lines, lettered options, one recommendation, and the
+literal `DECISION B<n>: <letter>` reply, where the letter is an offered
+alternative. Ids continue after B11 and details are folded. The immutable
+`<!-- owner-inbox id=B<n> -->` marker keys both creation and resolution through
+`ensure-pr-comment`; a separate body field records open or closed status, and a
+resolved blocker adds `RESOLVED B<n>`. Issue #26 is archived. Existing #26
+citations in this ledger and the QPBT gap register remain unchanged or are
+explicitly marked as historical provenance.
+
+**Expected effect:** owner attention is reserved for actions requiring personal
+permission, while routine status, mathematical difficulty, and project-outcome
+decisions continue without avoidable stalls and with concise decision requests.
+
+## 2026-09-09 - Reviewed merge trains (issue #502)
+
+**Trigger:** the 09:05Z meta decision in `results/telemetry/design-decisions.md`
+(D1, issue #502) records that each single-PR merge invalidates other refreshed
+heads. See the issue #502 development entry in `results/telemetry/events.md`.
+
+**Change:** add `pr_train.py`, a non-publishing integration mode in `ci.sh`,
+and a train-manifest check after `checked-push.sh` preflight. Reuse the existing
+member gates and CI steps; replace only individual-head base ancestry with
+mandatory combined-commit validation. Preserve exact-head independent review,
+dependency gates, checked fast-forward publication, and the full-build lock.
+CI step bodies stop on command failure; cache warming cannot start a nested
+full build. `issues-prs.md` documents the operator-owned invocation and recovery.
+
+**Expected effect:** two or more ready PRs share one integration build and CI
+run without losing a member's evidence or silently discarding accepted work.
+Activation remains subject to independent review and daemon-owner deployment.
+
+## 2026-09-09 - PR507 review repair: build coverage and publication outcomes
+
+**Trigger:** Canonical review `5154118210` on `e1dd7bb0`, findings F1-F3;
+see the issue #502 review-repair entry in `results/telemetry/events.md`.
+**Change:** Combined CI builds the full library and axiom audit in one locked
+invocation. Train names satisfy the external Lake-root validator. Ambiguous
+pushes retain unknown outcomes when reconciliation fails and recognize remote
+descendants containing the train. Outcomes are retained in runtime and telemetry.
+**Expected effect:** Cold publication has its root artifact, untouched downstream
+failures block publication, and operators receive no false refusal after an
+unresolved push. This is the authorized bounded repair of the original episode;
+deployment and independent review remain separate.
+
 ## 2026-09-09 - Simplify dispatcher worker reservations (#505)
 
 **Trigger:** `results/telemetry/events.md`, 2026-09-09T11:22Z stale-HOLD incident
@@ -1153,3 +1316,291 @@ The legacy CWD-exclusion setting is covered by the retired-settings regression.
 **Expected effect:** an unmarked application server consumes no worker reservation;
 merging the older fix does not restore host scans, native leases or retired gates.
 This reconciliation changes no Lean declarations, live allocation or credentials.
+
+## 2026-09-12 - Reconcile owner inbox and dispatcher retirement in PR #503
+
+**Trigger:** the user's merge-resolution request for PR #503 in session
+`orc-pr503-20260912-01`, merging `github/main` at `ae124f8f` into
+`issue-501-owner-inbox-500`.
+
+**Change:** reconcile `AGENTS.md` and `issues-prs.md` so the permissions-only
+owner inbox remains #500 and mathematical-gap work uses external dispatch,
+consistent with #505's retirement of native descendants. Retain both branches'
+existing entries in this ledger.
+
+**Expected effect:** the merged instructions preserve #501's owner-permission
+boundary and #505's dispatcher retirement without reviving either archived path.
+
+## 2026-09-09 - PR507 bounded refresh composition
+
+**Trigger:** main's priority recovery instruction for issue #502; see the
+`orc-502-20260909-03` entry in `results/telemetry/events.md`.
+**Change:** preserve the train's exact frozen-base condition while composing
+the reviewed ordinary-PR telemetry freshness predicate and PR506's step-failure
+explanation. No allowlist, member gate, publication, or cleanup rule changes.
+**Expected effect:** ordinary telemetry movement remains tolerated; any train
+base movement still refuses. Independent verification follows genuine green CI.
+
+## 2026-09-12 - Reconcile PR260 standing guidance with current main
+
+**Trigger:** `results/telemetry/events.md`, "2026-09-12 - PR260 standing
+policy merge recovery", and the requested merge of `ae124f8f` into PR #260.
+
+**Change:** reconcile the main persona and issues/PR protocol with main's
+Sol/Astra Ultra selection, configured account caps and retired native queue,
+while retaining autonomous useful-work reassessment, the explicit B7/B8 return
+to main and cumulative budget records. The orchestrator's mathfix instruction
+uses current Ultra effort. Review carry-forward keeps main's narrow passive
+telemetry freshness exception and the PR's existing review-cap restriction.
+The shim uses main's single attached-model parser; the PR's normalization tests
+remain, with current model/effort expectations. Historical event paragraphs
+lost by the automatic merge are appended verbatim.
+
+**Expected effect:** refreshing this older policy branch preserves its useful
+duties and evidence without reinstating superseded runtime admission rules,
+losing model-option coverage, or weakening proof, review or merge gates.
+
+## 2026-09-14 - Merge subjects carry the PR's Lean line delta (#557)
+
+**Trigger:** owner decision recorded in issue #557: GitHub's commits page showed
+`Merge pull request #N from Dengnifer/issue-...` and nothing about the size of
+the packet, so reading how much Lean a merge brought meant opening it.
+
+**Change:** `issues-prs.md` records the merge subject
+`Merge PR #N: <PR title> [lean +A -D]`, measured past the gates from
+`git diff --numstat <merge base>...<head> -- '*.lean'`, with `[lean 0]` for a PR
+that changes no Lean line and a one-line body naming the frozen head SHA.
+`pr_merge.py` computes it and `gh_common.merge_pr` forwards it through the REST
+`commit_title` / `commit_message` keys, which stay out of the payload entirely
+when absent. The count is cosmetic by contract: measured after every gate, never
+read back as evidence, and absent rather than wrong when git cannot answer — the
+merge then keeps GitHub's own wording instead of failing. Following PR #558
+review finding F1, closing keywords in the untrusted PR title are defused
+(`closes #900` becomes `closes issue 900`) before they reach the subject, and a
+subject that would still read as a closing reference is dropped in favour of
+GitHub's wording.
+
+**Expected effect:** the owner reads each merged packet's approximate Lean size
+off the commits page without opening the merge, no pull request that cleared the
+seven gates can fail on a cosmetic number, and gate 7's dependency check keeps
+covering every closing reference that reaches the default branch.
+
+## 2026-09-17 - PR507 review repair: member-ref leases and canonical telemetry
+
+**Trigger:** canonical review `5194195608` on `26ecf158`, findings F1 (blocker)
+and F2; see the issue #502 review-repair entries in
+`results/telemetry/events.md`.
+
+**Change:** the train publication transport is now atomic and leases every
+verified member ref at its verified value alongside the `main` lease, so a
+member branch that moves between verification and transport makes the remote
+refuse the entire push; verification returns the refs it confirmed instead of
+only reading them, and no member branch can be rewound because each is pushed
+back at the value it is expected to hold. Train telemetry is written through the
+canonical `telemetry.py` writers (`events-md` lock and dated section for
+`events.md`, the per-file lock for `builds.jsonl`) rather than a private lock
+and a raw append; an unreadable build spool is kept for the operator instead of
+being dropped. No gate, member evidence, or publication outcome rule changes.
+
+**Expected effect:** publication cannot carry a member head that stopped being
+the member branch's tip at transport start, and a concurrent canonical event
+writer can no longer lose or truncate the train's own event.
+
+## 2026-09-17 - Model-free duplicate-work guards before dispatch (#576)
+
+**Trigger:** owner observation recorded in issue #576: quota was spent twice on
+the same mathematics. Several open PRs (212, 296, 398, 488, 539, and per the
+Opus reviews 289 and 274) prove or declare results `main` already contains,
+because tasks covering the same statements were dispatched weeks apart and the
+overlap surfaced only at review or merge. On the same day a helper and the main
+session repaired PR 577 simultaneously.
+
+**Change:** `local/bin/dup_check.py` searches a ref for a declaration by exact
+fully qualified name, by last name component inside the `MIPStarRE` namespace,
+and by statement after a cheap normalisation, over explicit names, a blueprint
+node's `\lean{}` names, or the declarations a branch or open PR adds against
+its merge base; its `sweep` mode reports the same over every open PR as an
+`audits/` document. `local/registry/declaration-claims.jsonl` binds declaration
+names to the issue producing them, checked at issue creation and at dispatch.
+`dispatch.sh` runs the check for the `prover`, `mathfix` and `simplifier` roles
+as a warning (`MIPSTARRE_DUP_CHECK=fatal` refuses, `=off` skips).
+`local/bin/claim.sh` brings the meta session's atomic worker-claim list into the
+repository, format unchanged, with the file location overridable so it can be
+tested. `scripts/blueprint_lean_sync.collect_file_lean_decls` gained an optional
+`text=` argument so a ref can be parsed without a checkout; its behaviour is
+unchanged when the argument is absent. `issues-prs.md` section 7 records the
+obligations. No tool calls a model, and only the sweep's list of open PRs
+touches the network.
+
+**Expected effect:** an overlap is visible before a prover run pays for it, the
+main session can close or shrink a superseded PR instead of repairing it, and
+two workers no longer repair the same PR at once. The guards are advisory by
+construction: a text match is a prompt to look, never a verdict about the
+mathematics, and no gate is weakened by them.
+
+## 2026-09-17 - The merge subject's Lean delta counts code lines only (#574)
+
+**Trigger:** owner request recorded in issue #574: the `[lean +A -D]` bracket
+added by issue #557 counted every changed line of every `*.lean` file, so a
+docstring sweep or a commented-out block read on the commits page like a large
+code change and the figure stopped answering the question it was added for.
+
+**Change:** `issues-prs.md` records that A and D count changed Lean **code**
+lines. `pr_merge.lean_line_delta` now takes the changed blobs from
+`git diff --raw -z --find-renames` (blob ids, so renames need no path handling),
+reads the added line numbers from the head blob's `-U0` hunk headers and the
+removed ones from the merge-base blob's, and counts a line only when a
+single-pass scanner calls it code. That scanner tracks nesting block comments —
+`/-`, and the `/--` and `/-!` forms that share its `-/` closer — skips line
+comments, blank and whitespace-only lines, and keeps a line whose code is merely
+trailed by a comment. It is naive by design about the rest of Lean's grammar:
+only double-quoted strings hide delimiters, and string and escape state carry
+across physical lines until the closing quote. Added and deleted files count
+their own code lines; a pure rename counts none.
+
+**Scope disposition:** the cosmetic-by-contract rule of issue #557 is unchanged
+and now explicit in the code: the measurement is wrapped so that it returns
+`None` on any failure and cannot raise, the subject format stays
+`[lean +A -D]` with `[lean 0]` for a PR that changes no Lean code line, and no
+gate, CI step or REST payload key changes.
+
+**Expected effect:** the bracket tracks the Lean code a packet actually moved,
+documentation-only and comment-only work reads as such on the commits page, and
+no pull request that cleared the seven gates can fail on the number.
+
+## 2026-09-18 - PR507: the train's publication contract, claims and post-push check
+
+**Trigger:** the 2026-09-17 independent adjudication of PR #507
+(`/tmp/pr507-publication-adjudication-20260917-report.md`, archived under
+`native-audits/pr507-publication-adjudication-01a0afd6/`) reproduced, against a
+real `receive-pack`, a member ref advancing after the ref advertisement and
+before the remote committed `main`, with the transport still reporting success.
+Finding F1 of review `5194195608` therefore stayed open: the member leases added
+on 2026-09-17 are client-side comparisons against the advertisement, and a member
+that still matches sends no update command, so the transaction holds no
+server-side predicate for it. The owner authorized a narrower contract on
+2026-09-18 rather than leaving the reviewed train unusable.
+
+**Change:** `issues-prs.md` now states the contract in four parts instead of
+implying an atomic guard over every member: main only ever advances to an
+integration of the exact reviewed member SHAs; server-side atomicity covers the
+refs the transaction carries; the advertisement-to-commit window for an unmoved
+member is an accepted residual; and two mechanisms bound it. First, `pr_train.py`
+claims every member on the shared atomic claim list (`local/bin/claim.sh` when
+the checkout has it, otherwise the meta session's `qpbt-claim.sh`) with kind
+`train` and party `main` before the first gate reads a member, refuses to start
+and prints the holder line when another writer holds one, and releases the claims
+after the transport and its re-verification end — on success, on failure and on
+every abort path. Second, immediately after a successful transport the train
+re-reads every member ref from the remote; a member that moved is recorded as a
+CONTRACT VIOLATION on stdout, in `publication.json` and in the train event with
+the verified SHA, the observed SHA and any claim-list holder line, its train
+comment is not posted, and the run exits non-zero. The overclaiming wording in
+`pr_train.py`, `checked-push.sh` and the protocol is corrected to say what Git
+actually compares and when. No gate, member evidence, publication outcome rule,
+or `pr_merge.py` behaviour changes, and the train remains undeployed.
+
+**Expected effect:** the documented guarantee matches the mechanism; the only
+writers that could exercise the residual window are held off it by a claim they
+must take anyway; and a violation by anything else is detected, recorded and
+visible in the exit status instead of passing as a clean publication.
+
+## 2026-09-18 - Lean-delta subjects for train members (#590)
+
+**Trigger:** The owner requires a Lean delta in every first-parent merge subject
+on main (issue #590); the reviewed train still used bare member subjects even
+though ordinary merges already followed the policy from issues #557 and #574.
+
+**Change:** `pr_train.py` uses `pr_merge.lean_line_delta` on each committed merge
+against its immediately preceding accepted train commit, then applies
+`pr_merge.merge_commit_title` with the gated member title. Zero deltas retain
+`[lean 0]`; an unavailable count or unusable title retains the train's existing
+subject without blocking integration. Gated titles remain transient, so member
+manifests and publication checks are unchanged.
+
+**Expected effect:** each merge commit published by a reviewed train carries
+the same approximate Lean code-line signal as an ordinary merge, with no
+cumulative count or spurious deletion of newer main-only content.
+
+## 2026-09-18 - Schedule reviewed trains in the model-free daemon (#593)
+
+**Trigger:** Owner issue #593 and the 2026-09-18 daemon scan: the merged train
+and member-title policy had no caller in `/tmp/merge-daemon-v9k-cpa.sh`, leaving
+approved stale heads idle at PAR=0.
+
+**Change:** `issues-prs.md` records daemon admission, telemetry preparation,
+primary quiet-window coordination and refusal handling. `daemon_train.py`
+routes one pinned clean/stale batch and delegates all publication gates to the
+existing `pr_train.py`. The reviewed runtime patch and deployment instructions
+are under `local/deploy/`; no running daemon is changed by this commit.
+
+**Expected effect:** after independent review and controlled deployment, one
+daemon process can submit a reviewed batch without replacing its ordinary
+single-PR path, overlapping telemetry commits, or silently losing a local
+telemetry lead. A refused or uncertain train remains held for reconciliation.
+
+## 2026-09-18 - Preserve approved train pins and inspect unpublished history (#595)
+
+**Trigger:** Independent review 5244965776 at `00e2079f` found that a green
+replacement head could pass the train after the adapter had scanned the
+operator's pinned head, and that changed-then-reverted nontelemetry commits
+could pass the adapter's net-tree test (see the PR595 entry in
+`results/telemetry/events.md`).
+
+**Change:** The daemon passes approved PR-to-SHA pins to the train. Under the
+existing member claims, gate results must match the requested pins; the train
+manifest retains those pins for the publication verifier, including members
+dropped for conflicts. Standalone number-only trains remain available. During
+daemon preparation, every unpublished commit must satisfy the existing passive
+telemetry path-and-mode policy before `github-sync.sh main` runs. The accepted
+claim, lease, atomic transport and post-push verification contract is unchanged.
+
+**Expected effect:** A later independently approved but unrequested head never
+enters the batch, and reversed nontelemetry local history stays available for
+operator reconciliation rather than being published by the adapter.
+
+## 2026-09-17 - Record independent mixed-model review (#575; interim rule)
+
+**Trigger:** owner 11:22Z decision and explicit resend allocating six Mac
+helper slots as three fixers/three reviewers; same-day correction withdrawing
+Opus review of Opus-modified PRs. See `results/telemetry/events.md`,
+"2026-09-17 META 11:22Z owner decisions", "Read new owner11:22Z OPUS
+REVIEWERS handoff and same-day correction", and "2026-09-17 META 11:37Z";
+issue #575 records the requested durable amendment.
+
+**Change (superseded by the 12:29Z ruling below):** The interim assignment rule
+restricted Opus reviewers to PRs not modified by Opus helpers and assigned
+Opus-changed PRs to independent native Codex review. The owner-run exception to
+dispatch-only review remains: the three Mac reviewers publish marked
+exact-head COMMENT evidence; MAIN checks the published record and owns the
+summary status. Existing claims, trusted-source, CI, caps, round limits,
+source-faithfulness and strict-diff carry remain binding. This changes no
+scripts, keys, allocation, project goal, or merge authority: provenance and
+handback validation are documented operator duties, not new code enforcement.
+
+**Expected effect (interim):** separate reviewer capacity could shorten the
+review queue without same-model approval of Opus repairs or treating stale,
+malformed, or unpublished reviews as merge evidence. Existing automated
+exact-head gates continue to enforce their prior conditions; no throughput
+gain was asserted before observation.
+
+## 2026-09-17 - Replace family exclusion with session independence (#575)
+
+**Trigger:** the owner's 12:29Z ruling in the OPUS REVIEWERS handoff in
+`/tmp/qpbt-main-handoff-v5.md`: "a new Opus session counts for independent".
+This explicitly supersedes the earlier same-day meta correction recorded above.
+
+**Change:** `review.md` now permits a fresh Opus reviewer session to review
+any PR, including one repaired or refreshed by a different Opus session, so
+long as the reviewer has never worked on that PR. This matches native Codex
+session independence; same-model provenance is not grounds for rejection.
+Cross-model review is preferred only when it costs nothing. The six Mac slots
+(three fixers, three reviewers), relay-1 MAIN with one native delegate, and
+0/0/0 external caps remain unchanged. No goal, gate, key, runtime or merge
+authority changes; MAIN's provenance and evidence checks remain operator duties.
+
+**Expected effect:** independently reviewed Opus-modified PRs can use open
+reviewer slots without weakening trusted prompts, full-diff read-only review,
+exact-head COMMENT evidence, MAIN's fail-closed status check, round caps, or
+the whitespace-sensitive carry rule. No throughput gain is asserted before
+observation.
