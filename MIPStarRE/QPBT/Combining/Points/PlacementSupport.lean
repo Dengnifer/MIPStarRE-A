@@ -14,7 +14,7 @@ state-dependent distance between the two bipartition schemes of
 ## References
 
 The placements are those of `def:symmetric-equivalents`, blueprint
-`blueprint/src/chapter/ch14_qpbt_observables.tex:1003-1030`, paper
+`blueprint/src/chapter/ch14_qpbt_observables.tex`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`.  The
 placement module proves EPR-exchange invariance for the involution
 `(A' B'')(A'' B')`, which fixes `A` and `B`, in
