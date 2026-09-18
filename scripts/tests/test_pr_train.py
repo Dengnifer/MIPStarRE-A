@@ -15,6 +15,7 @@ from unittest import mock
 
 from scripts.tests.test_github_workflow import FakeGitHub, LOCAL_BIN, _git
 import pr_train
+from pr_merge import GateFailure
 
 
 class TrainTests(unittest.TestCase):
@@ -148,9 +149,12 @@ class TrainTests(unittest.TestCase):
             self.gh.route(rf"^issues/{number}/comments", {"id": number}, method="POST")
         self.gh.route(r"^issues/9/sub_issues", [{"number": 10, "state": "open"}])
 
-    def train(self, *members: int) -> subprocess.CompletedProcess:
+    def train(self, *members: int,
+              pinned: dict[int, str] | None = None) -> subprocess.CompletedProcess:
+        pins = ([arg for number, head in pinned.items()
+                 for arg in ("--pinned-head", str(number), head)] if pinned else [])
         return subprocess.run([sys.executable, str(self.repo / "local/bin/pr_train.py"),
-                               *map(str, members or (1, 2, 3))], cwd=self.repo,
+                               *pins, *map(str, members or (1, 2, 3))], cwd=self.repo,
                               env=self.env, text=True, capture_output=True, timeout=360)
 
     def remote_main(self) -> str:
@@ -200,6 +204,70 @@ class TrainTests(unittest.TestCase):
         events = (self.repo / "results/telemetry/events.md").read_text()
         self.assertRegex(events, r"\A# Incident and observation log")
         self.assertRegex(events, rf"\n## \d{{4}}-\d{{2}}-\d{{2}}\n\n- [^\n]*Reviewed train {head}")
+
+    def test_pinned_train_keeps_pins_while_dropping_a_conflict(self) -> None:
+        result = self.train(pinned=dict(self.heads))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("dropped PR #2", result.stdout)
+        self.assertNotEqual(self.remote_main(), self.base)
+        directory = next((self.cache / "trains").iterdir())
+        manifest = json.loads((directory / "manifest.json").read_text())
+        self.assertEqual(manifest["requested_heads"],
+                         {str(n): sha for n, sha in self.heads.items()})
+        self.assertEqual(manifest["dropped"], [2])
+        self.assertEqual([m["number"] for m in manifest["members"]], [1, 3])
+
+    def test_pinned_train_refuses_a_new_independently_green_head(self) -> None:
+        approved = dict(self.heads)
+        _git(self.repo, "switch", "-q", "issue-3")
+        self.write("third", "new independently reviewed content\n")
+        _git(self.repo, "commit", "-qam", "advance member 3")
+        self.heads[3] = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "switch", "-q", "main")
+        _git(self.repo, "push", "-q", "github", "issue-3")
+        self.arm()  # The replacement has actual successful CI and review fixtures.
+
+        result = self.train(1, 3, pinned={1: approved[1], 3: approved[3]})
+
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f"requested pin {approved[3]} changed to {self.heads[3]}", result.stderr)
+        self.assertEqual(self.remote_main(), self.base)
+        self.assertFalse((self.cache / "trains").exists())
+        self.assertFalse((self.tmp / "build.log").exists())
+        self.assertEqual(self.claim_cli("check", "1").stdout.strip(), "free")
+        self.assertEqual(self.claim_cli("check", "3").stdout.strip(), "free")
+
+        # Standalone callers still gate and integrate the latest eligible heads.
+        current = self.train(1, 3)
+        self.assertEqual(current.returncode, 0, current.stdout + current.stderr)
+        self.assertNotEqual(self.remote_main(), self.base)
+
+    def test_verifier_refuses_green_replacement_for_dropped_pin(self) -> None:
+        approved = dict(self.heads)
+        _git(self.repo, "switch", "-q", "issue-2")
+        self.write("shared", "new independently reviewed conflict\n")
+        _git(self.repo, "commit", "-qam", "advance dropped member")
+        self.heads[2] = _git(self.repo, "rev-parse", "HEAD")
+        _git(self.repo, "switch", "-q", "main")
+        _git(self.repo, "push", "-q", "github", "issue-2")
+        self.arm()  # The changed ref's exact head has successful CI and review.
+        path = self.tmp / "manifest.json"
+        path.write_text(json.dumps({
+            "repo": str(self.repo), "worktree": str(self.repo), "base": self.base,
+            "head": "f" * 40,
+            "members": [dict(number=n, head=approved[n], branch=f"issue-{n}",
+                             adjudicated=False) for n in (1, 3)],
+            "dropped": [2],
+            "requested_heads": {str(n): sha for n, sha in approved.items()},
+        }))
+        with mock.patch.dict(os.environ, self.env), \
+             pr_train.member_claims(self.repo, [1, 2, 3]):
+            with self.assertRaisesRegex(GateFailure,
+                                        f"PR #2: requested pin {approved[2]} changed"):
+                pr_train.verify_manifest(path, self.base, "f" * 40, "refs/heads/main")
+        self.assertEqual(self.remote_main(), self.base)
+        for number in (1, 2, 3):
+            self.assertEqual(self.claim_cli("check", str(number)).stdout.strip(), "free")
 
     def test_member_titles_count_only_each_merged_lean_delta(self) -> None:
         _git(self.repo, "switch", "-q", "issue-1")

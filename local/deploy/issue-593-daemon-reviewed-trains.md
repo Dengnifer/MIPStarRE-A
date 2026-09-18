@@ -37,9 +37,12 @@ published `main` in the primary checkout. Do not run `pr_train.py` by hand.
    ```
 
    Store it as `$D/train-approved.json` only when ready to admit one batch.
-   No adjudicated or unreviewed member enters this batch. Leave PAR=0 and all
-   model lanes disabled. Restart only the existing daemon service after the
-   approved file is in place; it alone invokes the adapter and train.
+   The adapter carries these exact pins into the claimed train and its
+   publication verifier; a changed pin refuses even when its replacement has
+   green CI and independent review. No adjudicated or unreviewed member enters
+   this batch. Leave PAR=0 and all model lanes disabled. Restart only the
+   existing daemon service after the approved file is in place; it alone
+   invokes the adapter and train.
 4. Coordinate MAIN's required status snapshot and other primary telemetry
    appends: finish or spool them outside primary before the train begins, do
    not write/commit/push primary telemetry while the train integrates and
@@ -48,8 +51,11 @@ published `main` in the primary checkout. Do not run `pr_train.py` by hand.
    legitimate telemetry (e.g. 62b6b04f ahead of published b6c09eb0 at the
    checkpoint), it uses `github-sync.sh main` to publish the *existing* local
    commits and its snapshot; it never resets or rebases them. Sync failure or
-   nontelemetry dirt blocks the train. The daemon's ordinary pre-merge and
-   hourly telemetry batching remains intact outside this train cycle.
+   nontelemetry dirt or an unpublished commit touching any nontelemetry path or
+   mode blocks the train, even when later commits reverse the change. Reconcile
+   that history without resetting, dropping or rewriting local commits. The
+   daemon's ordinary pre-merge and hourly telemetry batching remains intact
+   outside this train cycle.
 
 ## Observe and reconcile
 

@@ -44,7 +44,7 @@ def pinned_batch(path: Path) -> list[tuple[int, str]]:
     return members
 
 
-def select(repo: Path, batch: list[tuple[int, str]], scan: str) -> list[int]:
+def select(repo: Path, batch: list[tuple[int, str]], scan: str) -> list[tuple[int, str]]:
     candidates = {}
     for line in scan.splitlines():
         match = CANDIDATE.fullmatch(line)
@@ -66,7 +66,18 @@ def select(repo: Path, batch: list[tuple[int, str]], scan: str) -> list[int]:
             raise GateFailure(f"PR #{number} has an active claim: {holder}")
         if code != 0:
             raise LayerError(f"claim check for PR #{number} failed ({code}): {holder}")
-    return [number for number, _ in batch]
+    return batch
+
+
+def unpublished_history_is_telemetry(repo: Path, remote: str, local: str) -> bool:
+    """Check each unpublished commit, including changes hidden by later reversals."""
+    for sha in git(repo, "rev-list", "--reverse", f"{remote}..{local}").splitlines():
+        commit, *parents = git(repo, "rev-list", "--parents", "-n", "1", sha).split()
+        if commit != sha or not parents:
+            return False
+        if any(not pr_merge._base_advance_is_tolerated(repo, parent, sha) for parent in parents):
+            return False
+    return True
 
 
 def prepare_primary(repo: Path) -> None:
@@ -84,7 +95,7 @@ def prepare_primary(repo: Path) -> None:
     remote, local = git(repo, "rev-parse", "github/main"), git(repo, "rev-parse", "main")
     if remote != local:
         if (not git_ok(repo, "merge-base", "--is-ancestor", remote, local)
-                or not pr_merge._base_advance_is_tolerated(repo, remote, local)):
+                or not unpublished_history_is_telemetry(repo, remote, local)):
             raise GateFailure("local main is not a telemetry-only descendant of published main")
         result = subprocess.run([str(repo / "local/bin/github-sync.sh"), "main"], cwd=repo)
         if result.returncode:
@@ -96,10 +107,12 @@ def prepare_primary(repo: Path) -> None:
 
 
 def run(repo: Path, batch_file: Path, scan: str) -> int:
-    numbers = select(repo, pinned_batch(batch_file), scan)
+    members = select(repo, pinned_batch(batch_file), scan)
     prepare_primary(repo)
+    pins = [arg for number, head in members for arg in ("--pinned-head", str(number), head)]
     result = subprocess.run([sys.executable, str(repo / "local/bin/pr_train.py"),
-                             "--repo-root", str(repo), *(str(n) for n in numbers)], cwd=repo)
+                             "--repo-root", str(repo), *pins,
+                             *(str(number) for number, _ in members)], cwd=repo)
     if result.returncode:
         print(f"daemon train refused or incomplete (exit {result.returncode}); "
               "inspect train publication evidence before any retry", file=sys.stderr)

@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -26,6 +27,7 @@ from wf_util import LayerError, atomic_write, cache_root, file_lock, utcnow
 
 
 CLAIM_PARTY, CLAIM_KIND = "main", "train"
+SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 
 def claim_script(repo: Path) -> Path:
@@ -88,12 +90,16 @@ def primary_at(repo: Path, base: str) -> None:
 
 
 def members_at(repo: Path, numbers: list[int], base: str, adjudicated: set[int],
-               titles: dict[int, str] | None = None) -> list[dict]:
+               titles: dict[int, str] | None = None,
+               expected_heads: dict[int, str] | None = None) -> list[dict]:
     members, failures = [], []
     for number in numbers:
         try:
             row = pr_merge.run_gate(repo, number, adjudicated=number in adjudicated,
                                     integration_base=base)
+            if expected_heads is not None and row["head_sha"] != expected_heads[number]:
+                raise GateFailure(f"requested pin {expected_heads[number]} changed to "
+                                  f"{row['head_sha']}")
             members.append({"number": number, "head": row["head_sha"],
                             "branch": row["branch"], "adjudicated": number in adjudicated})
             if titles is not None:
@@ -174,11 +180,26 @@ def verify_manifest(path: Path, expected_main: str, expected_head: str,
         raise GateFailure("publication tuple differs from the tested train")
     if len(data["members"]) < 2:
         raise GateFailure("fewer than two train members")
+    expected_heads = None
+    if "requested_heads" in data:
+        requested = data["requested_heads"]
+        if not isinstance(requested, dict) or any(
+                not isinstance(number, str) or not number.isdecimal()
+                or not isinstance(head, str) or not SHA.fullmatch(head)
+                for number, head in requested.items()):
+            raise GateFailure("invalid requested head pins in train manifest")
+        expected_heads = {int(number): head for number, head in requested.items()}
+        if (len(expected_heads) != len(requested)
+                or set(expected_heads) != {m["number"] for m in data["members"]} | set(data["dropped"])):
+            raise GateFailure("requested head pins do not match train members and drops")
     primary_at(repo, data["base"])
     current = members_at(repo, [m["number"] for m in data["members"]], data["base"],
-                         {m["number"] for m in data["members"] if m["adjudicated"]})
+                         {m["number"] for m in data["members"] if m["adjudicated"]},
+                         expected_heads=expected_heads)
     if current != data["members"]:
         raise GateFailure("a train member head or branch changed")
+    if expected_heads is not None and data["dropped"]:
+        members_at(repo, data["dropped"], data["base"], set(), expected_heads=expected_heads)
     if git(worktree, "rev-parse", "HEAD") != data["head"] or git(worktree, "status", "--porcelain"):
         raise GateFailure("tested train changed")
     for member in current:
@@ -290,11 +311,16 @@ def record(repo: Path, data: dict, outcome: str) -> None:
             datetime.now().astimezone().strftime("%Y-%m-%d"))
 
 
-def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
+def run_train(repo: Path, numbers: list[int], adjudicated: set[int],
+              expected_heads: dict[int, str] | None = None) -> int:
     if len(numbers) < 2 or len(set(numbers)) != len(numbers) or any(n <= 0 for n in numbers):
         raise GateFailure("provide at least two distinct positive PR numbers")
     if not adjudicated.issubset(numbers):
         raise GateFailure("--adjudicated must name a train member")
+    if expected_heads is not None and (set(expected_heads) != set(numbers) or any(
+            not isinstance(head, str) or not SHA.fullmatch(head)
+            for head in expected_heads.values())):
+        raise GateFailure("pinned heads must name every train member with a full SHA")
     if os.environ.get("MIPSTARRE_SKIP_HOOKS") == "1":
         raise GateFailure("a train cannot bypass hooks")
     with ExitStack() as stack:
@@ -308,7 +334,7 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
         base = git(repo, "rev-parse", "github/main")
         primary_at(repo, base)
         titles: dict[int, str] = {}
-        members = members_at(repo, numbers, base, adjudicated, titles)
+        members = members_at(repo, numbers, base, adjudicated, titles, expected_heads)
         runtime = cache_root() / "trains"
         runtime.mkdir(parents=True, exist_ok=True)
         directory = Path(tempfile.mkdtemp(prefix="train-", dir=runtime))
@@ -324,6 +350,8 @@ def run_train(repo: Path, numbers: list[int], adjudicated: set[int]) -> int:
             data = {"repo": str(repo), "worktree": str(worktree), "base": base,
                     "head": git(worktree, "rev-parse", "HEAD"), "members": members,
                     "dropped": dropped}
+            if expected_heads is not None:
+                data["requested_heads"] = {str(n): expected_heads[n] for n in numbers}
             path = directory / "manifest.json"
             atomic_write(path, json.dumps(data, indent=2) + "\n")
             run_ci(repo, data)
@@ -388,6 +416,7 @@ def main() -> int:
     parser.add_argument("prs", type=int, nargs="*")
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--adjudicated", type=int, action="append", default=[])
+    parser.add_argument("--pinned-head", nargs=2, action="append", metavar=("PR", "SHA"))
     parser.add_argument("--verify-manifest", type=Path)
     parser.add_argument("--expected-main", default="")
     parser.add_argument("--expected-head", default="")
@@ -403,7 +432,14 @@ def main() -> int:
                 atomic_write(args.members_out, "".join(
                     f"refs/heads/{member['branch']} {member['head']}\n" for member in members))
             return 0
-        return run_train(args.repo_root.resolve(), args.prs, set(args.adjudicated))
+        expected_heads = None
+        if args.pinned_head:
+            expected_heads = {}
+            for number, head in args.pinned_head:
+                if not number.isdecimal() or int(number) <= 0 or int(number) in expected_heads:
+                    raise GateFailure("duplicate or invalid pinned PR number")
+                expected_heads[int(number)] = head
+        return run_train(args.repo_root.resolve(), args.prs, set(args.adjudicated), expected_heads)
     except (LayerError, OSError, ValueError, KeyError) as exc:
         print(f"pr_train.py: ERROR: {exc}", file=sys.stderr)
         return 1

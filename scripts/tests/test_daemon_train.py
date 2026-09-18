@@ -47,14 +47,14 @@ class DaemonTrainTests(unittest.TestCase):
                      f"587:587:issue-587-two:two:clean:{self.second}\n"
                      f"260:260:issue-260-adj:adj:adj:{'c' * 40}\n")
 
-    def select(self, scan: str | None = None) -> list[int]:
+    def select(self, scan: str | None = None) -> list[tuple[int, str]]:
         with mock.patch.object(daemon_train.pr_merge, "head_is_fresh", return_value=False), \
              mock.patch.object(daemon_train.pr_train, "claim_call", return_value=(0, "free")):
             return daemon_train.select(self.repo, daemon_train.pinned_batch(self.batch),
                                        self.scan if scan is None else scan)
 
     def test_only_pinned_clean_stale_heads_route_to_train(self) -> None:
-        self.assertEqual(self.select(), [580, 587])
+        self.assertEqual(self.select(), [(580, self.first), (587, self.second)])
 
     def test_head_change_or_adjudication_refuses_batch(self) -> None:
         for scan in (self.scan.replace(self.first, "d" * 40),
@@ -131,13 +131,59 @@ class DaemonTrainTests(unittest.TestCase):
             with self.assertRaisesRegex(GateFailure, "telemetry-only"):
                 daemon_train.prepare_primary(self.repo)
 
+    def test_reverted_nontelemetry_commits_never_reach_sync(self) -> None:
+        (self.repo / "README").write_text("temporary code\n")
+        git(self.repo, "commit", "-qam", "modify README")
+        (self.repo / "README").write_text("base\n")
+        git(self.repo, "commit", "-qam", "undo README change")
+        before = git(self.repo, "rev-parse", "HEAD")
+        self.assertEqual(git(self.repo, "diff", self.base, before), "")
+        real_run = subprocess.run
+
+        def forbid_sync(args: list[str], **kwargs: object) -> subprocess.CompletedProcess:
+            if args[0] != "git":
+                self.fail(f"publisher invoked: {args}")
+            return real_run(args, **kwargs)
+
+        with mock.patch.object(daemon_train.subprocess, "run", side_effect=forbid_sync):
+            with self.assertRaisesRegex(GateFailure, "telemetry-only"):
+                daemon_train.prepare_primary(self.repo)
+        self.assertEqual(git(self.repo, "rev-parse", "HEAD"), before)
+        self.assertEqual(git(self.remote, "rev-parse", "main"), self.base)
+
+    def test_reverted_telemetry_executable_mode_never_reaches_sync(self) -> None:
+        record = self.repo / "results/telemetry/events.md"
+        record.parent.mkdir(parents=True)
+        record.write_text("base\n")
+        git(self.repo, "add", "results/telemetry/events.md")
+        git(self.repo, "commit", "-qm", "add passive record")
+        record.chmod(0o755)
+        git(self.repo, "commit", "-qam", "make telemetry executable")
+        record.chmod(0o644)
+        git(self.repo, "commit", "-qam", "restore telemetry mode")
+        real_run = subprocess.run
+
+        def forbid_sync(args: list[str], **kwargs: object) -> subprocess.CompletedProcess:
+            if args[0] != "git":
+                self.fail(f"publisher invoked: {args}")
+            return real_run(args, **kwargs)
+
+        with mock.patch.object(daemon_train.subprocess, "run", side_effect=forbid_sync):
+            with self.assertRaisesRegex(GateFailure, "telemetry-only"):
+                daemon_train.prepare_primary(self.repo)
+        self.assertEqual(git(self.remote, "rev-parse", "main"), self.base)
+
     def test_train_failure_is_not_described_as_a_merge(self) -> None:
-        with mock.patch.object(daemon_train, "select", return_value=[580, 587]), \
+        with mock.patch.object(daemon_train, "select",
+                               return_value=[(580, self.first), (587, self.second)]), \
              mock.patch.object(daemon_train, "prepare_primary"), \
              mock.patch.object(daemon_train.subprocess, "run",
                                return_value=subprocess.CompletedProcess([], 1)) as train:
             self.assertEqual(daemon_train.run(self.repo, self.batch, self.scan), 1)
             self.assertEqual(train.call_args.args[0][-2:], ["580", "587"])
+            self.assertEqual(train.call_args.args[0][4:-2],
+                             ["--pinned-head", "580", self.first,
+                              "--pinned-head", "587", self.second])
 
 
 if __name__ == "__main__":
