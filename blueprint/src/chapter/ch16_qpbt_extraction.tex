@@ -1238,12 +1238,16 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\proves{thm:pauli}
 	\uses{lem:qld-unitary, lem:qld-extraction-error-form, lem:pauli-completeness,
 		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
-		def:EPR, def:povm-distance}
+		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
+		thm:pauli-isometry-transfer-alice-support,
+		thm:pauli-isometry-transfer-bob-support}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
 	\]
 	define $\phi_{\mathrm{B}}$ analogously.
+	Theorem~\ref{thm:pauli-ancilla-intertwining-support} gives the isometry and
+	exact intertwining identities for these unit-ancilla embeddings.
 	% Reliance disclosure added: the proof chain of thm:pauli passes through
 	% lem:qld-4-7, whose source proof (lines 1277--1413 of
 	% 14_analysis_of_the_pauli_basis_test.tex) instantiates the classical low
@@ -1296,7 +1300,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		= V_{\mathrm{A}} \, \Bigl( (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \ot \bigl(\ket{\mathrm{EPR}_q}\bra{\mathrm{EPR}_q}^{\ot M}\bigr)_{\mathrm{A}'\mathrm{A}''} \Bigr) \, V_{\mathrm{A}}^\dagger
 		= N^W_h \, Q_{\mathrm{A}} = Q_{\mathrm{A}} \, N^W_h\;.
 	\]
-	The estimates transfer from $N^W_h$ to $\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger$ as follows. Write $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and $\ket{\vartheta} = \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}$. Since $\phi_{\mathrm{A}}^\dagger \phi_{\mathrm{A}} = \Id$, the projection $\Id - Q_{\mathrm{A}}$ annihilates $\ket{\vartheta}$, so the displayed bound above gives
+	The estimates transfer from $N^W_h$ to $\phi_{\mathrm{A}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{A}} \, \phi_{\mathrm{A}}^\dagger$ by Theorem~\ref{thm:pauli-isometry-transfer-alice-support}, whose range-projection step is as follows. Write $\ket{\Delta} = \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and $\ket{\vartheta} = \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi}$. Since $\phi_{\mathrm{A}}^\dagger \phi_{\mathrm{A}} = \Id$, the projection $\Id - Q_{\mathrm{A}}$ annihilates $\ket{\vartheta}$, so the displayed bound above gives
 	\[
 		\bigl\| (\Id - Q_{\mathrm{A}}) \ket{\Delta} \bigr\|^2
 		= \bigl\| (\Id - Q_{\mathrm{A}}) (\ket{\Delta} - \ket{\vartheta}) \bigr\|^2
@@ -1314,7 +1318,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		\qquad \text{and, by the identical argument,} \qquad
 		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
 	\]
-	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
+	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. The Bob comparison is the corresponding application of Theorem~\ref{thm:pauli-isometry-transfer-bob-support}. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
 	The range-projection transfer just used, which is omitted in the source,
 	is documented in \cite{gap:qpbt_extraction-transfer}.
 \end{proof}

@@ -22,9 +22,9 @@
   \item \textbf{Difficulty.} Medium.  The extraction proof contains two
   incorrect numerical steps and later suppresses the range projection when
   passing from unitary conjugation to isometry conjugation.
-  \item \textbf{Estimated weight.} A corrected positive-contraction estimate,
-  a small-error case split for normalization, and one range-projection transfer
-  lemma for a projective measurement family.
+  \item \textbf{Estimated weight.} The corrected positive-contraction estimate,
+  small-error normalization split, and general range-projection transfer are
+  available; the concrete Pauli soundness application remains to be proved.
   \item \textbf{Mathlib/project split.} Positivity, contraction inequalities,
   isometry range projections, and norm estimates belong to finite-dimensional
   Hilbert-space algebra.  The state-dependent family distance and register
@@ -184,10 +184,11 @@ projective measurements internally and obtains a normalized auxiliary state
 and two concrete swap unitaries satisfying the state and both players'
 Pauli-family distances at the nested construction/extraction scale. This is
 the existence claim of Lemma~\path{lem:qld-unitary}; its proof does not
-require a supplied global measurement. The subsequent passage from the
-concrete swap operators to local isometries is now justified by the
-supplied-data transfer and the range-projection argument above; it does not
-extend the construction to arbitrary strategies.
+require a supplied global measurement. The general range-projection and
+unit-ancilla lemmas apply to the concrete swap operators and Pauli measurements
+through the proved supplied-data transfer above. This yields local isometry
+comparisons for the extracted projective setting, but does not extend the
+construction to arbitrary strategies.
 
 The stronger theorem \path{exists_extractionWitness_fourth_root_rate}
 normalizes the numerical rate of this concrete conclusion to the same
@@ -244,8 +245,10 @@ theorem remains useful for a supplied global measurement, and its composition
 with the proved global constructor establishes the source-facing existence
 claim of Lemma~\path{lem:qld-unitary} for projective strategies. Its concrete
 isometry transfer, including the state and both operator estimates, is proved
-for supplied extraction data. The unrestricted source theorem still requires
-the separate arbitrary-strategy and game-law steps.
+for supplied extraction data. Composing that transfer with the internally
+constructed data proves the restricted projective-setting isometry bounds.
+The unrestricted source theorem still requires the arbitrary-strategy and
+source-game correspondence steps, and \path{pauli_soundness} remains open.
 
 \bibliographystyle{alpha}
 \bibliography{references}
