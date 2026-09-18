@@ -217,6 +217,18 @@ rather than stored in the witness.
 \ghissue{529} records the independent general range-projection and ancilla
 results. \ghissue{586} applies them to the extracted swap maps and both Pauli
 operator families; neither result establishes unrestricted soundness.
+Composing the global-pair and extraction construction with this isometry
+transfer gives, for every admissible parameter tuple, $0\leq\epsilon\leq1$,
+and projective setting, local isometries and a unit auxiliary state whose
+state norm and both complete Pauli-family distances have a common
+$a(md)^a(\epsilon^b+q^{-b}+2^{-bmd})$ bound. The universal constants are
+chosen before the setting; neither global-pair nor extraction data are
+assumptions of the resulting theorem. This is the separately labelled
+projective-setting support result, not Theorem~\path{thm:pauli}: an arbitrary
+successful strategy is not yet placed in the required projective setting,
+and the seed-indexed game correspondence remains a separate obligation
+recorded in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+\ghissue{602} tracks this restricted composition.
 
 \section{Conclusion}
 

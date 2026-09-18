@@ -2,6 +2,7 @@ import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness.RangeProjection
 import MIPStarRE.QPBT.Test.Soundness.Ancilla
 import MIPStarRE.QPBT.Test.Soundness.OperatorTransfer
+import MIPStarRE.QPBT.Test.Soundness.ProjectiveSetting
 
 /-!
 # Pauli basis test soundness
