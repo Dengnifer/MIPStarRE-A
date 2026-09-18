@@ -1567,6 +1567,33 @@ assembled by Fourier averaging.
 	so it contributes neither to a marginal nor to the squared distance.
 \end{proof}
 
+\begin{lemma}[Formalization support: point self-consistency defect]
+	\label{lem:qld-point-self-consistency-defect}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, def:consistency, def:povm-distance,
+		def:line-point-dist, lem:qld-line-point-marginal-identities}
+	Let $\{\hat Q^{x,z}_{a,b}\}$ be the joint point measurements of
+	Lemma~\ref{lem:qld-4-10}, placed on two opposite placements. Their
+	self-consistency estimate, stated there as a state-dependent squared
+	distance, also holds in the consistency-defect convention of
+	Definition~\ref{def:consistency}, with the same bound $\delta_Q$, on
+	average over uniformly random $x,z$. The same bound holds when the pair
+	$(x,z)$ is instead read off as the point coordinates of two independent
+	samples from the line-point distribution.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, def:consistency, def:povm-distance,
+		def:line-point-dist, lem:qld-line-point-marginal-identities}
+	The two placed families are projective, so the consistency defect is bounded
+	by the state-dependent squared distance, which is the hypothesis. The point
+	marginal of the line-point distribution is uniform and the two samples are
+	independent, so the average defining the defect is unchanged by reading
+	$(x,z)$ off the two line-point samples.
+\end{proof}
+
 \begin{lemma}[Formalization support: point-to-line marginal estimates]
 	\label{lem:qld-point-line-marginal-bounds}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
