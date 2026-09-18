@@ -1488,3 +1488,49 @@ claim, lease, atomic transport and post-push verification contract is unchanged.
 **Expected effect:** A later independently approved but unrequested head never
 enters the batch, and reversed nontelemetry local history stays available for
 operator reconciliation rather than being published by the adapter.
+
+## 2026-09-17 - Record independent mixed-model review (#575; interim rule)
+
+**Trigger:** owner 11:22Z decision and explicit resend allocating six Mac
+helper slots as three fixers/three reviewers; same-day correction withdrawing
+Opus review of Opus-modified PRs. See `results/telemetry/events.md`,
+"2026-09-17 META 11:22Z owner decisions", "Read new owner11:22Z OPUS
+REVIEWERS handoff and same-day correction", and "2026-09-17 META 11:37Z";
+issue #575 records the requested durable amendment.
+
+**Change (superseded by the 12:29Z ruling below):** The interim assignment rule
+restricted Opus reviewers to PRs not modified by Opus helpers and assigned
+Opus-changed PRs to independent native Codex review. The owner-run exception to
+dispatch-only review remains: the three Mac reviewers publish marked
+exact-head COMMENT evidence; MAIN checks the published record and owns the
+summary status. Existing claims, trusted-source, CI, caps, round limits,
+source-faithfulness and strict-diff carry remain binding. This changes no
+scripts, keys, allocation, project goal, or merge authority: provenance and
+handback validation are documented operator duties, not new code enforcement.
+
+**Expected effect (interim):** separate reviewer capacity could shorten the
+review queue without same-model approval of Opus repairs or treating stale,
+malformed, or unpublished reviews as merge evidence. Existing automated
+exact-head gates continue to enforce their prior conditions; no throughput
+gain was asserted before observation.
+
+## 2026-09-17 - Replace family exclusion with session independence (#575)
+
+**Trigger:** the owner's 12:29Z ruling in the OPUS REVIEWERS handoff in
+`/tmp/qpbt-main-handoff-v5.md`: "a new Opus session counts for independent".
+This explicitly supersedes the earlier same-day meta correction recorded above.
+
+**Change:** `review.md` now permits a fresh Opus reviewer session to review
+any PR, including one repaired or refreshed by a different Opus session, so
+long as the reviewer has never worked on that PR. This matches native Codex
+session independence; same-model provenance is not grounds for rejection.
+Cross-model review is preferred only when it costs nothing. The six Mac slots
+(three fixers, three reviewers), relay-1 MAIN with one native delegate, and
+0/0/0 external caps remain unchanged. No goal, gate, key, runtime or merge
+authority changes; MAIN's provenance and evidence checks remain operator duties.
+
+**Expected effect:** independently reviewed Opus-modified PRs can use open
+reviewer slots without weakening trusted prompts, full-diff read-only review,
+exact-head COMMENT evidence, MAIN's fail-closed status check, round caps, or
+the whitespace-sensitive carry rule. No throughput gain is asserted before
+observation.
