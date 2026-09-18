@@ -260,8 +260,17 @@ claim of Lemma~\path{lem:qld-unitary} for projective strategies. Its concrete
 isometry transfer, including the state and both operator estimates, is proved
 for supplied extraction data. Composing that transfer with the internally
 constructed data proves the restricted projective-setting isometry bounds.
-The unrestricted source theorem still requires the full error domain and the
-source-game correspondence step; \path{pauli_soundness} remains open.
+The Naimark reduction then removes the projectivity restriction with exact
+value preservation, the operator-family transfer returns both Pauli families
+to the original spaces at $3\delta + 6\delta^2$, the scalar absorption returns
+that shape to the robustness form at prefactor $21a^2$, and monotonicity in
+the error parameter carries the bounds to the rest of the source error
+domain.  Composing these with the projective-setting bounds proves
+\path{pauli_soundness} on the full source domain, with axiom closure
+\path{propext}, \path{Classical.choice} and \path{Quot.sound};
+\ghissue{614} records that composition.  The seed-indexed source-game
+correspondence step remains open, as does the divisibility obligation of
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 
 \bibliographystyle{alpha}
 \bibliography{references}
