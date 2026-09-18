@@ -7,10 +7,13 @@ purpose: >
   printed statement additionally asserts, and which Lean declaration now
   carries which form.
 issue: "#524"
-pr: "#TBD"
+pr: "#601"
 ---
 
 # Issue #524: approximate symmetrization realignment
+
+Published as PR 601 on branch
+`issue-524-approximate-symmetrization-20260918`.
 
 ## Scope
 
@@ -23,8 +26,8 @@ formalization-only blueprint node, and records the realignment in the gap
 note and the gap register.
 
 The packet also does not re-audit the empty-answer refutation. That evidence
-is the separate documentation packet for #524 (branch
-`issue-524-proof-exists-symmetric-projective-strategy`, PR 540, based on
+is the separate documentation packet for #524, PR 540 (branch
+`issue-524-proof-exists-symmetric-projective-strategy`, based on
 `ae124f8f`), whose completed bounded metadata fix and review history are
 preserved. The present branch is based on current `github/main`, which does
 not contain PR 540's note edits; the edits here are additive and land in

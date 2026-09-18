@@ -13,6 +13,8 @@
 \newcommand{\strategy}{\mathcal{S}}
 \renewcommand{\ghissue}[1]{%
   \href{https://github.com/Dengnifer/MIPStarRE-A/issues/#1}{GitHub issue \##1}}
+\renewcommand{\ghpr}[1]{%
+  \href{https://github.com/Dengnifer/MIPStarRE-A/pull/#1}{PR \##1}}
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
@@ -207,7 +209,8 @@ symmetric conclusion as that node, and its proof is complete.
 
 \section{Realignment of the Lean statements (2026-09-18)}
 
-Following the disposition recorded for \ghissue{524}, the formalization keeps
+This realignment is published as \ghpr{601}.  Following the disposition
+recorded for \ghissue{524}, the formalization keeps
 the source-labelled statement as printed and adds the approximate form beside
 it as a separate, proved Lean declaration.  Three points fix the record.
 
@@ -218,7 +221,8 @@ node \path{lem:symmetric-strat} is still stated as printed and still carries no
 proof-level \texttt{leanok} flag.  Nothing in this realignment proves the
 printed statement, and the weaker result is not renamed as it.
 
-Second, the approximate form of Section~2 above is now formalized and proved as
+Second, the approximate form listed under ``Key theorem forms'' above is now
+formalized and proved as
 \leanid{exists\_symmetric\_projective\_strategy\_approx}, with the equivalent
 slack form \leanid{exists\_symmetric\_projective\_strategy\_of\_lt\_value}
 beside it, against a new formalization-only blueprint node
