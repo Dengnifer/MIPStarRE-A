@@ -1460,6 +1460,93 @@ final soundness argument. The omitted step in the source is discussed in
   robustness family.
 \end{proof}
 
+\begin{theorem}[Questionwise Pauli Naimark reduction]
+  \label{thm:pauli-naimark-reduction-support}
+  \lean{MIPStarRE.QPBT.pauliNaimarkEmbeddingA,
+    MIPStarRE.QPBT.pauliNaimarkEmbeddingB,
+    MIPStarRE.QPBT.pauliNaimarkStrategy,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_isProjective,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_value,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_state,
+    MIPStarRE.QPBT.pauliNaimarkSetting,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_compressA,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_compressB,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressA,
+    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressB,
+    MIPStarRE.QPBT.pauliNaimarkWitness,
+    MIPStarRE.QPBT.pauli_naimark_witness_state_eq,
+    MIPStarRE.QPBT.pauli_naimark_witness_state_distance_eq}
+  \leanok
+  \uses{thm:naimark}
+  Let $S$ be any finite-dimensional strategy for the Pauli basis test,
+  with possibly distinct local spaces. There is a projective strategy $T$
+  on separately enlarged local spaces with $\operatorname{val}(T)
+  =\operatorname{val}(S)$, and fixed question-independent local isometries
+  $i_{\mathrm A},i_{\mathrm B}$ such that
+  $\ket{\psi_T}=(i_{\mathrm A}\otimes i_{\mathrm B})\ket{\psi_S}$.
+  Compression to the ground coordinates recovers both entire original
+  question-indexed measurement families, including their full
+  $\mathsf{Pauli}$-answer postprocessings (which fold wrong-form answers into
+  the zero outcome). Thus $\operatorname{val}(S)\geq1-\eps$ constructs a
+  projective setting for $T$ at the same error. For any soundness witness on
+  $T$, composing its two local isometries with $i_{\mathrm A}$ and
+  $i_{\mathrm B}$ gives a witness on $S$ with the same auxiliary state:
+  the extracted state vectors, and hence their distances from the common
+  ideal state, agree exactly. This is formalization-only support for the
+  dilation at the start of the proof of Theorem~\ref{thm:pauli}; it does not
+  identify compression with operator conjugation, transfer either complete
+  operator-family estimate, or handle the unrestricted error domain.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:naimark}
+  Apply the completed one-measurement Naimark dilation for every question,
+  with one fixed ground coordinate on each player's enlarged local space.
+  Ground-slice compression recovers every POVM effect, and commutes with
+  answer postprocessing. The padded state is the tensor image of the two
+  ground embeddings, so all game correlations and the value are unchanged.
+  Composition of local isometries gives equality of extracted states for
+  the original and dilated strategies.
+\end{proof}
+
+\begin{theorem}[Pauli operator-family transfer through Naimark compression]
+  \label{thm:pauli-naimark-operator-transfer-support}
+  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceA_le,
+    MIPStarRE.QPBT.pauli_naimark_operator_distanceB_le}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  Let $S$ be any strategy for the Pauli basis test, let $T$ be its
+  questionwise Naimark dilation, and let $w$ be a soundness witness for $T$.
+  For every $W\in\{X,Z\}$, write
+  \[
+    \Delta = (\phi_{\mathrm A}\ot\phi_{\mathrm B})\ket{\psi_T}
+      \quad\text{and}\quad
+    \Theta = \ket{\mathrm{aux}}\ot\ket{\mathrm{EPR}_q}^{\ot M}.
+  \]
+  The witness obtained by composing its local isometries with the two ground
+  embeddings satisfies
+  \begin{align*}
+    d_{\mathrm A}(S) &\leq 3d_{\mathrm A}(T)+6\|\Delta-\Theta\|^2,\\
+    d_{\mathrm B}(S) &\leq 3d_{\mathrm B}(T)+6\|\Delta-\Theta\|^2.
+  \end{align*}
+  Here each $d_w$ is the complete Pauli operator-family distance, summed over
+  all answers.  This is a formalization-only support result: it has no
+  outcome-cardinality factor and adds no consistency, projectivity, range, or
+  producer hypothesis to the source theorem.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-naimark-reduction-support,
+    thm:pauli-range-projection-support}
+  The range projection of each composed ground embedding fixes the dilated
+  state.  The complete Pauli projector family on the opposite register gives
+  the required mirror identity on the ideal EPR state.  The range-projection
+  estimate therefore bounds the compressed family by three times the dilated
+  family distance and six times the squared state distance.  The two final
+  equalities are the exact compression identities for the pulled-back witness.
+\end{proof}
+
 We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
 
 \begin{proof}
@@ -1467,6 +1554,8 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\uses{lem:qld-unitary, lem:qld-extraction-error-form, lem:pauli-completeness,
 		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
 		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
+		thm:pauli-naimark-reduction-support,
+		thm:pauli-naimark-operator-transfer-support,
 		thm:pauli-isometry-transfer-alice-support,
 		thm:pauli-isometry-transfer-bob-support}
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by

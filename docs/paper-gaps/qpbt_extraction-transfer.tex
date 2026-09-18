@@ -226,10 +226,23 @@ $a(md)^a(\epsilon^b+q^{-b}+2^{-bmd})$ bound. The universal constants are
 chosen before the setting; neither global-pair nor extraction data are
 assumptions of the resulting theorem. This is the separately labelled
 projective-setting support result, not Theorem~\path{thm:pauli}: an arbitrary
-successful strategy is not yet placed in the required projective setting,
-and the seed-indexed game correspondence remains a separate obligation
-recorded in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+successful strategy can now be placed in the required projective setting by
+the questionwise Naimark dilation of issue~\#603. That construction preserves
+the value and the complete Pauli-answer measurements under ground-slice
+compression, and a witness on the dilation pulls back to an original-space
+witness with exactly the same extracted state and state distance. Compression
+does not identify the projective dilated effects with the conjugates of the
+original POVM effects. Issue~\#604 now proves the two complete
+operator-family transfers for this pullback, with bounds
+\(3d_w^{\mathrm{dilated}}+6\|\Delta-\Theta\|^2\) for each player, using the
+range projection and the opposite-player Pauli mirror identity. The estimate
+is summed over all outcomes and has no outcome-cardinality factor. The full
+source error domain and the seed-indexed game correspondence remain separate
+obligations, recorded in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 \ghissue{602} tracks this restricted composition.
+\ghissue{603} tracks the concrete dilation and original-space state pullback.
+\ghissue{604} tracks the operator-family transfer proved here.
 
 \section{Conclusion}
 
@@ -247,8 +260,8 @@ claim of Lemma~\path{lem:qld-unitary} for projective strategies. Its concrete
 isometry transfer, including the state and both operator estimates, is proved
 for supplied extraction data. Composing that transfer with the internally
 constructed data proves the restricted projective-setting isometry bounds.
-The unrestricted source theorem still requires the arbitrary-strategy and
-source-game correspondence steps, and \path{pauli_soundness} remains open.
+The unrestricted source theorem still requires the full error domain and the
+source-game correspondence step; \path{pauli_soundness} remains open.
 
 \bibliographystyle{alpha}
 \bibliography{references}
