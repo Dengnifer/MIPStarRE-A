@@ -89,7 +89,8 @@ case or construction of the supplied global witness.
 **Unfaithful:** The global measurement is supplied as `GlobalPairWitness`,
 rather than constructed from `lem:qld-4-7`. The discrepancy and planned
 composition with `exists_globalPairWitness` are recorded in
-`docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #123. -/
+`docs/paper-gaps/qpbt_extraction-transfer.tex`, issue #123. The source-facing
+composition is `exists_extractionWitness`. -/
 theorem exists_extractionWitness_ofGlobalPairWitness_of_four_le
     {P : AdmissibleParams} {epsilon deltaG delta : ℝ}
     (S : ProjectiveSetting P epsilon) (w : GlobalPairWitness S deltaG)
@@ -125,7 +126,8 @@ paper `14_analysis_of_the_pauli_basis_test.tex:1743-1783`.
 
 **Unfaithful:** The proof uses the supplied-witness helper
 `exists_extractionWitness_ofGlobalPairWitness_of_four_le`. The global-witness
-construction and its planned composition remain open under issue #123 in
+construction is supplied by `exists_globalPairWitness` in the source-facing
+`exists_extractionWitness`; see issue #123 and
 `docs/paper-gaps/qpbt_extraction-transfer.tex`. -/
 theorem exists_extractionWitness_ofGlobalPairWitness_of_one_le_construct
     {P : AdmissibleParams} {epsilon deltaG C : ℝ}
@@ -151,8 +153,8 @@ blueprint `lem:qld-unitary` and paper
 derived inside `lem:qld-unitary` rather than assumed by the paper statement.
 The discrepancy is documented in
 `docs/paper-gaps/qpbt_extraction-transfer.tex`. Elimination: obtain `w` from
-`exists_globalPairWitness` before applying this conditional extraction result; issue
-#123 tracks that composition.
+`exists_globalPairWitness` before applying this conditional extraction result;
+`exists_extractionWitness` performs that composition under issue #123.
 
 **Local fix:** the positive-contraction estimate and normalization case split
 repair the two numerical defects at paper lines 1743-1783 without changing the
