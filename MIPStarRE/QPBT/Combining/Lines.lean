@@ -21,6 +21,7 @@ import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 import MIPStarRE.QPBT.Combining.Lines.FiberCollision
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
 import MIPStarRE.QPBT.Combining.Lines.RestrictedConsistency
+import MIPStarRE.QPBT.Combining.Lines.PastingRestoration
 import MIPStarRE.QPBT.Games.RestrictedAverage
 
 /-!
