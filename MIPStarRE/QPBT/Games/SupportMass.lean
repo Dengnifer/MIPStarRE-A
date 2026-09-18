@@ -10,10 +10,10 @@ quadratic forms are the corresponding Born probabilities.
 
 These are formalization-only auxiliary estimates for the non-encoding mass
 calculation in blueprint `eq:qld-nonencoding-mass`. They can be composed with
-`SandwichProduct.point_codeword_defect_le_avg_evaluated_add` after constructing
-an encoding-supported reference measurement on the opposite tensor factor.
-They do not construct that reference or establish its evaluated consistency,
-and do not prove `nonencodingMarginalMass_le` or global-pair witness existence.
+the codeword-defect comparison after constructing an encoding-supported
+reference measurement on the opposite tensor factor. They do not construct
+that reference or establish its evaluated consistency, and do not prove the
+non-encoding marginal-mass bound or global-pair witness existence.
 
 ## References
 
@@ -79,7 +79,8 @@ theorem mass_outside_support_le_point_defect
       · exact hnonneg outcome other
 
 /-- Averaging the supported-reference mass bound gives the same inequality
-for `consistencyDefect` with the existing left and right tensor placements.
+for the bipartite consistency defect with the existing left and right tensor
+placements.
 This formalization-only auxiliary for blueprint `eq:qld-nonencoding-mass`
 requires neither a probability distribution nor a normalized state, so it
 applies in particular to the normalized state used in that calculation. -/

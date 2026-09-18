@@ -117,7 +117,7 @@ private theorem concreteXPointOverlap_restricted_deficit_le
             ((S.lineMeasExp Placement.AA'.side .X w.1).effect fX) *
           S.place .BA''
             (S.expPointEffectAtLineAnswer Placement.BA''.side .X w.1 w.2 fX))) := by
-    rw [avgOver_prod]
+    rw [SandwichProduct.avgOver_distribution_prod]
     refine avgOver_congr _ _ _ fun wX => ?_
     calc
       avgOver μZ (fun wZ =>
