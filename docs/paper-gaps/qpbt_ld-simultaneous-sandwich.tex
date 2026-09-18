@@ -127,6 +127,11 @@ its form with the error function $\delta_{\mathrm{ld}}$ is
 source-shaped seed-indexed form is
 \leanid{exists\_ld\_soundness\_of\_k\_eq\_one} in
 \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/SeedIndexedSoundness.lean};
+the general seed-indexed statement is now proved as
+\leanid{exists\_ld\_soundness} in
+\doclink{MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean}, by correlated seed
+dilation, compression of the two mixed relations, and recovery of global
+agreement as detailed in \cite{gap:qpbt_ld-dimension-divisibility};
 the instantiation with $k = 1$ at dimension $2m+2$ is in the proof of
 \texttt{lem:qld-4-7}, \path{blueprint/src/chapter/ch15_qpbt_combining.tex}.}
 
@@ -293,7 +298,11 @@ note added a third: the extension is the combining reduction and must be
 formalized as such.  That third obligation is now met.  The blueprint records
 the reduction in \texttt{prop:ld-simultaneous-general-k} and the nodes
 preceding it, and the directly indexed game and its transport prove the source
-form from the low individual degree theorem for every $k$.  The game
+form from the low individual degree theorem for every $k$. Correlated seed
+compression and global recovery now also establish it for the seed-indexed
+game for every $k$. The collision estimate used in that recovery selects a
+coordinate where two already constructed tuples differ; it does not construct
+simultaneous measurements from their coordinate marginals. The game
 correspondence and the parameter bound of the import remain as they were.  The
 combination of the coordinate measurements by the sandwich is defined and is a
 POVM, but it carries no consistency estimate, and by the computation above it
@@ -308,8 +317,9 @@ coordinatewise application of the $k = 1$ theorem followed by any
 combination of the coordinate measurements provably cannot yield the
 theorem.  The application in the analysis of the Pauli basis test uses
 $k = 1$ only, for which the source form is proved from the low individual
-degree theorem directly; for general $k$ it is proved by the reduction, for
-the directly indexed game.
+degree theorem directly; for general $k$ it is proved by the reduction for
+the directly indexed game, followed by correlated seed compression and global
+consistency recovery for the seed-indexed game.
 
 \bibliographystyle{alpha}
 \bibliography{references}
