@@ -1,0 +1,1 @@
+{"at": "2026-09-18T14:30:32.545078+00:00", "source": "/home/drx/.cache/mipstarre-dev/watchdog/opus-sessions-spool.jsonl", "new_rows": 17, "deduplication": "semantic JSON equality", "source_retained": "append-only spool retained; no truncate race with helpers"}
