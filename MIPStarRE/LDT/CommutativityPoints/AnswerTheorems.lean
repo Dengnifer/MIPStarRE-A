@@ -332,7 +332,8 @@ point-commutativity chain.
 Paper origin: `references/ldt-paper/commutativity_points.tex`; this is one of
 the formal transport steps used to realize the mixed point/diagonal comparison
 appearing in the paper.  It is internal to the answer-valued implementation
-tracked in issue #1507 and is not a source theorem.  Discharge: proved here from
+tracked in upstream issue 1507 (historical) and is not a source theorem.
+Discharge: proved here from
 the already formalized point-to-diagonal-line approximation and tensor-ordering
 identities. -/
 private lemma answerOrderedLiftToMixedLine
@@ -450,7 +451,7 @@ the ordered diagonal-line product.
 
 Paper origin: `references/ldt-paper/commutativity_points.tex`; this is an
 internal reindexing and tensor-ordering step in the answer-valued
-point-commutativity route tracked in issue #1507.  Discharge: proved here by
+point-commutativity route tracked in upstream issue 1507 (historical).  Discharge: proved here by
 transporting the point-to-line comparison through the explicit ordered product
 identities. -/
 private lemma answerOrderedLiftToLineProduct
@@ -580,7 +581,8 @@ diagonal-line product to the reversed mixed product.
 
 Paper origin: `references/ldt-paper/commutativity_points.tex`; this is an
 internal answer-valued implementation step for the point-commutativity argument
-tracked in issue #1507.  Discharge: proved here from the reversed
+tracked in upstream issue 1507 (historical).  Discharge: proved here from the
+reversed
 point-to-line comparison and the explicit ordered/reversed product equality. -/
 private lemma answerOrderedDropFromLineComparison
     (params : Parameters)
@@ -735,7 +737,8 @@ product back to the reversed point product.
 
 Paper origin: `references/ldt-paper/commutativity_points.tex`; this is the last
 internal answer-valued transport step in the point-commutativity chain tracked
-in issue #1507.  Discharge: proved here from the line-to-point comparison and
+in upstream issue 1507 (historical).  Discharge: proved here from the
+line-to-point comparison and
 the explicit tensor-placement identities. -/
 private lemma answerReversedDropToPointsComparison
     (params : Parameters)

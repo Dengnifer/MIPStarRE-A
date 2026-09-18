@@ -647,6 +647,102 @@ class AccountRouterTests(unittest.TestCase):
             self.assertEqual(subprocess.run(['bash', shim, 'exec', '-m', 'gpt-6-astra'], env=environment,
                 capture_output=True).returncode, 0)
 
+    def test_runtime_shim_normalizes_attached_config_options(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            binary = home / '.local/bin/codex'
+            binary.parent.mkdir(parents=True)
+            binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
+            binary.chmod(0o755)
+            environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+            shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
+            prompt = 'literal -c=model_reasoning_effort=low\n-c=model="other-model"'
+            configs = ['sandbox_mode="read-only"', 'log_dir="logs with spaces=a=b"']
+            for command in ([], ['exec'], ['exec', 'resume', '--last']):
+                for prefix in ('-c', '-c=', '--config='):
+                    for effort, expected in (('ultra', 'ultra'), ('"ultra"', 'ultra')):
+                        with self.subTest(command=command, prefix=prefix, effort=effort):
+                            result = subprocess.run(
+                                ['bash', shim, *command, prefix + 'model="gpt-6-astra"',
+                                 prefix + f'model_reasoning_effort={effort}',
+                                 prefix + 'features.multi_agent=true',
+                                 prefix + 'agents.max_concurrent_threads_per_session=2',
+                                 *[prefix + config for config in configs], '--', prompt],
+                                env=environment, capture_output=True, text=True, check=True)
+                            argv = json.loads(result.stdout)
+                            self.assertEqual(argv[:-1], [
+                                '-m', 'gpt-6-astra', '-c', f'model_reasoning_effort="{expected}"',
+                                '-c', 'features.multi_agent=false',
+                                '-c', 'agents.max_concurrent_threads_per_session=1',
+                                *command, '-c', configs[0], '-c', configs[1], '--'])
+                            self.assertEqual(argv[-1],
+                                'Complete this task in the current session. '
+                                'Do not use collaboration tools or spawn subagents.\n\n' + prompt)
+                    for config in ('model="other-model"', 'model_reasoning_effort=low',
+                                   'model_reasoning_effort=max', 'model_reasoning_effort=xhigh',
+                                   'features={multi_agent=true}',
+                                   'agents={max_concurrent_threads_per_session=2}'):
+                        with self.subTest(command=command, prefix=prefix, rejected=config):
+                            result = subprocess.run(
+                                ['bash', shim, *command, prefix + config, '--', prompt],
+                                env=environment, capture_output=True, text=True)
+                            self.assertEqual(result.returncode, 4, result.stderr)
+                            self.assertEqual(result.stdout, '')
+
+    def test_runtime_shim_validates_attached_model_options(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            binary = home / '.local/bin/codex'
+            binary.parent.mkdir(parents=True)
+            binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
+            binary.chmod(0o755)
+            environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+            shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
+            prompt = 'prompt with -mgpt-5.6-sol and -m=gpt-5.6-sol'
+            reservation = home / 'cache/accounts/primary' / str(os.getpid())
+            reservation.parent.mkdir(parents=True)
+            reservation.touch()
+            environment.update(MIPSTARRE_DISPATCH_ACCOUNT='primary',
+                               MIPSTARRE_DISPATCH_PID=str(os.getpid()))
+            for command in ([], ['exec'], ['exec', 'resume', '--last']):
+                for option in ('-mother-model', '-m=other-model', '-m='):
+                    with self.subTest(command=command, rejected=option):
+                        result = subprocess.run(
+                            ['bash', shim, '-m', 'gpt-6-astra', *command, option,
+                             '--model=gpt-6-astra', '--', prompt],
+                            env=environment, capture_output=True, text=True)
+                        self.assertEqual(result.returncode, 4, result.stderr)
+                        self.assertEqual(result.stdout, '')
+                for model in ('gpt-6-astra', 'gpt-5.6-sol'):
+                    environment.update(
+                        MIPSTARRE_JOB_CLASS='control_policy' if model == 'gpt-6-astra' else 'general',
+                        MIPSTARRE_HARDNESS_REASON=(
+                            'Routing-control test fixture' if model == 'gpt-6-astra' else ''))
+                    for option in ('-m' + model, '-m=' + model):
+                        effort = 'ultra'
+                        with self.subTest(command=command, accepted=option, effort=effort):
+                            result = subprocess.run(
+                                ['bash', shim, *command, option,
+                                 '-c', f'model_reasoning_effort={effort}',
+                                 '--config', 'features.multi_agent=true',
+                                 '-c', 'agents.max_concurrent_threads_per_session=2',
+                                 '--', prompt],
+                                env=environment, capture_output=True, text=True, check=True)
+                            argv = json.loads(result.stdout)
+                            separator = argv.index('--')
+                            self.assertEqual(argv[:2], ['-m', model])
+                            self.assertEqual([item for item in argv[:separator]
+                                              if item.startswith('-m')], ['-m'])
+                            self.assertEqual([item for item in argv[:separator]
+                                              if item.startswith('model_reasoning_effort=')],
+                                             [f'model_reasoning_effort="{effort}"'])
+                            self.assertIn('features.multi_agent=false', argv)
+                            self.assertIn('agents.max_concurrent_threads_per_session=1', argv)
+                            self.assertEqual(argv[8:separator], command)
+                            self.assertTrue(argv[-1].endswith(prompt))
+
     def test_empty_secondary_home_resume_uses_default_rollout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

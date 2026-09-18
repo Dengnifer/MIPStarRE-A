@@ -455,7 +455,7 @@ private lemma evaluatedSlicePhaseFivePaperSwappedDefect_appendPoint_expansion
 
 /-- Exact reindexing of the swapped paper defect to the raw scalar stability defect.
 
-This is the phase-five coordinate audit point from issue #628.  The proof
+This is the phase-five coordinate audit point from upstream issue 628 (historical).  The proof
 intentionally decomposes the **first** evaluated-slice coordinate
 `q.1 = appendPoint params u x`, because the defect reads
 `pointHeight params q.1` and the first-coordinate point outcome

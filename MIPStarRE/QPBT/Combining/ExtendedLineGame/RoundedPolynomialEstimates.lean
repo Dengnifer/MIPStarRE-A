@@ -165,8 +165,8 @@ not the weaker point-derived estimate. The rounded point error is
 This proves the calculation `eq:qld-g-42/43` from the directly indexed extended
 line witness with its completed-answer domain. It does not construct that line
 witness, prove polynomial separation, or certify source lemma `lem:qld-4-7`.
-The remaining source obligations are tracked by issue #513 and the module's
-paper-gap references. -/
+The remaining source obligations are tracked by issues #515 and #598 and the
+module's paper-gap references. -/
 theorem exists_rounded_polynomial_ordered_estimates :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
       ∀ (P : AdmissibleParams) (ε δQ δL : ℝ) (S : ProjectiveSetting P ε)

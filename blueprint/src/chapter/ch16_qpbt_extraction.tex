@@ -350,6 +350,34 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	is symmetric under exchanging $(g,h)$ with $(g',h')$: since $\mathrm{Dec}$ is linear with $\mathrm{Dec}(g_{h}) = h$ for all $h \in \F_q^M$ (Remark~\ref{rem:qld-decoding-identity}), the constraint $g' - g_{h'} = g - g_h$ implies $\mathrm{Dec}(g) - h = \mathrm{Dec}(g') - h'$, so the two constraint sets coincide. The same derivation therefore bounds the distance of the displayed expression to $(\tilde{M}^{W,\tilde{u}}_a)_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$, and \eqref{eq:qld-pulling-cons} follows at the common scale $\delta_P$. Finally, since $\{\tilde{M}^{W,\tilde{u}}_a\}$ is projective, Item~2 of Lemma~\ref{fact:agreement}, data processing along the map $a \mapsto \tr(e_j a)$ (Lemma~\ref{fact:data-processing}), and Item~1 of Lemma~\ref{fact:agreement} yield $(\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{A}\mathrm{A}'\mathrm{A}''} \approx_{\delta_P} (\tilde{M}^{W,\tilde{u}}_{[\tr(e_j \cdot) = b]})_{\mathrm{B}\mathrm{B}'\mathrm{B}''}$ with answer summation over $b \in \F_2$, and Lemma~\ref{lem:povm-to-obs} converts this into the claimed self-consistency of the observables $\tilde{W}^j(\tilde{u})$.
 \end{proof}
 
+% Source: references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1594--1602.
+% The same scalar estimate is used before eq:qld-nonencoding-mass.
+% tracked in issue #259
+\begin{lemma}[Formalization support for polynomial evaluation collisions]
+\label{lem:qld-poly-eval-collision}
+	\lean{MIPStarRE.QPBT.poly_eval_collision_le}
+	\leanok
+	\uses{def:admissible, def:polynomials-degree}
+	This auxiliary lemma isolates the scalar Schwartz--Zippel estimate used in
+	the proof of Lemma~\ref{lem:qld-construct-the-paulis}
+	in~\cite{Ji2020MIPStar}; it is not a separately named result of the source.
+	Let $(q,m,d)$ be admissible parameters and let
+	$g,g'\in\mathrm{ideg}_{d,m}(\F_q)$ be distinct polynomial representatives.
+	For uniformly distributed $u\in\F_q^m$,
+	\[
+		\Prb_{u\sim\F_q^m}[g(u)=g'(u)]
+		=\E_{u\in\F_q^m}\mathbf{1}[g(u)=g'(u)]
+		\leq\frac{md}{q}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:schwartz-zippel-individual}
+	Apply Lemma~\ref{lem:schwartz-zippel-individual} to $g$ and $g'$.
+	The uniform average of the agreement indicator is the fraction of points
+	at which the two evaluations agree, and the field has cardinality $q$.
+\end{proof}
+
 \begin{lemma}[Non-encoding support estimate for a supplied witness]
 \label{lem:qld-nonencoding-mass-bound}
 	\lean{MIPStarRE.QPBT.nonencodingMarginalMass}
@@ -1170,42 +1198,242 @@ final soundness argument. The omitted step in the source is discussed in
   $U(M\ot I\ot I)U^\dagger UJ=UJM$.
 \end{proof}
 
+\begin{theorem}[Formalization support for the extraction-data isometries]
+  \label{thm:pauli-extraction-isometry-construction-support}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.toPauliSoundnessWitness}
+  \lean{MIPStarRE.QPBT.isometryTensor_ancilla_eq_psiHat}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.isometryTensor_eq}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.idealState_eq}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.state_error_eq}
+  \leanok
+  \uses{lem:qld-unitary, def:expanded-state, def:EPR}
+  This node is not a named statement of the paper; it isolates the register
+  bookkeeping that the final appendix argument performs silently and that the
+  formal proof must carry out explicitly. Let $S$ be a projective Pauli-test
+  setting with original local spaces $\mathcal H_{\mathrm A}$ and
+  $\mathcal H_{\mathrm B}$, let $w$ be a global polynomial-pair witness for
+  $S$, and let $v$ be an extraction witness for $S,w$ with squared error at
+  most $\delta$. Adjoining the normalized EPR ancilla to each original local
+  space and applying the swap unitary supplied by $v$ gives two local
+  isometries, which together with the normalized auxiliary state of $v$ form
+  the data compared by the test. For these data the following identities hold,
+  where the six registers are regrouped as
+  $(\mathrm{A}\mathrm{A}')\mathrm{A}''$ and
+  $(\mathrm{B}\mathrm{B}')\mathrm{B}''$.
+  \begin{enumerate}
+    \item The tensor of the two plain ancilla embeddings applied to the
+      strategy state is the expanded state of $S$.
+    \item The tensor of the two isometries applied to the strategy state is
+      the simultaneous swap action on the expanded state.
+    \item The ideal comparison state of the test built from the auxiliary
+      state of $v$ is the ideal expanded state of $v$.
+    \item Consequently the squared state error compared by the test equals the
+      squared error of the supplied extraction data.
+  \end{enumerate}
+  No success, consistency, or range hypothesis is used; only the identification
+  of registers.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-ancilla-intertwining-support, def:expanded-state}
+  The first identity is a coefficientwise computation with the tensor
+  expansion of the EPR ancilla. The second follows from it, because applying
+  the two swap unitaries commutes with the regrouping of registers. The third
+  is the same regrouping applied to the auxiliary and EPR factors, and the
+  fourth follows from the first three because the regrouping preserves norms.
+\end{proof}
+
+\begin{example}[Formalization support: state component of the transfer]
+  \label{lem:pauli-extraction-state-distance-support}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.state_close_ofExtractionWitness}
+  \leanok
+  \uses{lem:qld-unitary, def:expanded-state}
+  This node is not a named statement of the paper; it records the state
+  component of the final appendix estimate for supplied extraction data. In
+  the situation of
+  Theorem~\ref{thm:pauli-extraction-isometry-construction-support}, the
+  squared distance between the transferred strategy state and the ideal state
+  is at most $\delta$. Since the left-hand side is the square of a norm, this
+  is exactly the bound $\sqrt\delta$ on the state distance itself.
+\end{example}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-extraction-isometry-construction-support}
+  Rewrite the squared error through the register identification and apply the
+  state estimate carried by the extraction witness.
+\end{proof}
+
+\begin{theorem}[Formalization support: Alice's operator component of the transfer]
+  \label{thm:pauli-extraction-alice-distance-support}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.pauli_distance_alice_le}
+  \leanok
+  \uses{lem:qld-unitary, def:povm-distance}
+  This node is not a named statement of the paper; it records Alice's operator
+  component of the final appendix estimate for supplied extraction data. In
+  the situation of
+  Theorem~\ref{thm:pauli-extraction-isometry-construction-support}, for every
+  $W\in\{X,Z\}$ the complete squared Pauli operator-family distance for Alice,
+  summed over all $h\in\F_q^M$ and evaluated on the ideal state, is at most
+  $4\delta$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-isometry-transfer-alice-support,
+    thm:pauli-ancilla-intertwining-support,
+    thm:pauli-extraction-isometry-construction-support,
+    lem:pauli-extraction-state-distance-support}
+  The swapped total-Pauli family is a complete POVM and satisfies the exact
+  intertwining identity for the ancilla isometry, so Alice's bipartite
+  isometry transfer applies. Reindexing the extraction witness's own Pauli
+  comparison into the test register order bounds the first term by $2\delta$,
+  and the state component bounds the second term by $2\delta$.
+\end{proof}
+
+\begin{theorem}[Formalization support: Bob's operator component of the transfer]
+  \label{thm:pauli-extraction-bob-distance-support}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.pauli_distance_bob_le}
+  \leanok
+  \uses{lem:qld-unitary, def:povm-distance}
+  This node is not a named statement of the paper; it records Bob's operator
+  component of the same estimate. In the situation of
+  Theorem~\ref{thm:pauli-extraction-isometry-construction-support}, for every
+  $W\in\{X,Z\}$ the complete squared Pauli operator-family distance for Bob,
+  summed over all $h\in\F_q^M$ and evaluated on the ideal state, is at most
+  $4\delta$. The two original local spaces are never identified with one
+  another.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-isometry-transfer-bob-support,
+    thm:pauli-ancilla-intertwining-support,
+    thm:pauli-extraction-isometry-construction-support,
+    lem:pauli-extraction-state-distance-support}
+  The argument is the one for Alice, with Bob's bipartite isometry transfer in
+  place of Alice's.
+\end{proof}
+
+\begin{theorem}[Formalization support: the transferred state lies in both isometry ranges]
+  \label{thm:pauli-extraction-transferred-range-support}
+  \lean{MIPStarRE.QPBT.ExtractionWitness.transformed_state_in_ranges}
+  \leanok
+  \uses{lem:qld-unitary}
+  This node is not a named statement of the paper; it records the range
+  identities that the appendix argument uses when it says that the transferred
+  state lies in the range of each local isometry. In the situation of
+  Theorem~\ref{thm:pauli-extraction-isometry-construction-support}, the range
+  projection of Alice's isometry, and likewise that of Bob's, fixes the
+  transferred strategy state. No range condition is imposed on the ideal
+  comparison state.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-extraction-isometry-construction-support}
+  Each range projection acts on its own tensor factor as the conjugation of
+  the identity by that isometry, and that operator fixes every vector in the
+  image of the isometry tensor.
+\end{proof}
+
 \begin{theorem}[Concrete Pauli isometry transfer from extraction data]
   \label{thm:pauli-concrete-isometry-transfer-support}
   \lean{MIPStarRE.QPBT.ExtractionWitness.isometry_transfer_bounds}
   \leanok
+  \uses{lem:qld-unitary, def:povm-distance}
   Let $S$ be a projective Pauli-test setting with original local spaces
   $\mathcal H_{\mathrm A}$ and $\mathcal H_{\mathrm B}$. Suppose $w$ is a
   global polynomial-pair witness for $S$, and $v$ is an extraction witness
-  for $S,w$ with squared error at most $\delta$. Adjoin the normalized EPR
-  ancilla to each original space and apply the corresponding swap unitary
-  from $v$. These maps define local isometries and a normalized auxiliary
-  state. Their state distance is at most $\sqrt\delta$, and for each
-  $W\in\{X,Z\}$, the full squared Pauli operator-family distance on the
-  ideal state is at most $4\delta$ for Alice and at most $4\delta$ for Bob.
-  In particular, all three distances are bounded by
-  $\max\{\sqrt\delta,4\delta\}$.
+  for $S,w$ with squared error at most $\delta$. Then there exist local
+  isometries and a normalized auxiliary state whose state norm distance is at
+  most $\max\{\sqrt\delta,4\delta\}$ and whose complete squared Pauli
+  operator-family distance on the ideal state is at most
+  $\max\{\sqrt\delta,4\delta\}$ for Alice and for Bob, for every
+  $W\in\{X,Z\}$. This statement asserts only the common bound and only the
+  existence of such data. The sharper component bounds $\sqrt\delta$ and
+  $4\delta$, and the explicit isometries obtained from the EPR ancilla and the
+  swap unitaries of $v$ that realize them, are recorded separately in the
+  subordinate statements~\ref{thm:pauli-extraction-isometry-construction-support},
+  \ref{lem:pauli-extraction-state-distance-support},
+  \ref{thm:pauli-extraction-alice-distance-support},
+  and~\ref{thm:pauli-extraction-bob-distance-support}.
 \end{theorem}
 \begin{proof}
-  \uses{thm:pauli-ancilla-intertwining-support,
-    thm:pauli-isometry-transfer-alice-support,
-    thm:pauli-isometry-transfer-bob-support}
+  \uses{thm:pauli-extraction-isometry-construction-support,
+    lem:pauli-extraction-state-distance-support,
+    thm:pauli-extraction-alice-distance-support,
+    thm:pauli-extraction-bob-distance-support}
   \leanok
-  The tensor of the two ancilla isometries, after applying the swap maps,
-  equals the extracted state up to register reassociation. Hence its squared
-  state distance is at most $\delta$. The swapped total-Pauli POVMs are
-  complete and satisfy the exact intertwining identities. Reindex the
-  extraction witness's two Pauli comparisons into the bipartite test order
-  and apply the two range-projection estimates. Each comparison contributes
-  $2\delta$ and the squared state error contributes another $2\delta$.
+  Take the isometries and auxiliary state built from the EPR ancilla and the
+  swap unitaries of $v$ as the witness. The state bound follows from the
+  squared state component by taking square roots, and the two operator bounds
+  are the Alice and Bob components. Each of the three is then relaxed to the
+  common maximum.
+\end{proof}
+
+\begin{example}[Formalization support: state bound in the robustness error family]
+  \label{lem:pauli-extraction-state-error-form-support}
+  \lean{MIPStarRE.QPBT.extraction_state_norm_le_deltaQld_ofExtractionWitness}
+  \leanok
+  \uses{lem:qld-unitary, lem:qld-extraction-error-form}
+  This node is not a named statement of the paper; it records the state
+  estimate alone in the robustness error family, conditional on supplied
+  extraction data. Let $C\geq1$, $a>1$, and $0<b<1$. There are constants
+  $a'\geq1$ and $0<b'<1$, depending only on $C,a,b$, such that for every
+  admissible $(q,m,d)$, every $0\leq\eps\leq1$, every projective Pauli-test
+  setting $S$, every global polynomial-pair witness $w$ for $S$ at the global
+  error scale of Lemma~\ref{lem:qld-unitary}, and every extraction witness $v$
+  for $S,w$ at the extraction error scale of that lemma, the state distance of
+  the data transferred as in
+  Theorem~\ref{thm:pauli-extraction-isometry-construction-support} is at most
+  $a'(md)^{a'}(\eps^{b'}+q^{-b'}+2^{-b'md})$.
+\end{example}
+\begin{proof}
+  \leanok
+  \uses{lem:qld-extraction-error-form,
+    lem:pauli-extraction-state-distance-support,
+    thm:pauli-error-square-root-support}
+  Take the constants supplied by the preservation of the robustness error
+  family and halve the exponent. The squared state component gives the state
+  distance as a square root, and the square-root estimate for the error family
+  absorbs it into the displayed form.
+\end{proof}
+
+\begin{example}[Error-form isometry bounds for supplied extraction data]
+  \label{lem:pauli-supplied-extraction-error-form-support}
+  \lean{MIPStarRE.QPBT.pauli_soundness_deltaQld_ofExtractionWitness}
+  \leanok
+  \uses{lem:qld-unitary, lem:qld-extraction-error-form, def:povm-distance}
+  This formalization-only node is conditional on supplied extraction data; it
+  is not the soundness theorem of the paper. Let $C\geq1$, $a>1$, and
+  $0<b<1$. There are constants $a'\geq1$ and $0<b'<1$, depending only on
+  $C,a,b$, such that for every admissible $(q,m,d)$, every $0\leq\eps\leq1$,
+  every projective Pauli-test setting $S$, every global polynomial-pair
+  witness $w$ for $S$ at the global error scale of
+  Lemma~\ref{lem:qld-unitary}, and every extraction witness $v$ for $S,w$ at
+  the extraction error scale of that lemma, there are local isometries and a
+  normalized auxiliary state whose state norm distance and whose two complete
+  squared Pauli-family distances, for every $W\in\{X,Z\}$ and summed over all
+  $h\in\F_q^M$, are all at most
+  $a'(md)^{a'}(\eps^{b'}+q^{-b'}+2^{-b'md})$. Neither the global
+  polynomial-pair measurement nor the extraction data is constructed here.
+\end{example}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-concrete-isometry-transfer-support,
+    lem:qld-extraction-error-form,
+    thm:pauli-error-square-root-support,
+    lem:delta-qld-mono-support}
+  Take the constants supplied by the preservation of the robustness error
+  family, multiply the prefactor by four, and halve the exponent. Apply the
+  concrete transfer to the supplied data. The square-root estimate for the
+  error family bounds the state term, monotonicity in the universal constants
+  bounds the two operator terms after multiplication by four, and the enlarged
+  prefactor absorbs that factor.
 \end{proof}
 
 \begin{theorem}[Pauli isometry bounds for projective settings]
   \label{thm:pauli-projective-setting-isometry-support}
   \lean{MIPStarRE.QPBT.exists_projective_setting_isometry_bounds}
   \leanok
-  \uses{lem:qld-unitary, thm:pauli-concrete-isometry-transfer-support,
-    lem:qld-extraction-error-form}
+  \uses{def:strategy-observables, def:povm-distance, def:expanded-state}
   This formalization-only result concerns the projective setting in the
   appendix proof of Theorem~\ref{thm:pauli}, not the arbitrary strategies in
   its statement. There are universal constants $a\geq1$ and $0<b<1$, chosen
@@ -1222,14 +1450,14 @@ final soundness argument. The omitted step in the source is discussed in
 \end{theorem}
 \begin{proof}
   \leanok
-  \uses{lem:qld-unitary, thm:pauli-concrete-isometry-transfer-support,
-    lem:qld-extraction-error-form}
-  Fix the universal constants in Lemma~\ref{lem:qld-unitary}, then choose
-  the constants of the error-form isometry transfer. For the given setting,
-  construct the global polynomial-pair measurement and extraction unitaries
-  by Lemma~\ref{lem:qld-unitary}. Transfer the state and both operator-family
-  estimates through the local isometries, and apply the error normalization
-  to give their common bound in the displayed robustness family.
+  \uses{lem:qld-unitary, lem:pauli-supplied-extraction-error-form-support}
+  Fix the universal constants and the extraction constant of
+  Lemma~\ref{lem:qld-unitary}, and with them the constants of the error-form
+  bounds for supplied extraction data. For the given setting, that lemma
+  produces a global polynomial-pair witness and an extraction witness at the
+  corresponding error scales. Feeding them to the error-form bounds gives the
+  isometries, the auxiliary state, and the common bound in the displayed
+  robustness family.
 \end{proof}
 
 \begin{theorem}[Questionwise Pauli Naimark reduction]

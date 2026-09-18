@@ -33,7 +33,8 @@ variable {P : AdmissibleParams} {epsilon deltaG delta : ℝ}
 
 /-- The local isometries and auxiliary state associated to supplied extraction
 data. This is the construction in the final proof of `thm:pauli`, with the
-extraction conclusion explicitly given. No existence assertion is made. -/
+extraction conclusion explicitly given. No existence assertion is made.
+This construction is part of blueprint `thm:pauli-extraction-isometry-construction-support`. -/
 def ExtractionWitness.toPauliSoundnessWitness (v : ExtractionWitness S w delta) :
     PauliSoundnessWitness P S.toStrategy where
   ιA' := S.toStrategy.ιA × PauliRegister P
@@ -47,7 +48,8 @@ def ExtractionWitness.toPauliSoundnessWitness (v : ExtractionWitness S w delta) 
 
 open Classical in
 /-- The two ancilla embeddings produce exactly the expanded strategy state,
-after grouping the local registers as `(AA')A''` and `(BB')B''`. -/
+after grouping the local registers as `(AA')A''` and `(BB')B''`.
+This identity is part of blueprint `thm:pauli-extraction-isometry-construction-support`. -/
 theorem isometryTensor_ancilla_eq_psiHat (S : ProjectiveSetting P epsilon) :
     isometryTensor
         (ancillaBlockIsometry (ι := S.toStrategy.ιA)
@@ -63,7 +65,8 @@ theorem isometryTensor_ancilla_eq_psiHat (S : ProjectiveSetting P epsilon) :
 open Classical in
 /-- The tensor of the constructed test isometries is the supplied simultaneous
 swap action, in test register order. This identity precedes every state-error
-estimate and requires no success or consistency bound. -/
+estimate and requires no success or consistency bound.
+This identity is part of blueprint `thm:pauli-extraction-isometry-construction-support`. -/
 theorem ExtractionWitness.isometryTensor_eq (v : ExtractionWitness S w delta) :
     isometryTensor v.toPauliSoundnessWitness.φA v.toPauliSoundnessWitness.φB
         S.toStrategy.ψ =
@@ -96,7 +99,8 @@ theorem ExtractionWitness.isometryTensor_eq (v : ExtractionWitness S w delta) :
 
 open Classical in
 /-- The auxiliary-state/EPR vector is unchanged by grouping each player's
-first two registers into that player's auxiliary space. -/
+first two registers into that player's auxiliary space.
+This identity is part of blueprint `thm:pauli-extraction-isometry-construction-support`. -/
 theorem ExtractionWitness.idealState_eq (v : ExtractionWitness S w delta) :
     idealState P v.toPauliSoundnessWitness.aux =
       reindexState (sixRegExtractionEquiv P S.toStrategy.ιA S.toStrategy.ιB)
@@ -106,7 +110,8 @@ theorem ExtractionWitness.idealState_eq (v : ExtractionWitness S w delta) :
 
 open Classical in
 /-- The supplied extraction state's squared error is exactly the squared state
-error of its test witness. Only the register order changes. -/
+error of its test witness. Only the register order changes.
+This identity is part of blueprint `thm:pauli-extraction-isometry-construction-support`. -/
 theorem ExtractionWitness.state_error_eq (v : ExtractionWitness S w delta) :
     ‖isometryTensor v.toPauliSoundnessWitness.φA v.toPauliSoundnessWitness.φB
         S.toStrategy.ψ - idealState P v.toPauliSoundnessWitness.aux‖ ^ 2 =
@@ -124,7 +129,8 @@ theorem ExtractionWitness.state_error_eq (v : ExtractionWitness S w delta) :
   rw [hsub, reindexState_norm_eq]
 
 /-- Conditional transfer of the state estimate from fully supplied extraction
-data. The paper-facing theorem must still construct that data; see issue #529. -/
+data. The paper-facing theorem must still construct that data; see issue #529.
+This is blueprint `lem:pauli-extraction-state-distance-support`. -/
 theorem ExtractionWitness.state_close_ofExtractionWitness (v : ExtractionWitness S w delta) :
     ‖isometryTensor v.toPauliSoundnessWitness.φA v.toPauliSoundnessWitness.φB
         S.toStrategy.ψ - idealState P v.toPauliSoundnessWitness.aux‖ ^ 2 ≤ delta := by
@@ -134,7 +140,8 @@ theorem ExtractionWitness.state_close_ofExtractionWitness (v : ExtractionWitness
 /-- The saved extraction error composition and square-root estimate give the
 source's unsquared state bound for supplied extraction data. This conditional
 support theorem concerns the state estimate. The companion `OperatorTransfer`
-module proves the common bound for the state and both operator families. -/
+module proves the common bound for the state and both operator families.
+This is blueprint `lem:pauli-extraction-state-error-form-support`. -/
 theorem extraction_state_norm_le_deltaQld_ofExtractionWitness
     (C a b : ℝ) (hC : 1 ≤ C) (ha : 1 < a) (hb : 0 < b) (hb1 : b < 1) :
     ∃ a' b' : ℝ, 1 ≤ a' ∧ 0 < b' ∧ b' < 1 ∧

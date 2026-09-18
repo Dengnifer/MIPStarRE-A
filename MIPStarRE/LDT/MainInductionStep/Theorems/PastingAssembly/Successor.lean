@@ -124,7 +124,8 @@ that, once the
 recursive predecessor hypothesis is available inside a genuine induction on
 the dimension, all remaining slice restriction, self-improvement, averaging,
 and scalar fields reduce the successor branch to
-`answerLdPastingInInductionSectionOfSmallError`.  It is tracked in issue #1507.
+`answerLdPastingInInductionSectionOfSmallError`.  It is tracked in upstream
+issue 1507 (historical).
 Discharge: proved here from the predecessor answer-valued induction hypothesis
 and the proved answer-valued pasting invocation. -/
 theorem answerMainInductionSuccessorNext_ofRecursiveHypothesisAndAnswerPasting.{uF}
@@ -230,7 +231,7 @@ lemma stronglySelfConsistent_of_slice_bounds
 self-improvement data, in the ordinary ambient pasting interface.
 
 **Lean-only:** This is an internal adapter for the induction-section pasting
-interface, tracked in issue #1507.  Paper origin:
+interface, tracked in upstream issue 1507 (historical).  Paper origin:
 `references/ldt-paper/inductive_step.tex:461-551`.  Discharge: proved here by
 applying `idxPolyFamily_sliceBoundednessInput_of_slice_bounds` to the
 answer-valued self-improvement data. -/
