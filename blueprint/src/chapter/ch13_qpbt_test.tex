@@ -1361,6 +1361,7 @@ The converse construction shows that any pair of anticommuting binary observable
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
+	\leanok
 	\uses{def:consistent-measurement}
 	The strategy is based on the canonical two-qubit operator solution of the Magic Square, with the state $\ket{\psi} = \ket{\mathrm{EPR}_q}^{\ot n} \ot \ket{\mathrm{EPR}_2}$ and the cells of the grid assigned the $\pm 1$-valued observables
 	\[
@@ -1628,6 +1629,7 @@ The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclu
 	\end{enumerate}
 \end{corollary}
 \begin{proof}
+	\leanok
 	\uses{thm:pauli, lem:pauli-binary}
 	By Lemma~\ref{lem:pauli-binary}, since $q$ is a power of $2$ there are local isometries that map $\ket{\mathrm{EPR}_q}^{\ot M}$ to $\ket{\mathrm{EPR}_2}^{\ot M \log q}$ and map the generalized Pauli measurements $\tau^W_u$ to the qubit tensor products $\bigotimes_{i=1}^M \bigotimes_{j=1}^{\log q} \sigma^W_{u_{ij}}$, where $\kappa(u_i) = (u_{i1},\ldots,u_{i \log q})$. Composing these isometries with those produced by Theorem~\ref{thm:pauli} gives the statement.
 \end{proof}
