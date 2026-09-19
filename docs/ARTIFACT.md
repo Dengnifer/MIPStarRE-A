@@ -57,11 +57,24 @@ per-section split from arXiv. The directories are plain per-section splits of
 the papers' arXiv sources.
 
 **Licence.** These files are the work of their own authors and are **not**
-covered by this repository's licence (see the *Licence* section of `README.md`;
-the licence for the development itself is the repository owner's to set). They
-are kept here for reference and for line-precise citation; their own terms
-govern any further use or redistribution. The `MANIFEST.txt` of every snapshot
-repeats this.
+covered by the Apache-2.0 `LICENSE` that ships with the snapshot and governs the
+development itself. They are kept here for reference and for line-precise
+citation; their own terms govern any further use or redistribution. The
+`MANIFEST.txt` of every snapshot repeats this.
+
+**Locator report.** `MANIFEST.txt` records how many of the
+`references/<paper>/<file>.tex` paths cited in the Lean sources, the blueprint
+and the docs actually resolve inside the snapshot. It is a report, not a gate:
+a locator may name a section the per-file split arranges differently. The
+gap-note template's fill-in placeholder is not counted (the mirrors' file names
+are lower case, so a locator with a capital in it is a form to complete rather
+than a citation). At the commit named in the MANIFEST two do not resolve —
+`references/ldt-paper/commutativity_points.tex` and
+`references/ldt-paper/projectivization.tex`, cited from
+`MIPStarRE/LDT/CommutativityPoints/AnswerTheorems.lean` and
+`MIPStarRE/LDT/MakingMeasurementsProjective/Orthonormalization.lean`. They
+predate this packaging work and are tracked separately; the surrounding
+docstrings also name their blueprint labels, which do resolve.
 
 **Leak scan.** The scan that gates packaging (below) treats these files like
 any other: a home path or a key-shaped string inside `references/` still fails
@@ -256,8 +269,13 @@ re-admits the two shipped top-level files with `-export-ignore`;
 `references/` is named in `.gitattributes` too, as a comment rather than an
 `export-ignore` line, so that the decision to ship it is visible where somebody
 would otherwise add the line back. Checked on 2026-09-19 after that change: a
-plain `git archive` of the repository and `scripts/make_artifact.sh` produce the
-same 860 files, the snapshot adding only its `MANIFEST.txt`.
+plain `git archive` of the repository and `scripts/make_artifact.sh --no-pdf`
+produce the same 864 files, the snapshot adding only its `MANIFEST.txt`. Without
+`--no-pdf` the snapshot also carries the 48 gap-note PDFs the script typesets,
+which are not tracked in git and so cannot appear in a plain `git archive`;
+`latexmk`'s intermediates are pruned, both because they are not part of the
+artifact and because `.fls` and `.fdb_latexmk` record the absolute path of the
+directory the build ran in.
 
 The leak scan is the backstop: it is what caught an upstream developer's home
 path in `docs/reports/` and got that directory excluded. It is fail-closed —

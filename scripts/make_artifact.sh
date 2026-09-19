@@ -22,8 +22,8 @@
 # paper sources in the public repository).  They are what the Lean docstrings,
 # the theorem index and the deviations page cite by `<file>.tex:<lines>`, so a
 # snapshot without them cannot be checked against its sources.  They are
-# third-party material kept for reference and are NOT covered by this
-# repository's own licence; the MANIFEST and docs/ARTIFACT.md say so.
+# third-party material kept for reference and are NOT covered by the Apache-2.0
+# LICENSE that ships with the snapshot; the MANIFEST and docs/ARTIFACT.md say so.
 #
 # The script FAILS on a leak-scan hit.  That is the point: a snapshot that
 # leaks a home path, a key-shaped string or an e-mail address is not shipped.
@@ -241,6 +241,20 @@ if [ "$BUILD_PDF" -eq 1 ] && [ -f "$SNAP/docs/paper-gaps/Makefile" ]; then
     log "$GAP_PDF"
     tail -n 20 "$WORK/gap-make.log" >&2 || true
   fi
+  # latexmk leaves its intermediates beside the PDFs in the same build
+  # directory.  They are not part of the artifact, and two of the kinds it
+  # writes -- `.fls` and `.fdb_latexmk` -- record the absolute path of the
+  # directory the build ran in, so with TMPDIR under a home directory they
+  # would carry a home path into the snapshot and the leak scan would refuse to
+  # package a release.  Keep the PDFs, drop everything else it wrote.
+  PRUNED=$(find "$SNAP/docs/paper-gaps" -type f ! -name '*.pdf' \
+      ! -name '*.tex' ! -name '*.bib' ! -name '*.md' ! -name 'Makefile' \
+      -print -delete 2>/dev/null | wc -l | tr -d ' ')
+  find "$SNAP/docs/paper-gaps" -type d -empty -delete 2>/dev/null || true
+  if [ "$PRUNED" -gt 0 ]; then
+    GAP_PDF="$GAP_PDF; $PRUNED LaTeX build intermediate(s) pruned"
+    log "pruned $PRUNED LaTeX build intermediate(s)"
+  fi
 elif [ "$BUILD_PDF" -eq 1 ]; then
   GAP_PDF="skipped: docs/paper-gaps/Makefile is not in this revision"
   log "$GAP_PDF"
@@ -399,6 +413,36 @@ PY
 )
 log "internal Markdown links: $DEAD_LINKS"
 
+# ---- 7b. paper locators ---------------------------------------------------
+
+# Now that the paper sources ship, a docstring's `references/<paper>/<file>.tex`
+# locator is a path a reviewer can open in the snapshot — so a locator naming a
+# file that is not there is worth saying out loud.  A report, not a gate: the
+# locator may name a section the mirror splits differently, and a packaging
+# script is the wrong place to decide that.  The MANIFEST carries the count so
+# that it cannot rot unnoticed.
+# The mirrors' file names are lower case throughout, so a locator whose file
+# component carries a capital is a fill-in placeholder rather than a citation --
+# `references/ldt-paper/FILE.tex` in the gap-note template and the row for it in
+# the gap-note README.  Those are dropped here instead of being reported as
+# absent every time.
+LOC_LIST="$WORK/paper-locators"
+grep -rhoE 'references/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+\.tex' \
+    "$SNAP/MIPStarRE" "$SNAP/blueprint/src" "$SNAP/docs" 2>/dev/null \
+  | grep -vE '/[A-Za-z0-9_.-]*[A-Z][A-Za-z0-9_.-]*\.tex$' \
+  | sort -u > "$LOC_LIST" || true
+LOC_TOTAL=$(wc -l < "$LOC_LIST" | tr -d ' ')
+LOC_DEAD_LIST=$(while read -r locator; do
+    [ -f "$SNAP/$locator" ] || printf '%s ' "$locator"
+  done < "$LOC_LIST")
+LOC_DEAD=$(printf '%s' "$LOC_DEAD_LIST" | wc -w | tr -d ' ')
+if [ "$LOC_DEAD" -gt 0 ]; then
+  PAPER_LOCATORS="$LOC_DEAD of $LOC_TOTAL cited files absent: $LOC_DEAD_LIST"
+else
+  PAPER_LOCATORS="all $LOC_TOTAL cited files are in the snapshot"
+fi
+log "paper locators: $PAPER_LOCATORS"
+
 # ---- 8. MANIFEST ----------------------------------------------------------
 
 FILE_COUNT=$(( $(find "$SNAP" -type f | wc -l | tr -d ' ') + 1 ))  # + this MANIFEST
@@ -420,6 +464,7 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "gap-note PDFs     : $GAP_PDF"
   echo "pdf leak scan     : $PDF_SCAN"
   echo "internal links    : $DEAD_LINKS"
+  echo "paper locators    : $PAPER_LOCATORS"
   echo "self-contained    : $SELF_CONTAINED"
   echo
   echo "Excluded from this snapshot, on purpose:"
@@ -432,8 +477,9 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "  docstrings, the theorem index and the deviations page cite them as"
   echo "  references/<paper>/<file>.tex:<lines>, so every locator resolves inside"
   echo "  this snapshot.  These files are the work of their own authors, kept"
-  echo "  here for reference; they are NOT covered by this repository's licence,"
-  echo "  and their own terms govern any further use or redistribution."
+  echo "  here for reference; they are NOT covered by the Apache-2.0 LICENSE"
+  echo "  that ships with this snapshot, and their own terms govern any further"
+  echo "  use or redistribution."
   echo
   echo "See docs/ARTIFACT.md for what this contains and how to verify it."
 } > "$MANIFEST"

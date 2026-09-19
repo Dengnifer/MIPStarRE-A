@@ -229,6 +229,35 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
                          "a snapshot leaking through a PDF must not be packaged")
 
+    # -- the gap-note PDF build ---------------------------------------------
+
+    def test_the_latexmk_intermediates_are_pruned(self) -> None:
+        """Only the PDFs are part of the artifact.
+
+        `.fls` and `.fdb_latexmk` also record the absolute path of the directory
+        the build ran in, so shipping them would put the build host's home
+        directory into a release cut with TMPDIR under a home.  A stand-in
+        Makefile stands for latexmk here: what is under test is the pruning.
+        """
+        if shutil.which("pdftotext") is None:
+            self.skipTest("pdftotext (poppler-utils) is not installed")
+        gaps = self.repo / "docs" / "paper-gaps"
+        (gaps / "note.pdf").parent.mkdir(parents=True, exist_ok=True)
+        (gaps / "note.pdf").write_bytes(minimal_pdf("a gap note"))
+        # The stand-in writes a plain `.fls`: a real one would name the build
+        # directory's absolute path, which the scan would catch here rather than
+        # letting the assertion below do the work.
+        write(gaps / "Makefile",
+              "all:\n\tmkdir -p build\n\tcp note.pdf build/note.pdf\n"
+              "\tprintf 'INPUT note.tex\\n' > build/note.fls\n")
+        self.commit("a gap-note build that leaves intermediates")
+        result = self.run_script()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        names = self.members()
+        self.assertIn("docs/paper-gaps/build/note.pdf", names)
+        self.assertNotIn("docs/paper-gaps/build/note.fls", names)
+        self.assertIn("docs/paper-gaps/note.pdf", names)
+
     # -- shipped pages ------------------------------------------------------
 
     def test_the_manifest_reports_a_link_to_a_page_that_does_not_ship(self) -> None:
@@ -237,6 +266,26 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertEqual(self.run_script().returncode, 0)
         manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
         self.assertIn("internal links    : 1 dead of 1 checked", manifest)
+
+    def test_the_manifest_reports_a_paper_locator_that_does_not_resolve(self) -> None:
+        """A docstring locator is now a path a reviewer can open."""
+        write(self.repo / "MIPStarRE" / "Bar.lean",
+              "/-- Paper origin: `references/qpbt-paper/frontmatter.tex`. -/\n"
+              "theorem bar : True := trivial\n")
+        self.commit("a locator that resolves")
+        self.assertEqual(self.run_script().returncode, 0)
+        manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
+        self.assertIn("paper locators    : all 1 cited files are in the snapshot",
+                      manifest)
+
+        write(self.repo / "MIPStarRE" / "Bar.lean",
+              "/-- Paper origin: `references/qpbt-paper/no-such-section.tex`. -/\n"
+              "theorem bar : True := trivial\n")
+        self.commit("a locator that does not resolve")
+        self.assertEqual(self.run_script().returncode, 0)
+        manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
+        self.assertIn("1 of 1 cited files absent", manifest)
+        self.assertIn("references/qpbt-paper/no-such-section.tex", manifest)
 
     # -- anonymization ------------------------------------------------------
 
