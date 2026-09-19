@@ -4512,6 +4512,128 @@ The final identity follows from commutation of opposite placements.
 The first two calculations are also used in the polynomial-image estimate.
 \end{proof}
 
+The next five assertions are formalization-only auxiliary calculations for
+the ordered products in \texttt{eq:qld-g-prime} and
+\texttt{eq:qld-g-43} of \cite{Ji2020MIPStar}. They do not assert the
+concentration or polynomial-pair conclusion of Lemma~\ref{lem:qld-4-7}.
+
+\begin{theorem}[Uniform exceptional-coefficient error]
+\label{thm:aux-ordered-exceptional-average}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_abs_orderedIndicator_norm_sq_sub_diagonal_le}
+\leanok
+\uses{def:qld-polynomial-indicators}
+Let $F$ be a finite field, let $X,Z$ be complete projective measurements
+on a common finite-dimensional space, and let $\psi$ be any vector. For
+each fixed $\alpha\in F$ and arbitrary function $a:F\to F$,
+\[
+ \mathbb E_{\beta\in F}
+ \left|\|T_{\alpha,\beta,a(\beta)}\psi\|^2
+ -\langle\psi,H_{\alpha,\beta,a(\beta)}\psi\rangle\right|
+ \leq |F|^{-1}\|\psi\|^2.
+\]
+The expectation is uniform and $\psi$ need not be normalized.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:qld-fiber-norm-comparisons}
+Apply the pointwise estimate and average the indicator of $\beta=0$;
+its uniform probability is $|F|^{-1}$.
+\end{proof}
+
+\begin{theorem}[Summed exceptional-coefficient error]
+\label{thm:aux-ordered-exceptional-sum}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_sum_abs_orderedIndicator_norm_sq_sub_diagonal_le}
+\leanok
+\uses{def:qld-polynomial-indicators}
+Let $F$ be a finite field, $X,Z$ complete projective measurements,
+$\alpha\in F$, $\Gamma$ a finite outcome set, $\psi_g$ arbitrary vectors
+on their common space, and $a_g:F\to F$ arbitrary functions. Then
+\[
+ \mathbb E_{\beta\in F}\sum_{g\in\Gamma}
+ \left|\|T_{\alpha,\beta,a_g(\beta)}\psi_g\|^2
+ -\langle\psi_g,H_{\alpha,\beta,a_g(\beta)}\psi_g\rangle\right|
+ \leq |F|^{-1}\sum_{g\in\Gamma}\|\psi_g\|^2.
+\]
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:aux-ordered-exceptional-average}
+Exchange the finite sum with the uniform average and apply the preceding
+inequality separately to each $\psi_g$.
+\end{proof}
+
+\begin{theorem}[Projective exceptional-coefficient error]
+\label{thm:aux-projective-exceptional-average}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_sum_abs_projective_orderedIndicator_le}
+\leanok
+\uses{def:qld-polynomial-indicators}
+Let $F$ be a finite field and $S=\{S_g\}_{g\in\Gamma}$ a complete projective measurement on
+the same space as complete projective measurements $X,Z$. For any vector
+$\psi$, fixed $\alpha\in F$, and arbitrary functions $a_g:F\to F$,
+\[
+ \mathbb E_{\beta\in F}\sum_{g\in\Gamma}
+ \left|\|T_{\alpha,\beta,a_g(\beta)}S_g\psi\|^2
+ -\langle S_g\psi,H_{\alpha,\beta,a_g(\beta)}S_g\psi\rangle\right|
+ \leq |F|^{-1}\|\psi\|^2.
+\]
+No commutation of the three measurements is required.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:aux-ordered-exceptional-sum, thm:qld-projective-outcome-mass}
+Apply the summed bound with $\psi_g=S_g\psi$ and use
+$\sum_g\|S_g\psi\|^2=\|\psi\|^2$.
+\end{proof}
+
+\begin{theorem}[Uniform base-point and scalar exceptional error]
+\label{thm:aux-projective-exceptional-uniform}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.avg_uniform_sum_abs_projective_orderedIndicator_le}
+\leanok
+\uses{def:qld-polynomial-indicators}
+Over a finite field $F$, let $U$ be a finite nonempty base set and
+$S=\{S_g\}_{g\in\Gamma}$ a
+complete projective measurement, and $X(t),Z(t)$ complete projective
+measurements for every $t\in U$, all on the same finite-dimensional
+space. For arbitrary field-valued answers $a_{g,t}(\alpha,\beta)$ and
+any vector $\psi$,
+\[
+ \mathbb E_{(t,\alpha,\beta)\in U\times(F\times F)}\sum_{g\in\Gamma}
+ \left|\|T^{(t)}_{\alpha,\beta,a_{g,t}(\alpha,\beta)}S_g\psi\|^2
+ -\langle S_g\psi,
+ H^{(t)}_{\alpha,\beta,a_{g,t}(\alpha,\beta)}S_g\psi\rangle\right|
+ \leq |F|^{-1}\|\psi\|^2,
+\]
+where the superscript denotes the indicators formed from $X(t),Z(t)$
+and the expectation is uniform on the entire product.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:aux-projective-exceptional-average}
+Decompose the product uniform law into successive averages over $t$,
+$\alpha$, and $\beta$. Apply the preceding inequality at each fixed
+$t,\alpha$, then average the constant bound.
+\end{proof}
+
+\begin{theorem}[Reversal of the ordered indicator]
+\label{thm:aux-ordered-indicator-reverse}
+\lean{MIPStarRE.QPBT.PolynomialImageBounds.orderedIndicator_reverse}
+\leanok
+\uses{def:qld-polynomial-indicators}
+For complete measurements $X,Z$ over a finite field $F$ and any
+$\alpha,\beta,a\in F$,
+\[
+ \sum_{\alpha b+\beta c=a}Z_cX_b
+ =T_{\beta,\alpha,a}(Z,X).
+\]
+Projectivity and commutation are not assumed.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{def:qld-polynomial-indicators}
+Exchange the pair of summation indices and commute the field addition;
+the order of the operators remains unchanged.
+\end{proof}
+
 \begin{definition}[Partial coefficient polynomials]
 \label{def:qld-block-coefficient-polynomial}
 \lean{MIPStarRE.QPBT.ExtendedLineGame.blockCoefficientPolynomial}

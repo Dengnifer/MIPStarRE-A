@@ -3,7 +3,7 @@ import MIPStarRE.QPBT.Games.Sandwich
 import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.GroundSlice
 
 /-!
-# Indicator-weighted ordered projectors
+# Indicator-weighted ordered products
 
 This module proves the local norm calculation in `eq:qld-g-prime`. The state
 vector is not assumed normalized: its squared norm controls the exceptional
@@ -171,6 +171,35 @@ theorem abs_orderedIndicator_norm_sq_sub_diagonal_le (X Z : Quantum.Measurement 
   · rw [if_neg hβ, orderedIndicator_norm_sq_of_ne_zero X Z hX α β a hβ ψ]
     simp
 
+/-- Uniformly averaging the exceptional error in `eq:qld-g-prime` costs at most
+`q⁻¹ * ‖ψ‖²`, even if the tested answer depends on the coefficient. -/
+theorem avg_abs_orderedIndicator_norm_sq_sub_diagonal_le (X Z : Quantum.Measurement F ι)
+    (hX : Measurement.IsProjective X) (hZ : Measurement.IsProjective Z)
+    (α : F) (a : F → F) (ψ : EuclideanSpace ℂ ι) :
+    avgOver (uniformDistribution F) (fun β =>
+      |‖applyOperatorToState (orderedIndicator X Z α β (a β)) ψ‖ ^ 2 -
+        stateQForm ψ (diagonalIndicator X Z α β (a β))|) ≤
+      (Fintype.card F : ℝ)⁻¹ * ‖ψ‖ ^ 2 := by
+  calc
+    _ ≤ avgOver (uniformDistribution F) (fun β : F => if β = 0 then ‖ψ‖ ^ 2 else 0) :=
+      avgOver_mono _ _ _ fun β =>
+        abs_orderedIndicator_norm_sq_sub_diagonal_le X Z hX hZ α β (a β) ψ
+    _ = _ := by simp [avgOver_uniform_eq_inv_card_mul_sum]
+
+/-- Summing the exceptional error over arbitrary state vectors costs their
+total squared mass, without a factor counting outcomes. -/
+theorem avg_sum_abs_orderedIndicator_norm_sq_sub_diagonal_le {Γ : Type*} [Fintype Γ]
+    (X Z : Quantum.Measurement F ι)
+    (hX : Measurement.IsProjective X) (hZ : Measurement.IsProjective Z)
+    (α : F) (a : Γ → F → F) (ψ : Γ → EuclideanSpace ℂ ι) :
+    avgOver (uniformDistribution F) (fun β => ∑ g : Γ,
+      |‖applyOperatorToState (orderedIndicator X Z α β (a g β)) (ψ g)‖ ^ 2 -
+        stateQForm (ψ g) (diagonalIndicator X Z α β (a g β))|) ≤
+      (Fintype.card F : ℝ)⁻¹ * ∑ g : Γ, ‖ψ g‖ ^ 2 := by
+  rw [avgOver_sum, Finset.mul_sum]
+  exact Finset.sum_le_sum fun g _ =>
+    avg_abs_orderedIndicator_norm_sq_sub_diagonal_le X Z hX hZ α (a g) (ψ g)
+
 /-- Completeness and projectivity preserve total squared state mass. This is
 the normalization used after summing `eq:qld-g-prime` over polynomial labels. -/
 theorem sum_projective_state_norm_sq {Γ : Type*} [Fintype Γ]
@@ -181,6 +210,66 @@ theorem sum_projective_state_norm_sq {Γ : Type*} [Fintype Γ]
     fun g => (hS g).isIdempotentElem.eq]
   change (∑ g : Γ, stateQForm ψ (S.effect g)) = ‖ψ‖ ^ 2
   rw [← stateQForm_finset_sum, S.sum_eq_one, stateQForm_one]
+
+/-- After summing over a projective measurement, the exceptional error in
+`eq:qld-g-prime` is at most `q⁻¹ * ‖ψ‖²`; no measurements commute by assumption. -/
+theorem avg_sum_abs_projective_orderedIndicator_le {Γ : Type*} [Fintype Γ]
+    (S : Quantum.Measurement Γ ι) (X Z : Quantum.Measurement F ι)
+    (hS : Measurement.IsProjective S)
+    (hX : Measurement.IsProjective X) (hZ : Measurement.IsProjective Z)
+    (α : F) (a : Γ → F → F) (ψ : EuclideanSpace ℂ ι) :
+    avgOver (uniformDistribution F) (fun β => ∑ g : Γ,
+      |‖applyOperatorToState (orderedIndicator X Z α β (a g β))
+          (applyOperatorToState (S.effect g) ψ)‖ ^ 2 -
+        stateQForm (applyOperatorToState (S.effect g) ψ)
+          (diagonalIndicator X Z α β (a g β))|) ≤
+      (Fintype.card F : ℝ)⁻¹ * ‖ψ‖ ^ 2 := by
+  simpa only [sum_projective_state_norm_sq S hS ψ] using
+    avg_sum_abs_orderedIndicator_norm_sq_sub_diagonal_le X Z hX hZ α a
+      (fun g => applyOperatorToState (S.effect g) ψ)
+
+/-- The full uniform law on base points and both scalar coefficients retains
+the `q⁻¹` exceptional bound after summing projective polynomial outcomes. -/
+theorem avg_uniform_sum_abs_projective_orderedIndicator_le
+    {T Γ : Type*} [Fintype T] [DecidableEq T] [Nonempty T] [Fintype Γ]
+    (S : Quantum.Measurement Γ ι) (X Z : T → Quantum.Measurement F ι)
+    (hS : Measurement.IsProjective S)
+    (hX : ∀ t, Measurement.IsProjective (X t))
+    (hZ : ∀ t, Measurement.IsProjective (Z t))
+    (a : Γ → T → F → F → F) (ψ : EuclideanSpace ℂ ι) :
+    avgOver (uniformDistribution (T × (F × F))) (fun tαβ => ∑ g : Γ,
+      |‖applyOperatorToState
+          (orderedIndicator (X tαβ.1) (Z tαβ.1) tαβ.2.1 tαβ.2.2
+            (a g tαβ.1 tαβ.2.1 tαβ.2.2)) (applyOperatorToState (S.effect g) ψ)‖ ^ 2 -
+        stateQForm (applyOperatorToState (S.effect g) ψ)
+          (diagonalIndicator (X tαβ.1) (Z tαβ.1) tαβ.2.1 tαβ.2.2
+            (a g tαβ.1 tαβ.2.1 tαβ.2.2))|) ≤
+      (Fintype.card F : ℝ)⁻¹ * ‖ψ‖ ^ 2 := by
+  rw [avgOver_uniform_prod (fun (t : T) (αβ : F × F) => ∑ g : Γ,
+    |‖applyOperatorToState (orderedIndicator (X t) (Z t) αβ.1 αβ.2 (a g t αβ.1 αβ.2))
+        (applyOperatorToState (S.effect g) ψ)‖ ^ 2 -
+      stateQForm (applyOperatorToState (S.effect g) ψ)
+        (diagonalIndicator (X t) (Z t) αβ.1 αβ.2 (a g t αβ.1 αβ.2))|)]
+  apply avgOver_uniform_le_const
+  intro t
+  rw [avgOver_uniform_prod (fun (α β : F) => ∑ g : Γ,
+    |‖applyOperatorToState (orderedIndicator (X t) (Z t) α β (a g t α β))
+        (applyOperatorToState (S.effect g) ψ)‖ ^ 2 -
+      stateQForm (applyOperatorToState (S.effect g) ψ)
+        (diagonalIndicator (X t) (Z t) α β (a g t α β))|)]
+  apply avgOver_uniform_le_const
+  intro α
+  exact avg_sum_abs_projective_orderedIndicator_le S (X t) (Z t) hS (hX t) (hZ t)
+    α (fun g β => a g t α β) ψ
+
+/-- Exchanging the two measurements and the two coefficients gives the
+reversed ordered operator of `eq:qld-g-43`, with exceptional coefficient alpha. -/
+theorem orderedIndicator_reverse (X Z : Quantum.Measurement F ι) (α β a : F) :
+    (∑ bc : F × F,
+      if α * bc.1 + β * bc.2 = a then Z.effect bc.2 * X.effect bc.1 else 0) =
+      orderedIndicator Z X β α a := by
+  unfold orderedIndicator
+  exact Fintype.sum_equiv (Equiv.prodComm F F) _ _ fun bc => by simp [add_comm]
 
 /-- A polynomial not of the form `alpha * u + beta * v` has a nonzero
 coefficient outside those two monomials. Applied over the ring of base-point
@@ -340,7 +429,7 @@ private theorem avg_diagonalIndicator_le_of_not_linear {n : ℕ}
     _ = _ := by dsimp [D, E]; push_cast; ring
 
 /-- Adding the genuinely uniform zero-coefficient contribution gives the
-ordered-projector estimate for a polynomial outside the scalar-linear image.
+ordered-product estimate for a polynomial outside the scalar-linear image.
 The right side retains the squared norm of the unnormalized state. -/
 private theorem avg_orderedIndicator_norm_sq_le_of_not_linear {n : ℕ}
     (p : MvPolynomial (Fin 2) (MvPolynomial (Fin n) F))
