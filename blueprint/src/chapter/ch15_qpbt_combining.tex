@@ -841,6 +841,8 @@ assembled by Fourier averaging.
 	measurements]
 	\label{lem:expanded-point-field-commutation}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.expPoint_comm}
+	\lean{MIPStarRE.QPBT.sum_norm_sum_smul_sq_of_orthogonal}
+	\lean{MIPStarRE.QPBT.sum_fixedCharacter_mul}
 	\leanok
 	\uses{lem:qld-comm-cons, def:expanded-state,
 		def:expanded-point-measurement, def:povm-distance,
@@ -868,10 +870,23 @@ assembled by Fourier averaging.
 	This is the estimate actually used by the formal proof of
 	Lemma~\ref{lem:qld-4-10}; paper
 	\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:466--505}.
+
+	The formal proof isolates two finite-sum ingredients, both
+	formalization-only auxiliaries and neither a named statement of
+	\cite{Ji2020MIPStar}. The first is Parseval's identity in the form used
+	here: if $c_{j,i}$ are complex coefficients whose columns are orthogonal
+	with one common squared norm $N$, that is
+	$\sum_j \overline{c_{j,i}}\, c_{j,i'} = N \, [i = i']$, then
+	$\sum_j \lVert \sum_i c_{j,i} v_i \rVert^2 = N \sum_i \lVert v_i \rVert^2$
+	for any vectors $v_i$ of a complex inner product space. The second is the
+	one-dimensional case of the cancellation identity of
+	Lemma~\ref{lem:cancellation}: for the fixed trace character $\chi$ of
+	$\F_q$ and every $c \in \F_q$,
+	$\sum_{a \in \F_q} \chi(a c) = q \, [c = 0]$.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:qld-comm-cons, lem:twisted-commutation,
+	\uses{lem:qld-comm-cons, lem:twisted-commutation, lem:cancellation,
 		def:expanded-observables, def:expanded-point-measurement}
 	Each field-valued effect is the character average of the expanded point
 	observables over the dual scalar, so the commutator of the two effects is
@@ -961,6 +976,278 @@ assembled by Fourier averaging.
 	$(2C_0)^{1/4}\leq2C_0$ proves the final bound.
 \end{proof}
 
+\begin{lemma}[Formalization support: the crosswise EPR exchange]
+	\label{lem:qld-epr-cross-swap}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.eprCrossSwap}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.reindexState_eprCrossSwap_psiHat}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.norm_place_AB''_eq_norm_place_AA'}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.norm_place_BB'_eq_norm_place_BA''}
+	\leanok
+	\uses{def:expanded-state, def:symmetric-equivalents, def:EPR}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Ji2020MIPStar}; it transfers norms between register placements
+	without assuming that the strategy is symmetric.
+	Let $U$ be the permutation of the six registers of
+	Definition~\ref{def:symmetric-equivalents} that exchanges
+	$\mathsf{A}' \leftrightarrow \mathsf{B}''$ and
+	$\mathsf{A}'' \leftrightarrow \mathsf{B}'$ and fixes the two strategy
+	registers $\mathsf{A}$ and $\mathsf{B}$. Then $U$ is an involution, it
+	fixes the expanded state $\ket{\hat\psi}$ of
+	Definition~\ref{def:expanded-state}, and, writing $(\cdot)_p$ for a
+	placement,
+	\[
+		\bigl\lVert (P)_{\mathsf{A}\mathsf{B}''}\ket{\hat\psi}\bigr\rVert
+		= \bigl\lVert (P)_{\mathsf{A}\mathsf{A}'}\ket{\hat\psi}\bigr\rVert,
+		\qquad
+		\bigl\lVert (P')_{\mathsf{B}\mathsf{B}'}\ket{\hat\psi}\bigr\rVert
+		= \bigl\lVert (P')_{\mathsf{B}\mathsf{A}''}\ket{\hat\psi}\bigr\rVert,
+	\]
+	for every operator $P$ on Alice's expanded local space and every operator
+	$P'$ on Bob's. The only input is that the EPR vector of
+	Definition~\ref{def:EPR} takes the same value on $(x,y)$ and on $(y,x)$;
+	no symmetry of the strategy is used. This exchange is a separate
+	involution from the four-cycle on the ancillas that transports the
+	symmetric equivalents of Definition~\ref{def:symmetric-equivalents}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:EPR}
+	The permutation is its own inverse by inspection of the coordinate tuple.
+	On the expanded state it multiplies the same strategy amplitude by the two
+	EPR amplitudes with their registers exchanged, so the symmetry of the EPR
+	vector returns the original state. Reindexing an operator by $U$ carries
+	$(P)_{\mathsf{A}\mathsf{B}''}$ to $(P)_{\mathsf{A}\mathsf{A}'}$ and
+	$(P')_{\mathsf{B}\mathsf{B}'}$ to $(P')_{\mathsf{B}\mathsf{A}''}$
+	entrywise, and reindexing a state by a permutation of its coordinates
+	preserves norms.
+\end{proof}
+
+\begin{lemma}[Formalization support: the sandwich point POVM]
+	\label{lem:qld-sandwich-povm}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichPoint}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichPoint_ordered_dist_le}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.ordered_cross_dist_le}
+	\leanok
+	\uses{def:expanded-point-measurement, def:expanded-state,
+		def:povm-distance, def:symmetric-equivalents,
+		lem:expanded-point-field-commutation, lem:qld-comm-cons,
+		lem:qld-placement-completeness}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Ji2020MIPStar}; it is the first step of the proof of Lemma~4.10 of
+	\cite{Ji2020MIPStar}
+	(\texttt{references/qpbt-paper/14\_analysis\_of\_the\_pauli\_basis\_test.tex},
+	lines~731--770), carried out with field-valued outcomes rather than with
+	the binary refinements of the source proof; the replacement is recorded in
+	the paper-gap note
+	\texttt{docs/paper-gaps/qpbt\_combined-points-field-valued.tex}.
+	Write $\hat{M}^{(\mathrm{Point},X),x}_{a}$ and
+	$\hat{M}^{(\mathrm{Point},Z),z}_{b}$ for the expanded point measurements
+	of Definition~\ref{def:expanded-point-measurement} on one player's
+	expanded local space, and set, for $x, z \in \F_q^m$,
+	\[
+		R^{x,z}_{a,b}
+		= \hat{M}^{(\mathrm{Point},Z),z}_{b}\,
+		\hat{M}^{(\mathrm{Point},X),x}_{a}\,
+		\hat{M}^{(\mathrm{Point},Z),z}_{b},
+		\qquad a, b \in \F_q .
+	\]
+	\begin{enumerate}
+		\item $\{R^{x,z}_{a,b}\}_{a,b \in \F_q}$ is a POVM: every effect is
+		positive semidefinite and the effects sum to the identity. Only
+		projectivity of the two point measurements is used; no commutation
+		between them is assumed.
+		\item There is a constant $C \ge 1$ such that, for every admissible
+		parameter set, every $\eps$, every projective strategy of value at
+		least $1-\eps$, and every one of the four placements $p$ of
+		Definition~\ref{def:symmetric-equivalents},
+		\[
+			\E_{x,z} \sum_{a,b \in \F_q}
+			\bigl\lVert \bigl(R^{x,z}_{a,b}
+			- \hat{M}^{(\mathrm{Point},Z),z}_{b}
+			\hat{M}^{(\mathrm{Point},X),x}_{a}\bigr)_{p}
+			\ket{\hat\psi} \bigr\rVert^2
+			\;\le\; C \sqrt{\eps}\,.
+		\]
+		\item There is a constant $C \ge 1$ such that, with the same
+		quantification and for every directed pair of opposite placements
+		$p_1, p_2$,
+		\[
+			\E_{x,z} \sum_{a,b \in \F_q}
+			\bigl\lVert \bigl(
+			(\hat{M}^{(\mathrm{Point},Z),z}_{b}
+			\hat{M}^{(\mathrm{Point},X),x}_{a})_{p_1}
+			- (\hat{M}^{(\mathrm{Point},X),x}_{a}
+			\hat{M}^{(\mathrm{Point},Z),z}_{b})_{p_2}
+			\bigr) \ket{\hat\psi} \bigr\rVert^2
+			\;\le\; C \eps\,.
+		\]
+	\end{enumerate}
+	Both averages are over a uniformly random point pair
+	$(x,z) \in \F_q^m \times \F_q^m$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:expanded-point-field-commutation, lem:qld-comm-cons,
+		lem:qld-placement-completeness, fact:triangle, def:povm-distance}
+	Each effect equals
+	$(\hat{M}^{X,x}_{a}\hat{M}^{Z,z}_{b})^\dagger
+	(\hat{M}^{X,x}_{a}\hat{M}^{Z,z}_{b})$ and is therefore positive
+	semidefinite; summing first over $a$ and then over $b$ and using
+	idempotence of the $Z$-effects gives the identity.
+	For item~2, projectivity gives
+	$R^{x,z}_{a,b} - \hat{M}^{Z,z}_{b}\hat{M}^{X,x}_{a}
+	= \hat{M}^{Z,z}_{b}\,[\hat{M}^{X,x}_{a},\hat{M}^{Z,z}_{b}]$; a placement
+	is multiplicative and carries a projector to a contraction
+	(Lemma~\ref{lem:qld-placement-completeness}), so each summand is at most
+	the corresponding placed commutator norm, whose average is
+	$C\sqrt\eps$ by Lemma~\ref{lem:expanded-point-field-commutation}.
+	For item~3, pass through the intermediate family
+	$(\hat{M}^{Z,z}_{b})_{p_1}(\hat{M}^{X,x}_{a})_{p_2}$, transporting one
+	factor at a time: each transport costs the self-consistency of that single
+	point measurement, which is item~1 of Lemma~\ref{lem:qld-comm-cons}, with a
+	placed contraction as the remaining factor. The squared triangle
+	inequality (Lemma~\ref{fact:triangle}) combines the two estimates and
+	accounts for the constant.
+\end{proof}
+
+\begin{lemma}[Formalization support: consistency of the sandwich point POVM]
+	\label{lem:qld-sandwich-consistency-defect}
+	\lean{MIPStarRE.QPBT.sandwich_overlap_identity}
+	\lean{MIPStarRE.QPBT.sandwich_defect_pointwise_le}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwichDefectBound}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.sandwich_offDiagonal_le_sandwichDefectBound}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.avg_sandwichDefectBound_le}
+	\leanok
+	\uses{lem:qld-sandwich-povm, lem:qld-placement-completeness,
+		def:consistency, def:expanded-state, def:expanded-point-measurement,
+		lem:qld-comm-cons, lem:expanded-point-field-commutation}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Ji2020MIPStar}; it replaces the Cauchy--Schwarz chain in the first
+	step of the proof of Lemma~4.10 of \cite{Ji2020MIPStar}
+	(\texttt{references/qpbt-paper/14\_analysis\_of\_the\_pauli\_basis\_test.tex},
+	lines~743--790) by an exact identity and a bound derived from it.
+
+	\emph{Abstract form.} Let $\ket\psi$ be a vector of a finite-dimensional
+	complex Hilbert space and let $\{X^1_a\}$, $\{X^2_a\}$, $\{Z^1_b\}$,
+	$\{Z^2_b\}$ be projective measurements on it with finite outcome sets,
+	such that $X^1_a Z^2_b = Z^2_b X^1_a$ and $Z^1_b X^2_a = X^2_a Z^1_b$ for
+	all $a, b$, and $Z^1_b Z^2_b = Z^2_b Z^1_b$ for every $b$. Put
+	$R^i_{a,b} = Z^i_b X^i_a Z^i_b$ and $W_b = Z^1_b Z^2_b$. Then
+	\[
+		\sum_{a,b} \bra\psi R^1_{a,b} R^2_{a,b} \ket\psi
+		= \lVert\psi\rVert^2
+		- \tfrac12 \sum_b \lVert (Z^1_b - Z^2_b)\ket\psi \rVert^2
+		- \tfrac12 \sum_{a,b} \lVert (X^1_a - X^2_a) W_b \ket\psi \rVert^2 ,
+	\]
+	and consequently
+	\[
+		\lVert\psi\rVert^2 - \sum_{a,b} \bra\psi R^1_{a,b} R^2_{a,b} \ket\psi
+		\;\le\; \tfrac12 \sum_b \lVert (Z^1_b - Z^2_b)\ket\psi \rVert^2
+		+ \tfrac32 \Bigl( \sum_a \lVert (X^1_a - X^2_a)\ket\psi \rVert^2
+		+ K_1 + K_2 \Bigr) ,
+	\]
+	where $K_i = \sum_{a,b} \lVert [X^i_a, Z^i_b] \ket\psi \rVert^2$. No
+	commutation between $X^i$ and $Z^i$ with the same superscript is assumed.
+
+	\emph{In the chapter's setting.} Fix a directed pair of opposite
+	placements $p_1, p_2$ and let $c_{x,z}$ denote the right-hand side of the
+	second display evaluated at $\ket{\hat\psi}$ with the two placements of the
+	expanded point measurements at the point pair $(x,z)$. Then the
+	off-diagonal mass
+	$\sum_{(a,b) \ne (a',b')} \bra{\hat\psi} (R^{x,z}_{a,b})_{p_1}
+	(R^{x,z}_{a',b'})_{p_2} \ket{\hat\psi}$ of the two placed sandwich POVMs
+	of Lemma~\ref{lem:qld-sandwich-povm} is at most $c_{x,z}$, and on average
+	over a uniformly random point pair $\E_{x,z} c_{x,z} \le C(\eps+\sqrt\eps)$
+	for a constant $C \ge 1$ independent of all parameters.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-sandwich-povm, lem:qld-comm-cons,
+		lem:expanded-point-field-commutation, lem:distance-point-defect,
+		lem:qld-placement-completeness, def:consistency}
+	The commutation hypotheses and idempotence collapse each summand to
+	$\bra{W_b \psi} X^1_a X^2_a \ket{W_b \psi}$. The identity
+	$\sum_c \bra{w} P_c Q_c \ket{w} = \lVert w \rVert^2
+	- \tfrac12 \sum_c \lVert (P_c - Q_c) w \rVert^2$ for two projective
+	measurements, applied once with $w = W_b \psi$ and once with $w = \psi$,
+	gives the first display. For the second, write
+	$(X^1_a - X^2_a) W_b = W_b (X^1_a - X^2_a)
+	+ Z^2_b [X^1_a, Z^1_b] - Z^1_b [X^2_a, Z^2_b]$ and use that the $Z^i_b$
+	are contractions whose squares sum to the identity; splitting the three
+	terms costs the factor $3/2$.
+	In the chapter's setting the abstract hypotheses hold because operators on
+	opposite placements commute and each placement is multiplicative
+	(Lemma~\ref{lem:qld-placement-completeness}); the off-diagonal mass is the
+	consistency defect of Definition~\ref{def:consistency}, which
+	Lemma~\ref{lem:distance-point-defect} rewrites in the form just bounded.
+	The average of $c_{x,z}$ is controlled by item~1 of
+	Lemma~\ref{lem:qld-comm-cons} for the two distance terms and by
+	Lemma~\ref{lem:expanded-point-field-commutation} for the two commutator
+	terms.
+\end{proof}
+
+\begin{lemma}[Formalization support: orthonormalizing the sandwich point POVM]
+	\label{lem:qld-sandwich-orthonormalization}
+	\lean{MIPStarRE.QPBT.avgOver_rpow_quarter_le}
+	\lean{MIPStarRE.QPBT.baAaBipartition}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_projective_close_sandwich}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_projective_close_sandwich_alice}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.exists_projective_close_sandwich_bob}
+	\leanok
+	\uses{lem:qld-sandwich-consistency-defect, lem:ortho,
+		lem:ortho-explicit-constant, def:qld-opposite-bipartition,
+		def:povm-distance, def:symmetric-equivalents, def:expanded-state}
+	This formalization-only auxiliary is not a named statement of
+	\cite{Ji2020MIPStar}; it applies Lemma~\ref{lem:ortho} once for every
+	point pair, as in the proof of Lemma~4.10 of \cite{Ji2020MIPStar}
+	(\texttt{references/qpbt-paper/14\_analysis\_of\_the\_pauli\_basis\_test.tex},
+	lines~786--790).
+
+	First, a scalar fact: if the weights of a distribution $\mathcal D$ sum to
+	at most one and $b \ge 0$, then
+	$\E_{\mathcal D}\, b^{1/4} \le \bigl(\E_{\mathcal D}\, b\bigr)^{1/4}$.
+
+	Second, let $p_1, p_2$ be a directed pair of opposite placements, let
+	$R^{x,z}$ be the sandwich POVM of
+	Lemma~\ref{lem:qld-sandwich-povm} and let $c_{x,z}$ be the pointwise bound
+	of Lemma~\ref{lem:qld-sandwich-consistency-defect} for that pair. Given a
+	regrouping of the six registers that exhibits the registers of $p_1$ as
+	the first tensor factor and those of $p_2$ as the second, with the
+	remaining EPR pair as an unused third factor, there is a family
+	$\{\hat{Q}^{x,z}_{a,b}\}_{a,b \in \F_q}$ of projective measurements on the
+	expanded local space of the side of $p_1$, one for each point pair, with
+	\[
+		\E_{x,z} \sum_{a,b \in \F_q}
+		\bigl\lVert \bigl(\hat{Q}^{x,z}_{a,b} - R^{x,z}_{a,b}\bigr)_{p_1}
+		\ket{\hat\psi} \bigr\rVert^2
+		\;\le\; 220 \, \bigl(\E_{x,z} c_{x,z}\bigr)^{1/4} .
+	\]
+	Such a regrouping exists for the directed pair
+	$(\mathsf{A}\mathsf{A}', \mathsf{B}\mathsf{A}'')$, giving Alice's family,
+	and for the reversed pair
+	$(\mathsf{B}\mathsf{A}'', \mathsf{A}\mathsf{A}')$, which regroups the six
+	registers as
+	$\mathsf{B}\mathsf{A}'' \mid \mathsf{A}\mathsf{A}'(\mathsf{B}'\mathsf{B}'')$
+	and gives Bob's family.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-sandwich-consistency-defect, lem:ortho-explicit-constant,
+		def:qld-opposite-bipartition}
+	On the nonnegative reals $t^{1/4} = \sqrt{\sqrt t}$, so the scalar fact is
+	Jensen's inequality for the square root applied twice.
+	For the second part, read the expanded state in the given regrouping: it
+	stays a unit vector, operators at $p_1$ act on the first tensor factor and
+	operators at $p_2$ on the second, and reindexing preserves the squared
+	distances. For each fixed $(x,z)$ the consistency defect of the sandwich
+	POVM at $p_1$ against its copy at $p_2$ is at most $c_{x,z}$ by
+	Lemma~\ref{lem:qld-sandwich-consistency-defect}, so
+	Lemma~\ref{lem:ortho-explicit-constant} supplies a projective measurement
+	on the first factor at squared distance at most $220\, c_{x,z}^{1/4}$.
+	Choosing one for every point pair and averaging, the scalar fact turns
+	$\E_{x,z} 220\, c_{x,z}^{1/4}$ into $220 (\E_{x,z} c_{x,z})^{1/4}$.
+\end{proof}
+
 \begin{lemma}[Combined point measurements]
 	\label{lem:qld-4-10}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness}
@@ -1009,6 +1296,9 @@ assembled by Fourier averaging.
 	\leanok
 	\uses{lem:qld-comm-cons, lem:expanded-point-field-commutation,
 		lem:ortho, fact:triangle, lem:combined-point-distance-support,
+		lem:qld-epr-cross-swap, lem:qld-sandwich-povm,
+		lem:qld-sandwich-consistency-defect,
+		lem:qld-sandwich-orthonormalization,
 		def:expanded-point-measurement, def:symmetric-equivalents,
 		def:povm-distance}
 	The formal proof works with field-valued outcomes directly. On each
@@ -2123,11 +2413,13 @@ analyzed, together with candidate repairs, in
 	bounds the two fresh variables $\alpha$ and $\beta$.
 \end{proof}
 
-\begin{lemma}[Formalization support for completeness under register placement]
+\begin{lemma}[Formalization support for the algebra of register placements]
 	\label{lem:qld-placement-completeness}
 	\lean{MIPStarRE.QPBT.place_sum}
 	\lean{MIPStarRE.QPBT.sum_placed_measurement_eq_one}
 	\lean{MIPStarRE.QPBT.sum_placed_measurement_products_eq_one}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_mul}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_comm}
 	\leanok
 	\uses{def:symmetric-equivalents, def:povm-conventions}
 	This auxiliary lemma isolates the finite-sum identities used in
@@ -2148,6 +2440,15 @@ analyzed, together with candidate repairs, in
 		\sum_{(a,b)\in I\times J}(M_aN_b)_p=\Id.
 	\]
 	Neither projectivity nor commutation between the measurements is required.
+
+	The same placement is moreover multiplicative,
+	$(AB)_p = (A)_p (B)_p$ for all operators $A, B$ on the expanded local
+	space of the side of $p$, and operators on opposite placements commute:
+	if $p_1$ and $p_2$ are opposite, then
+	$(A)_{p_1} (B)_{p_2} = (B)_{p_2} (A)_{p_1}$ for every $A$ on the side of
+	$p_1$ and every $B$ on the side of $p_2$. Together with the identity
+	above this makes each placement a unital $*$-homomorphism, so it carries a
+	projector to a contraction.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -2160,6 +2461,10 @@ analyzed, together with candidate repairs, in
 		=\Big(\sum_a M_a\Big)\Big(\sum_b N_b\Big)=\Id;
 	\]
 	apply preservation of sums and identity once more.
+	Multiplicativity and opposite-placement commutation are read off from the
+	expression of each placement as a reindexed tensor factor: the two
+	operands of a product sit in the same factor, and two opposite placements
+	sit in different factors of one bipartition.
 \end{proof}
 
 \begin{lemma}[Formalization support for averaged affine coarse-graining]
