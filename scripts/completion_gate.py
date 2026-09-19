@@ -6,7 +6,7 @@ finished.  This script decides the mechanically checkable part of that
 definition: it runs no model, opens no network connection, and uses only the
 standard library, so its verdict is reproducible by anyone holding the commit.
 
-Six criteria, in the protocol's numbering:
+Seven criteria, in the protocol's numbering:
 
 * ``C1`` proof integrity — no ``sorry``/``admit`` site, project ``axiom``
   declaration, native evaluation or ``trustCompiler`` under the track's Lean
@@ -15,16 +15,20 @@ Six criteria, in the protocol's numbering:
   headline theorem (the axiom *values* come from the CI build: delegated).
 * ``C3`` paper-gap register — every row terminal.
 * ``C4`` blueprint — every ``\lean{}`` node marked ``\leanok`` or exempted.
-* ``C5`` comparator — challenge recorded, expected copy present, verified
-  library commit an ancestor-or-equal of the commit being declared.
+* ``C5`` comparator — challenge recorded, the *registered* expected copy
+  present and naming every headline theorem, verified library commit an
+  ancestor-or-equal of the commit being declared.
 * ``C6`` docs truthful — no stale nonzero open-site claim once ``C1`` holds.
+* ``C7`` artifact readiness — every file an ITP artifact submission needs is
+  committed (the snapshot build and its leak scan are delegated).
 
-``C2``, ``C4`` and ``C5`` each have a half this gate cannot decide without a
-Lean build — the axiom values, ``blueprint_leanok_axioms.py --ci`` and the
-comparator drift regeneration.  When their static half holds they report
-``DELEGATED`` rather than ``PASS``, so a completion comment can never quote a
-``PASS`` for a check nobody ran; ``DELEGATED`` does not count against the exit
-code, and a failing static half is still ``FAIL``.
+``C2``, ``C4``, ``C5`` and ``C7`` each have a half this gate cannot decide
+without running something — the axiom values, ``blueprint_leanok_axioms.py
+--ci``, the comparator drift regeneration and the artifact snapshot's leak
+scan.  When their static half holds they report ``DELEGATED`` rather than
+``PASS``, so a completion comment can never quote a ``PASS`` for a check nobody
+ran; ``DELEGATED`` does not count against the exit code, and a failing static
+half is still ``FAIL``.
 
 Shared rules, never restated here:
 
@@ -110,7 +114,10 @@ class Track:
     blueprint_chapters: tuple[str, ...]
     leanok_exemptions: str
     comparator_doc: str
+    expected_challenge: str
     truthful_docs: tuple[str, ...]
+    artifact_files: tuple[str, ...]
+    artifact_script: str
 
 
 TRACKS: dict[str, Track] = {
@@ -135,7 +142,16 @@ TRACKS: dict[str, Track] = {
         ),
         leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
+        expected_challenge="scripts/comparator/expected/qpbt/Challenge.lean.expected",
         truthful_docs=("README.md",),
+        artifact_files=(
+            "README.md",
+            "docs/QPBT-theorem-index.md",
+            "docs/DEVIATIONS.md",
+            "docs/ARTIFACT.md",
+            "LICENSE",
+        ),
+        artifact_script="scripts/make_artifact.sh",
     )
 }
 
@@ -530,12 +546,37 @@ def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
         return crit
 
     problems: list[str] = []
+    # The coverage claim is checked against the challenge artifact, never
+    # against the record alone: `covered-theorems` is written by hand in the
+    # same document, by the same session that wants to declare the track
+    # finished.  The registered expected copy (§6 of the protocol, `Track`
+    # below) is the object the drift check regenerates, so it is the one the
+    # record must name and the one the headline names must occur in.
     expected = record["expected-challenge"]
-    if not (root / expected).exists():
+    registered = track.expected_challenge
+    if expected != registered:
         problems.append(
             f"{track.comparator_doc}:{record_line}: expected challenge {expected} "
-            "does not exist"
+            f"is not the registered expected copy {registered}"
         )
+    path = root / registered
+    if not path.exists():
+        problems.append(
+            f"{registered}:0: registered expected challenge does not exist"
+        )
+    else:
+        # A generated challenge names each declaration of the closure by its
+        # fully-qualified name (the assembler's `-- source:` line), so the
+        # occurrence test needs no build.  What it proves is that the recorded
+        # challenge is about these theorems; that it *elaborates* to the same
+        # statements is the delegated drift check and the comparator run.
+        challenge = path.read_text(encoding="utf-8", errors="replace")
+        for name, _ in track.headline:
+            if name not in challenge:
+                problems.append(
+                    f"{registered}:0: headline theorem {name} does not occur in "
+                    "the registered expected challenge"
+                )
     covered = {name.strip() for name in record["covered-theorems"].split(",")}
     for name, _ in track.headline:
         if name not in covered:
@@ -567,9 +608,9 @@ def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
         crit.evidence = problems
         return crit
     crit.summary = (
-        f"challenge {record['challenge-repository']} covers all "
-        f"{len(track.headline)} headline theorems; verified at {pin[:12]}; "
-        "the drift check comes from CI"
+        f"challenge {record['challenge-repository']}; the registered expected "
+        f"copy names all {len(track.headline)} headline theorems; verified at "
+        f"{pin[:12]}; the drift check comes from CI"
     )
     return crit
 
@@ -623,6 +664,36 @@ def criterion_docs_truthful(root: Path, track: Track, integrity: Criterion) -> C
     return crit
 
 
+def criterion_artifact_readiness(root: Path, track: Track) -> Criterion:
+    """C7: every file an artifact submission needs is committed."""
+
+    crit = Criterion("C7", "artifact readiness", DELEGATED)
+    crit.notes.append(
+        f"`{track.artifact_script}` must produce a snapshot whose leak scan "
+        "passes; that run is not performed here"
+    )
+    required = (*track.artifact_files, track.artifact_script)
+    missing = [rel for rel in required if not (root / rel).exists()]
+    if missing:
+        # Fail closed: a missing artifact file is the whole point of this
+        # criterion, and naming the files is the to-do list it produces.
+        crit.status = FAIL
+        crit.summary = (
+            f"{len(missing)} of {len(required)} artifact file(s) missing: "
+            + ", ".join(missing)
+        )
+        crit.evidence = [
+            f"{rel}:0: artifact file registered for this track is missing"
+            for rel in missing
+        ]
+        return crit
+    crit.summary = (
+        f"all {len(required)} artifact file(s) present; the snapshot leak scan "
+        "comes from the artifact run"
+    )
+    return crit
+
+
 # ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
@@ -650,6 +721,7 @@ def run_check(root: Path, track: Track, commit: str) -> list[Criterion]:
         criterion_blueprint(root, track),
         criterion_comparator(root, track, commit),
         criterion_docs_truthful(root, track, integrity),
+        criterion_artifact_readiness(root, track),
     ]
 
 
@@ -670,8 +742,9 @@ def render_text(track: Track, commit: str, criteria: Sequence[Criterion]) -> str
     else:
         out.append("PASS: every mechanically checkable criterion holds")
     out.append(
-        "reminder: C2 axiom values, the blueprint --ci run and the comparator "
-        "drift check are delegated to CI" + (f" ({', '.join(delegated)})" if delegated else "")
+        "reminder: C2 axiom values, the blueprint --ci run, the comparator "
+        "drift check and the artifact snapshot's leak scan are delegated"
+        + (f" ({', '.join(delegated)})" if delegated else "")
     )
     return "\n".join(out)
 

@@ -12,8 +12,9 @@ done without caveat, and satisfies the lean comparator"*; earlier the same day,
 ## 1. Scope
 
 A **track** is a Lean subtree, the blueprint chapters describing it, its
-paper-gap register, its axiom-audit file, its blueprint exemption table and its
-comparator record. The per-track data is §6; QPBT is the only track registered
+paper-gap register, its axiom-audit file, its blueprint exemption table, its
+comparator record and its artifact file set. The per-track data is §6; QPBT is
+the only track registered
 today, but nothing here is QPBT-specific.
 
 **Declaring finished** means any public statement that the track is complete: a
@@ -22,7 +23,7 @@ issues, tagging a release, or a README/status page that says the track is done.
 
 ## 2. Finished without caveat
 
-A track is finished without caveat at a commit when all six criteria hold *at
+A track is finished without caveat at a commit when all seven criteria hold *at
 that commit*.
 
 **C1 — Proof integrity.** Zero term-level `sorry`, `admit`, project `axiom` or
@@ -84,10 +85,32 @@ ancestor-or-equal of the commit being declared finished, with no Lean change to
 the statement closure in between — which is exactly what a passing drift check
 proves.
 
+The coverage half of C5 is decided against the challenge, never against the
+record alone. The record's `expected-challenge` must be exactly the expected
+copy §6 registers for the track, and every headline theorem of §6 must occur in
+that file by its fully-qualified name — the name the assembler of
+`scripts/comparator/` writes for each declaration of the closure. A record that
+lists a headline theorem the registered expected copy never names fails C5:
+`covered-theorems` is written by hand in the same document, by the same session
+that wants to declare the track finished, so it may not be its own evidence.
+That the challenge *elaborates* to the same statements is the drift check and
+the comparator run, both delegated to CI.
+
 **C6 — Docs truthful.** No README, status page or estimate may advertise a
 nonzero open-site count once C1 holds. Every doc the track registers (§6) must
 exist: a registered doc that has been renamed or deleted fails C6 rather than
 being skipped, so the criterion can never report a green run over zero docs.
+
+**C7 — Artifact readiness.** "Done" means ready to be attached as an artifact
+to an ITP submission (owner, 2026-09-19), so every file such a submission needs
+is committed at the declared commit: the files §6 registers for the track —
+today `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`,
+`docs/ARTIFACT.md` and `LICENSE` — and the snapshot script
+`scripts/make_artifact.sh`. The gate checks that each of them exists and fails
+closed naming the missing ones; that the script *produces* a snapshot whose
+leak scan passes is a run, and is reported as delegated like C2, C4 and C5.
+A missing artifact file is main's to-do list, not a caveat that may be carried
+into a completion statement.
 
 ## 3. Where the comparator challenge lives
 
@@ -133,8 +156,9 @@ the gate is run by hand before a completion statement.
 `scripts/completion_gate.py` is python3, standard library only, no network and
 no model call. `check --track <t> [--repo-root R] [--commit C] [--json]` prints
 one PASS/FAIL line per criterion with `file:line` evidence, and exits 0 only
-when every mechanically checkable criterion passes. Criteria that need a Lean
-build (C2 axiom values, C4 `--ci` run, C5 drift regeneration) print as
+when every mechanically checkable criterion passes. Criteria with a half that
+needs a run the gate does not perform (C2 axiom values, C4 `--ci` run, C5 drift
+regeneration, C7 snapshot leak scan) print as
 `DELEGATED` once their static half holds — never as `PASS`, so no completion
 comment can quote a green line for a check nobody ran — while a failing static
 half is still `FAIL`. `DELEGATED` does not turn a failing run green and does
@@ -156,6 +180,8 @@ run of the same commit. Unit tests:
 | Comparator record | `docs/comparator.md`, block `track=qpbt` |
 | Expected challenge | `scripts/comparator/expected/qpbt/Challenge.lean.expected` |
 | Truthful docs (C6) | `README.md` |
+| Artifact files (C7) | `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`, `docs/ARTIFACT.md`, `LICENSE` |
+| Artifact script (C7) | `scripts/make_artifact.sh` |
 | Umbrella issues | 27, 168 |
 
 Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
@@ -168,4 +194,5 @@ Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
 | `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
 
 Adding a track means adding its row set here and its entry in the gate's
-`TRACKS` registry, in one commit.
+`TRACKS` registry, in one commit; a unit test reads this section and fails if a
+registry entry names a path these rows do not.

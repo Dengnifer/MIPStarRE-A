@@ -105,6 +105,19 @@ import Fixture
 assert_standard_axioms Fixture.good
 """
 
+# The shape a generated challenge has: a Mathlib-only prelude whose assembler
+# names each declaration of the closure by its fully-qualified name.
+EXPECTED_CHALLENGE = """\
+import Mathlib
+
+namespace Fixture
+
+-- source: MIPStarRE/Fixture/Good.lean:6-6  (Fixture.good)
+theorem good : True := sorry
+
+end Fixture
+"""
+
 
 def track_for(root: Path) -> gate.Track:
     return gate.Track(
@@ -116,7 +129,10 @@ def track_for(root: Path) -> gate.Track:
         blueprint_chapters=("blueprint/src/chapter/ch99_fixture.tex",),
         leanok_exemptions="docs/completion/fixture-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
+        expected_challenge="scripts/comparator/expected/fixture/Challenge.lean.expected",
         truthful_docs=("README.md",),
+        artifact_files=("README.md", "docs/ARTIFACT.md", "LICENSE"),
+        artifact_script="scripts/make_artifact.sh",
     )
 
 
@@ -150,8 +166,15 @@ class GateFixture(unittest.TestCase):
         write(self.root, "MIPStarRE/Fixture/AxiomAudit.lean", GOOD_AUDIT)
         write(self.root, "docs/paper-gaps/fixture-register.md", GOOD_REGISTER)
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", GOOD_CHAPTER)
-        write(self.root, "scripts/comparator/expected/fixture/Challenge.lean.expected", "-- x\n")
+        write(
+            self.root,
+            "scripts/comparator/expected/fixture/Challenge.lean.expected",
+            EXPECTED_CHALLENGE,
+        )
         write(self.root, "README.md", "Fixture track: 0 open sites.\n")
+        write(self.root, "docs/ARTIFACT.md", "How to run the artifact.\n")
+        write(self.root, "LICENSE", "Apache-2.0 fixture text.\n")
+        write(self.root, "scripts/make_artifact.sh", "#!/bin/sh\nexit 0\n")
 
         if shutil.which("git"):
             git(self.root, "init", "-q")
@@ -403,6 +426,44 @@ class ComparatorTests(GateFixture):
         crit = gate.criterion_comparator(self.root, self.track, self.head)
         self.assertEqual(crit.status, gate.FAIL)
 
+    def test_record_that_over_claims_coverage_fails(self) -> None:
+        """`covered-theorems` is hand-written; the challenge file decides."""
+        write(
+            self.root,
+            "scripts/comparator/expected/fixture/Challenge.lean.expected",
+            EXPECTED_CHALLENGE.replace("Fixture.good", "Fixture.other"),
+        )
+        crit = gate.criterion_comparator(self.root, self.track, self.head)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertTrue(
+            any("does not occur in" in line for line in crit.evidence),
+            crit.evidence,
+        )
+
+    def test_record_naming_another_expected_copy_fails(self) -> None:
+        """A record may only name the copy the track registers."""
+        doc = self.root / "docs/comparator.md"
+        doc.write_text(
+            doc.read_text(encoding="utf-8").replace(
+                "- expected-challenge: scripts/comparator/expected/fixture/"
+                "Challenge.lean.expected",
+                "- expected-challenge: scripts/comparator/expected/"
+                "Challenge.lean.expected",
+            ),
+            encoding="utf-8",
+        )
+        write(self.root, "scripts/comparator/expected/Challenge.lean.expected",
+              EXPECTED_CHALLENGE)
+        crit = gate.criterion_comparator(self.root, self.track, self.head)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("registered expected copy", crit.evidence[0])
+
+    def test_missing_expected_copy_fails(self) -> None:
+        (self.root / "scripts/comparator/expected/fixture/Challenge.lean.expected").unlink()
+        crit = gate.criterion_comparator(self.root, self.track, self.head)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("does not exist", crit.evidence[0])
+
     def test_pin_that_is_not_an_ancestor_fails(self) -> None:
         self.write_comparator(self.head)
         crit = gate.criterion_comparator(self.root, self.track, self.pin)
@@ -443,6 +504,33 @@ class DocsTruthfulTests(GateFixture):
         crit = gate.criterion_docs_truthful(self.root, self.track, integrity)
         self.assertEqual(crit.status, gate.FAIL)
         self.assertTrue(crit.evidence[0].startswith("README.md:1"))
+
+
+class ArtifactReadinessTests(GateFixture):
+    def test_complete_bundle_is_delegated_not_passed(self) -> None:
+        """No snapshot was built here, so C7 may not claim the leak scan ran."""
+        crit = gate.criterion_artifact_readiness(self.root, self.track)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertFalse(crit.counts_against_exit)
+        self.assertTrue(crit.notes)
+
+    def test_missing_files_fail_and_are_named(self) -> None:
+        (self.root / "docs/ARTIFACT.md").unlink()
+        (self.root / "LICENSE").unlink()
+        crit = gate.criterion_artifact_readiness(self.root, self.track)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("docs/ARTIFACT.md", crit.summary)
+        self.assertIn("LICENSE", crit.summary)
+        self.assertEqual(
+            {line.split(":")[0] for line in crit.evidence},
+            {"docs/ARTIFACT.md", "LICENSE"},
+        )
+
+    def test_missing_snapshot_script_fails(self) -> None:
+        (self.root / "scripts/make_artifact.sh").unlink()
+        crit = gate.criterion_artifact_readiness(self.root, self.track)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("scripts/make_artifact.sh", crit.summary)
 
 
 @unittest.skipUnless(shutil.which("git"), "git is required")
@@ -491,14 +579,25 @@ class DriverTests(GateFixture):
     def test_text_report_names_every_criterion(self) -> None:
         criteria = gate.run_check(self.root, self.track, self.head)
         text = gate.render_text(self.track, self.head, criteria)
-        for ident in ("C1", "C2", "C3", "C4", "C5", "C6"):
+        for ident in ("C1", "C2", "C3", "C4", "C5", "C6", "C7"):
             self.assertIn(ident, text)
 
     def test_text_report_lists_the_delegated_criteria(self) -> None:
         criteria = gate.run_check(self.root, self.track, self.head)
         delegated = [c.ident for c in criteria if c.status == gate.DELEGATED]
-        self.assertEqual(delegated, ["C2", "C4", "C5"])
-        self.assertIn("(C2, C4, C5)", gate.render_text(self.track, self.head, criteria))
+        self.assertEqual(delegated, ["C2", "C4", "C5", "C7"])
+        self.assertIn(
+            "(C2, C4, C5, C7)", gate.render_text(self.track, self.head, criteria)
+        )
+
+    def test_missing_artifact_file_fails_the_run(self) -> None:
+        (self.root / "LICENSE").unlink()
+        code, text = self.run_gate(
+            "check", "--track", "fixture", "--repo-root", str(self.root),
+            "--commit", self.head,
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("FAIL: C7", text)
 
 
 class RegisteredTrackTests(unittest.TestCase):
@@ -518,6 +617,24 @@ class RegisteredTrackTests(unittest.TestCase):
                     (REPO_ROOT / doc).exists(),
                     f"track {track.name} registers a truthful doc that does "
                     f"not exist: {doc}",
+                )
+
+    def test_registry_and_protocol_agree_on_the_registered_paths(self) -> None:
+        """§6 rows and the `TRACKS` entry are one commit's work, so they match."""
+        protocol = (REPO_ROOT / "local/protocols/completion.md").read_text(
+            encoding="utf-8"
+        )
+        for track in gate.TRACKS.values():
+            for rel in (
+                track.expected_challenge,
+                track.artifact_script,
+                *track.artifact_files,
+            ):
+                self.assertIn(
+                    f"`{rel}`",
+                    protocol,
+                    f"track {track.name} registers {rel}, which section 6 of "
+                    "the protocol does not name",
                 )
 
     def test_the_repository_still_carries_the_shared_rule(self) -> None:

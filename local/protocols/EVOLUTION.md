@@ -1615,13 +1615,19 @@ comparator"*, and, earlier the same day, *"i want zero sorry"*. Context:
 instruction)" and the 2026-09-19T12:49:41Z bullet added with this change.
 
 **Change:** new protocol `local/protocols/completion.md` ("definition of
-done"), naming the six criteria a formalization track must satisfy before it
+done"), naming the seven criteria a formalization track must satisfy before it
 may be declared finished — zero proof debt under the track's Lean root, a
 built axiom audit over the track's headline theorems, a terminal status on
 every paper-gap row, every `\lean{}` blueprint node marked or exempted with a
 reason, a recorded and drift-checked comparator challenge whose verified
-library commit is an ancestor-or-equal of the commit being declared, and
-truthful status docs. New model-free checker `scripts/completion_gate.py`
+library commit is an ancestor-or-equal of the commit being declared and whose
+registered expected copy names every headline theorem, truthful status docs,
+and the files an ITP artifact submission needs (C7: the registered artifact
+files and `scripts/make_artifact.sh`, whose snapshot leak scan is delegated).
+The coverage half of C5 is decided against the challenge file, not against the
+hand-written `covered-theorems` row of the same document, so no criterion
+validates a document against itself. New model-free checker
+`scripts/completion_gate.py`
 (`check --track qpbt`) with unit tests under `scripts/tests/`; it loads the
 sorry-site rule out of `results/telemetry/owner-tools/estimate.sh` and imports
 `DECL_RE`/`strip_lean_comments` from `scripts/audit_lean_axiom_declarations.py`
@@ -1640,4 +1646,5 @@ blocker. The gate is deliberately kept out of the blocking PR CI — `ci.sh` has
 no non-blocking step class and the gate must fail until the comparator
 challenge exists — so CI is unchanged by this entry. First run on
 `c6c8c2f2`: C1 and C6 pass (the QPBT tree is already free of sorry sites),
-C2–C5 fail, which is the remaining work list.
+C2–C5 fail, which is the remaining work list; C7 was added in the same PR and
+fails too, naming the artifact files that do not exist yet.
