@@ -1718,6 +1718,104 @@ assembled by Fourier averaging.
 	$(x,z)$ off the two line-point samples.
 \end{proof}
 
+\begin{lemma}[Formalization support: completing the point answers]
+	\label{lem:qld-completed-point-answers}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.consistencyDefect_postprocess_some_pair}
+	\leanok
+	\uses{def:consistency, def:povm-conventions, def:expanded-state}
+	Let $\iota \colon \F_q \to \F_q \cup \{\bot\}$ be the inclusion and write
+	$\iota \times \iota$ for the coordinatewise inclusion of
+	$\F_q \times \F_q$ into $(\F_q \cup \{\bot\})^2$. For two families
+	$\{A^s_{a,b}\}$, $\{B^s_{a,b}\}$ of measurements with outcomes in
+	$\F_q \times \F_q$, indexed by a sample $s$ and placed on two directed
+	registers, the postprocessings of $A$ and $B$ along $\iota \times \iota$
+	have the same consistency defect as $A$ and $B$ themselves.
+	This node and the two that follow it are auxiliary leaf support recorded
+	for tracking issue 485. No node of this blueprint uses them: the pasting
+	route to Lemma~\ref{lem:combined-line-measurement-consistency} runs
+	through Lemma~\ref{lem:qld-point-line-marginal-bounds} and
+	Lemma~\ref{lem:qld-line-conditioning-restoration} instead, and
+	no consumer is claimed for them here.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:consistency, def:povm-conventions}
+	The map $\iota \times \iota$ is injective, so each of its fibers over a
+	pair in its image is a single outcome and each fiber over a pair with an
+	absent coordinate is empty; the corresponding effects are therefore either
+	the original effects or zero, and the double outcome sum defining the
+	defect is unchanged term by term.
+\end{proof}
+
+\begin{lemma}[Formalization support: completed point self-consistency]
+	\label{lem:qld-completed-point-self-consistency}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_completed_linePoint_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_completed_orderedZX_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-completed-point-answers, def:line-point-dist,
+		def:consistency, def:expanded-state,
+		lem:qld-point-self-consistency-defect}
+	Let $(\ell_X, x)$ and $(\ell_Z, z)$ be drawn independently from the
+	line-point distribution of Definition~\ref{def:line-point-dist}, and let
+	$\hat{Q}^{x,z}$ be the joint point measurement of
+	Lemma~\ref{lem:qld-4-10} with both answers completed as in
+	Lemma~\ref{lem:qld-completed-point-answers}. On every pair of directed
+	opposite placements, the consistency defect of
+	$\big(\hat{Q}^{x,z}_{\iota a,\,\iota b}\big)$ against its copy on the
+	opposite placement, averaged over the product law of $(\ell_X,x)$ and
+	$(\ell_Z,z)$, is at most $\delta_Q$, and the same bound holds for the
+	exchanged answer pair $(\iota b, \iota a)$, ordered $Z$ then $X$.
+	This is a formalization-only consequence
+	of~\eqref{eq:qld-q-self-cons}, not that equation: its question law is the
+	product line-point law rather than the uniform law on pairs of points, and
+	its outcome alphabet is the completed one. The exchanged ordering is the
+	one that would be required if the X-Z-X sandwich were read as a pasting
+	instance with inner family the $Z$-line family and outer family the
+	$X$-line family. It completes nothing that the source leaves open.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-completed-point-answers, def:line-point-dist,
+		lem:qld-point-self-consistency-defect}
+	Completion leaves the defect unchanged
+	(Lemma~\ref{lem:qld-completed-point-answers}), so the claim reduces to the
+	line-point form already recorded in
+	Lemma~\ref{lem:qld-point-self-consistency-defect}, which
+	bounds~\eqref{eq:qld-q-self-cons} transported to the product law by
+	$\delta_Q$. Exchanging the two completed coordinates is a bijective
+	relabeling of the outcome set, under which the defect is invariant.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditioned completed point
+	self-consistency]
+	\label{lem:qld-conditioned-completed-point-self-consistency}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_conditioned_completed_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_conditioned_completed_orderedZX_defect_le}
+	\leanok
+	\uses{lem:qld-completed-point-self-consistency, def:line-point-dist,
+		def:consistency, def:expanded-state}
+	Let $\mu$ be the law of two independent line-point samples
+	$(\ell_X, x)$, $(\ell_Z, z)$ conditioned on the event that the direction
+	of $\ell_X$ is nonzero, and let $\rho > 0$ be the probability of that
+	event under the unconditioned product law. With the completed joint point
+	measurement of Lemma~\ref{lem:qld-completed-point-self-consistency}, the
+	consistency defect on every pair of directed opposite placements, averaged
+	over $\mu$, is at most $\delta_Q / \rho$, in both orderings of the
+	completed answer pair.
+	This is a formalization-only restriction of
+	Lemma~\ref{lem:qld-completed-point-self-consistency} to the question law
+	on which the pasting argument is run; it is neither~\eqref{eq:qld-q-self-cons}
+	nor the hypothesis~\eqref{eq:pasting-2} as printed, both of which average
+	over the unconditioned law with error $\delta_Q$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-completed-point-self-consistency}
+	The summand defining the defect at a fixed question is nonnegative, so
+	discarding the questions outside an event of probability $\rho$ and
+	renormalizing increases the average by a factor of at most $1/\rho$.
+\end{proof}
+
 \begin{lemma}[Formalization support: point-to-line marginal estimates]
 	\label{lem:qld-point-line-marginal-bounds}
 	\lean{MIPStarRE.QPBT.CombinedPointsWitness.marginal_X_linePoint_distance_le}
