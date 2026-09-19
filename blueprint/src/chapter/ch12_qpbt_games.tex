@@ -2907,6 +2907,131 @@ of the paper.
 		pair their conclusions.
 	\end{proof}
 
+	\subsection{Completion on a prescribed set of outcomes}
+
+	% Formalization-only auxiliaries for the completion step after
+	% eq:qld-sgg-mhat-sandwich in the proof of lem:qld-4-7, tracked by issue
+	% #279; see references/qpbt-paper/
+	% 14_analysis_of_the_pauli_basis_test.tex:1364-1402. They formalize no
+	% statement of lem:qld-4-7, and none of them supplies the source estimate on
+	% the mass outside the image of the polynomial combining map.
+
+	\begin{definition}[Completion of a measurement on its good outcomes]
+		\label{def:supported-completion}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.toGood}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.toGood_coe}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.badEffect}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.restrict}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete}
+		\leanok
+		\uses{def:povm-conventions, def:post-processing}
+		This construction is not named in the source article. Let $M$ be a
+		measurement with finite outcome set $\mathcal A$ on a finite-dimensional
+		space, let $G \subseteq \mathcal A$ be a decidable set of \emph{good}
+		outcomes, and fix a good outcome $a_0 \in G$. The \emph{bad effect} of
+		$M$ at $G$ is $M_{G^c} = \sum_{a \notin G} M_a$. The \emph{restriction}
+		of $M$ to $G$ is the sub-measurement $\{M_a\}_{a \in G}$. The
+		\emph{completion} of $M$ at $G$ with default $a_0$ is the post-processing
+		of $M$ along the map that fixes every good outcome and sends every bad
+		outcome to $a_0$; it is a complete measurement with outcome set $G$.
+	\end{definition}
+
+	\begin{lemma}[Structure of the completion]
+		\label{lem:supported-completion-structure}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.badEffect_eq_one_sub}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.badEffect_nonneg}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.badEffect_isStarProjection}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete_isProjective}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete_effect}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete_postprocess_effect}
+		\leanok
+		\uses{def:supported-completion, def:povm-conventions,
+			def:post-processing}
+		With the notation of Definition~\ref{def:supported-completion}:
+		$M_{G^c} = \Id - \sum_{a \in G} M_a$ and $M_{G^c} \geq 0$. If $M$ is
+		projective, then $M_{G^c}$ is a projection and the completion is again
+		projective. The completed effect at $a \in G$ is $M_a$ for $a \neq a_0$
+		and $M_{a_0} + M_{G^c}$ at the default outcome. After a further
+		relabeling $g$ of $G$, the completed effect at a label $b$ is the
+		corresponding effect of the relabeled restriction, plus $M_{G^c}$
+		exactly when $b = g(a_0)$.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{def:supported-completion, def:post-processing}
+		Splitting the complete sum of $M$ along $G$ and its complement gives the
+		complement identity, and positivity of the effects gives
+		$M_{G^c} \geq 0$. For projective $M$ the bad effect is one effect of the
+		binary post-processing that records badness, hence a projection, and
+		post-processing preserves projectivity. The two effect identities are the
+		fiber sums of the defining outcome map.
+	\end{proof}
+
+	\begin{lemma}[Relabelings agreeing on the good outcomes]
+		\label{lem:supported-completion-relabeling}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.abs_postprocess_consistency_left_sub_le}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.abs_postprocess_consistency_right_sub_le}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.abs_complete_consistency_left_sub_le}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.abs_complete_consistency_right_sub_le}
+		\leanok
+		\uses{def:supported-completion, def:consistency,
+			def:distance-state-quadratic-form, def:post-processing}
+		This formalization-only auxiliary charges a change of outcome labels to
+		the bad mass alone. Let $\mu$ be a probability distribution on a finite
+		question set, let $M$ be a measurement on one player's space, let
+		$\{N^x\}$ be measurements on the other player's space, and let
+		$\ket{\psi}$ be a state on the pair of spaces. If two question-dependent
+		outcome maps agree at every good outcome of $M$, then the two
+		consistency defects of the correspondingly post-processed $M$ against
+		$\{N^x\}$ differ by at most $q_\psi(M_{G^c} \ot \Id)$. The same bound
+		holds when one of the two post-processings is replaced by the completion
+		of $M$ relabeled by a map that agrees with the other one. Both player
+		orientations are covered, with the bad effect placed on the factor
+		carrying $M$. The two local spaces may differ, the measurements $N^x$
+		need not be projective, and $\ket{\psi}$ need not be normalized.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:supported-completion-structure,
+			def:distance-state-quadratic-form}
+		Expand both defects as averages over questions of sums over outcomes.
+		The terms at good outcomes coincide. Each remaining term is nonnegative
+		and at most the corresponding diagonal mass, so the total change is at
+		most the state mass of the bad effect. The completion is a
+		post-processing of $M$ that agrees with the given map at the good
+		outcomes, which gives the second form.
+	\end{proof}
+
+	\begin{lemma}[From the restriction to the completion]
+		\label{lem:supported-completion-restriction}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete_restrict_consistency_left_le}
+		\lean{MIPStarRE.QPBT.SupportedCompletion.complete_restrict_consistency_right_le}
+		\leanok
+		\uses{def:supported-completion, def:consistency,
+			def:distance-state-quadratic-form, def:post-processing}
+		In the setting of Lemma~\ref{lem:supported-completion-relabeling}, let
+		$g$ be a question-dependent relabeling of the good outcomes. Then the
+		consistency defect of the relabeled completion against $\{N^x\}$ is at
+		most the consistency defect of the relabeled restriction against
+		$\{N^x\}$, plus $q_\psi(M_{G^c} \ot \Id)$, in both player orientations.
+		This is the passage from a sub-measurement supported on the good
+		outcomes to a complete measurement. It does not bound the bad mass
+		itself; for the polynomial-pair measurement that bound is the separate
+		source estimate on the mass outside the image of the polynomial
+		combining map, which remains unproved.
+	\end{lemma}
+	\begin{proof}
+		\leanok
+		\uses{lem:supported-completion-structure,
+			def:distance-state-quadratic-form}
+		By Lemma~\ref{lem:supported-completion-structure} the relabeled
+		completed effects are the relabeled restricted effects, plus the bad
+		effect at the single label $g(a_0)$. Adding one fixed positive operator
+		at one outcome changes the defect by its state mass minus a nonnegative
+		overlap, so the defect grows by at most the state mass of the bad
+		effect.
+	\end{proof}
+
 \section{Conditionally linear functions and distributions}
 % Paper subsection label sec:cl kept for cross-reference fidelity.
 \label{sec:cl}
