@@ -574,7 +574,8 @@ class AccountRouterTests(unittest.TestCase):
             watchdog = root / 'watchdog'
             watchdog.mkdir()
             for name in ('account-mode', 'account-mode-both-preserved.json',
-                         'primary-key-capacity', 'primary-external-admission', 'max-codex'):
+                         'primary-key-capacity', 'primary-external-admission', 'max-codex',
+                         'primary-excluded-interactive-cwds.json', 'primary-external-reserved'):
                 (watchdog / name).write_text('0')
             (watchdog / 'max-codex-second').write_text('2')
             self.assertEqual(router.reserve(root, 'auto', 123, 0, True), 'second')
