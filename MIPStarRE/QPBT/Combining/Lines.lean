@@ -20,6 +20,7 @@ import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 import MIPStarRE.QPBT.Combining.Lines.FiberCollision
+import MIPStarRE.QPBT.Combining.Lines.NondegenerateFiberCollision
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
 import MIPStarRE.QPBT.Combining.Lines.RestrictedConsistency
 import MIPStarRE.QPBT.Combining.Lines.PastingRestoration

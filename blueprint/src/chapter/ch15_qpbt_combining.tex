@@ -1224,6 +1224,37 @@ assembled by Fourier averaging.
 	returns the value of the coefficient polynomial at $t$.
 \end{proof}
 
+\begin{lemma}[Formalization support: collision mass on a fixed nondegenerate line]
+	\label{lem:nondegenerate-fiber-line-collision}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_fiber_collision_le}
+	\leanok
+	\uses{def:line-point-dist, def:ideg-deg-polynomials}
+	Let $\ell_0$ be a line of $\F_q^m$ with direction $v_{\ell_0} \ne 0$ and
+	let $f \ne g$ be polynomials of degree at most $c$. Then
+	\[
+		\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\,\bone{f(x) = g(x)}\bigr]
+		\le \frac{c}{q}\,
+			\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\bigr],
+	\]
+	the expectation being over the line-point distribution
+	(Definition~\ref{def:line-point-dist}). Both sides are unnormalized
+	masses; when the fiber mass on the right is positive, dividing by it gives
+	the conditional collision probability at most $c/q$ required by
+	Lemma~\ref{lem:pasting}. The nonzero-direction hypothesis on $\ell_0$ is
+	part of the assertion. This is a formalization-only auxiliary for the
+	Schwartz--Zippel step in the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:affine-line-evaluation, lem:coefficient-polynomial-agreement,
+		cor:line-point-parameter-resampling}
+	Specialize the nonnegative weighted line-collision estimate to
+	$w(\ell)=\bone{\ell=\ell_0}$. Since $v_{\ell_0}\ne0$, the
+	nondegenerate-direction indicator is redundant on the support of this
+	weight, giving the stated fixed-fiber inequality.
+\end{proof}
+
 \begin{definition}[Formalization support: retained nondegenerate mass]
 	\label{def:nondegenerate-line-pasting-mass}
 	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
