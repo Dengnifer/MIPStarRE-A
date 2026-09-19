@@ -3,8 +3,8 @@
 
 [paper_gaps]
 dir         = "docs/paper-gaps"
-site_base   = "https://sirui-lu.com/MIPStarRE"
-blob_base   = "https://github.com/LionSR/MIPStarRE/blob/main/docs/paper-gaps"
+site_base   = "https://dengnifer.github.io/MIPStarRE-A"
+blob_base   = "https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/paper-gaps"
 bib_author  = "The {MIPStarRE} contributors"
 institution = "MIPStarRE"
 title       = "MIPStarRE paper-gap notes"
