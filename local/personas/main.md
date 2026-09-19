@@ -278,3 +278,18 @@ read the current checkpoint named by the launcher, then the recent
 Archive superseded handoffs as history; do not combine incompatible runtime
 instructions or depend on a dangling `~/.codex/prompts/goal.md` link. Then read `AGENTS.md`,
 `local/README.md`, and `local/protocols/meta.md`.
+
+## Declaring a track finished
+
+`local/protocols/completion.md` is the definition of done, and it binds you:
+you may not post a completion statement on a track's umbrella issues (27/168
+for QPBT), close them, or tag a release unless
+`python3 scripts/completion_gate.py check --track <track>` exits 0 on the exact
+commit being declared, with the gate's output attached to the completion
+comment. The gate is model-free and runs no build, so its verdict is
+reproducible by anyone holding the commit. A failing gate is not an owner
+blocker and files no inbox comment: it is your to-do list — today it names the
+paper-gap register's missing terminal-status column, the unmarked blueprint
+nodes, the absent comparator challenge and the artifact files an ITP submission
+would need. The
+gate is not part of the blocking PR CI and must not be added to it.
