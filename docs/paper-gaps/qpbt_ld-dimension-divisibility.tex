@@ -35,6 +35,9 @@
   indexed game is now established by an independent application of the low
   individual degree theorem.  That proof avoids the tensor-code import; it
   does not discharge either of these two source-import obligations.
+  Separately from both matters, the scalar sub-line claims are formalized
+  over that auxiliary directly indexed law rather than over the source law;
+  that scope record is Section~\ref{sec:auxiliary-subline-scalars}.
   \item \textbf{Estimated weight:} the directly indexed game, its soundness
   theorem, the reduction from general simultaneity to one, the correlated
   residue lift from the seed-indexed game, and the compression of the two
@@ -434,6 +437,107 @@ is then only approximately uniform, the identification with the external
 test fails exactly, and every distributional identity in the sub-line
 analysis acquires an error term; this amounts to re-proving the imported
 soundness theorem for a perturbed game and is not recommended.
+
+\section{Scalar estimates on the auxiliary subline law}
+\label{sec:auxiliary-subline-scalars}
+
+The source sub-line lemma \path{lem:qld-sublines} samples the extended line
+over $\F_q^{2m+2}$, so its distribution $D$ is exactly the seed-indexed
+object at which the divisibility condition of this note fails.  The scalar
+claims \path{claim:17-1} and \path{claim:17-3}, at lines 1140--1166 and
+1204--1239 of
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex} --- the
+blueprint nodes \path{lem:claim-17-1} and \path{lem:claim-17-3} --- are
+stated over that $D$.  Their formal counterparts are stated over a different
+law $D_{\rm dir}$, carried by \leanid{SubLineWitness} at line 209 of
+\doclink{MIPStarRE/QPBT/Combining/Witnesses.lean}: its extended-line
+marginal is the marginal of \leanid{directLinePointDist} (line 263 of
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Geometry.lean}), and its
+$X$ and $Z$ point marginals are recorded \emph{separately} as mixtures of
+the restricted line-point law \leanid{restrictedLinePointDist} (line 151 of
+the same witnesses file), built from \leanid{restrictedALineDist} and
+\leanid{restrictedDLineDist} at lines 379 and 387 of
+\doclink{MIPStarRE/QPBT/Combining/Defs.lean}, which are the refined
+restricted laws of blueprint \path{def:ith-restricted-line}.  That structure
+claims no equality for the joint conditional law of the pair of projected
+points.  Identifying the corresponding source push-forwards, including
+forgetting the residual seed on axis lines, remains open.  Existence of this
+auxiliary distribution does not identify it with $D$: sampling a coordinate
+index directly does not construct the seed-indexed extended-line questions
+at which the divisibility condition fails, which is the obstruction recorded
+here.
+
+\paragraph{The scalar conclusions.}
+Let $A_Q(\cdot)$, $A_{ZX}(\cdot)$ and $A_Z(\cdot)$ denote the averaged
+joint-point, ordered-product, and $Z$-point overlaps of these claims.  The
+source assertions are
+\[
+ |A_Q(D)-A_{ZX}(D)|=O(\sqrt{\delta_Q}),\qquad
+ |A_Z(D)-1|=O\bigl(\sqrt m\,
+   (\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4})\bigr).
+\]
+The established statements instead bound real parts over $D_{\rm dir}$: for
+projective joint point measurements and complete paired-line measurements
+satisfying the witness hypotheses, and any auxiliary subline witness,
+\[
+ |\operatorname{Re}A_Q(D_{\rm dir})-
+     \operatorname{Re}A_{ZX}(D_{\rm dir})|\le C\,\delta_Q^{1/2},\qquad
+ |\operatorname{Re}A_Z(D_{\rm dir})-1|\le
+ C\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
+\]
+The constant is existentially quantified in both formal statements; the
+recorded proofs supply the witness $C=2$, at lines 117 and 686 of
+\doclink{MIPStarRE/QPBT/Combining/Claims.lean}.  The evaluations use the
+completed answer alphabet, so an undefined evaluation contributes zero point
+effect.  The joint-point and paired-line witnesses retain their stated
+consistency and degree hypotheses; neither new transport data nor a reality
+assumption is imposed on these results.
+
+\paragraph{Which claims are real-part only.}
+The ordered product $M_ZM_X$ need not be Hermitian, so a real-part bound
+alone does not establish the first source assertion; the source
+correspondence of the three scalar claims is kept in
+\path{docs/paper-gaps/qpbt_subline-claims-line-marginal.tex}
+(\ghissue{474}) and is not restated here.  The \path{lem:claim-17-2}
+analogue over $D_{\rm dir}$ is not real-part only:
+\leanid{subline\_remove\_X\_factor\_re\_direct} and
+\leanid{subline\_remove\_X\_factor\_direct} in
+\doclink{MIPStarRE/QPBT/Combining/Claims.lean} establish the real-part and
+the complex-modulus form, the latter without a reality hypothesis.  The two
+real-part estimates displayed above are
+\leanid{subline\_replace\_by\_ordered\_product\_re\_direct} and
+\leanid{subline\_Z\_term\_near\_one\_re\_direct} in the same file.
+
+\paragraph{Remaining obligations.}
+Two obligations with distinct mathematical content remain for those two
+claims; neither is declared in the tree in any form.  A source-distribution
+transport must construct the seed-indexed law where it is defined and prove
+the corresponding push-forward, evaluation, and separate point-marginal
+identities; over the unrestricted source domain it still requires the
+definition-level obstruction above to be resolved.  A complex-modulus
+estimate for the ordered-product claim must be derived from positivity,
+completeness, the point marginal, and the same-placement distance, without
+an added reality hypothesis.  For the $Z$ overlap, positivity of the two
+commuting opposite-placement factors gives reality, which must also be
+recorded when passing from the real-part result to the source scalar
+statement.  These are described future proof targets, not assumed or
+axiomatized declarations.
+
+\paragraph{Blueprint bookkeeping.}
+The blueprint therefore leaves \path{lem:claim-17-1} and
+\path{lem:claim-17-3} pending and records the established auxiliary results
+as the separate nodes \path{lem:claim-17-1-re-direct},
+\path{lem:claim-17-2-direct-real}, \path{lem:claim-17-2-direct} and
+\path{lem:claim-17-3-re-direct} of
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, with their carrier,
+completed evaluations, measurement hypotheses, and their real-part or
+complex-modulus conclusions explicit; their Lean statements and proofs are retained.  This scope record
+introduces no new proof hole, and it changes nothing about the source-import
+obligations of Section~\ref{sec:import-obligations} (\ghissue{527}), nor
+about the separate obligations tracked in
+\path{docs/paper-gaps/qpbt_combined-lines-error-term.tex} (\ghissue{598})
+and \path{docs/paper-gaps/qpbt_symmetrization-attainment.tex}
+(\ghissue{524}).
 
 \section{Comparison with the blueprint}
 
