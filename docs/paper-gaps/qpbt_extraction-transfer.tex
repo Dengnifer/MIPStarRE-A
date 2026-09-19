@@ -212,9 +212,14 @@ issue~\#123 targets remain unfinished; the earlier attempt history is unchanged.
 The direct-carrier proof of the global constructor does not discharge the
 seed-indexed correspondence and direct-law restrictions documented in
 \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
-\ghissue{47} tracks the separate range-projection transfer needed
-by \path{pauli_soundness}; that theorem must be derived from the concrete data
-rather than stored in the witness.
+\ghissue{47} tracked the separate range-projection transfer needed
+by \path{pauli_soundness}; it is now derived from the concrete data rather
+than stored in the witness.  The two bipartite estimates of
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean} are applied to the
+extracted swap maps in
+\path{MIPStarRE/QPBT/Test/Soundness/OperatorTransfer.lean}, and the resulting
+bounds are composed into \path{pauli_soundness} through the
+projective-setting, Naimark, and error-domain steps.
 \ghissue{529} records the independent general range-projection and ancilla
 results. \ghissue{586} applies them to the extracted swap maps and both Pauli
 operator families; neither result establishes unrestricted soundness.
