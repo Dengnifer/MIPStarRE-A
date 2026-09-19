@@ -1604,3 +1604,40 @@ reviewer slots without weakening trusted prompts, full-diff read-only review,
 exact-head COMMENT evidence, MAIN's fail-closed status check, round caps, or
 the whitespace-sensitive carry rule. No throughput gain is asserted before
 observation.
+
+## 2026-09-19 - Definition of done and a model-free completion gate (#635)
+
+**Trigger:** the owner's policy decision of 2026-09-19 in the meta session,
+*"some protocol(s) in the workflow should ensure that when the project
+finishes, the formalization is done without caveat, and satisfies the lean
+comparator"*, and, earlier the same day, *"i want zero sorry"*. Context:
+`results/telemetry/events.md`, "2026-09-18T16:44Z - META TAKEOVER (owner
+instruction)" and the 2026-09-19T12:49:41Z bullet added with this change.
+
+**Change:** new protocol `local/protocols/completion.md` ("definition of
+done"), naming the six criteria a formalization track must satisfy before it
+may be declared finished — zero proof debt under the track's Lean root, a
+built axiom audit over the track's headline theorems, a terminal status on
+every paper-gap row, every `\lean{}` blueprint node marked or exempted with a
+reason, a recorded and drift-checked comparator challenge whose verified
+library commit is an ancestor-or-equal of the commit being declared, and
+truthful status docs. New model-free checker `scripts/completion_gate.py`
+(`check --track qpbt`) with unit tests under `scripts/tests/`; it loads the
+sorry-site rule out of `results/telemetry/owner-tools/estimate.sh` and imports
+`DECL_RE`/`strip_lean_comments` from `scripts/audit_lean_axiom_declarations.py`
+rather than restating either rule. Pointers added in `local/personas/main.md`
+and `local/README.md` (`AGENTS.md` is at 730 lines, past the ~700-line
+session-start budget of `CLAUDE.md`, so the pointer went to `local/README.md`).
+The protocol also records where the comparator challenge lives: a separate
+repository outside this one and outside the umbrella repository, as
+`LDT-comparator` already is; creating it is an owner action.
+
+**Expected effect:** "done" stops being a judgement call. The main session may
+not post a completion statement on issues 27/168, close a track's umbrella
+issues or tag a release unless the gate exits 0 on that exact commit with its
+output attached, and a failing gate is main's to-do list rather than an owner
+blocker. The gate is deliberately kept out of the blocking PR CI — `ci.sh` has
+no non-blocking step class and the gate must fail until the comparator
+challenge exists — so CI is unchanged by this entry. First run on
+`c6c8c2f2`: C1 and C6 pass (the QPBT tree is already free of sorry sites),
+C2–C5 fail, which is the remaining work list.
