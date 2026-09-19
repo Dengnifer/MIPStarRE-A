@@ -1596,3 +1596,4 @@
 {"ts": "2026-09-19T15:23:16+0900", "kind": "ci-build", "trigger": "ci.sh pr=442", "seconds": 204, "outcome": "success", "sha": "693541dad775464cf9de79d077301da076357ffd", "note": "branch issue-437-linepoint-same-placement"}
 {"ts": "2026-09-19T15:30:48+0900", "kind": "ci-build", "trigger": "ci.sh pr=493", "seconds": 22, "outcome": "success", "sha": "57c75f541dd24a69ea8f08eb4a2c5946f4d08b5d", "note": "branch issue-477-nondegenerate-pasting-resampling"}
 {"ts": "2026-09-19T15:33:15+0900", "kind": "ci-build", "trigger": "ci.sh pr=626", "seconds": 30, "outcome": "success", "sha": "cafe0b5727f50714a2842acf5628f367c2b3a949", "note": "branch issue-364-preserve-supplied-polynomial-consistency-20260919"}
+{"ts": "2026-09-19T15:48:08+0900", "kind": "ci-build", "trigger": "ci.sh pr=627", "seconds": 167, "outcome": "success", "sha": "05aedbaada3f87723f8177c8444d329c04e0f36a", "note": "branch issue-485-preserve-completed-point-support-20260919"}
