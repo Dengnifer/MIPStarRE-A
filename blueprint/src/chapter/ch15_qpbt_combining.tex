@@ -1382,6 +1382,62 @@ assembled by Fourier averaging.
 	the factor four, after summing over $b$ and averaging over $x,z$.
 \end{proof}
 
+\begin{lemma}[Formalization support: unrestricted error in the point witness domain]
+	\label{lem:combined-points-unrestricted-error}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.exists_error_of_projective}
+	\leanok
+	\uses{lem:qld-4-10, def:povm-distance, def:expanded-state}
+	This formalization-only auxiliary is not a named statement of the source
+	article, and it does not certify Lemma~\ref{lem:qld-4-10}. Let $S$ be a
+	projective setting and let $\{Q^{x,z}\}$ be any family of projective
+	measurements with outcomes in $\F_q \times \F_q$, one for each player side
+	and each pair $(x,z)$ of supplied points. Then there is a real number
+	$\delta$ such that $\{Q^{x,z}\}$ satisfies, at error $\delta$, all three
+	placement comparisons required of a combined-points witness. The witness
+	domain by itself therefore carries no quantitative content: $\delta$ is
+	obtained as an upper bound of a finite range of real numbers, and no
+	dependence of $\delta$ on the strategy error is asserted. This is the
+	obstruction to the unrestricted supplied-point domain recorded in
+	\cite{gap:qpbt_combined-lines-error-term}, for the supplied-point statement
+	at \texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:993-1034}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance}
+	There are finitely many ordered pairs of placements, and for each such pair
+	the three comparison quantities are real numbers. The pointwise maximum of
+	the three therefore has a finite range, which is bounded above; any upper
+	bound serves as $\delta$, and each of the three required inequalities
+	follows from the corresponding bound on the maximum.
+\end{proof}
+
+\begin{lemma}[Formalization support: linear answers rarely agree with a quadratic]
+	\label{lem:linear-quadratic-agreement}
+	\lean{MIPStarRE.QPBT.linear_quadratic_agreement_le}
+	\leanok
+	\uses{lem:coefficient-polynomial-agreement, def:ld-combining-parameters}
+	This formalization-only auxiliary is not a named statement of the source
+	article. Fix directly indexed parameters with field size $q$, let
+	$f = (f_0, f_1, f_2)$ be a coefficient answer of degree at most two whose
+	quadratic coefficient vanishes, so that $f$ evaluates to $f_0 + f_1 t$, and
+	let $\alpha \neq 0$ be a scalar. Then
+	\[
+		\Pr_{t}\bigl[\,f_0 + f_1 t = \alpha t^2\,\bigr] \leq \frac{2}{q}\;,
+	\]
+	the probability being over a uniformly random field element $t$. No
+	relation between the degree and $q$ is assumed, so the bound is not
+	truncated at one.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:coefficient-polynomial-agreement}
+	The coefficient answer of $\alpha T^2$ has quadratic coefficient
+	$\alpha \neq 0$, so it differs from $f$. The averaged collision estimate for
+	two distinct coefficient answers of degree at most two bounds the agreement
+	probability by $2/q$; that estimate is the uniform-parameter form of the
+	root count of Lemma~\ref{lem:coefficient-polynomial-agreement}.
+\end{proof}
+
 \section{Combined line measurements}
 
 \begin{theorem}[Resampling a line parameter]
@@ -1513,6 +1569,37 @@ assembled by Fourier averaging.
 	$v \neq 0$ forces $t = t'$. The parameter witnessing membership is
 	therefore unique, so completed evaluation is defined at $u_0 + t v$ and
 	returns the value of the coefficient polynomial at $t$.
+\end{proof}
+
+\begin{lemma}[Formalization support: collision mass on a fixed nondegenerate line]
+	\label{lem:nondegenerate-fiber-line-collision}
+	\lean{MIPStarRE.QPBT.linePointDist_nondegenerate_fiber_collision_le}
+	\leanok
+	\uses{def:line-point-dist, def:ideg-deg-polynomials}
+	Let $\ell_0$ be a line of $\F_q^m$ with direction $v_{\ell_0} \ne 0$ and
+	let $f \ne g$ be polynomials of degree at most $c$. Then
+	\[
+		\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\,\bone{f(x) = g(x)}\bigr]
+		\le \frac{c}{q}\,
+			\E_{(\ell,x)}\bigl[\bone{\ell = \ell_0}\bigr],
+	\]
+	the expectation being over the line-point distribution
+	(Definition~\ref{def:line-point-dist}). Both sides are unnormalized
+	masses; when the fiber mass on the right is positive, dividing by it gives
+	the conditional collision probability at most $c/q$ required by
+	Lemma~\ref{lem:pasting}. The nonzero-direction hypothesis on $\ell_0$ is
+	part of the assertion. This is a formalization-only auxiliary for the
+	Schwartz--Zippel step in the proof of Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--955}).
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:affine-line-evaluation, lem:coefficient-polynomial-agreement,
+		cor:line-point-parameter-resampling}
+	Specialize the nonnegative weighted line-collision estimate to
+	$w(\ell)=\bone{\ell=\ell_0}$. Since $v_{\ell_0}\ne0$, the
+	nondegenerate-direction indicator is redundant on the support of this
+	weight, giving the stated fixed-fiber inequality.
 \end{proof}
 
 \begin{definition}[Formalization support: retained nondegenerate mass]
@@ -1976,6 +2063,104 @@ assembled by Fourier averaging.
 	marginal of the line-point distribution is uniform and the two samples are
 	independent, so the average defining the defect is unchanged by reading
 	$(x,z)$ off the two line-point samples.
+\end{proof}
+
+\begin{lemma}[Formalization support: completing the point answers]
+	\label{lem:qld-completed-point-answers}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.consistencyDefect_postprocess_some_pair}
+	\leanok
+	\uses{def:consistency, def:povm-conventions, def:expanded-state}
+	Let $\iota \colon \F_q \to \F_q \cup \{\bot\}$ be the inclusion and write
+	$\iota \times \iota$ for the coordinatewise inclusion of
+	$\F_q \times \F_q$ into $(\F_q \cup \{\bot\})^2$. For two families
+	$\{A^s_{a,b}\}$, $\{B^s_{a,b}\}$ of measurements with outcomes in
+	$\F_q \times \F_q$, indexed by a sample $s$ and placed on two directed
+	registers, the postprocessings of $A$ and $B$ along $\iota \times \iota$
+	have the same consistency defect as $A$ and $B$ themselves.
+	This node and the two that follow it are auxiliary leaf support recorded
+	for tracking issue 485. No node of this blueprint uses them: the pasting
+	route to Lemma~\ref{lem:combined-line-measurement-consistency} runs
+	through Lemma~\ref{lem:qld-point-line-marginal-bounds} and
+	Lemma~\ref{lem:qld-line-conditioning-restoration} instead, and
+	no consumer is claimed for them here.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:consistency, def:povm-conventions}
+	The map $\iota \times \iota$ is injective, so each of its fibers over a
+	pair in its image is a single outcome and each fiber over a pair with an
+	absent coordinate is empty; the corresponding effects are therefore either
+	the original effects or zero, and the double outcome sum defining the
+	defect is unchanged term by term.
+\end{proof}
+
+\begin{lemma}[Formalization support: completed point self-consistency]
+	\label{lem:qld-completed-point-self-consistency}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_completed_linePoint_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_completed_orderedZX_linePoint_defect_le}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-completed-point-answers, def:line-point-dist,
+		def:consistency, def:expanded-state,
+		lem:qld-point-self-consistency-defect}
+	Let $(\ell_X, x)$ and $(\ell_Z, z)$ be drawn independently from the
+	line-point distribution of Definition~\ref{def:line-point-dist}, and let
+	$\hat{Q}^{x,z}$ be the joint point measurement of
+	Lemma~\ref{lem:qld-4-10} with both answers completed as in
+	Lemma~\ref{lem:qld-completed-point-answers}. On every pair of directed
+	opposite placements, the consistency defect of
+	$\big(\hat{Q}^{x,z}_{\iota a,\,\iota b}\big)$ against its copy on the
+	opposite placement, averaged over the product law of $(\ell_X,x)$ and
+	$(\ell_Z,z)$, is at most $\delta_Q$, and the same bound holds for the
+	exchanged answer pair $(\iota b, \iota a)$, ordered $Z$ then $X$.
+	This is a formalization-only consequence
+	of~\eqref{eq:qld-q-self-cons}, not that equation: its question law is the
+	product line-point law rather than the uniform law on pairs of points, and
+	its outcome alphabet is the completed one. The exchanged ordering is the
+	one that would be required if the X-Z-X sandwich were read as a pasting
+	instance with inner family the $Z$-line family and outer family the
+	$X$-line family. It completes nothing that the source leaves open.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-completed-point-answers, def:line-point-dist,
+		lem:qld-point-self-consistency-defect}
+	Completion leaves the defect unchanged
+	(Lemma~\ref{lem:qld-completed-point-answers}), so the claim reduces to the
+	line-point form already recorded in
+	Lemma~\ref{lem:qld-point-self-consistency-defect}, which
+	bounds~\eqref{eq:qld-q-self-cons} transported to the product law by
+	$\delta_Q$. Exchanging the two completed coordinates is a bijective
+	relabeling of the outcome set, under which the defect is invariant.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditioned completed point
+	self-consistency]
+	\label{lem:qld-conditioned-completed-point-self-consistency}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_conditioned_completed_defect_le}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.self_consistency_conditioned_completed_orderedZX_defect_le}
+	\leanok
+	\uses{lem:qld-completed-point-self-consistency, def:line-point-dist,
+		def:consistency, def:expanded-state}
+	Let $\mu$ be the law of two independent line-point samples
+	$(\ell_X, x)$, $(\ell_Z, z)$ conditioned on the event that the direction
+	of $\ell_X$ is nonzero, and let $\rho > 0$ be the probability of that
+	event under the unconditioned product law. With the completed joint point
+	measurement of Lemma~\ref{lem:qld-completed-point-self-consistency}, the
+	consistency defect on every pair of directed opposite placements, averaged
+	over $\mu$, is at most $\delta_Q / \rho$, in both orderings of the
+	completed answer pair.
+	This is a formalization-only restriction of
+	Lemma~\ref{lem:qld-completed-point-self-consistency} to the question law
+	on which the pasting argument is run; it is neither~\eqref{eq:qld-q-self-cons}
+	nor the hypothesis~\eqref{eq:pasting-2} as printed, both of which average
+	over the unconditioned law with error $\delta_Q$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-completed-point-self-consistency}
+	The summand defining the defect at a fixed question is nonnegative, so
+	discarding the questions outside an event of probability $\rho$ and
+	renormalizing increases the average by a factor of at most $1/\rho$.
 \end{proof}
 
 \begin{lemma}[Formalization support: point-to-line marginal estimates]
@@ -2742,7 +2927,7 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 	\label{thm:conditional-restricted-lines-consistency}
 	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
-	\uses{lem:restricted-line-mixture-bounds, def:consistency,
+	\uses{def:ith-restricted-line, def:consistency,
 		def:expanded-state}
 	There is a universal constant $C>0$ with the following property. Fix
 	admissible parameters, real errors $\eps,\delta_Q,\delta_P$, and a
@@ -2776,8 +2961,55 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 	integrand. The supplied unrestricted bound gives the result with $C=4$.
 \end{proof}
 
+% This lemma is not a statement of the source; it records the finite
+% mass bookkeeping of the proof-only conditioning step above.  It is a
+% root of the dependency graph: it uses no earlier blueprint entry.
+\begin{lemma}[Formalization support: conditioning and restoring a finite average]
+	\label{lem:restricted-average-mass-split}
+	\lean{MIPStarRE.QPBT.avgOver_restrict_mul_mass}
+	\lean{MIPStarRE.QPBT.avgOver_le_restrict_add_discarded_mass}
+	\leanok
+	Let $\mu$ be a finitely supported nonnegative weighting of a sample type.
+	Normalization is not assumed: neither linked declaration carries a
+	probability hypothesis, and $\mu$ ranges over the arbitrary finite
+	nonnegative weights of the formalized notion of distribution. Let $G$ be a
+	decidable event whose retained mass
+	$p = \mu(G) = \sum_{s \in G} \mu(s)$ is positive, and write
+	$\mu \mid G$ for the normalized restriction of $\mu$ to $G$, with weights
+	$\mu(s)/p$ on $G$ and $0$ off $G$; that restriction is a probability
+	distribution even when $\mu$ is not. Then, for every real-valued $f$,
+	\begin{equation}
+		\label{eq:restricted-average-normalization}
+		p \cdot \E_{\mu \mid G} f = \sum_{s \in G} \mu(s) f(s)\,,
+	\end{equation}
+	and if moreover $f(s) \le 1$ for every sample $s$,
+	\begin{equation}
+		\label{eq:restricted-average-restoration}
+		\E_{\mu} f \le p \cdot \E_{\mu \mid G} f + \mu(G^{c})\,.
+	\end{equation}
+	Here $\mu(G^{c}) = \sum_{s \notin G} \mu(s)$ is the mass discarded by the
+	conditioning; it is retained in full in
+	\eqref{eq:restricted-average-restoration} and no term is dropped. Since
+	$\mu$ need not be normalized, $p$ and $\mu(G^{c})$ are masses rather than
+	probabilities, and their sum is the total mass of $\mu$ rather than one.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The conditioned weights are $\mu(s)/p$ on $G$ and $0$ off $G$, which gives
+	\eqref{eq:restricted-average-normalization} termwise. For
+	\eqref{eq:restricted-average-restoration}, split the sum defining
+	$\E_\mu f$ along $G$ and its complement: the first part is the right-hand
+	side of \eqref{eq:restricted-average-normalization}, and the second is at
+	most $\mu(G^{c})$ because the weights are nonnegative and $f \le 1$.
+\end{proof}
+
 \begin{lemma}[The sub-line distribution]
 	\label{lem:qld-sublines}
+% No declaration link: the available construction uses the directly indexed
+% extended line-point law, not the seed-indexed law over F_q^(2m+2) of this
+% statement.  That construction is Definition~\ref{def:direct-subline-law}
+% and Lemma~\ref{lem:direct-subline-witness-exists}; transport to this statement
+% is the open obligation of \cite{gap:qpbt_ld-dimension-divisibility}.
 	\notready
 	\uses{def:line, def:line-point-dist, def:ith-restricted-line}
 	% Statement as in the source (references/qpbt-paper/
@@ -3271,8 +3503,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:claim-17-1-re-direct}
 	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
 	\leanok
-	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
-		lem:qld-sublines-uniform-point, lem:qld-xz-lines}
+	\uses{lem:overlap-gap-distance, lem:qld-4-10,
+		lem:qld-4-10-same-placement, lem:qld-sublines-uniform-point,
+		lem:qld-xz-lines, def:direct-subline-law}
 	There is a universal $C>0$ such that the following holds.
 	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law},
 	and let $Q,T$ satisfy the joint point and line measurement properties of
@@ -3315,8 +3548,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.concreteXPointOverlap}
 	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
 	\leanok
-	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
-		lem:qld-comm-line-cons, def:direct-subline-law}
+	\uses{def:concrete-paired-line-measurement, lem:qld-comm-line-cons,
+		def:direct-subline-law}
 	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law}.
 	For the concrete X-Z-X measurement, let
 	$A_X(\ell_X,\ell_Z,x)$ be the real overlap obtained by summing
@@ -3361,7 +3594,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:claim-17-3-re-direct}
 	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
 	\leanok
-	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement,
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10,
+		lem:qld-xz-lines, lem:qld-4-10-same-placement,
 		lem:overlap-gap-distance, def:direct-subline-law}
 	There is a universal $C>0$ such that the following holds.
 	Let $Q,T$ satisfy the joint point and line measurement properties of
@@ -4301,6 +4535,66 @@ proves the stated directly indexed auxiliary. Its comparison with the printed so
 to the separate question-law and completed-answer issues in
 \cite{gap:qpbt_ld-dimension-divisibility} and
 \cite{gap:qpbt_combined-lines-error-term}.
+\end{proof}
+
+% This lemma is not a statement of the source; it records the resampling
+% identity behind the coefficient-consistency estimate of the auxiliary above.
+\begin{lemma}[Formalization support: coefficient consistency under the directly indexed line laws]
+	\label{lem:direct-coefficient-resampling}
+	\lean{MIPStarRE.QPBT.directCoefficientEvaluationDefect}
+	\lean{MIPStarRE.QPBT.directJointCoefficientEvaluationDefect}
+	\lean{MIPStarRE.QPBT.consistencyDefect_directALine_coefficients_le_joint_add}
+	\lean{MIPStarRE.QPBT.consistencyDefect_directDLine_coefficients_le_joint_add}
+	\leanok
+	\uses{def:consistency, def:ld-game, def:admissible-size,
+		def:ideg-deg-polynomials}
+	Fix directly indexed parameters $D = (q,m,d,k)$ as in
+	Lemma~\ref{lem:qld-4-13-established}, a degree bound $\mathrm{deg}$, a
+	state $\psi$ with $\|\psi\| = 1$, and two measurement families $A$ and $B$
+	indexed by directly indexed lines whose outcomes are the coefficient
+	vectors of univariate polynomials of degree at most $\mathrm{deg}$.
+
+	For a line $\ell$ and a scalar $t$, the \emph{evaluated coefficient
+	defect} is the off-diagonal consistency integrand of $A^{\ell}$ against
+	$B^{\ell}$ on $\psi$, after postcomposing each with the evaluation of its
+	coefficient vector at $t$. Its \emph{joint} form at a line-point sample
+	$(\ell, u)$ is that quantity at the affine parameter of $u$ on $\ell$ when
+	the direction of $\ell$ is nonzero, and the full uniform average over
+	$t \in \F_q$ when the direction is zero; in the degenerate case the point
+	does not determine a parameter, so no distinguished parameter is selected
+	and the whole parameter average is retained.
+
+	Then, for the axis-parallel line marginal and for the diagonal line
+	marginal of the directly indexed line-point law alike, the consistency
+	defect of $A$ against $B$ over that marginal is at most the average of the
+	joint evaluated coefficient defect over the original line-point law, plus
+	$\mathrm{deg}/q$. The diagonal statement carries no nonzero-direction
+	restriction.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:sandwich-codeword-defect, lem:coefficient-polynomial-agreement,
+		def:consistency, def:ld-game, def:admissible-size,
+		def:ideg-deg-polynomials}
+	Comparing the coefficient outcomes with their evaluations at an independent
+	uniform parameter is the codeword step of
+	Lemma~\ref{lem:sandwich-codeword-defect}. Its collision hypothesis holds
+	with $\eps = \mathrm{deg}/q$: two distinct coefficient vectors of degree at
+	most $\mathrm{deg}$ agree at a uniformly random parameter with probability
+	at most $\mathrm{deg}/q$, which is the uniform-parameter form of the root
+	count of Lemma~\ref{lem:coefficient-polynomial-agreement}.
+	The resulting product law of a line marginal with an independent uniform
+	parameter is then reexpressed over the original line-point law: for a
+	nonzero direction the representative-parameter map identifies the two
+	averages termwise, and for a zero direction both sides are the uniform
+	parameter average of the same integrand. That reexpression is carried in
+	Lean by the axis and diagonal resampling identities of
+	\texttt{DirectLowDegree/Transport/LineResampling.lean} and the evaluated
+	defect identities of
+	\texttt{DirectLowDegree/ResampledCoefficientConsistency.lean}. These are
+	the directly indexed analogues of
+	Corollary~\ref{cor:line-point-parameter-resampling} and carry no blueprint
+	node of their own.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
@@ -5424,6 +5718,84 @@ Ground compression preserves every bipartite correlation on the padded state
 and commutes with outcome postprocessing. Apply
 Theorem~\ref{thm:qld-polynomial-consistency-from-points} to the compressed
 POVMs with $n=2m+2$ and $k=1$.
+\end{proof}
+
+% This lemma is not a statement of the source; it records the branch
+% accounting and the Naimark transport for a strategy assembled from supplied
+% measurements.  It does not construct those measurements.
+\begin{lemma}[Formalization support: passing value of the supplied extended-line strategy]
+	\label{lem:direct-passing-value}
+	\lean{MIPStarRE.QPBT.directPassingErrorEnvelope}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.seven_branch_rejections_le}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.strategy_value_ge_directPassingErrorEnvelope}
+	\lean{MIPStarRE.QPBT.ExtendedLineGame.projectiveStrategy_value_ge_directPassingErrorEnvelope}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-13-established, def:ld-combined-strategy,
+		def:tensor-product-value, thm:naimark}
+	Write $\mathrm{env}(x,y) = 3(\sqrt{x} + y)$ for the direct passing-error
+	function. Let $\mathcal S$ be a projective setting carrying combined point
+	measurements with error $\delta_Q$ as in Lemma~\ref{lem:qld-4-10} and
+	supplied extended-line measurements with error $\delta_{\mathrm{Line}}$ as
+	in Lemma~\ref{lem:qld-4-13-established}, and let $T$ be the strategy for
+	the directly indexed low individual degree game at parameters
+	$(q,2m+2,d,1)$ assembled from them. Then the seven potentially rejecting
+	question branches of $T$ reject with total probability at most
+	\[
+		\delta_Q + 16\delta_{\mathrm{Line}}
+		+ 4\sqrt{\delta_Q + 2\delta_{\mathrm{Line}}}
+		+ 5\,\frac{md}{q}\,,
+	\]
+	and consequently the value of $T$, which is one minus one ninth of that
+	total, satisfies
+	\[
+		\mathrm{val}(T) \ge 1 - \mathrm{env}\Big(
+			\delta_Q + \delta_{\mathrm{Line}},\ \frac{md}{q}\Big)\,.
+	\]
+	The strategy obtained from $T$ by Naimark dilation
+	(Theorem~\ref{thm:naimark}) satisfies the same lower bound.
+
+	Both measurement families are hypotheses here, not constructions, so this
+	lemma does not establish Lemma~\ref{lem:qld-4-7}: the questions are the
+	directly indexed ones, and transport to the seed-indexed question
+	distribution of Definition~\ref{def:ld-game} remains open; see
+	\cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:qld-4-10, lem:qld-4-13-established, def:ld-combined-strategy,
+		def:tensor-product-value, thm:naimark, lem:sandwich-codeword-defect,
+		lem:coefficient-polynomial-agreement}
+	The seven branches are estimated separately: the point/point branch by the
+	combined point consistency, the four mixed line/point branches by four
+	times the shared line/point estimate, and the two same-kind line branches
+	by the axis and the diagonal parameter-evaluation defects together with
+	the coefficient-collision loss $d/q + (2m+2)d/q \le 5md/q$. The two
+	same-kind branches reach those defects through the codeword step of
+	Lemma~\ref{lem:sandwich-codeword-defect}, whose collision hypothesis is
+	supplied by Lemma~\ref{lem:coefficient-polynomial-agreement} at degree $d$
+	for the axis branch and at degree $(2m+2)d$ for the diagonal branch. The
+	value of the strategy is one minus one ninth of the branch total; capping
+	the rejection probability by one and applying the capped scalar estimate
+	for $\mathrm{env}$ gives the stated bound. Naimark dilation preserves the
+	value of the strategy, hence the same bound.
+
+	In Lean the branch accounting is assembled from
+	\texttt{point\_point\_rejection\_le},
+	\texttt{mixed\_line\_point\_rejections\_le\_four\_mul} and the two
+	same-line bounds of
+	\texttt{ExtendedLineGame/SameLineCoefficientBound.lean}; the latter are
+	transported to the parameter-evaluation defects by the two
+	\texttt{parameter\_evaluated\_coefficient\_defect\_eq} identities and
+	bounded by \texttt{axis\_parameter\_evaluation\_defect\_le} and
+	\texttt{diagonal\_parameter\_evaluation\_defect\_le}. The collision
+	arithmetic $d/q + (2m+2)d/q \le 5md/q$ is
+	\texttt{extendedDirectLd\_coefficientCollisionLoss\_le\_five\_mul}, the
+	cap on the rejection probability is
+	\texttt{directLdRejectionProbability\_le\_one}, and the capped scalar
+	envelope step is
+	\texttt{seven\_branch\_capped\_error\_le\_directPassingErrorEnvelope}.
+	None of these auxiliaries carries a blueprint node of its own.
 \end{proof}
 
 % This remark records a defect of the source argument; it is not a statement

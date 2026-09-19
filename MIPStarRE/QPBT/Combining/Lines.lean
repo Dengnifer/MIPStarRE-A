@@ -12,14 +12,17 @@ import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingDistribution
 import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingMass
 import MIPStarRE.QPBT.Combining.Lines.PairStateConsistencyTransport
 import MIPStarRE.QPBT.Combining.Lines.RestrictedAverage
+import MIPStarRE.QPBT.Combining.Lines.NondegeneratePastingResampling
 import MIPStarRE.QPBT.Combining.Lines.SubLineMixture
 import MIPStarRE.QPBT.Combining.Lines.UniformAffineCollision
 import MIPStarRE.QPBT.Combining.Lines.WeightedCollision
 import MIPStarRE.QPBT.Combining.Lines.PointwiseDefect
+import MIPStarRE.QPBT.Combining.Lines.PointSelfConsistencyCompleted
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 import MIPStarRE.QPBT.Combining.Lines.FiberCollision
+import MIPStarRE.QPBT.Combining.Lines.NondegenerateFiberCollision
 import MIPStarRE.QPBT.Combining.Lines.ZeroDirectionMass
 import MIPStarRE.QPBT.Combining.Lines.RestrictedConsistency
 import MIPStarRE.QPBT.Combining.Lines.PastingRestoration
