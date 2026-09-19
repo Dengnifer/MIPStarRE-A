@@ -2438,7 +2438,7 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 	\label{thm:conditional-restricted-lines-consistency}
 	\lean{MIPStarRE.QPBT.restricted_lines_consistency_bound}
 	\leanok
-	\uses{lem:restricted-line-mixture-bounds, def:consistency,
+	\uses{def:ith-restricted-line, def:consistency,
 		def:expanded-state}
 	There is a universal constant $C>0$ with the following property. Fix
 	admissible parameters, real errors $\eps,\delta_Q,\delta_P$, and a
@@ -2967,8 +2967,9 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:claim-17-1-re-direct}
 	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_re_direct}
 	\leanok
-	\uses{lem:overlap-gap-distance, lem:qld-4-10-same-placement,
-		lem:qld-sublines-uniform-point, lem:qld-xz-lines}
+	\uses{lem:overlap-gap-distance, lem:qld-4-10,
+		lem:qld-4-10-same-placement, lem:qld-sublines-uniform-point,
+		lem:qld-xz-lines, def:direct-subline-law}
 	There is a universal $C>0$ such that the following holds.
 	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law},
 	and let $Q,T$ satisfy the joint point and line measurement properties of
@@ -3011,8 +3012,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\lean{MIPStarRE.QPBT.concreteXPointOverlap}
 	\lean{MIPStarRE.QPBT.exists_concreteXPointOverlap_deficit_le}
 	\leanok
-	\uses{lem:concrete-line-X-marginal, lem:restricted-line-mixture-bounds,
-		lem:qld-comm-line-cons, def:direct-subline-law}
+	\uses{def:concrete-paired-line-measurement, lem:qld-comm-line-cons,
+		def:direct-subline-law}
 	Let $D_{\mathrm{dir}}$ satisfy Definition~\ref{def:direct-subline-law}.
 	For the concrete X-Z-X measurement, let
 	$A_X(\ell_X,\ell_Z,x)$ be the real overlap obtained by summing
@@ -3057,7 +3058,8 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	\label{lem:claim-17-3-re-direct}
 	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_re_direct}
 	\leanok
-	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10-same-placement,
+	\uses{lem:restricted-line-mixture-bounds, lem:qld-4-10,
+		lem:qld-xz-lines, lem:qld-4-10-same-placement,
 		lem:overlap-gap-distance, def:direct-subline-law}
 	There is a universal $C>0$ such that the following holds.
 	Let $Q,T$ satisfy the joint point and line measurement properties of
