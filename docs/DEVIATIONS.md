@@ -23,7 +23,7 @@ record. The policy that governs when a note must be written is
 [`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). This page is a summary of
 those notes, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `c6c8c2f2`.
+Every row below was checked against `github/main` at commit `838c51b7`.
 Line numbers are from that commit.
 
 ## How to read the table
@@ -309,7 +309,7 @@ source obligation is openly outstanding, and it does **not** sit under
 | **What differs** | The established Lean result is the **real-part** estimate on the *directly indexed* subline law, with completed evaluations: `\|Re A_dir(T) − Re B_dir(T)\| ≤ C·m√δ_Line(ε)`. It assumes no joint-point or paired-line consistency witness. This is not yet the complex estimate on the source law. |
 | **Why** | Same directly indexed replacement as [c2](#c2-dimension-divisibility-in-the-classical-test-instantiation) — the seed-indexed subline law is not defined for the admissible parameters. The source distribution correspondence remains open. |
 | **Lean** | `subline_replace_by_ordered_product_re_direct`, `MIPStarRE/QPBT/Combining/Claims.lean:80`; `subline_remove_X_factor_re_direct`, `Claims.lean:448`; `subline_Z_term_near_one_re_direct`, `Claims.lean:665` |
-| **Blueprint** | `ch15_qpbt_combining.tex` lines 2439, 3277, 3596, 3896 — the source distribution correspondence is marked open at each |
+| **Blueprint** | `ch15_qpbt_combining.tex` lines 2443, 3281, 3600, 3900 — the source distribution correspondence is marked open at each |
 | **Gap note** | [`qpbt_subline-claims-line-marginal.tex`](paper-gaps/qpbt_subline-claims-line-marginal.tex) |
 | **Printed-claim status** | **unproved** on the source law (real part proved on the directly indexed law). The note's own verdict line reads `formalization-deviation / open-proof`. |
 
@@ -391,7 +391,7 @@ except as an explicit hypothesis. Comparator:
 git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/*.lean"
 ```
 
-At commit `c6c8c2f2` this returns eight lines: the two definitions, the
+At commit `838c51b7` this returns eight lines: the two definitions, the
 refutation `not_forall_printedSymmetricProjectiveAttainmentClaim`
 (`StrategyClasses.lean:952–954`, whose hit is on line 954), and five
 docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
@@ -400,8 +400,8 @@ docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
 
 **2. There is no proof debt.** No `sorry`, `admit`, `axiom` declaration,
 `native_decide`, `unsafe`, `@[extern]`, bodyless `opaque`, `implemented_by`, or
-`backward.*`/`respectTransparency` option occurs anywhere in the 669 Lean files
-under `MIPStarRE/`. (The repository holds 675 `.lean` files in all; the six
+`backward.*`/`respectTransparency` option occurs anywhere in the 670 Lean files
+under `MIPStarRE/`. (The repository holds 676 `.lean` files in all; the six
 outside `MIPStarRE/` are `MIPStarRE.lean`, `scripts/Checkdecls.lean`, the three
 `scripts/comparator/*.lean` helpers, and one archived telemetry audit module,
 none of which the development imports.) Comparator:
@@ -410,14 +410,21 @@ none of which the development imports.) Comparator:
 git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/*.lean"
 ```
 
-At `c6c8c2f2` this returns exactly two lines, both inside a docstring:
+At `838c51b7` this returns exactly two lines, both inside a docstring:
 `MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the successor-step
 theorem no longer has a direct `sorry`, and
 `MIPStarRE/QPBT/Combining/Apply.lean:57`, the docstring of
 `PrintedExtendedLinesWitnessClaim` recording that the former open `sorry` at
 that site was replaced by the unasserted `Prop`. There are **zero** real sites.
-(The regex does not match `sorryAx`, which occurs once more as prose, at
-`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean:187`.)
+(The regex does not match `sorryAx`. That identifier occurs at eleven sites
+under `MIPStarRE/`, none of them a use in a proof: once at
+`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean:187`, and
+ten times in the LDT axiom-audit module `MIPStarRE/LDT/Test/AxiomAudit.lean`
+(lines 40, 106, 115, 137, 166, 177, 191, 224, 248, 249). Nine of the eleven are
+prose; `AxiomAudit.lean:248–249` is executable metaprogram code — the
+`collectAxioms` guard that raises an error when an audited declaration depends
+on `sorryAx`. Comparator:
+`git grep -n "sorryAx" -- "MIPStarRE/*.lean"`.)
 
 **3. Axiom audit.** The intended check is
 
@@ -453,13 +460,34 @@ Not a deviation, but adjacent, and better answered here than discovered later.
 `pauli_soundness` bounds its conclusion by
 `deltaQld a b ε m d q = a·(m·d)^a·(ε^b + q^(−b) + 2^(−b·m·d))`
 (`MIPStarRE/QPBT/Test/SoundnessDefs.lean:35`) with `a, b` **existentially
-quantified** (`1 ≤ a`, `0 < b < 1`). No declaration currently shows
-`deltaQld < 1` in any regime. The shape is faithful — the source also only
-asserts that such constants exist — but a bound that is never known to beat the
-trivial one invites the question. Satisfiability of the hypotheses *does* hold:
-`introParams` (`MIPStarRE/QPBT/Test/CanonicalParams.lean:105`) constructs an
-`AdmissibleParams`, and `exists_spcc_value_one` gives a value-**1** strategy for
-every admissible `P`.
+quantified** (`1 ≤ a`, `0 < b < 1`), so no single numeric value can be read off
+the statement. Both halves of the question are answered by citable declarations
+in `MIPStarRE/QPBT/Test/NonVacuity.lean`, a corollary module that adds no
+mathematics of the source and no hypothesis:
+
+- **The hypotheses are satisfiable.** `AdmissibleParams` is inhabited —
+  `nonVacuousParams` (`NonVacuity.lean:85`), hence
+  `nonempty_admissibleParams` (`:101`) — and every admissible `P` carries a
+  strategy for `pauliBasisTest P` itself of value exactly `1`
+  (`exists_pauliBasisTest_strategy_value_one`, `:110`), transported from
+  `exists_spcc_value_one`. `introParams`
+  (`MIPStarRE/QPBT/Test/CanonicalParams.lean:105`) is a second explicit
+  admissible tuple.
+- **The conclusion is non-trivial.** Whatever constants the theorem produces,
+  along the explicit admissible family `nonVacuousParams n` the error at
+  `ε = 0` tends to `0` (`tendsto_deltaQld_nonVacuousParams`, `:231`), so for
+  every `η > 0` there are admissible parameters with
+  `deltaQld a b 0 P.m P.d P.q < η` — in particular below `1`
+  (`exists_admissibleParams_deltaQld_lt`, `:252`). The two halves are combined
+  in `pauli_soundness_nontrivial` (`:277`), which exhibits, for every `η > 0`,
+  admissible parameters together with a value-one strategy for which the
+  theorem's own state distance and both operator distances are strictly below
+  `η`.
+
+What this does **not** give is a uniform rate in `ε` at fixed parameters: the
+non-triviality is established at `ε = 0`, with `deltaQld` continuous in `ε` from
+the right there (`tendsto_deltaQld_eps_zero`, `:263`). The shape of the bound
+remains faithful — the source too only asserts that such constants exist.
 
 ---
 
