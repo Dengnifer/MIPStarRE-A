@@ -31,9 +31,14 @@ rigidity ingredients of *MIP\* = RE*. The headline results:
 `pauli_soundness` states: there are constants `a ≥ 1` and `0 < b < 1` such that
 for every admissible parameter tuple `P` and every `ε ≥ 0`, every strategy for
 the Pauli basis test with value at least `1 - ε` admits local isometries and an
-auxiliary state under which the strategy's state is within `deltaQld a b ε` of
-the ideal state, and both players' operator families are within `deltaQld a b ε`
-of the ideal Pauli observables. As in the source, the constants are
+auxiliary state under which the strategy's state is within
+`deltaQld a b ε P.m P.d P.q` of the ideal state, and both players' operator
+families are within the same bound of the ideal Pauli observables. The error
+scale carries the admissible sizes as explicit arguments —
+`deltaQld (a b ε : ℝ) (m d q : ℕ)`, `MIPStarRE/QPBT/Test/SoundnessDefs.lean:35` —
+because it is `a · (m·d)^a · (ε^b + q^(-b) + 2^(-b·m·d))`: the bound depends on
+the admissible sizes `m`, `d` and `q` as well as on `ε`, which is what the
+`q^(-b)` and `2^(-b·m·d)` terms express. As in the source, the constants are
 existentially quantified and no regime in which `deltaQld < 1` is exhibited;
 see [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
 
@@ -50,27 +55,53 @@ re-derive it.
 
 - **No proof debt.** There is no `sorry`, `admit`, `native_decide`, `unsafe`
   declaration or project-introduced `axiom` anywhere in the Lean sources under
-  `MIPStarRE/`. The word `sorry` occurs four times in the tree: twice in prose
-  inside docstrings, once in prose under `scripts/comparator/`, and once as
-  real syntax in `scripts/comparator/challenge_footer.lean`, which is a
+  `MIPStarRE/`. In the `.lean` files of the whole tree the word `sorry` occurs
+  exactly four times: twice in prose inside docstrings
+  (`MIPStarRE/LDT/Test/AxiomAudit.lean:81`,
+  `MIPStarRE/QPBT/Combining/Apply.lean:57`), once in prose in
+  `scripts/comparator/challenge_header.lean:14`, and once as real syntax in
+  `scripts/comparator/challenge_footer.lean:44` — the footer of a
   statement-only challenge template that is supposed to be unproved (see
-  "Independent checking" below).
+  "Independent checking" below). One further file is Lean-shaped without
+  carrying the `.lean` extension: `scripts/comparator/expected/Challenge.lean.expected`,
+  the checked-in expected assembly of that same template, repeats the prose
+  mention (line 14) and the template's `sorry` (line 802);
+  `scripts/comparator/README.md:14` mentions it in prose as well. These counts
+  are about source files: the string also
+  occurs throughout the development records under `results/telemetry/` and in
+  the documentation, so a bare `git grep sorry` over the whole tree returns
+  thousands of lines.
 - **Standard axioms only.** The headline theorems depend on `propext`,
-  `Classical.choice` and `Quot.sound` and on nothing else. This is checked in
-  the repository by [`MIPStarRE/QPBT/Test/AxiomAudit.lean`](MIPStarRE/QPBT/Test/AxiomAudit.lean),
-  which prints the axioms of each headline declaration when built.
+  `Classical.choice` and `Quot.sound` and on nothing else. There is no
+  dedicated Pauli-test axiom-audit module yet — the existing
+  [`MIPStarRE/LDT/Test/AxiomAudit.lean`](MIPStarRE/LDT/Test/AxiomAudit.lean)
+  covers the classical low-degree track only — so the check is made by asking
+  Lean directly; the command is under "Build and check" below. Repository-wide,
+  the pre-push gate (`.githooks/pre-push`) runs
+  [`scripts/blueprint_leanok_axioms.py`](scripts/blueprint_leanok_axioms.py)
+  `--ci`, which runs `#print axioms` on every blueprint declaration marked
+  `\leanok` and fails if any of them depends on `sorryAx`.
 - **Statement corrections are documented, not hidden.** Where the source
   paper's printed statement is wrong, or where its printed proof does not
   establish the printed claim, the deviation is recorded rather than papered
-  over. There are 20 Pauli-test gap notes (49 notes in total) under
+  over. There are 20 Pauli-test gap notes (45 notes in total; the directory
+  also holds `command.tex`, `template.tex`, `policy.tex` and
+  `proof-gap-protocol.tex`, which are not notes) under
   `docs/paper-gaps/`, summarized in the register linked below. Two printed
   claims that are not established are carried as `Prop`-valued definitions
   which state the source sentence without asserting it, so the printed form
   stays visible and stays unproved.
-- **Independent checking.** The statement can be re-checked outside this
-  repository with the comparator challenge at
-  [Dengnifer/QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator);
-  see [`docs/comparator.md`](docs/comparator.md).
+- **Independent checking.** There is no comparator challenge for
+  `pauli_soundness` yet. What can be re-checked outside this repository today
+  is the classical low individual degree test underneath: the statement
+  `MIPStarRE.LDT.Test.mainFormal` has a challenge repository at
+  [LionSR/LDT-comparator](https://github.com/LionSR/LDT-comparator), which
+  re-declares the statement against Mathlib alone and runs the Lean comparator
+  against this library; the setup is described in
+  [`docs/comparator.md`](docs/comparator.md), and the template it is assembled
+  from lives under `scripts/comparator/`. The analogous challenge for the
+  Pauli statement has not been built: `Dengnifer/QPBT-comparator` is so far a
+  placeholder holding only a licence and a toolchain pin.
 
 ## Build and check
 
@@ -83,11 +114,18 @@ lake build MIPStarRE.QPBT       # build the Pauli basis test development
 lake build MIPStarRE            # build everything (QPBT, LDT, Quantum)
 ```
 
-To reproduce the axiom claim:
+To reproduce the axiom claim, ask Lean for the axiom closure of a headline
+declaration:
 
 ```bash
-lake build MIPStarRE.QPBT.Test.AxiomAudit
+lake build MIPStarRE.QPBT.Test.Soundness
+printf 'import MIPStarRE.QPBT.Test.Soundness\n#print axioms MIPStarRE.QPBT.pauli_soundness\n' > AxiomCheck.lean
+lake env lean AxiomCheck.lean
 ```
+
+`propext`, `Classical.choice` and `Quot.sound` are the only axioms that should
+appear; in particular `sorryAx` must not. The same recipe applies to the other
+three headline declarations, with their own modules imported.
 
 To type-check a single file, which is the fastest iteration loop:
 
@@ -174,7 +212,7 @@ them, and they can be ignored when evaluating the proofs.
 | [`docs/ARTIFACT.md`](docs/ARTIFACT.md) | How to evaluate this repository as an artifact: what to check and in what order |
 | [`docs/QPBT-theorem-index.md`](docs/QPBT-theorem-index.md) | Every headline result: paper statement → Lean name → file:line → blueprint node → axioms |
 | [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) | Where the formalization departs from the printed source, and why |
-| [`docs/paper-gaps/qpbt-gap-register.md`](docs/paper-gaps/qpbt-gap-register.md) | The full gap register: 18 note rows, each linking a source statement, its blueprint label, the correction and the Lean status |
+| [`docs/paper-gaps/qpbt-gap-register.md`](docs/paper-gaps/qpbt-gap-register.md) | The gap register: 18 of the 20 Pauli-test notes, each linking a source statement, its blueprint label, the correction and the Lean status. `qpbt_combined-points-field-valued.tex` and `qpbt_subline-claims-line-marginal.tex` have no row yet |
 | [`docs/comparator.md`](docs/comparator.md) | Independent re-checking with the official Lean comparator |
 | [`blueprint/src/`](blueprint/src/) | The LaTeX blueprint: the informal argument, node by node, cross-referenced to Lean |
 | [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | PR and issue conventions, review checklist |
