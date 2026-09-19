@@ -49,6 +49,8 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 \label{sec:strat}
 
 \begin{definition}[Two-player one-round games]\label{def:game}
+	\lean{MIPStarRE.QPBT.Game}
+	\leanok
 	A \emph{two-player one-round game} $\mathfrak G$ is specified by a tuple $(\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ where
 	\begin{enumerate}
 		\item $\mathcal X$ and $\mathcal Y$ are finite sets, called the \emph{question alphabets},
@@ -59,6 +61,8 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 \end{definition}
 
 \begin{definition}[Tensor product strategies]\label{def:tensor-product-strategy}
+	\lean{MIPStarRE.QPBT.Strategy}
+	\leanok
 	\uses{def:game, def:povm-conventions}
 	A \emph{tensor product strategy} $\mathcal S$ for a game $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ is a tuple $(\ket{\psi}, A, B)$ where
 	\begin{itemize}
@@ -69,6 +73,8 @@ This chapter records the vocabulary in which the quantum Pauli basis test and it
 \end{definition}
 
 \begin{definition}[Tensor product value]\label{def:tensor-product-value}
+	\lean{MIPStarRE.QPBT.Strategy.value, MIPStarRE.QPBT.Game.value}
+	\leanok
 	\uses{def:tensor-product-strategy}
 	The \emph{tensor product value} of a tensor product strategy $\mathcal S = (\ket{\psi}, A, B)$ with respect to a game $\mathfrak G = (\mathcal X, \mathcal Y, \mathcal A, \mathcal B, \mu, D)$ is
 	\[
@@ -3066,6 +3072,13 @@ Throughout this section $V$ denotes the linear space $\F^n$ for some integer $n 
 \]
 and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, respectively. For a register subspace $V'$ of $V$, the symbol $x^{V'}$ denotes the projection of $x$ onto $V'$ parallel to the complementary register subspace (Definition~\ref{def:complementary}). Moreover, if $F \colon V' \to V'$ is a function and $x \in V$, we write $x^F$ for $F(x^{V'})$; for example, in the following definition $x^{L_1}$ is shorthand for $L_1(x^{V_1})$.
 
+% Exemption: the node is not marked \leanok. `IsCondLinearOn` records a
+% representation deviation in its docstring -- a positive syntax tree, because Lean's
+% strict-positivity checker rejects the direct inductive form of this definition --
+% and the node sits in the cluster of def:cl-dist, def:typed-cl-functions and
+% def:typed-cl-distributions, which are deliberately unmarked for the reasons given
+% at those nodes. Whether the representation deviation permits a statement-level
+% mark is a faithfulness decision and is left open here rather than taken silently.
 \begin{definition}[Conditionally linear functions]\label{def:cl-func}
 	\lean{MIPStarRE.QPBT.IsCondLinearOn, MIPStarRE.QPBT.IsCondLinear}\uses{def:register-subspace, def:complementary}
 	Let $V$ be $\F^n$ for some $n \ge 0$. For all integers $\ell \ge 0$ the collection of \emph{$\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is defined inductively as follows.

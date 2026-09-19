@@ -22,13 +22,20 @@ $\hat{e}_i$ has a $1$ in the $i$-th coordinate and $0$'s elsewhere, and
 $\mathrm{End}(V)$ for the set of linear maps from $V$ to itself.
 
 \begin{definition}[Register subspace]\label{def:register-subspace}
+	\lean{MIPStarRE.QPBT.registerSubmodule}
+	\leanok
 	A \emph{register subspace} $S$ of $V$ is a subspace that is the span of a
 	subset of the standard basis of $V$. Such a subspace is represented by an
 	indicator vector $u \in \{0,1\}^s$, where $s = \dim(V)$, via
 	$S = \mathrm{span}\{\hat{e}_i : u_i = 1\}$.
 \end{definition}
 
+% The dot product itself is Mathlib's `dotProduct`; the Lean declaration listed here
+% is the orthogonal-subspace half of the node, which is the part this development
+% defines for itself.
 \begin{definition}[Dot product and orthogonal subspace]\label{def:dot-product-orthogonal}
+	\lean{MIPStarRE.QPBT.dotOrthogonal}
+	\leanok
 	For two vectors $u = \sum_{i=1}^n u_i \hat{e}_i$ and
 	$v = \sum_{i=1}^n v_i \hat{e}_i$ in $V = \F^n$, the \emph{dot product} is
 	\[
@@ -84,7 +91,13 @@ $S = \mathrm{span}\{(1,1)\}$ has the distinct complements
 $\mathrm{span}\{(1,0)\}$ and $\mathrm{span}\{(0,1)\}$. Given a basis of $S$,
 one may nevertheless single out a \emph{canonical} complement.
 
+% Exemption: the node is not marked \leanok. The Lean `canonicalComplement` fixes the
+% pivot set by the intrinsic prefix-rank characterization instead of running the
+% reduced-row-echelon algorithm this node prescribes. The two agree by the
+% basis-independence paragraph below, but that identification is not itself formalized,
+% so a statement-level mark here would claim the algorithmic presentation as matched.
 \begin{definition}[Canonical complement]\label{def:canonical-complement}
+	\lean{MIPStarRE.QPBT.canonicalComplement}
 	\uses{def:register-subspace}
 	Let $\hat{E}$ be the standard basis of $V = \F^n$ and let
 	$F = \{v_1, \dots, v_m\} \subset V$ be a set of $m$ linearly independent
@@ -112,7 +125,13 @@ one may nevertheless single out a \emph{canonical} complement.
 	$S^\perp$.
 \end{definition}
 
+% Exemption: no formalization mark, for the reason recorded above
+% Definition~def:canonical-complement. `isCompl_registerSubmodule_canonicalComplement`
+% proves exactly the displayed conclusion for the prefix-rank complement, and its own
+% docstring places the equivalence with a reduced-row-echelon algorithm outside the
+% statement; the proof below is the row-echelon route and is not the route Lean takes.
 \begin{lemma}\label{lem:canonical-complement}
+	\lean{MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement}
 	\uses{def:canonical-complement, def:complementary}
 	Let $S$ be the span of linearly independent vectors
 	$F = \{v_1, \dots, v_m\} \subseteq V$, let $F^\perp$ be the canonical
@@ -218,12 +237,18 @@ $\F_q$, and $\F_p$ is its prime subfield.
 \end{definition}
 
 \begin{definition}[Admissible field size]\label{def:admissible-size}
+	\lean{MIPStarRE.QPBT.IsAdmissibleSize}
+	\leanok
 	A field size $q$ is \emph{admissible} if $q = 2^k$ for an odd integer $k$.
 \end{definition}
 
 Only fields $\F_{2^k}$ with $k$ odd are used in the analysis of the Pauli basis
 test.
 
+% Exemption: the node is not marked \leanok. The Lean `binTrace` is the $q = 2$
+% specialization of this node, the only one the Pauli basis test uses; the general
+% subfield trace $\tr_{q^k \to q}$ has no Lean counterpart. The scope difference is
+% recorded in gap:qpbt_characteristic-two-pauli-scope.
 \begin{definition}[Trace of $\F_{q^k}$ over $\F_q$]\label{def:subfield-trace}
 	\uses{def:subfields-kappa, def:admissible-size}
 	The \emph{trace of $\F_{q^k}$ over $\F_q$} is the map
@@ -407,6 +432,8 @@ error-correcting code with good distance, the \emph{low-degree code} (a special
 case of the generalized Reed--Muller code).
 
 \begin{definition}[Low-degree encoding]\label{def:low-degree-encoding}
+	\lean{MIPStarRE.QPBT.lowDegreeEncoding, MIPStarRE.QPBT.lowDegreeEnc}
+	\leanok
 	\uses{def:polynomials-degree}
 	Fix an integer $m \in \N$ and let $M = 2^m$. For every $y \in \{0,1\}^m$
 	define the $m$-variate multilinear polynomial over $\F_q$
@@ -429,6 +456,8 @@ case of the generalized Reed--Muller code).
 \end{definition}
 
 \begin{definition}[Indicator vector and linearity of the encoding]\label{def:indicator-vector}
+	\lean{MIPStarRE.QPBT.indicatorVec, MIPStarRE.QPBT.lowDegreeEnc_eq_dotProduct}
+	\leanok
 	\uses{def:low-degree-encoding, def:dot-product-orthogonal}
 	For $x \in \F_q^m$, the \emph{indicator vector} is
 	\[
@@ -574,6 +603,8 @@ representation is obtained as follows.
 \end{definition}
 
 \begin{definition}[EPR state]\label{def:EPR}
+	\lean{MIPStarRE.QPBT.eprState}
+	\leanok
 	\uses{def:lin-reg}
 	For a linear space $V$ over a finite field $\F$, the \emph{EPR state} on
 	$\C^V \ot \C^V$ is
@@ -719,7 +750,13 @@ representation is obtained as follows.
 	forces $C = 0$.
 \end{proof}
 
+% Exemption: the node is not marked \leanok. The two Lean declarations listed are the
+% characteristic-two specializations of eq:pauli-obs-proj and eq:pauli-inversion-0; the
+% node states both identities in general prime characteristic. Marking it would present
+% a scope-restricted theorem as the unrestricted source statement. The scope difference
+% is recorded in gap:qpbt_characteristic-two-pauli-scope, as for def:generalized-pauli.
 \begin{lemma}[Fourier expansion of Pauli observables]\label{lem:pauli-observable-expansion}
+	\lean{MIPStarRE.QPBT.tauObservable_eq_sum_pauliProj, MIPStarRE.QPBT.pauliProj_eq_avg_tauObservable}
 	\uses{def:generalized-pauli, def:subfield-trace}
 	For every integer $n \ge 1$, all $W \in \{X, Z\}$, and all $a \in \F_q^n$,
 	% Paper equation label kept on the display it names.
