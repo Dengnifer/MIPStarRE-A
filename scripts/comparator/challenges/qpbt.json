@@ -1,0 +1,20 @@
+{
+  "name": "qpbt",
+  "description": "Quantum Pauli basis test: soundness, its qubit form, and completeness.",
+  "imports": [
+    "MIPStarRE.QPBT.Test.Soundness",
+    "MIPStarRE.QPBT.Test.QubitForm",
+    "MIPStarRE.QPBT.Test.Completeness"
+  ],
+  "targets": [
+    "MIPStarRE.QPBT.pauli_soundness",
+    "MIPStarRE.QPBT.pauli_soundness_qubit",
+    "MIPStarRE.QPBT.exists_spcc_value_one"
+  ],
+  "header": "scripts/comparator/challenge_header_qpbt.lean",
+  "footer": "scripts/comparator/challenge_footer_qpbt.lean",
+  "expected": "scripts/comparator/expected/qpbt/Challenge.lean.expected",
+  "require_expected": false,
+  "extras": {},
+  "module_preludes": {}
+}

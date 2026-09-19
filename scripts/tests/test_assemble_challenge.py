@@ -4,12 +4,19 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ASSEMBLER = REPO_ROOT / "scripts" / "comparator" / "assemble_challenge.py"
+COMPARATOR = REPO_ROOT / "scripts" / "comparator"
+ASSEMBLER = COMPARATOR / "assemble_challenge.py"
+
+# the assembler imports its sibling `challenge_config`, which a script run
+# finds on `sys.path[0]` and a file-location import does not
+if str(COMPARATOR) not in sys.path:
+    sys.path.insert(0, str(COMPARATOR))
 
 _spec = importlib.util.spec_from_file_location("assemble_challenge", ASSEMBLER)
 assert _spec is not None and _spec.loader is not None

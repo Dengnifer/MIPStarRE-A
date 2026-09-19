@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the body of Challenge.lean from the extractor's TSV.
+"""Assemble the body of a comparator `Challenge.lean` from the extractor's TSV.
 
 Input: the TSV produced by ``extract_closure.lean`` (one declaration per row:
 name, module path, start line, end line).  For each declaration this script
@@ -8,11 +8,12 @@ point (tracking ``namespace``/``section``/``end`` lines), orders declarations
 topologically (module import rank, then line number), and emits the snippets
 grouped under merged namespace blocks with provenance comments.
 
-The ``EXTRAS``/``MODULE_PRELUDES`` tables carry elaboration context (attribute
-commands, ``CoeFun`` instances, ``variable``/``open`` blocks) that the kernel
-closure cannot see; the script fails if a table key no longer matches any
-extracted declaration.  See README.md in this directory for the full
-regeneration pipeline.
+The elaboration context that the kernel closure cannot see (attribute commands,
+``CoeFun`` instances, ``variable``/``open`` blocks) lives in the ``extras`` and
+``module_preludes`` tables of the selected challenge configuration under
+``challenges/``; the script fails if one of *that challenge's* keys no longer
+matches any extracted declaration.  See README.md in this directory for the
+full regeneration pipeline.
 """
 
 from __future__ import annotations
@@ -22,63 +23,18 @@ import re
 import sys
 from pathlib import Path
 
-# extra context commands needed for re-elaboration but absent from the kernel
-# closure (attributes, CoeFun instances that elaboration unfolds), keyed by the
-# declaration after which they must appear
-EXTRAS: dict[str, list[str]] = {
-    "MIPStarRE.LDT.FieldModel": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/ParametersBase.lean (attribute command)",
-        "attribute [instance_reducible, instance] FieldModel.instField FieldModel.instFintype",
-        "  FieldModel.instDecidableEq",
-    ],
-    "MIPStarRE.LDT.Polynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LowDegreePolynomial.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (Polynomial params) (fun _ => Point params → Fq params) :=",
-        "  ⟨Polynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.AxisLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (AxisLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨AxisLinePolynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.DiagonalLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (DiagonalLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨DiagonalLinePolynomial.toFun⟩",
-    ],
-}
-
-# per-module elaboration context (opens/variables) inserted once before the
-# module's first snippet, inside the given namespace stack, wrapped in
-# `section ... end`
-MODULE_PRELUDES: dict[str, tuple[list[str], list[str]]] = {
-    "MIPStarRE/LDT/Test/StrategyBiProj/Measurements.lean": (
-        ["MIPStarRE.LDT", "ProjStrat"],
-        [
-            "open MIPStarRE.Quantum",
-            "variable {params : Parameters} [FieldModel params.q]",
-            "variable {ιA : Type*} [Fintype ιA] [DecidableEq ιA]",
-            "variable {ιB : Type*} [Fintype ιB] [DecidableEq ιB]",
-        ],
-    ),
-    "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": (
-        ["MIPStarRE.Quantum"],
-        [
-            "open scoped Matrix.Norms.Elementwise",
-            "open WithLp",
-            "variable {d : Type*} [Fintype d]",
-        ],
-    ),
-}
+from challenge_config import (
+    DEFAULT_CHALLENGE,
+    ChallengeConfig,
+    ChallengeConfigError,
+    load_challenges,
+)
 
 Entry = tuple[str, str, int, int, list[str]]
+
+
+class StaleContextTables(ValueError):
+    """A challenge's ``extras``/``module_preludes`` key matches no declaration."""
 
 
 def source_range_with_context(
@@ -95,8 +51,15 @@ def source_range_with_context(
 
 
 class Assembler:
-    def __init__(self, repo_root: Path) -> None:
+    def __init__(
+        self,
+        repo_root: Path,
+        extras: dict[str, list[str]] | None = None,
+        module_preludes: dict[str, tuple[list[str], list[str]]] | None = None,
+    ) -> None:
         self.repo_root = repo_root
+        self.extras = extras or {}
+        self.module_preludes = module_preludes or {}
         self._file_cache: dict[str, list[str]] = {}
         self.out: list[str] = []
         self.cur_ns: list[str] = []
@@ -189,8 +152,8 @@ class Assembler:
             emitted_ranges.add((path, a))
             if path != prev_path:
                 self.close_prelude()
-                if path in MODULE_PRELUDES:
-                    base_ns, lines = MODULE_PRELUDES[path]
+                if path in self.module_preludes:
+                    base_ns, lines = self.module_preludes[path]
                     self.switch_ns(base_ns)
                     self.out.append("")
                     self.out.append(f"-- elaboration context of {path}")
@@ -202,10 +165,49 @@ class Assembler:
             self.out.append("")
             self.out.append(f"-- source: {path}:{a}-{b}  ({name})")
             self.out.extend(src)
-            self.out.extend(EXTRAS.get(name, []))
+            self.out.extend(self.extras.get(name, []))
         self.close_prelude()
         self.switch_ns([])
         return "\n".join(self.out)
+
+
+def read_entries(
+    asm: Assembler, tsv: Path
+) -> tuple[list[Entry], list[tuple[str, str]]]:
+    entries: list[Entry] = []
+    generated: list[tuple[str, str]] = []
+    for row in tsv.read_text(encoding="utf-8").splitlines():
+        if not row or "\t" not in row:
+            continue
+        name, path, a, b = row.split("\t")
+        if a == "NORANGE":
+            generated.append((name, path))
+            continue
+        start, end = int(a), int(b)
+        start, source = source_range_with_context(asm.get_lines(path), start, end)
+        entries.append((name, path, start, end, source))
+    return entries, generated
+
+
+def assemble(challenge: ChallengeConfig, root: Path, tsv: Path) -> str:
+    """Assembled body text; raises ``StaleContextTables`` on an unmatched key."""
+    asm = Assembler(root, challenge.extras, challenge.module_preludes)
+    entries, generated = read_entries(asm, tsv)
+
+    rank = asm.module_ranks({e[1] for e in entries})
+    entries.sort(key=lambda e: (rank.get(e[1], 999), e[2]))
+
+    body = asm.emit(entries, generated)
+
+    unused_extras = set(challenge.extras) - {name for name, *_ in entries}
+    unused_preludes = set(challenge.module_preludes) - {e[1] for e in entries}
+    if unused_extras or unused_preludes:
+        raise StaleContextTables(
+            f"stale context tables in {challenge.path} — "
+            f"unmatched extras keys: {sorted(unused_extras)}; "
+            f"unmatched module_preludes keys: {sorted(unused_preludes)}"
+        )
+    return body
 
 
 def main() -> int:
@@ -217,39 +219,22 @@ def main() -> int:
         default=Path.cwd(),
         help="repository root (default: current directory)",
     )
+    parser.add_argument(
+        "--challenge",
+        default=DEFAULT_CHALLENGE,
+        help=(
+            "challenge name under challenges/, or a path to a configuration "
+            f"file (default: {DEFAULT_CHALLENGE})"
+        ),
+    )
     args = parser.parse_args()
 
-    asm = Assembler(args.root)
-    entries: list[Entry] = []
-    generated: list[tuple[str, str]] = []
-    for row in args.tsv.read_text(encoding="utf-8").splitlines():
-        if not row or "\t" not in row:
-            continue
-        name, path, a, b = row.split("\t")
-        if a == "NORANGE":
-            generated.append((name, path))
-            continue
-        start, end = int(a), int(b)
-        start, source = source_range_with_context(asm.get_lines(path), start, end)
-        entries.append((name, path, start, end, source))
-
-    rank = asm.module_ranks({e[1] for e in entries})
-    entries.sort(key=lambda e: (rank.get(e[1], 999), e[2]))
-
-    body = asm.emit(entries, generated)
-
-    unused_extras = set(EXTRAS) - {name for name, *_ in entries}
-    unused_preludes = set(MODULE_PRELUDES) - {e[1] for e in entries}
-    if unused_extras or unused_preludes:
-        print(
-            "stale context tables — "
-            f"unmatched EXTRAS keys: {sorted(unused_extras)}; "
-            f"unmatched MODULE_PRELUDES keys: {sorted(unused_preludes)}",
-            file=sys.stderr,
-        )
+    try:
+        challenge = load_challenges([args.challenge])[0]
+        print(assemble(challenge, args.root, args.tsv))
+    except (ChallengeConfigError, StaleContextTables) as exc:
+        print(exc, file=sys.stderr)
         return 1
-
-    print(body)
     return 0
 
 
