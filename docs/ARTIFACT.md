@@ -83,25 +83,58 @@ paragraph. Budget several hours.
 
 ### 3. Check that nothing is assumed
 
-Build the axiom-audit module and read its output; it runs `#print axioms` on
-the headline theorems:
-
-```sh
-lake build MIPStarRE.QPBT.Test.AxiomAudit
-```
-
 The development claims to depend on no axioms beyond Lean's three standard
 ones — `propext`, `Classical.choice`, `Quot.sound` — and on no `sorry`,
-`admit`, `native_decide`, `unsafe` or `@[extern]` escape hatch. You can check
-the second half directly:
+`admit`, `native_decide`, `unsafe` or `@[extern]` escape hatch.
 
-```sh
-grep -rn --include='*.lean' -E '\b(sorry|admit|native_decide|axiom)\b' MIPStarRE/
+The check that settles the first half is Lean's own `#print axioms`: it reports
+the complete axiom closure of a declaration, and unlike a text search it cannot
+be misled by prose. Put this in a scratch file at the root of the unpacked
+snapshot and elaborate it with `lake env lean scratch.lean`:
+
+```lean
+import MIPStarRE.QPBT
+
+#print axioms MIPStarRE.QPBT.pauli_soundness
+#print axioms MIPStarRE.QPBT.pauli_soundness_qubit
+#print axioms MIPStarRE.QPBT.exists_spcc_value_one
+#print axioms MIPStarRE.QPBT.exists_ld_soundness
 ```
 
-(If `MIPStarRE/QPBT/Test/AxiomAudit.lean` is absent from your copy, the
-snapshot predates it; then run `#print axioms MIPStarRE.QPBT.Test.pauli_soundness`
-in a scratch file that imports `MIPStarRE.QPBT`.)
+Each of the four must report exactly `[propext, Classical.choice, Quot.sound]`.
+A `sorryAx` in a closure would mean the theorem is not proved; a project
+`axiom` would appear in the list under its own name.
+
+The snapshot also ships one standing axiom-audit module, for the classical
+low-individual-degree layer underneath the Pauli test. It runs `#print axioms`
+at build time and fails the build when a declaration's closure is not the one
+recorded beside it:
+
+```sh
+lake build MIPStarRE.LDT.Test.AxiomAudit
+```
+
+There is no such module for the QPBT layer yet — the scratch file above is the
+check for the four headline theorems.
+
+`#print axioms` does not report `native_decide`, `unsafe` or `@[extern]`, which
+move trust outside the kernel without leaving an axiom behind. A text search is
+the check for those, and for `axiom` declarations:
+
+```sh
+grep -rn --include='*.lean' -E '^[[:space:]]*axiom |\b(sorry|admit|native_decide|unsafe)\b|@\[extern' MIPStarRE/
+```
+
+**Expected output: a handful of matches, every one of them inside a comment or
+a docstring that discusses an escape hatch rather than using one.** At the
+commit named in `MANIFEST.txt` there are three: two are the word `sorry` in
+backticks (`MIPStarRE/QPBT/Combining/Apply.lean`, describing a source proof
+that was open in the paper, and `MIPStarRE/LDT/Test/AxiomAudit.lean`), and one
+is a docstring line in `MIPStarRE/QPBT/Test/QubitForm.lean` that happens to
+begin with the word "axiom". A match in code position — a bare `sorry` in
+tactic position, or a line that really begins a declaration with `axiom` —
+would be a genuine escape hatch. `grep` cannot tell prose from code, which is
+why the `#print axioms` run above is the check that counts.
 
 ### 4. Headline statements
 
@@ -186,6 +219,22 @@ What ships is decided twice, on purpose:
 - the `export-ignore` attributes in `.gitattributes` — applied by `git archive`
   itself, so a plain `git archive` or a GitHub source tarball is clean too.
 
-A path excluded in one should be excluded in the other. The leak scan is the
-backstop: it is what caught an upstream developer's home path in
-`docs/reports/` and got that directory excluded.
+A path excluded in one should be excluded in the other, and the second guard is
+the weaker of the two: it is a deny-list, so a new workflow-only file has to be
+added to it by hand, whereas the allow-list drops anything it has not been told
+about. `scripts/` is the one mixed directory — three entries ship, the roughly
+thirty workflow-only ones do not — and `git archive` does not descend into a
+directory it has been told to ignore, so a child of an ignored directory cannot
+be re-admitted. The deny-list therefore excludes the workflow-only scripts by
+glob (`scripts/*.py`, `scripts/*.sh`, `scripts/*.lean`, `scripts/tests/`) and
+re-admits the two shipped top-level files with `-export-ignore`;
+`scripts/comparator/` is never matched and ships under both guards. Checked on
+2026-09-19: a plain `git archive` of the repository and `scripts/make_artifact.sh`
+then produced the same 779 files, the snapshot adding only its `MANIFEST.txt`.
+
+The leak scan is the backstop: it is what caught an upstream developer's home
+path in `docs/reports/` and got that directory excluded. PDFs are covered too:
+any PDF in the snapshot has its text extracted with `pdftotext` and scanned
+with everything else, and the run stops rather than ship a PDF it could not
+read, so cutting a release with the gap notes built needs `poppler-utils`
+installed.

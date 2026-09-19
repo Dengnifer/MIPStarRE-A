@@ -8,7 +8,10 @@
 # the AI-workflow layer and of the third-party paper mirrors.
 #
 # Keep the two in step: a path excluded here and a path missing from the
-# script's INCLUDE list should describe the same snapshot.
+# script's INCLUDE list should describe the same snapshot.  This list is a
+# deny-list, so it is the weaker of the two guards: a new workflow-only path
+# joins a plain `git archive` until it is named here, while the script's
+# allow-list drops it on its own.
 
 # --- AI-workflow layer: the machinery that produced the development ---------
 local/                  export-ignore
@@ -23,6 +26,24 @@ home_page/              export-ignore
 AGENTS.md               export-ignore
 CLAUDE.md               export-ignore
 texra-blueprint.toml    export-ignore
+
+# --- workflow-only scripts --------------------------------------------------
+# `scripts/` is mixed: `scripts/comparator/`, `scripts/blueprint_leanok_axioms.py`
+# and this packaging script ship with the artifact, the rest only serve the
+# workflow layer.  `git archive` does not descend into an ignored directory, so
+# a child of `scripts/ export-ignore` could not be re-admitted; the workflow-only
+# scripts are excluded by glob instead and the two shipped top-level files are
+# re-admitted with `-export-ignore`.  `scripts/comparator/` is never matched.
+scripts/*.py            export-ignore
+scripts/*.sh            export-ignore
+scripts/*.lean          export-ignore
+scripts/tests/          export-ignore
+scripts/blueprint_leanok_axioms.py -export-ignore
+scripts/make_artifact.sh -export-ignore
+
+# --- repository plumbing ----------------------------------------------------
+.gitignore              export-ignore
+.gitattributes          export-ignore
 
 # --- workflow-only docs -----------------------------------------------------
 docs/campaign/                  export-ignore

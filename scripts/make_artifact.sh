@@ -20,6 +20,10 @@
 #
 # The script FAILS on a leak-scan hit.  That is the point: a snapshot that
 # leaks a home path, a key-shaped string or an e-mail address is not shipped.
+# The scan reads text, so any PDF in the snapshot has its text extracted with
+# `pdftotext` first; if that is not possible the run stops rather than ship a
+# binary nothing looked inside.  Generated PDFs are built after the
+# anonymization pass, because `sed` cannot reach inside a finished PDF.
 
 set -euo pipefail
 
@@ -119,6 +123,9 @@ Options:
   --no-pdf      skip the gap-note PDF build even when its Makefile is present.
   -h, --help    this text.
 
+Building the gap-note PDFs needs pdftotext (poppler-utils) as well, because a
+PDF in the snapshot is scanned for leaks through its extracted text.
+
 Exit status: 0 packaged, 1 usage or environment error, 2 leak scan failed.
 See docs/ARTIFACT.md for what ships, what does not, and why.
 USAGE
@@ -179,7 +186,33 @@ git -C "$REPO_ROOT" archive --format=tar "$COMMIT" -- "${PATHSPECS[@]}" "${EXCLU
   | tar -x -C "$SNAP"
 [ -n "$(find "$SNAP" -type f -print -quit)" ] || die "the snapshot is empty"
 
-# ---- 2. gap-note PDFs (optional; another packet adds the Makefile) --------
+# ---- 2. anonymize ---------------------------------------------------------
+
+# One pass over the tree; every later step reads this list instead of walking
+# the snapshot again.  `grep -qI .` keeps the text files: both the anonymizer
+# and the leak scan work on text, and step 4 adds the extracted text of any
+# binary PDF to the same list.
+TEXT_LIST="$WORK/text-files"
+find "$SNAP" -type f -print0 | while IFS= read -r -d '' file; do
+  if LC_ALL=C grep -qI . "$file" 2>/dev/null; then printf '%s\0' "$file"; fi
+done > "$TEXT_LIST"
+
+if [ "$ANONYMIZE" -eq 1 ]; then
+  log "anonymizing (${#ANON_RULES[@]} rules)"
+  SED_ARGS=()
+  for rule in "${ANON_RULES[@]}"; do
+    SED_ARGS+=(-e "s#${rule%% :: *}#${rule#* :: }#g")
+  done
+  xargs -0 -r sed -i "${SED_ARGS[@]}" < "$TEXT_LIST"
+  SOURCE_REPO=$(printf '%s' "$SOURCE_REPO" | sed "${SED_ARGS[@]}")
+fi
+
+# ---- 3. gap-note PDFs (optional; another packet adds the Makefile) --------
+
+# After the anonymization pass on purpose: these PDFs are typeset from TeX in
+# the snapshot, so building them here means they are typeset from the rewritten
+# TeX.  A PDF built before the pass would keep the identifying strings, which
+# the pass cannot reach inside a finished PDF.
 
 GAP_PDF="skipped: --no-pdf"
 if [ "$BUILD_PDF" -eq 1 ] && [ -f "$SNAP/docs/paper-gaps/Makefile" ]; then
@@ -196,26 +229,35 @@ elif [ "$BUILD_PDF" -eq 1 ]; then
   log "$GAP_PDF"
 fi
 
-# ---- 3. anonymize ---------------------------------------------------------
+# ---- 4. PDF text, so the leak scan is not blind to the binaries -----------
 
-# One pass over the tree; every later step reads this list instead of walking
-# the snapshot again.
-TEXT_LIST="$WORK/text-files"
-find "$SNAP" -type f -print0 | while IFS= read -r -d '' file; do
-  if LC_ALL=C grep -qI . "$file" 2>/dev/null; then printf '%s\0' "$file"; fi
-done > "$TEXT_LIST"
-
-if [ "$ANONYMIZE" -eq 1 ]; then
-  log "anonymizing (${#ANON_RULES[@]} rules)"
-  SED_ARGS=()
-  for rule in "${ANON_RULES[@]}"; do
-    SED_ARGS+=(-e "s#${rule%% :: *}#${rule#* :: }#g")
-  done
-  xargs -0 -r sed -i "${SED_ARGS[@]}" < "$TEXT_LIST"
-  SOURCE_REPO=$(printf '%s' "$SOURCE_REPO" | sed "${SED_ARGS[@]}")
+# The leak scan reads the text-file list built in step 2, which by construction
+# skips binaries; a PDF -- one built just above, or one tracked in git -- would
+# otherwise ship without anything looking inside it.  Its text is extracted
+# here and appended to the same list, under a path that maps back to the
+# shipped file.  If it cannot be extracted the run stops: an unscanned binary
+# is exactly what the header promises cannot ship.
+PDF_TEXT_DIR="$WORK/pdf-text"
+PDF_LIST="$WORK/pdfs"
+find "$SNAP" -type f -name '*.pdf' > "$PDF_LIST"
+PDF_COUNT=$(wc -l < "$PDF_LIST" | tr -d ' ')
+PDF_SCAN="none in the snapshot"
+if [ "$PDF_COUNT" -gt 0 ]; then
+  command -v pdftotext >/dev/null 2>&1 || die \
+    "$PDF_COUNT PDF(s) in the snapshot but pdftotext (poppler-utils) is not installed; the leak scan cannot read them"
+  while IFS= read -r pdf; do
+    rel=${pdf#"$SNAP"/}
+    out="$PDF_TEXT_DIR/$rel.txt"
+    mkdir -p "$(dirname "$out")"
+    pdftotext -q "$pdf" "$out" 2>/dev/null \
+      || die "cannot extract the text of $rel for the leak scan"
+    printf '%s\0' "$out" >> "$TEXT_LIST"
+  done < "$PDF_LIST"
+  PDF_SCAN="$PDF_COUNT PDF(s), text extracted with pdftotext and scanned"
+  log "$PDF_SCAN"
 fi
 
-# ---- 4. measurements ------------------------------------------------------
+# ---- 5. measurements ------------------------------------------------------
 
 # Lean *code* lines: blank lines and lines lying wholly inside a line, block,
 # doc or module-doc comment do not count.  The rule is the one behind the
@@ -285,7 +327,7 @@ else:
     print("unknown")
 ' "$SNAP/lake-manifest.json" 2>/dev/null) || MATHLIB_REV=unknown
 
-# ---- 5. import self-containment ------------------------------------------
+# ---- 6. import self-containment ------------------------------------------
 
 # Every `import MIPStarRE.…` in the snapshot must resolve to a file that is in
 # the snapshot; imports of Mathlib and friends are supplied by lake.
@@ -302,7 +344,45 @@ else
   SELF_CONTAINED="yes — every MIPStarRE import resolves inside the snapshot"
 fi
 
-# ---- 6. MANIFEST ----------------------------------------------------------
+# ---- 7. internal Markdown links -------------------------------------------
+
+# A page that ships must not point at a page that does not.  The `docs/`
+# carve-out is what makes this possible: a shipped page may link a workflow-only
+# page the allow-list drops.  This is a report, not a gate -- a link may
+# legitimately be waiting for a page another packet adds -- but it is recorded
+# in the MANIFEST so that nobody has to discover it by clicking.
+DEAD_LINKS=$(python3 - "$SNAP" <<'PY' || echo "check failed"
+import os, re, sys
+
+root = sys.argv[1]
+link = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
+dead = total = 0
+report = []
+for base, _dirs, names in os.walk(root):
+    for name in names:
+        if not name.endswith(".md"):
+            continue
+        path = os.path.join(base, name)
+        try:
+            text = open(path, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        for match in link.finditer(text):
+            target = match.group(1).split("#")[0].strip()
+            if not target or "://" in target or target.startswith("mailto:"):
+                continue
+            total += 1
+            if not os.path.exists(os.path.normpath(os.path.join(base, target))):
+                dead += 1
+                report.append("%s -> %s" % (os.path.relpath(path, root), target))
+print("%d dead of %d checked" % (dead, total))
+for line in sorted(set(report)):
+    print("  dead link: " + line, file=sys.stderr)
+PY
+)
+log "internal Markdown links: $DEAD_LINKS"
+
+# ---- 8. MANIFEST ----------------------------------------------------------
 
 FILE_COUNT=$(( $(find "$SNAP" -type f | wc -l | tr -d ' ') + 1 ))  # + this MANIFEST
 MANIFEST="$SNAP/MANIFEST.txt"
@@ -321,6 +401,8 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "toolchain         : $TOOLCHAIN"
   echo "mathlib revision  : $MATHLIB_REV"
   echo "gap-note PDFs     : $GAP_PDF"
+  echo "pdf leak scan     : $PDF_SCAN"
+  echo "internal links    : $DEAD_LINKS"
   echo "self-contained    : $SELF_CONTAINED"
   echo
   echo "Excluded from this snapshot, on purpose:"
@@ -336,7 +418,7 @@ MANIFEST="$SNAP/MANIFEST.txt"
 } > "$MANIFEST"
 printf '%s\0' "$MANIFEST" >> "$TEXT_LIST"
 
-# ---- 7. leak scan ---------------------------------------------------------
+# ---- 9. leak scan ---------------------------------------------------------
 
 log "leak scan over $FILE_COUNT files"
 ALLOW_RE=""
@@ -361,13 +443,14 @@ log "leak scan: $RAW raw hit(s), $(( RAW - KEPT )) allow-listed, $KEPT remaining
 if [ -s "$HITS.kept" ]; then
   echo "$PROG: LEAK SCAN FAILED — the snapshot was not packaged." >&2
   echo "$PROG: $KEPT hit(s); first 40, paths relative to the snapshot:" >&2
-  sed "s|^$SNAP/||" "$HITS.kept" | head -n 40 >&2
+  sed -e "s|^$PDF_TEXT_DIR/\(.*\)\.txt$|\1 (text extracted from the PDF)|" \
+      -e "s|^$SNAP/||" "$HITS.kept" | head -n 40 >&2
   echo "$PROG: fix the source, or add a LEAK_ALLOW entry WITH a reason." >&2
   exit 2
 fi
 log "leak scan clean"
 
-# ---- 8. package -----------------------------------------------------------
+# ---- 10. package ----------------------------------------------------------
 
 TARBALL="$OUT_DIR/$NAME.tar.gz"
 tar -czf "$TARBALL" -C "$WORK" "$NAME"
