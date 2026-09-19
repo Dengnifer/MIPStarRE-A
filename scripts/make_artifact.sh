@@ -13,10 +13,17 @@
 #      clean too.
 #
 # Excluded on purpose: the AI-workflow layer (results/telemetry/, local/,
-# .github/, .githooks/, workflow-only scripts and docs) and the third-party
-# paper mirrors under references/, whose redistribution terms are unsettled.
-# Dropping the workflow layer also removes every tracked file that mentions the
-# build host's home path, without rewriting history.
+# .github/, .githooks/, workflow-only scripts and docs).  Dropping it also
+# removes every tracked file that mentions the build host's home path, without
+# rewriting history.
+#
+# INCLUDED on purpose: the third-party paper sources under references/ (owner
+# decision, 2026-09-19, following the companion LDT repository, which keeps its
+# paper sources in the public repository).  They are what the Lean docstrings,
+# the theorem index and the deviations page cite by `<file>.tex:<lines>`, so a
+# snapshot without them cannot be checked against its sources.  They are
+# third-party material kept for reference and are NOT covered by this
+# repository's own licence; the MANIFEST and docs/ARTIFACT.md say so.
 #
 # The script FAILS on a leak-scan hit.  That is the point: a snapshot that
 # leaks a home path, a key-shaped string or an e-mail address is not shipped.
@@ -42,6 +49,7 @@ INCLUDE=(
   lean-toolchain
   blueprint/src
   docs
+  references
   README.md
   LICENSE
   scripts/comparator
@@ -77,12 +85,21 @@ LEAK_PATTERNS=(
   '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 )
 
-# `<regex> :: <reason>`: a hit is forgiven only when it matches one of these
-# AND the reason says why that is safe.  `::` separates the two because a
-# regex may well contain `|`.  Keep the list short and the reasons honest —
-# every entry is something a reviewer may read in the shipped files.
+# `<regex> :: <reason>`: a hit is forgiven anywhere in the snapshot when the
+# TEXT THAT MATCHED a leak pattern also matches this regex, and the reason says
+# why that is safe.  `::` separates the two because a regex may well contain
+# `|`.  Keep the list short and the reasons honest — every entry is something a
+# reviewer may read in the shipped files.
 LEAK_ALLOW=(
   '@example\.(com|org|invalid) :: documentation placeholder domain reserved by RFC 2606'
+)
+
+# `<path regex> :: <text regex> :: <reason>`: the same, but forgiven ONLY in the
+# files whose snapshot-relative path matches.  Scoping is the whole point — a
+# blanket entry for the entry below would stop the scan catching a real address
+# of ours anywhere in the development, which is exactly what it is for.
+LEAK_ALLOW_IN=(
+  '^references/ :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: corresponding-author addresses printed in the source papers themselves; third-party material reproduced as published, not a contact address of this development'
 )
 
 # --------------------------------------------------------------------------
@@ -408,11 +425,15 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "Excluded from this snapshot, on purpose:"
   echo "  results/telemetry/, local/, .github/, .githooks/, audits/, home_page/,"
   echo "  docbuild/ and the workflow-only scripts and docs — the AI-workflow"
-  echo "  layer that produced the development but is not part of it;"
-  echo "  references/ — mirrors of five third-party papers whose redistribution"
-  echo "  terms are unsettled.  Docstrings cite those papers by arXiv identifier;"
-  echo "  the file:line locators in them refer to the mirror as it stood at the"
-  echo "  source commit above, in the source repository."
+  echo "  layer that produced the development but is not part of it."
+  echo
+  echo "Third-party material included, on purpose:"
+  echo "  references/ — the TeX sources of the five source papers.  The Lean"
+  echo "  docstrings, the theorem index and the deviations page cite them as"
+  echo "  references/<paper>/<file>.tex:<lines>, so every locator resolves inside"
+  echo "  this snapshot.  These files are the work of their own authors, kept"
+  echo "  here for reference; they are NOT covered by this repository's licence,"
+  echo "  and their own terms govern any further use or redistribution."
   echo
   echo "See docs/ARTIFACT.md for what this contains and how to verify it."
 } > "$MANIFEST"
@@ -421,31 +442,48 @@ printf '%s\0' "$MANIFEST" >> "$TEXT_LIST"
 # ---- 9. leak scan ---------------------------------------------------------
 
 log "leak scan over $FILE_COUNT files"
-ALLOW_RE=""
-for entry in "${LEAK_ALLOW[@]}"; do
-  ALLOW_RE="${ALLOW_RE:+$ALLOW_RE|}${entry%% :: *}"
+
+RAW_HITS="$WORK/leaks-raw.txt"
+: > "$RAW_HITS"
+for pattern in "${LEAK_PATTERNS[@]}"; do
+  xargs -0 -r grep -HnoE "$pattern" < "$TEXT_LIST" >> "$RAW_HITS" 2>/dev/null || true
 done
 
+# `<path>:<line>:<matched text>`, with the path made snapshot-relative and the
+# extracted text of a PDF mapped back to the PDF that ships — BEFORE any
+# filtering, because both allow-lists are written against the shipped paths,
+# and so is the failure report below.
 HITS="$WORK/leaks.txt"
-: > "$HITS"
-for pattern in "${LEAK_PATTERNS[@]}"; do
-  xargs -0 -r grep -HnoE "$pattern" < "$TEXT_LIST" >> "$HITS" 2>/dev/null || true
+sed -e "s|^$PDF_TEXT_DIR/\(.*\)\.txt:|\1 (text extracted from the PDF):|" \
+    -e "s|^$SNAP/||" "$RAW_HITS" > "$HITS"
+
+# Drop the forgiven hits.  Both lists are matched against the text that matched
+# a leak pattern, never against the path, so a file whose *name* contains an
+# allow-listed string cannot launder a real hit; LEAK_ALLOW_IN additionally
+# requires the file to be one of the paths named with it.
+KEPT_HITS="$WORK/leaks-kept.txt"
+cp "$HITS" "$KEPT_HITS"
+drop_forgiven() {
+  grep -vE "$1" "$KEPT_HITS" > "$KEPT_HITS.next" 2>/dev/null || true
+  mv "$KEPT_HITS.next" "$KEPT_HITS"
+}
+for entry in "${LEAK_ALLOW[@]}"; do
+  drop_forgiven ":[0-9]+:.*(${entry%% :: *})"
 done
-if [ -n "$ALLOW_RE" ]; then
-  grep -vE "$ALLOW_RE" "$HITS" > "$HITS.kept" || true
-else
-  cp "$HITS" "$HITS.kept"
-fi
+for entry in "${LEAK_ALLOW_IN[@]}"; do
+  rest=${entry#* :: }
+  drop_forgiven "(${entry%% :: *})[^:]*:[0-9]+:.*(${rest%% :: *})"
+done
+
 RAW=$(wc -l < "$HITS" | tr -d ' ')
-KEPT=$(wc -l < "$HITS.kept" | tr -d ' ')
+KEPT=$(wc -l < "$KEPT_HITS" | tr -d ' ')
 log "leak scan: $RAW raw hit(s), $(( RAW - KEPT )) allow-listed, $KEPT remaining"
 
-if [ -s "$HITS.kept" ]; then
+if [ -s "$KEPT_HITS" ]; then
   echo "$PROG: LEAK SCAN FAILED — the snapshot was not packaged." >&2
   echo "$PROG: $KEPT hit(s); first 40, paths relative to the snapshot:" >&2
-  sed -e "s|^$PDF_TEXT_DIR/\(.*\)\.txt$|\1 (text extracted from the PDF)|" \
-      -e "s|^$SNAP/||" "$HITS.kept" | head -n 40 >&2
-  echo "$PROG: fix the source, or add a LEAK_ALLOW entry WITH a reason." >&2
+  head -n 40 "$KEPT_HITS" >&2
+  echo "$PROG: fix the source, or add a LEAK_ALLOW/LEAK_ALLOW_IN entry WITH a reason." >&2
   exit 2
 fi
 log "leak scan clean"

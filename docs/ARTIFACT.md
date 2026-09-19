@@ -16,6 +16,7 @@ commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 | `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | the pinned build: Lean 4 and all ten dependencies by exact revision |
 | `blueprint/src/` | the LaTeX blueprint, cross-referenced to the Lean names with `\lean{}` / `\leanok` |
 | `docs/` | the mathematical documentation, including `docs/paper-gaps/` (the register of gaps found in the source papers) |
+| `references/` | the TeX sources of the five source papers — third-party material, see below — so that every `file.tex:lines` locator in the docstrings resolves inside the snapshot |
 | `scripts/comparator/` | the generator for the self-contained `Challenge.lean` statement file used by the independent challenge repository |
 | `scripts/blueprint_leanok_axioms.py` | the blueprint/axiom consistency check |
 | `scripts/make_artifact.sh` | the script that produced this snapshot, so the packaging is itself auditable |
@@ -32,26 +33,45 @@ mathematics and it dominates the repository's size (the telemetry session logs
 alone are roughly 200 MB). Excluding it also removes, without any history
 rewrite, the ~2,456 tracked files that mention the build host's home path.
 
-**The third-party paper mirrors, `references/`.** The repository mirrors the
-TeX of five papers. arXiv's default terms do not grant redistribution, and only
-two of the five mirrors carry a provenance statement, so until the copyright
-holders' permission is obtained the mirrors do not ship. The papers are cited
-by arXiv identifier instead:
+## Third-party material: the paper sources, `references/`
 
-| mirror | paper | arXiv |
+The snapshot ships the TeX sources of the five papers the development is
+formalized from (owner decision, 2026-09-19, following the companion
+low-degree-test repository, which likewise keeps its paper sources in the
+public repository):
+
+| path | paper | arXiv |
 |---|---|---|
 | `references/qpbt-paper/` | *MIP\* = RE* (primary source) | arXiv:2001.04383 |
 | `references/neexp-paper/` | *NEEXP in MIP\** (secondary source) | arXiv:1904.05870 |
 | `references/ldt-paper/` | low individual degree test | arXiv:2009.12982 |
 | `references/nv-paper/` | Natarajan–Vidick | arXiv:1610.03574 |
-| `references/cs-paper/` | see `references/cs-paper/SOURCE.md` in the source repository | — |
+| `references/cs-paper/` | see `references/cs-paper/SOURCE.md` | — |
 
-**Consequence for the docstrings.** Lean docstrings in this snapshot cite their
-source as `references/<paper>/<file>.tex:<lines>`. Those locators point into
-the mirror **as it stood at the source commit recorded in `MANIFEST.txt`**, in
-the source repository — not at a file inside this tarball. The mirrors are
-plain per-section splits of the papers' arXiv sources, so a reader with the
-arXiv source can follow a locator to the same passage.
+**Why they ship.** Lean docstrings, `docs/QPBT-theorem-index.md` and
+`docs/DEVIATIONS.md` cite their source as
+`references/<paper>/<file>.tex:<lines>`. With the sources in the snapshot every
+one of those locators resolves inside the tarball, and a reviewer can read the
+paper statement next to the Lean statement without reconstructing the
+per-section split from arXiv. The directories are plain per-section splits of
+the papers' arXiv sources.
+
+**Licence.** These files are the work of their own authors and are **not**
+covered by this repository's licence (see the *Licence* section of `README.md`;
+the licence for the development itself is the repository owner's to set). They
+are kept here for reference and for line-precise citation; their own terms
+govern any further use or redistribution. The `MANIFEST.txt` of every snapshot
+repeats this.
+
+**Leak scan.** The scan that gates packaging (below) treats these files like
+any other: a home path or a key-shaped string inside `references/` still fails
+the run. The one forgiveness is scoped to `references/` by path and to
+e-mail addresses by content — the corresponding-author addresses printed in the
+papers' own front matter, which are third-party material reproduced as
+published, not contact addresses of this development. It is recorded as a
+`LEAK_ALLOW_IN` entry in `scripts/make_artifact.sh` with that reason, and a
+blanket entry was deliberately not used: the scan must still catch an address of
+ours anywhere else in the snapshot.
 
 ## Verifying the artifact as a reviewer
 
@@ -145,7 +165,8 @@ and the low-degree soundness statement is `exists_ld_soundness` in
 `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`. Each carries a docstring
 naming its blueprint label and its paper locator. Where the snapshot ships a
 theorem index (`docs/QPBT-theorem-index.md`), that table is the intended entry
-point.
+point. The paper locator in each docstring is a path under `references/`, which
+ships, so it can be opened directly in the unpacked snapshot.
 
 ### 5. Independent statement check (optional)
 
@@ -205,10 +226,13 @@ scripts/make_artifact.sh --anonymize <tag> /tmp/artifact
 This additionally rewrites the author-identifying strings listed in
 `ANON_RULES` in the script (the GitHub owner name inside URLs, the upstream
 project name and host, the author name and address) and tags the tarball
-`-anon`. It is **not** by itself sufficient: the commit history, the issue and
-PR links in the docs, and the hosted blueprint would still identify the
-authors, so a double-blind submission needs a fresh single-commit repository
-built from the anonymized snapshot, not merely this flag.
+`-anon`. It does **not** touch the source papers under `references/`, and it
+should not: those are published third-party works, and their authors are cited
+authors, not the submitters. It is **not** by itself sufficient: the commit
+history, the issue and PR links in the docs, and the hosted blueprint would
+still identify the authors, so a double-blind submission needs a fresh
+single-commit repository built from the anonymized snapshot, not merely this
+flag.
 
 ## Keeping the two exclusion lists in step
 
@@ -228,13 +252,19 @@ directory it has been told to ignore, so a child of an ignored directory cannot
 be re-admitted. The deny-list therefore excludes the workflow-only scripts by
 glob (`scripts/*.py`, `scripts/*.sh`, `scripts/*.lean`, `scripts/tests/`) and
 re-admits the two shipped top-level files with `-export-ignore`;
-`scripts/comparator/` is never matched and ships under both guards. Checked on
-2026-09-19: a plain `git archive` of the repository and `scripts/make_artifact.sh`
-then produced the same 779 files, the snapshot adding only its `MANIFEST.txt`.
+`scripts/comparator/` is never matched and ships under both guards.
+`references/` is named in `.gitattributes` too, as a comment rather than an
+`export-ignore` line, so that the decision to ship it is visible where somebody
+would otherwise add the line back. Checked on 2026-09-19 after that change: a
+plain `git archive` of the repository and `scripts/make_artifact.sh` produce the
+same 860 files, the snapshot adding only its `MANIFEST.txt`.
 
 The leak scan is the backstop: it is what caught an upstream developer's home
-path in `docs/reports/` and got that directory excluded. PDFs are covered too:
-any PDF in the snapshot has its text extracted with `pdftotext` and scanned
-with everything else, and the run stops rather than ship a PDF it could not
-read, so cutting a release with the gap notes built needs `poppler-utils`
-installed.
+path in `docs/reports/` and got that directory excluded. It is fail-closed —
+exit 2, nothing packaged — and forgives a hit only through an entry that
+carries a written reason: `LEAK_ALLOW` for a pattern safe anywhere (the RFC 2606
+placeholder domains) and `LEAK_ALLOW_IN` for one safe only in named paths (the
+papers' own author addresses under `references/`). PDFs are covered too: any
+PDF in the snapshot has its text extracted with `pdftotext` and scanned with
+everything else, and the run stops rather than ship a PDF it could not read, so
+cutting a release with the gap notes built needs `poppler-utils` installed.

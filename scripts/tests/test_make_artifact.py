@@ -98,6 +98,9 @@ class MakeArtifactTests(unittest.TestCase):
             {"packages": [{"name": "mathlib", "rev": "deadbeefcafe"}]}))
         write(self.repo / "README.md", "See https://github.com/Dengnifer/MIPStarRE-A\n")
         write(self.repo / "docs" / "comparator.md", "trust model\n")
+        # Third-party paper sources: they ship (owner decision, 2026-09-19).
+        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+              "\\title{A paper}\n")
         # The workflow layer: excluded by the allow-list, and carrying exactly
         # the kind of home path the leak scan exists to catch.
         write(self.repo / "local" / "bin" / "tool.sh", "cd /home/somebody/checkout\n")
@@ -139,6 +142,11 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertIn(head, result.stdout)
         self.assertIn("sha256", result.stdout)
 
+    def test_the_paper_sources_ship(self) -> None:
+        """They are what the docstring `file.tex:lines` locators point at."""
+        self.assertEqual(self.run_script().returncode, 0)
+        self.assertIn("references/qpbt-paper/frontmatter.tex", self.members())
+
     def test_manifest_records_toolchain_mathlib_and_lean_code_lines(self) -> None:
         self.assertEqual(self.run_script().returncode, 0)
         manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
@@ -178,6 +186,33 @@ class MakeArtifactTests(unittest.TestCase):
         write(self.repo / "docs" / "notes.md", "write to nobody@example.invalid\n")
         self.commit("placeholder address")
         self.assertEqual(self.run_script().returncode, 0)
+
+    def test_an_author_address_is_forgiven_in_the_paper_sources_only(self) -> None:
+        """The `references/` forgiveness must be scoped by path, not blanket.
+
+        The papers print their corresponding authors' addresses; an address in a
+        file of ours is still a leak, and the scan has to keep catching it.
+        """
+        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+              "\\email{someone@some-university.edu}\n")
+        self.commit("an address in the paper source")
+        self.assertEqual(self.run_script().returncode, 0)
+
+        write(self.repo / "docs" / "notes.md", "write to someone@some-university.edu\n")
+        self.commit("the same address in a page of ours")
+        result = self.run_script()
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("docs/notes.md", result.stderr)
+        self.assertNotIn("references/qpbt-paper/frontmatter.tex", result.stderr)
+
+    def test_a_home_path_in_the_paper_sources_still_fails_the_run(self) -> None:
+        """The forgiveness is scoped by content too: only addresses."""
+        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+              "%% typeset in /home/somebody/tex\n")
+        self.commit("a home path in the paper source")
+        result = self.run_script()
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("references/qpbt-paper/frontmatter.tex", result.stderr)
 
     def test_a_home_path_inside_a_pdf_fails_the_run(self) -> None:
         """The scan must read the PDFs it ships, not skip them as binaries."""

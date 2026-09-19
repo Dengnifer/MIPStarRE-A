@@ -5,7 +5,7 @@
 # That script already restricts the export to an explicit allow-list, so these
 # attributes are the second, independent guard: they also keep a plain
 # `git archive` (or a GitHub "Download source" tarball of a release) free of
-# the AI-workflow layer and of the third-party paper mirrors.
+# the AI-workflow layer.
 #
 # Keep the two in step: a path excluded here and a path missing from the
 # script's INCLUDE list should describe the same snapshot.  This list is a
@@ -54,10 +54,14 @@ docs/pr_review_management.md    export-ignore
 docs/stale_issue_audit.md       export-ignore
 docs/blueprint-script-coverage.md export-ignore
 
-# --- third-party paper mirrors ---------------------------------------------
-# Five papers' TeX, redistribution terms unsettled (ITP-readiness audit, 2026-09-19
-# section 5).  The snapshot cites them by arXiv identifier instead.
-references/             export-ignore
+# --- third-party paper sources: NOT ignored, on purpose ---------------------
+# `references/` ships with the artifact (owner decision, 2026-09-19, following
+# the companion LDT repository).  The Lean docstrings, the theorem index and the
+# deviations page cite `references/<paper>/<file>.tex:<lines>`, so a snapshot
+# without them cannot be checked against its sources.  They are third-party
+# material kept for reference, not covered by this repository's licence; see
+# docs/ARTIFACT.md.  Listed here so that nobody adds `export-ignore` back
+# without reading that decision.
 
 # --- generated or workflow-only build products ------------------------------
 blueprint/web/          export-ignore
