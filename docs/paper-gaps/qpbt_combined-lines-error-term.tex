@@ -562,7 +562,9 @@ its consumer \path{exists_globalPairWitness} is unaffected.
 carrying the printed error expression $\poly(m^2\eps,md/q)$, was removed. Under
 the same domain repair its statement becomes the repaired conditional auxiliary
 with a different error expression, and the printed expression is already carried
-by the existential declaration \path{exists_extendedLinesWitness}; no Lean
+by the declaration that records the printed form, then the theorem
+\path{exists_extendedLinesWitness} and since 2026-09-19 the unasserted
+proposition \path{PrintedExtendedLinesWitnessClaim}; no Lean
 declaration and no blueprint node consumed it, as a search across
 \path{MIPStarRE} and \path{blueprint} confirmed before its removal. Its
 obstruction and provenance are the subject of the preceding subsection and of
@@ -571,15 +573,54 @@ It was \ghissue{509}, closed with the obstruction pull request that did not
 prove the printed form.
 
 \paragraph{What stays open.}
-The printed error form itself. \path{exists_extendedLinesWitness} keeps the
-printed expression and keeps an open proof; it is a source-gap declaration, not
-a proof obligation of any Lean consumer, and it is neither marked proved nor
-removed. The scalar obstruction \path{not_exists_combining_quarter_power_bound}
+The printed error form itself.  Its Lean carrier is described in
+Section~\ref{sec:printed-claim-correction}: since 2026-09-19 the printed
+expression is recorded by \path{PrintedExtendedLinesWitnessClaim}, a
+proposition that is stated but not asserted, in place of the former theorem
+\path{exists_extendedLinesWitness} with an open proof.  Either way the printed
+form is a source-gap record, not a proof obligation of any Lean consumer, and it
+is neither marked proved nor removed.
+The scalar obstruction \path{not_exists_combining_quarter_power_bound}
 still blocks absorbing the first route's $m\eps^{1/4}$ term into
 $\poly(m^2\eps,md/q)$, so a different estimate would be required. Because
 \ghissue{509} and \ghissue{510} were closed by their obstruction pull requests
 without proving the printed assertion, live tracking of this gap is restored by
 \ghissue{598}; the closed issues are not reopened.
+
+\section{The 2026-09-19 statement correction}
+\label{sec:printed-claim-correction}
+
+The declaration \path{exists_extendedLinesWitness} was a theorem whose
+statement was the printed conclusion of the lemma and whose proof was an open
+\path{sorry}.  That \path{sorry} was the last one in the combining track, and
+it was not a proof obligation: no declaration depended on it, as a search over
+the whole declaration set confirmed, and every consumer routes through
+\path{exists_extendedLinesWitness_established}.
+
+The correction replaces that theorem by a definition of type \path{Prop} with
+the same binders and the same body,
+\path{PrintedExtendedLinesWitnessClaim}.  Writing a proposition down is not
+asserting it, so the development no longer claims the printed error form, and
+it no longer carries proof debt for it either.  The printed sentence remains
+readable in Lean, next to the theorem that states what the source proof
+actually gives, which is what this note asks for: the printed form must not be
+asserted, because no route to it is known, and it must not be silently dropped,
+because it is what the source prints.
+
+No implication is recorded between \path{PrintedExtendedLinesWitnessClaim} and
+\path{exists_extendedLinesWitness_established}, in either direction.  The
+printed form applies an arbitrary error function of the corrected two-variable
+contract to $m^2\eps$; for exponent $r$ this contributes $m^{2r}$, which is not
+dominated by the single prefactor $m$ of the established form for $r > 1/2$,
+and the converse direction is the one obstructed by
+\path{not_exists_combining_quarter_power_bound} along the first route.  Forcing
+either direction would require an estimate that this note does not have.
+
+The blueprint node \path{lem:qld-4-13} keeps the source statement, links the
+new definition in place of the old theorem, and still carries no formalization
+mark; the correction is recorded in \path{rem:qld-4-13-source-defects}.  The
+mathematical content of the gap is unchanged by this correction, and
+\ghissue{598} stays open.
 
 \section{Comparison with the blueprint}
 
@@ -603,16 +644,16 @@ chapter remark summarizes the discrepancy and cites this note.%
 
 The source-labelled lemma links the carrier
 \path{ExtendedLinesWitness} and the declaration
-\path{exists_extendedLinesWitness}, which retains the printed error form
-$\poly(m^2\eps,md/q)$ and whose proof is the tracked obligation.  The
+\path{PrintedExtendedLinesWitnessClaim}, which retains the printed error form
+$\poly(m^2\eps,md/q)$ and which is the tracked record of the gap.  The
 established error form is linked from the separate formalization-support node
 \path{lem:qld-4-13-established}, whose declaration
 \path{exists_extendedLinesWitness_established} has the explicit form
 $C m\,\poly(\eps,md/q)$ for a universal $C>0$; this agrees with the blueprint
 convention that constants are absorbed into $\poly$.  The two declarations now
-have different statuses.  The printed error form is still unproved: the proof of
-\path{exists_extendedLinesWitness} is the tracked obligation, tracked by
-\ghissue{598}, and
+have different statuses.  The printed error form is still unproved and
+unrefuted: it is recorded by \path{PrintedExtendedLinesWitnessClaim} without
+being asserted, it is tracked by \ghissue{598}, and
 \path{lem:qld-4-13} carries no formalization mark.  The established error form
 is proved: \path{exists_extendedLinesWitness_established} has a complete proof,
 and the support node \path{lem:qld-4-13-established} carries both a

@@ -13,13 +13,16 @@ import MIPStarRE.QPBT.Test.SoundnessDefs
 
 This module states the two application obligations at the end of the Pauli-basis
 combining argument.  Directly indexed combined-line measurements are recorded both
-with the error form printed in the source and with the weaker estimate established by
-its first proof route.  The final witness consists of a projective measurement of a
+with the error form printed in the source, as an unasserted proposition, and with
+the weaker estimate established by its first proof route, as a theorem.  The
+final witness consists of a projective measurement of a
 pair of global bounded individual-degree polynomials.  The existence assertions below
 record the measurements and quantitative estimates required by the combining argument.
 The established direct-line constructor, its conditional supplied-point companion,
 and the source global-pair theorem are proved.  The printed error form of the
-combined-line lemma remains an open source gap, tracked by issue #598.
+combined-line lemma remains an open source gap, tracked by issue #598; it is
+recorded here as a proposition that is stated but not asserted, so this module
+contains no proof debt.
 
 ## References
 
@@ -39,43 +42,60 @@ open MIPStarRE.LDT
 noncomputable section
 
 /-! The directly indexed obligations below share the extended-line carrier.
-The first keeps the error expression printed in the source and supplies its
-point witness existentially; it is a source-gap declaration with an open proof.
+The first records the error expression printed in the source as a proposition
+that is stated but not asserted; it is a source-gap record, not a theorem.
 The second is the conditional auxiliary for a polynomially controlled supplied
 point family, carrying the error the first proof route establishes; the third
-supplies that family existentially. -/
+supplies that family existentially and is the official formalization of what
+the source proof establishes at this node. -/
 
-/-- Directly indexed extended-line obligation with the numerical error expression
-printed in `lem:qld-4-13`, paper lines 1020--1034.
+/-- The assertion printed as the conclusion of `lem:qld-4-13`, paper lines
+1020--1034, recorded in Lean **without being asserted**.
 
-Both this declaration and the established forms below use the directly indexed
-questions, law, and completed answer alphabet, so neither is the source-facing
-paper statement.
+This is a `Prop`-valued definition, not a theorem, so writing it down commits
+the development to nothing. It replaced a theorem of exactly this statement
+whose proof was an open `sorry`; the printed sentence of the source therefore
+stays visible in Lean and is neither marked proved nor removed, while no proof
+debt is carried at this site. The blueprint node `lem:qld-4-13` links this
+definition and carries no formalization mark. What the source proof does
+establish is formalized by `exists_extendedLinesWitness_established` below,
+whose blueprint node is `lem:qld-4-13-established`; that theorem is what every
+consumer uses, in particular `exists_globalPairWitness`.
 
-The first proof route's term `m * epsilon ^ (1 / 4)` cannot be absorbed into
-the printed error arguments, even after capping it by one and restricting to
-admissible parameters; `not_exists_combining_quarter_power_bound` proves this
-scalar obstruction. It does not refute this existence assertion, which requires
-a different estimate. See `docs/paper-gaps/qpbt_combined-lines-error-term.tex`
-and issues #510 and #598.
+**Why the printed form is not asserted.** The error expression
+`poly(m ^ 2 * epsilon, md / q)` is delivered by neither of the two derivations
+printed in the source proof. The first route establishes
+`C * m * poly(epsilon, md / q)`. The second route would give
+`m ^ 2 * poly(epsilon, md / q)` and needs in addition a joint product law for
+the two sampled points that Property 2 of `lem:qld-sublines` does not supply;
+the directly indexed decomposition `subLineDist_map_joint` and its consequence
+`subLineDist_consistencyDefect_le_ofLinesWitness`, which gives `4 * m^2 * δP`
+for a supplied line witness, do not discharge that premise.
 
-**Open source gap, carried deliberately:** the printed error form is
-established by neither source route, and no route to it is known here. This
-declaration is retained so that the source assertion stays visible and is
-neither marked proved nor removed; its `sorry` records the gap and must not be
-read as a proof. No Lean argument depends on it. Every consumer, in particular
-`exists_globalPairWitness`, routes through `exists_extendedLinesWitness_established`,
-whose error `C * m * poly(epsilon, md / q)` is the form the first route actually
-delivers. What remains open is tracked by issue #598; the earlier issues #509
-and #510 were closed by their obstruction pull requests without a proof of the
-printed assertion, and are not reopened.
+**Why it is not refuted either.** `not_exists_combining_quarter_power_bound`
+(`MIPStarRE/QPBT/Combining/ErrorObstruction.lean`) proves the scalar
+obstruction that the first route's term `m * epsilon ^ (1 / 4)` cannot be
+absorbed into the printed error arguments, even after capping it by one and
+restricting to admissible parameters. That obstructs the first route; it is
+not a counterexample to this proposition, since an upper bound on a defect
+need not be attained. No implication between this proposition and the
+established theorem is recorded in either direction: the printed form feeds
+`m ^ 2 * epsilon` to an arbitrary `IsPolyErr₂` function, whose exponent may
+exceed the single factor `m` that the established form carries outside, so
+neither direction follows by a short faithful argument.
 
-The concrete directly indexed sampler now has the joint product decomposition
-`subLineDist_map_joint`. Its second-route consequence
-`subLineDist_consistencyDefect_le_ofLinesWitness` gives `4 * m^2 * δP` for a
-supplied line witness. Neither that premise nor the stronger error estimate needed
-here is discharged by this comparison; see issue #510 and
+**Carrier caveat.** Like the established forms below, this proposition uses the
+directly indexed questions, the directly indexed line-point law, and the
+`Option`-completed answer alphabet, so it is not the source-facing paper
+statement even as regards its carrier; only its error expression is the printed
+one. Those three replacements are documented in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex` and
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
+
+The full analysis of the gap is
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`, and it is tracked by
+issue #598. Issues #509 and #510 were closed by their obstruction pull requests
+without a proof of the printed assertion, and are not reopened.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form
@@ -85,15 +105,14 @@ of the source shorthand at `04_preliminaries.tex:22-29`.  The correction and
 the two-dimensional strategy that refutes the product form are recorded in
 `docs/paper-gaps/qpbt_pasting-product-error.tex` and tracked by issue #196.
 Here `poly(m^2 * epsilon, md / q)` is read in that sense. -/
-theorem exists_extendedLinesWitness :
-    ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
-      ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
-        ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
-          ∃ points : CombinedPointsWitness S (deltaQ ε),
-            Nonempty (ExtendedLinesWitness S points
-              (deltaCombine ((P.m : ℝ) ^ 2 * ε)
-                ((P.m * P.d : ℕ) / (P.q : ℝ)))) := by
-  sorry
+def PrintedExtendedLinesWitnessClaim : Prop :=
+  ∃ deltaQ : ℝ → ℝ, IsPolyErr deltaQ ∧
+    ∃ deltaCombine : ℝ → ℝ → ℝ, IsPolyErr₂ deltaCombine ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε),
+        ∃ points : CombinedPointsWitness S (deltaQ ε),
+          Nonempty (ExtendedLinesWitness S points
+            (deltaCombine ((P.m : ℝ) ^ 2 * ε)
+              ((P.m * P.d : ℕ) / (P.q : ℝ))))
 
 /-- Conditional existence of extended-line measurements with the first-route
 estimate `C * m * poly(epsilon, md / q)`, for a polynomially controlled supplied

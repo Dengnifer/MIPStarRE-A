@@ -196,9 +196,11 @@ nonemptiness condition, it does not specify a real value for the supremum
 over an empty strategy class.  The example therefore does not establish
 nonattainment for the intended class of games with nonempty alphabets.
 Making that domain condition explicit would exclude this example but would
-leave the source proof's attainment step unproved.  The public Lean statement
-and its existing proof-gap marker are preserved in issue~\#524; any domain
-correction requires a separate statement-integrity review.
+leave the source proof's attainment step unproved.  The statement-integrity
+review requested here was carried out on 2026-09-19 and is the statement
+correction recorded below; the printed Lean statement and its proof-gap marker
+were replaced there by an unasserted Lean proposition and this refutation,
+proved as \leanid{not\_forall\_printedSymmetricProjectiveAttainmentClaim}.
 
 \section{Uses of the lemma}
 
@@ -236,6 +238,9 @@ Consequently, no consumer of the lemma --- in the source or here --- requires
 the attainment form.
 
 \section{Comparison with the blueprint}
+
+The two subsections that follow describe the arrangement in force before
+2026-09-19; the statement-correction section below supersedes them.
 
 The blueprint \cite{MIPStarREBlueprint} states the lemma in the source shape,
 as the proof-gap protocol requires when the printed statement is not known to
@@ -293,6 +298,64 @@ its checked Lean witness are the subject of the separate documentation packet
 for \ghissue{524}; the present section does not restate or re-audit its
 evidence.
 
+\section{Statement correction (2026-09-19)}
+
+This section is published as the zero-sorry statement correction for
+\ghissue{524}, on the owner decision of 2026-09-19 that the development carry
+no \texttt{sorry}.  It supersedes the disposition of the realignment section
+above, which kept the printed form as an unproved Lean theorem.
+
+The reclassification anticipated in the conclusion below has now happened, and
+for the reason recorded in the formal-domain section: on the domain over which
+the Lean statement was quantified, the printed form is not merely unproved, it
+is \emph{false}.  Keeping it as a Lean theorem with an open proof therefore
+asserted something the development cannot establish and, on part of its own
+domain, could never establish.  Four changes implement the correction; none of
+them weakens a statement that was proved, and none of them removes the
+discrepancy from view.
+
+\begin{enumerate}
+  \item The Lean theorem \leanid{exists\_symmetric\_projective\_strategy},
+  with its \texttt{sorry}, is removed.  Nothing in the development depended on
+  it.  Its printed content is preserved verbatim, and unasserted, as the
+  Prop-valued definition
+  \leanid{PrintedSymmetricProjectiveAttainmentClaim}, whose binders are those
+  of the printed sentence and whose docstring records the locator, the reason
+  the sentence is not established, and the pointers to the proved forms and to
+  this note.
+  \item The refutation recorded in the formal-domain section above is now a
+  proved Lean theorem rather than an audit artifact:
+  \leanid{not\_forall\_printedSymmetricProjectiveAttainmentClaim} proves that
+  the printed claim does not hold for every symmetric game and every $\eps$,
+  using the empty-answer game
+  \leanid{SymmetrizationObstruction.emptyAnswerGame} together with
+  \leanid{SymmetrizationObstruction.no\_strategy} and
+  \leanid{SymmetrizationObstruction.value\_eq\_zero}.  These are the
+  declarations checked in
+  \path{audits/2026-09-12_issue-524-symmetrization-obstruction.md}, moved into
+  the library unchanged.
+  \item The blueprint node \path{lem:symmetric-strat} now carries the
+  \emph{corrected} statement --- the approximate form, with the nonempty
+  answer alphabet displayed --- with \leanid{exists\_symmetric\_projective\_strategy\_approx}
+  and \leanid{exists\_symmetric\_projective\_strategy\_of\_lt\_value} as its
+  formalization and with statement- and proof-level \texttt{leanok}.  The
+  printed sentence is stated in full in \path{rem:symmetric-strat-limit}
+  beside it, and the Lean record and its refutation are the node
+  \path{lem:symmetric-strat-printed-claim}.  The former approximate node
+  \path{lem:symmetric-strat-approx} is folded into \path{lem:symmetric-strat}
+  and no longer exists.
+  \item The given-strategy node \path{lem:symmetric-strat-given-strategy} and
+  its Lean declaration are unchanged.
+\end{enumerate}
+
+This is a correction of the \emph{statement}, in the sense of the register:
+the mathematics the source argument establishes is stated and proved, and the
+mathematics the source prints is displayed beside it and shown not to follow.
+It is not a weakening adopted to make a proof go through; no proof was
+attempted against the printed form, and the two obstructions --- the unattained
+supremum over unbounded dimension, and the empty-answer counterexample --- are
+unchanged by it.
+
 \section{Conclusion}
 
 For games with nonempty answer alphabets, the verdict remains a proof-level
@@ -305,20 +368,18 @@ project, proceed from a given strategy of value at least $1-\eps$ or from a
 strict lower bound on the value, for which the value-preserving construction
 suffices.  Stage~4 has carried out the recommendation of this note: the
 given-strategy symmetrization lemma is formalized and proved as the workhorse
-statement, while the source-labelled lemma keeps its source shape with the
-attainment step an explicit, tracked proof obligation.  The 2026-09-18
-realignment adds the approximate form as a proved Lean declaration under an
-explicit nonempty-answer hypothesis and leaves the attainment assertion open
-and tracked.  If a later
-investigation settles the counterexample question for symmetric games with
-nonempty answer alphabets, the statement should then be reclassified from
-an unproved step to a documented
-statement correction.
+statement.  The 2026-09-18
+realignment added the approximate form as a proved Lean declaration under an
+explicit nonempty-answer hypothesis, and the 2026-09-19 statement correction
+above makes that approximate form the formalization of the source node, keeps
+the printed sentence visible as an unasserted Lean proposition, and proves its
+refutation on the formal domain.  The reclassification from an unproved step to
+a documented statement correction, anticipated here, is thereby carried out.
 
-The exact current Lean domain has the additional empty-answer counterexample
-above.  An unrestricted attainment theorem cannot discharge that statement;
-the domain must first be reviewed separately.  No public statement is changed
-by this note, and neither obstruction is discharged.
+The exact current Lean domain has the empty-answer counterexample
+above.  An unrestricted attainment theorem cannot discharge the printed
+statement.  Neither obstruction is discharged by the correction; both are made
+explicit by it.
 
 \bibliographystyle{alpha}
 \bibliography{references}
