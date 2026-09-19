@@ -689,6 +689,31 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	into $\sum_o S_o \ot (A_o A_o^\dagger) = \sum_o S_o \ot \Id = \Id$.
 \end{proof}
 
+\begin{lemma}[Formalization support for controlled unitary membership]
+	\label{lem:controlled-unitary-membership}
+	\lean{MIPStarRE.Quantum.conjTranspose_mul_sum_heteroKron}
+	\lean{MIPStarRE.Quantum.sum_heteroKron_mem_unitary}
+	\leanok
+	\uses{lem:controlled-sum-support, def:povm-conventions}
+	In the notation of Lemma~\ref{lem:controlled-sum-support}, suppose first
+	that $A_o^\dagger A_o = \Id$ for every outcome $o$; then
+	$\bigl(\sum_o S_o \ot A_o\bigr)^\dagger \bigl(\sum_o S_o \ot A_o\bigr)
+	= \Id$. Suppose instead that every $A_o$ is unitary; then
+	$\sum_o S_o \ot A_o$ is a unitary operator on the product space. The
+	hypotheses constrain the component operators only: no unitarity is assumed
+	of the controlled sum, and no Pauli relation is used or concluded.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:controlled-sum-support}
+	For finite square matrices a left inverse is also a right inverse, so
+	$A_o^\dagger A_o = \Id$ gives $A_o A_o^\dagger = \Id$, and the second
+	assertion of Lemma~\ref{lem:controlled-sum-support}, applied with the
+	adjoints as components, yields the reverse identity for the controlled sum.
+	Unitary membership is the conjunction of the two identities, each supplied
+	by one half of the unitarity of the components.
+\end{proof}
+
 \begin{definition}[The swap unitaries]\label{def:v-swap-unitary}
 	\lean{MIPStarRE.QPBT.swapUnitary}
 	\leanok

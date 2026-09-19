@@ -1091,6 +1091,62 @@ assembled by Fourier averaging.
 	the factor four, after summing over $b$ and averaging over $x,z$.
 \end{proof}
 
+\begin{lemma}[Formalization support: unrestricted error in the point witness domain]
+	\label{lem:combined-points-unrestricted-error}
+	\lean{MIPStarRE.QPBT.CombinedPointsWitness.exists_error_of_projective}
+	\leanok
+	\uses{lem:qld-4-10, def:povm-distance, def:expanded-state}
+	This formalization-only auxiliary is not a named statement of the source
+	article, and it does not certify Lemma~\ref{lem:qld-4-10}. Let $S$ be a
+	projective setting and let $\{Q^{x,z}\}$ be any family of projective
+	measurements with outcomes in $\F_q \times \F_q$, one for each player side
+	and each pair $(x,z)$ of supplied points. Then there is a real number
+	$\delta$ such that $\{Q^{x,z}\}$ satisfies, at error $\delta$, all three
+	placement comparisons required of a combined-points witness. The witness
+	domain by itself therefore carries no quantitative content: $\delta$ is
+	obtained as an upper bound of a finite range of real numbers, and no
+	dependence of $\delta$ on the strategy error is asserted. This is the
+	obstruction to the unrestricted supplied-point domain recorded in
+	\cite{gap:qpbt_combined-lines-error-term}, for the supplied-point statement
+	at \texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:993-1034}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance}
+	There are finitely many ordered pairs of placements, and for each such pair
+	the three comparison quantities are real numbers. The pointwise maximum of
+	the three therefore has a finite range, which is bounded above; any upper
+	bound serves as $\delta$, and each of the three required inequalities
+	follows from the corresponding bound on the maximum.
+\end{proof}
+
+\begin{lemma}[Formalization support: linear answers rarely agree with a quadratic]
+	\label{lem:linear-quadratic-agreement}
+	\lean{MIPStarRE.QPBT.linear_quadratic_agreement_le}
+	\leanok
+	\uses{lem:coefficient-polynomial-agreement, def:ld-combining-parameters}
+	This formalization-only auxiliary is not a named statement of the source
+	article. Fix directly indexed parameters with field size $q$, let
+	$f = (f_0, f_1, f_2)$ be a coefficient answer of degree at most two whose
+	quadratic coefficient vanishes, so that $f$ evaluates to $f_0 + f_1 t$, and
+	let $\alpha \neq 0$ be a scalar. Then
+	\[
+		\Pr_{t}\bigl[\,f_0 + f_1 t = \alpha t^2\,\bigr] \leq \frac{2}{q}\;,
+	\]
+	the probability being over a uniformly random field element $t$. No
+	relation between the degree and $q$ is assumed, so the bound is not
+	truncated at one.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:coefficient-polynomial-agreement}
+	The coefficient answer of $\alpha T^2$ has quadratic coefficient
+	$\alpha \neq 0$, so it differs from $f$. The averaged collision estimate for
+	two distinct coefficient answers of degree at most two bounds the agreement
+	probability by $2/q$; that estimate is the uniform-parameter form of the
+	root count of Lemma~\ref{lem:coefficient-polynomial-agreement}.
+\end{proof}
+
 \section{Combined line measurements}
 
 \begin{theorem}[Resampling a line parameter]
