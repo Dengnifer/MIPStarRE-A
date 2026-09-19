@@ -4411,6 +4411,44 @@ Theorem~\ref{thm:qld-direct-soundness-any-strategy}; its three conclusions have
 exactly the displayed bound and already act on the original expanded spaces.
 \end{proof}
 
+\begin{theorem}[Formalization-only supplied-witness scalar polynomial consistency]
+\label{thm:qld-supplied-scalar-polynomial-consistency}
+\lean{MIPStarRE.QPBT.ExtendedLineGame.exists_scalar_polynomial_measurements_of_supplied_witnesses}
+\leanok
+\uses{thm:qld-supplied-direct-polynomial-consistency,
+	lem:qld-supplied-scalar-point-measurement, fact:data-processing,
+	def:consistency, def:ld-meas}
+Under the assumptions of
+Theorem~\ref{thm:qld-supplied-direct-polynomial-consistency}, there are ordinary
+polynomial POVMs $G^{\mathrm A},G^{\mathrm B}$ on the same original expanded
+local spaces. For uniform $u\in\F_q^{2m+2}$, the supplied scalar point POVM for
+Alice is consistent with evaluation of $G^{\mathrm B}$, evaluation of
+$G^{\mathrm A}$ is consistent with the supplied scalar point POVM for Bob, and
+the two polynomial POVMs are mutually consistent. Each of these three defects
+is at most
+\[
+ \delta_{\rm ld}\!\left(a,b,
+  3\left(\sqrt{\delta_Q+\delta_L}+\frac{md}{q}\right),
+  q,2m+2,d,1\right).
+\]
+Here the scalar point POVM is the supplied joint point measurement
+$\hat Q^{x,z}$ coarse-grained by $(r,s)\mapsto\alpha r+\beta s$, and polynomial
+evaluation is transported through the canonical scalar-field identification.
+This is a formalization-only auxiliary conditional on the supplied witnesses.
+It asserts no projectivity, polynomial separation, paired measurement, or
+completion of Lemma~\ref{lem:qld-4-7}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{thm:qld-supplied-direct-polynomial-consistency,
+	lem:qld-supplied-scalar-point-measurement, fact:data-processing}
+Take the unique coordinate marginal of each polynomial-tuple POVM. Polynomial
+evaluation commutes with this marginal. Apply data processing to the first two
+tuple consistency defects and use the exact supplied-point readout identity;
+apply data processing to both polynomial families in the third defect. These
+postprocessings preserve the displayed direct-soundness bound.
+\end{proof}
+
 \begin{theorem}[Formalization support: simultaneous rounding under postprocessing]
 \label{thm:qld-simultaneous-postprocessed-rounding}
 \lean{MIPStarRE.QPBT.projective_rounding_preserves_postprocessed_consistency}
