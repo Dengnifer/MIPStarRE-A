@@ -73,6 +73,34 @@ end Matrix
 
 namespace MIPStarRE.Quantum
 
+/-! ### Named instances shared by the comparator statement closure
+
+Instance synthesis returns these two facts as *non-atomic* proof terms:
+`RingHomInvPair.ids` applied to a synthesized `Semiring ℂ`, and
+`Nat.instNeZeroSucc` applied to `1`.  Lean lifts a non-atomic nested proof out
+of a definition's value into an auto-generated auxiliary constant and names it
+after whichever declaration first needed it in that module.  The library
+spreads the affected declarations over six modules and so produces several
+copies of the same fact under different names, while the generated
+Mathlib-only comparator challenge is a single module and produces exactly one.
+The statement closure then fails to match even though both sides hold the same
+proposition with the same proof.
+
+Naming the two facts here — in the one module that every affected declaration
+imports — makes synthesis return an atomic constant, so no auxiliary constant
+is generated on either side.  No statement, definition body or proof script
+changes.  See `docs/comparator.md`, "Environment alignment for QPBT".
+-/
+
+/-- The identity ring homomorphism on `ℂ` is its own inverse pair.  Named so
+that it is an atomic term in the comparator statement closure. -/
+instance instRingHomInvPairIdComplex :
+    RingHomInvPair (RingHom.id ℂ) (RingHom.id ℂ) := RingHomInvPair.ids
+
+/-- Two is nonzero.  Named so that the `Fintype (ZMod 2)` instance behind the
+qubit alphabet is an atomic term in the comparator statement closure. -/
+instance instNeZeroTwo : NeZero (2 : ℕ) := ⟨by decide⟩
+
 /-! ### Basic operator type -/
 
 /-- Square complex matrices as the finite-dimensional operator algebra. -/

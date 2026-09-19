@@ -123,19 +123,6 @@ def prefixMap (k n : ℕ) (hk : k ≤ n) :
     map_smul' := by
       intro c x
       rfl }
-end  -- module scope
-end MIPStarRE.QPBT
-namespace MIPStarRE.Quantum
-
--- source: MIPStarRE/Quantum/FiniteMatrix/Basic.lean:78-79  (MIPStarRE.Quantum.Op)
-/-- Square complex matrices as the finite-dimensional operator algebra. -/
-abbrev Op (d : Type*) := Matrix d d ℂ
-end MIPStarRE.Quantum
-namespace MIPStarRE.QPBT
-
--- elaboration context of MIPStarRE/QPBT/Algebra/Subspaces.lean
-section
-variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]
 
 -- source: MIPStarRE/QPBT/Algebra/Subspaces.lean:82-85  (MIPStarRE.QPBT.prefixRank)
 /-- The rank of a prefix restriction used by the pivot characterization. -/
@@ -156,6 +143,20 @@ noncomputable def canonicalComplement {n : ℕ}
   Finset.univ.filter fun j =>
     prefixRank W (j.1 + 1) (Nat.succ_le_of_lt j.2) =
       prefixRank W j.1 j.2.le
+end  -- module scope
+end MIPStarRE.QPBT
+namespace MIPStarRE.Quantum
+
+-- source: MIPStarRE/Quantum/FiniteMatrix/Basic.lean:100-102  (MIPStarRE.Quantum.instNeZeroTwo)
+/-- Two is nonzero.  Named so that the `Fintype (ZMod 2)` instance behind the
+qubit alphabet is an atomic term in the comparator statement closure. -/
+instance instNeZeroTwo : NeZero (2 : ℕ) := ⟨by decide⟩
+end MIPStarRE.Quantum
+namespace MIPStarRE.QPBT
+
+-- elaboration context of MIPStarRE/QPBT/Algebra/Subspaces.lean
+section
+variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]
 
 -- source: MIPStarRE/QPBT/Algebra/Subspaces.lean:100-107  (MIPStarRE.QPBT.registerSubmodule_eq_spanSubset)
 /-- The register submodule is the standard coordinate span on its index set. -/
@@ -166,6 +167,19 @@ lemma registerSubmodule_eq_spanSubset (S : Finset ι) :
   congr 1
   ext v
   simp [Pi.basisFun_apply, eq_comm]
+end  -- module scope
+end MIPStarRE.QPBT
+namespace MIPStarRE.Quantum
+
+-- source: MIPStarRE/Quantum/FiniteMatrix/Basic.lean:106-107  (MIPStarRE.Quantum.Op)
+/-- Square complex matrices as the finite-dimensional operator algebra. -/
+abbrev Op (d : Type*) := Matrix d d ℂ
+end MIPStarRE.Quantum
+namespace MIPStarRE.QPBT
+
+-- elaboration context of MIPStarRE/QPBT/Algebra/Subspaces.lean
+section
+variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]
 
 -- source: MIPStarRE/QPBT/Algebra/Subspaces.lean:109-121  (MIPStarRE.QPBT.prefixRank_mono_succ)
 /-- Prefix restriction rank is nondecreasing when one coordinate is added. -/

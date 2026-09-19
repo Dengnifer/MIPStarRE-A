@@ -128,6 +128,34 @@ obstacles had to be removed in the library:
    a challenge file in another module cannot reproduce.  They now carry
    explicit names.
 
+4. **Order-dependent auxiliary proofs.**  Lean lifts a *non-atomic* nested
+   proof out of a definition's value into an auto-generated auxiliary
+   constant, and names it after whichever declaration first needed it in that
+   module.  Two facts in the closure are synthesized as non-atomic proof
+   terms: `RingHomInvPair (RingHom.id ℂ) (RingHom.id ℂ)`, reached through
+   `RingHomInvPair.ids`, and `NeZero 2`, reached through `Nat.instNeZeroSucc`
+   and needed by `ZMod.fintype 2` behind the qubit alphabet.  The library
+   spreads the declarations that need them over six modules and so produced
+   five and three differently named copies of the same fact, while the
+   generated challenge is a single module and produces exactly one — so
+   `MIPStarRE.QPBT.qubitOperatorDistanceA` and `qubitOperatorDistanceB`
+   referred to `MIPStarRE.QPBT.idealQubitState._proof_2` in the library and to
+   `MIPStarRE.QPBT.qubitPauliProj._proof_1` in the challenge, and comparator
+   rejected the pair.  Both facts now have explicit named instances,
+   `MIPStarRE.Quantum.instRingHomInvPairIdComplex` and
+   `MIPStarRE.Quantum.instNeZeroTwo`, in
+   `MIPStarRE/Quantum/FiniteMatrix/Basic.lean` — the one module every affected
+   declaration imports.  Synthesis now returns an atomic constant, so no
+   auxiliary constant is generated on either side.
+
+   The systematic check, if a further mismatch of this class appears: list
+   every constant of both exported closures whose name contains `._proof_`,
+   `.match_`, `._aux`, `._eq_` or `._simp_`, group them by statement *and*
+   value, and give a named declaration to every group that has more than one
+   member.  Groups with a single member are safe: the assembler emits a
+   declaration before the declarations that depend on it, so a parent that
+   owns exactly one copy regenerates the same auxiliary name on both sides.
+
 No statement of either headline theorem changed, and their axiom closure
 remains `propext`, `Classical.choice`, `Quot.sound`.
 
