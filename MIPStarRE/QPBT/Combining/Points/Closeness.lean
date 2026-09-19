@@ -8,10 +8,11 @@ that are close to the sandwich POVMs on the placements where they were
 constructed, this file assembles the three conclusions of `lem:qld-4-10` on
 every pair of opposite placements by the triangle inequality along
 `Q ≈ R ≈ M^Z M^X ≈ M^X M^Z` and the cross-placement consistency of the
-ordered products.  It also records the trivial bound `4` on the state-dependent
-distance of two square-summable families, used when the test error exceeds
-one, and the elementary estimate collapsing the error terms `ε`, `√ε`, and
-`(ε + √ε)^{1/4}` into a single power `ε^{1/8}` when `ε ≤ 1`.
+ordered products.  It also records the bound `4` on the averaged squared
+state-dependent distance of two families satisfying `∑ a, (A a)ᴴ * A a ≤ 1`
+and `∑ a, (B a)ᴴ * B a ≤ 1` at every question, used when the test error
+exceeds one, and the elementary estimate collapsing the error terms `ε`,
+`√ε`, and `(ε + √ε)^{1/4}` into a single power `ε^{1/8}` when `ε ≤ 1`.
 
 ## References
 
@@ -32,8 +33,8 @@ noncomputable section
 
 /-! ## The trivial bound -/
 
-/-- A square-summable family of operators has total squared norm at most one on
-a unit vector. -/
+/-- A family of operators satisfying `∑ a, (A a)ᴴ * A a ≤ 1` has total squared
+norm at most one on a unit vector. -/
 theorem sum_norm_apply_sq_le_one {α ι : Type*} [Fintype α] [Fintype ι]
     [DecidableEq ι] (A : α → Op ι) (ψ : EuclideanSpace ℂ ι) (hψ : ‖ψ‖ = 1)
     (hA : ∑ a, (A a)ᴴ * A a ≤ 1) :
@@ -42,8 +43,10 @@ theorem sum_norm_apply_sq_le_one {α ι : Type*} [Fintype α] [Fintype ι]
   simp only [mul_one, WinImplications.applyOperatorToState_one, hψ] at h
   simpa using h
 
-/-- The state-dependent distance of two square-summable families is at most
-`4` on a unit vector, under a uniform distribution. -/
+/-- The averaged squared state-dependent distance of two families is at most
+`4` on a unit vector, under a uniform distribution, provided the sums
+`∑ a, (A x a)ᴴ * A x a` and `∑ a, (B x a)ᴴ * B x a` are at most the identity
+for every question `x`. -/
 theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableEq X]
     [Nonempty X] [Fintype α] [Fintype ι] [DecidableEq ι]
     (A B : X → α → Op ι) (ψ : EuclideanSpace ℂ ι) (hψ : ‖ψ‖ = 1)
@@ -83,7 +86,7 @@ theorem opFamilyDistSq_uniform_le_four {X α ι : Type*} [Fintype X] [DecidableE
     _ = 4 := avgOver_uniform_const _
 
 /-- The products `A_a B_b` of the effects of two projective measurements on a
-common space are square-summable to the identity. -/
+common space satisfy `∑ a b, (A_a B_b)ᴴ * (A_a B_b) = 1`. -/
 theorem sum_mul_conjTranspose_mul_self_eq_one {α β ι : Type*} [Fintype α]
     [Fintype β] [Fintype ι] [DecidableEq ι]
     (A : Measurement α ι) (B : Measurement β ι)
@@ -111,8 +114,8 @@ theorem sum_mul_conjTranspose_mul_self_eq_one {α β ι : Type*} [Fintype α]
         exact B.sum_eq_one
 
 /-- The products `B_b A_a` of the effects of two projective measurements on a
-common space, indexed by the pair `(a, b)`, are square-summable to the
-identity. -/
+common space, indexed by the pair `(a, b)`, satisfy
+`∑ a b, (B_b A_a)ᴴ * (B_b A_a) = 1`. -/
 theorem sum_mul_conjTranspose_mul_self_eq_one' {α β ι : Type*} [Fintype α]
     [Fintype β] [Fintype ι] [DecidableEq ι]
     (A : Measurement α ι) (B : Measurement β ι)
