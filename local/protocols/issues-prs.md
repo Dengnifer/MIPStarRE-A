@@ -247,7 +247,8 @@ branches and worktrees are preserved. Failed train worktrees remain for diagnosi
 
 `ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
 against the combined commit, using one locked build of the complete `MIPStarRE`
-library and `MIPStarRE.LDT.Test.AxiomAudit`. This includes the root artifact
+library and both axiom audits, `MIPStarRE.LDT.Test.AxiomAudit` and
+`MIPStarRE.QPBT.Test.AxiomAudit`. This includes the root artifact
 needed by publication's dynamic `checkdecls` import and all downstream modules.
 It rejects skip flags and dirty or moved train
 heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
