@@ -153,7 +153,7 @@ jobs:
           use-github-cache: false
 
       - name: Build axiom audit regression checks
-        run: lake build MIPStarRE.LDT.Test.AxiomAudit
+        run: lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
 
       - name: Check comparator challenge regeneration drift
         run: python3 scripts/comparator/check_challenge_drift.py --root .
