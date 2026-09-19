@@ -11,7 +11,7 @@
 
 \title{Triangle Estimates and Isometry Transfer in Pauli Extraction}
 \author{}
-\date{2026-09-03}
+\date{2026-09-15}
 
 \begin{document}
 \maketitle
@@ -22,9 +22,9 @@
   \item \textbf{Difficulty.} Medium.  The extraction proof contains two
   incorrect numerical steps and later suppresses the range projection when
   passing from unitary conjugation to isometry conjugation.
-  \item \textbf{Estimated weight.} A corrected positive-contraction estimate,
-  a small-error case split for normalization, and one range-projection transfer
-  lemma for a projective measurement family.
+  \item \textbf{Estimated weight.} The corrected positive-contraction estimate,
+  small-error normalization split, and general range-projection transfer are
+  available; the concrete Pauli soundness application remains to be proved.
   \item \textbf{Mathlib/project split.} Positivity, contraction inequalities,
   isometry range projections, and norm estimates belong to finite-dimensional
   Hilbert-space algebra.  The state-dependent family distance and register
@@ -111,10 +111,34 @@ where $T_h$ is the ideal Pauli projector.  Summing squared norms over $h$
 uses projectivity and orthogonality to keep the second term under control.
 The same argument is required for each player and each Pauli basis.
 
-This transfer is an open proof obligation for the next extraction stage.  It
-must be a theorem derived from the concrete swap unitaries, transformed-state
-estimate, and operator comparisons.  It must not be stored as a bridge field,
-residual assumption, or hypothesis of the source-labelled soundness theorem.
+The finite-dimensional estimate is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean}. For a complete POVM
+$\{N_h\}$, an orthogonal projection $Q$, and $Q\vartheta=\vartheta$, it gives
+\[
+  \sum_h\|(N_hQ-T_h)\Delta\|^2
+  \le 2\sum_h\|(N_h-T_h)\Delta\|^2+2\|\Delta-\vartheta\|^2.
+\]
+The proof uses $\sum_h N_h^\dagger N_h\le I$, so it also applies when the
+measurement is not projective. The same module proves the isometry form under
+the exact identity $N_h\phi=\phi M_h$ and its two bipartite placements. The
+unit-ancilla embedding and its composition with a unitary, including the
+identity $U(M\ot I\ot I)U^\dagger\phi=\phi M$, are proved in
+\path{MIPStarRE/QPBT/Test/Soundness/Ancilla.lean} for $\phi=UJ$,
+$J\psi=\psi\ot\eta$, $\|\eta\|=1$, and $U^\dagger U=I$.
+
+The supplied-data transfer is proved in
+\path{MIPStarRE/QPBT/Test/Soundness/StateTransfer.lean} and
+\path{MIPStarRE/QPBT/Test/Soundness/OperatorTransfer.lean}. Given an actual
+\path{ExtractionWitness}, the local maps adjoin a normalized EPR state and
+apply its swap unitaries. Register reassociation identifies their tensor
+action with the witness's transformed state, so its squared distance from
+the ideal state is at most $\delta$. The existing swapped total-Pauli POVMs
+intertwine with these maps; the two bipartite range-projection estimates
+bound each full squared operator-family sum by $4\delta$. Thus the same
+\path{PauliSoundnessWitness} satisfies all three soundness estimates at
+$\max\{\sqrt\delta,4\delta\}$. This is an auxiliary result with supplied
+extraction data, not a new bridge field or a proof of soundness for arbitrary
+strategies.
 
 \section{Blueprint and formalization status}
 
@@ -131,38 +155,94 @@ unitarity equations for the concrete swap maps, a normalized auxiliary state,
 the transformed-state estimate, and the two-player Pauli-projector comparison.
 The theorem \path{exists_extractionWitness_ofGlobalPairWitness} concludes the
 existence of this data at the explicit extraction scale, but it takes the
-\path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis
-rather than obtaining it from \path{exists_globalPairWitness}.  That bundle
-carries the projective global polynomial-pair measurements and both
-point-consistency estimates, and the blueprint proof of
-Lemma~\path{lem:qld-unitary} obtains it from Lemma~\path{lem:qld-4-7}; deleting
-the hypothesis would leave that construction unproved.  By the criterion of
-\path{docs/paper-gaps/proof-gap-protocol.tex} the hypothesis is therefore proof
-debt rather than a faithful boundary condition, and the declaration is a
-conditional helper: it does not certify the source lemma, and the blueprint
-node Lemma~\path{lem:qld-unitary} accordingly neither links it nor carries any
-statement-level formalization mark.  The declaration is recorded instead on the
-separate formalization-support node
-\path{lem:qld-unitary-given-global-pair}, whose statement assumes the global
-polynomial-pair measurement explicitly and whose formal link points only to the
-conditional helper.  It therefore cannot be mistaken for the source result.
-Apart from that hypothesis the
-conclusion matches the Stage~4.2 extraction lemma, including the corrected
-numerical estimates; the later passage to the isometries in the soundness
-theorem is not formalized, and no declaration yet states that passage.
+\path{GlobalPairWitness} of Lemma~\path{lem:qld-4-7} as an explicit hypothesis.
+It therefore remains a conditional helper rather than a formalization of the
+source lemma.  The blueprint records it on the separate formalization-support
+node \path{lem:qld-unitary-given-global-pair}, whose statement displays the
+global polynomial-pair measurement as supplied data.  The helper is proved at
+this conditional statement and has only the standard axioms \path{propext},
+\path{Classical.choice}, and \path{Quot.sound}.  Apart from the supplied witness,
+its conclusion matches the Stage~4.2 extraction lemma, including the corrected
+numerical estimates.
 
-The conditional character of the result is visible wherever the declaration is
-invoked: the suffix \path{ofGlobalPairWitness} names the extra premise in the
-declaration itself, and its docstring records the statement as conditional and
-its dependence on the assumed witness as unfaithful.  Discharging the debt
-requires composing \path{exists_globalPairWitness} with this helper to obtain
-the source lemma; no declaration carries out that composition.
+The preceding global-measurement construction is now complete.
+The theorem \path{exists_globalPairWitness} proves the full-domain construction
+of Lemma~\path{lem:qld-4-7} for every strategy error, including zero.  The
+source-facing theorem \path{exists_pulled_apart_consistency} chooses one such
+witness, applies the two point-consistency estimates and the observable
+self-consistency estimate to it, and replaces their three universal constants
+by their maximum.  Thus Lemma~\path{lem:qld-construct-the-paulis} is proved for
+the stated domain $0\leq\epsilon\leq1$, including the zero-error boundary.
+
+The source-facing theorem \path{exists_extractionWitness} now composes
+\path{exists_globalPairWitness} with
+\path{exists_extractionWitness_ofGlobalPairWitness}: the universal error
+constants for the global measurement and extraction are chosen before the
+parameters and strategy. For every admissible parameter tuple and projective
+strategy with $0\leq\epsilon\leq1$, it constructs the global pair of
+projective measurements internally and obtains a normalized auxiliary state
+and two concrete swap unitaries satisfying the state and both players'
+Pauli-family distances at the nested construction/extraction scale. This is
+the existence claim of Lemma~\path{lem:qld-unitary}; its proof does not
+require a supplied global measurement. The general range-projection and
+unit-ancilla lemmas apply to the concrete swap operators and Pauli measurements
+through the proved supplied-data transfer above. This yields local isometry
+comparisons for the extracted projective setting, but does not extend the
+construction to arbitrary strategies.
+
+The stronger theorem \path{exists_extractionWitness_fourth_root_rate}
+normalizes the numerical rate of this concrete conclusion to the same
+global-measurement parameter. Starting with the global error
+$\delta_G^{a_0,b_0}$, the scalar absorption theorem bounds the nested
+extraction error by another family member $\delta_G^{a_1,b_1}$. Choose
+$a\geq\max\{a_0,a_1+1\}$ and $b=\min\{b_0,b_1\}$. Monotonicity permits the
+\emph{same} global measurements to carry the larger consistency certificate
+$x=\delta_G^{a,b}$. If $x\leq1$, their established extraction error is at
+most $x\leq x^{1/4}$; if $x>1$, the universal four-error construction gives
+both estimates. Enlarging the extraction constant to at least four yields
+$C(x^{1/4}+md/q)$ in both cases. This normalization concerns the concrete
+swap maps only: it neither identifies the seed-indexed low-degree game with
+the direct carrier nor establishes soundness for arbitrary strategies. The
+separate supplied-data isometry transfer above applies to its witness.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
-\ghissue{123} owns the source-facing composition through
-\path{exists_globalPairWitness}.  \ghissue{47} tracks the separate
-range-projection transfer needed by \path{pauli_soundness}; that theorem must
-be derived from the concrete data rather than stored in the witness.
+\ghissue{123} records the source-facing composition work: both the pulled-apart
+consistency and the source-unitary existence compositions are proved. Other
+issue~\#123 targets remain unfinished; the earlier attempt history is unchanged.
+The direct-carrier proof of the global constructor does not discharge the
+seed-indexed correspondence and direct-law restrictions documented in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+\ghissue{47} tracks the separate range-projection transfer needed
+by \path{pauli_soundness}; that theorem must be derived from the concrete data
+rather than stored in the witness.
+\ghissue{529} records the independent general range-projection and ancilla
+results. \ghissue{586} applies them to the extracted swap maps and both Pauli
+operator families; neither result establishes unrestricted soundness.
+Composing the global-pair and extraction construction with this isometry
+transfer gives, for every admissible parameter tuple, $0\leq\epsilon\leq1$,
+and projective setting, local isometries and a unit auxiliary state whose
+state norm and both complete Pauli-family distances have a common
+$a(md)^a(\epsilon^b+q^{-b}+2^{-bmd})$ bound. The universal constants are
+chosen before the setting; neither global-pair nor extraction data are
+assumptions of the resulting theorem. This is the separately labelled
+projective-setting support result, not Theorem~\path{thm:pauli}: an arbitrary
+successful strategy can now be placed in the required projective setting by
+the questionwise Naimark dilation of issue~\#603. That construction preserves
+the value and the complete Pauli-answer measurements under ground-slice
+compression, and a witness on the dilation pulls back to an original-space
+witness with exactly the same extracted state and state distance. Compression
+does not identify the projective dilated effects with the conjugates of the
+original POVM effects. Issue~\#604 now proves the two complete
+operator-family transfers for this pullback, with bounds
+\(3d_w^{\mathrm{dilated}}+6\|\Delta-\Theta\|^2\) for each player, using the
+range projection and the opposite-player Pauli mirror identity. The estimate
+is summed over all outcomes and has no outcome-cardinality factor. The full
+source error domain and the seed-indexed game correspondence remain separate
+obligations, recorded in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
+\ghissue{602} tracks this restricted composition.
+\ghissue{603} tracks the concrete dilation and original-space state pullback.
+\ghissue{604} tracks the operator-family transfer proved here.
 
 \section{Conclusion}
 
@@ -170,11 +250,27 @@ The printed triangle calculation has repairable numerical errors, and the
 last passage from unitaries to isometries omits a genuine range-projection
 argument.  Neither defect is a counterexample to Pauli soundness.  The former
 is corrected by positive-contraction inequalities and a small-error split;
-the latter remains a named downstream proof obligation whose hypotheses are
-already supplied by the extraction lemma.  Independently of both defects, the
-present extraction declaration is conditional on the global polynomial-pair
-measurement, and that conditionality must be removed before it may be
-advertised as the source lemma.
+the latter has a proved general estimate and an application to the concrete
+extraction data. The global polynomial-pair witness
+and the three pulled-apart consistency estimates are now composed in a proved
+source-facing theorem, including at zero error. The conditional extraction
+theorem remains useful for a supplied global measurement, and its composition
+with the proved global constructor establishes the source-facing existence
+claim of Lemma~\path{lem:qld-unitary} for projective strategies. Its concrete
+isometry transfer, including the state and both operator estimates, is proved
+for supplied extraction data. Composing that transfer with the internally
+constructed data proves the restricted projective-setting isometry bounds.
+The Naimark reduction then removes the projectivity restriction with exact
+value preservation, the operator-family transfer returns both Pauli families
+to the original spaces at $3\delta + 6\delta^2$, the scalar absorption returns
+that shape to the robustness form at prefactor $21a^2$, and monotonicity in
+the error parameter carries the bounds to the rest of the source error
+domain.  Composing these with the projective-setting bounds proves
+\path{pauli_soundness} on the full source domain, with axiom closure
+\path{propext}, \path{Classical.choice} and \path{Quot.sound};
+\ghissue{614} records that composition.  The seed-indexed source-game
+correspondence step remains open, as does the divisibility obligation of
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 
 \bibliographystyle{alpha}
 \bibliography{references}

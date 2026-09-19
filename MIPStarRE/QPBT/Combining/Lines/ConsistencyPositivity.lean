@@ -12,8 +12,8 @@ after separating the two placements along the corresponding tensor
 bipartition, the off-diagonal sum is
 `∑_a (place p₁ E_a) (place p₂ (∑_{b ≠ a} F_b))`, a sum of products of
 positive operators supported on complementary registers.  The placement
-algebra itself — additivity, the image of zero, positivity and the
-commutation of opposite placements — is the shared API of
+algebra itself — additivity, the image of zero, positivity and the commutation
+of opposite placements — is supplied by the placement identities proved in
 `MIPStarRE.QPBT.Combining.Points.PlacementSupport` and
 `MIPStarRE.QPBT.Observables.LineMeasurement.LinePointOverlap`.
 
@@ -41,32 +41,6 @@ namespace ProjectiveSetting
 
 variable {P : AdmissibleParams} {ε : ℝ}
 
-/-- A register placement maps the zero operator to zero. -/
-private theorem place_zero_local (S : ProjectiveSetting P ε) (p : Placement) :
-    S.place p (0 : Op (S.ExpandedLocalSpace p.side)) = 0 := by
-  ext i j
-  cases p <;> simp [place]
-
-/-- Positive operators placed on `AA'` and on `BA''` have a positive product.
-Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
-blueprint `def:expanded-state`. -/
-theorem place_AA'_mul_place_BA''_nonneg (S : ProjectiveSetting P ε)
-    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
-    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
-    0 ≤ S.place .AA' X * S.place .BA'' Y := by
-  exact Commute.mul_nonneg (S.place_nonneg .AA' hX) (S.place_nonneg .BA'' hY)
-    (S.place_comm .AA' .BA'' trivial X Y)
-
-/-- Positive operators placed on `AB''` and on `BB'` have a positive product.
-Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
-blueprint `def:expanded-state`. -/
-theorem place_AB''_mul_place_BB'_nonneg (S : ProjectiveSetting P ε)
-    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
-    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
-    0 ≤ S.place .AB'' X * S.place .BB' Y := by
-  exact Commute.mul_nonneg (S.place_nonneg .AB'' hX) (S.place_nonneg .BB' hY)
-    (S.place_comm .AB'' .BB' trivial X Y)
-
 /-- Positive operators placed on a directed opposite pair of registers have a
 positive product.  Paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
@@ -79,6 +53,24 @@ theorem place_mul_place_nonneg (S : ProjectiveSetting P ε)
     0 ≤ S.place p₁ X * S.place p₂ Y := by
   exact Commute.mul_nonneg (S.place_nonneg p₁ hX) (S.place_nonneg p₂ hY)
     (S.place_comm p₁ p₂ hopp X Y)
+
+/-- Positive operators placed on `AA'` and on `BA''` have a positive product.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
+blueprint `def:expanded-state`. -/
+theorem place_AA'_mul_place_BA''_nonneg (S : ProjectiveSetting P ε)
+    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
+    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
+    0 ≤ S.place .AA' X * S.place .BA'' Y := by
+  exact S.place_mul_place_nonneg .AA' .BA'' (by simp [Placement.IsOpposite]) hX hY
+
+/-- Positive operators placed on `AB''` and on `BB'` have a positive product.
+Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:420-450`,
+blueprint `def:expanded-state`. -/
+theorem place_AB''_mul_place_BB'_nonneg (S : ProjectiveSetting P ε)
+    {X : Op (S.ExpandedLocalSpace .alice)} {Y : Op (S.ExpandedLocalSpace .bob)}
+    (hX : 0 ≤ X) (hY : 0 ≤ Y) :
+    0 ≤ S.place .AB'' X * S.place .BB' Y := by
+  exact S.place_mul_place_nonneg .AB'' .BB' (by simp [Placement.IsOpposite]) hX hY
 
 end ProjectiveSetting
 

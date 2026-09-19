@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Combining.Points.Placement
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.Rigidity.Consistency
 
 /-!
 # Approximate commutation of the field-valued expanded point measurements
@@ -33,7 +34,7 @@ The commutation estimate for the binary refinements is item 2 of
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`; the
 Fourier form of the point effects is `def:expanded-point-measurement`, paper
 lines 384--418.  The role of the transfer in the proof of `lem:qld-4-10` is
-explained in `docs/paper-gaps/qpbt_combined-points-direct.tex`.
+explained in `docs/paper-gaps/qpbt_combined-points-field-valued.tex`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -283,15 +284,6 @@ theorem expPointOp_commutator_eq (S : ProjectiveSetting P ε) (side : PlayerSide
   refine Finset.sum_congr rfl fun rs _ => ?_
   rw [smul_sub]
 
-/-- Formalization-only auxiliary: an operator applied to a state is linear in
-the operator over finite sums. -/
-theorem applyOperatorToState_finsetSum {ι γ : Type*} [Fintype ι] [DecidableEq ι]
-    (s : Finset γ) (M : γ → Op ι) (ψ : EuclideanSpace ℂ ι) :
-    applyOperatorToState (∑ x ∈ s, M x) ψ =
-      ∑ x ∈ s, applyOperatorToState (M x) ψ := by
-  unfold applyOperatorToState
-  simp only [map_sum, LinearMap.sum_apply]
-
 /-- Parseval transfer, pointwise in the point pair: the summed squared norms of
 the placed commutators of the field-valued point effects equal the average over
 `(r, s)` of the squared norms of the placed commutators of the expanded
@@ -324,7 +316,7 @@ theorem sum_norm_place_expPointOp_commutator_sq (S : ProjectiveSetting P ε)
               phaseSign (fixedBinTrace P.model (ab.2 * rs.2))) • v rs := by
     intro ab
     rw [expPointOp_commutator_eq, place_smul, place_finsetSum,
-      WinImplications.applyOperatorToState_smul_op, applyOperatorToState_finsetSum]
+      WinImplications.applyOperatorToState_smul_op, applyOperatorToState_finset_sum]
     congr 1
     refine Finset.sum_congr rfl fun rs _ => ?_
     rw [place_smul, WinImplications.applyOperatorToState_smul_op]
@@ -366,7 +358,7 @@ of the source by the Parseval identity, without loss in the field size.  Paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:466-505`,
 blueprint `blueprint/src/chapter/ch14_qpbt_observables.tex:1139-1210`; the
 role of this form in the proof of `lem:qld-4-10` is explained in
-`docs/paper-gaps/qpbt_combined-points-direct.tex`. -/
+`docs/paper-gaps/qpbt_combined-points-field-valued.tex`. -/
 theorem expPoint_comm :
     ∃ C : ℝ, 1 ≤ C ∧
       ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
