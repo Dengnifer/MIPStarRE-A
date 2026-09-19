@@ -14,15 +14,19 @@ passage, on top of the value-preserving construction
 ## Main results
 
 * `exists_symmetric_projective_strategy_approx` — blueprint
-  `lem:symmetric-strat-approx`, the approximate form in the source's own
-  shape.
+  `lem:symmetric-strat`, the corrected statement of that node: the approximate
+  form in the source's own shape.
 * `exists_symmetric_projective_strategy_of_lt_value` — the same statement in
   slack form.
 
 The exact-attainment assertion printed as `lem:symmetric-strat` is **not**
-proved here or anywhere in this development: it is an open source gap,
-recorded in `docs/paper-gaps/qpbt_symmetrization-attainment.tex` and carried
-by the proof hole of `exists_symmetric_projective_strategy`.
+proved here or anywhere in this development, and is asserted nowhere. It is
+recorded verbatim, unasserted, as the proposition
+`PrintedSymmetricProjectiveAttainmentClaim` in
+`MIPStarRE.QPBT.Games.StrategyClasses`, where its universally quantified form
+is also refuted on the current Lean domain by
+`not_forall_printedSymmetricProjectiveAttainmentClaim`. The analysis is in
+`docs/paper-gaps/qpbt_symmetrization-attainment.tex` and issue `#524`.
 -/
 
 open scoped BigOperators Matrix MatrixOrder ComplexOrder
@@ -89,7 +93,7 @@ theorem exists_strategy_lt_value {G : Game} (hS : Nonempty (Strategy G))
   exact ⟨S, hlt⟩
 
 /-- Approximate symmetrization in slack form, blueprint
-`lem:symmetric-strat-approx`, paper
+`lem:symmetric-strat` in its corrected statement, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:101-132`: for every
 positive slack `δ` a symmetric projective strategy comes within `δ` of the
 game value.  The proof is the source argument verbatim -- choose a strategy
@@ -100,8 +104,8 @@ The hypothesis `Nonempty G.Answer` is the source's standing assumption that
 the answer alphabet is a nonempty finite set; it is load-bearing in the Lean
 domain, where an empty answer alphabet admits no strategy at all while
 `Game.value` is still defined, so the conclusion is then false.  No attainment
-claim is made at `δ = 0`: that is the open source gap of
-`lem:symmetric-strat`, recorded in
+claim is made at `δ = 0`: the printed attainment form is recorded unasserted as
+`PrintedSymmetricProjectiveAttainmentClaim` and analyzed in
 `docs/paper-gaps/qpbt_symmetrization-attainment.tex`. -/
 theorem exists_symmetric_projective_strategy_of_lt_value (G : SymmetricGame)
     (hA : Nonempty G.Answer) (δ : ℝ) (hδ : 0 < δ) :
@@ -119,13 +123,14 @@ theorem exists_symmetric_projective_strategy_of_lt_value (G : SymmetricGame)
   linarith
 
 /-- Approximate symmetrization in the source's own shape, blueprint
-`lem:symmetric-strat-approx`, paper
+`lem:symmetric-strat` in its corrected statement, paper
 `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-132`: if
 `val*(G) = 1 - ε` then for every `ε' > ε` there is a symmetric projective
 strategy of value at least `1 - ε'`.  This is what the source proof of
-`lem:symmetric-strat` establishes; the printed conclusion at `ε' = ε`
-additionally asserts that the supremum defining `Game.value` is attained and
-remains the open source gap recorded in
+`lem:symmetric-strat` establishes, and it is the official formalization of
+that node.  The printed conclusion at `ε' = ε` additionally asserts that the
+supremum defining `Game.value` is attained; it is asserted nowhere here and is
+recorded unasserted as `PrintedSymmetricProjectiveAttainmentClaim`, analyzed in
 `docs/paper-gaps/qpbt_symmetrization-attainment.tex`.
 
 As in `exists_symmetric_projective_strategy_of_lt_value`, `Nonempty G.Answer`

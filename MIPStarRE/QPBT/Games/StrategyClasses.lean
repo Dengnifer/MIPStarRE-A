@@ -866,34 +866,97 @@ theorem nonempty_of_probability {α : Type*}
   rw [hs] at hsum
   norm_num at hsum
 
-/-- Source symmetrization statement blueprint
-`lem:symmetric-strat`, paper `06_nonlocal_games_and_mipstar.tex:94-130`.
-The attainment defect is `rem:symmetric-strat-limit` and is tracked in
-`docs/paper-gaps/qpbt_symmetrization-attainment.tex`.
+/-- The attainment statement printed as `lem:symmetric-strat`, paper
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-99`, recorded
+verbatim as a proposition and **not asserted anywhere in this development**.
 
-**Unfaithful:** The `sorry` is the source's unattested attainment step:
-`Game.value` is a supremum over unbounded finite dimensions, whereas the cited
-argument, `06_nonlocal_games_and_mipstar.tex:101-132`, constructs a strategy
-only above every strict lower bound. What is proved is the value-preserving
-given-strategy form `exists_symmetric_projective_strategy_of_strategy` and,
-on top of it, the approximate form
-`exists_symmetric_projective_strategy_approx`; what remains is the passage
-from that family to a single strategy of value at least `1 - ε`. Documented in
-`docs/paper-gaps/qpbt_symmetrization-attainment.tex` and issue `#524` (the
-earlier tracker `#98` is closed). A second, independent defect is recorded in
-the same note: on an empty answer alphabet this Lean domain has no strategy at
-all while `Game.value` is the totalized supremum of the empty set, so the
-statement as printed is false there; the approximate form therefore carries
-`Nonempty G.Answer` as an explicit boundary hypothesis.
-Elimination: prove an independent finite-dimensional attainment theorem for
-`Game.value` and discharge the `sorry` with it. The source statement is kept
-as printed; it may be weakened only by a future documented statement
-correction, not by this proof. -/
-theorem exists_symmetric_projective_strategy (G : SymmetricGame) (ε : ℝ)
-    (hε : 0 ≤ ε) (h : G.toGame.value = 1 - ε) :
+What the paper prints: if `G` is a symmetric game and `val*(G) = 1 - ε` for
+some `ε ≥ 0`, then there exists a symmetric projective strategy `S` with
+`val*(G, S) ≥ 1 - ε`. The binders of this definition are the binders of that
+sentence, with its two hypotheses as antecedents.
+
+Why it is not established. The cited argument,
+`06_nonlocal_games_and_mipstar.tex:101-132`, fixes `ε' > ε`, draws a strategy
+above the strict lower bound `1 - ε'` from the supremum defining `Game.value`,
+and symmetrizes it while preserving its value. It never produces a strategy at
+the bound itself, and `Game.value` is a supremum over unbounded finite
+dimension, which need not be attained. What the argument does prove is
+formalized and proved here: the value-preserving given-strategy form
+`exists_symmetric_projective_strategy_of_strategy` below, and on top of it the
+approximate forms `exists_symmetric_projective_strategy_approx` and
+`exists_symmetric_projective_strategy_of_lt_value` in
+`MIPStarRE.QPBT.Games.Symmetrization`, which carry the source's nonempty
+answer alphabet as an explicit hypothesis.
+
+Moreover the universally quantified printed claim is refuted outright on this
+Lean domain, where the answer alphabet may be empty:
+`not_forall_printedSymmetricProjectiveAttainmentClaim` below.
+
+This is a documented statement correction, not a weakening chosen for
+convenience: the printed sentence stays visible here, the blueprint node
+`lem:symmetric-strat` states the corrected form that the source argument
+proves, `rem:symmetric-strat-limit` states the printed form beside it, and the
+analysis is in `docs/paper-gaps/qpbt_symmetrization-attainment.tex` and issue
+`#524`. -/
+def PrintedSymmetricProjectiveAttainmentClaim (G : SymmetricGame) (ε : ℝ) :
+    Prop :=
+  0 ≤ ε → G.toGame.value = 1 - ε →
     ∃ S : SymmetricStrategy G, S.toStrategy.IsProjective ∧
-      1 - ε ≤ S.toStrategy.value := by
-  sorry
+      1 - ε ≤ S.toStrategy.value
+
+namespace SymmetrizationObstruction
+
+/-- A symmetric game with one question and no answers. It witnesses that the
+Lean domain of `lem:symmetric-strat`, paper
+`06_nonlocal_games_and_mipstar.tex:74-92`, admits an empty answer alphabet,
+which the source's finite alphabets are never taken to be. Analyzed in
+`docs/paper-gaps/qpbt_symmetrization-attainment.tex`, section "An additional
+obstruction in the formal domain". -/
+def emptyAnswerGame : SymmetricGame where
+  Question := Unit
+  Answer := Empty
+  μ := uniformDistribution (Unit × Unit)
+  μ_prob := uniformDistribution_isProbability (Unit × Unit)
+  μ_symm := by intros; rfl
+  decide := fun _ _ a _ => nomatch a
+  decide_symm := by intro _ _ a; exact isEmptyElim a
+
+/-- A unit state and a complete measurement rule out an empty answer alphabet,
+so `emptyAnswerGame` has no strategy at all. -/
+theorem no_strategy : IsEmpty (Strategy emptyAnswerGame.toGame) := by
+  refine ⟨fun S => ?_⟩
+  have hι := nonempty_of_unit_vector S.ψ S.ψ_norm
+  letI : Nonempty S.ιA := hι.map Prod.fst
+  have ha : Nonempty Empty := measurement_outcome_nonempty (S.A ())
+  exact isEmptyElim (Classical.choice ha)
+
+/-- The real conditional supremum of the empty set of strategy values is zero,
+a totalization convention rather than a least-upper-bound property. -/
+theorem value_eq_zero : emptyAnswerGame.toGame.value = 0 := by
+  letI := no_strategy
+  simp [Game.value, Set.range_eq_empty, Real.sSup_empty]
+
+end SymmetrizationObstruction
+
+/-- The printed attainment claim of `lem:symmetric-strat` is false on the Lean
+domain it is stated over: `SymmetrizationObstruction.emptyAnswerGame` satisfies
+both hypotheses at `ε = 1` and has no strategy whatsoever.
+
+This refutes only the unrestricted claim over the current Lean game structure,
+which admits an empty answer alphabet; it settles nothing about attainment for
+symmetric games with nonempty answer alphabets, where the source's own
+obstruction -- the unattained supremum over unbounded dimension -- is the one
+that remains. Both are recorded in
+`docs/paper-gaps/qpbt_symmetrization-attainment.tex` and in
+`audits/2026-09-12_issue-524-symmetrization-obstruction.md`. -/
+theorem not_forall_printedSymmetricProjectiveAttainmentClaim :
+    ¬ ∀ (G : SymmetricGame) (ε : ℝ),
+        PrintedSymmetricProjectiveAttainmentClaim G ε := by
+  intro h
+  obtain ⟨S, -, -⟩ :=
+    h SymmetrizationObstruction.emptyAnswerGame 1 zero_le_one
+      (by simpa using SymmetrizationObstruction.value_eq_zero)
+  exact SymmetrizationObstruction.no_strategy.false S.toStrategy
 
 /-- Value-preserving formalization-only form of `lem:symmetric-strat` starting
 from a specified near-optimal strategy; blueprint
