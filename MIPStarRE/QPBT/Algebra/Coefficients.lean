@@ -1,5 +1,4 @@
-import Mathlib.Algebra.Polynomial.OfFn
-import Mathlib.Algebra.Polynomial.Roots
+import Mathlib
 
 /-!
 # Coefficient polynomials and finite-field collision bounds
@@ -13,6 +12,11 @@ coefficient vectors agree at no more parameters than their degree bound.
 - Blueprint `def:ld-win-predicate` and `lem:coefficient-polynomial-agreement`.
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:331-344`.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:950-955`.
+
+Note: this module contributes declarations to the comparator statement closure
+of the QPBT headline theorems, which must elaborate in the same environment as
+the Mathlib-only `ChallengeQPBT.lean`.  Keep the full `import Mathlib`; do not
+narrow it.  See `docs/comparator.md`, "Environment alignment".
 -/
 
 open scoped BigOperators
