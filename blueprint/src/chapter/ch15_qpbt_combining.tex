@@ -1134,14 +1134,15 @@ assembled by Fourier averaging.
 	all $a, b$, and $Z^1_b Z^2_b = Z^2_b Z^1_b$ for every $b$. Put
 	$R^i_{a,b} = Z^i_b X^i_a Z^i_b$ and $W_b = Z^1_b Z^2_b$. Then
 	\[
-		\sum_{a,b} \bra\psi R^1_{a,b} R^2_{a,b} \ket\psi
+		\sum_{a,b} \operatorname{Re}\!\left(\bra\psi R^1_{a,b} R^2_{a,b} \ket\psi\right)
 		= \lVert\psi\rVert^2
 		- \tfrac12 \sum_b \lVert (Z^1_b - Z^2_b)\ket\psi \rVert^2
 		- \tfrac12 \sum_{a,b} \lVert (X^1_a - X^2_a) W_b \ket\psi \rVert^2 ,
 	\]
 	and consequently
 	\[
-		\lVert\psi\rVert^2 - \sum_{a,b} \bra\psi R^1_{a,b} R^2_{a,b} \ket\psi
+		\lVert\psi\rVert^2
+		- \sum_{a,b} \operatorname{Re}\!\left(\bra\psi R^1_{a,b} R^2_{a,b} \ket\psi\right)
 		\;\le\; \tfrac12 \sum_b \lVert (Z^1_b - Z^2_b)\ket\psi \rVert^2
 		+ \tfrac32 \Bigl( \sum_a \lVert (X^1_a - X^2_a)\ket\psi \rVert^2
 		+ K_1 + K_2 \Bigr) ,
@@ -1167,7 +1168,7 @@ assembled by Fourier averaging.
 		lem:qld-placement-completeness, def:consistency}
 	The commutation hypotheses and idempotence collapse each summand to
 	$\bra{W_b \psi} X^1_a X^2_a \ket{W_b \psi}$. The identity
-	$\sum_c \bra{w} P_c Q_c \ket{w} = \lVert w \rVert^2
+	$\sum_c \operatorname{Re}\!\left(\bra{w} P_c Q_c \ket{w}\right) = \lVert w \rVert^2
 	- \tfrac12 \sum_c \lVert (P_c - Q_c) w \rVert^2$ for two projective
 	measurements, applied once with $w = W_b \psi$ and once with $w = \psi$,
 	gives the first display. For the second, write
@@ -1201,7 +1202,7 @@ assembled by Fourier averaging.
 	\cite{Ji2020MIPStar}; it applies Lemma~\ref{lem:ortho} once for every
 	point pair, as in the proof of Lemma~4.10 of \cite{Ji2020MIPStar}
 	(\texttt{references/qpbt-paper/14\_analysis\_of\_the\_pauli\_basis\_test.tex},
-	lines~786--790).
+	lines~782--785).
 
 	First, a scalar fact: if the weights of a distribution $\mathcal D$ sum to
 	at most one and $b \ge 0$, then
@@ -2446,9 +2447,7 @@ analyzed, together with candidate repairs, in
 	space of the side of $p$, and operators on opposite placements commute:
 	if $p_1$ and $p_2$ are opposite, then
 	$(A)_{p_1} (B)_{p_2} = (B)_{p_2} (A)_{p_1}$ for every $A$ on the side of
-	$p_1$ and every $B$ on the side of $p_2$. Together with the identity
-	above this makes each placement a unital $*$-homomorphism, so it carries a
-	projector to a contraction.
+	$p_1$ and every $B$ on the side of $p_2$.
 \end{lemma}
 \begin{proof}
 	\leanok
