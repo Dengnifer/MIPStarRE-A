@@ -865,13 +865,13 @@ step_build() {
   fi
 
   if [ -n "$INTEGRATION_HEAD" ]; then
-    echo "+ lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit"
-    run_outside_git_env lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit
+    echo "+ lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"
+    run_outside_git_env lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
   else
     echo "+ lake build"
     run_outside_git_env lake build
-    echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit"
-    run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit
+    echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"
+    run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
   fi
 
   # pr-ci.yml:158-159
