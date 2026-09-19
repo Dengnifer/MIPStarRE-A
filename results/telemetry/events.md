@@ -8324,3 +8324,40 @@ not actual commit/publication hooks. No productive session was killed.
   at 08:26Z (caps primary 2 / second 0 / total 2), key-watch now counts 429 retry-limit errors, the affected lanes were requeued.
   The meta session retires at the owner's word (08:2xZ); no further Opus subagents. Open for the main: repair the conflicted refreshes of
   432 487 460; retarget PR 430 to main; PR 552 size ruling and the 552 → 554/556 merge order (owner).
+
+### 2026-09-09T10:36Z - PR470 pending refresh conflict recovery
+
+- Session orc-461-20260909-02 continues the failed refresh from immutable
+  parents 8a46bbf7f04c4b147fb69d9d49582489d77db47e and
+  aa45ea711f2b77c2a04319f9bc0fbc2abc482676. Dispatcher2513251 exhausted
+  admission before starting a model; its original task and capacity-failure
+  log remain in watchdog/lanes. This continuation is operational recovery,
+  not a fresh mathematical attempt. The existing proof iteration remains2/5.
+- The retained session ledger contains six completed PR470 sessions totaling
+  11538 recorded wall seconds: reviewer01=1459, prover01=1339,
+  reviewer02=4123, prover02=332, orc461-01=3568, reviewer04=717.
+  This is the recorded-session subtotal, not a new proof budget or a claim
+  that unrecorded admission waiting consumed model time. The current session
+  retains its45-minute bound from actual admission; the dispatcher records
+  its terminal usage. B11 second-only routing and parked B8 remain unchanged.
+- Read both complete parent versions of ConsistencyPositivity.lean and the
+  cited paper passages: section6 lines232-248 and section14 lines420-450,
+  1052-1058. Retain the incoming public reindexOp_nonneg declaration, with
+  its existing proof through Quantum.reindex_nonneg, and every first-parent
+  proof using the shared placement calculus. No new proof or assumption is
+  introduced. All five first-parent public signatures and all six incoming
+  public signatures remain byte-identical.
+- Statement integrity: the paper uses positive measurement effects on
+  complementary registers; Lean retains positivity and opposite-placement
+  hypotheses with the same nonnegative product and consistency-integrand
+  conclusions. Finite index types encode the finite-dimensional setting.
+  Reindexing positivity is explicitly a formalization-only auxiliary.
+  Verdict: faithful boundary hypotheses; no changed paper statement.
+- The resolved file type-checks without warnings and its proof-hole and
+  forbidden-bypass scan is empty. Line multiplicities from both immutable
+  parents are preserved in sessions.jsonl, builds.jsonl, stages.jsonl,
+  events.md and design-decisions.md. The merge-loss guard, focused collision
+  check, checked publication and canonical locked CI provide the remaining
+  recovery evidence; final exact-head results are recorded in the session
+  handoff. Independent review is a separate-session gate; this author
+  launches no child, native or Fable worker and does not merge the PR.

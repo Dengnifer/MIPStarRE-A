@@ -925,9 +925,9 @@ assembled by Fourier averaging.
 \begin{lemma}[Formalization support for affine parameter resampling]
 	\label{lem:line-point-parameter-resampling}
 	\lean{MIPStarRE.QPBT.avgOver_uniform_lineRepMap_resample_parameter}
-	\lean{MIPStarRE.QPBT.avgOver_aLinePointDist_resample_parameter,
-		MIPStarRE.QPBT.avgOver_dLinePointDist_resample_parameter,
-		MIPStarRE.QPBT.avgOver_linePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_aLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_dLinePointDist_resample_parameter}
+	\lean{MIPStarRE.QPBT.avgOver_linePointDist_resample_parameter}
 	\leanok
 	\uses{def:line-point-dist}
 	Let $F$ be a real-valued function of a line and a point of $\F_q^m$, and
@@ -1027,6 +1027,157 @@ assembled by Fourier averaging.
 	$v_{\ell_0} \ne 0$, the indicator $\bone{v_\ell \ne 0}$ is redundant
 	against $\bone{\ell = \ell_0}$ on both sides, which turns the weighted
 	inequality into the stated one.
+\end{proof}
+
+\begin{lemma}[Formalization support: axis lines have nonzero direction]
+	\label{lem:axis-line-nonzero-direction}
+	\lean{MIPStarRE.QPBT.aLinePointDist_zero_direction_mass}
+	\leanok
+	\uses{def:line-point-dist}
+	The axis-parallel component of the line-point distribution
+	(Definition~\ref{def:line-point-dist}) gives mass $0$ to the event
+	$v_\ell = 0$. This is a formalization-only auxiliary; the paper uses the
+	same fact implicitly when it applies Schwartz--Zippel along a sampled
+	axis-parallel line.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line-point-dist}
+	The axis-parallel sampler returns the coordinate direction indexed by the
+	sampled seed, whose entry at that coordinate is $1$, hence the direction
+	is nonzero and the indicator of $v_\ell = 0$ vanishes pointwise.
+\end{proof}
+
+\begin{definition}[Formalization support: the nondegenerate line-pasting mass and law]
+	\label{def:nondegenerate-line-pasting-law}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist}
+	\leanok
+	\uses{def:line-point-dist, lem:pasting}
+	Draw two independent pairs $(\ell_1,x_1)$ and $(\ell_2,x_2)$ from the
+	line-point distribution (Definition~\ref{def:line-point-dist}). The
+	\emph{nondegenerate pasting mass} is the mass of the event
+	$v_{\ell_1}\ne0$ under that product law. The \emph{nondegenerate
+	line-pasting law} is the product law conditioned on that event and
+	relabelled as
+	$\bigl((\ell_1,\ell_2),(\ell_2,x_2)\bigr),(\ell_1,x_1)$, which is the
+	question--answer shape required by Lemma~\ref{lem:pasting}. Both objects
+	are proof-only devices of the formalization; neither occurs in
+	\cite{Ji2020MIPStar}.
+\end{definition}
+
+\begin{lemma}[Formalization support: the nondegenerate line-pasting law is normalized]
+	\label{lem:nondegenerate-line-pasting-normalized}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingMass_bounds}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_mass_pos}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_isProbability}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-law,
+		lem:axis-line-nonzero-direction, def:line-point-dist}
+	The nondegenerate pasting mass of
+	Definition~\ref{def:nondegenerate-line-pasting-law} lies between $1/2$
+	and $1$. In particular it is positive, so the conditioning is defined and
+	the nondegenerate line-pasting law is a probability distribution.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:axis-line-nonzero-direction, def:line-point-dist}
+	The event constrains only the first sample, so its product-law mass is its
+	mass under the line-point distribution. That distribution is the equal
+	mixture of the axis-parallel and the diagonal component; the axis-parallel
+	one has no zero-direction mass by
+	Lemma~\ref{lem:axis-line-nonzero-direction} and so contributes $1/2$,
+	the diagonal one contributes a nonnegative amount, and the indicator is
+	bounded by $1$. Normalizing a positive-mass restriction and pushing it
+	forward along a relabelling preserve normalization.
+\end{proof}
+
+\begin{lemma}[Formalization support: conditional collision from fiber averages]
+	\label{lem:collision-bound-from-fiber-averages}
+	\lean{MIPStarRE.QPBT.collision_bound_of_fiber_averages}
+	\leanok
+	\uses{lem:pasting}
+	Let a distribution on pairs consisting of a first question and a second
+	answer index be given, together with an evaluation of the second answer
+	index by a second question. Suppose that for every value of the first
+	coordinate and every two distinct second questions the unnormalized
+	collision mass carried by that fiber is at most $\eta$ times the mass of
+	the fiber itself. Then the conditional collision hypothesis that
+	Lemma~\ref{lem:pasting} takes with parameter $\eta$ holds. This is a
+	formalization-only normalization adapter; it converts unnormalized fiber
+	estimates into the normalized predicate and asserts nothing new about the
+	game.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:pasting}
+	The mass of a fiber is the weight the first marginal gives to the
+	corresponding first question, so dividing the assumed inequality by that
+	weight, which the predicate assumes positive, gives the normalized bound.
+\end{proof}
+
+\begin{lemma}[Formalization support: weighted collision for two independent line-point samples]
+	\label{lem:prod-nondegenerate-weighted-line-collision}
+	\lean{MIPStarRE.QPBT.prod_linePointDist_nondegenerate_weighted_collision_le}
+	\leanok
+	\uses{lem:nondegenerate-weighted-line-collision, def:line-point-dist,
+		def:ideg-deg-polynomials}
+	Let $f\ne g$ be polynomials of degree at most $c$ and let $w\ge0$ be a
+	weight depending on the first sampled line and on the whole second
+	sample. For two independent draws $(\ell_1,x_1)$ and $(\ell_2,x_2)$ from
+	the line-point distribution (Definition~\ref{def:line-point-dist}),
+	\[
+		\E\bigl[\bone{v_{\ell_1}\ne0}\,w(\ell_1,(\ell_2,x_2))\,
+			\bone{f(x_1)=g(x_1)}\bigr]
+		\le\frac{c}{q}\,
+			\E\bigl[\bone{v_{\ell_1}\ne0}\,w(\ell_1,(\ell_2,x_2))\bigr].
+	\]
+	No condition is imposed on the second direction. The restriction to
+	nonzero first directions is part of the assertion, exactly as in
+	Lemma~\ref{lem:nondegenerate-weighted-line-collision}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:nondegenerate-weighted-line-collision}
+	Write the average against the product law as the iterated average with
+	the second sample on the outside, and apply
+	Lemma~\ref{lem:nondegenerate-weighted-line-collision} for each fixed
+	second sample to the nonnegative weight
+	$\ell\mapsto w(\ell,(\ell_2,x_2))$.
+\end{proof}
+
+\begin{lemma}[Formalization support: collision bound for the nondegenerate line-pasting law]
+	\label{lem:nondegenerate-line-pasting-collision}
+	\lean{MIPStarRE.QPBT.nondegenerateLinePastingDist_collision_bound}
+	\leanok
+	\uses{def:nondegenerate-line-pasting-law,
+		lem:collision-bound-from-fiber-averages,
+		lem:prod-nondegenerate-weighted-line-collision, lem:pasting,
+		def:ideg-deg-polynomials}
+	Fix an admissible tuple $(q,m,d)$ and a degree bound $c$. The
+	nondegenerate line-pasting law of
+	Definition~\ref{def:nondegenerate-line-pasting-law}, whose second answer
+	is evaluated by sending a line-point pair to the optional evaluation at
+	that point of a polynomial of degree at most $c$, satisfies the
+	conditional collision hypothesis of Lemma~\ref{lem:pasting} with
+	$\eta=c/q$. This is the formalization-only Schwartz--Zippel conditioning
+	step for the pasting argument inside the proof of
+	Lemma~\ref{lem:qld-xz-lines}
+	(\texttt{14\_analysis\_of\_the\_pauli\_basis\_test.tex:950--963}); the
+	measurement side of that argument is separate.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:collision-bound-from-fiber-averages,
+		lem:prod-nondegenerate-weighted-line-collision,
+		lem:nondegenerate-line-pasting-normalized}
+	Reduce the normalized predicate to unnormalized fiber estimates with
+	Lemma~\ref{lem:collision-bound-from-fiber-averages}. Unfolding the
+	conditioning multiplies both sides by the retained mass, which is
+	positive by Lemma~\ref{lem:nondegenerate-line-pasting-normalized}, and
+	turns the claim into the estimate of
+	Lemma~\ref{lem:prod-nondegenerate-weighted-line-collision} for the
+	indicator weight of the fixed first question.
 \end{proof}
 
 \begin{lemma}[Combined line measurements]
@@ -1734,6 +1885,7 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 \begin{lemma}[Formalization support: a uniform point under the directly indexed law]
 	\label{lem:qld-sublines-uniform-point}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_uncurry}
+	\lean{MIPStarRE.QPBT.uniformDistribution_map_lineRepMap_add_smul}
 	\lean{MIPStarRE.QPBT.uniformDistribution_map_directLine_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_uniform_directLdSpace_line_add_smul}
 	\lean{MIPStarRE.QPBT.avgOver_directLinePointDist_line_add_smul}

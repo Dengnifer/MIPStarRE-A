@@ -920,6 +920,40 @@ $C_0=1$, $a=2.5\cdot10^9$, and $b=1/80000$.
 Theorem~\ref{lem:ld-transport-absorption} applies to each defect.
 \end{proof}
 
+\begin{theorem}[Formalization support: directly indexed soundness for $k=1$
+without projectivity]
+\label{lem:direct-ld-soundness-k-one-any-strategy}
+\lean{MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, lem:naimark-helper, def:ld-meas,
+def:consistency}
+This is not a named statement of \cite{Ji2020MIPStar}. It removes the
+projectivity premise from Theorem~\ref{lem:direct-ld-soundness-k-one}.
+With the same universal constants $a\ge1$ and $0<b\le1$: for every
+directly indexed parameter tuple $D=(q,m,d,k)$ with $k=1$, every
+$\eps>0$, and every strategy for the directly indexed game --- not
+assumed projective --- of value at least $1-\eps$, there are
+polynomial-tuple POVMs $G^{\mathrm A},G^{\mathrm B}$ on the two original
+player carriers satisfying the same three conclusions of
+Theorem~\ref{lem:direct-ld-soundness-k-one} with the same error
+$\delta_{\mathrm{ld}}(\eps,q,m,d,k)$. The returned POVMs are not
+asserted to be projective. This node records only that transport; it
+does not complete Lemma~\ref{lem:qld-4-7}.
+\end{theorem}
+\begin{proof}
+\leanok
+\uses{lem:direct-ld-soundness-k-one, lem:naimark-helper}
+Dilate both question-indexed POVM families by the one-measurement Naimark
+construction of Lemma~\ref{lem:naimark-helper}. The dilated strategy is
+projective and its value is at least $1-\eps$, so
+Theorem~\ref{lem:direct-ld-soundness-k-one} applies to it and returns two
+polynomial-tuple POVMs. Compress them to the original carriers at the
+distinguished ancillary coordinate. Compression against the padded state
+leaves each of the three consistency defects unchanged, so the error
+function and its universal constants are the same as in the projective
+statement.
+\end{proof}
+
 \begin{theorem}[Formalization support: point agreement and residue compression]
 \label{lem:ld-point-agreement}
 \lean{MIPStarRE.QPBT.directLdPointPair_consistencyDefect_le}
