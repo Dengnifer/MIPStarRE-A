@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Combining.Lines.Construction
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
+import MIPStarRE.QPBT.Combining.Lines.ConditionalConsistency
 import MIPStarRE.QPBT.Combining.Lines.Marginal
 import MIPStarRE.QPBT.Combining.Lines.ConsistencyPositivity
 import MIPStarRE.QPBT.Combining.Lines.ConditionalCollision
