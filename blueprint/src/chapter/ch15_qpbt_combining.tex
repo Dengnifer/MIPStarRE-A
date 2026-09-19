@@ -2606,6 +2606,7 @@ analyzed, together with candidate repairs, in
 	\lean{MIPStarRE.QPBT.sum_placed_measurement_products_eq_one}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_mul}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_comm}
+	\lean{MIPStarRE.QPBT.ProjectiveSetting.place_conjTranspose_mul_self_le_one}
 	\leanok
 	\uses{def:symmetric-equivalents, def:povm-conventions}
 	This auxiliary lemma isolates the finite-sum identities used in
@@ -2632,7 +2633,9 @@ analyzed, together with candidate repairs, in
 	space of the side of $p$, and operators on opposite placements commute:
 	if $p_1$ and $p_2$ are opposite, then
 	$(A)_{p_1} (B)_{p_2} = (B)_{p_2} (A)_{p_1}$ for every $A$ on the side of
-	$p_1$ and every $B$ on the side of $p_2$.
+	$p_1$ and every $B$ on the side of $p_2$. If moreover $E$ is a projector
+	on that space, then $(E)_p$ is a contraction,
+	$(E)_p^\dagger (E)_p \le \Id$.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -2648,7 +2651,11 @@ analyzed, together with candidate repairs, in
 	Multiplicativity and opposite-placement commutation are read off from the
 	expression of each placement as a reindexed tensor factor: the two
 	operands of a product sit in the same factor, and two opposite placements
-	sit in different factors of one bipartition.
+	sit in different factors of one bipartition. For the contraction bound,
+	multiplicativity and compatibility with the adjoint turn
+	$(E)_p^\dagger (E)_p$ into $(E^\dagger E)_p = (E)_p$ for a projector
+	$E$, and $E \le \Id$ is carried to $(E)_p \le \Id$ because a placement
+	is positive and preserves the identity.
 \end{proof}
 
 \begin{lemma}[Formalization support for averaged affine coarse-graining]
