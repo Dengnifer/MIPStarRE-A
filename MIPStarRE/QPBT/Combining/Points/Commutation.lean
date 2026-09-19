@@ -128,7 +128,7 @@ theorem fixedCharacter_neg (x : PauliScalar P) :
 /-- Fourier cancellation for the fixed trace character: the character sums to
 the field size at `0` and to zero elsewhere.  This is `lem:cancellation` for
 the one-dimensional space, blueprint
-`blueprint/src/chapter/ch11_qpbt_algebra.tex:686`, paper
+`blueprint/src/chapter/ch11_qpbt_algebra.tex:697`, paper
 `references/qpbt-paper/04_preliminaries.tex:1124-1132`. -/
 theorem sum_fixedCharacter_mul (c : PauliScalar P) :
     ∑ a : PauliScalar P, phaseSign (fixedBinTrace P.model (a * c)) =
