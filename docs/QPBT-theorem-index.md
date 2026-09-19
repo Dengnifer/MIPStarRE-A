@@ -192,8 +192,8 @@ zero-direction completion, reversed observable indices, and a label typo.
 | `MIPStarRE.QPBT.win_ms_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:123` | Success implies the Magic-Square-consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
 | `MIPStarRE.QPBT.ProjectiveSetting` | `MIPStarRE/QPBT/Observables/Defs.lean:49` | The working setting of the analysis: a projective strategy of value at least `1 - ε` for the test, with its expanded state. | — | `def:strategy-observables`, `ch14:582` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.ProjectiveSetting.pointObs` | `MIPStarRE/QPBT/Observables/Defs.lean:614` | The `±1` point observables extracted from the point measurements. | — | `def:strategy-observables`, `ch14:582` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.pointObs_self_consistent` | `MIPStarRE/QPBT/Observables/WinImplications.lean:275` | The point observables of the two players agree on the state up to a controlled defect. | `lem:qld-win-implications-obs`, `14:197-362` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
-| `MIPStarRE.QPBT.pointObs_twisted_commutation` | `MIPStarRE/QPBT/Observables/WinImplications.lean:293` | The **twisted commutation** relation for the point observables, on average and up to a controlled defect. | `lem:qld-win-implications-obs`, `14:197-362` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.pointObs_self_consistent` | `MIPStarRE/QPBT/Observables/WinImplications.lean:275` | The point observables of the two players agree on the state up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
+| `MIPStarRE.QPBT.pointObs_twisted_commutation` | `MIPStarRE/QPBT/Observables/WinImplications.lean:293` | The **twisted commutation** relation for the point observables, on average and up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: same note |
 | `MIPStarRE.QPBT.ProjectiveSetting.exists_twistedCommutator_avg_le` | `MIPStarRE/QPBT/Observables/ExpandedCommutation.lean:188` | The averaged twisted-commutator bound in the expanded picture. | — | — | S | support |
 | `MIPStarRE.QPBT.IsAnticommuting` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:34` | A tuple of observables pairwise anticommutes. | — | `def:anticommuting-tuple`, `ch14:132` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.anticommProb_ge_of_one_le_md` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:442` | The lower bound on the probability that a random pair of the sampled tuple anticommutes. | `fact:omega-anticomm-prob`, `14:70-78` | `fact:omega-anticomm-prob`, `ch14:159` (stmt ✓, proof ✓) | S | correction: [`qpbt_anticommuting-probability`](paper-gaps/qpbt_anticommuting-probability.tex); hypothesis: `1 ≤ m·d` [^md] |
@@ -222,6 +222,12 @@ zero-direction completion, reversed observable indices, and a label typo.
 | `MIPStarRE.QPBT.tildeObs_twisted_commutation` | `MIPStarRE/QPBT/Extraction/Observables.lean:331` | The extracted observables satisfy the twisted commutation relation, with the full trace phase. | `14:1451-1456` | `lem:tildew-product-form`, `ch16:199` (stmt ✓, proof ✓) | S | correction: [`qpbt_cross-basis-phase`](paper-gaps/qpbt_cross-basis-phase.tex) |
 | `MIPStarRE.QPBT.exists_pulled_apart_consistency` | `MIPStarRE/QPBT/Extraction/Construction.lean:46` | Pulling the X and Z measurements apart: the extracted measurements are consistent with the point measurements. | `lem:qld-construct-the-paulis`, `14:1463-1481` | `lem:qld-construct-the-paulis`, `ch16:241` (stmt ✓, proof ✓) | S | correction: [`qpbt_extraction-transfer`](paper-gaps/qpbt_extraction-transfer.tex), [`qpbt_decoding-identity`](paper-gaps/qpbt_decoding-identity.tex) |
 | `MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness` | `MIPStarRE/QPBT/Extraction/StateExtraction.lean:109` | The auxiliary state extraction, from a global-pair witness. | — | — | S | support |
+| `MIPStarRE.QPBT.exists_extractionWitness` | `MIPStarRE/QPBT/Extraction/SourceUnitary.lean:34` | **The extraction-to-soundness bridge.** For every admissible tuple, every `0 ≤ ε ≤ 1` and every projective setting: a global-pair witness together with an extraction witness — the two swap unitaries, the auxiliary state and the Pauli transport — at the nested construction/extraction scale. This is the assembly the soundness layer consumes: `exists_projective_setting_isometry_bounds` (section 4) discharges its hypotheses from exactly this theorem (`Soundness/ProjectiveSetting.lean:48`). | `lem:qld-unitary`, `14:1669-1685` | `lem:qld-unitary`, `ch16:767` (stmt ✓, proof ✓) | S | correction: [`qpbt_extraction-transfer`](paper-gaps/qpbt_extraction-transfer.tex), [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] [^transfer] |
+
+[^transfer]: The Lean statement is the *unitary* conclusion of the source
+    lemma. The subsequent range-projection step that turns those unitaries into
+    the isometries of the printed soundness theorem is not asserted here; the
+    blueprint node records the same separation, and the gap note carries it.
 
 [^unmarked]: This is the one node in the chain whose blueprint entry carries
     **neither** a statement-level nor a proof-level `\leanok`, and that is
@@ -325,7 +331,10 @@ Two cautions, both learned while producing this index:
 ### Raw output
 
 Produced by the probe at commit `c6c8c2f2d34add9aebf15872f50a0f18039e4d46`.
-Format: `AX <requested name> <resolved name> [<axioms>]`.
+Format: `AX <requested name> <resolved name> [<axioms>]`. The final row,
+`exists_extractionWitness`, was probed in a later run when that declaration was
+added to the index; no `.lean` file changed between the two runs, so it reports
+on the same Lean tree as the rest.
 
 ```text
 AX	Game	MIPStarRE.QPBT.Game	[propext, Classical.choice, Quot.sound]
@@ -401,6 +410,7 @@ AX	anticommProb_ge_of_one_le_md	MIPStarRE.QPBT.anticommProb_ge_of_one_le_md	[pro
 AX	tildeObs_twisted_commutation	MIPStarRE.QPBT.tildeObs_twisted_commutation	[propext, Classical.choice, Quot.sound]
 AX	exists_pulled_apart_consistency	MIPStarRE.QPBT.exists_pulled_apart_consistency	[propext, Classical.choice, Quot.sound]
 AX	exists_extraction_aux_ofGlobalPairWitness	MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness	[propext, Classical.choice, Quot.sound]
+AX	exists_extractionWitness	MIPStarRE.QPBT.exists_extractionWitness	[propext, Classical.choice, Quot.sound]
 ```
 
 ---
