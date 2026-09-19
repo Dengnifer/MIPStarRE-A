@@ -310,6 +310,7 @@ Each displayed construction estimate below has its own universal constant $C_E \
 	or the unrestricted conclusion of Lemma~\ref{lem:qld-construct-the-paulis}.
 \end{example}
 \begin{proof}
+	\leanok
 	\uses{lem:qld-4-7, lem:qld-constructing-the-paulis-helper, def:expanded-point-measurement, def:tilde-m-measurement, def:tau-dot-product-projector, lem:qld-decoder-evaluation, lem:qld-decoder-linearity, def:indicator-vector, lem:qld-win-implications, lem:qld-comm-cons, fact:add-a-proj, fact:agreement, fact:triangle, fact:data-processing, def:bracket, lem:povm-to-obs, lem:schwartz-zippel-total-degree}
 	% Support restriction added: the source (line 1492 of
 	% 14_analysis_of_the_pauli_basis_test.tex) rewrites Dec(g).ind_m(u) as
@@ -978,6 +979,13 @@ of $V_{\mathrm{A}}$ and the outcomewise form of the conjugation.
 	each player and each basis. No restriction on a projection norm is needed.
 \end{example}
 
+% Exemption: no proof-level mark. The Lean carrier
+% exists_extractionWitness_ofGlobalPairWitness is marked unfaithful at
+% MIPStarRE/QPBT/Extraction/Unitary.lean: it assumes the GlobalPairWitness that
+% lem:qld-unitary derives, and the discrepancy is recorded in
+% gap:qpbt_extraction-transfer. The statement-level mark below is correct, since the
+% node states that assumption explicitly; a proof-level mark would certify the
+% unconditional extraction, which this node does not state.
 \begin{example}[Conditional extraction given a global polynomial-pair witness]
 	\label{lem:qld-unitary-given-global-pair}
 	\lean{MIPStarRE.QPBT.exists_extractionWitness_ofGlobalPairWitness}
