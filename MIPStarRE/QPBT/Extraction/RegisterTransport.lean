@@ -38,19 +38,20 @@ section Reindex
 variable {dom cod : Type*} [Fintype dom] [DecidableEq dom]
   [Fintype cod] [DecidableEq cod]
 
-/-- Coordinate reindexing is Mathlib's linear isometric permutation of a finite
-Euclidean space. -/
-theorem reindexState_eq_piLpCongrLeft (equiv : dom ≃ cod)
-    (state : EuclideanSpace ℂ dom) :
-    reindexState equiv state = LinearIsometryEquiv.piLpCongrLeft 2 ℂ ℂ equiv state :=
-  rfl
+-- The identification of `reindexState` with Mathlib's linear isometric
+-- permutation `LinearIsometryEquiv.piLpCongrLeft` is already available as
+-- `MIPStarRE.QPBT.BinaryWitnessTransport.reindex_state_eq`
+-- (`MIPStarRE/QPBT/Test/QubitForm.lean`). That module is not importable here,
+-- so the identity is not restated; the cancellation and subtraction identities
+-- below are proved from the definition of `reindexState` instead.
 
 /-- Reindexing by the inverse permutation cancels state transport. -/
 @[simp] theorem reindexState_symm_apply (equiv : dom ≃ cod)
     (state : EuclideanSpace ℂ dom) :
     reindexState equiv.symm (reindexState equiv state) = state := by
-  simp only [reindexState_eq_piLpCongrLeft, ← LinearIsometryEquiv.piLpCongrLeft_symm,
-    LinearIsometryEquiv.symm_apply_apply]
+  ext index
+  change state (equiv.symm (equiv index)) = state index
+  rw [Equiv.symm_apply_apply]
 
 /-- Reindexing cancels transport by the inverse permutation. -/
 @[simp] theorem reindexState_apply_symm (equiv : dom ≃ cod)
@@ -62,7 +63,10 @@ theorem reindexState_eq_piLpCongrLeft (equiv : dom ≃ cod)
 theorem reindexState_sub (equiv : dom ≃ cod) (left right : EuclideanSpace ℂ dom) :
     reindexState equiv (left - right) =
       reindexState equiv left - reindexState equiv right := by
-  simp only [reindexState_eq_piLpCongrLeft, map_sub]
+  ext index
+  change (left - right) (equiv.symm index) =
+    left (equiv.symm index) - right (equiv.symm index)
+  rfl
 
 /-- State-vector distance is invariant under a register permutation. -/
 theorem reindexState_norm_sub (equiv : dom ≃ cod) (left right : EuclideanSpace ℂ dom) :
@@ -71,7 +75,13 @@ theorem reindexState_norm_sub (equiv : dom ≃ cod) (left right : EuclideanSpace
 
 /-- The action of a reindexed operator is obtained by transporting the state
 forward, acting, and transporting the result back. No property of the operator
-or state is assumed. -/
+or state is assumed.
+
+This is the inverse-substituted form of
+`MIPStarRE.QPBT.BinaryWitnessTransport.operator_action_reindex`
+(`MIPStarRE/QPBT/Test/QubitForm.lean`), which cannot be imported here: its
+module closure is the whole Pauli-test soundness tree. The overlap is recorded
+in the packet audit. -/
 theorem applyOperatorToState_reindexOp (equiv : dom ≃ cod) (operator : Op cod)
     (state : EuclideanSpace ℂ dom) :
     applyOperatorToState (reindexOp equiv operator) state =
@@ -84,7 +94,8 @@ theorem applyOperatorToState_reindexOp (equiv : dom ≃ cod) (operator : Op cod)
     (fun entry => state entry) equiv equiv) index
 
 /-- State reindexing intertwines the reindexed operator with the original
-operator. -/
+operator. This is the rearrangement of the preceding identity that the block
+statements below apply directly. -/
 theorem reindexState_applyOperatorToState (equiv : dom ≃ cod) (operator : Op cod)
     (state : EuclideanSpace ℂ dom) :
     reindexState equiv (applyOperatorToState (reindexOp equiv operator) state) =

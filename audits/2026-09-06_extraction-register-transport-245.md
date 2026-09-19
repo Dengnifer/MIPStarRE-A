@@ -35,7 +35,9 @@ Write `V = PauliRegister params`, `A₀ = ιA × V`, and `B₀ = ιB × V`.
 The existing definitions retain independent original player carriers `ιA`
 and `ιB`. No equality of these spaces is introduced.
 
-The new `extractionEprFirstEquiv` composes `sixRegExtractionEquiv` with
+`extractionEprFirstEquiv` is not added here: it is defined on `main` in
+`MIPStarRE/QPBT/Extraction/EPRState.lean` and this packet imports and reuses it.
+It composes `sixRegExtractionEquiv` with
 `Equiv.prodCongr` of the two local factor swaps. Explicitly,
 
 ```text
@@ -44,11 +46,12 @@ The new `extractionEprFirstEquiv` composes `sixRegExtractionEquiv` with
 
 Its codomain is `(V × A₀) × (V × B₀)`, exactly the carrier in the already
 proved `MagicSquareRigidity.exists_unit_residual`.
-`extractionEprFirstIsometry` uses Mathlib's
+The new `extractionEprFirstIsometry` uses Mathlib's
 `LinearIsometryEquiv.piLpCongrLeft`, rather than constructing another norm
-preservation proof. The general identity
-`reindexState_eq_piLpCongrLeft` identifies that isometry with the project's
-existing coordinate operation.
+preservation proof. The identification of that isometry with the project's
+existing coordinate operation is not restated here: it is already
+`MIPStarRE.QPBT.BinaryWitnessTransport.reindex_state_eq` in
+`MIPStarRE/QPBT/Test/QubitForm.lean`.
 
 For an equivalence `equiv : dom ≃ cod`, state transport goes from `dom` to
 `cod`, whereas `reindexOp equiv` transports operators from `cod` to `dom`.
@@ -59,6 +62,20 @@ these directions, using `Matrix.submatrix_mulVec_equiv`:
 apply (reindexOp equiv operator) state
   = reindexState equiv.symm (apply operator (reindexState equiv state)).
 ```
+
+This identity is not new mathematics in the project: it is
+`MIPStarRE.QPBT.BinaryWitnessTransport.operator_action_reindex`
+(`MIPStarRE/QPBT/Test/QubitForm.lean`) after substituting the inverse
+bijection, and `reindexState_applyOperatorToState` is its rearrangement. The
+duplication is deliberate and is recorded here rather than removed: the closure
+of `MIPStarRE/QPBT/Test/QubitForm.lean` is the whole Pauli-test soundness tree,
+so importing it into an extraction leaf is not an option, and no module that
+this leaf and that one both import has `reindexState` and
+`applyOperatorToState` in scope at once (`MIPStarRE/QPBT/State.lean` carries
+`reindexState` but does not import `MIPStarRE/QPBT/Games/Defs.lean`, where
+`applyOperatorToState` is defined). Hoisting the pair to a shared ancestor is
+left to a separate change that may add that import; this packet therefore does
+not claim full reuse for the operator-action identity.
 
 Inverse cancellation, subtraction, vector distance, real quadratic forms,
 and averaged operator-family distance then follow from the same isometry.
@@ -186,10 +203,12 @@ after the marked review of 2026-09-14, which the statements above now describe.
   `MIPStarRE/QPBT.lean` (one re-export line), and the append-only telemetry
   record. The earlier claim that no blueprint entry and no shared import file
   changed described the first packet only and has been corrected above.
-- Declaration count. The module defines 21 declarations, 1 definition and 20
+- Declaration count. The module defines 20 declarations, 1 definition and 19
   theorems. The earlier count of 28 predates the withdrawal of the duplicated
   `psiHat_norm` and of `stateQForm_reindexState`; `ProjectiveSetting.psiHat_norm`
-  now lives only in `MIPStarRE/QPBT/Observables/ExpandedPlacement.lean`.
+  now lives only in `MIPStarRE/QPBT/Observables/ExpandedPlacement.lean`. The
+  count of 21 predates the withdrawal of `reindexState_eq_piLpCongrLeft`
+  recorded below.
 - Reuse of `Extraction.EPRState`. Refreshing onto `main` showed that
   `MIPStarRE/QPBT/Extraction/EPRState.lean` now carries
   `extractionEprFirstEquiv`, `ProjectiveSetting.reindexState_idealExpState`,
@@ -199,7 +218,20 @@ after the marked review of 2026-09-14, which the statements above now describe.
   module's five copies were deleted and `Extraction.EPRState` is imported
   instead, so each of these declarations has exactly one definition in the
   project. The blueprint nodes keep their `\lean` tags, which now resolve to the
-  declarations on `main`.
+  declarations on `main`. The "Register identifications" section above now names
+  `extractionEprFirstEquiv` as reused from `Extraction.EPRState` rather than as
+  a declaration this packet adds; the declarations the packet really adds, such
+  as `extractionEprFirstIsometry`, keep the word "new".
+- Withdrawal of `reindexState_eq_piLpCongrLeft`. That theorem was character for
+  character `MIPStarRE.QPBT.BinaryWitnessTransport.reindex_state_eq`
+  (`MIPStarRE/QPBT/Test/QubitForm.lean`), including its `rfl` proof, so it was
+  deleted. Its only two uses, `reindexState_symm_apply` and `reindexState_sub`,
+  are now proved from the definition of `reindexState` and introduce no
+  replacement declaration. The remaining overlap with
+  `BinaryWitnessTransport.operator_action_reindex` is the operator-action
+  identity, which cannot be imported into this leaf; it is described in the
+  "Register identifications" section above, so the packet no longer claims full
+  reuse. No statement changed.
 - Warnings. The stale transitive import of `Observables.ExpandedPlacement` and
   the unused `BigOperators` scope were removed, and the file-wide
   `open scoped Classical` was narrowed to the four declarations that need
