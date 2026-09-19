@@ -15,8 +15,11 @@ says how to check that mechanically.
 
 Detail for each row lives in a mathematical note under `docs/paper-gaps/`. The
 machine-readable index of those notes is
-[`docs/paper-gaps/qpbt-gap-register.md`](paper-gaps/qpbt-gap-register.md); the
-policy that governs when a note must be written is
+[`docs/paper-gaps/qpbt-gap-register.md`](paper-gaps/qpbt-gap-register.md), which
+currently indexes 18 of the 20 notes: `qpbt_subline-claims-line-marginal.tex`
+(row c8) and `qpbt_combined-points-field-valued.tex` (row d1) have no register
+entry yet, so for those two rows this page, not the register, is the complete
+record. The policy that governs when a note must be written is
 [`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). This page is a summary of
 those notes, not a replacement for them.
 
@@ -385,30 +388,36 @@ are introduced with `def … : Prop`. A `def` of type `Prop` produces a
 except as an explicit hypothesis. Comparator:
 
 ```
-git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/**/*.lean"
+git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/*.lean"
 ```
 
-At commit `c6c8c2f2` this returns seven lines: the two definitions, the
+At commit `c6c8c2f2` this returns eight lines: the two definitions, the
 refutation `not_forall_printedSymmetricProjectiveAttainmentClaim`
-(`StrategyClasses.lean:952–954`), and four docstring or comment mentions
-(`Combining/ErrorObstruction.lean:20`, `Combining/Lines/SubLineJoint.lean:124`,
-`Games/Symmetrization.lean:25` and `:108`, `:133`). **No theorem takes either as
-a hypothesis.**
+(`StrategyClasses.lean:952–954`, whose hit is on line 954), and five
+docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
+`Combining/Lines/SubLineJoint.lean:124`, and `Games/Symmetrization.lean:25`,
+`:108`, `:133`). **No theorem takes either as a hypothesis.**
 
 **2. There is no proof debt.** No `sorry`, `admit`, `axiom` declaration,
 `native_decide`, `unsafe`, `@[extern]`, bodyless `opaque`, `implemented_by`, or
-`backward.*`/`respectTransparency` option occurs anywhere in the 675 Lean files.
-Comparator:
+`backward.*`/`respectTransparency` option occurs anywhere in the 669 Lean files
+under `MIPStarRE/`. (The repository holds 675 `.lean` files in all; the six
+outside `MIPStarRE/` are `MIPStarRE.lean`, `scripts/Checkdecls.lean`, the three
+`scripts/comparator/*.lean` helpers, and one archived telemetry audit module,
+none of which the development imports.) Comparator:
 
 ```
-git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/**/*.lean"
+git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/*.lean"
 ```
 
-At `c6c8c2f2` every hit is inside a docstring or comment — all of them in
-`MIPStarRE/LDT/Test/AxiomAudit.lean` and
-`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean`, where the
-word appears in prose recording that a former `sorryAx` dependency was removed.
-There are **zero** real sites.
+At `c6c8c2f2` this returns exactly two lines, both inside a docstring:
+`MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the successor-step
+theorem no longer has a direct `sorry`, and
+`MIPStarRE/QPBT/Combining/Apply.lean:57`, the docstring of
+`PrintedExtendedLinesWitnessClaim` recording that the former open `sorry` at
+that site was replaced by the unasserted `Prop`. There are **zero** real sites.
+(The regex does not match `sorryAx`, which occurs once more as prose, at
+`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean:187`.)
 
 **3. Axiom audit.** The intended check is
 
@@ -448,7 +457,7 @@ quantified** (`1 ≤ a`, `0 < b < 1`). No declaration currently shows
 `deltaQld < 1` in any regime. The shape is faithful — the source also only
 asserts that such constants exist — but a bound that is never known to beat the
 trivial one invites the question. Satisfiability of the hypotheses *does* hold:
-`introParams` (`MIPStarRE/QPBT/Test/CanonicalParams.lean:106`) constructs an
+`introParams` (`MIPStarRE/QPBT/Test/CanonicalParams.lean:105`) constructs an
 `AdmissibleParams`, and `exists_spcc_value_one` gives a value-**1** strategy for
 every admissible `P`.
 
