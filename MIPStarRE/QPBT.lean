@@ -95,6 +95,7 @@ import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
 import MIPStarRE.QPBT.Extraction.Construction
 import MIPStarRE.QPBT.Extraction.Unitary
+import MIPStarRE.QPBT.Extraction.RegisterTransport
 import MIPStarRE.QPBT.Extraction.SourceUnitary
 import MIPStarRE.Quantum.ControlledUnitary
 import MIPStarRE.QPBT.Test.Soundness.ScalarAbsorption
