@@ -119,3 +119,5 @@
 {"ts":"2026-09-18T16:07:04Z","main":"c80383a8","denominator":197,"open_sites":6,"closed_sites":191,"percent":96,"open_sites_24h_ago":12,"rate_per_day":6,"days_to_go":"1.0","sites_in_open_prs_dedup":6}
 {"ts":"2026-09-18T17:34:32Z","main":"8db3263f","denominator":197,"open_sites":6,"closed_sites":191,"percent":96,"open_sites_24h_ago":12,"rate_per_day":6,"days_to_go":"1.0","sites_in_open_prs_dedup":5}
 {"ts":"2026-09-18T19:04:12Z","main":"5364be3e","denominator":197,"open_sites":6,"closed_sites":191,"percent":96,"open_sites_24h_ago":12,"rate_per_day":6,"days_to_go":"1.0","sites_in_open_prs_dedup":7}
+{"ts":"2026-09-18T20:33:54Z","main":"1a3fbf6c","denominator":197,"open_sites":5,"closed_sites":192,"percent":97,"open_sites_24h_ago":12,"rate_per_day":7,"days_to_go":"0.7","sites_in_open_prs_dedup":6}
+{"ts":"2026-09-18T21:14:55Z","main":"6f5331dc","denominator":197,"open_sites":2,"closed_sites":195,"percent":98,"open_sites_24h_ago":10,"rate_per_day":8,"days_to_go":"0.2","sites_in_open_prs_dedup":6,"lean_code_lines":77261,"lean_files":320}

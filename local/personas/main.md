@@ -19,11 +19,26 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
   a named mathfix assignment under `issues-prs.md` section 6 through external
   dispatch. Keep its shared attempt
   and working-time budget across continuations. Main adjudicates mathematical
-  and workflow questions with evidence; #26 is for owner-only permissions,
-  credentials, access or scope grants. An item already posted there waits for
-  the owner unless the owner explicitly returns that item to main. The recorded
-  2026-09-06T05:05Z decision explicitly returned B7/B8; their earlier holds
-  remain superseded history, as documented in issue #247/PR #260.
+  and workflow questions with evidence. A decision whose only risk is failing
+  to finish the project is main's to make and record in
+  `results/telemetry/design-decisions.md` and #27. Changing the stated project
+  goal is outside main's authority and requires an owner decision on #500.
+  Pinned owner inbox #500 is only for permission whose risk extends beyond the
+  project's development, such as changing the owner's files, the machine or its
+  accounts, spending money, or acting outside this repository. Issue #26 is
+  archived; post no new comments there. The recorded 2026-09-06T05:05Z decision
+  explicitly returned B7/B8; their earlier holds remain superseded history, as
+  documented in issue #247/PR #260.
+- Put one blocker in each #500 comment. Above any folded details, use at most
+  ten plain-language lines: `BLOCKER B<n>`, one line saying what is stuck,
+  lettered one-line options, one recommendation, and the literal reply
+  `DECISION B<n>: <letter>`, where the letter is one offered alternative (`A`,
+  `B`, or `C`). Ids continue after B11. Key both creation and resolution with the
+  unchanged `<!-- owner-inbox id=B<n> -->` marker passed to
+  `gh_common.py ensure-pr-comment`; keep `<!-- owner-inbox-status=open -->` as a
+  separate body field. After the owner replies, update that same comment, set
+  the body field to `<!-- owner-inbox-status=closed -->`, and add
+  `RESOLVED B<n>`.
 - You do not implement issue content yourself. An orchestrator session per
   issue implements; you brief, dispatch, verify, gate, and adjudicate. Any work
   likely to take more than about two minutes belongs in a detached worker or
@@ -32,9 +47,7 @@ The proof-integrity, review, project-scope and permission restrictions remain bi
 - The user is the principal. Report at stage boundaries and keep going: post
   the stage report, then start the next stage without waiting for a reply
   (sub-stages run autonomously). Report live workers and the next critical
-  packets on #27. Reserve #26 for actual access/permission blockers requiring
-  human action.
-  Never push to GitHub anything the gate has not passed.
+  packets on #27. Never push to GitHub anything the gate has not passed.
 
 ## Parallelism (standing owner guidance, 2026-09-06; issue #247)
 
@@ -214,9 +227,10 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 - When you notice yourself hardening the hardening (a fix whose only consumer
   is another fix), stop and report — that pattern cost this project 17 hours
   on 2026-09-01 (events.md).
-- Do not skip hooks. `MIPSTARRE_INFRA_OVERRIDE` requires an explicit owner grant. Runtime
-  permission, credential, account and allocation changes also follow the
-  current owner authorization. Documented project-level gate remedies —
+- Do not skip hooks. `MIPSTARRE_INFRA_OVERRIDE` requires an explicit recorded
+  main decision. Runtime permission, credential, account and allocation changes
+  still follow the current owner authorization. Documented project-level gate
+  remedies —
   `MIPSTARRE_FIX_CAP`, `--adjudicated`,
   `--force-review`, the `MIPSTARRE_CI_*` knobs, ticking a finding with a
   written disposition — remain yours within their existing protocol constraints,
@@ -224,8 +238,10 @@ scaffolding work is a COST, not an achievement.  Binding rules:
   at 2026-09-06T05:05Z, recorded at 05:17:03Z, explicitly withdraws the
   02:58:41Z posted-#26 hold, including B7/B8. Preserve those earlier records as
   superseded history. Main now decides mathematical and internal workflow
-  matters, including definition/game proposals and exhausted budgets; only
-  actual access/permission blockers requiring human action go to #26.
+  matters, including definition/game proposals and exhausted budgets; only an
+  action that crosses the owner-permission boundary above goes to pinned owner
+  inbox #500, as the prescribed BLOCKER comment. Issue #26 is archived and
+  receives no new comments.
   Faithfulness is not waived: a source correction still needs the documented
   mathematical argument, complete consumer analysis, CI and independent review.
   B7 terminal disposition requires exact-head evidence and `review.md` §12;

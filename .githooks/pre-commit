@@ -29,11 +29,11 @@ fi
 # workflow scaffolding is budgeted at <=1000 changed lines per commit (400 until the owner raised it on 2026-09-05).  This is
 # mechanical enforcement — repeated verbal correction of scaffolding bloat did
 # not stick, so the budget lives in the hook.  The override env var is granted
-# by the OWNER per commit, never self-granted by an agent session.  Runs
+# only after a recorded main decision, never self-granted by a worker session. Runs
 # before the ACMR early-exit so deletion-only commits are counted too
 # (numstat includes deletions; PR 7 round 3, F8), and before the
 # MIPSTARRE_SKIP_HOOKS exit so a blanket hook skip cannot launder the
-# owner-only budget override.
+# workflow budget override.
 # A merge that carries main stages already-reviewed content.  A merge head
 # contained in github/main measures the budget against MERGE_HEAD; a merge head
 # that contains github/main (a parent branch of a stack that already merged
@@ -64,8 +64,8 @@ if [ "${INFRA_CHANGED:-0}" -gt 1000 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1
   echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 1000)."
   echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"
   echo "commit — serial oversized commits are the same violation and show in the"
-  echo "telemetry. Shrink the change, or ask the OWNER to authorize this commit"
-  echo "with MIPSTARRE_INFRA_OVERRIDE=1 (self-granting it is a protocol breach)."
+  echo "telemetry. Shrink the change, or stop for a recorded main decision that"
+  echo "authorizes MIPSTARRE_INFRA_OVERRIDE=1; workers must not self-grant it."
   exit 1
 fi
 
