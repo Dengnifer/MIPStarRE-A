@@ -1604,3 +1604,47 @@ reviewer slots without weakening trusted prompts, full-diff read-only review,
 exact-head COMMENT evidence, MAIN's fail-closed status check, round caps, or
 the whitespace-sensitive carry rule. No throughput gain is asserted before
 observation.
+
+## 2026-09-19 - CI builds the QPBT axiom audit (#640)
+
+**Trigger:** the owner's 2026-09-19 policy decision that completion means a
+caveat-free, comparator-checked formalization, ready to attach as an ARTIFACT to
+an ITP submission. The ITP-readiness audit of the same day found that the
+QPBT axiom-cleanliness claim was not reproducible inside the repository: the
+Lean tree held zero `#print axioms` directives, the only audit module
+(`MIPStarRE/LDT/Test/AxiomAudit.lean`) covered the classical low-degree track
+only, and the "three standard axioms" result came from a one-off metaprogram in
+a worktree that was then discarded. Issue #640 records the gap.
+
+**Change:** `MIPStarRE/QPBT/Test/AxiomAudit.lean` audits the QPBT headline
+declarations — `pauli_soundness`, `pauli_soundness_qubit`, `exists_ld_soundness`,
+the completeness pair, the four combining results, the three extraction results,
+and the two corrected forms `exists_extendedLinesWitness_established` and
+`exists_symmetric_projective_strategy_approx`. Its `audit_standard_axioms`
+command calls `Lean.collectAxioms`, logs the axiom set, and throws unless that
+set is exactly `{propext, Classical.choice, Quot.sound}`, naming `sorryAx`
+explicitly when it is the offender. The build step of `ci.sh` and the
+corresponding step of `.github/workflows/pr-ci.yml` now build
+`MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit` instead of the
+LDT target alone, in both the per-PR and the `--integration-head` invocations;
+`ci.md` §2, §7 and §7's train paragraph are updated in lockstep, as amendments
+§12 requires. No gating glob, manifest field, status context, lock or schema
+changes, so no consumer of the manifest is affected; the QPBT audit is reached
+by the existing `lean` filter, which already matches `**.lean`.
+
+Following the LDT precedent, the module is a CI build target and is *not*
+imported from the `MIPStarRE.QPBT` umbrella, so the audits stay out of normal
+downstream imports while still acting as regression tests. This is a
+re-automation, the opposite direction from §8's deliberate de-automation of
+`blueprint_leanok_axioms.py`: that check needs a full Lean environment the
+`blueprint-sync` job does not have, whereas these audits ride the build the
+`build` step already pays for, at the cost of elaborating one extra module whose
+imports the step compiled anyway.
+
+**Expected effect:** an axiom regression in a QPBT headline theorem — a `sorry`
+left open, a new `axiom` declaration, a `native_decide` route — now fails the
+`build` step instead of passing unnoticed until someone re-runs a metaprogram by
+hand, and the build log carries the printed axiom sets as the positive record a
+reviewer of the artifact can re-derive. No throughput or timing gain is
+asserted before observation; the added elaboration is one module against a full
+library build.

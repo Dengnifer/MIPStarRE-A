@@ -83,8 +83,8 @@ theorem exists_combinedPointsWitness :
     have hv := WinImplications.strategy_value_le_one S.toStrategy
     have hw := S.win
     linarith
-  obtain ⟨Qa, hQa, hQaR⟩ := S.exists_projective_close_sandwich_alice
-  obtain ⟨Qb, hQb, hQbR⟩ := S.exists_projective_close_sandwich_bob
+  obtain ⟨Qa, hQa, -, hQaR⟩ := S.exists_projective_close_sandwich_alice
+  obtain ⟨Qb, hQb, -, hQbR⟩ := S.exists_projective_close_sandwich_bob
   -- the joint measurements on the two sides
   let Q : (side : PlayerSide) → PointPair P →
       Measurement (PauliScalar P × PauliScalar P) (S.ExpandedLocalSpace side) :=

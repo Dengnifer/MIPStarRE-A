@@ -71,6 +71,7 @@ class TrainTests(unittest.TestCase):
         self.write("MIPStarRE/LDT/Test/SurfaceVsPoint.lean",
                    "import MIPStarRE.QPBT\ndef downstreamValue : Nat := trainValue\n")
         self.write("MIPStarRE/LDT/Test/AxiomAudit.lean", "import MIPStarRE.QPBT\n")
+        self.write("MIPStarRE/QPBT/Test/AxiomAudit.lean", "import MIPStarRE.QPBT\n")
         shutil.copy2(LOCAL_BIN.parents[1] / "scripts/Checkdecls.lean", self.repo / "scripts")
         self.write("blueprint/lean_decls", "downstreamValue\n")
         packages = self.tmp / "packages"
@@ -195,7 +196,7 @@ class TrainTests(unittest.TestCase):
         self.assertEqual((self.repo / "shared").read_text(), "accepted\n")
         self.assertEqual((self.repo / "third").read_text(), "third\n")
         self.assertEqual((self.tmp / "build.log").read_text().splitlines(),
-                         ["build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit"])
+                         ["build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"])
         self.assertEqual(_git(self.repo, "branch", "--list", "train-*"), "")
         posts = [row for row in self.gh.calls() if row["method"] != "GET"]
         self.assertEqual([row["rel"] for row in posts], ["issues/1/comments", "issues/3/comments"])
@@ -555,7 +556,7 @@ class TrainTests(unittest.TestCase):
         self.env["MIPSTARRE_CI_BUILD_LOCK_WAIT_S"] = "300"
         self.write_tool("lake", '#!/bin/sh\nset -eu\n'
                         'printf "%s\\n" "$*" >> "$TRAIN_BUILD_LOG"\n'
-                        'if [ "$*" = "build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit" ]; then\n'
+                        'if [ "$*" = "build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit" ]; then\n'
                         ' test -d "$MIPSTARRE_FULL_BUILD_LOCK"\n'
                         ' test ! -e .lake/build/lib/lean/MIPStarRE.olean\nfi\n'
                         f'exec {shlex.quote(lake)} "$@"\n')
@@ -587,7 +588,8 @@ class TrainTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("All 1 declarations", result.stdout)
         calls = (self.tmp / "build.log").read_text().splitlines()
-        self.assertEqual(calls.count("build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit"), 1)
+        self.assertEqual(calls.count("build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"),
+                         1)
         self.assertIn("exe checkdecls blueprint/lean_decls", calls)
         self.assertNotEqual(self.remote_main(), self.base)
 
