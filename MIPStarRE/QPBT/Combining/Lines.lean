@@ -161,10 +161,16 @@ theorem exists_combinedLinesWitness :
 /-- The axis and diagonal line-point laws are uniform mixtures of their
 coordinate-index restrictions.
 
-**Source statement:** blueprint
-`lem:restricted-line-mixture-bounds`, formalizing the
-unlabelled observation at
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`.
+**Formalization-only auxiliary:** blueprint
+`lem:restricted-line-mixture-bounds`, which states the mixture over the
+refined, seed-bearing line laws of `def:ith-restricted-line`.  This
+decomposes those refined laws and is not a formalization of a source
+statement: the unlabelled prose at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1049-1051`
+speaks of the source laws, and identifying the corresponding source
+push-forwards remains an open obligation recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+`sec:auxiliary-subline-scalars`.
 `Distribution.bind` is the finite uniform-mixture operation.  The two halves
 are proved from the equal-fiber decomposition of `chiIndex` and the fact that
 every line conditioning map retains the shared scalar seed. -/
@@ -180,10 +186,15 @@ theorem linePointDist_eq_mixture_restricted (L : LdParams) :
 /-- Restricting a nonnegative average from the line-point distribution to one
 fixed line kind and coordinate inflates its bound by at most `2m`.
 
-**Source statement:** item 1 of blueprint
-`lem:restricted-line-mixture-bounds`, from the unlabelled
-estimate at
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`.
+**Formalization-only auxiliary:** item 1 of blueprint
+`lem:restricted-line-mixture-bounds`, stated over the refined, seed-bearing
+line laws of `def:ith-restricted-line`.  It is a consequence of that refined
+mixture, not a formalization of a source estimate: the unlabelled prose at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1052-1056`
+speaks of the source laws, and identifying the corresponding source
+push-forwards remains an open obligation recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+`sec:auxiliary-subline-scalars`.
 The restricted component carries mixture weight `1 / (2m)`, so a nonnegative
 average bounded by `δ` bounds it by `2mδ`. -/
 theorem avg_restricted_le {P : AdmissibleParams}
@@ -199,10 +210,15 @@ theorem avg_restricted_le {P : AdmissibleParams}
 /-- Restricting both variables of a nonnegative average over two independent
 line-point samples inflates its bound by at most `4m^2`.
 
-**Source statement:** item 2 of blueprint
-`lem:restricted-line-mixture-bounds`, from the unlabelled
-estimate at
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`.
+**Formalization-only auxiliary:** item 2 of blueprint
+`lem:restricted-line-mixture-bounds`, stated over the refined, seed-bearing
+line laws of `def:ith-restricted-line`.  As for `avg_restricted_le`, the
+unlabelled prose at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1056-1058`
+speaks of the source laws, and identifying the corresponding source
+push-forwards remains an open obligation recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+`sec:auxiliary-subline-scalars`.
 The one-variable estimate is applied successively to the two product
 coordinates. -/
 theorem avg_restricted_prod_le {P : AdmissibleParams}
