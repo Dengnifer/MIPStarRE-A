@@ -14,10 +14,18 @@ SCRIPT = REPO_ROOT / "scripts" / "comparator" / "check_challenge_drift.py"
 PR_CI = REPO_ROOT / ".github" / "workflows" / "pr-ci.yml"
 README = REPO_ROOT / "scripts" / "comparator" / "README.md"
 
+CHALLENGES_SCRIPT = REPO_ROOT / "scripts" / "comparator" / "challenges.py"
+EXTRACTOR = REPO_ROOT / "scripts" / "comparator" / "extract_closure.lean"
+
 _spec = importlib.util.spec_from_file_location("check_challenge_drift", SCRIPT)
 assert _spec is not None and _spec.loader is not None
 check_challenge_drift = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(check_challenge_drift)
+
+_cspec = importlib.util.spec_from_file_location("challenges", CHALLENGES_SCRIPT)
+assert _cspec is not None and _cspec.loader is not None
+challenges = importlib.util.module_from_spec(_cspec)
+_cspec.loader.exec_module(challenges)
 
 
 class ComparatorChallengeDriftTests(unittest.TestCase):
@@ -61,6 +69,53 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
         self.assertIn("python3 scripts/comparator/check_challenge_drift.py --root . --update", readme)
         self.assertIn("challenge_footer.lean", readme)
         self.assertIn("MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean", readme)
+        self.assertIn("challenge_qpbt_footer.lean", readme)
+        self.assertIn("MIPStarRE/QPBT/Test/Soundness.lean", readme)
+        self.assertIn("MIPStarRE/QPBT/Test/QubitForm.lean", readme)
+
+    def test_every_challenge_is_configured_completely(self) -> None:
+        self.assertEqual(sorted(challenges.CHALLENGES), ["ldt", "qpbt"])
+        for name, challenge in challenges.CHALLENGES.items():
+            with self.subTest(challenge=name):
+                self.assertEqual(challenge.name, name)
+                self.assertTrue(challenge.targets)
+                for path in (challenge.header, challenge.footer, challenge.expected):
+                    self.assertTrue(
+                        (REPO_ROOT / path).is_file(), f"{name}: missing {path}"
+                    )
+                self.assertEqual(
+                    challenge.target_env, " ".join(challenge.targets)
+                )
+
+    def test_qpbt_targets_are_the_headline_theorems(self) -> None:
+        qpbt = challenges.CHALLENGES["qpbt"]
+        self.assertEqual(
+            qpbt.targets,
+            (
+                "MIPStarRE.QPBT.pauli_soundness",
+                "MIPStarRE.QPBT.pauli_soundness_qubit",
+            ),
+        )
+        footer = (REPO_ROOT / qpbt.footer).read_text(encoding="utf-8")
+        for target in qpbt.targets:
+            self.assertIn(target.rsplit(".", 1)[1], footer)
+
+    def test_extractor_reads_targets_from_the_environment(self) -> None:
+        extractor = EXTRACTOR.read_text(encoding="utf-8")
+        self.assertIn("COMPARATOR_TARGETS", extractor)
+        for challenge in challenges.CHALLENGES.values():
+            module_prefix = challenge.targets[0].rsplit(".", 1)[0]
+            with self.subTest(challenge=challenge.name):
+                self.assertIn(module_prefix.split(".")[1], extractor)
+
+    def test_pr_ci_runs_one_drift_step_per_challenge(self) -> None:
+        workflow = PR_CI.read_text(encoding="utf-8")
+        for name in challenges.CHALLENGES:
+            self.assertIn(
+                "python3 scripts/comparator/check_challenge_drift.py "
+                f"--root . --challenge {name}",
+                workflow,
+            )
 
 
 if __name__ == "__main__":

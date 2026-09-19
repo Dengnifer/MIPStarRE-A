@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the body of Challenge.lean from the extractor's TSV.
+"""Assemble the body of a comparator challenge file from the extractor's TSV.
 
 Input: the TSV produced by ``extract_closure.lean`` (one declaration per row:
 name, module path, start line, end line).  For each declaration this script
@@ -8,11 +8,11 @@ point (tracking ``namespace``/``section``/``end`` lines), orders declarations
 topologically (module import rank, then line number), and emits the snippets
 grouped under merged namespace blocks with provenance comments.
 
-The ``EXTRAS``/``MODULE_PRELUDES`` tables carry elaboration context (attribute
-commands, ``CoeFun`` instances, ``variable``/``open`` blocks) that the kernel
-closure cannot see; the script fails if a table key no longer matches any
-extracted declaration.  See README.md in this directory for the full
-regeneration pipeline.
+The selected challenge's ``extras``/``module_preludes`` tables (see
+``challenges.py``) carry elaboration context (attribute commands, ``CoeFun``
+instances, ``variable``/``open`` blocks) that the kernel closure cannot see;
+the script fails if a table key no longer matches any extracted declaration.
+See README.md in this directory for the full regeneration pipeline.
 """
 
 from __future__ import annotations
@@ -22,61 +22,15 @@ import re
 import sys
 from pathlib import Path
 
-# extra context commands needed for re-elaboration but absent from the kernel
-# closure (attributes, CoeFun instances that elaboration unfolds), keyed by the
-# declaration after which they must appear
-EXTRAS: dict[str, list[str]] = {
-    "MIPStarRE.LDT.FieldModel": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/ParametersBase.lean (attribute command)",
-        "attribute [instance_reducible, instance] FieldModel.instField FieldModel.instFintype",
-        "  FieldModel.instDecidableEq",
-    ],
-    "MIPStarRE.LDT.Polynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LowDegreePolynomial.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (Polynomial params) (fun _ => Point params → Fq params) :=",
-        "  ⟨Polynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.AxisLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (AxisLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨AxisLinePolynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.DiagonalLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (DiagonalLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨DiagonalLinePolynomial.toFun⟩",
-    ],
-}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# per-module elaboration context (opens/variables) inserted once before the
-# module's first snippet, inside the given namespace stack, wrapped in
-# `section ... end`
-MODULE_PRELUDES: dict[str, tuple[list[str], list[str]]] = {
-    "MIPStarRE/LDT/Test/StrategyBiProj/Measurements.lean": (
-        ["MIPStarRE.LDT", "ProjStrat"],
-        [
-            "open MIPStarRE.Quantum",
-            "variable {params : Parameters} [FieldModel params.q]",
-            "variable {ιA : Type*} [Fintype ιA] [DecidableEq ιA]",
-            "variable {ιB : Type*} [Fintype ιB] [DecidableEq ιB]",
-        ],
-    ),
-    "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": (
-        ["MIPStarRE.Quantum"],
-        [
-            "open scoped Matrix.Norms.Elementwise",
-            "open WithLp",
-            "variable {d : Type*} [Fintype d]",
-        ],
-    ),
-}
+from challenges import (  # noqa: E402
+    CHALLENGES,
+    Challenge,
+    Extras,
+    ModulePreludes,
+    Prelude,
+)
 
 Entry = tuple[str, str, int, int, list[str]]
 
@@ -95,12 +49,20 @@ def source_range_with_context(
 
 
 class Assembler:
-    def __init__(self, repo_root: Path) -> None:
+    def __init__(
+        self,
+        repo_root: Path,
+        extras: Extras,
+        module_preludes: ModulePreludes,
+    ) -> None:
         self.repo_root = repo_root
+        self.extras = extras
+        self.module_preludes = module_preludes
         self._file_cache: dict[str, list[str]] = {}
         self.out: list[str] = []
         self.cur_ns: list[str] = []
-        self.open_prelude: tuple[str, list[str]] | None = None
+        self.open_prelude: tuple[str, Prelude] | None = None
+        self.used_preludes: set[tuple[str, int]] = set()
 
     def get_lines(self, path: str) -> list[str]:
         if path not in self._file_cache:
@@ -165,11 +127,27 @@ class Assembler:
             self.out.append(f"namespace {n}")
         self.cur_ns = target
 
+    def prelude_for(self, path: str, line: int) -> Prelude | None:
+        for prelude in self.module_preludes.get(path, ()):
+            if prelude.covers(line):
+                return prelude
+        return None
+
     def close_prelude(self) -> None:
         if self.open_prelude:
-            self.switch_ns(self.open_prelude[1])
+            self.switch_ns(list(self.open_prelude[1].ns))
             self.out.append("end  -- module scope")
             self.open_prelude = None
+
+    def open_prelude_for(self, path: str, prelude: Prelude) -> None:
+        self.switch_ns(list(prelude.ns))
+        label = path if prelude.whole_file else f"{path}:{prelude.first}-{prelude.last}"
+        self.out.append("")
+        self.out.append(f"-- elaboration context of {label}")
+        self.out.append("noncomputable section" if prelude.noncomputable else "section")
+        self.out.extend(prelude.lines)
+        self.open_prelude = (path, prelude)
+        self.used_preludes.add((path, prelude.first))
 
     def emit(self, entries: list[Entry], generated: list[tuple[str, str]]) -> str:
         # compiler-generated declarations (no source range) regenerate
@@ -182,47 +160,41 @@ class Assembler:
                 self.out.append(f"--   {name}  (from {path})")
 
         emitted_ranges: set[tuple[str, int]] = set()
-        prev_path: str | None = None
+        # widest range emitted so far per module, to swallow the pieces of a
+        # declaration that the closure reports separately
+        enclosing: dict[str, tuple[int, int]] = {}
         for name, path, a, b, src in entries:
             if (path, a) in emitted_ranges:  # deriving twins share the range
                 continue
+            # a constructor's `.elim`/`.noConfusion`/`.injEq` companion and a
+            # `deriving` clause report a range *inside* their inductive's
+            # range; emitting those lines on their own is a syntax error, and
+            # the inductive command regenerates them anyway
+            outer = enclosing.get(path)
+            if outer is not None and outer[0] <= a and b <= outer[1]:
+                continue
             emitted_ranges.add((path, a))
-            if path != prev_path:
+            enclosing[path] = (a, b)
+            prelude = self.prelude_for(path, a)
+            if self.open_prelude and self.open_prelude != (path, prelude):
                 self.close_prelude()
-                if path in MODULE_PRELUDES:
-                    base_ns, lines = MODULE_PRELUDES[path]
-                    self.switch_ns(base_ns)
-                    self.out.append("")
-                    self.out.append(f"-- elaboration context of {path}")
-                    self.out.append("section")
-                    self.out.extend(lines)
-                    self.open_prelude = (path, base_ns)
-                prev_path = path
+            if prelude is not None and self.open_prelude is None:
+                self.open_prelude_for(path, prelude)
             self.switch_ns(self.ns_stack_at(path, a))
             self.out.append("")
             self.out.append(f"-- source: {path}:{a}-{b}  ({name})")
             self.out.extend(src)
-            self.out.extend(EXTRAS.get(name, []))
+            self.out.extend(self.extras.get(name, []))
         self.close_prelude()
         self.switch_ns([])
         return "\n".join(self.out)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("tsv", type=Path, help="TSV from extract_closure.lean")
-    parser.add_argument(
-        "--root",
-        type=Path,
-        default=Path.cwd(),
-        help="repository root (default: current directory)",
-    )
-    args = parser.parse_args()
-
-    asm = Assembler(args.root)
+def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
+    asm = Assembler(root, challenge.extras, challenge.module_preludes)
     entries: list[Entry] = []
     generated: list[tuple[str, str]] = []
-    for row in args.tsv.read_text(encoding="utf-8").splitlines():
+    for row in tsv.read_text(encoding="utf-8").splitlines():
         if not row or "\t" not in row:
             continue
         name, path, a, b = row.split("\t")
@@ -238,18 +210,40 @@ def main() -> int:
 
     body = asm.emit(entries, generated)
 
-    unused_extras = set(EXTRAS) - {name for name, *_ in entries}
-    unused_preludes = set(MODULE_PRELUDES) - {e[1] for e in entries}
+    unused_extras = set(challenge.extras) - {name for name, *_ in entries}
+    unused_preludes = {
+        f"{path}:{p.first}"
+        for path, preludes in challenge.module_preludes.items()
+        for p in preludes
+        if (path, p.first) not in asm.used_preludes
+    }
     if unused_extras or unused_preludes:
-        print(
-            "stale context tables — "
-            f"unmatched EXTRAS keys: {sorted(unused_extras)}; "
-            f"unmatched MODULE_PRELUDES keys: {sorted(unused_preludes)}",
-            file=sys.stderr,
+        raise SystemExit(
+            f"stale context tables for challenge {challenge.name} — "
+            f"unmatched extras keys: {sorted(unused_extras)}; "
+            f"unmatched module_preludes scopes: {sorted(unused_preludes)}"
         )
-        return 1
+    return body
 
-    print(body)
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("tsv", type=Path, help="TSV from extract_closure.lean")
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path.cwd(),
+        help="repository root (default: current directory)",
+    )
+    parser.add_argument(
+        "--challenge",
+        choices=sorted(CHALLENGES),
+        default="ldt",
+        help="challenge whose context tables to use (default: ldt)",
+    )
+    args = parser.parse_args()
+
+    print(assemble(args.tsv, args.root, CHALLENGES[args.challenge]))
     return 0
 
 

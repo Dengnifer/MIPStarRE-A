@@ -90,10 +90,10 @@ section GroupAlgebra
 variable {G : Type*} [CommGroup G]
 
 /-- The squaring automorphism of a commutative group whose `Nat.card` is odd. -/
-private noncomputable def squareMulEquiv (hodd : Odd (Nat.card G)) : G ≃* G :=
+noncomputable def squareMulEquiv (hodd : Odd (Nat.card G)) : G ≃* G :=
   MulEquiv.ofBijective (powMonoidHom 2) hodd.coprime_two_right.pow_left_bijective
 
-private theorem monoid_algebra_sq_eq_dom_congr (hodd : Odd (Nat.card G))
+theorem monoid_algebra_sq_eq_dom_congr (hodd : Odd (Nat.card G))
     (x : MonoidAlgebra (ZMod 2) G) :
     x ^ 2 = MonoidAlgebra.domCongr (ZMod 2) (ZMod 2) (squareMulEquiv hodd) x := by
   letI : CharP (MonoidAlgebra (ZMod 2) G) 2 :=
@@ -105,7 +105,7 @@ private theorem monoid_algebra_sq_eq_dom_congr (hodd : Odd (Nat.card G))
   | single g r =>
       simp [MonoidAlgebra.single_pow, squareMulEquiv, ZMod.pow_card]
 
-private theorem monoid_algebra_sq_bijective (hodd : Odd (Nat.card G)) :
+theorem monoid_algebra_sq_bijective (hodd : Odd (Nat.card G)) :
     Function.Bijective (fun x : MonoidAlgebra (ZMod 2) G => x ^ 2) := by
   have heq : (fun x : MonoidAlgebra (ZMod 2) G => x ^ 2) =
       MonoidAlgebra.domCongr (ZMod 2) (ZMod 2) (squareMulEquiv hodd) := by
@@ -125,7 +125,7 @@ local notation "G" => Gal(K/(ZMod 2))
 noncomputable local instance : CommGroup G := IsCyclic.commGroup
 noncomputable local instance : DecidableEq G := Classical.decEq G
 
-private theorem normal_basis_trace_dual_apply (σ : G) :
+theorem normal_basis_trace_dual_apply (σ : G) :
     (IsGalois.normalBasis (ZMod 2) K).traceDual σ =
       σ ((IsGalois.normalBasis (ZMod 2) K).traceDual 1) := by
   classical
@@ -157,7 +157,7 @@ private theorem normal_basis_trace_dual_apply (σ : G) :
       _ = if υ = τ then 1 else 0 := by simp only [inv_mul_eq_one, eq_comm]
   exact congr_fun hdual σ
 
-private theorem normal_basis_repr_symm_mul_single
+theorem normal_basis_repr_symm_mul_single
     (a : MonoidAlgebra (ZMod 2) G) (σ : G) (r : ZMod 2) :
     ((MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans
         (IsGalois.normalBasis (ZMod 2) K).repr.symm)
@@ -183,7 +183,7 @@ private theorem normal_basis_repr_symm_mul_single
         _ = σ (τ (b 1)) := rfl
         _ = σ (b τ) := congrArg σ (IsGalois.normalBasis_apply τ).symm
 
-private theorem normal_basis_transition (a : MonoidAlgebra (ZMod 2) G) :
+theorem normal_basis_transition (a : MonoidAlgebra (ZMod 2) G) :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
     let ψ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.traceDual.repr.symm
@@ -206,7 +206,7 @@ private theorem normal_basis_transition (a : MonoidAlgebra (ZMod 2) G) :
         MonoidAlgebra.coeff_single, b.traceDual.repr_symm_single]
       exact congrArg (fun x : K => r • x) (normal_basis_trace_dual_apply σ).symm
 
-private theorem normal_basis_transition_is_unit :
+theorem normal_basis_transition_is_unit :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
     IsUnit (φ.symm (b.traceDual 1)) := by
@@ -226,7 +226,7 @@ private theorem normal_basis_transition_is_unit :
   rw [heq]
   exact φ.symm.bijective.comp ψ.bijective
 
-private theorem normal_basis_repr_apply_eq_trace (x : K) (σ : G) :
+theorem normal_basis_repr_apply_eq_trace (x : K) (σ : G) :
     let b := IsGalois.normalBasis (ZMod 2) K
     (b.repr x) σ = Algebra.trace (ZMod 2) K (x * b.traceDual σ) := by
   classical
@@ -235,7 +235,7 @@ private theorem normal_basis_repr_apply_eq_trace (x : K) (σ : G) :
   simpa only [Algebra.traceForm_apply, b.traceDual_traceDual] using
     b.traceDual.traceDual_repr_apply x σ
 
-private theorem normal_basis_transition_inv :
+theorem normal_basis_transition_inv :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
     let v := φ.symm (b.traceDual 1)
@@ -272,7 +272,7 @@ private theorem normal_basis_transition_inv :
     _ = Algebra.trace (ZMod 2) K (b.traceDual 1 * b.traceDual σ) := by
       rw [mul_comm]
 
-private theorem trace_group_algebra_pairing
+theorem trace_group_algebra_pairing
     (a d : MonoidAlgebra (ZMod 2) G) :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
@@ -314,7 +314,7 @@ basis, the construction multiplies by the inversion-invariant square root of
 the transition element to the trace-dual basis in the group algebra. This is
 the construction underlying `exists_selfDualNormalBasis`, paper
 `04_preliminaries.tex:702-725`. -/
-private theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
+theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
     ∃ c : Module.Basis G (ZMod 2) K,
       (∀ σ τ, Algebra.trace (ZMod 2) K (c σ * c τ) =
         if σ = τ then 1 else 0) ∧
@@ -424,7 +424,7 @@ theorem exists_selfDualNormalBasis {K : Type*} [Field K] [Fintype K]
     rw [AlgEquiv.coe_pow,
       FiniteField.coe_frobeniusAlgEquivOfAlgebraic_iterate]
 
-private theorem zmod2_fin_equiv_symm_val (x : ZMod 2) :
+theorem zmod2_fin_equiv_symm_val (x : ZMod 2) :
     ((ZMod.finEquiv 2).symm x).val = if x = 1 then 1 else 0 := by
   fin_cases x <;> rfl
 

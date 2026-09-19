@@ -352,7 +352,7 @@ theorem binaryTauShift_mul_tauPhase :
 
 /-- The single-qudit eigenvector coordinate used in the tensor-product basis;
 see `references/qpbt-paper/04_preliminaries.tex:1126-1161`. -/
-private noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
+noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
   match W with
   | .Z => if x = e then 1 else 0
   | .X =>
