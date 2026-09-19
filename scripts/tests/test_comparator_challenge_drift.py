@@ -70,6 +70,10 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
         self.assertIn("MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean", readme)
         self.assertIn("--challenge", readme)
         self.assertIn("challenges/qpbt.json", readme)
+        self.assertIn(
+            "refuses a challenge whose configured header or footer file is not",
+            readme,
+        )
 
     def test_default_invocation_leaves_every_challenge_selected(self) -> None:
         # CI passes no --challenge, so every configuration under challenges/

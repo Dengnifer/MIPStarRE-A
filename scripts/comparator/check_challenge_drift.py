@@ -85,7 +85,9 @@ def challenge_part(root: Path, relative: str | None) -> bytes:
     """A header or footer file's bytes; empty when unconfigured or absent.
 
     A challenge under development is generated before its footer exists;
-    `missing_challenge_inputs` reports what was left out.
+    `missing_challenge_inputs` reports what was left out.  Only `--write`
+    generates such a challenge: `check_challenge` refuses to `--update` it, so
+    a checked-in expected copy is never written with a part left out.
     """
     if relative is None:
         return b""
@@ -174,6 +176,20 @@ def check_challenge(
         return 0
 
     absent = missing_challenge_inputs(root, challenge)
+    if absent and update and write is None:
+        # Writing the checked-in copy without a configured part would record a
+        # challenge missing those statements; a `require_expected: false`
+        # challenge would then stop being skipped and every later drift run
+        # would report that hollow copy as current.
+        print(
+            f"::error::challenge {challenge.name!r}: refusing to update "
+            f"{challenge.expected} without {', '.join(absent)} (not in this "
+            "tree); the checked-in copy would omit that part of the "
+            f"challenge.  Use `--challenge {challenge.name} --write PATH` "
+            "while the challenge is still being developed.",
+            file=sys.stderr,
+        )
+        return 1
     if absent:
         print(
             f"challenge {challenge.name!r}: assembling without "

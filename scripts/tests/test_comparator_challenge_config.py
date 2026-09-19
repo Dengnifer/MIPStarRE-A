@@ -320,6 +320,60 @@ class AbsentExpectedFileTests(unittest.TestCase):
             self.assertEqual(status, 1)
             self.assertIn("does not exist", buffer.getvalue())
 
+    def test_update_refuses_a_challenge_with_an_absent_part(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            challenge = self._challenge(
+                root, footer="footer.lean", require_expected=False
+            )
+            buffer = io.StringIO()
+
+            # the refusal precedes assembly: no lake invocation may happen,
+            # and no expected copy without the footer may be left behind
+            with redirect_stderr(buffer):
+                status = check_challenge_drift.check_challenge(
+                    root, challenge, update=True, write=None
+                )
+
+            self.assertEqual(status, 1)
+            self.assertIn("refusing to update", buffer.getvalue())
+            self.assertIn("footer.lean", buffer.getvalue())
+            self.assertFalse((root / challenge.expected).exists())
+
+    def test_write_of_a_challenge_with_an_absent_part_is_still_allowed(self) -> None:
+        # `--write` is the development loop; only the checked-in copy is gated
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            challenge = self._challenge(
+                root, footer="footer.lean", require_expected=False
+            )
+
+            self.assertEqual(
+                check_challenge_drift.missing_challenge_inputs(root, challenge),
+                ["footer.lean"],
+            )
+            calls = []
+            original = check_challenge_drift.assemble_candidate
+
+            def fake(assemble_root, workdir, assemble_challenge_config):
+                calls.append(assemble_challenge_config.name)
+                candidate = workdir / "Challenge.lean"
+                candidate.write_bytes(b"-- draft\n")
+                return candidate
+
+            check_challenge_drift.assemble_candidate = fake
+            try:
+                status = check_challenge_drift.check_challenge(
+                    root, challenge, update=True, write=root / "draft.lean"
+                )
+            finally:
+                check_challenge_drift.assemble_candidate = original
+
+            self.assertEqual(status, 0)
+            self.assertEqual(calls, ["sample"])
+            self.assertEqual((root / "draft.lean").read_bytes(), b"-- draft\n")
+            self.assertFalse((root / challenge.expected).exists())
+
     def test_write_needs_exactly_one_challenge(self) -> None:
         buffer = io.StringIO()
 

@@ -55,6 +55,12 @@ dependency change, run the exact maintenance command:
 python3 scripts/comparator/check_challenge_drift.py --root . --update
 ```
 
+That command refuses a challenge whose configured header or footer file is not
+in the tree, and reports it as an error while still updating the others: the
+copy it would write omits those statements, and once such a copy exists the
+`require_expected: false` skip no longer applies, so every later drift run
+would report a challenge that states nothing as current.
+
 To generate a challenge somewhere else without touching the checked-in copy —
 the usual loop while filling in a new challenge's context tables:
 
@@ -108,4 +114,5 @@ and run its `./verify.sh` (its CI also runs on every push).
   regenerate identically during elaboration of the challenge file.
 - A configured header or footer file that is not in the tree is reported and
   omitted, so a challenge under development can be generated before its footer
-  exists.
+  exists.  That omission is confined to `--write`: `--update` refuses such a
+  challenge rather than checking in a copy without that part.
