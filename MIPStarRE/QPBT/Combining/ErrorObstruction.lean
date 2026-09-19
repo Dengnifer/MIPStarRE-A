@@ -17,7 +17,8 @@ Paper `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1134-1137`,
 `eq:qld-combined-lines-consistency`, and blueprint `rem:qld-4-13-source-defects`.
 The scaling argument is recorded in
 `docs/paper-gaps/qpbt_combined-lines-error-term.tex`; issue #510 checks it on
-the numerical domain of `exists_extendedLinesWitness`.
+the numerical domain of `PrintedExtendedLinesWitnessClaim`, the unasserted
+proposition that records the printed error form.
 -/
 
 namespace MIPStarRE.QPBT

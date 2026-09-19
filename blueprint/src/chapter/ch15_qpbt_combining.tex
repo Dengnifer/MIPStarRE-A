@@ -2457,7 +2457,7 @@ analyzed, together with candidate repairs, in
 \begin{lemma}[Combined line measurement on the extended coordinates]
 	\label{lem:qld-4-13}
 	\lean{MIPStarRE.QPBT.ExtendedLinesWitness}
-	\lean{MIPStarRE.QPBT.exists_extendedLinesWitness}
+	\lean{MIPStarRE.QPBT.PrintedExtendedLinesWitnessClaim}
 	\notready
 	\uses{lem:qld-4-12, def:line, def:line-point-dist, def:consistency,
 		def:bracket, def:expanded-state, def:ideg-deg-polynomials}
@@ -2468,7 +2468,13 @@ analyzed, together with candidate repairs, in
 	% m * poly(eps, md/q), which is the form the sequel uses. See
 	% rem:qld-4-13-source-defects and the analysis in
 	% docs/paper-gaps/qpbt_combined-lines-error-term.tex; the open printed-error
-	% form is tracked by GitHub issue 598. The line-point
+	% form is tracked by GitHub issue 598. Since 2026-09-19 the printed claim is
+	% carried in Lean by MIPStarRE.QPBT.PrintedExtendedLinesWitnessClaim, a
+	% definition of type Prop that states the printed conclusion without
+	% asserting it; it replaced a theorem of the same statement whose proof was
+	% an open sorry. This node therefore still carries no formalization mark,
+	% and the established content of the node is lem:qld-4-13-established.
+	% The line-point
 	% distribution over F_q^{2m+2} presupposes that 2m+2 divides q; see
 	% rem:qld-4-7-divisibility.
 	There exists a function
@@ -3881,11 +3887,24 @@ source-labelled claims is certified by these auxiliary entries.
 	candidate repairs with their open obligations --- is given in
 	\cite{gap:qpbt_combined-lines-error-term}.
 	The printed error form is therefore an open source gap and not a Lean proof
-	obligation of any consumer: its declaration keeps an open proof, every
-	formalized consumer uses the established form of
-	Lemma~\ref{lem:qld-4-13-established}, and the gap is tracked by GitHub issue
-	598 after the obstruction pull requests of the earlier issues closed those
-	issues without proving the printed assertion.
+	obligation of any consumer: every formalized consumer uses the established
+	form of Lemma~\ref{lem:qld-4-13-established}, and the gap is tracked by
+	GitHub issue 598 after the obstruction pull requests of the earlier issues
+	closed those issues without proving the printed assertion.
+	Since 2026-09-19 the printed claim is carried in Lean by the definition
+	\path{MIPStarRE.QPBT.PrintedExtendedLinesWitnessClaim}, a proposition that is
+	stated but not asserted, which replaced a theorem of the same statement whose
+	proof was an open \path{sorry}. The statement the source prints is thus
+	neither proved nor dropped, and the Lean development carries no proof debt at
+	this site. What the source proof does establish is formalized by
+	\path{MIPStarRE.QPBT.exists_extendedLinesWitness_established} of
+	Lemma~\ref{lem:qld-4-13-established}; the scalar obstruction to the first
+	route is \path{MIPStarRE.QPBT.not_exists_combining_quarter_power_bound}.
+	No implication between the unasserted proposition and the established theorem
+	is recorded in either direction, because none follows by a short faithful
+	argument: the printed form applies an arbitrary polynomial error function to
+	$m^2\eps$, whose exponent may exceed the single prefactor $m$ that the
+	established form carries outside its error function.
 \end{remark}
 
 \begin{example}[The paired-line construction given a joint point family]
