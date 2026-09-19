@@ -23,12 +23,10 @@ conclusions; they do not assert these five uniform exceptional averages or
 the reversed ordered-indicator identity. This port leaves those later
 bounds, the existing private helpers, and the factored mass inequality intact.
 
-Refreshed on 2026-09-19: the port is re-applied onto
-`2eb5f770c452f54aba0e0e725e97ccbc9c615a67`. The Lean module is byte-identical
-between `7de8fe0b` and that base, so its hunks apply unchanged. The blueprint
-chapter has moved substantially in between; the five auxiliary entries are
-inserted at the same anchor, after the fiber-norm comparison proof and before
-the partial-coefficient-polynomial definition, and every blueprint label they
+The blueprint chapter, unlike the Lean module, moved substantially between
+the two bases. The five auxiliary entries are nonetheless inserted at the same
+anchor as before, after the fiber-norm comparison proof and before the
+partial-coefficient-polynomial definition, and every blueprint label they
 reference still exists on the new base.
 
 # Source of Truth
