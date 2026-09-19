@@ -120,7 +120,8 @@ at most `4m^2 δP` at the two blocks of one sampled extended point.
 
 This is the directly indexed form of the estimate at paper lines 1241-1245,
 with the supplied line witness displayed explicitly. It does not construct that
-witness or prove the printed error form of `exists_extendedLinesWitness`.
+witness or prove the printed error form recorded by
+`PrintedExtendedLinesWitnessClaim`.
 Blueprint `rem:qld-subline-joint-consistency`; issue #510. -/
 theorem subLineDist_consistencyDefect_le_ofLinesWitness {P : AdmissibleParams}
     {ε δQ δP : ℝ} (S : ProjectiveSetting P ε)
