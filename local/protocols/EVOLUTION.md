@@ -1626,7 +1626,10 @@ and the files an ITP artifact submission needs (C7: the registered artifact
 files and `scripts/make_artifact.sh`, whose snapshot leak scan is delegated).
 The coverage half of C5 is decided against the challenge file, not against the
 hand-written `covered-theorems` row of the same document, so no criterion
-validates a document against itself. New model-free checker
+validates a document against itself. C2 accepts either audit command the
+repository defines, `assert_standard_axioms` (LDT) or `audit_standard_axioms`
+(the QPBT audit module merged from main on 2026-09-19), rather than making one
+tree rename its command to satisfy the gate. New model-free checker
 `scripts/completion_gate.py`
 (`check --track qpbt`) with unit tests under `scripts/tests/`; it loads the
 sorry-site rule out of `results/telemetry/owner-tools/estimate.sh` and imports

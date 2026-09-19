@@ -305,6 +305,16 @@ class HeadlineAxiomTests(GateFixture):
         self.assertEqual(crit.status, gate.FAIL)
         self.assertIn("Fixture.good", crit.evidence[0])
 
+    def test_the_qpbt_audit_command_also_counts(self) -> None:
+        """`MIPStarRE/QPBT/Test/AxiomAudit.lean` defines `audit_standard_axioms`."""
+        write(
+            self.root,
+            "MIPStarRE/Fixture/AxiomAudit.lean",
+            "import Fixture\n\naudit_standard_axioms Fixture.good\n",
+        )
+        crit = gate.criterion_headline_axioms(self.root, self.track)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+
     def test_commented_assertion_does_not_count(self) -> None:
         write(
             self.root,
@@ -618,6 +628,14 @@ class RegisteredTrackTests(unittest.TestCase):
                     f"track {track.name} registers a truthful doc that does "
                     f"not exist: {doc}",
                 )
+
+    def test_the_real_qpbt_audit_covers_every_headline_theorem(self) -> None:
+        """C2 must see the audit module this repository actually ships."""
+        track = gate.TRACKS["qpbt"]
+        if not (REPO_ROOT / track.axiom_audit).exists():
+            self.skipTest(f"{track.axiom_audit} is not in this tree yet")
+        crit = gate.criterion_headline_axioms(REPO_ROOT, track)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
 
     def test_registry_and_protocol_agree_on_the_registered_paths(self) -> None:
         """§6 rows and the `TRACKS` entry are one commit's work, so they match."""

@@ -37,8 +37,11 @@ rather than copied.
 
 **C2 — Headline axioms.** Every headline theorem of §6 depends only on
 `propext`, `Classical.choice` and `Quot.sound`. The check is a committed
-`AxiomAudit` Lean file for the track that carries one `assert_standard_axioms`
-command per headline theorem and is built in CI. The gate checks that the file
+`AxiomAudit` Lean file for the track that carries one audit command per
+headline theorem — `assert_standard_axioms` (LDT) or `audit_standard_axioms`
+(the command QPBT's audit module defines); both print the axiom set and fail
+elaboration unless it is exactly those three — and is built in CI. The gate
+checks that the file
 exists and covers the table; the axiom values themselves come from the build
 and are reported as delegated.
 

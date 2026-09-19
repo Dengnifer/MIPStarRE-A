@@ -95,6 +95,14 @@ DECL_NAME_RE = re.compile(r"[^\W\d]\S*")
 EVIDENCE_LIMIT = 10
 STANDARD_AXIOMS = ("propext", "Classical.choice", "Quot.sound")
 
+# The repository has two axiom-audit commands: `assert_standard_axioms`
+# (`MIPStarRE/LDT/Test/AxiomAudit.lean`) and `audit_standard_axioms`, which
+# `MIPStarRE/QPBT/Test/AxiomAudit.lean` defines for its own tree.  Both print
+# the axiom set of a declaration and fail elaboration unless it is exactly the
+# three standard axioms, which is the whole of what C2 delegates to the build,
+# so the gate accepts either instead of making one tree rename its command.
+AUDIT_COMMAND_RE = re.compile(r"\b(?:assert|audit)_standard_axioms\s+(\S+)")
+
 PASS, FAIL, DELEGATED, DEFERRED = "PASS", "FAIL", "DELEGATED", "DEFERRED"
 
 
@@ -298,14 +306,15 @@ def criterion_headline_axioms(root: Path, track: Track) -> Criterion:
     text = path.read_text(encoding="utf-8", errors="replace")
     stripped = strip_lean_comments(text)
     covered: dict[str, int] = {}
-    for match in re.finditer(r"assert_standard_axioms\s+(\S+)", stripped):
+    for match in AUDIT_COMMAND_RE.finditer(stripped):
         covered.setdefault(match.group(1), line_number(stripped, match.start()))
     missing = [name for name, _ in track.headline if name not in covered]
     if missing:
         crit.status = FAIL
         crit.summary = f"{len(missing)} of {len(track.headline)} headline theorems uncovered"
         crit.evidence = [
-            f"{track.axiom_audit}:0: no `assert_standard_axioms {name}`"
+            f"{track.axiom_audit}:0: no `assert_standard_axioms` or "
+            f"`audit_standard_axioms` for {name}"
             for name in missing
         ]
         return crit
@@ -314,7 +323,7 @@ def criterion_headline_axioms(root: Path, track: Track) -> Criterion:
         "values come from the CI build"
     )
     crit.evidence = [
-        f"{track.axiom_audit}:{covered[name]}: assert_standard_axioms {name}"
+        f"{track.axiom_audit}:{covered[name]}: audited {name}"
         for name, _ in track.headline
     ]
     return crit
