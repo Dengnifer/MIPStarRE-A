@@ -5,6 +5,7 @@ import MIPStarRE.QPBT.Combining.ActualErrorBounds
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.PointErrorObstruction
 import MIPStarRE.QPBT.Combining.ErrorObstruction
+import MIPStarRE.QPBT.Combining.Lines.SubLineJoint
 import MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-!
@@ -68,6 +69,13 @@ whose error `C * m * poly(epsilon, md / q)` is the form the first route actually
 delivers. What remains open is tracked by issue #598; the earlier issues #509
 and #510 were closed by their obstruction pull requests without a proof of the
 printed assertion, and are not reopened.
+
+The concrete directly indexed sampler now has the joint product decomposition
+`subLineDist_map_joint`. Its second-route consequence
+`subLineDist_consistencyDefect_le_ofLinesWitness` gives `4 * m^2 * δP` for a
+supplied line witness. Neither that premise nor the stronger error estimate needed
+here is discharged by this comparison; see issue #510 and
+`docs/paper-gaps/qpbt_combined-lines-error-term.tex`.
 
 **Error contract:** the polynomial bound printed in the source is carried
 by `IsPolyErr₂`, which states the corrected sum form

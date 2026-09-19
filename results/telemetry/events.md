@@ -8035,6 +8035,20 @@ this worktree's private build cache made the unchanged incoming file pass.
   no mathematical declaration or proof was changed by the conflict resolution.
   Historical admission fixes must be reconciled with the current router contract.
 
+## 2026-09-12 - Issue 510 independent attempt: validation friction
+
+Session `prover-510-20260912-02` proved the joint projected law for the
+concrete direct sub-line sampler. The initial full-build helper waited 120
+seconds for a live machine-wide lock and exited before compiling; no lock
+was bypassed. Pre-commit then rejected the conditional consistency helper's
+blueprint link in a lemma environment, although the new auxiliary entry
+stated its line-witness premise explicitly. The author retained the
+conditional declaration name and moved that discussion to an unlinked
+remark, preserving proof-complete links only on the unconditional joint-law
+entry. No audit exception or workflow rule was changed. Mathematical scope,
+prior attempt costs, and verification are recorded in
+`audits/2026-09-12_issue510-second-route-joint-law.md`.
+
 - 2026-09-12 - PR #507 merge-conflict recovery, session `orc-pr507-20260912-02`:
   resolved the pending merge of `ae124f8f09ee002444ac5b9711822c0f1daae142`
   into `f427e121` by retaining both sides of the EVOLUTION.md and events.md
