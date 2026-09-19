@@ -176,7 +176,7 @@ run of the same commit. Unit tests:
 | Field | Value |
 |---|---|
 | Lean root | `MIPStarRE/QPBT` |
-| Blueprint chapters | `blueprint/src/chapter/ch11`–`ch16` |
+| Blueprint chapters | `blueprint/src/chapter/ch11_qpbt_algebra.tex`, `blueprint/src/chapter/ch12_qpbt_games.tex`, `blueprint/src/chapter/ch13_qpbt_test.tex`, `blueprint/src/chapter/ch14_qpbt_observables.tex`, `blueprint/src/chapter/ch15_qpbt_combining.tex`, `blueprint/src/chapter/ch16_qpbt_extraction.tex` |
 | Paper-gap register | `docs/paper-gaps/qpbt-gap-register.md` |
 | Axiom audit | `MIPStarRE/QPBT/Test/AxiomAudit.lean` |
 | `\leanok` exemptions | `docs/completion/qpbt-leanok-exemptions.md` |
@@ -198,4 +198,7 @@ Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
 
 Adding a track means adding its row set here and its entry in the gate's
 `TRACKS` registry, in one commit; a unit test reads this section and fails if a
-registry entry names a path these rows do not.
+registry entry names a path these rows do not. That test reads every
+path-valued field of `Track` — every row above but the umbrella issues — and
+fails as well when `Track` gains or loses a field without a line in the test,
+so the rule cannot quietly stop covering part of the registry.

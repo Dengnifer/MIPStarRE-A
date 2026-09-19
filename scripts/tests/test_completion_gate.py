@@ -11,6 +11,7 @@ rule, since the protocol requires a single implementation of that rule.
 from __future__ import annotations
 
 import contextlib
+import dataclasses
 import io
 import shutil
 import subprocess
@@ -642,12 +643,35 @@ class RegisteredTrackTests(unittest.TestCase):
         protocol = (REPO_ROOT / "local/protocols/completion.md").read_text(
             encoding="utf-8"
         )
+        path_fields = (
+            "lean_root",
+            "gap_register",
+            "axiom_audit",
+            "blueprint_chapters",
+            "leanok_exemptions",
+            "comparator_doc",
+            "expected_challenge",
+            "truthful_docs",
+            "artifact_files",
+            "artifact_script",
+        )
+        # A field added to `Track` without a line here would silently escape
+        # the rule stated at the end of section 6, which is the shape of defect
+        # this gate exists to remove.
+        self.assertEqual(
+            {f.name for f in dataclasses.fields(gate.Track)},
+            {"name", "headline", *path_fields},
+            "`Track` gained or lost a field: name it here (and in section 6 of "
+            "the protocol) so every path-valued field is still checked",
+        )
         for track in gate.TRACKS.values():
-            for rel in (
-                track.expected_challenge,
-                track.artifact_script,
-                *track.artifact_files,
-            ):
+            registered: list[str] = []
+            for fieldname in path_fields:
+                value = getattr(track, fieldname)
+                registered.extend(
+                    value if isinstance(value, tuple) else (value,)
+                )
+            for rel in registered:
                 self.assertIn(
                     f"`{rel}`",
                     protocol,
