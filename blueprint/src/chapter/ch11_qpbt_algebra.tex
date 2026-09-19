@@ -589,10 +589,14 @@ representation is obtained as follows.
 % Paper label sec:generalized-pauli kept for cross-reference fidelity.
 \label{sec:generalized-pauli}
 
+% The node is not marked \leanok: the Fourier transform F of eq:fourier-f has no Lean
+% counterpart, and pauliVec/pauliProj formalize the eigenbasis vectors and the rank-one
+% projective measurement only in the characteristic-two scope recorded by
+% gap:qpbt_characteristic-two-pauli-scope, not in general prime characteristic.
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
 	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase}
 	\lean{MIPStarRE.QPBT.primeTauObservable}
-	\leanok
+	\lean{MIPStarRE.QPBT.pauliVec, MIPStarRE.QPBT.pauliProj}
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
