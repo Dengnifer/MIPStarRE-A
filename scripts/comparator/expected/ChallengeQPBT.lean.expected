@@ -581,13 +581,15 @@ section
 variable {K : Type*} [Field K] [Fintype K] [Algebra (ZMod 2) K]
 local notation "G" => Gal(K/(ZMod 2))
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:125-125  (MIPStarRE.QPBT.instCommGroupAlgEquivZModOfNatNat_mIPStarRE)
-noncomputable local instance : CommGroup G := IsCyclic.commGroup
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:129-130  (MIPStarRE.QPBT.instCommGroupGaloisZMod2)
+noncomputable local instance instCommGroupGaloisZMod2 : CommGroup G :=
+  IsCyclic.commGroup
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:126-126  (MIPStarRE.QPBT.instDecidableEqAlgEquivZModOfNatNat_mIPStarRE)
-noncomputable local instance : DecidableEq G := Classical.decEq G
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:131-132  (MIPStarRE.QPBT.instDecidableEqGaloisZMod2)
+noncomputable local instance instDecidableEqGaloisZMod2 : DecidableEq G :=
+  Classical.decEq G
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:128-158  (MIPStarRE.QPBT.normal_basis_trace_dual_apply)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:134-164  (MIPStarRE.QPBT.normal_basis_trace_dual_apply)
 theorem normal_basis_trace_dual_apply (σ : G) :
     (IsGalois.normalBasis (ZMod 2) K).traceDual σ =
       σ ((IsGalois.normalBasis (ZMod 2) K).traceDual 1) := by
@@ -620,7 +622,7 @@ theorem normal_basis_trace_dual_apply (σ : G) :
       _ = if υ = τ then 1 else 0 := by simp only [inv_mul_eq_one, eq_comm]
   exact congr_fun hdual σ
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:160-184  (MIPStarRE.QPBT.normal_basis_repr_symm_mul_single)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:166-190  (MIPStarRE.QPBT.normal_basis_repr_symm_mul_single)
 theorem normal_basis_repr_symm_mul_single
     (a : MonoidAlgebra (ZMod 2) G) (σ : G) (r : ZMod 2) :
     ((MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans
@@ -647,7 +649,7 @@ theorem normal_basis_repr_symm_mul_single
         _ = σ (τ (b 1)) := rfl
         _ = σ (b τ) := congrArg σ (IsGalois.normalBasis_apply τ).symm
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:186-207  (MIPStarRE.QPBT.normal_basis_transition)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:192-213  (MIPStarRE.QPBT.normal_basis_transition)
 theorem normal_basis_transition (a : MonoidAlgebra (ZMod 2) G) :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
@@ -671,7 +673,7 @@ theorem normal_basis_transition (a : MonoidAlgebra (ZMod 2) G) :
         MonoidAlgebra.coeff_single, b.traceDual.repr_symm_single]
       exact congrArg (fun x : K => r • x) (normal_basis_trace_dual_apply σ).symm
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:209-227  (MIPStarRE.QPBT.normal_basis_transition_is_unit)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:215-233  (MIPStarRE.QPBT.normal_basis_transition_is_unit)
 theorem normal_basis_transition_is_unit :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
@@ -692,7 +694,7 @@ theorem normal_basis_transition_is_unit :
   rw [heq]
   exact φ.symm.bijective.comp ψ.bijective
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:229-236  (MIPStarRE.QPBT.normal_basis_repr_apply_eq_trace)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:235-242  (MIPStarRE.QPBT.normal_basis_repr_apply_eq_trace)
 theorem normal_basis_repr_apply_eq_trace (x : K) (σ : G) :
     let b := IsGalois.normalBasis (ZMod 2) K
     (b.repr x) σ = Algebra.trace (ZMod 2) K (x * b.traceDual σ) := by
@@ -702,7 +704,7 @@ theorem normal_basis_repr_apply_eq_trace (x : K) (σ : G) :
   simpa only [Algebra.traceForm_apply, b.traceDual_traceDual] using
     b.traceDual.traceDual_repr_apply x σ
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:238-273  (MIPStarRE.QPBT.normal_basis_transition_inv)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:244-279  (MIPStarRE.QPBT.normal_basis_transition_inv)
 theorem normal_basis_transition_inv :
     let b := IsGalois.normalBasis (ZMod 2) K
     let φ := (MonoidAlgebra.coeffLinearEquiv (ZMod 2)).trans b.repr.symm
@@ -740,7 +742,7 @@ theorem normal_basis_transition_inv :
     _ = Algebra.trace (ZMod 2) K (b.traceDual 1 * b.traceDual σ) := by
       rw [mul_comm]
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:275-309  (MIPStarRE.QPBT.trace_group_algebra_pairing)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:281-315  (MIPStarRE.QPBT.trace_group_algebra_pairing)
 theorem trace_group_algebra_pairing
     (a d : MonoidAlgebra (ZMod 2) G) :
     let b := IsGalois.normalBasis (ZMod 2) K
@@ -777,7 +779,7 @@ theorem trace_group_algebra_pairing
           · have hne : σ⁻¹ * τ ≠ 1 := by simpa [inv_mul_eq_one]
             simp [h, hne]
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:311-383  (MIPStarRE.QPBT.exists_self_dual_normal_basis_gal)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:317-389  (MIPStarRE.QPBT.exists_self_dual_normal_basis_gal)
 /-- A finite binary extension whose Galois group has odd cardinality admits a
 self-dual normal basis indexed by that group. Starting from Mathlib's normal
 basis, the construction multiplies by the inversion-invariant square root of
@@ -853,7 +855,7 @@ theorem exists_self_dual_normal_basis_gal (hodd : Odd (Nat.card G)) :
     rfl
 end  -- module scope
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:387-425  (MIPStarRE.QPBT.exists_selfDualNormalBasis)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:393-431  (MIPStarRE.QPBT.exists_selfDualNormalBasis)
 /-- Existence over the binary extension of cardinality `2^k` for odd `k`;
 blueprint `def:dual-self-dual-normal-basis`,
 paper `04_preliminaries.tex:702-725`. -/
@@ -894,12 +896,12 @@ theorem exists_selfDualNormalBasis {K : Type*} [Field K] [Fintype K]
     rw [AlgEquiv.coe_pow,
       FiniteField.coe_frobeniusAlgEquivOfAlgebraic_iterate]
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:427-429  (MIPStarRE.QPBT.zmod2_fin_equiv_symm_val)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:433-435  (MIPStarRE.QPBT.zmod2_fin_equiv_symm_val)
 theorem zmod2_fin_equiv_symm_val (x : ZMod 2) :
     ((ZMod.finEquiv 2).symm x).val = if x = 1 then 1 else 0 := by
   fin_cases x <;> rfl
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:431-470  (MIPStarRE.QPBT.FixedFieldModel)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:437-476  (MIPStarRE.QPBT.FixedFieldModel)
 /--
 A fixed finite-field model records the carrier and the chosen coding of its
 elements by `Fin q`.  The algebra structure and stored basis data make explicit
@@ -941,7 +943,7 @@ structure FixedFieldModel (q : ℕ) extends MIPStarRE.LDT.FieldModel.{0} q where
   /-- Normality of the chosen basis, recorded by a Frobenius generator. -/
   normal : ∃ α : K, ∀ i, basis i = α ^ (2 ^ i.1)
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:480-538  (MIPStarRE.QPBT.exists_fixed_field_model)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:486-544  (MIPStarRE.QPBT.exists_fixed_field_model)
 /-- An admissible binary field size admits the fixed self-dual normal model used
 by the Pauli basis test.  This is the existence assertion implicit in
 `def:dual-self-dual-normal-basis` and blueprint
@@ -1002,7 +1004,7 @@ theorem exists_fixed_field_model (q : ℕ) (hq : IsAdmissibleSize q) :
     refine ⟨α, fun i => ?_⟩
     simpa using hα i
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:540-548  (MIPStarRE.QPBT.fixedFieldModel)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:546-554  (MIPStarRE.QPBT.fixedFieldModel)
 /-- The once-and-for-all field model selected for an admissible size.  Every
 QPBT parameter record uses this same choice, matching the paper's fixed
 self-dual normal-basis identification rather than quantifying over arbitrary
@@ -1013,24 +1015,24 @@ noncomputable def fixedFieldModel (q : ℕ) (hq : IsAdmissibleSize q) :
     FixedFieldModel q :=
   Classical.choice (exists_fixed_field_model q hq)
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:550-550  (MIPStarRE.QPBT.instFieldK)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:556-556  (MIPStarRE.QPBT.instFieldK)
 instance {q : ℕ} (F : FixedFieldModel q) : Field F.K := F.toFieldModel.instField
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:551-551  (MIPStarRE.QPBT.instFintypeK)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:557-557  (MIPStarRE.QPBT.instFintypeK)
 instance {q : ℕ} (F : FixedFieldModel q) : Fintype F.K := F.toFieldModel.instFintype
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:552-552  (MIPStarRE.QPBT.instDecidableEqK)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:558-558  (MIPStarRE.QPBT.instDecidableEqK)
 instance {q : ℕ} (F : FixedFieldModel q) : DecidableEq F.K := F.toFieldModel.instDecidableEq
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:553-553  (MIPStarRE.QPBT.instAlgebraZModOfNatNatK)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:559-559  (MIPStarRE.QPBT.instAlgebraZModOfNatNatK)
 instance {q : ℕ} (F : FixedFieldModel q) : Algebra (ZMod 2) F.K := F.algebra
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:555-557  (MIPStarRE.QPBT.binaryRepresentation)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:561-563  (MIPStarRE.QPBT.binaryRepresentation)
 /-- The fixed binary representation obtained from the chosen basis coordinates. -/
 noncomputable def binaryRepresentation {q : ℕ} (F : FixedFieldModel q) : F.K ≃ Fin q :=
   F.toFieldModel.equiv
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:580-588  (MIPStarRE.QPBT.binTrace)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:586-594  (MIPStarRE.QPBT.binTrace)
 /--
 The finite-field trace used by the Pauli phases.  This is a thin wrapper around
 Mathlib's basis-independent `Algebra.trace`, matching Equation `eq:def-trace`
@@ -1041,7 +1043,7 @@ noncomputable abbrev binTrace (K : Type*) [CommRing K] [Algebra (ZMod 2) K] :
     K →ₗ[ZMod 2] ZMod 2 :=
   Algebra.trace (ZMod 2) K
 
--- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:590-594  (MIPStarRE.QPBT.fixedBinTrace)
+-- source: MIPStarRE/QPBT/Algebra/FieldBasis.lean:596-600  (MIPStarRE.QPBT.fixedBinTrace)
 /-- The trace selected by a fixed model; this is the map denoted `tr` in the
 paper's blueprint `def:binary-representation`,
 paper origin `references/qpbt-paper/04_preliminaries.tex:653-680`. -/

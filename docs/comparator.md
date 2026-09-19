@@ -121,6 +121,13 @@ obstacles had to be removed in the library:
    faithful edit: no statement, definition body or proof script changes, only
    the visibility of names that the statement closure already depends on.
 
+3. **Anonymous local instances.**  Two `local instance`s in
+   `MIPStarRE/QPBT/Algebra/FieldBasis.lean` (the group and decidable-equality
+   structure on the Galois group) are in the closure, and an anonymous
+   instance receives a generated name that encodes its defining module, which
+   a challenge file in another module cannot reproduce.  They now carry
+   explicit names.
+
 No statement of either headline theorem changed, and their axiom closure
 remains `propext`, `Classical.choice`, `Quot.sound`.
 
