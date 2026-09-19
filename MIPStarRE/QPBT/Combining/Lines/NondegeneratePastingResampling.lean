@@ -60,7 +60,8 @@ theorem avgOver_nondegenerateLinePastingDist_resample_parameter (L : LdParams)
   simp only [Distribution.avgOver_map]
   rw [avgOver_restrict_eq, avgOver_restrict_eq]
   congr 1
-  rw [avgOver_prod, avgOver_prod]
+  rw [SandwichProduct.avgOver_distribution_prod,
+    SandwichProduct.avgOver_distribution_prod]
   calc
     avgOver (linePointDist L) (fun first => avgOver (linePointDist L) (fun second =>
         if first.1.direction ≠ 0 then
