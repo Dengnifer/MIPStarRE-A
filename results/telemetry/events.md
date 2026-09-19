@@ -5826,6 +5826,23 @@ not actual commit/publication hooks. No productive session was killed.
   13 attempts/26509 seconds remain cumulative and unchanged. Receipt:
   /tmp/qpbt-parameter-evaluated-line-bound-astra-status-20260908.json
   (sha256 adc49ff3bd1aafca860c6ffa3562455947743e1dfe9d0e9b7d205bb07b738655).
+- Owner-approved default-home app-server occupancy correction (#345): the canonical
+  host census counted PID 3286270, a VS Code ChatGPT extension `codex app-server`
+  started September 8, 2026 at 10:16:05 +0800 with effective Codex home
+  `/home/drx/.codex` and CWD `/home/drx`, as a worker. The owner receipt
+  `~/.cache/mipstarre-dev/qpbt-switch/worker-occupancy-correction-20260908.json`
+  defines total `k` as one main plus `k - 1` native descendants with no unrelated-use
+  reservation, and requires eight actually active native workers at `k = 10`. The narrow
+  repair extends the existing validated CWD exclusion only to the exact default-home
+  `app-server` command; generic workers, scoped homes, reservations, leases and unknown
+  visibility remain guarded. This branch did not signal the process, activate a lease,
+  restart main or change credentials. PID 3286270 exited naturally before the switch
+  checkpoint, after which meta bound the nine-descendant lease using the unchanged
+  published guard. A post-switch read-only check with the branch code verified root
+  PID 3846730/start187183661 at nine descendants, census `[9, 0]` workers and
+  `[1, 0]` interactives within capacity ten, external reservation zero, no live
+  `app-server`, and an unchanged lease-file timestamp and SHA-256. The router fix
+  remains unmerged and subject to normal CI, independent review and service merge.
 - PR310's coordinator published telemetry commit
   00565abd6d9dcfded2c914601ecef07542d2f4d8 and snapshot
   fcfb392b01a33ea4779e92776a96f2bd77b99fef before merging the already
@@ -8006,6 +8023,32 @@ this worktree's private build cache made the unchanged incoming file pass.
   four-line crontab): watchdog, heartbeat and astra-poll rows commented with `#PAUSED-20260909`, `estimate.sh` at `0 */6` active. No other
   rows are known to have existed. Both scripts now use `#` as the delimiter and never install an empty crontab.
 
+## 2026-09-12 - PR #350 merge conflicts after router retirement
+
+- Session `orc-pr350-20260912-01` found eight workflow-only conflicts while merging
+  `ae124f8f09ee002444ac5b9711822c0f1daae142` into `issue-345-app-server-occupancy`.
+  Issue #505 (router commit `24394eef`, merged in PR #508) had removed host-process
+  occupancy and native leases after issue #345 changed the app-server exclusion.
+  The resolution keeps main's marker-only router, tests and retirement documentation,
+  and preserves the earlier issue #345 records. The legacy exclusion setting is added
+  to the retired-settings regression. Every Lean file already matched incoming main;
+  no mathematical declaration or proof was changed by the conflict resolution.
+  Historical admission fixes must be reconciled with the current router contract.
+
+## 2026-09-12 - Issue 510 independent attempt: validation friction
+
+Session `prover-510-20260912-02` proved the joint projected law for the
+concrete direct sub-line sampler. The initial full-build helper waited 120
+seconds for a live machine-wide lock and exited before compiling; no lock
+was bypassed. Pre-commit then rejected the conditional consistency helper's
+blueprint link in a lemma environment, although the new auxiliary entry
+stated its line-witness premise explicitly. The author retained the
+conditional declaration name and moved that discussion to an unlinked
+remark, preserving proof-complete links only on the unconditional joint-law
+entry. No audit exception or workflow rule was changed. Mathematical scope,
+prior attempt costs, and verification are recorded in
+`audits/2026-09-12_issue510-second-route-joint-law.md`.
+
 - 2026-09-12 - PR #507 merge-conflict recovery, session `orc-pr507-20260912-02`:
   resolved the pending merge of `ae124f8f09ee002444ac5b9711822c0f1daae142`
   into `f427e121` by retaining both sides of the EVOLUTION.md and events.md
@@ -9271,3 +9314,4 @@ historical entry above is rewritten.
 - 2026-09-18T19:36:35Z - Reviewed train 9d253f645a0ce76f0802a262f7261d7eeb54d315: publication published; members #617@85b8c67b95b74d3593cdba281068ad1f5b9594bd, #616@5a399a6c1c0de17230b562834d00b2d0c67fd693, #618@fa1ac80a22e3f63cba0e22fca164b2be3e4ad315; conflicting PRs dropped: [].
 - 2026-09-18T21:38:15Z - Reviewed train 2bddc5b0790af8d62a71dab792dfd57f9b32571a: publication published; members #503@b26a35c6c4c63c462ccb78e6d2f4d9c37aea7e0e, #588@e34cb21313edbcfdc8494664f2c3b87eab11448f; conflicting PRs dropped: [].
 - 2026-09-19T03:42:04Z - Reviewed train aef8274378684e1028032f001d9f63bb3f2b729a: publication refused; members #479@b3d5f6daf03b716b679e2dd5236b08d37acdefb3, #350@874c64250a14236762a65060854b06a992d2fb30, #546@1a395cec45fb73b30ea917c7997a691368fd4bcd; conflicting PRs dropped: [].
+- 2026-09-19T04:33:07Z - Reviewed train bfa8e2796f1da70a5867e70790c944fcea3b9e28: publication published; members #479@b3d5f6daf03b716b679e2dd5236b08d37acdefb3, #350@874c64250a14236762a65060854b06a992d2fb30, #546@1a395cec45fb73b30ea917c7997a691368fd4bcd; conflicting PRs dropped: [].
