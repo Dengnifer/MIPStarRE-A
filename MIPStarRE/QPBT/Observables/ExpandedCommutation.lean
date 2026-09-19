@@ -45,7 +45,7 @@ theorem tauObservable_conjTranspose {K ι : Type*} [Field K] [Finite K]
   exact (Matrix.posSemidef_vecMulVec_self_star (pauliVec W e)).isHermitian.eq
 
 /-- The generalized Pauli observables are reflections. Blueprint
-`ch11_qpbt_algebra.tex:587-634`, paper
+`ch11_qpbt_algebra.tex:592-640`, paper
 `references/qpbt-paper/04_preliminaries.tex:1088-1089`. -/
 theorem tauObservable_conjTranspose_mul_self {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Algebra (ZMod 2) K] [Fintype ι]
@@ -70,7 +70,7 @@ noncomputable def tauZ (P : AdmissibleParams) (ω : PauliTuple P) :
   tauObservable .Z (fun h => ω.2.2.2 * indicatorVec ω.2.1 h)
 
 /-- The product of the two Pauli-register factors is an isometry. Blueprint
-`ch11_qpbt_algebra.tex:587-634`, paper
+`ch11_qpbt_algebra.tex:592-640`, paper
 `references/qpbt-paper/04_preliminaries.tex:1088-1095`. -/
 theorem tauX_mul_tauZ_isometry (P : AdmissibleParams) (ω : PauliTuple P) :
     (tauX P ω * tauZ P ω)ᴴ * (tauX P ω * tauZ P ω) = 1 :=
@@ -80,7 +80,7 @@ theorem tauX_mul_tauZ_isometry (P : AdmissibleParams) (ω : PauliTuple P) :
 
 /-- The two Pauli-register factors commute up to the tuple's commutation sign.
 This is the exact half of the argument of `lem:qld-comm-cons`; blueprint
-`ch11_qpbt_algebra.tex:587-634`, paper
+`ch11_qpbt_algebra.tex:592-640`, paper
 `14_analysis_of_the_pauli_basis_test.tex:495-505`. -/
 theorem tauZ_mul_tauX (P : AdmissibleParams) (ω : PauliTuple P) :
     tauZ P ω * tauX P ω =

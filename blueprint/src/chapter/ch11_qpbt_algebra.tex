@@ -56,6 +56,7 @@ nevertheless holds over every field.
 	\]
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:dot-product-orthogonal}
 	The elements of $S^\perp$ are the solutions of a feasible linear system whose
 	coefficient matrix has $\dim(S)$ linearly independent rows, so the solution
@@ -166,6 +167,7 @@ one may nevertheless single out a \emph{canonical} complement.
 	$\ker(L^\perp) = \ker(L)^\perp$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:Lperp, def:cl-canonical, lem:canonical-complement}
 	Set $S = \mathrm{span}(F) = \ker(L)^\perp$ and $T = \mathrm{span}(F^\perp)$;
 	by Lemma~\ref{lem:canonical-complement} every $v \in V$ decomposes uniquely
@@ -187,6 +189,7 @@ $\F_q$, and $\F_p$ is its prime subfield.
 
 \begin{definition}[Coordinate map and multiplication tables]\label{def:subfields-kappa}
 	\lean{MIPStarRE.QPBT.chiOfBasis, MIPStarRE.QPBT.basisCoordVec}
+	\leanok
 	% The source lets k range over all integers; the extension field exists
 	% only for k >= 1, so that domain condition is made explicit here.
 	Let $q$ be a prime power and $k \ge 1$ an integer, so that $\F_q$ is a
@@ -276,6 +279,7 @@ test.
 	Items 1 and 2 use self-duality; item 3 holds for an arbitrary basis.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:subfields-kappa, def:subfield-trace, def:dual-self-dual-normal-basis}
 	For item 1, write $x = \sum_i x_i e_i$, multiply both sides by $e_j$, and
 	take traces: $\tr_{q^k \to q}(x e_j) = \sum_i x_i \tr_{q^k \to q}(e_i e_j)
@@ -297,6 +301,7 @@ test.
 	vector in $\F_2^k$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{lem:downsize_field}
 	Normality gives $e_{i+1} = e_i^2$ (indices taken cyclically), and
 	$\tr(b^2) = \tr(b)$ for every $b \in \F_{2^k}$ because squaring permutes the
@@ -587,6 +592,7 @@ representation is obtained as follows.
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
 	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase}
 	\lean{MIPStarRE.QPBT.primeTauObservable}
+	\leanok
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
@@ -669,6 +675,7 @@ representation is obtained as follows.
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
+	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace}
 	All identities are verified on computational basis states. For the product
 	relations with $W = X$, shifting twice by $a'$ and $a$ equals shifting by
@@ -696,6 +703,7 @@ representation is obtained as follows.
 	where the expectation is over a uniformly random vector $\bu$ in $V$.
 \end{lemma}
 \begin{proof}
+	\leanok
 	This is Fact 3.2 of \cite{Natarajan2018NEEXP}. Since $v \notin V^\perp$,
 	the $\F_q$-linear functional $u \mapsto u \cdot v$ is not identically zero
 	on $V$, hence surjective onto $\F_q$; composing with the nonzero map $\tr$
