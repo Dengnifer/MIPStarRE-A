@@ -3,12 +3,16 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Observables.WinImplications.Averages
 
 /-!
-# Transport for the diagonal parameter defect
+# Transport of the diagonal parameter-evaluation defect
 
-This module identifies the diagonal coefficient defect used in the same-line
-rejection bound with the diagonal parameter-evaluation defect used in the
-supplied-line comparison. The proof composes the measurement postprocessings,
-and the two rules for extracting coefficients coincide.
+The coefficient-evaluation defect of the same-diagonal branch equals the
+parameter-evaluation defect of the supplied direct-game strategy. Both average
+the consistency defect of one and the same diagonal coefficient vector,
+evaluated at the sampled affine parameter, over the diagonal line marginal
+paired with an independent uniform parameter. The two sides only reach that
+vector by different routes: `diagonalRead` applied to the supplied line
+measurement, and the answer map of the assembled strategy followed by
+coefficient extraction. Those routes agree, so the averaged defects agree.
 
 The equality is an auxiliary identity supporting the classical-game
 construction in the proof of `lem:qld-4-7`. It retains the original diagonal

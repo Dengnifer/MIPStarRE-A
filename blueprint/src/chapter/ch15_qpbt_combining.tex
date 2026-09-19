@@ -2442,17 +2442,22 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 \end{proof}
 
 % This lemma is not a statement of the source; it records the finite
-% probability bookkeeping of the proof-only conditioning step above.  It is a
+% mass bookkeeping of the proof-only conditioning step above.  It is a
 % root of the dependency graph: it uses no earlier blueprint entry.
 \begin{lemma}[Formalization support: conditioning and restoring a finite average]
 	\label{lem:restricted-average-mass-split}
 	\lean{MIPStarRE.QPBT.avgOver_restrict_mul_mass}
 	\lean{MIPStarRE.QPBT.avgOver_le_restrict_add_discarded_mass}
 	\leanok
-	Let $\mu$ be a finitely supported probability distribution on a sample
-	type, let $G$ be a decidable event of positive mass $p = \mu(G) > 0$, and
-	write $\mu \mid G$ for the distribution $\mu$ conditioned on $G$. Then,
-	for every real-valued $f$,
+	Let $\mu$ be a finitely supported nonnegative weighting of a sample type.
+	Normalization is not assumed: neither linked declaration carries a
+	probability hypothesis, and $\mu$ ranges over the arbitrary finite
+	nonnegative weights of the formalized notion of distribution. Let $G$ be a
+	decidable event whose retained mass
+	$p = \mu(G) = \sum_{s \in G} \mu(s)$ is positive, and write
+	$\mu \mid G$ for the normalized restriction of $\mu$ to $G$, with weights
+	$\mu(s)/p$ on $G$ and $0$ off $G$; that restriction is a probability
+	distribution even when $\mu$ is not. Then, for every real-valued $f$,
 	\begin{equation}
 		\label{eq:restricted-average-normalization}
 		p \cdot \E_{\mu \mid G} f = \sum_{s \in G} \mu(s) f(s)\,,
@@ -2462,8 +2467,11 @@ $i\in\{0,\dots,r-1\}$ denotes coordinate $i+1$ in the one-based notation of
 		\label{eq:restricted-average-restoration}
 		\E_{\mu} f \le p \cdot \E_{\mu \mid G} f + \mu(G^{c})\,.
 	\end{equation}
-	The mass $\mu(G^{c})$ discarded by the conditioning is retained in full in
-	\eqref{eq:restricted-average-restoration}; no term is dropped.
+	Here $\mu(G^{c}) = \sum_{s \notin G} \mu(s)$ is the mass discarded by the
+	conditioning; it is retained in full in
+	\eqref{eq:restricted-average-restoration} and no term is dropped. Since
+	$\mu$ need not be normalized, $p$ and $\mu(G^{c})$ are masses rather than
+	probabilities, and their sum is the total mass of $\mu$ rather than one.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -3985,16 +3993,28 @@ to the separate question-law and completed-answer issues in
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:consistency, def:ld-game, def:admissible-size,
+	\uses{lem:sandwich-codeword-defect, lem:coefficient-polynomial-agreement,
+		def:consistency, def:ld-game, def:admissible-size,
 		def:ideg-deg-polynomials}
-	Comparing the coefficient outcomes with their evaluations at a uniform
-	parameter costs $\mathrm{deg}/q$, the probability that two distinct
-	polynomials of degree at most $\mathrm{deg}$ agree at a uniform point.
+	Comparing the coefficient outcomes with their evaluations at an independent
+	uniform parameter is the codeword step of
+	Lemma~\ref{lem:sandwich-codeword-defect}. Its collision hypothesis holds
+	with $\eps = \mathrm{deg}/q$: two distinct coefficient vectors of degree at
+	most $\mathrm{deg}$ agree at a uniformly random parameter with probability
+	at most $\mathrm{deg}/q$, which is the uniform-parameter form of the root
+	count of Lemma~\ref{lem:coefficient-polynomial-agreement}.
 	The resulting product law of a line marginal with an independent uniform
 	parameter is then reexpressed over the original line-point law: for a
 	nonzero direction the representative-parameter map identifies the two
 	averages termwise, and for a zero direction both sides are the uniform
-	parameter average of the same integrand.
+	parameter average of the same integrand. That reexpression is carried in
+	Lean by the axis and diagonal resampling identities of
+	\texttt{DirectLowDegree/Transport/LineResampling.lean} and the evaluated
+	defect identities of
+	\texttt{DirectLowDegree/ResampledCoefficientConsistency.lean}. These are
+	the directly indexed analogues of
+	Corollary~\ref{cor:line-point-parameter-resampling} and carry no blueprint
+	node of their own.
 \end{proof}
 
 The measurements of Lemma~\ref{lem:qld-4-12} and Lemma~\ref{lem:qld-4-13}
@@ -4967,16 +4987,38 @@ POVMs with $n=2m+2$ and $k=1$.
 \begin{proof}
 	\leanok
 	\uses{lem:qld-4-10, lem:qld-4-13-established, def:ld-combined-strategy,
-		def:tensor-product-value, thm:naimark}
+		def:tensor-product-value, thm:naimark, lem:sandwich-codeword-defect,
+		lem:coefficient-polynomial-agreement}
 	The seven branches are estimated separately: the point/point branch by the
 	combined point consistency, the four mixed line/point branches by four
 	times the shared line/point estimate, and the two same-kind line branches
 	by the axis and the diagonal parameter-evaluation defects together with
-	the coefficient-collision loss $d/q + (2m+2)d/q \le 5md/q$. The value of
-	the strategy is one minus one ninth of the branch total; capping the
-	rejection probability by one and applying the capped scalar estimate for
-	$\mathrm{env}$ gives the stated bound. Naimark dilation preserves the
+	the coefficient-collision loss $d/q + (2m+2)d/q \le 5md/q$. The two
+	same-kind branches reach those defects through the codeword step of
+	Lemma~\ref{lem:sandwich-codeword-defect}, whose collision hypothesis is
+	supplied by Lemma~\ref{lem:coefficient-polynomial-agreement} at degree $d$
+	for the axis branch and at degree $(2m+2)d$ for the diagonal branch. The
+	value of the strategy is one minus one ninth of the branch total; capping
+	the rejection probability by one and applying the capped scalar estimate
+	for $\mathrm{env}$ gives the stated bound. Naimark dilation preserves the
 	value of the strategy, hence the same bound.
+
+	In Lean the branch accounting is assembled from
+	\texttt{point\_point\_rejection\_le},
+	\texttt{mixed\_line\_point\_rejections\_le\_four\_mul} and the two
+	same-line bounds of
+	\texttt{ExtendedLineGame/SameLineCoefficientBound.lean}; the latter are
+	transported to the parameter-evaluation defects by the two
+	\texttt{parameter\_evaluated\_coefficient\_defect\_eq} identities and
+	bounded by \texttt{axis\_parameter\_evaluation\_defect\_le} and
+	\texttt{diagonal\_parameter\_evaluation\_defect\_le}. The collision
+	arithmetic $d/q + (2m+2)d/q \le 5md/q$ is
+	\texttt{extendedDirectLd\_coefficientCollisionLoss\_le\_five\_mul}, the
+	cap on the rejection probability is
+	\texttt{directLdRejectionProbability\_le\_one}, and the capped scalar
+	envelope step is
+	\texttt{seven\_branch\_capped\_error\_le\_directPassingErrorEnvelope}.
+	None of these auxiliaries carries a blueprint node of its own.
 \end{proof}
 
 % This remark records a defect of the source argument; it is not a statement
