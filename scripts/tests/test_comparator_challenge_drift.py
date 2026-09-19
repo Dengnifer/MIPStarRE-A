@@ -4,15 +4,22 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "scripts" / "comparator" / "check_challenge_drift.py"
+COMPARATOR = REPO_ROOT / "scripts" / "comparator"
+SCRIPT = COMPARATOR / "check_challenge_drift.py"
 PR_CI = REPO_ROOT / ".github" / "workflows" / "pr-ci.yml"
-README = REPO_ROOT / "scripts" / "comparator" / "README.md"
+README = COMPARATOR / "README.md"
+
+# the drift checker imports its sibling `challenge_config`, which a script run
+# finds on `sys.path[0]` and a file-location import does not
+if str(COMPARATOR) not in sys.path:
+    sys.path.insert(0, str(COMPARATOR))
 
 _spec = importlib.util.spec_from_file_location("check_challenge_drift", SCRIPT)
 assert _spec is not None and _spec.loader is not None
@@ -61,6 +68,17 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
         self.assertIn("python3 scripts/comparator/check_challenge_drift.py --root . --update", readme)
         self.assertIn("challenge_footer.lean", readme)
         self.assertIn("MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean", readme)
+        self.assertIn("--challenge", readme)
+        self.assertIn("challenges/qpbt.json", readme)
+
+    def test_default_invocation_leaves_every_challenge_selected(self) -> None:
+        # CI passes no --challenge, so every configuration under challenges/
+        # is checked; a new challenge is picked up by adding its file alone.
+        configured = {path.stem for path in (COMPARATOR / "challenges").glob("*.json")}
+        self.assertIn("ldt", configured)
+
+        workflow = PR_CI.read_text(encoding="utf-8")
+        self.assertIn("check_challenge_drift.py --root .\n", workflow)
 
 
 if __name__ == "__main__":
