@@ -12,9 +12,13 @@ test → winning implications and the commutation/anticommutation tests →
 combining the two bases → applying the classical low individual degree test →
 extraction → soundness.
 
-**Generated from commit `c6c8c2f2d34add9aebf15872f50a0f18039e4d46`** (the
-`github/main` of 2026-09-19). Every row was read off that tree; nothing here is
-carried over from an earlier report.
+**Generated from commit `838c51b78f30b2dc8b0d9c696ce6f4970731f733`** (the
+`github/main` of 2026-09-19, after PRs 633, 634, 648, 657 and 658 landed).
+Every row was read off that tree; nothing here is carried over from an earlier
+report. The previous revision of this file pinned
+`c6c8c2f2d34add9aebf15872f50a0f18039e4d46`; the Lean locators are unchanged
+between the two commits, the blueprint locators moved by the line counts the
+intervening chapters gained.
 
 ---
 
@@ -24,7 +28,7 @@ carried over from an earlier report.
 declared at in this commit. Permalink base:
 
 ```
-https://github.com/Dengnifer/MIPStarRE-A/blob/c6c8c2f2d34add9aebf15872f50a0f18039e4d46/<file>#L<line>
+https://github.com/Dengnifer/MIPStarRE-A/blob/838c51b78f30b2dc8b0d9c696ce6f4970731f733/<file>#L<line>
 ```
 
 **Paper** — file and line range under `references/qpbt-paper/`, given as the
@@ -41,9 +45,12 @@ when it has one. Chapter files are abbreviated:
 A dash means the source states the content as unlabelled prose with no
 environment to cite; the blueprint node then carries the reference.
 
-**Blueprint** — the node label and its location under `blueprint/src/chapter/`.
-The pairing is not guessed: it is the node's own `\lean{…}` tag. `stmt`/`proof`
-record whether that node carries a statement-level and a proof-level `\leanok`.
+**Blueprint** — the node label and its location under `blueprint/src/chapter/`,
+given as the line that carries the node's `\label{…}`. Chapter files are
+abbreviated `ch11`–`ch16` after their `blueprint/src/chapter/chNN_qpbt_*.tex`
+file names. The pairing is not guessed: it is the node's own `\lean{…}` tag.
+`stmt`/`proof` record whether that node carries a statement-level and a
+proof-level `\leanok`.
 
 **Ax** — the axioms the declaration depends on, from `#print axioms`:
 
@@ -74,7 +81,7 @@ Section 8 gives the raw probe output and the command that regenerates it.
 | `MIPStarRE.QPBT.pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` | The same conclusion restated over qubit EPR pairs and qubit Pauli observables, using that the admissible field sizes are powers of two. | `cor:pauli-binary`, `08:1469-1487` | `cor:pauli-binary`, `ch13:1606` (stmt ✓, proof ✓) | S | no [^binary] |
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` | For every admissible parameter tuple the symmetrized Pauli basis test has a symmetric, projective, consistent, commuting strategy of value exactly 1. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
 | `MIPStarRE.QPBT.honestStrategy_isSPCC` | `MIPStarRE/QPBT/Test/Completeness.lean:220` | The honest strategy built from the ideal Pauli measurements is SPCC. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
-| `MIPStarRE.QPBT.exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` | Quantum soundness of the simultaneous classical low individual degree test: a projective strategy of value `1 - ε` is close to one measuring simultaneous low-degree polynomials, at the source's error `deltaLd`. | `lem:ld-soundness`, `08:413-440` | `lem:ld-soundness`, `ch13:245` (stmt ✓, proof —) | S | no [^ldroute] |
+| `MIPStarRE.QPBT.exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` | Quantum soundness of the simultaneous classical low individual degree test, in the source's own **seed-indexed** shape: a projective strategy of value `1 - ε` is close to one measuring simultaneous low-degree polynomials, at the source's error `deltaLd`. Proved separately, for every `k`; it is **not** the low-degree input the soundness chain consumes — that is the directly indexed carrier in [section 6](#6-combining-the-two-bases-and-extraction). | `lem:ld-soundness`, `08:413-440` | `lem:ld-soundness`, `ch13:245` (stmt ✓, proof —) | S | no [^ldroute] |
 
 [^route]: The statement is the printed one. What the proof route replaces is
     below it: the carriers of `lem:qld-sublines`, `lem:qld-4-13` and
@@ -100,6 +107,16 @@ Section 8 gives the raw probe output and the command that regenerates it.
     [`qpbt_ld-simultaneous-sandwich.tex`](paper-gaps/qpbt_ld-simultaneous-sandwich.tex)
     and
     [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex).
+    **This row is the source-shaped statement, not a link in the chain.**
+    `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean` is not in the import
+    closure of `MIPStarRE/QPBT/Test/Soundness.lean`, so nothing in it can be a
+    dependency of `pauli_soundness`; the combining argument consumes the
+    directly indexed family instead
+    (`exists_direct_ld_soundness_of_k_eq_one_any_strategy`, section 6). The
+    reason is the same unsatisfiable divisibility condition recorded in
+    [^direct]: the chain needs the low-degree test at the directly indexed line
+    dimension, and the seed-indexed statement is kept because it is the one the
+    source prints.
 
 ---
 
@@ -113,13 +130,13 @@ Section 8 gives the raw probe output and the command that regenerates it.
 | `MIPStarRE.QPBT.Game.value` | `MIPStarRE/QPBT/Games/Defs.lean:573` | The entangled value: the supremum of `Strategy.value` over all finite-dimensional strategies. | `def:tensor-product-value`, `06:40-57` | — | S | no |
 | `MIPStarRE.QPBT.Strategy.value_le_one` | `MIPStarRE/QPBT/Games/Defs.lean:551` | Every strategy's value is at most 1. | `def:tensor-product-value`, `06:40-57` | — | S | support |
 | `MIPStarRE.QPBT.Strategy.value_le_game_value` | `MIPStarRE/QPBT/Games/Symmetrization.lean:51` | Every strategy's value is at most the game's value. | — | — | S | support |
-| `MIPStarRE.QPBT.Strategy.IsProjective` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:27` | Every measurement operator of the strategy is a projection. | — | `def:projective-strategy-general`, `ch12:89` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.SymmetricGame` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:35` | A game with one question alphabet and a symmetric question distribution and win predicate. | — | `def:symmetric-game`, `ch12:100` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.SymmetricStrategy` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:67` | A strategy for a symmetric game in which both players use the same measurement family. | — | `def:symmetric-game`, `ch12:100` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.Strategy.IsPCC` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:139` | Projective, consistent and commuting. | `def:spcc`, `06:176-180` | `def:spcc`, `ch12:232` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.SymmetricStrategy.IsSPCC` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:151` | Symmetric, projective, consistent and commuting. | `def:spcc`, `06:176-180` | `def:spcc`, `ch12:232` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx` | `MIPStarRE/QPBT/Games/Symmetrization.lean:139` | For every `ε' > ε` a game of value `1 - ε` has a **symmetric projective** strategy of value at least `1 - ε'`, given a nonempty answer alphabet. | `lem:symmetric-strat`, `06:94-99` | `lem:symmetric-strat`, `ch12:121` (stmt ✓, proof ✓) | S | correction: [`qpbt_symmetrization-attainment`](paper-gaps/qpbt_symmetrization-attainment.tex); hypothesis: `Nonempty G.Answer` |
-| `MIPStarRE.QPBT.exists_symmetric_projective_strategy_of_strategy` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:967` | Value-preserving symmetrization of a **given** strategy. | — | `lem:symmetric-strat-given-strategy`, `ch12:179` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.Strategy.IsProjective` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:27` | Every measurement operator of the strategy is a projection. | — | `def:projective-strategy-general`, `ch12:95` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.SymmetricGame` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:35` | A game with one question alphabet and a symmetric question distribution and win predicate. | — | `def:symmetric-game`, `ch12:106` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.SymmetricStrategy` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:67` | A strategy for a symmetric game in which both players use the same measurement family. | — | `def:symmetric-game`, `ch12:106` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.Strategy.IsPCC` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:139` | Projective, consistent and commuting. | `def:spcc`, `06:176-180` | `def:spcc`, `ch12:238` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.SymmetricStrategy.IsSPCC` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:151` | Symmetric, projective, consistent and commuting. | `def:spcc`, `06:176-180` | `def:spcc`, `ch12:238` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx` | `MIPStarRE/QPBT/Games/Symmetrization.lean:139` | For every `ε' > ε` a game of value `1 - ε` has a **symmetric projective** strategy of value at least `1 - ε'`, given a nonempty answer alphabet. | `lem:symmetric-strat`, `06:94-99` | `lem:symmetric-strat`, `ch12:127` (stmt ✓, proof ✓) | S | correction: [`qpbt_symmetrization-attainment`](paper-gaps/qpbt_symmetrization-attainment.tex); hypothesis: `Nonempty G.Answer` |
+| `MIPStarRE.QPBT.exists_symmetric_projective_strategy_of_strategy` | `MIPStarRE/QPBT/Games/StrategyClasses.lean:967` | Value-preserving symmetrization of a **given** strategy. | — | `lem:symmetric-strat-given-strategy`, `ch12:186` (stmt ✓, proof ✓) | S | support |
 
 The printed form of `lem:symmetric-strat` — that the supremum defining the value
 is *attained* — is kept visible but not asserted; see section 7.
@@ -134,7 +151,7 @@ is *attained* — is kept visible but not asserted; see section 7.
 | `MIPStarRE.QPBT.pauliQuestionDistribution` | `MIPStarRE/QPBT/Test/PauliBasisTest.lean:465` | The question distribution of the test: a uniformly chosen edge of the type graph, with the two endpoints' conditionally linear question components. | `08:1070-1120` | `def:pauli-question-distribution`, `ch13:1408` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.pauliWinPredicate` | `MIPStarRE/QPBT/Test/PauliBasisTest.lean:676` | The acceptance predicate: answer well-formedness, the line/point and point/Pauli consistency conditions, the pair condition, and the commutation phase `γ`. | `08:1126-1225` | `def:pauli-win-predicate`, `ch13:1510` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.pauliBasisTest` | `MIPStarRE/QPBT/Test/PauliBasisTest.lean:728` | The Pauli basis test game itself, assembled from the two above. | `08:964-1225` | `def:pauli-win-predicate`, `ch13:1510` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.pauliBasisTestSymm` | `MIPStarRE/QPBT/Test/Completeness.lean:178` | The symmetrized form of the test, on which completeness is stated. | `08:964-1225` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | — | support |
+| `MIPStarRE.QPBT.pauliBasisTestSymm` | `MIPStarRE/QPBT/Test/Completeness.lean:178` | The symmetrized form of the test, on which completeness is stated. Its underlying game is `pauliBasisTest` definitionally (`pauliBasisTestSymm_toGame`). | `08:964-1225` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | support |
 | `MIPStarRE.QPBT.LdParams` | `MIPStarRE/QPBT/Test/LowDegreeGame.lean:40` | Parameters `(q, m, d, k)` of the classical low individual degree test. | `08:31-391` | — | P | no |
 | `MIPStarRE.QPBT.ldGame` | `MIPStarRE/QPBT/Test/LowDegreeGame.lean:757` | The classical simultaneous low individual degree test game. | `08:31-391` | `def:ld-game`, `ch13:17` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.introParams` | `MIPStarRE/QPBT/Test/CanonicalParams.lean:105` | The canonical admissible tuple used to instantiate the test. | `def:introparams`, `08:1503-1514` | `def:introparams`, `ch13:1648` (stmt ✓) | S | no |
@@ -152,23 +169,46 @@ is *attained* — is kept visible but not asserted; see section 7.
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
 | `MIPStarRE.QPBT.deltaQld` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:35` | `deltaQld a b ε m d q = a · (m·d)^a · (ε^b + q^(-b) + 2^(-b·m·d))`, the soundness error. | `thm:pauli`, `08:1431-1445` | — | S | no [^vacuity] |
-| `MIPStarRE.QPBT.deltaQld_mono` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:47` | `deltaQld` is monotone in its constant and error arguments. | `14:1402` | `lem:delta-qld-mono-support`, `ch16:1730` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.deltaQld_mono` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:47` | `deltaQld` is monotone in its constant and error arguments. | `14:1402` | `lem:delta-qld-mono-support`, `ch16:1738` (stmt ✓, proof ✓) | S | support |
 | `MIPStarRE.QPBT.idealState` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:85` | The target state: an auxiliary state tensored with `M = 2^m` qudit EPR pairs. | `def:EPR`, `04:946-955` | — | S | no |
 | `MIPStarRE.QPBT.PauliSoundnessWitness` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:164` | The data the conclusion produces: the two local isometries and the auxiliary state. | `thm:pauli`, `08:1431-1445` | — | S | no |
 | `MIPStarRE.QPBT.pauliOperatorDistanceA` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:187` | Alice's squared operator distance between her transported Pauli family and the ideal one, on the ideal state. | `def:povm-distance`, `06:258-271` | — | S | no |
 | `MIPStarRE.QPBT.pauliOperatorDistanceB` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:199` | Bob's counterpart. | `def:povm-distance`, `06:258-271` | — | S | no |
 | `MIPStarRE.QPBT.pauli_soundness_deltaQld_ofExtractionWitness` | `MIPStarRE/QPBT/Test/Soundness/OperatorTransfer.lean:248` | From an extraction witness, the three soundness estimates at scale `deltaQld`. | — | — | S | support |
-| `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/ProjectiveSetting.lean:37` | The soundness conclusion for **projective** strategies. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | `thm:pauli-projective-setting-isometry-support`, `ch16:1458` (stmt ✓, proof ✓) | S | support |
-| `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/NaimarkAssembly.lean:47` | The same for an **arbitrary** strategy, via Naimark dilation — this is what drops the projectivity assumption. | `thm:pauli`, `08:1431-1445` | `thm:pauli-arbitrary-strategy-isometry-support`, `ch16:1576` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/ProjectiveSetting.lean:37` | The soundness conclusion for **projective** strategies. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | `thm:pauli-projective-setting-isometry-support`, `ch16:1467` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/NaimarkAssembly.lean:47` | The same for an **arbitrary** strategy, via Naimark dilation — this is what drops the projectivity assumption. | `thm:pauli`, `08:1431-1445` | `thm:pauli-arbitrary-strategy-isometry-support`, `ch16:1585` (stmt ✓, proof ✓) | S | support |
 | `MIPStarRE.QPBT.pauli_isometry_bounds_extend_epsilon` | `MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean:101` | Extension of the conclusion to every `ε ≥ 0`, including the range where the bound is vacuous. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | — | S | support |
 
 [^vacuity]: A reviewer's fair question is whether the conclusion is ever
     non-trivial. The constants `a, b` are existentially quantified exactly as in
-    the paper, and **no declaration in this tree exhibits a regime with
-    `deltaQld < 1`.** The hypotheses are satisfiable — `introParams`
-    (`CanonicalParams.lean:105`) is an admissible tuple and `exists_spcc_value_one`
-    gives a value-1 strategy — but the strength of the conclusion is inherited
-    from the source, not established here.
+    the paper, so no single numeric bound can be read off. Section 4.1 answers
+    the question as far as the tree answers it: the hypotheses are satisfiable,
+    and for whatever constants the theorem produces there are admissible
+    parameters at which the `ε = 0` error is below any prescribed `η > 0`. What
+    is still **not** established is a uniform rate — no threshold `ε₀ > 0` below
+    which the bound is small at a *fixed* parameter tuple, and no comparison
+    against the trivial bound on the operator distances at fixed parameters.
+
+### 4.1 Non-vacuity of the conclusion
+
+A leaf module states the two corollaries a sceptical reviewer asks for. Nothing
+in it changes or restates an existing definition or theorem, and none of its
+declarations carries a blueprint node: they are formalization-only bookkeeping
+about the shape of `pauli_soundness`, not statements of the source.
+
+| Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
+|---|---|---|---|---|---|---|
+| `MIPStarRE.QPBT.nonVacuousParams` | `MIPStarRE/QPBT/Test/NonVacuity.lean:85` | An explicit admissible family: `q = 2^(2n+1)`, `m = 1`, `d = n + 1`. A witness, not a constraint added to `def:admissible`. | `def:admissible`, `08:958-961` | — | P | support |
+| `MIPStarRE.QPBT.exists_pauliBasisTest_strategy_value_one` | `MIPStarRE/QPBT/Test/NonVacuity.lean:110` | Every admissible tuple carries a strategy of value exactly 1 for `pauliBasisTest P` **itself** — `exists_spcc_value_one` transported along the definitional `pauliBasisTestSymm_toGame`, which is the form in which the hypothesis `1 - ε ≤ S.value` is met. | `lem:pauli-completeness`, `08:1232-1234` | — | S | support |
+| `MIPStarRE.QPBT.pauli_soundness_hypotheses_satisfiable` | `MIPStarRE/QPBT/Test/NonVacuity.lean:118` | **Q1.** The hypothesis triple of `thm:pauli` is jointly satisfiable, and satisfiable in the strongest case `ε = 0`. | `thm:pauli`, `08:1431-1445` | — | S | support |
+| `MIPStarRE.QPBT.pauli_soundness_applies_to_honest_strategy` | `MIPStarRE/QPBT/Test/NonVacuity.lean:131` | `thm:pauli` applied to hypotheses that are actually met: for the constants it produces, every admissible tuple carries a value-one strategy with extraction data and all three bounds at `ε = 0`. No hypothesis is left. | `thm:pauli`, `08:1431-1445` | — | S | support |
+| `MIPStarRE.QPBT.tendsto_deltaQld_nonVacuousParams` | `MIPStarRE/QPBT/Test/NonVacuity.lean:231` | **Q2, quantitative.** For any `a ≥ 1` and `b > 0` — in particular the theorem's own — `deltaQld a b 0` tends to `0` along `nonVacuousParams n`: the `(md)^a` prefactor is polynomial in `n` while both remaining summands decay geometrically. | — | — | S | support |
+| `MIPStarRE.QPBT.exists_admissibleParams_deltaQld_lt` | `MIPStarRE/QPBT/Test/NonVacuity.lean:252` | **Q2, the form a reader asks for.** Whatever the constants, for every `η > 0` there are admissible parameters with `deltaQld a b 0 m d q < η` — in particular below `1`, hence below any trivial bound. | — | — | S | support |
+| `MIPStarRE.QPBT.tendsto_deltaQld_eps_zero` | `MIPStarRE/QPBT/Test/NonVacuity.lean:263` | `deltaQld` is right-continuous in `ε` at `0`, so the `ε = 0` section used above is the limiting case of the theorem's `ε > 0` statement and not a degenerate one. | — | — | S | support |
+| `MIPStarRE.QPBT.pauli_soundness_nontrivial` | `MIPStarRE/QPBT/Test/NonVacuity.lean:277` | **Q1 and Q2 together.** For the constants `pauli_soundness` produces and any `η > 0` there are admissible parameters carrying a value-one strategy — so the hypotheses hold — for which the conclusion bounds the state distance and both operator distances strictly below `η`. | `thm:pauli`, `08:1431-1445` | — | S | support |
+
+The module's own docstring states what this does not establish, in the same
+terms as the note above. Landed on `main` in PR 657.
 
 ---
 
@@ -184,20 +224,20 @@ zero-direction completion, reversed observable indices, and a label typo.
 
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
-| `MIPStarRE.QPBT.win_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:34` | Success implies the consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
-| `MIPStarRE.QPBT.win_low_degree` | `MIPStarRE/QPBT/Observables/WinImplications.lean:50` | Success implies the low individual degree subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
-| `MIPStarRE.QPBT.win_comm` | `MIPStarRE/QPBT/Observables/WinImplications.lean:79` | Success implies the **commutation** subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
-| `MIPStarRE.QPBT.win_comm_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:93` | Success implies the commutation-consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
-| `MIPStarRE.QPBT.win_magic_square` | `MIPStarRE/QPBT/Observables/WinImplications.lean:111` | Success implies the embedded **Magic Square** (anticommutation) subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
-| `MIPStarRE.QPBT.win_ms_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:123` | Success implies the Magic-Square-consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:667` (stmt ✓, proof ✓) | S | correction: same note |
-| `MIPStarRE.QPBT.ProjectiveSetting` | `MIPStarRE/QPBT/Observables/Defs.lean:49` | The working setting of the analysis: a projective strategy of value at least `1 - ε` for the test, with its expanded state. | — | `def:strategy-observables`, `ch14:582` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.ProjectiveSetting.pointObs` | `MIPStarRE/QPBT/Observables/Defs.lean:614` | The `±1` point observables extracted from the point measurements. | — | `def:strategy-observables`, `ch14:582` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.pointObs_self_consistent` | `MIPStarRE/QPBT/Observables/WinImplications.lean:275` | The point observables of the two players agree on the state up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
-| `MIPStarRE.QPBT.pointObs_twisted_commutation` | `MIPStarRE/QPBT/Observables/WinImplications.lean:293` | The **twisted commutation** relation for the point observables, on average and up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1049` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.win_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:34` | Success implies the consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
+| `MIPStarRE.QPBT.win_low_degree` | `MIPStarRE/QPBT/Observables/WinImplications.lean:50` | Success implies the low individual degree subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.win_comm` | `MIPStarRE/QPBT/Observables/WinImplications.lean:79` | Success implies the **commutation** subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.win_comm_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:93` | Success implies the commutation-consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.win_magic_square` | `MIPStarRE/QPBT/Observables/WinImplications.lean:111` | Success implies the embedded **Magic Square** (anticommutation) subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.win_ms_cons` | `MIPStarRE/QPBT/Observables/WinImplications.lean:123` | Success implies the Magic-Square-consistency subtest passes. | `lem:qld-win-implications`, `14:197-228` | `lem:qld-win-implications`, `ch14:668` (stmt ✓, proof ✓) | S | correction: same note |
+| `MIPStarRE.QPBT.ProjectiveSetting` | `MIPStarRE/QPBT/Observables/Defs.lean:49` | The working setting of the analysis: a projective strategy of value at least `1 - ε` for the test, with its expanded state. | — | `def:strategy-observables`, `ch14:583` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.ProjectiveSetting.pointObs` | `MIPStarRE/QPBT/Observables/Defs.lean:614` | The `±1` point observables extracted from the point measurements. | — | `def:strategy-observables`, `ch14:583` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.pointObs_self_consistent` | `MIPStarRE/QPBT/Observables/WinImplications.lean:275` | The point observables of the two players agree on the state up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1050` (stmt ✓, proof ✓) | S | correction: [`qpbt_win-implications-corrections`](paper-gaps/qpbt_win-implications-corrections.tex) |
+| `MIPStarRE.QPBT.pointObs_twisted_commutation` | `MIPStarRE/QPBT/Observables/WinImplications.lean:293` | The **twisted commutation** relation for the point observables, on average and up to a controlled defect. | `lem:qld-win-implications-obs`, `14:267-284` | `lem:qld-win-implications-obs`, `ch14:1050` (stmt ✓, proof ✓) | S | correction: same note |
 | `MIPStarRE.QPBT.ProjectiveSetting.exists_twistedCommutator_avg_le` | `MIPStarRE/QPBT/Observables/ExpandedCommutation.lean:188` | The averaged twisted-commutator bound in the expanded picture. | — | — | S | support |
-| `MIPStarRE.QPBT.IsAnticommuting` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:34` | A tuple of observables pairwise anticommutes. | — | `def:anticommuting-tuple`, `ch14:132` (stmt ✓) | S | no |
-| `MIPStarRE.QPBT.anticommProb_ge_of_one_le_md` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:442` | The lower bound on the probability that a random pair of the sampled tuple anticommutes. | `fact:omega-anticomm-prob`, `14:70-78` | `fact:omega-anticomm-prob`, `ch14:159` (stmt ✓, proof ✓) | S | correction: [`qpbt_anticommuting-probability`](paper-gaps/qpbt_anticommuting-probability.tex); hypothesis: `1 ≤ m·d` [^md] |
-| `MIPStarRE.QPBT.exists_deltaAnticom` | `MIPStarRE/QPBT/Observables/PointConsistency.lean:768` | Existence of the polynomial anticommutation-consistency error function for the point observables. | `lem:qld-comm-cons`, `14:462-486` | `lem:qld-comm-cons`, `ch14:1508` (stmt ✓, proof ✓) | S | correction: [`qpbt_polynomial-error-square-root`](paper-gaps/qpbt_polynomial-error-square-root.tex) |
+| `MIPStarRE.QPBT.IsAnticommuting` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:34` | A tuple of observables pairwise anticommutes. | — | `def:anticommuting-tuple`, `ch14:133` (stmt ✓) | S | no |
+| `MIPStarRE.QPBT.anticommProb_ge_of_one_le_md` | `MIPStarRE/QPBT/Observables/Anticommuting.lean:442` | The lower bound on the probability that a random pair of the sampled tuple anticommutes. | `fact:omega-anticomm-prob`, `14:70-78` | `fact:omega-anticomm-prob`, `ch14:160` (stmt ✓, proof ✓) | S | correction: [`qpbt_anticommuting-probability`](paper-gaps/qpbt_anticommuting-probability.tex); hypothesis: `1 ≤ m·d` [^md] |
+| `MIPStarRE.QPBT.exists_deltaAnticom` | `MIPStarRE/QPBT/Observables/PointConsistency.lean:768` | Existence of the polynomial anticommutation-consistency error function for the point observables. | `lem:qld-comm-cons`, `14:462-486` | `lem:qld-comm-cons`, `ch14:1509` (stmt ✓, proof ✓) | S | correction: [`qpbt_polynomial-error-square-root`](paper-gaps/qpbt_polynomial-error-square-root.tex) |
 
 [^md]: Lean's `ℕ` contains `0`, which the source's positive-integer parameter
     domain does not; the hypothesis restores the source domain rather than
@@ -211,18 +251,36 @@ zero-direction completion, reversed observable indices, and a label typo.
 
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
-| `MIPStarRE.QPBT.exists_combinedLinesWitness` | `MIPStarRE/QPBT/Combining/Lines.lean:141` | The X and Z line measurements can be combined into a single line measurement with a polynomially controlled consistency error. | `lem:qld-xz-lines`, `14:882-894` | `lem:qld-xz-lines`, `ch15:1724` (stmt —, proof —) | S | correction: [`qpbt_combined-lines-error-term`](paper-gaps/qpbt_combined-lines-error-term.tex), [`qpbt_pasting-product-error`](paper-gaps/qpbt_pasting-product-error.tex) [^unmarked] |
-| `MIPStarRE.QPBT.restricted_lines_consistency_bound` | `MIPStarRE/QPBT/Combining/Lines.lean:274` | The consistency defect of the restricted-line mixture is bounded by the mixture of the coordinate defects. | `14:1058-1061` | `thm:conditional-restricted-lines-consistency`, `ch15:2939` (stmt ✓, proof ✓) | S | support |
-| `MIPStarRE.QPBT.exists_subLineWitness` | `MIPStarRE/QPBT/Combining/Lines.lean:326` | Existence of the sub-line measurements the combining argument restricts to. | `lem:qld-sublines`, `14:1063-1069` | `lem:qld-sublines-direct`, `ch15:3235` (stmt ✓, proof ✓) | S | correction: [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] |
-| `MIPStarRE.QPBT.exists_extendedLinesWitness_established` | `MIPStarRE/QPBT/Combining/Apply.lean:237` | Extended-line measurements with the error `C·m·poly(ε, md/q)` that the source's first derivation actually delivers. | `lem:qld-4-13`, `14:1020-1034` | `lem:qld-4-13-established`, `ch15:4508` (stmt ✓, proof ✓) | S | correction: [`qpbt_combined-lines-error-term`](paper-gaps/qpbt_combined-lines-error-term.tex) [^established] |
-| `MIPStarRE.QPBT.not_exists_combining_quarter_power_bound` | `MIPStarRE/QPBT/Combining/ErrorObstruction.lean:37` | The first route's `m·ε^(1/4)` term provably cannot be absorbed into the printed arguments — an obstruction to that route, not a refutation of the printed assertion. | — | `lem:qld-combining-quarter-power-obstruction`, `ch15:4372` (stmt ✓, proof ✓) | S | support |
-| `MIPStarRE.QPBT.exists_globalPairWitness` | `MIPStarRE/QPBT/Combining/Apply.lean:280` | The global polynomial-pair construction: a single pair of low-degree polynomials consistent with both players' point measurements. | `lem:qld-4-7`, `14:1267-1274` | `lem:qld-4-7`, `ch15:4818` (stmt ✓, proof ✓) | S | correction: [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] |
-| `MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound` | `MIPStarRE/QPBT/Combining/ActualErrorBounds.lean:90` | The rounded error bound actually carried by the global-pair construction. | — | `thm:qld-actual-rounded-error-bound`, `ch15:6569` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.exists_combinedLinesWitness` | `MIPStarRE/QPBT/Combining/Lines.lean:141` | The X and Z line measurements can be combined into a single line measurement with a polynomially controlled consistency error. | `lem:qld-xz-lines`, `14:882-894` | `lem:qld-xz-lines`, `ch15:1729` (stmt —, proof —) | S | correction: [`qpbt_combined-lines-error-term`](paper-gaps/qpbt_combined-lines-error-term.tex), [`qpbt_pasting-product-error`](paper-gaps/qpbt_pasting-product-error.tex) [^unmarked] |
+| `MIPStarRE.QPBT.restricted_lines_consistency_bound` | `MIPStarRE/QPBT/Combining/Lines.lean:274` | The consistency defect of the restricted-line mixture is bounded by the mixture of the coordinate defects. | `14:1058-1061` | `thm:conditional-restricted-lines-consistency`, `ch15:2944` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.exists_subLineWitness` | `MIPStarRE/QPBT/Combining/Lines.lean:326` | Existence of the sub-line measurements the combining argument restricts to. | `lem:qld-sublines`, `14:1063-1069` | `lem:qld-sublines-direct`, `ch15:3240` (stmt ✓, proof ✓) | S | correction: [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] |
+| `MIPStarRE.QPBT.exists_direct_ld_soundness` | `MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean:65` | Quantum soundness of the **directly indexed** low-degree game, for every `k` and every projective strategy, at the same error function `deltaLd`. This is the auxiliary form the combining chapter needs, obtained from `MIPStarRE.LDT.Test.mainFormal` rather than from the source's tensor-code route. | `14:1267-1288` | `prop:ld-simultaneous-general-k`, `ch13:813` (stmt ✓, proof ✓) | S | support [^ldinput] |
+| `MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy` | `MIPStarRE/QPBT/Combining/DirectLowDegree/AnyStrategySoundness.lean:114` | **The low-degree input the chain consumes.** The same conclusion at simultaneity parameter `k = 1` with the projectivity premise removed, by Naimark dilation of both POVM families and ground-slice compression: for an arbitrary strategy of value `1 - ε` there are polynomial-tuple POVMs on the original player spaces whose two point/polynomial defects and mutual polynomial defect are at most `deltaLd a b ε q m d 1`. Applied at `Combining/ExtendedLineGame/RoundedPolynomialEstimates.lean:187` and `Combining/ExtendedLineGame/SuppliedDirectSoundness.lean:101`, which is how the low-degree test enters `exists_extendedLinesWitness_established` below. | `14:1277-1289` | `thm:qld-direct-soundness-any-strategy`, `ch15:4980` (stmt ✓, proof ✓) | S | support [^ldinput] |
+| `MIPStarRE.QPBT.exists_extendedLinesWitness_established` | `MIPStarRE/QPBT/Combining/Apply.lean:237` | Extended-line measurements with the error `C·m·poly(ε, md/q)` that the source's first derivation actually delivers. | `lem:qld-4-13`, `14:1020-1034` | `lem:qld-4-13-established`, `ch15:4513` (stmt ✓, proof ✓) | S | correction: [`qpbt_combined-lines-error-term`](paper-gaps/qpbt_combined-lines-error-term.tex) [^established] |
+| `MIPStarRE.QPBT.not_exists_combining_quarter_power_bound` | `MIPStarRE/QPBT/Combining/ErrorObstruction.lean:37` | The first route's `m·ε^(1/4)` term provably cannot be absorbed into the printed arguments — an obstruction to that route, not a refutation of the printed assertion. | — | `lem:qld-combining-quarter-power-obstruction`, `ch15:4377` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.exists_globalPairWitness` | `MIPStarRE/QPBT/Combining/Apply.lean:280` | The global polynomial-pair construction: a single pair of low-degree polynomials consistent with both players' point measurements. | `lem:qld-4-7`, `14:1267-1274` | `lem:qld-4-7`, `ch15:4823` (stmt ✓, proof ✓) | S | correction: [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] |
+| `MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound` | `MIPStarRE/QPBT/Combining/ActualErrorBounds.lean:90` | The rounded error bound actually carried by the global-pair construction. | — | `thm:qld-actual-rounded-error-bound`, `ch15:6574` (stmt ✓, proof ✓) | S | support |
 | `MIPStarRE.QPBT.tildeObs` | `MIPStarRE/QPBT/Extraction/Observables.lean:158` | The extracted ideal Pauli observables `W̃` on the extraction registers. | — | `def:tilde-w-observables`, `ch16:186` (stmt ✓) | S | no |
 | `MIPStarRE.QPBT.tildeObs_twisted_commutation` | `MIPStarRE/QPBT/Extraction/Observables.lean:331` | The extracted observables satisfy the twisted commutation relation, with the full trace phase. | `14:1451-1456` | `lem:tildew-product-form`, `ch16:199` (stmt ✓, proof ✓) | S | correction: [`qpbt_cross-basis-phase`](paper-gaps/qpbt_cross-basis-phase.tex) |
 | `MIPStarRE.QPBT.exists_pulled_apart_consistency` | `MIPStarRE/QPBT/Extraction/Construction.lean:46` | Pulling the X and Z measurements apart: the extracted measurements are consistent with the point measurements. | `lem:qld-construct-the-paulis`, `14:1463-1481` | `lem:qld-construct-the-paulis`, `ch16:241` (stmt ✓, proof ✓) | S | correction: [`qpbt_extraction-transfer`](paper-gaps/qpbt_extraction-transfer.tex), [`qpbt_decoding-identity`](paper-gaps/qpbt_decoding-identity.tex) |
 | `MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness` | `MIPStarRE/QPBT/Extraction/StateExtraction.lean:109` | The auxiliary state extraction, from a global-pair witness. | — | — | S | support |
-| `MIPStarRE.QPBT.exists_extractionWitness` | `MIPStarRE/QPBT/Extraction/SourceUnitary.lean:34` | **The extraction-to-soundness bridge.** For every admissible tuple, every `0 ≤ ε ≤ 1` and every projective setting: a global-pair witness together with an extraction witness — the two swap unitaries, the auxiliary state and the Pauli transport — at the nested construction/extraction scale. This is the assembly the soundness layer consumes: `exists_projective_setting_isometry_bounds` (section 4) discharges its hypotheses from exactly this theorem (`Soundness/ProjectiveSetting.lean:48`). | `lem:qld-unitary`, `14:1669-1685` | `lem:qld-unitary`, `ch16:767` (stmt ✓, proof ✓) | S | correction: [`qpbt_extraction-transfer`](paper-gaps/qpbt_extraction-transfer.tex), [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] [^transfer] |
+| `MIPStarRE.QPBT.exists_extractionWitness` | `MIPStarRE/QPBT/Extraction/SourceUnitary.lean:34` | **The extraction-to-soundness bridge.** For every admissible tuple, every `0 ≤ ε ≤ 1` and every projective setting: a global-pair witness together with an extraction witness — the two swap unitaries, the auxiliary state and the Pauli transport — at the nested construction/extraction scale. This is the assembly the soundness layer consumes: `exists_projective_setting_isometry_bounds` (section 4) discharges its hypotheses from exactly this theorem (`Soundness/ProjectiveSetting.lean:48`). | `lem:qld-unitary`, `14:1669-1685` | `lem:qld-unitary`, `ch16:768` (stmt ✓, proof ✓) | S | correction: [`qpbt_extraction-transfer`](paper-gaps/qpbt_extraction-transfer.tex), [`qpbt_ld-dimension-divisibility`](paper-gaps/qpbt_ld-dimension-divisibility.tex) [^direct] [^transfer] |
+
+[^ldinput]: These two rows are where the classical low individual degree test
+    actually enters the chain, and neither is a source-labelled statement: the
+    blueprint nodes say so in their own words. The source-shaped
+    `exists_ld_soundness` of section 1 is stated at the seed-indexed dimension
+    and is proved separately; the combining argument needs the test at the
+    directly indexed line dimension `2m+2`, for the reason recorded in
+    [^direct]. Both directly indexed forms carry the source's own error
+    function `deltaLd`, so the error bookkeeping downstream is the printed one;
+    what differs is the indexing of the line space and, for the second row, the
+    dropped projectivity premise, which is a *weaker* hypothesis and asserts
+    nothing new about the source. The chain from here on is
+    `exists_direct_ld_soundness_of_k_eq_one_any_strategy` →
+    `exists_extendedLinesWitness_established` → `exists_globalPairWitness` →
+    `exists_extractionWitness` → `exists_projective_setting_isometry_bounds` →
+    `pauli_soundness`.
 
 [^transfer]: The Lean statement is the *unitary* conclusion of the source
     lemma. The subsequent range-projection step that turns those unitaries into
@@ -265,7 +323,7 @@ Both landed on 2026-09-19 and are the reason the tree now has zero `sorry`.
 |---|---|
 | Printed claim, unasserted | `MIPStarRE.QPBT.PrintedExtendedLinesWitnessClaim`, `MIPStarRE/QPBT/Combining/Apply.lean:108` |
 | Paper | `lem:qld-4-13`, `14:1020-1034` |
-| Blueprint | `lem:qld-4-13`, `ch15:2768` — no statement-level `\leanok` |
+| Blueprint | `lem:qld-4-13`, `ch15:2773` — no statement-level `\leanok` |
 | What it claims | Extended-line measurements at the error `poly(m²ε, md/q)`. |
 | Why it is not proved | Neither of the two derivations printed in the source delivers that error. The first yields `C·m·poly(ε, md/q)`; the second would yield `m²·poly(ε, md/q)` and additionally relies on a distributional decomposition the cited sub-line lemma does not supply. |
 | Proved corrected form | `MIPStarRE.QPBT.exists_extendedLinesWitness_established`, `MIPStarRE/QPBT/Combining/Apply.lean:237` — the first route's error form, and what the rest of the chain uses. |
@@ -278,7 +336,7 @@ Both landed on 2026-09-19 and are the reason the tree now has zero `sorry`.
 |---|---|
 | Printed claim, unasserted | `MIPStarRE.QPBT.PrintedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:901` |
 | Paper | `lem:symmetric-strat`, `06:94-99` |
-| Blueprint | `lem:symmetric-strat-printed-claim`, `ch12:165` (stmt ✓, proof ✓) |
+| Blueprint | `lem:symmetric-strat-printed-claim`, `ch12:172` (stmt ✓, proof ✓) |
 | What it claims | A game of value exactly `1 - ε` has a symmetric projective strategy *attaining* value `1 - ε`. |
 | Why it is not proved | Two independent defects. The source's argument builds a strategy above every strict lower bound and never at the bound, so the printed sentence asserts that a supremum over unbounded finite dimension is attained — which the source does not establish. And on the Lean domain, where the answer alphabet may be empty, the printed sentence is outright **false** at `ε = 1`. |
 | Proved corrected form | `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx`, `MIPStarRE/QPBT/Games/Symmetrization.lean:139` — for every `ε' > ε`, with `Nonempty G.Answer`; with the slack form `exists_symmetric_projective_strategy_of_lt_value` (`Symmetrization.lean:110`). |
@@ -295,16 +353,23 @@ declaration depends on `sorryAx`, and the Lean tree declares no axiom of its
 own: at this commit `MIPStarRE/` contains zero `axiom` declarations and zero
 `sorry` occurrences outside prose.
 
-The two `P` rows, `AdmissibleParams` and `LdParams`, are structure *types*; a
-structure's type constant needs only `propext`. Their projections and every
-theorem about them are `S`. `pauliBasisTestSymm` is marked `—` because it was
-added to this index from the completeness node and is not in the probe list
-below; it is reachable from `exists_spcc_value_one`, which is `S`.
+The four `P` rows need only `propext`: `AdmissibleParams` and `LdParams` are
+structure *types*, and a structure's type constant needs no more;
+`nonVacuousParams` builds a term of one from numerals, and
+`nonempty_admissibleParams` is that term boxed. Their projections and every
+theorem about them are `S`.
+
+Every row of this index now carries a probed value: the `—` that
+`pauliBasisTestSymm` used to carry has been replaced by the probe's own answer,
+`S`.
 
 ### Regenerating this column
 
 The probe deliberately lives **outside** the worktree, so that the index can be
-checked without adding a module to the build:
+checked without adding a module to the build. (A checked-in audit module that
+CI builds is proposed separately, in PR 655; if it lands, that module — not
+this section — becomes the authoritative per-commit record, and the block below
+becomes a snapshot.)
 
 ```bash
 # in a warm checkout of this commit
@@ -330,11 +395,11 @@ Two cautions, both learned while producing this index:
 
 ### Raw output
 
-Produced by the probe at commit `c6c8c2f2d34add9aebf15872f50a0f18039e4d46`.
-Format: `AX <requested name> <resolved name> [<axioms>]`. The final row,
-`exists_extractionWitness`, was probed in a later run when that declaration was
-added to the index; no `.lean` file changed between the two runs, so it reports
-on the same Lean tree as the rest.
+Produced by the probe at commit `838c51b78f30b2dc8b0d9c696ce6f4970731f733`,
+in one run over a freshly built `MIPStarRE.QPBT`. Format:
+`AX <requested name> <resolved name> [<axioms>]`. Every row of the previous
+revision was re-probed at this commit and none changed; the twelve rows after
+`exists_extractionWitness` are the ones this revision adds.
 
 ```text
 AX	Game	MIPStarRE.QPBT.Game	[propext, Classical.choice, Quot.sound]
@@ -411,6 +476,18 @@ AX	tildeObs_twisted_commutation	MIPStarRE.QPBT.tildeObs_twisted_commutation	[pro
 AX	exists_pulled_apart_consistency	MIPStarRE.QPBT.exists_pulled_apart_consistency	[propext, Classical.choice, Quot.sound]
 AX	exists_extraction_aux_ofGlobalPairWitness	MIPStarRE.QPBT.exists_extraction_aux_ofGlobalPairWitness	[propext, Classical.choice, Quot.sound]
 AX	exists_extractionWitness	MIPStarRE.QPBT.exists_extractionWitness	[propext, Classical.choice, Quot.sound]
+AX	pauliBasisTestSymm	MIPStarRE.QPBT.pauliBasisTestSymm	[propext, Classical.choice, Quot.sound]
+AX	exists_direct_ld_soundness	MIPStarRE.QPBT.exists_direct_ld_soundness	[propext, Classical.choice, Quot.sound]
+AX	exists_direct_ld_soundness_of_k_eq_one_any_strategy	MIPStarRE.QPBT.exists_direct_ld_soundness_of_k_eq_one_any_strategy	[propext, Classical.choice, Quot.sound]
+AX	nonVacuousParams	MIPStarRE.QPBT.nonVacuousParams	[propext]
+AX	nonempty_admissibleParams	MIPStarRE.QPBT.nonempty_admissibleParams	[propext]
+AX	exists_pauliBasisTest_strategy_value_one	MIPStarRE.QPBT.exists_pauliBasisTest_strategy_value_one	[propext, Classical.choice, Quot.sound]
+AX	pauli_soundness_hypotheses_satisfiable	MIPStarRE.QPBT.pauli_soundness_hypotheses_satisfiable	[propext, Classical.choice, Quot.sound]
+AX	pauli_soundness_applies_to_honest_strategy	MIPStarRE.QPBT.pauli_soundness_applies_to_honest_strategy	[propext, Classical.choice, Quot.sound]
+AX	tendsto_deltaQld_nonVacuousParams	MIPStarRE.QPBT.tendsto_deltaQld_nonVacuousParams	[propext, Classical.choice, Quot.sound]
+AX	exists_admissibleParams_deltaQld_lt	MIPStarRE.QPBT.exists_admissibleParams_deltaQld_lt	[propext, Classical.choice, Quot.sound]
+AX	tendsto_deltaQld_eps_zero	MIPStarRE.QPBT.tendsto_deltaQld_eps_zero	[propext, Classical.choice, Quot.sound]
+AX	pauli_soundness_nontrivial	MIPStarRE.QPBT.pauli_soundness_nontrivial	[propext, Classical.choice, Quot.sound]
 ```
 
 ---
@@ -423,7 +500,9 @@ AX	exists_extractionWitness	MIPStarRE.QPBT.exists_extractionWitness	[propext, Cl
   `pauli_soundness` — the great majority of the tree. The full declaration ↔
   blueprint cross-reference is `blueprint/lean_decls` (1,006 entries at this
   commit).
-- Non-triviality of the conclusion: see the note under `deltaQld` in section 4.
+- A uniform non-triviality rate: section 4.1 shows the conclusion is
+  non-trivial along an explicit parameter family at `ε = 0`, not that it is
+  non-trivial at fixed parameters for small `ε > 0`.
 - The full deviation list. This index names the notes that touch the chain
   above; the complete register is
   [`docs/paper-gaps/qpbt-gap-register.md`](paper-gaps/qpbt-gap-register.md).
