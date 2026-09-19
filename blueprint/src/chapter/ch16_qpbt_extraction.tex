@@ -1488,20 +1488,20 @@ final soundness argument. The omitted step in the source is discussed in
 
 \begin{theorem}[Questionwise Pauli Naimark reduction]
   \label{thm:pauli-naimark-reduction-support}
-  \lean{MIPStarRE.QPBT.pauliNaimarkEmbeddingA,
-    MIPStarRE.QPBT.pauliNaimarkEmbeddingB,
-    MIPStarRE.QPBT.pauliNaimarkStrategy,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_isProjective,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_value,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_state,
-    MIPStarRE.QPBT.pauliNaimarkSetting,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_compressA,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_compressB,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressA,
-    MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressB,
-    MIPStarRE.QPBT.pauliNaimarkWitness,
-    MIPStarRE.QPBT.pauli_naimark_witness_state_eq,
-    MIPStarRE.QPBT.pauli_naimark_witness_state_distance_eq}
+  \lean{MIPStarRE.QPBT.pauliNaimarkEmbeddingA}
+  \lean{MIPStarRE.QPBT.pauliNaimarkEmbeddingB}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_isProjective}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_value}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_state}
+  \lean{MIPStarRE.QPBT.pauliNaimarkSetting}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_compressA}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_compressB}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressA}
+  \lean{MIPStarRE.QPBT.pauliNaimarkStrategy_pauli_compressB}
+  \lean{MIPStarRE.QPBT.pauliNaimarkWitness}
+  \lean{MIPStarRE.QPBT.pauli_naimark_witness_state_eq}
+  \lean{MIPStarRE.QPBT.pauli_naimark_witness_state_distance_eq}
   \leanok
   \uses{thm:naimark}
   Let $S$ be any finite-dimensional strategy for the Pauli basis test,
@@ -1537,8 +1537,8 @@ final soundness argument. The omitted step in the source is discussed in
 
 \begin{theorem}[Pauli operator-family transfer through Naimark compression]
   \label{thm:pauli-naimark-operator-transfer-support}
-  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceA_le,
-    MIPStarRE.QPBT.pauli_naimark_operator_distanceB_le}
+  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceA_le}
+  \lean{MIPStarRE.QPBT.pauli_naimark_operator_distanceB_le}
   \leanok
   \uses{thm:pauli-naimark-reduction-support,
     thm:pauli-range-projection-support}
