@@ -23,8 +23,10 @@
   incorrect numerical steps and later suppresses the range projection when
   passing from unitary conjugation to isometry conjugation.
   \item \textbf{Estimated weight.} The corrected positive-contraction estimate,
-  small-error normalization split, and general range-projection transfer are
-  available; the concrete Pauli soundness application remains to be proved.
+  small-error normalization split, general range-projection estimate, concrete
+  range-projection transfer, and final \path{pauli_soundness} composition are
+  proved.  The genuine printed source-route gaps tracked by \ghissue{527},
+  \ghissue{598}, and \ghissue{524} remain explicit.
   \item \textbf{Mathlib/project split.} Positivity, contraction inequalities,
   isometry range projections, and norm estimates belong to finite-dimensional
   Hilbert-space algebra.  The state-dependent family distance and register
@@ -207,14 +209,26 @@ separate supplied-data isometry transfer above applies to its witness.
 
 Issue~\#19 owns this concrete Stage~4.2 interface and discrepancy record.
 \ghissue{123} records the source-facing composition work: both the pulled-apart
-consistency and the source-unitary existence compositions are proved. Other
-issue~\#123 targets remain unfinished; the earlier attempt history is unchanged.
+consistency and the source-unitary existence compositions are proved. Its three
+filed consistency names are not mere renames of the supplied-witness auxiliaries:
+\path{exists_pulled_apart_consistency} constructs the global witness internally
+and returns both point-consistency orientations and observable self-consistency
+for that same witness. Issue~\#123 remains open for tracker reconciliation and
+documentation integration, not for unproved soundness; the earlier attempt
+history is unchanged. The source-carrier and complex-scalar scopes of
+\ghissue{119} and \ghissue{387}, and the source-gap sites \ghissue{598} and
+\ghissue{524}, remain separate obligations.
 The direct-carrier proof of the global constructor does not discharge the
 seed-indexed correspondence and direct-law restrictions documented in
 \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
-\ghissue{47} tracks the separate range-projection transfer needed
-by \path{pauli_soundness}; that theorem must be derived from the concrete data
-rather than stored in the witness.
+\ghissue{47} tracked the separate range-projection transfer needed
+by \path{pauli_soundness}; it is now derived from the concrete data rather
+than stored in the witness.  The two bipartite estimates of
+\path{MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean} are applied to the
+extracted swap maps in
+\path{MIPStarRE/QPBT/Test/Soundness/OperatorTransfer.lean}, and the resulting
+bounds are composed into \path{pauli_soundness} through the
+projective-setting, Naimark, and error-domain steps.
 \ghissue{529} records the independent general range-projection and ancilla
 results. \ghissue{586} applies them to the extracted swap maps and both Pauli
 operator families; neither result establishes unrestricted soundness.
@@ -236,9 +250,10 @@ original POVM effects. Issue~\#604 now proves the two complete
 operator-family transfers for this pullback, with bounds
 \(3d_w^{\mathrm{dilated}}+6\|\Delta-\Theta\|^2\) for each player, using the
 range projection and the opposite-player Pauli mirror identity. The estimate
-is summed over all outcomes and has no outcome-cardinality factor. The full
-source error domain and the seed-indexed game correspondence remain separate
-obligations, recorded in
+is summed over all outcomes and has no outcome-cardinality factor.
+\path{pauli_soundness} now covers the full source error domain. The unproved
+seed-indexed game and divisibility correspondence remains a separate obligation
+under \ghissue{527}, recorded in
 \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 \ghissue{602} tracks this restricted composition.
 \ghissue{603} tracks the concrete dilation and original-space state pullback.
