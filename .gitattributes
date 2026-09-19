@@ -1,0 +1,44 @@
+# Paths that must never leave this repository inside a `git archive` export.
+#
+# The ITP artifact is a release snapshot of the mathematical development, cut
+# by scripts/make_artifact.sh; docs/ARTIFACT.md says what it contains and why.
+# That script already restricts the export to an explicit allow-list, so these
+# attributes are the second, independent guard: they also keep a plain
+# `git archive` (or a GitHub "Download source" tarball of a release) free of
+# the AI-workflow layer and of the third-party paper mirrors.
+#
+# Keep the two in step: a path excluded here and a path missing from the
+# script's INCLUDE list should describe the same snapshot.
+
+# --- AI-workflow layer: the machinery that produced the development ---------
+local/                  export-ignore
+results/                export-ignore
+.github/                export-ignore
+.githooks/              export-ignore
+.claude/                export-ignore
+.codex/                 export-ignore
+audits/                 export-ignore
+docbuild/               export-ignore
+home_page/              export-ignore
+AGENTS.md               export-ignore
+CLAUDE.md               export-ignore
+texra-blueprint.toml    export-ignore
+
+# --- workflow-only docs -----------------------------------------------------
+docs/campaign/                  export-ignore
+docs/reports/                   export-ignore
+docs/ci-automation.md           export-ignore
+docs/ci-blueprint-sync.md       export-ignore
+docs/pr_review_management.md    export-ignore
+docs/stale_issue_audit.md       export-ignore
+docs/blueprint-script-coverage.md export-ignore
+
+# --- third-party paper mirrors ---------------------------------------------
+# Five papers' TeX, redistribution terms unsettled (ITP-readiness audit, 2026-09-19
+# section 5).  The snapshot cites them by arXiv identifier instead.
+references/             export-ignore
+
+# --- generated or workflow-only build products ------------------------------
+blueprint/web/          export-ignore
+blueprint/lean_decls    export-ignore
+proof-guide-bridge-lemmas-sorry-elim.md export-ignore
