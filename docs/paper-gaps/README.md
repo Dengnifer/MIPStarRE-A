@@ -5,8 +5,9 @@ cites is justified here. A *paper-gap note* is a standalone LaTeX document that
 quotes the printed statement, says precisely what is wrong with it or what
 cannot be reconstructed from the printed proof, and states the corrected form
 the formalization uses instead. The notes are the reviewer-facing evidence
-behind the summary in [`../DEVIATIONS.md`](../DEVIATIONS.md) and behind the
-per-statement table in [`qpbt-gap-register.md`](qpbt-gap-register.md).
+behind the per-statement table in
+[`qpbt-gap-register.md`](qpbt-gap-register.md), which is the repository's
+summary of every deviation from the source papers.
 
 Nothing here is a to-do list. A note exists because a correction was already
 made; reading one should let a reviewer check that correction against the paper
@@ -138,8 +139,6 @@ packet, which changed no mathematics:
 
 - [`qpbt-gap-register.md`](qpbt-gap-register.md) — one row per QPBT note:
   source statement, blueprint label, correction status, Lean status, issues.
-- [`../DEVIATIONS.md`](../DEVIATIONS.md) — the reader-facing summary of every
-  deviation from the source papers.
 - [`policy.tex`](policy.tex) — when a gap is documented, and in what form.
 - [`proof-gap-protocol.tex`](proof-gap-protocol.tex) — what the formalization
   does when a printed statement is kept but its printed proof is blocked.
