@@ -19,6 +19,13 @@ Six criteria, in the protocol's numbering:
   library commit an ancestor-or-equal of the commit being declared.
 * ``C6`` docs truthful — no stale nonzero open-site claim once ``C1`` holds.
 
+``C2``, ``C4`` and ``C5`` each have a half this gate cannot decide without a
+Lean build — the axiom values, ``blueprint_leanok_axioms.py --ci`` and the
+comparator drift regeneration.  When their static half holds they report
+``DELEGATED`` rather than ``PASS``, so a completion comment can never quote a
+``PASS`` for a check nobody ran; ``DELEGATED`` does not count against the exit
+code, and a failing static half is still ``FAIL``.
+
 Shared rules, never restated here:
 
 * the sorry-site rule is parsed out of
@@ -32,6 +39,10 @@ Shared rules, never restated here:
   stronger than the estimate's ``sed 's/--.*$//'`` (it also blanks block
   comments and string literals), so the gate can only ever drop sites that are
   not real; it never invents one.
+* the set of blueprint environments a node may live in is read out of
+  ``_TEX_ENV_BEGIN_RE`` of ``scripts/blueprint_lean_sync.py`` — the parser
+  behind ``scripts/blueprint_leanok_axioms.py`` — so ``C4`` and the blueprint
+  tooling can never disagree about what a node is.
 
 Exit codes: 0 every mechanically checkable criterion passed, 1 at least one
 failed, 2 the gate could not run (missing shared rule, unknown track).
@@ -51,6 +62,7 @@ from typing import Sequence
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from audit_lean_axiom_declarations import DECL_RE, strip_lean_comments  # noqa: E402
+from blueprint_lean_sync import _TEX_ENV_BEGIN_RE  # noqa: E402
 from lean_header_utils import line_number  # noqa: E402
 
 
@@ -123,7 +135,7 @@ TRACKS: dict[str, Track] = {
         ),
         leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
-        truthful_docs=("README.md", "docs/status.md"),
+        truthful_docs=("README.md",),
     )
 }
 
@@ -253,7 +265,7 @@ def criterion_proof_integrity(root: Path, track: Track) -> Criterion:
 def criterion_headline_axioms(root: Path, track: Track) -> Criterion:
     """C2: the axiom-audit file exists and covers every headline theorem."""
 
-    crit = Criterion("C2", "headline axioms", PASS)
+    crit = Criterion("C2", "headline axioms", DELEGATED)
     path = root / track.axiom_audit
     crit.notes.append(
         "axiom values come from the CI build of "
@@ -281,7 +293,10 @@ def criterion_headline_axioms(root: Path, track: Track) -> Criterion:
             for name in missing
         ]
         return crit
-    crit.summary = f"all {len(track.headline)} headline theorems asserted"
+    crit.summary = (
+        f"all {len(track.headline)} headline theorems asserted; the axiom "
+        "values come from the CI build"
+    )
     crit.evidence = [
         f"{track.axiom_audit}:{covered[name]}: assert_standard_axioms {name}"
         for name, _ in track.headline
@@ -356,12 +371,29 @@ def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
     return crit
 
 
-NODE_RE = re.compile(
-    r"\\begin\{(theorem|lemma|corollary|proposition|definition|fact)\}"
-    r"(?P<body>.*?)\\end\{\1\}",
-    re.S,
-)
+# The blueprint's environment list is the repository's, not a second opinion:
+# it is read out of the alternation of ``_TEX_ENV_BEGIN_RE`` in
+# ``scripts/blueprint_lean_sync.py`` instead of being restated, exactly as the
+# sorry-site rule is read out of ``estimate.sh``.  Restating it is how a
+# ``\lean{}``-carrying ``example`` or ``remark`` node would become invisible to
+# C4 while the blueprint tooling still sees it.
+ENV_ALTERNATION_RE = re.compile(r"\\\\begin\\\{\(([^)]+)\)\\\}")
 LABEL_RE = re.compile(r"\\label\{(?P<label>[^}]+)\}")
+
+
+def blueprint_node_rule() -> re.Pattern[str]:
+    """Return the node rule, over the shared parser's environment list."""
+
+    match = ENV_ALTERNATION_RE.search(_TEX_ENV_BEGIN_RE.pattern)
+    if match is None:
+        raise GateConfigError(
+            "scripts/blueprint_lean_sync.py no longer spells its blueprint "
+            "environments in _TEX_ENV_BEGIN_RE; the gate refuses to restate "
+            "the rule in a second place"
+        )
+    return re.compile(
+        r"\\begin\{(" + match.group(1) + r")\}(?P<body>.*?)\\end\{\1\}", re.S
+    )
 
 
 def _exemptions(root: Path, track: Track) -> tuple[dict[str, str], str | None]:
@@ -381,11 +413,12 @@ def _exemptions(root: Path, track: Track) -> tuple[dict[str, str], str | None]:
 def criterion_blueprint(root: Path, track: Track) -> Criterion:
     """C4: every blueprint node with a Lean link is marked or exempted."""
 
-    crit = Criterion("C4", "blueprint marked", PASS)
+    crit = Criterion("C4", "blueprint marked", DELEGATED)
     crit.notes.append(
         "`python3 scripts/blueprint_leanok_axioms.py --ci` must also exit 0; "
         "it needs a Lean build and is not run here"
     )
+    node_re = blueprint_node_rule()
     exempt, exempt_problem = _exemptions(root, track)
     unmarked: list[str] = []
     nodes = 0
@@ -396,7 +429,7 @@ def criterion_blueprint(root: Path, track: Track) -> Criterion:
             crit.evidence.append(f"{chapter}:0: blueprint chapter missing")
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
-        for match in NODE_RE.finditer(text):
+        for match in node_re.finditer(text):
             body = match.group("body")
             if "\\lean{" not in body:
                 continue
@@ -421,7 +454,10 @@ def criterion_blueprint(root: Path, track: Track) -> Criterion:
     if crit.status == FAIL:
         crit.summary = "blueprint chapters missing"
         return crit
-    crit.summary = f"{nodes} linked nodes, {len(exempt)} exempted with a reason"
+    crit.summary = (
+        f"{nodes} linked nodes, {len(exempt)} exempted with a reason; "
+        "the `--ci` run comes from CI"
+    )
     return crit
 
 
@@ -473,7 +509,7 @@ def _is_ancestor(root: Path, pin: str, commit: str) -> bool | None:
 def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
     """C5: a recorded, drift-checked comparator challenge covering the headlines."""
 
-    crit = Criterion("C5", "lean comparator", PASS)
+    crit = Criterion("C5", "lean comparator", DELEGATED)
     crit.notes.append(
         "the drift check regenerates the challenge with `lake env lean` and is "
         "delegated to CI; this gate checks the record, the expected copy and the pin"
@@ -532,7 +568,8 @@ def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
         return crit
     crit.summary = (
         f"challenge {record['challenge-repository']} covers all "
-        f"{len(track.headline)} headline theorems; verified at {pin[:12]}"
+        f"{len(track.headline)} headline theorems; verified at {pin[:12]}; "
+        "the drift check comes from CI"
     )
     return crit
 
@@ -552,9 +589,16 @@ def criterion_docs_truthful(root: Path, track: Track, integrity: Criterion) -> C
         )
     crit = Criterion("C6", "docs truthful", PASS)
     checked = 0
+    missing: list[str] = []
     for doc in track.truthful_docs:
         path = root / doc
         if not path.exists():
+            # Fail closed, as every other criterion does: a registered doc that
+            # has been renamed or deleted must be noticed, not silently skipped
+            # into a green "0 doc(s) checked".
+            missing.append(doc)
+            crit.status = FAIL
+            crit.evidence.append(f"{doc}:0: registered truthful doc is missing")
             continue
         checked += 1
         for number, line in enumerate(
@@ -564,11 +608,18 @@ def criterion_docs_truthful(root: Path, track: Track, integrity: Criterion) -> C
                 if match.group("count") != "0":
                     crit.status = FAIL
                     crit.evidence.append(f"{doc}:{number}: {line.strip()[:100]}")
-    crit.summary = (
-        f"{len(crit.evidence)} stale claim(s) in {checked} doc(s)"
-        if crit.evidence
-        else f"{checked} doc(s) checked, no stale open-site claim"
-    )
+    stale = len(crit.evidence) - len(missing)
+    if missing and stale:
+        crit.summary = (
+            f"{stale} stale claim(s) in {checked} doc(s); "
+            f"{len(missing)} registered doc(s) missing"
+        )
+    elif missing:
+        crit.summary = f"{len(missing)} of {len(track.truthful_docs)} registered doc(s) missing"
+    elif stale:
+        crit.summary = f"{stale} stale claim(s) in {checked} doc(s)"
+    else:
+        crit.summary = f"{checked} doc(s) checked, no stale open-site claim"
     return crit
 
 

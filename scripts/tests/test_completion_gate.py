@@ -75,6 +75,21 @@ UNMARKED_CHAPTER = r"""
 \end{theorem}
 """
 
+# An ``example`` node is a node: the shared parser of
+# ``scripts/blueprint_lean_sync.py`` counts it, so C4 must too.
+UNMARKED_EXAMPLE_CHAPTER = r"""
+\begin{theorem}[Headline]\label{thm:fixture}
+  \lean{Fixture.good}
+  \leanok
+  True holds.
+\end{theorem}
+
+\begin{example}[Worked]\label{exa:fixture}
+  \lean{Fixture.worked}
+  An example carrying a Lean link and no marker.
+\end{example}
+"""
+
 GOOD_REGISTER = """\
 # Fixture register
 
@@ -248,9 +263,12 @@ class ProofIntegrityTests(GateFixture):
 
 
 class HeadlineAxiomTests(GateFixture):
-    def test_covered_audit_passes(self) -> None:
+    def test_covered_but_unbuilt_audit_is_delegated_not_passed(self) -> None:
+        """No build ran here, so C2 may not claim the axiom values are standard."""
         crit = gate.criterion_headline_axioms(self.root, self.track)
-        self.assertEqual(crit.status, gate.PASS, crit.evidence)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertNotEqual(crit.status, gate.PASS)
+        self.assertFalse(crit.counts_against_exit)
         self.assertTrue(crit.notes)
 
     def test_missing_audit_file_fails(self) -> None:
@@ -301,9 +319,27 @@ class PaperGapTests(GateFixture):
 
 
 class BlueprintTests(GateFixture):
-    def test_marked_nodes_pass(self) -> None:
+    def test_marked_nodes_are_delegated(self) -> None:
         crit = gate.criterion_blueprint(self.root, self.track)
-        self.assertEqual(crit.status, gate.PASS, crit.evidence)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertFalse(crit.counts_against_exit)
+
+    def test_environment_list_comes_from_the_shared_parser(self) -> None:
+        from blueprint_lean_sync import _TEX_ENV_BEGIN_RE
+
+        rule = gate.blueprint_node_rule()
+        for env in ("definition", "theorem", "lemma", "proposition",
+                    "corollary", "remark", "example"):
+            self.assertIn(env, rule.pattern)
+            self.assertIn(env, _TEX_ENV_BEGIN_RE.pattern)
+
+    def test_unmarked_example_node_fails(self) -> None:
+        """A `\\lean{}` node in an `example` is a node the blueprint tooling sees."""
+        write(self.root, "blueprint/src/chapter/ch99_fixture.tex",
+              UNMARKED_EXAMPLE_CHAPTER)
+        crit = gate.criterion_blueprint(self.root, self.track)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("exa:fixture", crit.evidence[0])
 
     def test_unmarked_node_fails(self) -> None:
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", UNMARKED_CHAPTER)
@@ -311,7 +347,7 @@ class BlueprintTests(GateFixture):
         self.assertEqual(crit.status, gate.FAIL)
         self.assertIn("thm:fixture", crit.evidence[0])
 
-    def test_exempted_node_passes(self) -> None:
+    def test_exempted_node_does_not_fail(self) -> None:
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", UNMARKED_CHAPTER)
         write(
             self.root,
@@ -319,7 +355,7 @@ class BlueprintTests(GateFixture):
             "| Node | Reason |\n|---|---|\n| `thm:fixture` | printed claim, not asserted |\n",
         )
         crit = gate.criterion_blueprint(self.root, self.track)
-        self.assertEqual(crit.status, gate.PASS, crit.evidence)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
 
     def test_exemption_without_a_reason_does_not_count(self) -> None:
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", UNMARKED_CHAPTER)
@@ -334,9 +370,10 @@ class BlueprintTests(GateFixture):
 
 @unittest.skipUnless(shutil.which("git"), "git is required")
 class ComparatorTests(GateFixture):
-    def test_recorded_and_pinned_challenge_passes(self) -> None:
+    def test_recorded_and_pinned_challenge_is_delegated(self) -> None:
         crit = gate.criterion_comparator(self.root, self.track, self.head)
-        self.assertEqual(crit.status, gate.PASS, crit.evidence)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertFalse(crit.counts_against_exit)
 
     def test_missing_block_fails(self) -> None:
         write(self.root, "docs/comparator.md", "# Comparator\n")
@@ -390,6 +427,15 @@ class DocsTruthfulTests(GateFixture):
         integrity = gate.criterion_proof_integrity(self.root, self.track)
         crit = gate.criterion_docs_truthful(self.root, self.track, integrity)
         self.assertEqual(crit.status, gate.PASS, crit.evidence)
+
+    def test_missing_registered_doc_fails(self) -> None:
+        """A renamed doc must not leave C6 green with nothing checked."""
+        (self.root / "README.md").unlink()
+        integrity = gate.criterion_proof_integrity(self.root, self.track)
+        crit = gate.criterion_docs_truthful(self.root, self.track, integrity)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertTrue(crit.evidence[0].startswith("README.md:0"))
+        self.assertIn("missing", crit.summary)
 
     def test_stale_nonzero_claim_fails(self) -> None:
         write(self.root, "README.md", "Fixture track: 12 open sites remain.\n")
@@ -448,6 +494,12 @@ class DriverTests(GateFixture):
         for ident in ("C1", "C2", "C3", "C4", "C5", "C6"):
             self.assertIn(ident, text)
 
+    def test_text_report_lists_the_delegated_criteria(self) -> None:
+        criteria = gate.run_check(self.root, self.track, self.head)
+        delegated = [c.ident for c in criteria if c.status == gate.DELEGATED]
+        self.assertEqual(delegated, ["C2", "C4", "C5"])
+        self.assertIn("(C2, C4, C5)", gate.render_text(self.track, self.head, criteria))
+
 
 class RegisteredTrackTests(unittest.TestCase):
     def test_qpbt_track_is_registered_with_its_headline_theorems(self) -> None:
@@ -457,6 +509,16 @@ class RegisteredTrackTests(unittest.TestCase):
         self.assertIn("MIPStarRE.QPBT.pauli_soundness_qubit", names)
         self.assertIn("MIPStarRE.QPBT.exists_spcc_value_one", names)
         self.assertIn("MIPStarRE.QPBT.exists_ld_soundness", names)
+
+    def test_registered_truthful_docs_exist_in_this_repository(self) -> None:
+        """C6 now fails on a missing doc, so the registry may not name a ghost."""
+        for track in gate.TRACKS.values():
+            for doc in track.truthful_docs:
+                self.assertTrue(
+                    (REPO_ROOT / doc).exists(),
+                    f"track {track.name} registers a truthful doc that does "
+                    f"not exist: {doc}",
+                )
 
     def test_the_repository_still_carries_the_shared_rule(self) -> None:
         pattern = gate.load_sorry_site_rule(REPO_ROOT)

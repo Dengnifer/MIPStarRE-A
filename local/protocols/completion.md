@@ -45,10 +45,17 @@ and are reported as delegated.
 carries a `Terminal status` cell reading exactly `corrected` or
 `no-difference`:
 
-- `corrected` — a documented statement correction: a gap note, a corrected
-  blueprint node citing it, and, where the printed claim is not proved, the
-  printed claim preserved as a non-asserted `Prop` (the `lem:symmetric-strat`
-  and `lem:qld-4-13` pattern of 2026-09-19).
+- `corrected` — a documented statement correction that **meets the four
+  adoption conditions of `local/protocols/issues-prs.md`** — correctness,
+  sufficiency, minimality ("the closest sufficient statement to the source,
+  with no unnecessary hypothesis or weakened conclusion and no change to the
+  source semantics") and Lean convergence — and carries its three artifacts: a
+  gap note, a corrected blueprint node citing it, and, where the printed claim
+  is not proved, the printed claim preserved as a non-asserted `Prop` (the
+  `lem:symmetric-strat` and `lem:qld-4-13` pattern of 2026-09-19). The
+  artifacts are evidence that a correction was adopted; they are not a route
+  around those conditions, and a row whose correction weakens a conclusion is
+  not terminal however complete its artifacts are.
 - `no-difference` — the formalization and the source statement agree; nothing
   to correct.
 
@@ -57,7 +64,11 @@ be weaker than the source paper except through a `corrected` row.
 
 **C4 — Blueprint marked.** Every blueprint node of the track that carries
 `\lean{...}` also carries `\leanok`, or appears in the track's exemption table
-with a written reason; `scripts/blueprint_leanok_axioms.py --ci` exits 0. The
+with a written reason; `scripts/blueprint_leanok_axioms.py --ci` exits 0. A
+node is any environment the repository's blueprint parser recognises: the gate
+reads that list out of `_TEX_ENV_BEGIN_RE` in `scripts/blueprint_lean_sync.py`
+instead of keeping its own, so an `example` or `remark` node with a Lean link
+counts exactly as a theorem does. The
 exemption table is the only place a permanently unmarked node may live, and a
 row there is a caveat that must be defensible in the paper.
 
@@ -74,7 +85,9 @@ the statement closure in between — which is exactly what a passing drift check
 proves.
 
 **C6 — Docs truthful.** No README, status page or estimate may advertise a
-nonzero open-site count once C1 holds.
+nonzero open-site count once C1 holds. Every doc the track registers (§6) must
+exist: a registered doc that has been renamed or deleted fails C6 rather than
+being skipped, so the criterion can never report a green run over zero docs.
 
 ## 3. Where the comparator challenge lives
 
@@ -122,7 +135,11 @@ no model call. `check --track <t> [--repo-root R] [--commit C] [--json]` prints
 one PASS/FAIL line per criterion with `file:line` evidence, and exits 0 only
 when every mechanically checkable criterion passes. Criteria that need a Lean
 build (C2 axiom values, C4 `--ci` run, C5 drift regeneration) print as
-`DELEGATED` and never turn a failing run green. Unit tests:
+`DELEGATED` once their static half holds — never as `PASS`, so no completion
+comment can quote a green line for a check nobody ran — while a failing static
+half is still `FAIL`. `DELEGATED` does not turn a failing run green and does
+not by itself make one green either: the delegated halves are read off the CI
+run of the same commit. Unit tests:
 `scripts/tests/test_completion_gate.py`.
 
 ## 6. Registered tracks
@@ -138,6 +155,7 @@ build (C2 axiom values, C4 `--ci` run, C5 drift regeneration) print as
 | `\leanok` exemptions | `docs/completion/qpbt-leanok-exemptions.md` |
 | Comparator record | `docs/comparator.md`, block `track=qpbt` |
 | Expected challenge | `scripts/comparator/expected/qpbt/Challenge.lean.expected` |
+| Truthful docs (C6) | `README.md` |
 | Umbrella issues | 27, 168 |
 
 Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
