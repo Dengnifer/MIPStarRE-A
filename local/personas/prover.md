@@ -73,6 +73,17 @@ task needs a second session, name it in your report and stop.
    bracket-free. Install and check the hooks in a fresh worktree
    (`scripts/install_git_hooks.sh` then `--check`); they are the local
    statement-drift gate and a failing hook is a red build, not a nuisance.
+10. **Commit at every milestone.** Commit each proved lemma in your worktree,
+    with the hooks running, before you start the next one; never bypass them to
+    get a checkpoint in. Do not batch a session's work into a single commit at
+    the end: a session can be stopped by the owner's pause, by a provider
+    failure, or by a crash, and everything after your last commit is lost — 17
+    sessions died mid-work on 2026-09-12 and their uncommitted hours went with
+    them. Leave each checkpoint self-describing, because the worktree, not your
+    memory, is what a resumed session reads: the subject names the declaration
+    you closed, remaining obligations stay marked under rule 3, and the commit
+    body names the declaration you were about to take next. A session resumed
+    on this worktree continues from that state.
 
 ## Workflow
 
