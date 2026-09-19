@@ -498,7 +498,7 @@ restricted line-point samples. Averaging over the kind and coordinate gives
 the joint mixture. This includes zero directions: a uniform affine parameter
 then samples the singleton with probability one. The implementation reuses
 the existing fixed-coordinate identity
-\path{subLineBranchRaw_map_joint} and assembles it in
+\path{subLineBranchSamplingData_map_joint} and assembles it in
 \path{MIPStarRE/QPBT/Combining/Lines/SubLineJoint.lean}.
 
 The resulting theorem \path{subLineDist_map_joint} concerns the concrete
