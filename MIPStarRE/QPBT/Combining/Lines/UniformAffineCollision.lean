@@ -1,5 +1,5 @@
-import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 import MIPStarRE.QPBT.Algebra.Coefficients
+import MIPStarRE.QPBT.Combining.Lines.AffineEvaluation
 
 /-!
 # Uniform collision bounds on nondegenerate affine lines

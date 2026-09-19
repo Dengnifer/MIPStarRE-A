@@ -11,6 +11,7 @@ import MIPStarRE.QPBT.Test.MagicSquare
 import MIPStarRE.QPBT.Test.PauliBasisTest
 import MIPStarRE.QPBT.Test.SoundnessDefs
 import MIPStarRE.QPBT.Test.Soundness
+import MIPStarRE.QPBT.Test.Soundness.EpsReduction
 import MIPStarRE.QPBT.State
 import MIPStarRE.QPBT.Algebra.SubspacesTheorems
 import MIPStarRE.QPBT.Algebra.SelfDualBasis
@@ -21,28 +22,37 @@ import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Games.Consistency
 import MIPStarRE.QPBT.Games.StrategyClasses
+import MIPStarRE.QPBT.Games.Symmetrization
 import MIPStarRE.QPBT.Games.MeasurementCompression
 import MIPStarRE.QPBT.Games.DistanceTheorems
+import MIPStarRE.QPBT.Games.DistanceTheorems.TensorConsistency
 import MIPStarRE.QPBT.Games.Sandwich
+import MIPStarRE.QPBT.Games.SupportMass
 import MIPStarRE.QPBT.Games.CondLinearTheorems
 import MIPStarRE.QPBT.Games.TypedCondLinear
+import MIPStarRE.QPBT.Games.GroundCompression
+import MIPStarRE.QPBT.Games.SupportedCompletion
 import MIPStarRE.QPBT.Observables.LineDefs
 import MIPStarRE.QPBT.Observables.Anticommuting
 import MIPStarRE.QPBT.Observables.Setup
 import MIPStarRE.QPBT.Observables.Defs
 import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Observables.IdealPointConsistency
 import MIPStarRE.QPBT.Observables.PointConsistency
 import MIPStarRE.QPBT.Observables.LineMeasurement
 import MIPStarRE.QPBT.Observables.WinImplications
+import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
 import MIPStarRE.QPBT.Test.Completeness
 import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Combining.CombinedPolynomialImage
 import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.PassingError
 import MIPStarRE.QPBT.Combining.DirectLowDegree
+import MIPStarRE.QPBT.Combining.BlockSpecialization
 import MIPStarRE.QPBT.Combining.Linearity
 import MIPStarRE.QPBT.Combining.Linearity.Defs
 import MIPStarRE.QPBT.Combining.Linearity.BooleanFourier
@@ -51,9 +61,15 @@ import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
 import MIPStarRE.QPBT.Combining.Linearity.Stability
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
+import MIPStarRE.QPBT.Combining.OrderedPolynomialEstimates
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.RoundedPolynomialEstimates
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.ScalarNonlinearMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.WrongVariableMass
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PairPointConsistency
 import MIPStarRE.QPBT.Combining.ExtendedLineGame
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.ParameterCompletion
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.StateTransport
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.SpectatorExpectation
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.LinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.MixedLinePointRejection
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PointPointRejection
@@ -65,16 +81,24 @@ import MIPStarRE.QPBT.Combining.ExtendedLineGame.SameLineCoefficientBound
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.AxisParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.DiagonalParameterDefectTransport
 import MIPStarRE.QPBT.Combining.ExtendedLineGame.PassingValue
+import MIPStarRE.QPBT.Combining.ExtendedLineGame.PolynomialConsistency
 import MIPStarRE.QPBT.Combining.WitnessErrorNonneg
 import MIPStarRE.QPBT.Combining.Lines
 import MIPStarRE.QPBT.Combining.Claims
+import MIPStarRE.QPBT.Combining.QuadraticPointObstruction
 import MIPStarRE.QPBT.Combining.Apply
 import MIPStarRE.QPBT.Algebra.Decoding
 import MIPStarRE.QPBT.Extraction.Defs
 import MIPStarRE.QPBT.Extraction.EncodingSupport
+import MIPStarRE.QPBT.Extraction.PolynomialCollision
 import MIPStarRE.QPBT.Extraction.Observables
 import MIPStarRE.QPBT.Extraction.Consistency
+import MIPStarRE.QPBT.Extraction.Construction
 import MIPStarRE.QPBT.Extraction.Unitary
+import MIPStarRE.QPBT.Extraction.RegisterTransport
+import MIPStarRE.QPBT.Extraction.SourceUnitary
+import MIPStarRE.Quantum.ControlledUnitary
+import MIPStarRE.QPBT.Test.Soundness.ScalarAbsorption
 
 -- Mathlib 4.31 header checks require this for this aggregate module.
 set_option linter.style.header false
@@ -84,6 +108,9 @@ set_option linter.style.header false
 
 This aggregate module provides the QPBT algebraic, game-theoretic, and test
 declarations.
+
+This module also provides the controlled-unitary results used in the QPBT
+development.
 
 ## References
 

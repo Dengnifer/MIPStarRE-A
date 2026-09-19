@@ -220,8 +220,15 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6: main selects Astra Ultra after the #26 availability report,
-supplying cumulative per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
+`issues-prs.md` section 6: main selects Astra Ultra and supplies cumulative
+per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
+Main owns mathematical/internal workflow decisions, including posted B7/B8, and
+records nonconverged project outcomes; only permission whose risk extends beyond
+project development goes to pinned owner inbox #500, and any such blocker uses
+section 6's at-most-ten-line plain-language format with ids continuing after B11.
+The 2026-09-06T05:05Z decision stands and issue #26 is archived, receiving no new
+comments. Workers return decision packets to main and never self-extend. The
+ordinary gap limit and explicit #118 tranche are in §6 there.
 
 ## 3. Naming
 
@@ -292,6 +299,17 @@ The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, an
 Continuations retain path, anchor and limit; monotone charges include snapshot plus completed
 segments. Rows link original account/thread, checkpoint and budget. Operators enforce budgets;
 route switches grant no reset/attempt or change to old homes, captures or uncommitted work.
+The #118/B8 authorization does not change this validator: `--continue-from`
+still refuses a changed original limit or exhausted budget. Main must supply a
+separately bounded ordinary dispatch for an authorized extension, linking its
+checkpoint, predecessor, original ledger/anchor and cumulative charges in the
+task; it is not a fresh gap budget. Preserve the old continuation snapshots and
+limits. Record main's authority and evaluation before each admitted attempt,
+then append actual time and outcome, not the allocation as completed work.
+Only the recorded attempts 11/12 tranche is authorized by this amendment, with
+12 conditional on main's evaluation of 11; neither workers nor route changes
+grant further attempts. Missing or inconsistent history stops admission for
+main to resolve, without changing runtime routing or weakening validation.
 Ordinary resumes recover prior provenance,
 skipping malformed/non-object history rows but rejecting invalid relevant metadata.
 Replay reads the private launch-time `.continuation.json`, never a later budget file.
