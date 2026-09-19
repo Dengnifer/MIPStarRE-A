@@ -1900,6 +1900,7 @@ orthonormalization directly, without extending the local spaces.
 	\lean{MIPStarRE.QPBT.consistencyDefect_nondegenerateLinePastingDist_le}
 	\lean{MIPStarRE.QPBT.exists_combinedPoints_conditioned_line_marginal_defect_le}
 	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_mass}
+	\lean{MIPStarRE.QPBT.consistencyDefect_le_nondegenerateLinePastingDist_add_discarded_mass}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_consistency_le_conditioned}
 	\leanok
 	\uses{def:nondegenerate-line-pasting-mass, def:nondegenerate-line-pasting-dist,
@@ -1908,7 +1909,11 @@ orthonormalization directly, without extending the local spaces.
 	$D_{\mathrm{nd}}^L$ for the conditioned law. For arbitrary complete
 	measurements on directed opposite placements, conditioning on nonzero $X$ direction
 	increases the consistency defect by at most a factor $1/\mu$, while restoring
-	the original law gives
+	the original law gives the exact bound
+	$\operatorname{defect}_{\mathrm{all}}\leq
+	\mu\operatorname{defect}_{\mathrm{cond}}+
+	\Pr_{(\ell_X,x),(\ell_Z,z)}[\operatorname{dir}(\ell_X)=0]$.
+	Bounding that discarded probability gives
 	\[
 		\operatorname{defect}_{\mathrm{all}}
 		\leq \mu\operatorname{defect}_{\mathrm{cond}}+\frac1{2q}.

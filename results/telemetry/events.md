@@ -4261,6 +4261,39 @@ boundary comment is updated in place with these final supervisor handles;
 no second comment or extra review is created. Implementer supervisor2326711
 remains live under primary/max. Persistent router semantics still await the
 bounded PR238 amendment and normal gates.
+
+## 2026-09-06 — Issue245 checked publication requires private artifact refresh
+
+- Session `orc-245-20260906-01` confirmed the terminal prover record
+  `prover-245-20260906-01` (exit 0, 1820 seconds) and exclusive dispatcher
+  worktree ownership. The new Lean module remains byte-identical to `9b75a5f`.
+  Targeted Lean checking and the forbidden-token scan pass; the recorded kernel
+  log contains 29 standard-axiom closures (28 new declarations and the reused
+  normalization theorem). The only packet repair adds prescribed audit metadata.
+- Canonical `pr_open.py` publication of `3bf51e7` failed closed at 12:03:18
+  UTC+08, after approximately 394 seconds in the checked-push gate. The gate
+  rebuilt the new leaf but `checkdecls` could not resolve existing declarations
+  such as `exists_schmidt_coordinates` and `consistencyDefect_codeword_cross_le`.
+  Both remain present in the actual source; `Checkdecls.lean` loads the root
+  compiled environment. No PR number was returned. The remedy is a normal
+  machine-wide-locked build of this worktree's private artifacts, followed by
+  checked publication, actual-number audit metadata, and exact-head CI. No root
+  import, blueprint declaration index, source claim, or proof is changed.
+- Selection evidence: the live launch arguments specify primary `gpt-6-astra`
+  with configured effort `xhigh`, appropriate to bounded publication of already
+  validated given-isometry identities. Server-side effort is not independently
+  verified; no model probe or subagent is run. At 11:57 UTC+08 the CLI reported
+  62,410 input tokens against a 258,400-token context window (approximately
+  195,990 tokens of context capacity, not a remaining task-token budget).
+  The dispatcher enforces a 1200-second session limit; final usage is recorded
+  by the dispatcher rather than reconstructed here.
+- Two local validation mistakes were corrected without bypassing any gate: a
+  premature GitHub status lookup for the not-yet-published commit returned 404,
+  and a line-oriented reader misparsed a wrapped axiom list. The complete
+  multiline axiom record confirms only the standard axioms. GitHub remains the
+  sole source of publication and CI status; no success is inferred from either
+  failed check. B7/B8 and the issue118 mathematical budget are unchanged.
+
 ## 2026-09-06 — Standing worker floor and posted-inbox policy drift (#247)
 
 - **Symptom:** `local/personas/main.md` says there is no worker-count target
@@ -9232,3 +9265,8 @@ historical entry above is rewritten.
 
 - 2026-09-18T15:08:52Z - Reviewed train 99027185811c1574710b7a50f4d61b5d59528925: publication published; members #606@6dbca3a60d30080322facf1e1bd73ab5a5768eb0, #607@5b9db04370162c50df16e0fa5634a987ac580faa, #540@707d0bbb61f3a5e7140ab1305a0543b7753c1838, #608@8ce2f2cb9a84e001f29bccb6e3055718271b128f, #582@feb7ff9b23c2056d3de6f7d03b017b1e46a0848e; conflicting PRs dropped: [].
 - 2026-09-18T17:19:51Z - Reviewed train eacc1bb794b3772b8829bd22ddcddcf357b83dcb: publication published; members #605@ffec0957019fedb5f7877adaec924e3791faa007, #609@074bbe98ca589a5b16bbbfcd9cd46f2044723ad6, #611@f93f882b7f1e1b0f2bb1a2dc0cacabe632211094, #265@4094e2f8cc67454e2f0fd03aafb986604abd3c86; conflicting PRs dropped: [503].
+- 2026-09-18T14:49:23Z - FALSE PAUSE (meta record). Symptom: no GitHub activity 15:12Z-16:06Z. Diagnosis: key watch v6b matched "unexpected status 403" in the main's pane while the main was reading the failed space-3 worker log, retired relay-1 and wrote the cutoff marker; the pause watch then stopped everything. The main's rollout shows successful relay-1 calls every minute until the interruption. Fix: key watch v6c (and v7 for space-d) retires the main key only after a failed direct probe of its endpoint (two probes for bare 401/402/403/503). Lesson: pane text is a hint, never evidence; the same rule the worker-capture check already followed since 2026-09-14.
+- 2026-09-18T15:54Z-16:06Z - Interrupted codex self-update (meta record). Reopening the main with `codex ... resume` showed the "Update available" prompt; the update (npm install -g) started and was cut off when the tmux session was killed by accident, leaving no `~/.local/bin/codex`. Fix: npm's set-aside copies renamed back (0.153.4 restored, partial package kept under ~/.cache/mipstarre-dev/), `check_for_update_on_startup = false` in the project's codex homes, tmux session recreated. The main is now started with codex default permissions and the owner sets Full Access in the TUI.
+- 2026-09-18T16:44Z - META TAKEOVER (owner instruction): for five hours the meta session acts as the main session with Opus subagents (15 slots from 16:52Z). relay-1 really ran out at 16:51:48Z (403 insufficient balance, probe-confirmed); the codex side is paused until the automatic space-d resume (2026-09-19T08:53Z); by owner decision A the model-free merge daemon keeps running during the window. Acting-main tools: /tmp/meta-gate.py (fail-closed gate + local-review/summary), /tmp/meta-stage-train.py, /tmp/meta-records.sh. Work started: pauli_soundness packets S0 (publish 603+604), S1 (scalar absorption), S2 (eps reduction), S3 (assembly); fresh reviews 479 588 212; update 503; fixes 442 253 350 546 296 398 543 547 400 454 538 539; closure clerks for 17 superseded candidates and 7 stale stacks.
+- 2026-09-18T19:36:35Z - Reviewed train 9d253f645a0ce76f0802a262f7261d7eeb54d315: publication published; members #617@85b8c67b95b74d3593cdba281068ad1f5b9594bd, #616@5a399a6c1c0de17230b562834d00b2d0c67fd693, #618@fa1ac80a22e3f63cba0e22fca164b2be3e4ad315; conflicting PRs dropped: [].
+- 2026-09-18T21:38:15Z - Reviewed train 2bddc5b0790af8d62a71dab792dfd57f9b32571a: publication published; members #503@b26a35c6c4c63c462ccb78e6d2f4d9c37aea7e0e, #588@e34cb21313edbcfdc8494664f2c3b87eab11448f; conflicting PRs dropped: [].

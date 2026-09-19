@@ -12,7 +12,10 @@ stored in the canonical `FixedFieldModel`.
 three `qubit_*_to_qubit` identities preserve its comparison quantities exactly.
 These are Lean-only transport results, not soundness existence theorems. This
 module derives `pauli_soundness_qubit` from `pauli_soundness` using those identities.
-The corollary still depends on the unfinished proof of `pauli_soundness` (issue #529).
+`pauli_soundness` itself is now proved, so the corollary is complete: its
+axiom closure is `propext`, `Classical.choice` and `Quot.sound`. The
+composition that discharged it is recorded in issue #614, under the
+umbrella issue #529.
 
 ## References
 
@@ -413,9 +416,10 @@ The theorem assumes a nonnegative error parameter, as in the source, and uses
 only `P.model` and its stored basis dimension.
 
 **Proof dependency:** The coordinate change and all three error identities are
-proved, but the source theorem `pauli_soundness` remains an open proof obligation
-(issue #529). Completing that theorem from `thm:pauli`'s hypotheses is required
-to certify this corollary; no proof-completeness claim is made here. -/
+proved, and the source theorem `pauli_soundness` is proved as well, so this
+corollary is complete: its axiom closure is `propext`, `Classical.choice` and
+`Quot.sound`. The composition that closed `pauli_soundness` is recorded in
+issue #614, under the umbrella issue #529. -/
 theorem pauli_soundness_qubit :
     ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b < 1 ∧
       ∀ (P : AdmissibleParams) (ε : ℝ), 0 ≤ ε →

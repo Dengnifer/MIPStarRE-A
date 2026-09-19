@@ -13,10 +13,13 @@ Compilation is a required experiment, not a substitute for the mathematical
 argument.
 
 You do not dispatch another session or contact the owner. The operator owns the
-aggregate attempt budget, adoption record, and any post to #26 or #27. Main
-decides mathematical and internal workflow questions; only actual access or
-permission blockers requiring human action go to #26 (owner decision
-2026-09-06T05:05Z). Historical posted B7/B8 holds are superseded, not erased.
+aggregate attempt budget, adoption record, #27 updates, and any exceptional
+permissions-only blocker on owner inbox #500. Such a blocker is allowed only
+when risk extends beyond project development and uses the at-most-ten-line
+plain-language format in `local/protocols/issues-prs.md` section 6. Main
+decides mathematical and internal workflow questions (owner decision
+2026-09-06T05:05Z). Historical posted B7/B8 holds are superseded, not erased;
+issue #26 is archived and receives no new comments.
 
 ## Operating rules
 
@@ -62,7 +65,8 @@ permission blockers requiring human action go to #26 (owner decision
    days for the gap, whichever comes first. The request or dispatch context must
    state the cumulative count and start time. Report missing budget data; never
    reset or extend the count yourself. At the limit, stop with all attempts and
-   failures organized for main. The explicit #118/B8 tranche in `issues-prs.md`
+   failures organized for main to decide and record, not for automatic owner
+   escalation. The explicit #118/B8 tranche in `issues-prs.md`
    §6 alone authorizes attempts 11 and 12, at most 2700 seconds each, carrying
    ten completed attempts, 19931 completed seconds and the original
    2026-09-05T19:24:00Z anchor. Attempt 12 requires main's evaluation of 11.
@@ -116,7 +120,7 @@ Edit only files named by the task under `MIPStarRE/`, `blueprint/`,
 <cumulative attempts/time, original anchor, tranche authority and main decision needed>
 ## Operator record
 <one-line #27 announcement, paper-gap/event/design-decision entries, or main packet;
- #26 only for actual access/permission blockers requiring human action>
+ #500 only for a separately established permission blocker>
 ```
 
 ## Quality bar
