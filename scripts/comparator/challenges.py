@@ -66,9 +66,22 @@ class Challenge:
     targets: tuple[str, ...]
     header: Path
     footer: Path
+    # checked-in generated copy: a file, or, for a split challenge, the
+    # directory holding the generated modules
     expected: Path
     extras: Extras = field(default_factory=dict)
     module_preludes: ModulePreludes = field(default_factory=dict)
+    # One challenge module per contributing library module, mirroring the
+    # library import graph, instead of a single file.  Lean caches an
+    # abstracted nested proof and a `match` auxiliary per *module*, names it
+    # after the first declaration of that module that needs it, and lets a
+    # declaration see only the instances its module's imports declare; a
+    # single-file challenge cannot reproduce either of those whenever the
+    # library needs the same fact in two modules.
+    split: bool = False
+    # `open`/`open scoped` lines replayed at the top of every split module
+    # (in the single-file layout they live in the header instead).
+    common_opens: tuple[str, ...] = ()
 
     @property
     def target_env(self) -> str:
@@ -318,9 +331,12 @@ CHALLENGES: dict[str, Challenge] = {
             "MIPStarRE.QPBT.pauli_soundness",
             "MIPStarRE.QPBT.pauli_soundness_qubit",
         ),
+        split=True,
+        common_opens=("open scoped BigOperators MatrixOrder Matrix ComplexOrder",),
         header=Path("scripts/comparator/challenge_qpbt_header.lean"),
         footer=Path("scripts/comparator/challenge_qpbt_footer.lean"),
-        expected=Path("scripts/comparator/expected/ChallengeQPBT.lean.expected"),
+        # a split challenge checks in a directory of generated modules
+        expected=Path("scripts/comparator/expected/qpbt"),
         extras=QPBT_EXTRAS,
         module_preludes=QPBT_MODULE_PRELUDES,
     ),

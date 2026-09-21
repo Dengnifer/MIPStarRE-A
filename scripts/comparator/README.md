@@ -101,3 +101,23 @@ generated from, and run its `./verify.sh` (its CI also runs on every push).
   defining module, so the challenge file could never re-declare it under the
   library's name.  Closure members found to be private are made public in the
   library (see `docs/comparator.md`, "Environment alignment").
+
+
+## Split (multi-module) challenges
+
+A challenge whose `challenges.py` entry sets `split=True` is generated as one
+Mathlib-only module per contributing library module instead of one file:
+
+```
+python3 scripts/comparator/assemble_challenge.py <closure.tsv> \
+    --root . --challenge qpbt --split-dir <out>
+```
+
+`<out>/Challenge.lean` imports the parts under `<out>/Challenge/<library
+path>.lean` and carries the header and the `sorry`-ed target statements; each
+part imports Mathlib plus the mirrors of the library modules its source module
+imports.  The layout is what makes Lean generate the same auxiliary
+declarations, under the same names, as the library — see the "environment
+alignment" section of `docs/comparator.md`.  The checked-in copy is a
+directory, and `check_challenge_drift.py --challenge <name> [--update]`
+compares or rewrites the whole tree.

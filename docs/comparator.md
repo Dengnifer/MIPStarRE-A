@@ -128,7 +128,44 @@ obstacles had to be removed in the library:
    a challenge file in another module cannot reproduce.  They now carry
    explicit names.
 
-4. **Order-dependent auxiliary proofs.**  Lean lifts a *non-atomic* nested
+4. **The challenge mirrors the library's module partition.**  Lean caches an
+   abstracted nested proof and a `match` auxiliary *per module* — the cache is
+   keyed by the statement and the constant is named after whichever declaration
+   of that module first needed it — and instance synthesis inside a module only
+   sees what that module's imports declare.  A single-file challenge therefore
+   cannot reproduce an auxiliary name whenever the library needs the same fact
+   in two modules, and it makes every instance visible to every declaration.
+   The QPBT challenge is consequently generated as one Mathlib-only module per
+   contributing library module (`Challenge/MIPStarRE/...`, mirroring the source
+   path), each importing the mirrors of the library modules that its source
+   module imports, with `Challenge.lean` importing them all and stating the
+   target theorems with `sorry`.  Every mismatch below was closed by that
+   change alone; the generator takes the layout from `split=True` in
+   `scripts/comparator/challenges.py` and writes it with
+   `assemble_challenge.py --split-dir`, and the checked-in copy is the
+   directory `scripts/comparator/expected/qpbt/`.
+
+   With a single module, comparator reported 26 mismatching closure constants
+   in three families: eight statement types and two proof terms in
+   `FieldBasis`/`SelfDualBasis` that picked up `MIPStarRE.Quantum.instNeZeroTwo`
+   (a module those files do not import in the library, so the library uses
+   `@Nat.instNeZeroSucc 1` there); four definitions that shared
+   `instReprPauliKind.repr.match_1` from `Algebra/Pauli.lean` where the library
+   creates `pauliPointBlock.match_1` in `Test/PauliBasisTest.lean`; and twelve
+   around `conjIsometry._proof_1`/`._proof_2`, which the library recreates as
+   `applyOperatorToState._proof_*`, `eprState._proof_1`, `idealState._proof_2`
+   and `idealQubitState._proof_2` in five different modules.  With the mirrored
+   layout all 26 disappear and `./verify.sh --fake-landrun` reports
+   `Your solution is okay!`.
+
+   Because the partition alone is enough, the two named instances added for
+   item 5 are no longer needed for acceptance;
+   `MIPStarRE.Quantum.instRingHomInvPairIdComplex` in particular is never
+   selected by synthesis (the goal carries the `RCLike`-derived `Semiring ℂ`
+   path) and does not appear in the closure at all.  Removing them is a
+   separate, rebuild-heavy change.
+
+5. **Order-dependent auxiliary proofs.**  Lean lifts a *non-atomic* nested
    proof out of a definition's value into an auto-generated auxiliary
    constant, and names it after whichever declaration first needed it in that
    module.  Two facts in the closure are synthesized as non-atomic proof

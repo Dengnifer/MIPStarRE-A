@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,6 +15,7 @@ from typing import Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from assemble_challenge import assemble, assemble_split  # noqa: E402
 from challenges import CHALLENGES, Challenge  # noqa: E402
 
 EXTRACTOR = Path("scripts/comparator/extract_closure.lean")
@@ -50,6 +52,93 @@ def clean_closure_rows(raw_tsv: Path, clean_tsv: Path) -> None:
         if len(line.split("\t")) == 4:
             rows.append(line)
     clean_tsv.write_text("\n".join(rows) + ("\n" if rows else ""), encoding="utf-8")
+
+
+def closure_tsv(root: Path, workdir: Path, challenge: Challenge) -> Path:
+    """Run the extractor and return the cleaned closure TSV."""
+    raw_tsv = workdir / "closure.tsv"
+    clean_tsv = workdir / "closure.clean.tsv"
+    env = dict(os.environ)
+    env["COMPARATOR_TARGETS"] = challenge.target_env
+    run(["lake", "env", "lean", str(EXTRACTOR)], cwd=root, stdout=raw_tsv, env=env)
+    clean_closure_rows(raw_tsv, clean_tsv)
+    return clean_tsv
+
+
+def assemble_split_candidate(
+    root: Path, workdir: Path, challenge: Challenge
+) -> dict[str, bytes]:
+    """Regenerate a split challenge as {path relative to the repo: bytes}."""
+    files = assemble_split(closure_tsv(root, workdir, challenge), root, challenge)
+    return {rel: text.encode("utf-8") for rel, text in files.items()}
+
+
+def read_expected_tree(expected_dir: Path) -> dict[str, bytes]:
+    if not expected_dir.is_dir():
+        return {}
+    return {
+        str(path.relative_to(expected_dir)): path.read_bytes()
+        for path in sorted(expected_dir.rglob("*.lean"))
+    }
+
+
+def tree_diff(expected: dict[str, bytes], candidate: dict[str, bytes]) -> str:
+    out: list[str] = []
+    for rel in sorted(set(expected) | set(candidate)):
+        old_bytes = expected.get(rel)
+        new_bytes = candidate.get(rel)
+        if old_bytes == new_bytes:
+            continue
+        if old_bytes is None:
+            out.append(f"--- missing from the checked-in copy: {rel}\n")
+            continue
+        if new_bytes is None:
+            out.append(f"--- no longer generated: {rel}\n")
+            continue
+        out.extend(
+            difflib.unified_diff(
+                old_bytes.decode("utf-8", "replace").splitlines(True),
+                new_bytes.decode("utf-8", "replace").splitlines(True),
+                fromfile=f"checked-in {rel}",
+                tofile=f"regenerated {rel}",
+            )
+        )
+    return "".join(out)
+
+
+def compare_or_update_split(
+    root: Path, challenge: Challenge, expected_dir: Path, *, update: bool
+) -> int:
+    expected_dir = root / expected_dir
+    with tempfile.TemporaryDirectory(prefix="comparator-challenge-") as td:
+        candidate = assemble_split_candidate(root, Path(td), challenge)
+        expected = read_expected_tree(expected_dir)
+
+        if update:
+            if expected_dir.exists():
+                shutil.rmtree(expected_dir)
+            for rel, data in candidate.items():
+                dest = expected_dir / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_bytes(data)
+            print(f"updated {expected_dir.relative_to(root)} ({len(candidate)} files)")
+            return 0
+
+        if expected == candidate:
+            print(
+                f"comparator challenge is current: "
+                f"{expected_dir.relative_to(root)} ({len(candidate)} files)"
+            )
+            return 0
+
+        print(
+            "::error::Comparator challenge regeneration drift detected. "
+            "Run `python3 scripts/comparator/check_challenge_drift.py --root . "
+            f"--challenge {challenge.name} --update` and review the resulting diff.",
+            file=sys.stderr,
+        )
+        print(tree_diff(expected, candidate), file=sys.stderr)
+        return 1
 
 
 def assemble_candidate(root: Path, workdir: Path, challenge: Challenge) -> Path:
@@ -170,6 +259,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     status = 0
     for name in names:
         challenge = CHALLENGES[name]
+        if challenge.split:
+            if args.expected is not None:
+                parser.error("--expected is not supported for a split challenge")
+            status |= compare_or_update_split(
+                root, challenge, challenge.expected, update=args.update
+            )
+            continue
         expected = args.expected if args.expected is not None else challenge.expected
         status |= compare_or_update(root, challenge, expected, update=args.update)
     return status

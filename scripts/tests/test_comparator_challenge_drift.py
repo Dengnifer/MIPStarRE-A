@@ -79,9 +79,28 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
             with self.subTest(challenge=name):
                 self.assertEqual(challenge.name, name)
                 self.assertTrue(challenge.targets)
-                for path in (challenge.header, challenge.footer, challenge.expected):
+                for path in (challenge.header, challenge.footer):
                     self.assertTrue(
                         (REPO_ROOT / path).is_file(), f"{name}: missing {path}"
+                    )
+                expected = REPO_ROOT / challenge.expected
+                if challenge.split:
+                    # one generated module per contributing library module
+                    self.assertTrue(
+                        expected.is_dir(),
+                        f"{name}: missing directory {challenge.expected}",
+                    )
+                    self.assertTrue(
+                        (expected / "Challenge.lean").is_file(),
+                        f"{name}: {challenge.expected} has no root module",
+                    )
+                    self.assertTrue(
+                        any(expected.rglob("Challenge/**/*.lean")),
+                        f"{name}: {challenge.expected} has no mirror modules",
+                    )
+                else:
+                    self.assertTrue(
+                        expected.is_file(), f"{name}: missing {challenge.expected}"
                     )
                 self.assertEqual(
                     challenge.target_env, " ".join(challenge.targets)
@@ -99,6 +118,34 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
         footer = (REPO_ROOT / qpbt.footer).read_text(encoding="utf-8")
         for target in qpbt.targets:
             self.assertIn(target.rsplit(".", 1)[1], footer)
+
+    def test_qpbt_challenge_is_split_and_mathlib_only(self) -> None:
+        qpbt = challenges.CHALLENGES["qpbt"]
+        self.assertTrue(
+            qpbt.split,
+            "the QPBT challenge must mirror the library module partition: a "
+            "single module cannot reproduce Lean's per-module auxiliary names",
+        )
+        expected = REPO_ROOT / qpbt.expected
+        parts = sorted(expected.rglob("Challenge/**/*.lean"))
+        self.assertTrue(parts)
+        allowed_prefixes = ("import Mathlib", "import Challenge")
+        for part in [expected / "Challenge.lean", *parts]:
+            with self.subTest(module=part.name):
+                imports = []
+                for line in part.read_text(encoding="utf-8").splitlines():
+                    # imports are only legal in the leading block of a module
+                    if line.startswith("import "):
+                        imports.append(line)
+                    elif line.strip():
+                        break
+                self.assertTrue(imports, f"{part} has no imports")
+                for line in imports:
+                    self.assertTrue(
+                        line.startswith(allowed_prefixes),
+                        f"{part}: challenge modules may only import Mathlib and "
+                        f"other challenge modules, found {line!r}",
+                    )
 
     def test_extractor_reads_targets_from_the_environment(self) -> None:
         extractor = EXTRACTOR.read_text(encoding="utf-8")

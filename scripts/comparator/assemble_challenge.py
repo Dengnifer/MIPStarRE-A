@@ -63,6 +63,7 @@ class Assembler:
         self.cur_ns: list[str] = []
         self.open_prelude: tuple[str, Prelude] | None = None
         self.used_preludes: set[tuple[str, int]] = set()
+        self._closure_cache: dict[str, set[str]] = {}
 
     def get_lines(self, path: str) -> list[str]:
         if path not in self._file_cache:
@@ -96,6 +97,23 @@ class Assembler:
             for raw in self.get_lines(path)
             if (m := re.match(r"import\s+([\w.]+)", raw))
         ]
+
+    def local_closure(self, path: str) -> set[str]:
+        """All `MIPStarRE/...` modules `path` imports, transitively."""
+        cached = self._closure_cache.get(path)
+        if cached is not None:
+            return cached
+        self._closure_cache[path] = set()  # cycle guard
+        out: set[str] = set()
+        for dep in self.imports_of(path):
+            if not dep.startswith("MIPStarRE/"):
+                continue
+            if not (self.repo_root / dep).exists():
+                continue
+            out.add(dep)
+            out |= self.local_closure(dep)
+        self._closure_cache[path] = out
+        return out
 
     def module_ranks(self, mods: set[str]) -> dict[str, int]:
         rank: dict[str, int] = {}
@@ -190,8 +208,107 @@ class Assembler:
         return "\n".join(self.out)
 
 
-def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
-    asm = Assembler(root, challenge.extras, challenge.module_preludes)
+MIRROR_ROOT = "Challenge"
+
+
+def mirror_module(path: str) -> str:
+    """`MIPStarRE/QPBT/Algebra/Pauli.lean` -> `Challenge.MIPStarRE.QPBT.Algebra.Pauli`."""
+    return f"{MIRROR_ROOT}." + path.removesuffix(".lean").replace("/", ".")
+
+
+def mirror_file(path: str) -> str:
+    return f"{MIRROR_ROOT}/" + path
+
+
+class SplitAssembler(Assembler):
+    """Emit one Mathlib-only challenge module per contributing library module.
+
+    Lean caches an abstracted nested proof and a `match` auxiliary *per module*,
+    keyed by the statement and named after the first declaration of that module
+    that needs it, and a module only sees the instances its imports declare.  A
+    single-file challenge therefore cannot reproduce either name when a library
+    fact is needed in two library modules, and it makes every instance visible
+    to every declaration.  Mirroring the library's module partition and import
+    graph reproduces both by construction.
+    """
+
+    def module_body(self, path: str, entries: list[Entry]) -> str:
+        self.out = []
+        self.cur_ns = []
+        self.open_prelude = None
+        return self.emit(entries, [])
+
+
+def minimal_mirror_imports(
+    asm: SplitAssembler, path: str, contributing: set[str]
+) -> list[str]:
+    """Contributing modules `path` imports, with redundant ancestors dropped."""
+    reach = {q for q in asm.local_closure(path) if q in contributing}
+    minimal = [
+        q
+        for q in reach
+        if not any(r != q and q in asm.local_closure(r) for r in reach)
+    ]
+    return sorted(minimal)
+
+
+def assemble_split(
+    tsv: Path, root: Path, challenge: Challenge
+) -> dict[str, str]:
+    """Return {path relative to the challenge repository: file contents}."""
+    asm = SplitAssembler(root, challenge.extras, challenge.module_preludes)
+    entries, generated = read_entries(asm, tsv)
+
+    rank = asm.module_ranks({e[1] for e in entries})
+    entries.sort(key=lambda e: (rank.get(e[1], 999), e[1], e[2]))
+
+    by_module: dict[str, list[Entry]] = {}
+    for entry in entries:
+        by_module.setdefault(entry[1], []).append(entry)
+    contributing = set(by_module)
+    ordered = sorted(contributing, key=lambda m: (rank.get(m, 999), m))
+
+    opens = list(challenge.common_opens)
+    files: dict[str, str] = {}
+    for path in ordered:
+        deps = minimal_mirror_imports(asm, path, contributing)
+        head = ["import Mathlib"] + [f"import {mirror_module(d)}" for d in deps]
+        head += [
+            "",
+            f"/-! Challenge mirror of `{path}`.",
+            "",
+            "One challenge module per contributing library module, importing the",
+            "mirrors of the library modules this one imports.  The partition is",
+            "what makes Lean generate the same auxiliary declarations, under the",
+            "same names, as the library does. -/",
+            "",
+        ]
+        head += opens
+        body = asm.module_body(path, by_module[path])
+        files[mirror_file(path)] = "\n".join(head) + "\n" + body + "\n"
+
+    header = (root / challenge.header).read_text(encoding="utf-8")
+    footer = (root / challenge.footer).read_text(encoding="utf-8")
+    part_imports = "\n".join(f"import {mirror_module(m)}" for m in ordered)
+    marker = "import Mathlib\n"
+    if marker not in header:
+        raise SystemExit("challenge header must start with `import Mathlib`")
+    header = header.replace(marker, marker + part_imports + "\n", 1)
+
+    lines: list[str] = []
+    if generated:
+        lines.append("-- Compiler-generated declarations in the closure (no source")
+        lines.append("-- range); they regenerate identically during elaboration:")
+        for name, gpath in generated:
+            lines.append(f"--   {name}  (from {gpath})")
+        lines.append("")
+    files["Challenge.lean"] = header + "\n".join(lines) + footer
+
+    check_stale_tables(asm, challenge, entries)
+    return files
+
+
+def read_entries(asm: Assembler, tsv: Path) -> tuple[list[Entry], list[tuple[str, str]]]:
     entries: list[Entry] = []
     generated: list[tuple[str, str]] = []
     for row in tsv.read_text(encoding="utf-8").splitlines():
@@ -204,12 +321,12 @@ def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
         start, end = int(a), int(b)
         start, source = source_range_with_context(asm.get_lines(path), start, end)
         entries.append((name, path, start, end, source))
+    return entries, generated
 
-    rank = asm.module_ranks({e[1] for e in entries})
-    entries.sort(key=lambda e: (rank.get(e[1], 999), e[2]))
 
-    body = asm.emit(entries, generated)
-
+def check_stale_tables(
+    asm: Assembler, challenge: Challenge, entries: list[Entry]
+) -> None:
     unused_extras = set(challenge.extras) - {name for name, *_ in entries}
     unused_preludes = {
         f"{path}:{p.first}"
@@ -223,6 +340,17 @@ def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
             f"unmatched extras keys: {sorted(unused_extras)}; "
             f"unmatched module_preludes scopes: {sorted(unused_preludes)}"
         )
+
+
+def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
+    asm = Assembler(root, challenge.extras, challenge.module_preludes)
+    entries, generated = read_entries(asm, tsv)
+
+    rank = asm.module_ranks({e[1] for e in entries})
+    entries.sort(key=lambda e: (rank.get(e[1], 999), e[2]))
+
+    body = asm.emit(entries, generated)
+    check_stale_tables(asm, challenge, entries)
     return body
 
 
@@ -241,9 +369,25 @@ def main() -> int:
         default="ldt",
         help="challenge whose context tables to use (default: ldt)",
     )
+    parser.add_argument(
+        "--split-dir",
+        type=Path,
+        default=None,
+        help="write one challenge module per library module into this directory",
+    )
     args = parser.parse_args()
 
-    print(assemble(args.tsv, args.root, CHALLENGES[args.challenge]))
+    challenge = CHALLENGES[args.challenge]
+    if args.split_dir is not None:
+        files = assemble_split(args.tsv, args.root, challenge)
+        for rel, text in sorted(files.items()):
+            dest = args.split_dir / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(text, encoding="utf-8")
+        print(f"wrote {len(files)} challenge files to {args.split_dir}")
+        return 0
+
+    print(assemble(args.tsv, args.root, challenge))
     return 0
 
 
