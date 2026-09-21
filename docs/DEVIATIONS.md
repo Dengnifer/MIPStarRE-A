@@ -24,7 +24,7 @@ record. The policy that governs when a note must be written is
 the 21 current `qpbt_*.tex` notes one-to-one. This page is a summary of those
 notes, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `c880f9ae`.
+Every row below was checked against `github/main` at commit `a2558616`.
 Line numbers are from that commit.
 
 ## How to read the table
@@ -422,7 +422,7 @@ except as an explicit hypothesis. Comparator:
 git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/*.lean"
 ```
 
-At commit `c880f9ae` this returns eight lines: the two definitions, the
+At commit `a2558616` this returns eight lines: the two definitions, the
 refutation `not_forall_printedSymmetricProjectiveAttainmentClaim`
 (`StrategyClasses.lean:952–954`, whose hit is on line 954), and five
 docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
@@ -441,7 +441,7 @@ none of which the development imports.) Comparator:
 git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/*.lean"
 ```
 
-At `c880f9ae` this returns exactly three lines, every one of them inside a
+At `a2558616` this returns exactly three lines, every one of them inside a
 docstring: `MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the
 successor-step theorem no longer has a direct `sorry`;
 `MIPStarRE/QPBT/Combining/Apply.lean:57`, the docstring of
