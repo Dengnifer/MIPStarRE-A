@@ -179,11 +179,10 @@ structure PauliSoundnessWitness (P : AdmissibleParams)
 attribute [instance] PauliSoundnessWitness.ιAFintype PauliSoundnessWitness.ιBFintype
   PauliSoundnessWitness.ιADecidableEq PauliSoundnessWitness.ιBDecidableEq
 
-/-- The A-side operator-distance quantity appearing in the soundness
-conclusion.  It is the finite-sum realization of `def:povm-distance` from
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
--/
+/-- The A-side operator distance for the completed Pauli family obtained by
+folding every wrong-form answer into outcome zero. This Lean-only quantity is
+used internally by the extraction and Naimark transfer; the source-facing
+distance is `rawPauliOperatorDistanceA`. -/
 noncomputable def pauliOperatorDistanceA
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
@@ -192,16 +191,40 @@ noncomputable def pauliOperatorDistanceA
         (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
       pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
 
-/-- The symmetric B-side operator-distance quantity from blueprint
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
--/
+/-- The symmetric B-side operator distance for the completed Pauli family.
+This is internal support for the extraction proof; the source-facing distance
+is `rawPauliOperatorDistanceB`. -/
 noncomputable def pauliOperatorDistanceB
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedBEffect S w.φB
         (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+      pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
+
+/-- Alice's source-facing Pauli operator distance. The strategy effect is the
+raw effect of the prescribed answer `.pauliOutcome u`, exactly as in
+`thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
+The sum is the finite realization of blueprint `def:povm-distance`. -/
+noncomputable def rawPauliOperatorDistanceA
+    (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
+    (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
+  ∑ u : PauliRegister P,
+      ‖applyOperatorToState (liftedAEffect S w.φA
+        ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
+      pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
+
+/-- Bob's source-facing Pauli operator distance, using the raw prescribed
+answer effect from `thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
+-/
+noncomputable def rawPauliOperatorDistanceB
+    (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
+    (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
+  ∑ u : PauliRegister P,
+      ‖applyOperatorToState (liftedBEffect S w.φB
+        ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
       pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
 
 end
