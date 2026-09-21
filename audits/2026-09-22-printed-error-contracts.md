@@ -149,3 +149,193 @@ specified in those rules. This packet changes neither the goal nor its gates.
 
 No full build or independent review has been run by this author session.
 Additional validation and publication receipts are appended below as obtained.
+
+## Validation and Graph Inventory at the Checkpoint
+
+Checkpoint commit `d35ec057ef0cd7cd54a497a0ce3a09e4aba5a979` passed all normal
+pre-commit audits. Source-header comparison against the base reports no changed
+public headers for source-labelled declarations. The diff adds 27 lines to
+ErrorFunctions and 55 to Sandwich, deleting no Lean lines. The gap register,
+completion rules, and all pre-existing predicates and proofs are unchanged.
+
+Corrections to identifiers in the initial consumer table: the two existential
+observable results are `exists_deltaAnticom` and `exists_deltaLine`, not
+`exists_expandedPointConclusions` and `exists_expandedLineConclusions`.
+The restricted-line modules are `Lines/RestrictedAverage.lean`,
+`Lines/RestrictedConsistency.lean`, and `Lines/RestrictedMixture.lean`;
+there is no `Lines/Restricted.lean`. These identification corrections do not
+change the mathematical verdict.
+
+Further checks completed successfully:
+
+- Single-file elaboration of `Combining/Lines/Construction.lean`,
+  `Combining/Apply.lean`, and `Observables/LineMeasurement.lean` with
+  `lake env lean MIPStarRE/QPBT/<path>`: exit 0, no diagnostics.
+- `lake env lean MIPStarRE/QPBT/Test/AxiomAudit.lean`: exit 0; all thirteen
+  existing headline audits report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`.
+- `lake env lean /tmp/Issue674Axioms.lean`: exit 0. Its eight
+  `#print axioms` commands cover the three new definitions, the one-sided,
+  conditional, and heterogeneous pasting theorems, and the two square-root
+  witnesses. Every set is exactly the same three standard axioms; none
+  contains `sorryAx`. A definition's dependency set is not a proof of its
+  proposition.
+- `latexmk -pdf -interaction=nonstopmode -halt-on-error
+  -outdir=/tmp/issue674-notes` on both notes from `docs/paper-gaps/`: exit 0;
+  PDFs have four and fifteen pages. The final square-root note has no
+  overfull boxes or undefined citations. Four overfull boxes remain in
+  the pre-existing pasting proof/consumer prose, not new mathematical gaps.
+- `leanblueprint web`: exit 0. The generated graph was used below.
+  The fresh worktree lacks `web.bbl`, so this smoke run reports missing
+  bibliography entries; it is not a clean full documentation-CI result.
+
+The graph below is parsed from the blueprint generator's actual DOT payload,
+using the repository's `extract_dot` helper and `pygraphviz.AGraph`, then
+taking successor closure. It includes detached `\\proves{thm:pauli}` proofs.
+This supplements textual searches: graph reachability is not a certificate
+that a source assertion is proved. In particular, it includes the unproved
+printed extended-line node. The graph is unchanged by this packet.
+
+All 52 descendants of `lem:pasting`:
+
+```text
+cor:pauli-binary
+def:introparams
+def:s-w-marginals
+def:tilde-m-measurement
+def:tilde-w-observables
+def:v-swap-unitary
+lem:claim-17-1
+lem:claim-17-1-re-direct
+lem:claim-17-2
+lem:claim-17-3
+lem:claim-17-3-re-direct
+lem:combined-line-measurement-consistency
+lem:combined-lines-given-points
+lem:delta-bound
+lem:delta-qld-mono-support
+lem:delta-qld-scalar-absorption-support
+lem:direct-passing-value
+lem:pauli-extraction-state-distance-support
+lem:pauli-extraction-state-error-form-support
+lem:pauli-supplied-extraction-error-form-support
+lem:qld-4-13
+lem:qld-4-13-established
+lem:qld-4-13-established-given-points
+lem:qld-4-7
+lem:qld-construct-the-paulis
+lem:qld-construct-the-paulis-given-global-pair
+lem:qld-constructing-the-paulis-helper
+lem:qld-evaluated-pauli-given-global-pair
+lem:qld-extraction-error-form
+lem:qld-large-error-extraction-given-global-pair
+lem:qld-nonencoding-mass-bound
+lem:qld-paired-line-restored-defect
+lem:qld-state-extraction-given-global-pair
+lem:qld-supplied-scalar-point-measurement
+lem:qld-unitary
+lem:qld-unitary-given-global-pair
+lem:qld-xz-lines
+lem:qld-xz-lines-restricted
+lem:s-w-marginals-projective
+lem:tilde-m-projective
+lem:tildew-product-form
+lem:v-swap-conjugation
+thm:pauli
+thm:pauli-arbitrary-strategy-isometry-support
+thm:pauli-concrete-isometry-transfer-support
+thm:pauli-extraction-alice-distance-support
+thm:pauli-extraction-bob-distance-support
+thm:pauli-extraction-isometry-construction-support
+thm:pauli-extraction-transferred-range-support
+thm:pauli-projective-setting-isometry-support
+thm:qld-supplied-direct-polynomial-consistency
+thm:qld-supplied-scalar-polynomial-consistency
+```
+
+All 79 descendants of `lem:qld-comm-cons` are those 52 plus:
+
+```text
+eq:qld-qxz-close-to-point
+eq:qld-qxz-close-to-point-2
+lem:combined-points-unrestricted-error
+lem:expanded-point-field-commutation
+lem:paired-subline-overlap-estimates
+lem:qld-4-10
+lem:qld-4-10-same-placement
+lem:qld-4-12
+lem:qld-completed-point-self-consistency
+lem:qld-conditioned-completed-point-self-consistency
+lem:qld-first-route-overlap-components
+lem:qld-line-conditioning-restoration
+lem:qld-line-point-marginal-identities
+lem:qld-opposite-ordered-products
+lem:qld-point-line-marginal-bounds
+lem:qld-point-self-consistency-defect
+lem:qld-sandwich-consistency-defect
+lem:qld-sandwich-orthonormalization
+lem:qld-sandwich-povm
+lem:qld-x-point-overlap-deficit
+lem:subline-joint-overlap
+thm:qld-completed-pair-actual-error
+thm:qld-direct-line-real-overlap
+thm:qld-rounded-polynomial-ordered
+thm:qld-rounded-scalar-linearity
+thm:qld-rounded-separated-mass
+thm:qld-rounded-wrong-variable-mass
+```
+
+All 57 descendants of `lem:qld-comm-line-cons` are those same 52 plus:
+
+```text
+lem:claim-17-2-direct
+lem:claim-17-2-direct-real
+lem:concrete-X-deficit-direct
+lem:qld-line-conditioning-restoration
+lem:qld-point-line-marginal-bounds
+```
+
+The support nodes fall under the constructions and conditional supplied-witness
+routes identified in the table. None proves the coupled square-root claim or
+restores the product scalar guarantee. Thus enumerating all descendants does
+not change the negative full-source-sufficiency and C3 verdicts.
+
+Reproduction after `leanblueprint web` (from the repository root):
+
+```python
+from pathlib import Path
+from pygraphviz import AGraph
+from scripts.audit_dependency_graph_status import extract_dot
+g = AGraph(string=extract_dot(
+    Path("blueprint/web/dep_graph_document.html").read_text()))
+for seed in ("lem:pasting", "lem:qld-comm-cons", "lem:qld-comm-line-cons"):
+    seen, pending = {seed}, [seed]
+    while pending:
+        for node in g.successors(pending.pop()):
+            name = str(node)
+            if name not in seen:
+                seen.add(name)
+                pending.append(name)
+    print(seed, sorted(seen - {seed}))
+```
+
+## Final Targeted Checks
+
+The additional single-file checks of `Observables/PointConsistency.lean`,
+`Extraction/SourceUnitary.lean`, and `Test/Soundness.lean` all exited 0 without
+diagnostics. These, together with the earlier checks, cover both immediate
+square-root consumers, concrete pasting application, global-pair assembly,
+extraction and the headline soundness module. They are not a full rebuild of
+every support module; main still owns full CI.
+
+The branch-wide duplicate guard (`dup_check.py check --repo . --branch HEAD
+--json`) returned exit 3 with two **statement-only** matches: both closed
+`Prop` definitions `PrintedPastingClaim` and `PrintedSquareRootPolynomialClaim`
+matched the header `PrintedExtendedLinesWitnessClaim : Prop`. The scanner
+cuts definitions at `:=`, so this comparison sees only their identical result
+sort, not their defining propositions. Reading all three bodies resolves these
+as different claims: one is pasting for arbitrary finite function collections,
+one is the real square-root bound, and one is a supplied quantum-setting
+extended-line existence statement under an additive error contract. No name
+matches or actual duplicate mathematical declarations were found. The exit-3
+receipt is not reported as a clean branch-wide guard.
