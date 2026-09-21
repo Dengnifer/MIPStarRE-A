@@ -1,5 +1,6 @@
 import Mathlib
 import Challenge.MIPStarRE.LDT.Basic.ParametersBase
+import Challenge.MIPStarRE.LDT.Preliminaries.Polynomials
 import Challenge.MIPStarRE.QPBT.Algebra.Coefficients
 import Challenge.MIPStarRE.QPBT.Algebra.Subspaces
 import Challenge.MIPStarRE.Quantum.FiniteMatrix.Basic
@@ -7,6 +8,7 @@ import Challenge.MIPStarRE.QPBT.Algebra.FieldBasis
 import Challenge.MIPStarRE.QPBT.Algebra.Lines
 import Challenge.MIPStarRE.QPBT.Algebra.LowDegreeCode
 import Challenge.MIPStarRE.QPBT.State
+import Challenge.MIPStarRE.Quantum.FiniteMatrix.NormalizedTrace
 import Challenge.MIPStarRE.QPBT.Algebra.Pauli
 import Challenge.MIPStarRE.QPBT.Algebra.SelfDualBasis
 import Challenge.MIPStarRE.Quantum.Measurement
@@ -14,27 +16,32 @@ import Challenge.MIPStarRE.QPBT.Algebra.SelfDualBasisTheorems
 import Challenge.MIPStarRE.LDT.Basic.Distribution
 import Challenge.MIPStarRE.QPBT.Algebra.PauliTheorems
 import Challenge.MIPStarRE.QPBT.Games.Defs
+import Challenge.MIPStarRE.QPBT.Games.DistributionAux
+import Challenge.MIPStarRE.QPBT.Games.CondLinear
+import Challenge.MIPStarRE.QPBT.Games.Consistency
 import Challenge.MIPStarRE.QPBT.Test.LowDegreeGame
 import Challenge.MIPStarRE.QPBT.Test.MagicSquare
+import Challenge.MIPStarRE.QPBT.Games.TypedCondLinear
 import Challenge.MIPStarRE.QPBT.Test.PauliBasisTest
 import Challenge.MIPStarRE.QPBT.Test.SoundnessDefs
+import Challenge.MIPStarRE.QPBT.Games.StrategyClasses
+import Challenge.MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
+import Challenge.MIPStarRE.QPBT.Observables.WinImplications.Setup
+import Challenge.MIPStarRE.QPBT.Test.Completeness
 import Challenge.MIPStarRE.QPBT.Test.QubitForm
 
 /-!
-# Challenge: quantum soundness of the Pauli basis test
+# Challenge: headline theorems of the quantum Pauli basis test
 
-Self-contained comparator challenge for `MIPStarRE.QPBT.pauli_soundness` and
-`MIPStarRE.QPBT.pauli_soundness_qubit`, the source statements of `thm:pauli`
-and `cor:pauli-binary` — the quantum soundness of the Pauli basis test
-(Natarajan, Wright, "NEEXP in MIP*", and the low-degree chapter of the
-quantum low individual degree test literature), the ingredient that turns the
-classical low-degree test into a Pauli-braiding-style rigidity statement.
+Self-contained comparator challenge for the four registered QPBT headline
+theorems: low-degree soundness, completeness of the Pauli basis test, its
+soundness theorem, and the qubit-coordinate soundness corollary.
 
 The challenge is **Mathlib-only**: apart from Mathlib it imports nothing but
 its own modules under `Challenge/`, one for each library module that
 contributes to the closure.  Together they re-declare, verbatim and in
 dependency order, every definition in the transitive closure of the statements
-of the two theorems; the theorems themselves are stated here with `sorry`.
+of the four theorems; the theorems themselves are stated here with `sorry`.
 Those modules and their imports mirror the library's own module partition
 and import graph.  That is not cosmetic: Lean caches a nested proof and
 a `match` auxiliary *per module*, names it after the first declaration of that
@@ -67,55 +74,138 @@ open scoped BigOperators MatrixOrder Matrix ComplexOrder
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_7  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.MsType.ctorIdx  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
 --   MIPStarRE.QPBT.msWinPredicate._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
+--   MIPStarRE.QPBT.bind_uniformOnFinset_map._simp_1_3  (from MIPStarRE/QPBT/Games/DistributionAux.lean)
 --   MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement._simp_1_4  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
+--   MIPStarRE.QPBT.LdType.enumList  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.typedCLDistribution_symm._simp_1_1  (from MIPStarRE/QPBT/Games/TypedCondLinear.lean)
 --   MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement._simp_1_6  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
 --   MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement._simp_1_3  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_2  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_1.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_3  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   _private.MIPStarRE.QPBT.Test.Completeness.0.MIPStarRE.QPBT.pauliWinPredicate  (from [anonymous].lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_4.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_5.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.PauliType.ctorElimType  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_3.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.PauliAnswer.ctorIdx  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.prefixRank.eq_1  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.pauliAnswerOrZero._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.PauliKind.ofNat_ctorIdx  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
 --   MIPStarRE.QPBT.PauliType.proxyTypeEquiv  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.typedCLDistribution_symm._simp_1_2  (from MIPStarRE/QPBT/Games/TypedCondLinear.lean)
+--   MIPStarRE.QPBT.LdType.ofNat_ctorIdx  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 --   MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement._simp_1_5  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
 --   MIPStarRE.QPBT.msWinPredicate._sparseCasesOn_2  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
 --   MIPStarRE.QPBT.exists_self_dual_normal_basis_gal._simp_1_2  (from MIPStarRE/QPBT/Algebra/FieldBasis.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_2.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_6.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.instInhabitedMsType.default  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_5  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_1.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.trace_group_algebra_pairing._simp_1_2  (from MIPStarRE/QPBT/Algebra/FieldBasis.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_8.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_2.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.PauliKind.ofNat  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
 --   MIPStarRE.QPBT.MsAnswer.ctorIdx  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
+--   MIPStarRE.QPBT.bind_uniformOnFinset_map._simp_1_1  (from MIPStarRE/QPBT/Games/DistributionAux.lean)
 --   MIPStarRE.QPBT.normal_basis_trace_dual_apply._simp_1_3  (from MIPStarRE/QPBT/Algebra/FieldBasis.lean)
 --   MIPStarRE.LDT.Distribution.mk.congr_simp  (from MIPStarRE/LDT/Basic/Distribution.lean)
 --   MIPStarRE.QPBT.PauliType.ctorIdx  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.PauliKind.enumList  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
 --   MIPStarRE.QPBT.PauliType.point.inj  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.validLdAnswer._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.bind_uniformOnFinset_map._simp_1_4  (from MIPStarRE/QPBT/Games/DistributionAux.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_2  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.Distribution.map_map._simp_1_1  (from MIPStarRE/QPBT/Games/DistributionAux.lean)
 --   MIPStarRE.QPBT.PauliAnswer.ctorElimType  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.normal_basis_trace_dual_apply._simp_1_2  (from MIPStarRE/QPBT/Algebra/FieldBasis.lean)
 --   MIPStarRE.QPBT.PauliType.point.injEq  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.LdAnswer.ctorIdx  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.validLdAnswer._sparseCasesOn_3  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 --   MIPStarRE.QPBT.PauliKind.enumList_nodup  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
+--   MIPStarRE.QPBT.ldWinPredicate._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 --   MIPStarRE.QPBT.registerSubmodule_eq_spanSubset._simp_1_2  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_1  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.instInhabitedLdType.default  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_5.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_3  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_5  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_6.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_8  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.LdType.ofNat  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.LdAnswer.ctorElimType  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.validLdAnswer._sparseCasesOn_2  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_4  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_3.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.MsType.proxyTypeEquiv  (from MIPStarRE/QPBT/Test/MagicSquare.lean)
 --   MIPStarRE.QPBT.registerSubmodule.eq_1  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
+--   MIPStarRE.QPBT.clDistribution.eq_1  (from MIPStarRE/QPBT/Games/CondLinearTheorems.lean)
+--   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_4.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_4  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.instInhabitedPauliKind.default  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
 --   MIPStarRE.QPBT.canonicalComplement.eq_1  (from MIPStarRE/QPBT/Algebra/Subspaces.lean)
+--   MIPStarRE.QPBT.pauliAnswerOrZero._sparseCasesOn_1.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
+--   MIPStarRE.QPBT.ldWinPredicate._sparseCasesOn_2  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 --   MIPStarRE.QPBT.PauliKind.enumList_getElem?_ctorIdx_eq  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
 --   MIPStarRE.QPBT.validPauliAnswer._sparseCasesOn_6  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_6  (from MIPStarRE/QPBT/Test/PauliBasisTest.lean)
 --   MIPStarRE.QPBT.PauliKind.ctorIdx  (from MIPStarRE/QPBT/Algebra/Pauli.lean)
+--   MIPStarRE.QPBT.LdType.enumList_nodup  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.LdType.ctorIdx  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
+--   MIPStarRE.QPBT.pauliWinPredicate._sparseCasesOn_7.else_eq  (from MIPStarRE/QPBT/Observables/Defs.lean)
+--   MIPStarRE.QPBT.bind_uniformOnFinset_map._simp_1_2  (from MIPStarRE/QPBT/Games/DistributionAux.lean)
+--   MIPStarRE.QPBT.LdType.enumList_getElem?_ctorIdx_eq  (from MIPStarRE/QPBT/Test/LowDegreeGame.lean)
 
 namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT.Preliminaries
+
+-- source: MIPStarRE/QPBT/Test/Completeness.lean:263-268
+--   (MIPStarRE.QPBT.exists_spcc_value_one)
+/-- `lem:pauli-completeness`: every admissible Pauli basis test has a
+value-one SPCC strategy. Blueprint `lem:pauli-completeness`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
+theorem exists_spcc_value_one (P : AdmissibleParams) :
+    ∃ S : SymmetricStrategy (pauliBasisTestSymm P),
+      S.IsSPCC ∧ S.toStrategy.value = 1 := by
+  sorry
+
+-- source: MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82-108
+--   (MIPStarRE.QPBT.exists_ld_soundness)
+/-- Quantum soundness of the simultaneous classical low individual degree test.
+Blueprint `lem:ld-soundness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
+theorem exists_ld_soundness :
+    ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
+      ∀ (L : LdParams) (ε : ℝ), 0 < ε →
+        ∀ S : Strategy (ldGame L), S.IsProjective → 1 - ε ≤ S.value →
+          ∃ GA : PolyMeasTuple L S.ιA, ∃ GB : PolyMeasTuple L S.ιB,
+            consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+                (fun u outcome =>
+                  heteroKron
+                    (((S.A (ldPointQuestionOf L u)).postprocess
+                      (ldPointValuesOrZero L)).effect outcome) 1)
+                (fun u outcome =>
+                  heteroKron 1
+                    ((GB.postprocess (evalPolyTupleAt u)).effect outcome))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k ∧
+            consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+                (fun u outcome =>
+                  heteroKron
+                    ((GA.postprocess (evalPolyTupleAt u)).effect outcome) 1)
+                (fun u outcome =>
+                  heteroKron 1
+                    (((S.B (ldPointQuestionOf L u)).postprocess
+                      (ldPointValuesOrZero L)).effect outcome))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k ∧
+            consistencyDefect (uniformDistribution Unit)
+                (fun _ g => heteroKron (GA.effect g) 1)
+                (fun _ g => heteroKron 1 (GB.effect g))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k := by
+  sorry
 
 -- source: MIPStarRE/QPBT/Test/Soundness.lean:40-65  (MIPStarRE.QPBT.pauli_soundness)
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits

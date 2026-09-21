@@ -13,6 +13,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import io
+import json
 import shutil
 import subprocess
 import sys
@@ -711,7 +712,29 @@ class RegisteredTrackTests(unittest.TestCase):
                 (REPO_ROOT / track.expected_challenge).exists(),
                 f"track {track.name} registers an expected challenge that does "
                 f"not exist: {track.expected_challenge}",
+                )
+
+    def test_qpbt_registry_matches_the_split_generator_and_covers_headlines(self) -> None:
+        """C5 derives QPBT coverage from the generated tree, not a manual list."""
+        track = gate.TRACKS["qpbt"]
+        config = json.loads(
+            (REPO_ROOT / "scripts/comparator/challenges/qpbt.json").read_text(
+                encoding="utf-8"
             )
+        )
+        self.assertTrue(config["split"])
+        self.assertEqual(track.expected_challenge, config["expected"])
+        self.assertEqual(
+            {name for name, _ in track.headline},
+            set(config["targets"]),
+        )
+        expected = REPO_ROOT / track.expected_challenge
+        self.assertTrue(expected.is_dir())
+        challenge = gate._expected_challenge_text(expected)
+        self.assertIsNotNone(challenge)
+        assert challenge is not None
+        for name, _ in track.headline:
+            self.assertIn(name, challenge)
 
     def test_the_real_qpbt_scope_covers_every_chapter_linking_the_track(self) -> None:
         """A QPBT node in a chapter section 6 does not list is still in C4."""

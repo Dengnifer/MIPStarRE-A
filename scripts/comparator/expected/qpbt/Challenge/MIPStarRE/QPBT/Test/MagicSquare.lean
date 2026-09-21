@@ -1,4 +1,5 @@
 import Mathlib
+import Challenge.MIPStarRE.QPBT.Games.CondLinear
 import Challenge.MIPStarRE.QPBT.Games.Defs
 
 /-! Challenge mirror of `MIPStarRE/QPBT/Test/MagicSquare.lean`.

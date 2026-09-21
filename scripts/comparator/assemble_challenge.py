@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the body of a comparator challenge file from the extractor's TSV.
+"""Assemble the body of a comparator `Challenge.lean` from the extractor's TSV.
 
 Input: the TSV produced by ``extract_closure.lean`` (one declaration per row:
 name, module path, start line, end line).  For each declaration this script
@@ -8,11 +8,12 @@ point (tracking ``namespace``/``section``/``end`` lines), orders declarations
 topologically (module import rank, then line number), and emits the snippets
 grouped under merged namespace blocks with provenance comments.
 
-The selected challenge's ``extras``/``module_preludes`` tables (see
-``challenges.py``) carry elaboration context (attribute commands, ``CoeFun``
-instances, ``variable``/``open`` blocks) that the kernel closure cannot see;
-the script fails if a table key no longer matches any extracted declaration.
-See README.md in this directory for the full regeneration pipeline.
+The elaboration context that the kernel closure cannot see (attribute commands,
+``CoeFun`` instances, ``variable``/``open`` blocks) lives in the ``extras`` and
+``module_preludes`` tables of the selected challenge configuration under
+``challenges/``; the script fails if one of *that challenge's* keys no longer
+matches any extracted declaration.  See README.md in this directory for the
+full regeneration pipeline.
 """
 
 from __future__ import annotations
@@ -22,17 +23,19 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from challenges import (  # noqa: E402
-    CHALLENGES,
-    Challenge,
-    Extras,
-    ModulePreludes,
+from challenge_config import (
+    DEFAULT_CHALLENGE,
+    ChallengeConfig,
+    ChallengeConfigError,
     Prelude,
+    load_challenges,
 )
 
 Entry = tuple[str, str, int, int, list[str]]
+
+
+class StaleContextTables(ValueError):
+    """A challenge's ``extras``/``module_preludes`` key matches no declaration."""
 
 
 def source_range_with_context(
@@ -52,12 +55,12 @@ class Assembler:
     def __init__(
         self,
         repo_root: Path,
-        extras: Extras,
-        module_preludes: ModulePreludes,
+        extras: dict[str, list[str]] | None = None,
+        module_preludes: dict[str, tuple[Prelude, ...]] | None = None,
     ) -> None:
         self.repo_root = repo_root
-        self.extras = extras
-        self.module_preludes = module_preludes
+        self.extras = extras or {}
+        self.module_preludes = module_preludes or {}
         self._file_cache: dict[str, list[str]] = {}
         self.out: list[str] = []
         self.cur_ns: list[str] = []
@@ -146,6 +149,7 @@ class Assembler:
         self.cur_ns = target
 
     def prelude_for(self, path: str, line: int) -> Prelude | None:
+        """The configured scope of ``path`` covering ``line``, if any."""
         for prelude in self.module_preludes.get(path, ()):
             if prelude.covers(line):
                 return prelude
@@ -153,12 +157,12 @@ class Assembler:
 
     def close_prelude(self) -> None:
         if self.open_prelude:
-            self.switch_ns(list(self.open_prelude[1].ns))
+            self.switch_ns(list(self.open_prelude[1].namespace))
             self.out.append("end  -- module scope")
             self.open_prelude = None
 
     def open_prelude_for(self, path: str, prelude: Prelude) -> None:
-        self.switch_ns(list(prelude.ns))
+        self.switch_ns(list(prelude.namespace))
         label = path if prelude.whole_file else f"{path}:{prelude.first}-{prelude.last}"
         self.out.append("")
         self.out.append(f"-- elaboration context of {label}")
@@ -253,7 +257,7 @@ def minimal_mirror_imports(
 
 
 def assemble_split(
-    tsv: Path, root: Path, challenge: Challenge
+    challenge: ChallengeConfig, root: Path, tsv: Path
 ) -> dict[str, str]:
     """Return {path relative to the challenge repository: file contents}."""
     asm = SplitAssembler(root, challenge.extras, challenge.module_preludes)
@@ -287,6 +291,10 @@ def assemble_split(
         body = asm.module_body(path, by_module[path])
         files[mirror_file(path)] = "\n".join(head) + "\n" + body + "\n"
 
+    if challenge.header is None or challenge.footer is None:
+        raise ChallengeConfigError(
+            f"split challenge {challenge.name!r} requires a header and footer"
+        )
     header = (root / challenge.header).read_text(encoding="utf-8")
     footer = (root / challenge.footer).read_text(encoding="utf-8")
     part_imports = "\n".join(f"import {mirror_module(m)}" for m in ordered)
@@ -308,7 +316,9 @@ def assemble_split(
     return files
 
 
-def read_entries(asm: Assembler, tsv: Path) -> tuple[list[Entry], list[tuple[str, str]]]:
+def read_entries(
+    asm: Assembler, tsv: Path
+) -> tuple[list[Entry], list[tuple[str, str]]]:
     entries: list[Entry] = []
     generated: list[tuple[str, str]] = []
     for row in tsv.read_text(encoding="utf-8").splitlines():
@@ -325,24 +335,25 @@ def read_entries(asm: Assembler, tsv: Path) -> tuple[list[Entry], list[tuple[str
 
 
 def check_stale_tables(
-    asm: Assembler, challenge: Challenge, entries: list[Entry]
+    asm: Assembler, challenge: ChallengeConfig, entries: list[Entry]
 ) -> None:
     unused_extras = set(challenge.extras) - {name for name, *_ in entries}
     unused_preludes = {
-        f"{path}:{p.first}"
-        for path, preludes in challenge.module_preludes.items()
-        for p in preludes
-        if (path, p.first) not in asm.used_preludes
+        f"{path}:{scope.first}"
+        for path, scopes in challenge.module_preludes.items()
+        for scope in scopes
+        if (path, scope.first) not in asm.used_preludes
     }
     if unused_extras or unused_preludes:
-        raise SystemExit(
-            f"stale context tables for challenge {challenge.name} — "
+        raise StaleContextTables(
+            f"stale context tables in {challenge.path} — "
             f"unmatched extras keys: {sorted(unused_extras)}; "
             f"unmatched module_preludes scopes: {sorted(unused_preludes)}"
         )
 
 
-def assemble(tsv: Path, root: Path, challenge: Challenge) -> str:
+def assemble(challenge: ChallengeConfig, root: Path, tsv: Path) -> str:
+    """Assembled body text; raises ``StaleContextTables`` on an unmatched key."""
     asm = Assembler(root, challenge.extras, challenge.module_preludes)
     entries, generated = read_entries(asm, tsv)
 
@@ -365,9 +376,11 @@ def main() -> int:
     )
     parser.add_argument(
         "--challenge",
-        choices=sorted(CHALLENGES),
-        default="ldt",
-        help="challenge whose context tables to use (default: ldt)",
+        default=DEFAULT_CHALLENGE,
+        help=(
+            "challenge name under challenges/, or a path to a configuration "
+            f"file (default: {DEFAULT_CHALLENGE})"
+        ),
     )
     parser.add_argument(
         "--split-dir",
@@ -377,17 +390,20 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    challenge = CHALLENGES[args.challenge]
-    if args.split_dir is not None:
-        files = assemble_split(args.tsv, args.root, challenge)
-        for rel, text in sorted(files.items()):
-            dest = args.split_dir / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(text, encoding="utf-8")
-        print(f"wrote {len(files)} challenge files to {args.split_dir}")
-        return 0
-
-    print(assemble(args.tsv, args.root, challenge))
+    try:
+        challenge = load_challenges([args.challenge])[0]
+        if args.split_dir is not None:
+            files = assemble_split(challenge, args.root, args.tsv)
+            for rel, text in sorted(files.items()):
+                dest = args.split_dir / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_text(text, encoding="utf-8")
+            print(f"wrote {len(files)} challenge files to {args.split_dir}")
+            return 0
+        print(assemble(challenge, args.root, args.tsv))
+    except (ChallengeConfigError, StaleContextTables) as exc:
+        print(exc, file=sys.stderr)
+        return 1
     return 0
 
 

@@ -28,6 +28,15 @@ noncomputable def conjIsometry {ι ι' : Type*}
   let U : Matrix ι' ι ℂ := Matrix.toEuclideanLin.symm φ.toLinearMap
   U * M * Uᴴ
 
+-- source: MIPStarRE/QPBT/State.lean:29-35  (MIPStarRE.QPBT.reindexState)
+/-- Coordinate transport used by blueprint
+`def:strategy-distance`, paper `06_nonlocal_games_and_mipstar.tex:273-285`. -/
+noncomputable def reindexState {ι ι' : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype ι'] [DecidableEq ι'] (e : ι ≃ ι')
+    (ψ : EuclideanSpace ℂ ι) : EuclideanSpace ℂ ι' :=
+  (EuclideanSpace.equiv ι' ℂ).symm
+    (fun j => (EuclideanSpace.equiv ι ℂ ψ) (e.symm j))
+
 -- source: MIPStarRE/QPBT/State.lean:37-55  (MIPStarRE.QPBT.isometryTensor)
 /-- Apply the two independent local isometries of blueprint
 `thm:ms-rigidity`, paper

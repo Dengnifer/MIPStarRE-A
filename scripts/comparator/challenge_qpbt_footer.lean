@@ -2,6 +2,51 @@
 namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
+open MIPStarRE.LDT.Preliminaries
+
+-- source: MIPStarRE/QPBT/Test/Completeness.lean:263-268
+--   (MIPStarRE.QPBT.exists_spcc_value_one)
+/-- `lem:pauli-completeness`: every admissible Pauli basis test has a
+value-one SPCC strategy. Blueprint `lem:pauli-completeness`, paper
+`08_classical_and_quantum_low_degree_tests.tex:1229-1421`. -/
+theorem exists_spcc_value_one (P : AdmissibleParams) :
+    ∃ S : SymmetricStrategy (pauliBasisTestSymm P),
+      S.IsSPCC ∧ S.toStrategy.value = 1 := by
+  sorry
+
+-- source: MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82-108
+--   (MIPStarRE.QPBT.exists_ld_soundness)
+/-- Quantum soundness of the simultaneous classical low individual degree test.
+Blueprint `lem:ld-soundness`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:413-458`. -/
+theorem exists_ld_soundness :
+    ∃ a b : ℝ, 1 ≤ a ∧ 0 < b ∧ b ≤ 1 ∧
+      ∀ (L : LdParams) (ε : ℝ), 0 < ε →
+        ∀ S : Strategy (ldGame L), S.IsProjective → 1 - ε ≤ S.value →
+          ∃ GA : PolyMeasTuple L S.ιA, ∃ GB : PolyMeasTuple L S.ιB,
+            consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+                (fun u outcome =>
+                  heteroKron
+                    (((S.A (ldPointQuestionOf L u)).postprocess
+                      (ldPointValuesOrZero L)).effect outcome) 1)
+                (fun u outcome =>
+                  heteroKron 1
+                    ((GB.postprocess (evalPolyTupleAt u)).effect outcome))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k ∧
+            consistencyDefect (uniformDistribution (Fin L.m → ScalarQ L))
+                (fun u outcome =>
+                  heteroKron
+                    ((GA.postprocess (evalPolyTupleAt u)).effect outcome) 1)
+                (fun u outcome =>
+                  heteroKron 1
+                    (((S.B (ldPointQuestionOf L u)).postprocess
+                      (ldPointValuesOrZero L)).effect outcome))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k ∧
+            consistencyDefect (uniformDistribution Unit)
+                (fun _ g => heteroKron (GA.effect g) 1)
+                (fun _ g => heteroKron 1 (GB.effect g))
+                S.ψ ≤ deltaLd a b ε L.q L.m L.d L.k := by
+  sorry
 
 -- source: MIPStarRE/QPBT/Test/Soundness.lean:40-65  (MIPStarRE.QPBT.pauli_soundness)
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits

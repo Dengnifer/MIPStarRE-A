@@ -1,4 +1,5 @@
 import Mathlib
+import Challenge.MIPStarRE.LDT.Preliminaries.Polynomials
 
 /-! Challenge mirror of `MIPStarRE/QPBT/Algebra/LowDegreeCode.lean`.
 

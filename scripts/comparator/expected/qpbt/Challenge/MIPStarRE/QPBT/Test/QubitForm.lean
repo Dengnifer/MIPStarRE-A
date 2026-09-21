@@ -1,5 +1,7 @@
 import Mathlib
 import Challenge.MIPStarRE.QPBT.Algebra.PauliTheorems
+import Challenge.MIPStarRE.QPBT.Observables.WinImplications.Setup
+import Challenge.MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import Challenge.MIPStarRE.QPBT.Test.SoundnessDefs
 
 /-! Challenge mirror of `MIPStarRE/QPBT/Test/QubitForm.lean`.

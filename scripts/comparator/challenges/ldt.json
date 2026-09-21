@@ -1,0 +1,58 @@
+{
+  "name": "ldt",
+  "description": "Low individual degree test main theorem (thm:main-formal).",
+  "imports": ["MIPStarRE.LDT.Test.MainTheorem.MainFormal"],
+  "targets": ["MIPStarRE.LDT.Test.mainFormal"],
+  "header": "scripts/comparator/challenge_header.lean",
+  "footer": "scripts/comparator/challenge_footer.lean",
+  "expected": "scripts/comparator/expected/Challenge.lean.expected",
+  "require_expected": true,
+  "extras": {
+    "MIPStarRE.LDT.FieldModel": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/ParametersBase.lean (attribute command)",
+      "attribute [instance_reducible, instance] FieldModel.instField FieldModel.instFintype",
+      "  FieldModel.instDecidableEq"
+    ],
+    "MIPStarRE.LDT.Polynomial.toFun": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/LowDegreePolynomial.lean (elaboration context)",
+      "noncomputable instance {params : Parameters} [FieldModel params.q] :",
+      "    CoeFun (Polynomial params) (fun _ => Point params → Fq params) :=",
+      "  ⟨Polynomial.toFun⟩"
+    ],
+    "MIPStarRE.LDT.AxisLinePolynomial.toFun": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
+      "noncomputable instance {params : Parameters} [FieldModel params.q] :",
+      "    CoeFun (AxisLinePolynomial params) (fun _ => Fq params → Fq params) :=",
+      "  ⟨AxisLinePolynomial.toFun⟩"
+    ],
+    "MIPStarRE.LDT.DiagonalLinePolynomial.toFun": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
+      "noncomputable instance {params : Parameters} [FieldModel params.q] :",
+      "    CoeFun (DiagonalLinePolynomial params) (fun _ => Fq params → Fq params) :=",
+      "  ⟨DiagonalLinePolynomial.toFun⟩"
+    ]
+  },
+  "module_preludes": {
+    "MIPStarRE/LDT/Test/StrategyBiProj/Measurements.lean": {
+      "namespace": ["MIPStarRE.LDT", "ProjStrat"],
+      "lines": [
+        "open MIPStarRE.Quantum",
+        "variable {params : Parameters} [FieldModel params.q]",
+        "variable {ιA : Type*} [Fintype ιA] [DecidableEq ιA]",
+        "variable {ιB : Type*} [Fintype ιB] [DecidableEq ιB]"
+      ]
+    },
+    "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": {
+      "namespace": ["MIPStarRE.Quantum"],
+      "lines": [
+        "open scoped Matrix.Norms.Elementwise",
+        "open WithLp",
+        "variable {d : Type*} [Fintype d]"
+      ]
+    }
+  }
+}

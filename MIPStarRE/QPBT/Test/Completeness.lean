@@ -40,7 +40,7 @@ in `MIPStarRE/QPBT/Games/DistributionAux.lean`.
 
 /-- Formalization-only auxiliary: the push-forward of a uniform distribution
 does not depend on the finiteness and decidability data used to form it. -/
-private theorem map_uniformDistribution_congr {α γ : Type*}
+theorem map_uniformDistribution_congr {α γ : Type*}
     (i₁ i₂ : Fintype α) (j₁ j₂ : DecidableEq α) (k₁ k₂ : Nonempty α)
     (d₁ d₂ : DecidableEq γ) (e : α → γ) :
     @Distribution.map α γ d₁ (@uniformDistribution α i₁ j₁ k₁) e =
@@ -55,7 +55,7 @@ private theorem map_uniformDistribution_congr {α γ : Type*}
 
 /-- Formalization-only auxiliary: a uniformly seeded typed bind does not depend
 on the finiteness and decidability data used to form it. -/
-private theorem bind_map_uniformDistribution_congr {α β γ : Type*}
+theorem bind_map_uniformDistribution_congr {α β γ : Type*}
     (i₁ i₂ : Fintype β) (j₁ j₂ : DecidableEq β) (k₁ k₂ : Nonempty β)
     (d₁ d₂ : DecidableEq γ) (μ : Distribution α) (g : α → β → γ) :
     @Distribution.bind α γ d₁ μ

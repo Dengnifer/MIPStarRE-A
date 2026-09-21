@@ -1,20 +1,17 @@
 import Mathlib
 
 /-!
-# Challenge: quantum soundness of the Pauli basis test
+# Challenge: headline theorems of the quantum Pauli basis test
 
-Self-contained comparator challenge for `MIPStarRE.QPBT.pauli_soundness` and
-`MIPStarRE.QPBT.pauli_soundness_qubit`, the source statements of `thm:pauli`
-and `cor:pauli-binary` — the quantum soundness of the Pauli basis test
-(Natarajan, Wright, "NEEXP in MIP*", and the low-degree chapter of the
-quantum low individual degree test literature), the ingredient that turns the
-classical low-degree test into a Pauli-braiding-style rigidity statement.
+Self-contained comparator challenge for the four registered QPBT headline
+theorems: low-degree soundness, completeness of the Pauli basis test, its
+soundness theorem, and the qubit-coordinate soundness corollary.
 
 The challenge is **Mathlib-only**: apart from Mathlib it imports nothing but
 its own modules under `Challenge/`, one for each library module that
 contributes to the closure.  Together they re-declare, verbatim and in
 dependency order, every definition in the transitive closure of the statements
-of the two theorems; the theorems themselves are stated here with `sorry`.
+of the four theorems; the theorems themselves are stated here with `sorry`.
 Those modules and their imports mirror the library's own module partition
 and import graph.  That is not cosmetic: Lean caches a nested proof and
 a `match` auxiliary *per module*, names it after the first declaration of that

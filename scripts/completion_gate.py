@@ -150,9 +150,8 @@ TRACKS: dict[str, Track] = {
         ),
         leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
-        # The comparator configuration gives this track's expected tree; the
-        # registry follows the generator rather than keeping a second opinion
-        # about where the generated challenge lives.
+        # QPBT is a split challenge: this path is the generated tree containing
+        # the root Challenge.lean and every mirrored closure module.
         expected_challenge="scripts/comparator/expected/qpbt",
         truthful_docs=("README.md",),
         artifact_files=(
@@ -593,7 +592,7 @@ def _is_ancestor(root: Path, pin: str, commit: str) -> bool | None:
 
 
 def _expected_challenge_text(path: Path) -> str | None:
-    """Read a single-file challenge or concatenate a split challenge tree."""
+    """Read a single-file challenge or all Lean files in a split challenge tree."""
 
     if path.is_file():
         return path.read_text(encoding="utf-8", errors="replace")

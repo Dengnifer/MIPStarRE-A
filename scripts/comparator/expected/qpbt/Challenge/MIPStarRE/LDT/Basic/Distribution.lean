@@ -1,6 +1,6 @@
 import Mathlib
 import Challenge.MIPStarRE.LDT.Basic.ParametersBase
-import Challenge.MIPStarRE.Quantum.FiniteMatrix.Basic
+import Challenge.MIPStarRE.Quantum.FiniteMatrix.NormalizedTrace
 
 /-! Challenge mirror of `MIPStarRE/LDT/Basic/Distribution.lean`.
 

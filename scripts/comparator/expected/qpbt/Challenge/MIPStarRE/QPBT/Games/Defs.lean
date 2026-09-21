@@ -46,6 +46,14 @@ attribute [instance] Game.questionAFintype Game.questionBFintype
   Game.answerAFintype Game.answerBFintype Game.questionADecidableEq
   Game.questionBDecidableEq Game.answerADecidableEq Game.answerBDecidableEq
 
+-- source: MIPStarRE/QPBT/Games/Defs.lean:76-81  (MIPStarRE.QPBT.Measurement.IsProjective)
+/-- Projectivity of every effect in a POVM (blueprint
+`def:povm-conventions`; paper origin
+`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:68-72`). -/
+def Measurement.IsProjective {α d : Type*} [Fintype α] [Fintype d] [DecidableEq d]
+    (M : Measurement α d) : Prop :=
+  ∀ a, IsProj (M.effect a)
+
 -- source: MIPStarRE/QPBT/Games/Defs.lean:83-98  (MIPStarRE.QPBT.Strategy)
 /--
 The tensor-product strategy of blueprint

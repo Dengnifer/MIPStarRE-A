@@ -1,6 +1,7 @@
 import Mathlib
 import Challenge.MIPStarRE.QPBT.Algebra.LowDegreeCode
 import Challenge.MIPStarRE.QPBT.Algebra.Pauli
+import Challenge.MIPStarRE.QPBT.Games.TypedCondLinear
 import Challenge.MIPStarRE.QPBT.Test.LowDegreeGame
 import Challenge.MIPStarRE.QPBT.Test.MagicSquare
 

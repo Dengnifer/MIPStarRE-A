@@ -1,43 +1,34 @@
 import MIPStarRE.LDT.Test.MainTheorem.MainFormal
-import MIPStarRE.QPBT.Test.QubitForm
 
 /-!
 # Comparator closure extractor
 
-Computes the transitive closure of repository-local constants referenced by
-the statements of the target theorems of one comparator challenge, mirroring
-comparator's `runForUsedConsts` traversal (types, definition bodies, inductive
-constructors, and recursor rules; theorem proof bodies are traversed for the
-constants they use).  Auto-generated auxiliaries (`_proof_`, `match_`,
-`_autoParam`, constructors, projections) are collapsed into their parent
-declarations.
+Computes the transitive closure of repository-local constants referenced by the
+statements of one challenge's target theorems, mirroring comparator's
+`runForUsedConsts` traversal (types, definition bodies, inductive constructors,
+and recursor rules; theorem proof bodies are traversed for the constants they
+use).  Auto-generated auxiliaries (`_proof_`, `match_`, `_autoParam`,
+constructors, projections) are collapsed into their parent declarations.
 
-The targets are read from the `COMPARATOR_TARGETS` environment variable
-(whitespace-separated fully qualified names) and default to the LDT challenge
-root `MIPStarRE.LDT.Test.mainFormal`, so the extractor is shared by every
-challenge configured in `check_challenge_drift.py`.  This file imports the
-root module of every configured challenge; targets outside those imports are
-reported as errors.
+The challenge is selected by `scripts/comparator/challenges/<name>.json`:
 
-Output: one TSV row per declaration — name, module path, start line, end
-line (`NORANGE` for compiler-generated declarations without a source range)
-— consumed by `assemble_challenge.py`.  See README.md in this directory for
-the full regeneration pipeline.
+* its `targets` reach this file through the environment variable
+  `MIPSTARRE_COMPARATOR_TARGETS` (comma-separated, fully qualified).  With the
+  variable unset the extractor closes the LDT main theorem, so running this
+  file directly reproduces the historical single-challenge behaviour.
+* its `imports` replace the `import` block above.  `check_challenge_drift.py`
+  renders a copy of this file with that block substituted, because a Lean
+  module header cannot be computed at elaboration time.
+
+Output: one TSV row per declaration — name, module path, start line, end line
+(`NORANGE` for compiler-generated declarations without a source range) —
+consumed by `assemble_challenge.py`.  Rows are emitted in `NameSet` order,
+which is deterministic; the dependency ordering (module import rank, then line
+number) happens downstream in the assembler.  See README.md in this directory
+for the full regeneration pipeline.
 -/
 
 open Lean
-
-def defaultTargets : List Name := [`MIPStarRE.LDT.Test.mainFormal]
-
-/-- Targets of this extraction run, from `COMPARATOR_TARGETS`. -/
-def readTargets : IO (List Name) := do
-  match ← IO.getEnv "COMPARATOR_TARGETS" with
-  | none => return defaultTargets
-  | some s =>
-    let flat := ((s.replace "\n" " ").replace "\t" " ").replace "," " "
-    let names := (flat.splitOn " ").filter (· ≠ "")
-    if names.isEmpty then return defaultTargets
-    return names.map String.toName
 
 def isLocal (env : Environment) (n : Name) : Bool :=
   match env.getModuleIdxFor? n with
@@ -107,12 +98,31 @@ partial def collect (env : Environment) (queue : List Name) (seen : NameSet) : N
     if seen.contains n || !isLocal env n then collect env rest seen
     else collect env ((refsOf env n).toList ++ rest) (seen.insert n)
 
+/-- Target theorems closed when `MIPSTARRE_COMPARATOR_TARGETS` is unset. -/
+def defaultTargets : List Name := [`MIPStarRE.LDT.Test.mainFormal]
+
+/-- Parse the comma-separated target list written by `challenge_config.py`. -/
+def parseTargets (s : String) : List Name :=
+  ((s.splitOn ",").map String.trim).filterMap fun part =>
+    if part.isEmpty then none else some part.toName
+
+def challengeTargets : IO (List Name) := do
+  match ← IO.getEnv "MIPSTARRE_COMPARATOR_TARGETS" with
+  | none => return defaultTargets
+  | some raw =>
+    let targets := parseTargets raw
+    if targets.isEmpty then
+      throw (IO.userError "MIPSTARRE_COMPARATOR_TARGETS is set but names no target")
+    return targets
+
 def runExtract : MetaM Unit := do
   let env ← getEnv
-  let targets ← readTargets
+  let targets ← challengeTargets
+  -- Roots are the local constants of every target's *statement*, accumulated in
+  -- configuration order; the closure itself is order-independent.
   let mut roots : List Name := []
-  for t in targets do
-    let some ci := env.find? t | throwError "target not found: {t}"
+  for target in targets do
+    let some ci := env.find? target | throwError "target not found: {target}"
     roots := roots ++ ci.type.getUsedConstants.toList.filter (isLocal env ·)
   let closure := collect env roots {}
   let mut canonSet : NameSet := {}

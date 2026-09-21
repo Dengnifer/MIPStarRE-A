@@ -4,28 +4,31 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = REPO_ROOT / "scripts" / "comparator" / "check_challenge_drift.py"
+COMPARATOR = REPO_ROOT / "scripts" / "comparator"
+SCRIPT = COMPARATOR / "check_challenge_drift.py"
 PR_CI = REPO_ROOT / ".github" / "workflows" / "pr-ci.yml"
-README = REPO_ROOT / "scripts" / "comparator" / "README.md"
+CI_SH = REPO_ROOT / "local" / "bin" / "ci.sh"
+README = COMPARATOR / "README.md"
+EXTRACTOR = COMPARATOR / "extract_closure.lean"
 
-CHALLENGES_SCRIPT = REPO_ROOT / "scripts" / "comparator" / "challenges.py"
-EXTRACTOR = REPO_ROOT / "scripts" / "comparator" / "extract_closure.lean"
+# the drift checker imports its sibling `challenge_config`, which a script run
+# finds on `sys.path[0]` and a file-location import does not
+if str(COMPARATOR) not in sys.path:
+    sys.path.insert(0, str(COMPARATOR))
+
+import challenge_config  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location("check_challenge_drift", SCRIPT)
 assert _spec is not None and _spec.loader is not None
 check_challenge_drift = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(check_challenge_drift)
-
-_cspec = importlib.util.spec_from_file_location("challenges", CHALLENGES_SCRIPT)
-assert _cspec is not None and _cspec.loader is not None
-challenges = importlib.util.module_from_spec(_cspec)
-_cspec.loader.exec_module(challenges)
 
 
 class ComparatorChallengeDriftTests(unittest.TestCase):
@@ -69,17 +72,50 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
         self.assertIn("python3 scripts/comparator/check_challenge_drift.py --root . --update", readme)
         self.assertIn("challenge_footer.lean", readme)
         self.assertIn("MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean", readme)
+        self.assertIn("--challenge", readme)
+        self.assertIn("challenges/qpbt.json", readme)
+        self.assertIn(
+            "refuses a challenge whose configured header or footer file is not",
+            readme,
+        )
         self.assertIn("challenge_qpbt_footer.lean", readme)
         self.assertIn("MIPStarRE/QPBT/Test/Soundness.lean", readme)
         self.assertIn("MIPStarRE/QPBT/Test/QubitForm.lean", readme)
 
+    def test_machine_wide_guard_selects_every_configured_challenge(self) -> None:
+        # `local/bin/ci.sh` passes no --challenge, so every configuration under
+        # challenges/ is checked; a new challenge is picked up by adding its
+        # file alone.
+        configured = {path.stem for path in (COMPARATOR / "challenges").glob("*.json")}
+        self.assertEqual(sorted(configured), ["ldt", "qpbt"])
+
+        self.assertIn(
+            "python3 scripts/comparator/check_challenge_drift.py --root .\n",
+            CI_SH.read_text(encoding="utf-8"),
+        )
+
+    def test_pr_ci_names_only_configured_challenges(self) -> None:
+        workflow = PR_CI.read_text(encoding="utf-8")
+        for name in ("ldt", "qpbt"):
+            self.assertIn(
+                "python3 scripts/comparator/check_challenge_drift.py "
+                f"--root . --challenge {name}",
+                workflow,
+            )
+
     def test_every_challenge_is_configured_completely(self) -> None:
-        self.assertEqual(sorted(challenges.CHALLENGES), ["ldt", "qpbt"])
-        for name, challenge in challenges.CHALLENGES.items():
+        challenges = {
+            challenge.name: challenge
+            for challenge in challenge_config.load_challenges()
+        }
+        self.assertEqual(sorted(challenges), ["ldt", "qpbt"])
+        for name, challenge in challenges.items():
             with self.subTest(challenge=name):
-                self.assertEqual(challenge.name, name)
                 self.assertTrue(challenge.targets)
+                self.assertTrue(challenge.imports)
                 for path in (challenge.header, challenge.footer):
+                    self.assertIsNotNone(path, f"{name}: unconfigured challenge part")
+                    assert path is not None
                     self.assertTrue(
                         (REPO_ROOT / path).is_file(), f"{name}: missing {path}"
                     )
@@ -102,25 +138,26 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
                     self.assertTrue(
                         expected.is_file(), f"{name}: missing {challenge.expected}"
                     )
-                self.assertEqual(
-                    challenge.target_env, " ".join(challenge.targets)
-                )
 
     def test_qpbt_targets_are_the_headline_theorems(self) -> None:
-        qpbt = challenges.CHALLENGES["qpbt"]
+        qpbt = challenge_config.load_challenges(["qpbt"])[0]
         self.assertEqual(
             qpbt.targets,
             (
                 "MIPStarRE.QPBT.pauli_soundness",
                 "MIPStarRE.QPBT.pauli_soundness_qubit",
+                "MIPStarRE.QPBT.exists_spcc_value_one",
+                "MIPStarRE.QPBT.exists_ld_soundness",
             ),
         )
+        self.assertEqual(qpbt.expected, "scripts/comparator/expected/qpbt")
+        assert qpbt.footer is not None
         footer = (REPO_ROOT / qpbt.footer).read_text(encoding="utf-8")
         for target in qpbt.targets:
             self.assertIn(target.rsplit(".", 1)[1], footer)
 
     def test_qpbt_challenge_is_split_and_mathlib_only(self) -> None:
-        qpbt = challenges.CHALLENGES["qpbt"]
+        qpbt = challenge_config.load_challenges(["qpbt"])[0]
         self.assertTrue(
             qpbt.split,
             "the QPBT challenge must mirror the library module partition: a "
@@ -149,20 +186,7 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
 
     def test_extractor_reads_targets_from_the_environment(self) -> None:
         extractor = EXTRACTOR.read_text(encoding="utf-8")
-        self.assertIn("COMPARATOR_TARGETS", extractor)
-        for challenge in challenges.CHALLENGES.values():
-            module_prefix = challenge.targets[0].rsplit(".", 1)[0]
-            with self.subTest(challenge=challenge.name):
-                self.assertIn(module_prefix.split(".")[1], extractor)
-
-    def test_pr_ci_runs_one_drift_step_per_challenge(self) -> None:
-        workflow = PR_CI.read_text(encoding="utf-8")
-        for name in challenges.CHALLENGES:
-            self.assertIn(
-                "python3 scripts/comparator/check_challenge_drift.py "
-                f"--root . --challenge {name}",
-                workflow,
-            )
+        self.assertIn(challenge_config.TARGETS_ENV, extractor)
 
 
 if __name__ == "__main__":

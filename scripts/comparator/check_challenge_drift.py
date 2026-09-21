@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""Check that a checked-in comparator challenge is freshly regenerated."""
+"""Check that each checked-in comparator challenge is freshly regenerated.
+
+Every configuration under ``challenges/`` describes one challenge.  A challenge
+whose expected file exists is regenerated in a temporary directory and byte
+compared; a challenge whose expected file does not exist yet is skipped with a
+message, unless its configuration sets ``require_expected``.
+"""
 
 from __future__ import annotations
 
 import argparse
 import difflib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -13,13 +20,22 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+from challenge_config import (
+    ChallengeConfig,
+    ChallengeConfigError,
+    load_challenges,
+)
+from assemble_challenge import assemble, assemble_split
 
-from assemble_challenge import assemble, assemble_split  # noqa: E402
-from challenges import CHALLENGES, Challenge  # noqa: E402
+# These belong to the scripts, not to the tree under `--root`: the checked tree
+# may be a different worktree than the one this script was invoked from.
+SCRIPT_DIR = Path(__file__).resolve().parent
+EXTRACTOR = SCRIPT_DIR / "extract_closure.lean"
+ASSEMBLER = SCRIPT_DIR / "assemble_challenge.py"
 
-EXTRACTOR = Path("scripts/comparator/extract_closure.lean")
-ASSEMBLER = Path("scripts/comparator/assemble_challenge.py")
+# A Lean module header cannot be computed at elaboration time, so the extractor
+# is rendered per challenge with its own import block substituted.
+IMPORT_BLOCK = re.compile(r"\A(?:[ \t]*\n)*(?:import[ \t]+\S+[^\n]*\n)+")
 
 
 def run(
@@ -52,25 +68,6 @@ def clean_closure_rows(raw_tsv: Path, clean_tsv: Path) -> None:
         if len(line.split("\t")) == 4:
             rows.append(line)
     clean_tsv.write_text("\n".join(rows) + ("\n" if rows else ""), encoding="utf-8")
-
-
-def closure_tsv(root: Path, workdir: Path, challenge: Challenge) -> Path:
-    """Run the extractor and return the cleaned closure TSV."""
-    raw_tsv = workdir / "closure.tsv"
-    clean_tsv = workdir / "closure.clean.tsv"
-    env = dict(os.environ)
-    env["COMPARATOR_TARGETS"] = challenge.target_env
-    run(["lake", "env", "lean", str(EXTRACTOR)], cwd=root, stdout=raw_tsv, env=env)
-    clean_closure_rows(raw_tsv, clean_tsv)
-    return clean_tsv
-
-
-def assemble_split_candidate(
-    root: Path, workdir: Path, challenge: Challenge
-) -> dict[str, bytes]:
-    """Regenerate a split challenge as {path relative to the repo: bytes}."""
-    files = assemble_split(closure_tsv(root, workdir, challenge), root, challenge)
-    return {rel: text.encode("utf-8") for rel, text in files.items()}
 
 
 def read_expected_tree(expected_dir: Path) -> dict[str, bytes]:
@@ -106,72 +103,84 @@ def tree_diff(expected: dict[str, bytes], candidate: dict[str, bytes]) -> str:
     return "".join(out)
 
 
-def compare_or_update_split(
-    root: Path, challenge: Challenge, expected_dir: Path, *, update: bool
-) -> int:
-    expected_dir = root / expected_dir
-    with tempfile.TemporaryDirectory(prefix="comparator-challenge-") as td:
-        candidate = assemble_split_candidate(root, Path(td), challenge)
-        expected = read_expected_tree(expected_dir)
-
-        if update:
-            if expected_dir.exists():
-                shutil.rmtree(expected_dir)
-            for rel, data in candidate.items():
-                dest = expected_dir / rel
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_bytes(data)
-            print(f"updated {expected_dir.relative_to(root)} ({len(candidate)} files)")
-            return 0
-
-        if expected == candidate:
-            print(
-                f"comparator challenge is current: "
-                f"{expected_dir.relative_to(root)} ({len(candidate)} files)"
-            )
-            return 0
-
-        print(
-            "::error::Comparator challenge regeneration drift detected. "
-            "Run `python3 scripts/comparator/check_challenge_drift.py --root . "
-            f"--challenge {challenge.name} --update` and review the resulting diff.",
-            file=sys.stderr,
+def render_extractor(challenge: ChallengeConfig, template: str) -> str:
+    """The extractor source with this challenge's import block substituted."""
+    body, substitutions = IMPORT_BLOCK.subn(
+        lambda _: challenge.import_block(), template, count=1
+    )
+    if substitutions != 1:
+        raise ChallengeConfigError(
+            f"{EXTRACTOR} does not start with an import block; cannot render "
+            f"challenge {challenge.name!r}"
         )
-        print(tree_diff(expected, candidate), file=sys.stderr)
-        return 1
+    return body
 
 
-def assemble_candidate(root: Path, workdir: Path, challenge: Challenge) -> Path:
+def challenge_part(root: Path, relative: str | None) -> bytes:
+    """A header or footer file's bytes; empty when unconfigured or absent.
+
+    A challenge under development is generated before its footer exists;
+    `missing_challenge_inputs` reports what was left out.  Only `--write`
+    generates such a challenge: `check_challenge` refuses to `--update` it, so
+    a checked-in expected copy is never written with a part left out.
+    """
+    if relative is None:
+        return b""
+    path = root / relative
+    return path.read_bytes() if path.exists() else b""
+
+
+def closure_tsv(root: Path, workdir: Path, challenge: ChallengeConfig) -> Path:
+    """Run the rendered extractor and return its cleaned closure TSV."""
     raw_tsv = workdir / "closure.tsv"
     clean_tsv = workdir / "closure.clean.tsv"
-    body = workdir / "draft.lean"
-    candidate = workdir / "Challenge.lean"
+    extractor = workdir / "extract_closure.lean"
+    extractor.write_text(
+        render_extractor(challenge, EXTRACTOR.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
 
     env = dict(os.environ)
-    env["COMPARATOR_TARGETS"] = challenge.target_env
-
-    run(["lake", "env", "lean", str(EXTRACTOR)], cwd=root, stdout=raw_tsv, env=env)
+    env.update(challenge.extractor_env())
+    run(["lake", "env", "lean", str(extractor)], cwd=root, stdout=raw_tsv, env=env)
     clean_closure_rows(raw_tsv, clean_tsv)
-    body_text = run(
-        [
-            sys.executable,
-            str(ASSEMBLER),
-            str(clean_tsv),
-            "--root",
-            str(root),
-            "--challenge",
-            challenge.name,
-        ],
-        cwd=root,
+    return clean_tsv
+
+
+def assemble_candidate(root: Path, workdir: Path, challenge: ChallengeConfig) -> Path:
+    body = workdir / "draft.lean"
+    candidate = workdir / "Challenge.lean"
+    body.write_text(
+        assemble(challenge, root, closure_tsv(root, workdir, challenge)),
+        encoding="utf-8",
     )
-    body.write_text(body_text, encoding="utf-8")
 
     candidate.write_bytes(
-        (root / challenge.header).read_bytes()
+        challenge_part(root, challenge.header)
         + body.read_bytes()
-        + (root / challenge.footer).read_bytes()
+        + b"\n"
+        + challenge_part(root, challenge.footer)
     )
     return candidate
+
+
+def assemble_split_candidate(
+    root: Path, workdir: Path, challenge: ChallengeConfig
+) -> dict[str, bytes]:
+    files = assemble_split(challenge, root, closure_tsv(root, workdir, challenge))
+    return {rel: text.encode("utf-8") for rel, text in files.items()}
+
+
+def write_tree(destination: Path, files: dict[str, bytes]) -> None:
+    if destination.exists():
+        if destination.is_dir():
+            shutil.rmtree(destination)
+        else:
+            destination.unlink()
+    for relative, data in files.items():
+        path = destination / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
 
 
 def unified_diff(expected: Path, candidate: Path) -> str:
@@ -182,42 +191,120 @@ def unified_diff(expected: Path, candidate: Path) -> str:
             expected_text,
             candidate_text,
             fromfile=str(expected),
-            tofile="regenerated challenge",
+            tofile="regenerated Challenge.lean",
         )
     )
 
 
-def compare_or_update(
-    root: Path, challenge: Challenge, expected: Path, *, update: bool
+def missing_challenge_inputs(root: Path, challenge: ChallengeConfig) -> list[str]:
+    """Header/footer files the configuration names but the tree does not have."""
+    return [
+        part
+        for part in (challenge.header, challenge.footer)
+        if part is not None and not (root / part).exists()
+    ]
+
+
+def check_challenge(
+    root: Path, challenge: ChallengeConfig, *, update: bool, write: Path | None
 ) -> int:
-    expected = root / expected
-    with tempfile.TemporaryDirectory(prefix="comparator-challenge-") as td:
+    expected = root / challenge.expected
+
+    if not (update or write) and not expected.exists():
+        if challenge.require_expected:
+            print(
+                f"::error::challenge {challenge.name!r}: {challenge.expected} does "
+                "not exist; run `python3 scripts/comparator/check_challenge_drift.py "
+                f"--root . --challenge {challenge.name} --update`",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            f"challenge {challenge.name!r}: no expected file yet "
+            f"({challenge.expected}); skipping the drift check"
+        )
+        return 0
+
+    absent = missing_challenge_inputs(root, challenge)
+    if absent and update and write is None:
+        # Writing the checked-in copy without a configured part would record a
+        # challenge missing those statements; a `require_expected: false`
+        # challenge would then stop being skipped and every later drift run
+        # would report that hollow copy as current.
+        print(
+            f"::error::challenge {challenge.name!r}: refusing to update "
+            f"{challenge.expected} without {', '.join(absent)} (not in this "
+            "tree); the checked-in copy would omit that part of the "
+            f"challenge.  Use `--challenge {challenge.name} --write PATH` "
+            "while the challenge is still being developed.",
+            file=sys.stderr,
+        )
+        return 1
+    if absent:
+        print(
+            f"challenge {challenge.name!r}: assembling without "
+            f"{', '.join(absent)} (not in this tree)",
+            file=sys.stderr,
+        )
+
+    with tempfile.TemporaryDirectory(prefix=f"comparator-{challenge.name}-") as td:
+        if challenge.split:
+            candidate_tree = assemble_split_candidate(root, Path(td), challenge)
+            if write is not None:
+                write_tree(write, candidate_tree)
+                print(
+                    f"challenge {challenge.name!r}: wrote {write} "
+                    f"({len(candidate_tree)} files)"
+                )
+                return 0
+            if update:
+                write_tree(expected, candidate_tree)
+                print(
+                    f"challenge {challenge.name!r}: updated {challenge.expected} "
+                    f"({len(candidate_tree)} files)"
+                )
+                return 0
+            expected_tree = read_expected_tree(expected)
+            if expected_tree == candidate_tree:
+                print(
+                    f"challenge {challenge.name!r} is current: {challenge.expected} "
+                    f"({len(candidate_tree)} files)"
+                )
+                return 0
+            print(
+                f"::error::Comparator challenge {challenge.name!r} regeneration "
+                "drift detected.  Run `python3 "
+                "scripts/comparator/check_challenge_drift.py --root . "
+                f"--challenge {challenge.name} --update` and review the diff.",
+                file=sys.stderr,
+            )
+            print(tree_diff(expected_tree, candidate_tree), file=sys.stderr)
+            return 1
+
         candidate = assemble_candidate(root, Path(td), challenge)
         candidate_bytes = candidate.read_bytes()
+
+        if write is not None:
+            write.parent.mkdir(parents=True, exist_ok=True)
+            write.write_bytes(candidate_bytes)
+            print(f"challenge {challenge.name!r}: wrote {write}")
+            return 0
 
         if update:
             expected.parent.mkdir(parents=True, exist_ok=True)
             expected.write_bytes(candidate_bytes)
-            print(f"updated {expected.relative_to(root)}")
+            print(f"challenge {challenge.name!r}: updated {challenge.expected}")
             return 0
 
-        if not expected.exists():
-            print(
-                f"::error::{expected.relative_to(root)} does not exist; "
-                "run `python3 scripts/comparator/check_challenge_drift.py --root . "
-                f"--challenge {challenge.name} --update`",
-                file=sys.stderr,
-            )
-            return 1
-
         if expected.read_bytes() == candidate_bytes:
-            print(f"comparator challenge is current: {expected.relative_to(root)}")
+            print(f"challenge {challenge.name!r} is current: {challenge.expected}")
             return 0
 
         print(
-            "::error::Comparator challenge regeneration drift detected. "
-            "Run `python3 scripts/comparator/check_challenge_drift.py --root . "
-            f"--challenge {challenge.name} --update` and review the resulting diff.",
+            f"::error::Comparator challenge {challenge.name!r} regeneration drift "
+            "detected.  Run `python3 scripts/comparator/check_challenge_drift.py "
+            f"--root . --challenge {challenge.name} --update` and review the "
+            "resulting diff.",
             file=sys.stderr,
         )
         print(unified_diff(expected, candidate), file=sys.stderr)
@@ -234,40 +321,49 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--challenge",
-        choices=[*sorted(CHALLENGES), "all"],
-        default="all",
-        help="challenge to check (default: all)",
-    )
-    parser.add_argument(
-        "--expected",
-        type=Path,
-        default=None,
-        help="override the checked-in generated copy (needs a single --challenge)",
+        action="append",
+        metavar="NAME",
+        help=(
+            "challenge name under challenges/, or a path to a configuration "
+            "file; repeatable (default: every configured challenge)"
+        ),
     )
     parser.add_argument(
         "--update",
         action="store_true",
         help="rewrite the checked-in generated challenge copy",
     )
+    parser.add_argument(
+        "--write",
+        type=Path,
+        metavar="PATH",
+        help="write the regenerated challenge to PATH instead of comparing; "
+        "requires exactly one --challenge and leaves the expected copy alone",
+    )
     args = parser.parse_args(argv)
 
-    names = sorted(CHALLENGES) if args.challenge == "all" else [args.challenge]
-    if args.expected is not None and len(names) != 1:
-        parser.error("--expected requires a single --challenge")
+    try:
+        challenges = load_challenges(args.challenge)
+    except ChallengeConfigError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 1
+
+    if args.write is not None and len(challenges) != 1:
+        print(
+            "::error::--write needs exactly one --challenge",
+            file=sys.stderr,
+        )
+        return 1
+    if not challenges:
+        print("::error::no challenge configuration found", file=sys.stderr)
+        return 1
 
     root = args.root.resolve()
     status = 0
-    for name in names:
-        challenge = CHALLENGES[name]
-        if challenge.split:
-            if args.expected is not None:
-                parser.error("--expected is not supported for a split challenge")
-            status |= compare_or_update_split(
-                root, challenge, challenge.expected, update=args.update
-            )
-            continue
-        expected = args.expected if args.expected is not None else challenge.expected
-        status |= compare_or_update(root, challenge, expected, update=args.update)
+    for challenge in challenges:
+        status |= check_challenge(
+            root, challenge, update=args.update, write=args.write
+        )
     return status
 
 

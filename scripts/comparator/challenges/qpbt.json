@@ -1,0 +1,228 @@
+{
+  "name": "qpbt",
+  "description": "The four registered QPBT headline theorems.",
+  "imports": [
+    "MIPStarRE.QPBT.Test.Soundness",
+    "MIPStarRE.QPBT.Test.QubitForm",
+    "MIPStarRE.QPBT.Test.Completeness",
+    "MIPStarRE.QPBT.Test.LowDegreeGameTheorems"
+  ],
+  "targets": [
+    "MIPStarRE.QPBT.pauli_soundness",
+    "MIPStarRE.QPBT.pauli_soundness_qubit",
+    "MIPStarRE.QPBT.exists_spcc_value_one",
+    "MIPStarRE.QPBT.exists_ld_soundness"
+  ],
+  "header": "scripts/comparator/challenge_qpbt_header.lean",
+  "footer": "scripts/comparator/challenge_qpbt_footer.lean",
+  "expected": "scripts/comparator/expected/qpbt",
+  "require_expected": true,
+  "split": true,
+  "common_opens": [
+    "open scoped BigOperators MatrixOrder Matrix ComplexOrder"
+  ],
+  "extras": {
+    "MIPStarRE.LDT.FieldModel": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/ParametersBase.lean (attribute command)",
+      "attribute [instance_reducible, instance] FieldModel.instField FieldModel.instFintype",
+      "  FieldModel.instDecidableEq"
+    ],
+    "MIPStarRE.LDT.Distribution.uniformOnFinset": [
+      "",
+      "-- source: MIPStarRE/LDT/Basic/Distribution.lean:430-432 (simp context)",
+      "@[simp]",
+      "theorem uniformOnFinset_support {α : Type*} (s : Finset α) :",
+      "    (uniformOnFinset s).support = s := rfl"
+    ],
+    "MIPStarRE.QPBT.Game": [
+      "",
+      "-- source: MIPStarRE/QPBT/Games/Defs.lean (attribute command)",
+      "attribute [instance] Game.questionAFintype Game.questionBFintype",
+      "  Game.answerAFintype Game.answerBFintype Game.questionADecidableEq",
+      "  Game.questionBDecidableEq Game.answerADecidableEq Game.answerBDecidableEq"
+    ],
+    "MIPStarRE.QPBT.SymmetricGame": [
+      "",
+      "-- source: MIPStarRE/QPBT/Games/StrategyClasses.lean (attribute command)",
+      "attribute [instance] SymmetricGame.questionFintype",
+      "  SymmetricGame.answerFintype SymmetricGame.questionDecidableEq",
+      "  SymmetricGame.answerDecidableEq"
+    ],
+    "MIPStarRE.QPBT.SymmetricStrategy": [
+      "",
+      "-- source: MIPStarRE/QPBT/Games/StrategyClasses.lean (attribute command)",
+      "attribute [instance] SymmetricStrategy.ιFintype",
+      "  SymmetricStrategy.ιDecidableEq"
+    ],
+    "MIPStarRE.QPBT.Strategy": [
+      "",
+      "-- source: MIPStarRE/QPBT/Games/Defs.lean (attribute command)",
+      "attribute [instance] Strategy.ιAFintype Strategy.ιBFintype",
+      "  Strategy.ιADecidableEq Strategy.ιBDecidableEq"
+    ],
+    "MIPStarRE.QPBT.PauliSoundnessWitness": [
+      "",
+      "-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean (attribute command)",
+      "attribute [instance] PauliSoundnessWitness.ιAFintype PauliSoundnessWitness.ιBFintype",
+      "  PauliSoundnessWitness.ιADecidableEq PauliSoundnessWitness.ιBDecidableEq"
+    ],
+    "MIPStarRE.QPBT.QubitSoundnessWitness": [
+      "",
+      "-- source: MIPStarRE/QPBT/Test/QubitForm.lean (attribute command)",
+      "attribute [instance] QubitSoundnessWitness.ιAFintype",
+      "  QubitSoundnessWitness.ιBFintype QubitSoundnessWitness.ιADecidableEq",
+      "  QubitSoundnessWitness.ιBDecidableEq"
+    ]
+  },
+  "module_preludes": {
+    "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": {
+      "namespace": ["MIPStarRE.Quantum"],
+      "lines": [
+        "open scoped Matrix.Norms.Elementwise",
+        "open WithLp",
+        "variable {d : Type*} [Fintype d]"
+      ]
+    },
+    "MIPStarRE/QPBT/Games/DistributionAux.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"]
+    },
+    "MIPStarRE/QPBT/Games/Consistency.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT MIPStarRE.Quantum"]
+    },
+    "MIPStarRE/QPBT/Games/CondLinear.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": [
+        "open MIPStarRE.LDT",
+        "variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]"
+      ]
+    },
+    "MIPStarRE/QPBT/Games/TypedCondLinear.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"]
+    },
+    "MIPStarRE/QPBT/Games/StrategyClasses.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": [
+        "open scoped Matrix MatrixOrder ComplexOrder",
+        "open MIPStarRE.LDT MIPStarRE.Quantum"
+      ],
+      "first": 1,
+      "last": 155
+    },
+    "MIPStarRE/QPBT/Observables/WinImplications/Setup.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": [
+        "open scoped Matrix ComplexOrder",
+        "open MIPStarRE.LDT",
+        "open MIPStarRE.Quantum"
+      ],
+      "first": 26,
+      "last": 114,
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Test/LowDegreeGameMeasurements.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": [
+        "open MIPStarRE.LDT",
+        "open MIPStarRE.LDT.Preliminaries",
+        "open MIPStarRE.Quantum"
+      ],
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Test/Completeness.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"],
+      "first": 30,
+      "last": 290,
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Algebra/FieldBasis.lean": [
+      {
+        "namespace": ["MIPStarRE.QPBT"],
+        "lines": ["variable {G : Type*} [CommGroup G]"],
+        "first": 88,
+        "last": 117
+      },
+      {
+        "namespace": ["MIPStarRE.QPBT"],
+        "lines": [
+          "variable {K : Type*} [Field K] [Fintype K] [Algebra (ZMod 2) K]",
+          "local notation \"G\" => Gal(K/(ZMod 2))"
+        ],
+        "first": 119,
+        "last": 385
+      }
+    ],
+    "MIPStarRE/QPBT/Algebra/Subspaces.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]"]
+    },
+    "MIPStarRE/QPBT/Algebra/Lines.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["variable {K : Type*} [Field K]"]
+    },
+    "MIPStarRE/QPBT/Algebra/LowDegreeCode.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MvPolynomial"]
+    },
+    "MIPStarRE/QPBT/Algebra/Pauli.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": [
+        "open MIPStarRE.Quantum",
+        "variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]",
+        "  [Algebra (ZMod 2) K]"
+      ]
+    },
+    "MIPStarRE/QPBT/Algebra/PauliTheorems.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT MIPStarRE.Quantum"]
+    },
+    "MIPStarRE/QPBT/Algebra/SelfDualBasisTheorems.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"]
+    },
+    "MIPStarRE/QPBT/Games/Defs.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT", "open MIPStarRE.Quantum"]
+    },
+    "MIPStarRE/QPBT/State.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.Quantum"]
+    },
+    "MIPStarRE/QPBT/Test/LowDegreeGame.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"],
+      "first": 31,
+      "last": 768,
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Test/MagicSquare.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"]
+    },
+    "MIPStarRE/QPBT/Test/PauliBasisTest.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT"],
+      "first": 28,
+      "last": 741,
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Test/SoundnessDefs.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT", "open MIPStarRE.Quantum"],
+      "first": 28,
+      "last": 229,
+      "noncomputable": true
+    },
+    "MIPStarRE/QPBT/Test/QubitForm.lean": {
+      "namespace": ["MIPStarRE.QPBT"],
+      "lines": ["open MIPStarRE.LDT MIPStarRE.Quantum"],
+      "first": 35,
+      "last": 447,
+      "noncomputable": true
+    }
+  }
+}
