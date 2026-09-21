@@ -81,3 +81,16 @@ pointed event or owner log rather than expanding the index into a second log.
   committed by a lane whose branch copy predates the hooks.
 - Friction with any protocol → log it in `results/telemetry/events.md`;
   propose amendments per `protocols/meta.md`.
+
+## Declaring a track finished
+
+The end of a track is gated like every other step of the lifecycle.
+[`protocols/completion.md`](protocols/completion.md) is the definition of done
+— zero proof debt, a built axiom audit over the headline theorems, terminal
+paper-gap rows, marked or explicitly exempted blueprint nodes, a comparator
+challenge pinned to an ancestor commit and naming every headline theorem,
+truthful status docs, and the files an ITP artifact submission needs — and
+`scripts/completion_gate.py check --track <track>` is the model-free checker
+that decides the mechanically checkable part of it. No completion statement,
+umbrella-issue closure or release tag without a passing run on the exact
+commit. The gate is intentionally outside the blocking PR CI.
