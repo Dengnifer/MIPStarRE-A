@@ -1,14 +1,14 @@
 # Deviations from the source paper
 
-This page lists **every** place where the Lean development in this repository
-differs from its source paper, *MIP\* = RE* (arXiv:2001.04383), whose TeX is
-mirrored under `references/qpbt-paper/`. It is written for a reviewer who wants
-to know, before reading any Lean, what was changed and why.
+This page lists every recorded place where the Lean development in this
+repository differs from its source paper, *MIP\* = RE* (arXiv:2001.04383),
+whose TeX is mirrored under `references/qpbt-paper/`. It is written for a
+reviewer who wants to know, before reading any Lean, what was changed and why.
 
-The short answer: the formalization corrects the source where the source is
-wrong, restricts it where the printed domain is not the formalizable one, and
-records the two printed sentences it could not establish as *unasserted
-propositions* rather than quietly proving something weaker. **No headline
+The short answer: the formalization corrects false printed claims, makes
+implicit source-domain conditions explicit as faithful boundary hypotheses,
+records unestablished printed claims without asserting them, and documents
+statement-preserving alternative proofs and representations. **No headline
 theorem depends on an unproved claim.** Section
 [No headline theorem rests on an unproved claim](#no-headline-theorem-rests-on-an-unproved-claim)
 says how to check that mechanically.
@@ -16,14 +16,15 @@ says how to check that mechanically.
 Detail for each row lives in a mathematical note under `docs/paper-gaps/`. The
 machine-readable index of those notes is
 [`docs/paper-gaps/qpbt-gap-register.md`](paper-gaps/qpbt-gap-register.md), which
-currently indexes 18 of the 20 notes: `qpbt_subline-claims-line-marginal.tex`
+currently indexes 19 of the 21 notes: `qpbt_subline-claims-line-marginal.tex`
 (row c8) and `qpbt_combined-points-field-valued.tex` (row d1) have no register
 entry yet, so for those two rows this page, not the register, is the complete
 record. The policy that governs when a note must be written is
-[`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). This page is a summary of
-those notes, not a replacement for them.
+[`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). The 21 rows below cover
+the 21 current `qpbt_*.tex` notes one-to-one. This page is a summary of those
+notes, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `05df4b74`.
+Every row below was checked against `github/main` at commit `c880f9ae`.
 Line numbers are from that commit.
 
 ## How to read the table
@@ -34,7 +35,7 @@ happened to the sentence as the paper prints it?
 | Status | Meaning |
 |---|---|
 | **refuted** | The printed sentence is *false*. The repository contains a counterexample, or the correction is forced by one. The paper's statement is not provable, in Lean or anywhere. |
-| **unproved** | The printed sentence may well be true, but neither the source's argument nor this development establishes it. It is recorded in Lean as a `Prop`-valued definition, which *states* it without *asserting* it. |
+| **unproved** | The printed sentence may well be true, but neither the source's argument nor this development establishes its source-shaped form. Where Lean records the sentence as a `Prop`-valued definition, that definition *states* the proposition without *asserting* it. |
 | **restated** | The printed mathematics is correct and is what Lean proves; only its presentation, indexing, domain encoding, or proof route differs. |
 
 Deviations are grouped by severity, (a) most severe to (d) least.
@@ -184,11 +185,12 @@ docstrings of six declarations.
 | **Lean** | `exists_extractionWitness`, `MIPStarRE/QPBT/Extraction/SourceUnitary.lean:34`; `exists_globalPairWitness`, `MIPStarRE/QPBT/Combining/Apply.lean:280`; range projection `sum_norm_leftTensor_conjIsometry_sub_sq_le` and its right companion in `MIPStarRE/QPBT/Test/Soundness/RangeProjection.lean` |
 | **Blueprint** | `lem:qld-construct-the-paulis`, `lem:qld-unitary`, `lem:qld-unitary-given-global-pair`, `rem:qld-unitary-triangle-slip`, proof of `thm:pauli` (`ch16_qpbt_extraction.tex`) |
 | **Gap note** | [`qpbt_extraction-transfer.tex`](paper-gaps/qpbt_extraction-transfer.tex) |
-| **Printed-claim status** | **restated** (the source-facing theorems are proved at their stated form); the printed intermediate estimates are **refuted**. |
+| **Printed-claim status** | **restated** (the source-facing theorems are proved at their stated raw-effect form); the printed intermediate estimates are **refuted**. See [d3](#d3-raw-prescribed-answer-effects-in-the-soundness-conclusion) for the proved transfer from the completed family used internally. |
 
 The range-projection transfer is on the dependency path of the final theorem —
 it reaches `pauli_soundness` through `ExtractionWitness.isometry_transfer_bounds`
-and `pauli_soundness_deltaQld_ofExtractionWitness`.
+and `pauli_soundness_deltaQld_ofExtractionWitness`, then through the completed
+arbitrary-strategy bounds and the raw-effect transfer recorded in [d3](#d3-raw-prescribed-answer-effects-in-the-soundness-conclusion).
 
 ---
 
@@ -229,12 +231,15 @@ was adopted by owner decision B5 (archived owner inbox #26).
 | **Lean** | `exists_direct_ld_soundness`, `MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean:65`; seed-indexed `exists_ld_soundness`, `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` (proved, unchanged statement); `exists_ld_soundness_of_k_eq_one`, `DirectLowDegree/SeedIndexedSoundness.lean:124` |
 | **Blueprint** | `lem:ld-soundness`, `lem:qld-sublines`, `lem:qld-4-7`, `rem:qld-4-7-divisibility` (`ch13_qpbt_test.tex`, `ch15_qpbt_combining.tex`) |
 | **Gap note** | [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex) |
-| **Printed-claim status** | **restated** for `exists_ld_soundness`; two source imports remain **unproved** — the claimed tensor-code game correspondence, and the requirement `K ≥ 12m(d+1)` for the printed choice `K = m³d`. Tracked as issue #527. |
+| **Printed-claim status** | **restated** for `exists_ld_soundness`; the source route remains **unproved** at the extended-dimension construction and at two tensor-code imports — the claimed game correspondence and the requirement `K ≥ 12m(d+1)` for the printed choice `K = m³d`. Tracked as issue #527. |
 
-The direct route does not apply the tensor-code theorem, so it does not
-discharge the original source-import obligations. This is the one place where a
-source obligation is openly outstanding, and it does **not** sit under
-`pauli_soundness` — `exists_ld_soundness` is proved at its unchanged statement.
+The alternative direct and seed-indexed route does not apply the tensor-code
+theorem, so it proves `exists_ld_soundness` at its unchanged statement without
+discharging the printed derivation. Other source-shaped work remains in
+[a1](#a1-the-error-form-of-the-combined-lines-lemma),
+[c7](#c7-quantum-linearity-quantifiers-a-spurious-hypothesis-and-the-ancilla),
+and [c8](#c8-the-constructed-measurement-in-subline-claim-17-2); the inventory
+below states each item explicitly.
 
 ### c3. Simultaneous polynomial measurements are not obtained coordinatewise
 
@@ -331,11 +336,14 @@ kernel-certified Lean instance. The note says so.
 
 ---
 
-## (d) Presentation-only differences
+## (d) Statement-preserving representation and proof differences
 
-Neither row changes any source theorem. Both are recorded because
+None of these rows changes the current source-facing theorem statement. They
+are recorded because
 `docs/paper-gaps/policy.tex` requires a note when the formal proof takes a
-different route from the cited argument, even when the statement is untouched.
+different route or uses a different internal representation, even when the
+statement is untouched. Row d3 also records a former public-statement mismatch
+that is now discharged by a proved transfer.
 
 ### d1. A field-valued construction of the combined point measurements
 
@@ -363,6 +371,19 @@ different route from the cited argument, even when the statement is untouched.
 | **Gap note** | [`qpbt_polynomial-error-square-root.tex`](paper-gaps/qpbt_polynomial-error-square-root.tex) |
 | **Printed-claim status** | **restated**; the concrete square-root error witnesses are proved. |
 
+### d3. Raw prescribed-answer effects in the soundness conclusion
+
+| | |
+|---|---|
+| **Paper statement** | `thm:pauli` and `cor:pauli-binary`: compare the effect attached directly to each prescribed Pauli answer `u ∈ 𝔽_q^M` with the corresponding ideal Pauli projector |
+| **Locator** | `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`, chapter 8 lines 913–915, 1162, 1426–1487; closing proof in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`, chapter 14 lines 1827–1876 |
+| **What differs** | The formal game has one sum-type answer alphabet for every question. Its extraction proof uses a complete Pauli-register measurement obtained by sending every malformed answer to outcome zero. For `u ≠ 0` this completed effect is the raw prescribed-answer effect; at zero it is the raw effect plus the total malformed-answer effect. Before PR #668 the public distance used the completed family. The current source-facing distances use the raw effects directly, while the completed family remains internal support. |
+| **Why** | Rejection of malformed answers bounds their state mass but does not make their effects definitionally zero. The proof therefore bounds malformed-answer mass on the two oriented Pauli–point edges, transfers the completed-family estimates to the raw family, and absorbs the added linear and squared errors into the existential prefactor of `deltaQld`. |
+| **Lean** | Raw distances `rawPauliOperatorDistanceA` and `rawPauliOperatorDistanceB`, `MIPStarRE/QPBT/Test/SoundnessDefs.lean:210` and `:222`; transfer estimates `raw_pauli_operator_distanceA_le_completed` and `raw_pauli_operator_distanceB_le_completed`, `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:393` and `:499`; scalar absorption and final raw bounds `exists_arbitrary_strategy_raw_isometry_bounds`, `RawOperatorTransfer.lean:658`; public theorems `pauli_soundness`, `MIPStarRE/QPBT/Test/Soundness.lean:53`, and `pauli_soundness_qubit`, `MIPStarRE/QPBT/Test/QubitForm.lean:423` |
+| **Blueprint** | `thm:pauli`, `cor:pauli-binary`, and the proof of `thm:pauli` in `blueprint/src/chapter/ch16_qpbt_extraction.tex` |
+| **Gap note** | [`qpbt_raw-pauli-effects.tex`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| **Printed-claim status** | **restated** — the paper statement requires no correction and no additional hypothesis. The completed-to-raw transfer is proved, both public conclusions now use the raw effects, and the completed distances are internal only. |
+
 ---
 
 ## No headline theorem rests on an unproved claim
@@ -371,14 +392,24 @@ The four headline results are
 
 | Theorem | Location |
 |---|---|
-| `pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:52` |
+| `pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` |
 | `pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` |
 | `exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` |
 | `exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` |
 
-None of them depends on either unasserted claim of section (a), and none
-contains proof debt. Three independent checks establish this, and a reviewer can
-run all three.
+The explicit Lean premise `0 ≤ ε` and the once-and-for-all
+`fixedFieldModel` choice are faithful boundary encodings, not extra proof
+inputs: the source treats `ε` as an error probability and fixes a binary field
+representation (`references/qpbt-paper/04_preliminaries.tex`, lines 653–680).
+Likewise, `PauliSoundnessWitness` (`SoundnessDefs.lean:164`) packages only the
+isometries and auxiliary unit state existentially produced by `thm:pauli`.
+
+The two soundness conclusions compare the raw prescribed-answer effects, as the
+paper does; the completed family is internal and reaches them only through the
+proved transfer in [d3](#d3-raw-prescribed-answer-effects-in-the-soundness-conclusion).
+None of the four results depends on either unasserted claim of section (a), and
+none contains proof debt. Three independent checks establish this, and a
+reviewer can run all three.
 
 **1. The unasserted claims are definitions, not theorems.** Both
 `PrintedExtendedLinesWitnessClaim` (`Combining/Apply.lean:108`) and
@@ -391,7 +422,7 @@ except as an explicit hypothesis. Comparator:
 git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/*.lean"
 ```
 
-At commit `05df4b74` this returns eight lines: the two definitions, the
+At commit `c880f9ae` this returns eight lines: the two definitions, the
 refutation `not_forall_printedSymmetricProjectiveAttainmentClaim`
 (`StrategyClasses.lean:952–954`, whose hit is on line 954), and five
 docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
@@ -400,8 +431,8 @@ docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
 
 **2. There is no proof debt.** No `sorry`, `admit`, `axiom` declaration,
 `native_decide`, `unsafe`, `@[extern]`, bodyless `opaque`, `implemented_by`, or
-`backward.*`/`respectTransparency` option occurs anywhere in the 671 Lean files
-under `MIPStarRE/`. (The repository holds 679 `.lean` files in all; the eight
+`backward.*`/`respectTransparency` option occurs anywhere in the 672 Lean files
+under `MIPStarRE/`. (The repository holds 680 `.lean` files in all; the eight
 outside `MIPStarRE/` are `MIPStarRE.lean`, `scripts/Checkdecls.lean`, the five
 `scripts/comparator/*.lean` helpers, and one archived telemetry audit module,
 none of which the development imports.) Comparator:
@@ -410,7 +441,7 @@ none of which the development imports.) Comparator:
 git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/*.lean"
 ```
 
-At `05df4b74` this returns exactly three lines, every one of them inside a
+At `c880f9ae` this returns exactly three lines, every one of them inside a
 docstring: `MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the
 successor-step theorem no longer has a direct `sorry`;
 `MIPStarRE/QPBT/Combining/Apply.lean:57`, the docstring of
@@ -473,13 +504,34 @@ that is also why the tree still contains zero literal `#print axioms`
 directives. All three checks are mechanical, and the reviewer runs them from
 this repository.
 
-**What remains genuinely open**, and where it sits: the two source imports of
-[c2](#c2-dimension-divisibility-in-the-classical-test-instantiation) — the
-tensor-code game correspondence and the `K ≥ 12m(d+1)` requirement — are not
-discharged. They are obligations of the *source's* route to `lem:ld-soundness`.
-The formalization reaches `exists_ld_soundness` by a different, complete route,
-so these open items are not load-bearing for any headline theorem. They are
-tracked as issue #527.
+**What remains genuinely open**, and where it sits:
+
+- [a1](#a1-the-error-form-of-the-combined-lines-lemma): the printed
+  `poly(m²ε, md/q)` combined-lines form, with the source's seed-indexed law and
+  field-valued evaluation sum, is not proved. The established auxiliary uses
+  the directly indexed law, completed evaluations, and the weaker
+  `m·poly(ε, md/q)` error.
+- [c2](#c2-dimension-divisibility-in-the-classical-test-instantiation): the
+  printed extended-dimension construction and the tensor-code route still need
+  the game correspondence and the `K ≥ 12m(d+1)` parameter argument. The
+  theorem `exists_ld_soundness` is nevertheless proved at its unchanged
+  statement by a different route. These source-route obligations are tracked
+  as issue #527.
+- [c7](#c7-quantum-linearity-quantifiers-a-spurious-hypothesis-and-the-ancilla):
+  the source's claim that the uniform Naimark ancilla is already available as
+  zero-state padding on the fixed expanded spaces is not proved. The direct
+  field-valued combined-point construction avoids that claim.
+- [c8](#c8-the-constructed-measurement-in-subline-claim-17-2): transport from
+  the directly indexed subline law to the source's seed-indexed law remains
+  open, as do the source-law complex forms of the scalar claims. The directly
+  indexed estimates, including the complex second claim, are proved.
+
+Row [c4](#c4-prime-characteristic-and-binary-pauli-scope) separately records
+source-general eigenvector and projector declarations that are absent rather
+than claimed or used. None of these remaining items is an assumption of the
+four headline results above. The raw-effect discrepancy of
+[d3](#d3-raw-prescribed-answer-effects-in-the-soundness-conclusion) is not on
+this list because its transfer is proved.
 
 ## A second question a reviewer may ask: is the conclusion non-vacuous?
 
@@ -509,8 +561,8 @@ mathematics of the source and no hypothesis:
   (`exists_admissibleParams_deltaQld_lt`, `:252`). The two halves are combined
   in `pauli_soundness_nontrivial` (`:277`), which exhibits, for every `η > 0`,
   admissible parameters together with a value-one strategy for which the
-  theorem's own state distance and both operator distances are strictly below
-  `η`.
+  theorem's own state distance and both raw operator distances are strictly
+  below `η`.
 
 What this does **not** give is a uniform rate in `ε` at fixed parameters: the
 non-triviality is established at `ε = 0`, with `deltaQld` continuous in `ε` from
