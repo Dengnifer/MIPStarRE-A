@@ -405,12 +405,13 @@ $m'+\kappa$ for
 all positive parameters.  Its proof uses the sampled geometric data and then
 applies the low individual degree theorem at the combined dimension.  This
 establishes soundness of the directly indexed game and, by the compression
-and recovery argument above, of the seed-indexed game. It does not change the
-source-shaped sub-line and polynomial-pair statements. The downstream use at dimension
-$2m+2$ still requires verification. Completing that application must respect
-the subtree protocol
-for a definition-level mismatch rather than adding a divisibility hypothesis
-to the paper statements.
+and recovery argument above, of the seed-indexed game. The directly indexed
+application at dimension $2m+2$ now also constructs the global polynomial-pair
+measurement, as \leanid{exists\_globalPairWitness} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean}. This proves the polynomial-pair
+conclusion without a divisibility hypothesis. It does not identify the
+undefined source seed law with the direct law or prove the intervening
+source-shaped subline statements.
 The external check that the tensor-code test of arXiv:2111.08131 samples
 its axes and subcubes directly has been made against that source: Figure~1
 there draws the axis index and the subcube data uniformly and directly,
@@ -549,8 +550,10 @@ first sampling step of the sub-line construction, where $\chi_{2m+2}$ and
 the line-point distribution over $\F_q^{2m+2}$ are invoked, and the
 instantiation step of the polynomial-pair proof, where $(q,2m+2,d,1)$ is
 used as a game parameter tuple.  A chapter remark records the divisibility
-arithmetic and cites this note; the final soundness theorem for the Pauli
-basis test remains open modulo this obligation.  The blueprint's proof node
+arithmetic and cites this note. The global polynomial-pair conclusion and
+the final Pauli soundness theorem now have complete proofs through the
+directly indexed construction; the source-law assertions described here
+remain distinct obligations. The blueprint's proof node
 for the classical soundness import itself states the source's route --- the
 identification with the two-prover tensor-code test and the application of
 Theorem~4.7 --- and enumerates the two obligations of
@@ -591,11 +594,11 @@ conclusions from this direct proof. For every $k$, point agreement and
 Schwartz--Zippel recover the global relation on the original Hilbert spaces,
 completing the seed-indexed soundness theorem without asserting a false
 double-compression identity.
-Separately, the source-shaped polynomial-pair construction
-still has its declared construction and carrier-transport obligations; repairing
-the original tensor-code import would provide another route to soundness.  We
-do not assert that either conclusion is false; the open points are verification
-obligations.
+The global polynomial-pair conclusion is also proved by the directly indexed
+construction. What remains is the source-law correspondence of the intermediate
+subline assertions, not another proof of that conclusion. Repairing the
+original tensor-code import would provide another route to soundness, subject
+to the source instantiation obstruction above.
 
 \bibliographystyle{alpha}
 \bibliography{references}

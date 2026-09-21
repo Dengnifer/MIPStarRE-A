@@ -91,7 +91,7 @@ $S = \mathrm{span}\{(1,1)\}$ has the distinct complements
 $\mathrm{span}\{(1,0)\}$ and $\mathrm{span}\{(0,1)\}$. Given a basis of $S$,
 one may nevertheless single out a \emph{canonical} complement.
 
-% Exemption: the node is not marked \leanok. The Lean `canonicalComplement` fixes the
+% Unmarked, tracked in issue #667; no permanent exemption. `canonicalComplement` fixes the
 % pivot set by the intrinsic prefix-rank characterization instead of running the
 % reduced-row-echelon algorithm this node prescribes. The two agree by the
 % basis-independence paragraph below, but that identification is not itself formalized,
@@ -125,7 +125,7 @@ one may nevertheless single out a \emph{canonical} complement.
 	$S^\perp$.
 \end{definition}
 
-% Exemption: no formalization mark, for the reason recorded above
+% Unmarked, tracked in issue #667, for the reason recorded above
 % Definition~def:canonical-complement. `isCompl_registerSubmodule_canonicalComplement`
 % proves exactly the displayed conclusion for the prefix-rank complement, and its own
 % docstring places the equivalence with a reduced-row-echelon algorithm outside the
@@ -750,7 +750,7 @@ representation is obtained as follows.
 	forces $C = 0$.
 \end{proof}
 
-% Exemption: the node is not marked \leanok. The two Lean declarations listed are the
+% Unmarked, tracked in issue #667; no permanent exemption. The two declarations are the
 % characteristic-two specializations of eq:pauli-obs-proj and eq:pauli-inversion-0; the
 % node states both identities in general prime characteristic. Marking it would present
 % a scope-restricted theorem as the unrestricted source statement. The scope difference

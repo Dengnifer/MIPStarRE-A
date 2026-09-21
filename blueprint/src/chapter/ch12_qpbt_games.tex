@@ -3072,15 +3072,14 @@ Throughout this section $V$ denotes the linear space $\F^n$ for some integer $n 
 \]
 and $V_{\le k}$, $V_{\ge k}$ are understood to be $V_{<k+1}$ and $V_{>k-1}$, respectively. For a register subspace $V'$ of $V$, the symbol $x^{V'}$ denotes the projection of $x$ onto $V'$ parallel to the complementary register subspace (Definition~\ref{def:complementary}). Moreover, if $F \colon V' \to V'$ is a function and $x \in V$, we write $x^F$ for $F(x^{V'})$; for example, in the following definition $x^{L_1}$ is shorthand for $L_1(x^{V_1})$.
 
-% Exemption: the node is not marked \leanok. `IsCondLinearOn` records a
-% representation deviation in its docstring -- a positive syntax tree, because Lean's
-% strict-positivity checker rejects the direct inductive form of this definition --
-% and the node sits in the cluster of def:cl-dist, def:typed-cl-functions and
-% def:typed-cl-distributions, which are deliberately unmarked for the reasons given
-% at those nodes. Whether the representation deviation permits a statement-level
-% mark is a faithfulness decision and is left open here rather than taken silently.
+% Issue #667: the supported syntax tree encodes this recursion faithfully.
+% At a successor, restriction to the first register supplies L_1's input;
+% the support invariant makes the remainder depend only on its complement.
+% Branches outside the image of L_1 may be filled by the zero function.
 \begin{definition}[Conditionally linear functions]\label{def:cl-func}
-	\lean{MIPStarRE.QPBT.IsCondLinearOn, MIPStarRE.QPBT.IsCondLinear}\uses{def:register-subspace, def:complementary}
+	\lean{MIPStarRE.QPBT.IsCondLinearOn, MIPStarRE.QPBT.IsCondLinear}
+	\leanok
+	\uses{def:register-subspace, def:complementary}
 	Let $V$ be $\F^n$ for some $n \ge 0$. For all integers $\ell \ge 0$ the collection of \emph{$\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is defined inductively as follows.
 	\begin{enumerate}
 		\item There is a single $0$-level conditionally linear function, which is the $0$ function on $V$.
@@ -3135,7 +3134,9 @@ We abbreviate ``conditionally linear'' as \emph{CL}. Operationally, an $\ell$-le
 \end{proof}
 
 \begin{definition}[Conditionally linear distributions]\label{def:cl-dist}
-	\lean{MIPStarRE.QPBT.clDistribution}\uses{def:cl-func}
+	\lean{MIPStarRE.QPBT.clDistribution}
+	\leanok
+	\uses{def:cl-func}
 	Let $L, R \colon V \to V$ be conditionally linear functions. The \emph{conditionally linear distribution $\mu_{L,R}$ corresponding to $(L,R)$} is the distribution over pairs $(L(x), R(x)) \in V \times V$ for $x$ drawn uniformly at random from $V$.
 \end{definition}
 
@@ -3290,11 +3291,12 @@ The marginal functions, factor spaces, and linear maps of a given CL function $L
 
 The question distribution of the Pauli basis test is \emph{typed}: each question is a pair consisting of a type, drawn together with the other player's type from the edges of a fixed \emph{type graph}, and a question content, drawn from a CL distribution determined by the pair of types.
 
-% IsTypedCondLinearFamily permits an arbitrary index type T, whereas the source assumes
-% that the type set is finite. It is therefore a strict generalization and is not marked
-% \leanok; the concrete low-degree and Pauli families below use finite inductive types.
+% Issue #667: restricting the pointwise predicate to a finite type set gives
+% exactly the source definition. The explicitly stated extension below adds
+% no condition to the source domain.
 \begin{definition}[Typed conditionally linear functions]\label{def:typed-cl-functions}
 	\lean{MIPStarRE.QPBT.IsTypedCondLinearFamily}
+	\leanok
 	\uses{def:cl-func}
 	Let $\mathcal T$ be a set (the \emph{type set}) and let $V$ be $\F^n$ for some integer $n \ge 0$. A \emph{$\mathcal T$-typed family of $\ell$-level conditionally linear functions} (implicitly, \emph{on $V$}) is a collection $\{L_t\}_{t \in \mathcal T}$ such that, for each $t \in \mathcal T$, $L_t$ is an $\ell$-level conditionally linear function on $V$. Finiteness of $\mathcal T$ is not needed for this pointwise condition, so the definition applies to an arbitrary type set. A finite type set is required from Definition~\ref{def:graph-distribution} onwards, where $\mathcal T$ indexes a distribution. The source states the definition for a finite type set, and every type set occurring below is finite.
 \end{definition}
@@ -3343,14 +3345,12 @@ The question distribution of the Pauli basis test is \emph{typed}: each question
 % The nonempty-edge hypothesis on G is inherited from def:graph-distribution, where it is
 % needed for the graph distribution mu_G to be defined; the source
 % (references/qpbt-paper/07_types.tex:84-93) leaves it implicit here as well.
-% The Lean declaration typedCLDistribution is stated for arbitrary T-indexed families of maps
-% on V: it carries neither a level nor the IsTypedCondLinearFamily hypotheses that this
-% definition imposes on L and R, so it is a strict generalization of the definition below and
-% the node is left unmarked, exactly as for def:cl-dist. The identifications of the two
-% concrete samplers with this construction are stated separately as lem:ld-question-typed-cl
-% and lem:pauli-question-typed-cl in Chapter chap:qpbt-test.
+% Issue #667: the sampling formula is defined for arbitrary families of maps.
+% Its restriction to CL families is exactly this definition, just as the
+% shared-seed push-forward in def:cl-dist is defined for arbitrary maps.
 \begin{definition}[Typed conditionally linear distributions]\label{def:typed-cl-distributions}
 	\lean{MIPStarRE.QPBT.typedCLDistribution}
+	\leanok
 	\uses{def:typed-cl-functions, def:graph-distribution, def:cl-dist}
 	Let $\mathcal T$ be a type set and let $L = \{L_u\}_{u \in \mathcal T}$ and $R = \{R_v\}_{v \in \mathcal T}$ be $\mathcal T$-typed families of conditionally linear functions on $V$. Let $G = (\mathcal T, E)$ be a graph with vertex set $\mathcal T$ and nonempty edge set $E$, so that the graph distribution $\mu_G$ of Definition~\ref{def:graph-distribution} is defined. The \emph{$(\mathcal T, G)$-typed conditionally linear distribution $\mu^G_{L,\,R}$ corresponding to $(L, R)$} is the distribution over pairs $\bigl( (u, x), (v, y) \bigr)$, where the type pair $(u,v)$ is drawn from the graph distribution $\mu_G$ and the content pair $(x,y)$ is drawn from $\mu_{L_u,\,R_v}$.
 \end{definition}
