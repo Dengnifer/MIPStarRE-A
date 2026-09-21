@@ -98,10 +98,11 @@ claim in the paper; it introduces no extra hypothesis.
 
 The declaration is now proved from the product form and generalized Pauli
 commutation; this independent algebraic result is recorded in \ghissue{240}.
-Issue~\#19 records the Stage~4.2 statement and this discrepancy.  The six
-measurement and swap-map proof obligations in the same Lean file remain open
-under \ghissue{47}; neither construction of the global polynomial-pair witness
-nor the final extraction theorem is completed by this calculation.
+Issue~\#19 records the Stage~4.2 statement and this discrepancy. The
+global polynomial-pair construction and the extraction theorems now have
+separate completed proofs. They do not depend on the false cross-basis
+dichotomy; the calculation here does not discharge the source-law obligations
+recorded in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 
 This correction changes neither the definition of the extracted observables
 nor the source-faithful consistency and extraction conclusions.  It repairs an

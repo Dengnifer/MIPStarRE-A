@@ -502,14 +502,17 @@ The one-sided argument has exactly those hypotheses and retains the same
 ordered sandwich. The additional random index gives the required conditional
 collision bounds. Thus the answer-reduction use also needs no new restriction.
 
-In this checkout, no Lean proof calls \leanid{exists\_pasting\_error}.
-The intended consumers
+No Lean proof calls the public declaration \leanid{exists\_pasting\_error}
+directly. The concrete line construction instead applies
+\leanid{exists\_pasting\_error\_heterogeneous}, obtained from the same
+one-sided marginal-consistency theorem. The consumers
 \leanid{exists\_combinedLinesWitness\_ofPointsWitness} and
 \leanid{exists\_combinedLinesWitness} in
-\doclink{MIPStarRE/QPBT/Combining/Lines.lean} still have their own proof
-holes, and the combining/application and extraction chain is not a completed
-proof of the combining and extraction results in Lean. Closing the generic
-pasting theorem does not close those independent obligations. The renamed
+\doclink{MIPStarRE/QPBT/Combining/Lines.lean} are now proved, as are the
+directly indexed extended-line construction, the global-pair construction,
+and the final extraction theorems. These proofs leave the printed extended-line
+rate and the source-law comparisons open, as recorded in
+\path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}. The renamed
 conditional theorem retains its proof and internal dependencies; the
 one-sided theorem has no dependence on it. All import consumers of the
 changed pasting modules passed the recorded focused checks summarized below.

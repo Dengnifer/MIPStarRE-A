@@ -1721,10 +1721,10 @@ assembled by Fourier averaging.
 	distribution on the restricted event, and push-forward preserves total mass.
 \end{proof}
 
-% This source-shape node carries no formalization mark: it is \notready, and the
-% established content is the restricted node lem:qld-xz-lines-restricted, whose Lean
-% carrier is MIPStarRE.QPBT.restricted_lines_consistency_bound. The \lean entries below
-% name the witness record and its existence statement for the declaration checker only.
+% Unmarked, tracked in issue #667; no permanent exemption. The concrete
+% unconditioned line measurement and its full product-law consistency are proved.
+% CombinedLinesWitness compares completed evaluations; the field-valued source
+% comparison, including the zero-direction convention, is not certified here.
 \begin{lemma}[Combined line measurements]
 	\label{lem:qld-xz-lines}
 	\lean{MIPStarRE.QPBT.CombinedLinesWitness}
@@ -2475,6 +2475,10 @@ obstruction is recorded in Remark~\ref{rem:qld-4-7-divisibility} and
 analyzed, together with candidate repairs, in
 \cite{gap:qpbt_ld-dimension-divisibility}.
 
+% Unmarked, tracked in issue #667. The global polynomial and its degree bound
+% are proved. The line formula currently takes explicit affine compatibility;
+% deriving it from the source projection domain, including degenerate-line
+% evaluations, remains a separate construction target.
 \begin{definition}[The combining map]
 	\label{def:combine-map}
 	\lean{MIPStarRE.QPBT.combinePoly, MIPStarRE.QPBT.combinePoly_eval}
