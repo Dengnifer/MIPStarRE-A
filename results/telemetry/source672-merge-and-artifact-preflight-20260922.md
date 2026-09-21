@@ -53,6 +53,10 @@ including all31QPBTfiles. Main verified no source/comparator/toolchain diff
 between that frozen clean c9c0b456 worktree and merged dcffa512. The diagnostic
 /tmp/main-post672-frozen-drift-20260922.sh rechecks this already-built tree to
 distinguish stale primary build products from an actual source change.
+It completed20:13:15Z, exit0: all31QPBTchallenge files are current. This confirms
+the first check was reading stale primary build products. The successful
+frozen check is source-equivalent to merged main; the failed primary log remains
+retained. No expected fixture, source or acceptance claim was changed.
 
 PR669's third code phase requests three fixes, while its prose phase remains
 live. No writer is admitted to its worktree. Prepared packet
@@ -70,3 +74,9 @@ CI and failure logs are retained. Main restarts only the review transport in
 1200s Astra/ultra budget and a3600s account wait. The cpa cap remains2, with no
 key fallback or budget reset. Existing669code/prose phases are live under the
 canonical parallel review tool; queued673/677repairs are unchanged.
+Issue673's first narrow-heading repair admission also ended exit4 after1800s,
+without any model reservation; PID595541 is gone. Main preserves its .log/.exit
+and requeues the same unspent600s packet with3600s admission wait. The existing
+wrapper now writes /tmp/main-fix673-note-heading-admission2-20260922.* so the
+original failed evidence is not overwritten. PR677 repair is actually admitted
+as orc-662-20260922-05, and669's prose phase occupies the other live cpa slot.
