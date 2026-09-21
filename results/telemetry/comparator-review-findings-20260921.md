@@ -80,3 +80,33 @@ frozen. Its start is12:13:17.818 UTC, checkpoint12:19:17.818, and deadline
 build. The queued packaging repair can then use that slot. Future Sol work must
 use a fresh explicit-model spawn unless model-preserving resume is actually
 supported and verified; an old thread's original model is insufficient evidence.
+
+## Successful Rebuild And Temporary Regeneration
+
+The locked build finished at12:27:43 UTC:835 seconds,9326 jobs, exit0. The
+before/after source guard passed. MAIN then checked all13 QPBT standard-axiom
+assertions and the blueprint audit:1837 declarations passed, none failed, with
+no proof-level `sorryAx` dependency.
+
+MAIN regenerated temporary candidates from the fresh compiled metadata between
+12:31:10 and12:31:34 UTC. Both write-only generator calls passed and the wrapper
+returned0. The candidate directory is
+`/tmp/issue662-reviewfix-postbuild-20260921.GwMDUg`, with a31-file QPBT tree and
+a41017-byte LDT file whose hash is exactly the original `cbe5642b...e73` above.
+This supplies the previously missing whole-PR baseline evidence. It does not
+yet update the checked-in fixture, elaborate the new QPBT candidate or publish
+the repair. Log: `/tmp/main-regenerate663-review-fix-20260921.log`.
+
+The documentation helper finished after487.332 seconds and was closed. Its
+33/34 preparation-test result correctly left the original-baseline test failing
+until the generated file is adopted. It changed only the two comparator
+documents and the existing drift-test file. Its final step suggesting that all
+publication wait for official merged-main verification is clarified by MAIN:
+source repair publication, CI, independent review and service merge precede
+the final official verification. No acceptance requirement is removed.
+
+The sole current native author is now
+`01a0c3ee-22f8-7c30-94db-3445834aa131`, verified Sol/ultra, fixing PR659's
+domain-suffix scanner defect. It started12:25:58.837 UTC, with checkpoint
+12:35:58.837 and deadline12:40:58.837. The prepared663 publication task waits
+for that slot. All current and predecessor costs remain in `sessions.jsonl`.
