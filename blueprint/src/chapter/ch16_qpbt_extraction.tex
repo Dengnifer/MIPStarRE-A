@@ -1622,28 +1622,16 @@ final soundness argument. The omitted step in the source is discussed in
   $21a^2$ and the same exponent.
 \end{proof}
 
-We can now prove the soundness theorem for the Pauli basis test, stated as Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}.
+The results above complete the directly indexed argument used in the proof of
+Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}. The following remark
+compares that argument with the seed-indexed derivation printed in the source.
 
-\begin{proof}
-	\proves{thm:pauli}
-	\uses{lem:qld-unitary, lem:qld-extraction-error-form, lem:pauli-completeness,
-		thm:naimark, lem:projective-strategy-setup, def:expanded-state,
-		def:EPR, def:povm-distance, thm:pauli-ancilla-intertwining-support,
-		thm:pauli-naimark-reduction-support,
-		thm:pauli-naimark-operator-transfer-support,
-		thm:pauli-isometry-transfer-alice-support,
-		thm:pauli-isometry-transfer-bob-support}
-	The account below is the route the source prints.  The Lean proof of
-	Theorem~\ref{thm:pauli} performs the same Naimark reduction and is
-	assembled from the formalization-support node
-	Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support} together with
-	the rejected-mass transfer from the completed Pauli family to the raw
-	prescribed-answer effects and the extension of the error domain past one;
-	it is complete under the
-	standard axioms, which is what the statement-level formalization mark on
-	Theorem~\ref{thm:pauli} records.  No proof-level mark is placed on this
-	account, because the divisibility obligation disclosed below is neither
-	discharged nor altered by that closure.
+\begin{remark}[Comparison with the printed seed-indexed argument]
+	\label{rem:pauli-printed-seed-argument}
+	The following account records the final argument printed in the source and
+	the additional transfer estimates needed for the theorem as stated. It is
+	not the directly indexed proof recorded with the theorem: the seed-indexed
+	low-degree step still has the obligations identified below.
 	Let $(\ket{\psi},M)$ be a strategy for $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ that succeeds with probability at least $1 - \eps$, where $\ket{\psi}$ is a bipartite state on registers $\mathrm{A}$ and $\mathrm{B}$. By Naimark's theorem (Theorem~\ref{thm:naimark}, as formulated in~\cite[Theorem 5.1]{Ji2020LowIndividualDegree}), at the cost of extending $\ket{\psi}$ by sufficiently many ancilla qubits initialized in the state $\ket{0}$, we may assume that the strategy is projective and that the state is padded as in the conventions of Lemma~\ref{lem:projective-strategy-setup} and the convention following it. Let $V_{\mathrm{A}}$ be the unitary acting on registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$ given by Lemma~\ref{lem:qld-unitary}, and let $\phi_{\mathrm{A}}$ be the isometry mapping register $\mathrm{A}$ to registers $\mathrm{A}\mathrm{A}'\mathrm{A}''$, where $\mathrm{A}'$ and $\mathrm{A}''$ are isomorphic to $(\C^q)^{\ot M}$, defined by
 	\[
 		\phi_{\mathrm{A}}\colon \ket{\theta}_{\mathrm{A}} \mapsto V_{\mathrm{A}} \bigl(\ket{\theta}_{\mathrm{A}} \ot (\ket{\mathrm{EPR}_q}^{\ot M})_{\mathrm{A}' \mathrm{A}''}\bigr)\;;
@@ -1657,8 +1645,8 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	% individual degree test at dimension 2m+2 without a divisibility
 	% hypothesis; the sentence below records the resulting outstanding
 	% obligation.
-	This invocation is where the classical low individual degree analysis enters
-	the formal proof. The account printed in the source would instantiate the
+	This is where the classical low individual degree analysis enters the
+	argument. The account printed in the source would instantiate the
 	classical test in $2m+2$ variables under the condition that $2m+2$ divides
 	$q$, a condition that fails for every admissible tuple with $m \geq 2$.
 	That route also leaves unproved the correspondence between
@@ -1667,12 +1655,13 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\cite{Ji2021Quantum}, and the printed combined-lines error
 	$\poly(m^2\eps,md/q)$. These four obligations are documented in
 	\cite{gap:qpbt_ld-dimension-divisibility} and
-	\cite{gap:qpbt_combined-lines-error-term}. The Lean proof does not assume
-	them: Lemma~\ref{lem:qld-unitary} is supplied through the proved directly
-	indexed carrier and the established combined-lines error, which the later
-	error-form lemmas absorb into the displayed robustness family. Thus the
-	printed source route remains conditional, while the Lean proof of
-	Theorem~\ref{thm:pauli} described above is complete. Since the
+	\cite{gap:qpbt_combined-lines-error-term}. Instead,
+	Lemma~\ref{lem:qld-unitary} follows from soundness of the directly indexed
+	low-degree game and the established combined-lines estimate; the subsequent
+	error estimates absorb this bound into the displayed robustness family.
+	Thus the printed seed-indexed derivation remains unresolved, while
+	Theorem~\ref{thm:pauli} follows from the preceding directly indexed
+	argument. Since the
 	expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is
 	exactly $\ket{\psi}$ with the halves of $M$ pairs
 	$\ket{\mathrm{EPR}_q}$ appended locally in registers
@@ -1717,7 +1706,7 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\]
 	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. The Bob comparison is the corresponding application of Theorem~\ref{thm:pauli-isometry-transfer-bob-support}. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
 
-	The formal game uses one answer alphabet for all question types.  Its
+	The game uses one answer alphabet for all question types. Its
 	internal Pauli-family construction therefore completes the prescribed
 	answers by folding every malformed answer into outcome zero.  For either
 	player the completed zero effect is the raw zero effect plus the malformed
@@ -1733,10 +1722,10 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	\cite{gap:qpbt_raw-pauli-effects}.
 	The range-projection transfer just used, which is omitted in the source,
 	is documented in \cite{gap:qpbt_extraction-transfer}.
-\end{proof}
+\end{remark}
 
 \begin{remark}[Norm conventions in the robustness bound]\label{rem:pauli-robustness-form}
-	The proof above, following the source, establishes the first conclusion of Theorem~\ref{thm:pauli} in the squared form $\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \|^2 \leq \delta_{\mathrm{qld}}$, whereas the theorem bounds the unsquared norm by $\delta_{\mathrm{qld}}(\eps,m,d,q)$. The two are reconciled by replacing the exponent $b$ with $b/2$ and enlarging $a$, since the class of functions $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ is closed under square roots up to such adjustments of the universal constants. Similarly, the closing sentence of the source proof asserts constants $a > 1$ and $0 < b < 1$, while Theorem~\ref{thm:pauli} requires only $a \geq 1$ and $0 < b < 1$; the former implies the latter.
+	The printed argument above establishes the first conclusion of Theorem~\ref{thm:pauli} in the squared form $\| \phi_{\mathrm{A}} \ot \phi_{\mathrm{B}} \ket{\psi} - \ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M} \|^2 \leq \delta_{\mathrm{qld}}$, whereas the theorem bounds the unsquared norm by $\delta_{\mathrm{qld}}(\eps,m,d,q)$. The two are reconciled by replacing the exponent $b$ with $b/2$ and enlarging $a$, since the class of functions $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ is closed under square roots up to such adjustments of the universal constants. Similarly, the closing sentence of the source proof asserts constants $a > 1$ and $0 < b < 1$, while Theorem~\ref{thm:pauli} requires only $a \geq 1$ and $0 < b < 1$; the former implies the latter.
 \end{remark}
 
 \section{Formalization support for the robustness bound}
@@ -1750,7 +1739,7 @@ brought to a common scale.
 \begin{lemma}[Monotonicity of the robustness bound in its universal constants]\label{lem:delta-qld-mono-support}
 	\lean{MIPStarRE.QPBT.deltaQld_mono}
 	\leanok
-	\uses{thm:pauli}
+	\uses{def:admissible}
 	Write $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)$ for the soundness function of Theorem~\ref{thm:pauli} with universal constants $a$ and $b$. Let $(q,m,d)$ be an admissible parameter tuple (Definition~\ref{def:admissible}), let $1 \le a \le a'$, let $0 < b' \le b$, and let $0 \le \eps \le 1$. Then
 	\[
 		\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) \le \delta_{\mathrm{qld}}^{a',b'}(\eps,m,d,q)\;.
@@ -1772,7 +1761,7 @@ form.
 \begin{lemma}[Scalar absorption of the transfer constants]\label{lem:delta-qld-scalar-absorption-support}
 	\lean{MIPStarRE.QPBT.three_add_six_sq_deltaQld_le}
 	\leanok
-	\uses{thm:pauli, lem:delta-qld-mono-support}
+	\uses{def:admissible}
 	Write $\delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q) = a(md)^a\bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)$ as in Lemma~\ref{lem:delta-qld-mono-support}, and abbreviate $\delta = \delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)$.  Let $(q,m,d)$ be an admissible parameter tuple (Definition~\ref{def:admissible}), let $a \ge 1$, let $b > 0$, and let $0 \le \eps \le 1$.  Then
 	\[
 		3\delta + 6\delta^2 \le \delta_{\mathrm{qld}}^{21a^2,\,b}(\eps,m,d,q)\;.

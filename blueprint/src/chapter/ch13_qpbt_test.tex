@@ -3,7 +3,32 @@
 % Paper label sec:pauli-verifier kept for cross-reference fidelity; it resolves to this chapter.
 \label{sec:pauli-verifier}
 
-This chapter defines the two testing primitives underlying the question-reduction step: the \emph{classical low individual degree game}, in its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built from the classical game together with the Magic Square game. We state the quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness}, imported, with the facts required by the identification, which remain to be proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game (Theorem~\ref{thm:ms-rigidity}, imported, and stated with the consistency hypothesis on the two distinguished variable measurements that the source omits --- the source's unrestricted statement is false; the counterexamples and the correction are recorded in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}; see Remark~\ref{rem:ms-rigidity-strategy-class}), completeness of the Pauli basis test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for the Pauli basis test (Theorem~\ref{thm:pauli}). The Lean theorem is proved under the standard axioms in Chapter~\ref{chap:qpbt-extraction}, using directly indexed replacements for the source's obstructed seed-indexed route. The unresolved obligations in that printed route remain recorded in \cite{gap:qpbt_ld-dimension-divisibility}; they are not hypotheses of Theorem~\ref{thm:pauli}. The chapter closes with the qubit form of the soundness statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice with its soundness bound (Definition~\ref{def:introparams}, Lemma~\ref{lem:delta-bound}).
+This chapter defines the two testing primitives underlying the
+question-reduction step: the \emph{classical low individual degree game}, in
+its simultaneous form, and the \emph{Pauli basis test}, a nonlocal game built
+from the classical game together with the Magic Square game. We state the
+quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness},
+imported, with the facts required by the identification, which remain to be
+proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see
+Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game
+(Theorem~\ref{thm:ms-rigidity}, imported, and stated with the consistency
+hypothesis on the two distinguished variable measurements that the source
+omits --- the source's unrestricted statement is false; the counterexamples
+and the correction are recorded in
+\cite{gap:qpbt_ms-rigidity-symmetric-strategies}; see
+Remark~\ref{rem:ms-rigidity-strategy-class}), completeness of the Pauli basis
+test (Lemma~\ref{lem:pauli-completeness}), and the main soundness theorem for
+the Pauli basis test (Theorem~\ref{thm:pauli}). The latter is proved in
+Chapter~\ref{chap:qpbt-extraction} from soundness of the directly indexed
+low-degree game, the global polynomial-pair construction, extraction of the
+EPR state and Pauli observables, Naimark dilation, and the transfer from
+completed Pauli measurements to the prescribed-answer effects. The unresolved
+seed-indexed argument printed in the source remains recorded in
+\cite{gap:qpbt_ld-dimension-divisibility}; it supplies no hypothesis of
+Theorem~\ref{thm:pauli}. The chapter closes with the qubit form of the soundness
+statement (Corollary~\ref{cor:pauli-binary}) and the canonical parameter choice
+with its soundness bound (Definition~\ref{def:introparams},
+Lemma~\ref{lem:delta-bound}).
 
 Throughout, the two players are denoted $\mathrm A$ and $\mathrm B$; for $w \in \{\mathrm A,\mathrm B\}$ we write $\overline w$ for the other player. Games, strategies, values, conditionally linear (CL) functions and distributions, typed distributions sampled from the edges of a graph, and the state-dependent approximation $\approx_\delta$ between families of measurement operators are as in Chapter~\ref{chap:qpbt-games}; the algebraic material on lines, canonical linear maps, the low-degree encoding, and generalized Pauli observables is from Chapter~\ref{chap:qpbt-algebra}.
 
@@ -1598,8 +1623,44 @@ We now state the main soundness property of the Pauli basis test; the statement 
 		where the $\approx_{\delta_{\mathrm{qld}}}$ statements hold with respect to the state $\ket{\mathrm{aux}}_{\mathrm{A'B'}} \ot \ket{\mathrm{EPR}_q}^{\ot M}_{\mathrm{A''B''}}$ and the answer summation is over $u \in \F_q^M$.
 	\end{enumerate}
 \end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:pauli-arbitrary-strategy-isometry-support,
+		lem:delta-qld-mono-support,
+		lem:delta-qld-scalar-absorption-support,
+		def:pauli-win-predicate, def:povm-distance}
+	The directly indexed low-degree argument supplies the global polynomial-pair
+	measurement and the extraction data used in the projective-strategy bounds.
+	Naimark dilation and compression then give local isometries and an auxiliary
+	state for an arbitrary strategy, with the state distance and both completed
+	Pauli-family distances bounded by the displayed robustness function when
+	$0\leq\eps\leq1$.
 
-The proof of Theorem~\ref{thm:pauli} is the adaptation, to low individual degree, of the analysis of the quantum low-degree test of Natarajan and Vidick. It is developed in Chapters~\ref{chap:qpbt-observables} and~\ref{chap:qpbt-combining} and concluded in Chapter~\ref{chap:qpbt-extraction}. The formal proof uses proved, directly indexed low-degree inputs and is complete under the standard axioms. The source's seed-indexed derivation still has the divisibility and identification obligations documented in \cite{gap:qpbt_ld-dimension-divisibility}; the blueprint therefore does not place a proof-level formalization mark on that printed proof account. The argument also uses the corrected rigidity statement of Theorem~\ref{thm:ms-rigidity}.
+	For either player, the completed zero effect is the prescribed zero effect
+	plus the effect of malformed answers, while the remaining completed effects
+	agree with their prescribed counterparts. Rejection on the two oriented
+	Pauli--point edges bounds the malformed-answer mass by a universal multiple
+	of $\eps$. Contractivity and the state estimate therefore transfer both
+	completed-family bounds to the prescribed-answer effects. The scalar losses
+	are absorbed by enlarging the universal prefactor. Finally, if $\eps>1$, the
+	strategy-value lower bound at $\eps=1$ follows from nonnegativity of the game
+	value, and monotonicity in $\eps$ carries the same witness to the required
+	error scale. This gives all three conclusions on the full domain
+	$\eps\geq0$.
+\end{proof}
+
+The argument adapts the analysis of the quantum
+low-degree test of Natarajan and Vidick to low individual degree. It is
+developed in Chapters~\ref{chap:qpbt-observables}
+and~\ref{chap:qpbt-combining} and concluded in
+Chapter~\ref{chap:qpbt-extraction}. The established argument uses directly
+indexed low-degree soundness and transfers the resulting completed Pauli
+measurements to the prescribed-answer effects. The seed-indexed derivation
+printed in the source remains subject to the divisibility and identification
+obligations documented in \cite{gap:qpbt_ld-dimension-divisibility} and is
+recorded separately in Remark~\ref{rem:pauli-printed-seed-argument}. The
+argument also uses the corrected rigidity statement of
+Theorem~\ref{thm:ms-rigidity}.
 
 The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclusion of Theorem~\ref{thm:pauli} are phrased in terms of qudit Pauli measurements and maximally entangled states of $q$-dimensional qudits. For the intended application it is more convenient to work with qubits: since the field sizes $q$ used here are powers of $2$, the conclusions can be restated in terms of qubit EPR pairs and qubit Pauli measurements.
 

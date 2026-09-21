@@ -80,7 +80,7 @@ that historical probe, whose raw output and scope are preserved explicitly.
 
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
-| `MIPStarRE.QPBT.pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` | There are universal constants `a ≥ 1`, `0 < b < 1` such that every strategy for the Pauli basis test that wins with probability at least `1 - ε` admits local isometries and an auxiliary state under which the state and both players' raw prescribed-answer Pauli effects are within `deltaQld a b ε m d q` of the ideal ones. | `thm:pauli`, `08:1431-1445` | `thm:pauli`, `ch13:1581` (stmt ✓, proof —) | S | no [^route] |
+| `MIPStarRE.QPBT.pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` | There are universal constants `a ≥ 1`, `0 < b < 1` such that every strategy for the Pauli basis test that wins with probability at least `1 - ε` admits local isometries and an auxiliary state under which the state and both players' raw prescribed-answer Pauli effects are within `deltaQld a b ε m d q` of the ideal ones. | `thm:pauli`, `08:1431-1445` | `thm:pauli`, `ch13:1581` (stmt ✓, proof ✓) | S | no [^route] |
 | `MIPStarRE.QPBT.pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` | The same conclusion restated over qubit EPR pairs and qubit Pauli observables, using that the admissible field sizes are powers of two. | `cor:pauli-binary`, `08:1469-1487` | `cor:pauli-binary`, `ch13:1606` (stmt ✓, proof ✓) | S | no [^binary] |
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` | For every admissible parameter tuple the symmetrized Pauli basis test has a symmetric, projective, consistent, commuting strategy of value exactly 1. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` | Quantum soundness of the simultaneous classical low individual degree test, in the source's own **seed-indexed** shape: a projective strategy of value `1 - ε` is close to one measuring simultaneous low-degree polynomials, at the source's error `deltaLd`. Proved separately, for every `k`; it is **not** the low-degree input the soundness chain consumes — that is the directly indexed carrier in [section 6](#6-combining-the-two-bases-and-extraction). | `lem:ld-soundness`, `08:413-440` | `lem:ld-soundness`, `ch13:245` (stmt ✓, proof —) | S | no [^ldroute] |
@@ -90,9 +90,12 @@ challenge. `MIPStarRE.QPBT.honestStrategy_isSPCC` is a supporting completeness
 declaration and is one of the nine additional current axiom-audit assertions;
 it is not a fifth registered headline target.
 
-[^route]: The statement is the printed one. What the proof route replaces is
-    below it: the carriers of `lem:qld-sublines`, `lem:qld-4-13` and
-    `lem:qld-4-7` use a **directly indexed** line space at dimension `2m+2`
+[^route]: The statement is the printed one. The proof mark records the
+    completed argument through the directly indexed low-degree game, Naimark
+    dilation, and transfer to the raw prescribed-answer effects. The printed
+    seed-indexed derivation remains unmarked in the blueprint. In the completed
+    argument, the carriers corresponding to `lem:qld-sublines`, `lem:qld-4-13`
+    and `lem:qld-4-7` use a **directly indexed** line space at dimension `2m+2`
     instead of the source's seed-indexed one, because the source's own side
     condition `2m+2 ∣ q` is unsatisfiable. Documented in
     [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex).

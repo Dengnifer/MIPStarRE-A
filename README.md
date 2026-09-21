@@ -15,7 +15,7 @@ commit `abb98018ec07d6ba5896907f5675f716c6e07a05` (September 21, 2026).
 | Headline theorem | `MIPStarRE.QPBT.pauli_soundness` |
 | Registered headline targets | 4, listed below |
 | QPBT axiom assertions | 13 compile-time checks |
-| Proof debt in `MIPStarRE/` | no active `sorry`, `admit`, or project `axiom` declaration |
+| Proof debt in `MIPStarRE/QPBT/` | no active `sorry`, `admit`, or project `axiom` declaration |
 | Toolchain | Lean `v4.32.0`, Mathlib `v4.32.0`, pinned by the repository |
 | Source size at the audited commit | QPBT: 332 Lean files / 106,458 lines; LDT: 326 files; Quantum: 11 files |
 
@@ -75,17 +75,18 @@ tuple. `tendsto_deltaQld_eps_zero` separately records right-continuity at zero.
 
 ### Proof integrity
 
-At the audited source commit, the following source-scoped search returns no
-active proof hole or project axiom declaration:
+For the QPBT track, criterion C1 of the repository's authoritative completion
+gate scans for `sorry` and `admit` sites with the shared comment-aware rule,
+project `axiom` and `constant` declarations, and prohibited native evaluation:
 
 ```bash
-rg --pcre2 -n '^\s*(?:sorry|admit)(?:\s|$)|:=\s*(?:sorry|admit)(?:\s|$)|\bby\s+(?:sorry|admit)(?:\s|$)|^\s*axiom\s+\S+(?=\s*[:({\[])' \
-  MIPStarRE --glob '*.lean'
+python3 scripts/completion_gate.py check --track qpbt
 ```
 
-Prose mentions of `sorry`, metaprogram identifiers such as `sorryAx`, and the
-intentional theorem stubs in a separately generated comparator challenge are
-not proof debt in `MIPStarRE/`.
+The C1 line is the proof-integrity result. The command can still exit nonzero
+while independent completion criteria remain pending. Comments and strings are
+removed before this scan, and the generated comparator challenge lies outside
+the QPBT Lean root.
 
 The source-size figures above are reproduced with:
 
@@ -147,13 +148,12 @@ for the four registered targets: one root plus 30 generated module files, with
 exactly four intentional root theorem stubs. Generation, elaboration, a
 disposable challenge build, and local CI passed.
 
-Those checks are not comparator acceptance. A diagnostic run on published input
-`8bd40f9f77d27815f65d85e81a6570146657173a` reported 34 structural proof-term
-differences. The PR head addresses two initial findings; the remaining equality
-defects, a real landrun with nanoda, and a final merged-main library pin are
-still pending. The older
-two-target fake-landrun result documented in [`docs/comparator.md`](docs/comparator.md)
-is historical and does not establish acceptance of the four-target challenge.
+Those checks are not comparator acceptance. A later diagnostic at source
+`a3683e9b` and candidate `73cb8a3d` reported
+`DIAG-TOTAL 0`, and Lean's default kernel accepted the solution. The diagnostic
+still used the fake-landrun path and ran with nanoda disabled, so it is not an
+official comparator run. A real landrun with nanoda and a final merged-main
+library pin remain pending.
 
 ## Build and check
 
