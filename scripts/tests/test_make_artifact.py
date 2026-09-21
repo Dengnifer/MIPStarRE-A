@@ -133,6 +133,12 @@ class MakeArtifactTests(unittest.TestCase):
                  "MIPSTARRE_REPO_ROOT": str(self.repo)},
         )
 
+    def install_packaging_script(self, suffix: str = "") -> Path:
+        """Install the real packaging script in the fixture repository."""
+        shipped = self.repo / "scripts" / "make_artifact.sh"
+        write(shipped, SCRIPT.read_text(encoding="utf-8") + suffix)
+        return shipped
+
     def members(self) -> list[str]:
         """Snapshot-relative paths inside the one tarball in the out directory."""
         tarballs = sorted(self.out.glob("*.tar.gz"))
@@ -217,6 +223,35 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stdout)
         self.assertIn("docs/notes.md", result.stderr)
         self.assertNotIn("references/qpbt-paper/frontmatter.tex", result.stderr)
+
+    def test_an_unrelated_address_in_the_shipped_script_fails_the_run(self) -> None:
+        """Only the configured rule contact, not every script address, is safe."""
+        unrelated = "unrelated.person@private.example"
+        self.install_packaging_script(f"\n# planted unrelated address: {unrelated}\n")
+        self.commit("plant an unrelated address in the shipped script")
+
+        result = self.run_script()
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("LEAK SCAN FAILED", result.stderr)
+        self.assertIn(unrelated, result.stderr)
+        self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                         "an unrelated script address must not be packaged")
+
+    def test_anonymize_rejects_an_unrelated_address_beside_the_rule_contact(self) -> None:
+        """One permitted match on a line must not launder another address."""
+        contact = "ruixuan.deng@icloud.com"
+        unrelated = "unrelated.person@private.example"
+        self.install_packaging_script(
+            f"\n# planted mixed address line: {contact} {unrelated}\n")
+        self.commit("plant mixed addresses in the shipped script")
+
+        result = self.run_script("--anonymize")
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("LEAK SCAN FAILED", result.stderr)
+        self.assertIn(unrelated, result.stderr)
+        self.assertNotIn(contact, result.stderr)
+        self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                         "an unrelated script address must not be packaged anonymously")
 
     def test_a_home_path_in_the_paper_sources_still_fails_the_run(self) -> None:
         """The forgiveness is scoped by content too: only addresses."""
@@ -321,8 +356,7 @@ class MakeArtifactTests(unittest.TestCase):
         spelling here: the address the rule exists to remove rode out in the
         rules list of the shipped copy, and nothing said so.
         """
-        (self.repo / "scripts").mkdir(parents=True, exist_ok=True)
-        shutil.copy(SCRIPT, self.repo / "scripts" / "make_artifact.sh")
+        self.install_packaging_script()
         self.commit("ship the packaging script, as the real repository does")
         # Plain run first: the rules name the owner's address literally now, so
         # the path-scoped allow-list entry for this one file has to hold, or no
@@ -343,11 +377,9 @@ class MakeArtifactTests(unittest.TestCase):
 
     def test_anonymize_rejects_an_escaped_rule_in_the_shipped_script(self) -> None:
         """A regex-escaped identity is still readable and must fail the run."""
-        shipped = self.repo / "scripts" / "make_artifact.sh"
         rule_text = "ruixuan.deng@icloud.com"
         escaped = rule_text.replace(".", r"\.")
-        write(shipped, SCRIPT.read_text(encoding="utf-8")
-              + f"\n# planted escaped rule spelling: {escaped}\n")
+        self.install_packaging_script(f"\n# planted escaped rule spelling: {escaped}\n")
         self.commit("plant an escaped anonymization rule in the shipped script")
 
         result = self.run_script("--anonymize")

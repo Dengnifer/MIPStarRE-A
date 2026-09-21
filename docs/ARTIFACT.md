@@ -291,15 +291,17 @@ re-admits the two shipped top-level files with `-export-ignore`;
 `scripts/comparator/` is never matched and ships under both guards.
 `references/` is named in `.gitattributes` too, as a comment rather than an
 `export-ignore` line, so that the decision to ship it is visible where somebody
-would otherwise add the line back. Checked again on 2026-09-21: a plain
-`git archive` of the repository produces 870 files and
-`scripts/make_artifact.sh --no-pdf` produces 871, the snapshot adding only its
-`MANIFEST.txt`. Without
-`--no-pdf` the snapshot also carries the 48 gap-note PDFs the script typesets,
-which are not tracked in git and so cannot appear in a plain `git archive`;
-`latexmk`'s intermediates are pruned, both because they are not part of the
-artifact and because `.fls` and `.fdb_latexmk` record the absolute path of the
-directory the build ran in.
+would otherwise add the line back. Checked again on 2026-09-21 at the final PR
+head: a plain `git archive` of the repository produces 872 files, while normal
+and anonymized `scripts/make_artifact.sh --no-pdf` snapshots each contain 873,
+the snapshot adding only its `MANIFEST.txt`. The retained full-PDF run used
+input-equivalent head `0e710bce16de`: `docs/paper-gaps/` is unchanged through
+the final head, and later included edits change only the contents of existing
+exported paths. That run built 49 gap-note PDFs and produced 922 files after
+pruning 339 `latexmk` intermediates. The PDFs are not tracked in git and so
+cannot appear in a plain `git archive`; the intermediates are pruned both
+because they are not part of the artifact and because `.fls` and
+`.fdb_latexmk` record the absolute path of the directory the build ran in.
 
 The leak scan is the backstop: it is what caught an upstream developer's home
 path in `docs/reports/` and got that directory excluded. It is fail-closed —

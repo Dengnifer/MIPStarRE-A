@@ -74,6 +74,7 @@ EXCLUDE=(
 # --------------------------------------------------------------------------
 
 # Anything matching one of these in the snapshot fails the run.
+EMAIL_LEAK_PATTERN='[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
 LEAK_PATTERNS=(
   '/home/[A-Za-z0-9._-]+'
   '/Users/[A-Za-z0-9._-]+'
@@ -82,7 +83,7 @@ LEAK_PATTERNS=(
   '\bgithub_pat_[A-Za-z0-9_]{20,}'
   '\bAKIA[0-9A-Z]{16}\b'
   '-----BEGIN [A-Z ]*PRIVATE KEY-----'
-  '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
+  "$EMAIL_LEAK_PATTERN"
 )
 
 # `<regex> :: <reason>`: a hit is forgiven anywhere in the snapshot when the
@@ -96,16 +97,13 @@ LEAK_ALLOW=(
 
 # `<path regex> :: <text regex> :: <reason>`: the same, but forgiven ONLY in the
 # files whose snapshot-relative path matches.  Scoping is the whole point — a
-# blanket entry for the entry below would stop the scan catching a real address
-# of ours anywhere in the development, which is exactly what it is for.
+# blanket entry for the paper-source case below would stop the scan catching a
+# real address of ours anywhere in the development, which is exactly what it is
+# for.
 LEAK_ALLOW_IN=(
   '^references/ :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: '\
 'corresponding-author addresses printed in the source papers themselves; third-party material '\
 'reproduced as published, not a contact address of this development'
-  '^scripts/make_artifact\.sh :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: '\
-'the literal contact address in ANON_RULES; permitted only in the shipped script of an authored '\
-'snapshot, while --anonymize rejects literal and regex-escaped rule spellings before this '\
-'allow-list is applied'
 )
 
 # --------------------------------------------------------------------------
@@ -138,6 +136,23 @@ SOURCE_REPO='Dengnifer/MIPStarRE-A'
 PROG=${0##*/}
 die() { printf '%s: %s\n' "$PROG" "$*" >&2; exit 1; }
 log() { printf '[%s] %s\n' "$PROG" "$*" >&2; }
+
+# The authored snapshot must ship the one contact address that is the literal
+# source of an anonymization rule. Derive it instead of spelling an escaped copy
+# elsewhere in this script: an escaped copy would survive `sed`, while a generic
+# script-wide e-mail exception would forgive unrelated addresses. Fail closed if
+# the rules ever contain zero or multiple e-mail-valued source fields.
+ANON_CONTACT=''
+ANON_CONTACT_COUNT=0
+for rule in "${ANON_RULES[@]}"; do
+  literal=${rule%% :: *}
+  if printf '%s\n' "$literal" | grep -qxE "$EMAIL_LEAK_PATTERN"; then
+    ANON_CONTACT=$literal
+    ANON_CONTACT_COUNT=$(( ANON_CONTACT_COUNT + 1 ))
+  fi
+done
+[ "$ANON_CONTACT_COUNT" -eq 1 ] \
+  || die "ANON_RULES must contain exactly one literal e-mail source field"
 
 # Turn a literal ANON_RULES field into something `sed` reads as itself: the
 # pattern side escapes the basic-regex metacharacters, the replacement side the
@@ -574,6 +589,12 @@ drop_forgiven() {
   grep -vE "$1" "$KEPT_HITS" > "$KEPT_HITS.next" 2>/dev/null || true
   mv "$KEPT_HITS.next" "$KEPT_HITS"
 }
+drop_exact_finding() {
+  awk -F: -v path="$1" -v text="$2" \
+    'NF == 3 && $1 == path && $2 ~ /^[0-9]+$/ && $3 == text { next } { print }' \
+    "$KEPT_HITS" > "$KEPT_HITS.next"
+  mv "$KEPT_HITS.next" "$KEPT_HITS"
+}
 for entry in "${LEAK_ALLOW[@]}"; do
   drop_forgiven ":[0-9]+:.*(${entry%% :: *})"
 done
@@ -581,6 +602,11 @@ for entry in "${LEAK_ALLOW_IN[@]}"; do
   rest=${entry#* :: }
   drop_forgiven "(${entry%% :: *})[^:]*:[0-9]+:.*(${rest%% :: *})"
 done
+
+# `grep -o` emits one scanner finding per matched address. Forgive only the
+# exact contact text derived from ANON_RULES in the shipped script; if the same
+# source line also contains another address, its separate finding remains.
+drop_exact_finding 'scripts/make_artifact.sh' "$ANON_CONTACT"
 
 RAW=$(wc -l < "$HITS" | tr -d ' ')
 KEPT=$(wc -l < "$KEPT_HITS" | tr -d ' ')
