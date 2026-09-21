@@ -201,10 +201,29 @@ class MakeArtifactTests(unittest.TestCase):
         self.commit("plant a key")
         self.assertEqual(self.run_script().returncode, 2)
 
-    def test_the_allow_list_forgives_a_placeholder_address(self) -> None:
-        write(self.repo / "docs" / "notes.md", "write to nobody@example.invalid\n")
-        self.commit("placeholder address")
-        self.assertEqual(self.run_script().returncode, 0)
+    def test_the_allow_list_forgives_exact_placeholder_addresses(self) -> None:
+        for domain in ("example.com", "example.org", "example.invalid"):
+            with self.subTest(domain=domain):
+                write(self.repo / "docs" / "notes.md", f"write to nobody@{domain}\n")
+                self.commit(f"placeholder address {domain}")
+                self.assertEqual(self.run_script().returncode, 0)
+
+    def test_placeholder_domain_suffix_is_rejected_in_both_modes(self) -> None:
+        """A reserved-domain prefix does not make the complete address safe."""
+        contact = "ruixuan.deng@icloud.com"
+        unrelated = "reviewer@example.com.private-mail.net"
+        self.install_packaging_script(
+            f"\n# planted mixed address line: {contact} {unrelated}\n")
+        self.commit("plant placeholder-domain suffix address")
+
+        for args in ((), ("--anonymize",)):
+            with self.subTest(args=args):
+                result = self.run_script(*args)
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertIn("LEAK SCAN FAILED", result.stderr)
+                self.assertIn(unrelated, result.stderr)
+                self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                                 "a suffix address must not be packaged")
 
     def test_an_author_address_is_forgiven_in_the_paper_sources_only(self) -> None:
         """The `references/` forgiveness must be scoped by path, not blanket.

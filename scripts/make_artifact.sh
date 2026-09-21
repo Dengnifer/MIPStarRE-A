@@ -92,7 +92,7 @@ LEAK_PATTERNS=(
 # `|`.  Keep the list short and the reasons honest — every entry is something a
 # reviewer may read in the shipped files.
 LEAK_ALLOW=(
-  '@example\.(com|org|invalid) :: documentation placeholder domain reserved by RFC 2606'
+  '@example\.(com|org|invalid)$ :: documentation placeholder domain reserved by RFC 2606'
 )
 
 # `<path regex> :: <text regex> :: <reason>`: the same, but forgiven ONLY in the
