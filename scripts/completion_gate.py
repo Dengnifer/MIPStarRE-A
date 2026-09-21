@@ -150,10 +150,9 @@ TRACKS: dict[str, Track] = {
         ),
         leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
-        # The name `scripts/comparator/challenges.py` gives this track's
-        # expected copy; the registry follows the generator rather than
-        # keeping a second opinion about where the file is.
-        expected_challenge="scripts/comparator/expected/ChallengeQPBT.lean.expected",
+        # QPBT is a split challenge: this path is the generated tree containing
+        # the root Challenge.lean and every mirrored closure module.
+        expected_challenge="scripts/comparator/expected/qpbt",
         truthful_docs=("README.md",),
         artifact_files=(
             "README.md",
@@ -592,6 +591,22 @@ def _is_ancestor(root: Path, pin: str, commit: str) -> bool | None:
     return None
 
 
+def _expected_challenge_text(path: Path) -> str | None:
+    """Read a single-file challenge or all Lean files in a split challenge tree."""
+
+    if path.is_file():
+        return path.read_text(encoding="utf-8", errors="replace")
+    if path.is_dir():
+        files = sorted(candidate for candidate in path.rglob("*.lean")
+                       if candidate.is_file())
+        if files:
+            return "\n".join(
+                candidate.read_text(encoding="utf-8", errors="replace")
+                for candidate in files
+            )
+    return None
+
+
 def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
     """C5: a recorded, drift-checked comparator challenge covering the headlines."""
 
@@ -630,9 +645,11 @@ def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
             f"is not the registered expected copy {registered}"
         )
     path = root / registered
-    if not path.exists():
+    challenge = _expected_challenge_text(path)
+    if challenge is None:
         problems.append(
-            f"{registered}:0: registered expected challenge does not exist"
+            f"{registered}:0: registered expected challenge does not exist or "
+            "contains no Lean files"
         )
     else:
         # A generated challenge names each declaration of the closure by its
@@ -640,7 +657,6 @@ def criterion_comparator(root: Path, track: Track, commit: str) -> Criterion:
         # occurrence test needs no build.  What it proves is that the recorded
         # challenge is about these theorems; that it *elaborates* to the same
         # statements is the delegated drift check and the comparator run.
-        challenge = path.read_text(encoding="utf-8", errors="replace")
         for name, _ in track.headline:
             if name not in challenge:
                 problems.append(

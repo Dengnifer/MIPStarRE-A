@@ -13,6 +13,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import io
+import json
 import shutil
 import subprocess
 import sys
@@ -495,6 +496,28 @@ class ComparatorTests(GateFixture):
             crit.evidence,
         )
 
+    def test_split_expected_tree_is_scanned_for_coverage(self) -> None:
+        expected = self.root / self.track.expected_challenge
+        split = expected.parent / "split"
+        split.mkdir()
+        (split / "Challenge.lean").write_text(
+            EXPECTED_CHALLENGE, encoding="utf-8"
+        )
+        self.track = dataclasses.replace(
+            self.track,
+            expected_challenge="scripts/comparator/expected/fixture/split",
+        )
+        doc = self.root / "docs/comparator.md"
+        doc.write_text(
+            doc.read_text(encoding="utf-8").replace(
+                "scripts/comparator/expected/fixture/Challenge.lean.expected",
+                "scripts/comparator/expected/fixture/split",
+            ),
+            encoding="utf-8",
+        )
+        crit = gate.criterion_comparator(self.root, self.track, self.head)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+
     def test_record_naming_another_expected_copy_fails(self) -> None:
         """A record may only name the copy the track registers."""
         doc = self.root / "docs/comparator.md"
@@ -689,7 +712,29 @@ class RegisteredTrackTests(unittest.TestCase):
                 (REPO_ROOT / track.expected_challenge).exists(),
                 f"track {track.name} registers an expected challenge that does "
                 f"not exist: {track.expected_challenge}",
+                )
+
+    def test_qpbt_registry_matches_the_split_generator_and_covers_headlines(self) -> None:
+        """C5 derives QPBT coverage from the generated tree, not a manual list."""
+        track = gate.TRACKS["qpbt"]
+        config = json.loads(
+            (REPO_ROOT / "scripts/comparator/challenges/qpbt.json").read_text(
+                encoding="utf-8"
             )
+        )
+        self.assertTrue(config["split"])
+        self.assertEqual(track.expected_challenge, config["expected"])
+        self.assertEqual(
+            {name for name, _ in track.headline},
+            set(config["targets"]),
+        )
+        expected = REPO_ROOT / track.expected_challenge
+        self.assertTrue(expected.is_dir())
+        challenge = gate._expected_challenge_text(expected)
+        self.assertIsNotNone(challenge)
+        assert challenge is not None
+        for name, _ in track.headline:
+            self.assertIn(name, challenge)
 
     def test_the_real_qpbt_scope_covers_every_chapter_linking_the_track(self) -> None:
         """A QPBT node in a chapter section 6 does not list is still in C4."""

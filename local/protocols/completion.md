@@ -96,7 +96,7 @@ proves.
 The coverage half of C5 is decided against the challenge, never against the
 record alone. The record's `expected-challenge` must be exactly the expected
 copy §6 registers for the track, and every headline theorem of §6 must occur in
-that file by its fully-qualified name — the name the assembler of
+that file or split challenge tree by its fully-qualified name — the name the assembler of
 `scripts/comparator/` writes for each declaration of the closure. A record that
 lists a headline theorem the registered expected copy never names fails C5:
 `covered-theorems` is written by hand in the same document, by the same session
@@ -186,7 +186,7 @@ run of the same commit. Unit tests:
 | Axiom audit | `MIPStarRE/QPBT/Test/AxiomAudit.lean` |
 | `\leanok` exemptions | `docs/completion/qpbt-leanok-exemptions.md` |
 | Comparator record | `docs/comparator.md`, block `track=qpbt` |
-| Expected challenge | `scripts/comparator/expected/ChallengeQPBT.lean.expected` |
+| Expected challenge | `scripts/comparator/expected/qpbt` |
 | Truthful docs (C6) | `README.md` |
 | Artifact files (C7) | `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`, `docs/ARTIFACT.md`, `LICENSE` |
 | Artifact script (C7) | `scripts/make_artifact.sh` |
@@ -201,17 +201,15 @@ Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `lem:pauli-completeness` |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
 
-The `Expected challenge` row and this table do not agree yet, and C5
-cannot go green until they do. The generator that writes that copy
-(`scripts/comparator/challenges.py`, the `targets` of its `qpbt` entry)
-covers two of the four headline theorems today — `pauli_soundness` and
-`pauli_soundness_qubit` — so the registered copy names neither
-`exists_spcc_value_one` nor `exists_ld_soundness`, and the coverage rule
-of C5 above fails against it by construction. Widening `targets` to all
-four headline theorems and regenerating the expected copy is therefore
-part of C5's remaining work, beside the absent comparator record itself;
-the table above is the paper's headline set and does not shrink to meet
-the generator.
+The expected challenge is the split tree generated from
+`scripts/comparator/challenges/qpbt.json`: its root `Challenge.lean` and
+mirrored modules together must name all four headline declarations above.
+The gate reads every Lean file in that registered tree, checks coverage against
+the headline table rather than the hand-written comparator record, and still
+requires the record's expected-copy path to agree exactly. Comparator
+verification remains delegated evidence: the record must name a verified
+ancestor revision, the official run must permit only the three standard
+axioms, and the drift check must establish agreement at the completion commit.
 
 The `Blueprint chapters` row is the track's own chapters, read whole; it is
 not the whole of C4's scope. The gate also reads every other `.tex` file in
