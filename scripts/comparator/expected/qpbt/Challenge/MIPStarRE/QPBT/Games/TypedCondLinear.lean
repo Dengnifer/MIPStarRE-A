@@ -1,33 +1,22 @@
-import MIPStarRE.QPBT.Games.CondLinearTheorems
-import MIPStarRE.QPBT.Games.DistributionAux
+import Mathlib
+import Challenge.MIPStarRE.QPBT.Games.CondLinear
+import Challenge.MIPStarRE.QPBT.Games.DistributionAux
 
-/-! # Typed conditionally linear distributions
+/-! Challenge mirror of `MIPStarRE/QPBT/Games/TypedCondLinear.lean`.
 
-Typed question distributions first sample an ordered edge of the type graph and
-then sample the corresponding pair of conditionally linear images of one common
-uniform seed.
+One challenge module per contributing library module, importing the
+mirrors of the library modules this one imports.  The partition is
+what makes Lean generate the same auxiliary declarations, under the
+same names, as the library does. -/
 
-## References
-
-These are blueprint `def:typed-cl-functions` and `def:typed-cl-distributions`,
-with paper origin
-`references/qpbt-paper/07_types.tex:57-94`.
--/
-
+open scoped BigOperators MatrixOrder Matrix ComplexOrder
 namespace MIPStarRE.QPBT
 
+-- elaboration context of MIPStarRE/QPBT/Games/TypedCondLinear.lean
+section
 open MIPStarRE.LDT
 
-/-- A typed family whose member at every type is `ell`-level conditionally
-linear. Finiteness of the index type is not needed for this pointwise condition;
-it is required when the family indexes a typed distribution. Blueprint
-`def:typed-cl-functions`, paper
-`references/qpbt-paper/07_types.tex:57-63`. -/
-def IsTypedCondLinearFamily (K T : Type*) [Field K]
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (ell : ℕ) (L : T → (ι → K) → (ι → K)) : Prop :=
-  ∀ t, IsCondLinear ell (L t)
-
+-- source: MIPStarRE/QPBT/Games/TypedCondLinear.lean:31-43  (MIPStarRE.QPBT.typedCLDistribution)
 /-- The typed CL distribution: sample a type pair from the graph distribution,
 then bind it to the CL distribution selected by those two types. This is
 blueprint `def:typed-cl-distributions`, paper
@@ -42,6 +31,7 @@ noncomputable def typedCLDistribution {K T ι : Type*}
     (clDistribution (L uv.1) (R uv.2)).map fun xy =>
       ((uv.1, xy.1), (uv.2, xy.2))
 
+-- source: MIPStarRE/QPBT/Games/TypedCondLinear.lean:45-113  (MIPStarRE.QPBT.typedCLDistribution_symm)
 /-- A typed conditionally linear distribution built from a single family is
 symmetric under exchanging the two players: the edge law of
 `def:graph-distribution` is symmetric, and exchanging the two types exchanges
@@ -111,5 +101,5 @@ theorem typedCLDistribution_symm {K T ι : Type*}
           fun z => ((v, L v z), (u, L u z)) = c.swap).card : Error) *
         (1 / (Fintype.card (ι → K) : Error)))
   rw [graphDistribution_symm E hE u v, hfib u v c]
-
+end  -- module scope
 end MIPStarRE.QPBT

@@ -40,7 +40,7 @@ in `MIPStarRE/QPBT/Games/DistributionAux.lean`.
 
 /-- Formalization-only auxiliary: the push-forward of a uniform distribution
 does not depend on the finiteness and decidability data used to form it. -/
-private theorem map_uniformDistribution_congr {α γ : Type*}
+theorem map_uniformDistribution_congr {α γ : Type*}
     (i₁ i₂ : Fintype α) (j₁ j₂ : DecidableEq α) (k₁ k₂ : Nonempty α)
     (d₁ d₂ : DecidableEq γ) (e : α → γ) :
     @Distribution.map α γ d₁ (@uniformDistribution α i₁ j₁ k₁) e =
@@ -55,7 +55,7 @@ private theorem map_uniformDistribution_congr {α γ : Type*}
 
 /-- Formalization-only auxiliary: a uniformly seeded typed bind does not depend
 on the finiteness and decidability data used to form it. -/
-private theorem bind_map_uniformDistribution_congr {α β γ : Type*}
+theorem bind_map_uniformDistribution_congr {α β γ : Type*}
     (i₁ i₂ : Fintype β) (j₁ j₂ : DecidableEq β) (k₁ k₂ : Nonempty β)
     (d₁ d₂ : DecidableEq γ) (μ : Distribution α) (g : α → β → γ) :
     @Distribution.bind α γ d₁ μ
@@ -152,19 +152,20 @@ theorem pauliWinPredicate_symm (P : AdmissibleParams)
     pauliWinPredicate P x y a b = pauliWinPredicate P y x b a := by
   obtain ⟨tA, xA⟩ := x
   obtain ⟨tB, xB⟩ := y
+  -- Definitional reduction avoids module-private matcher equations from `simp`.
+  dsimp only [pauliWinPredicate]
   by_cases hT : tA = tB
   · subst hT
-    simp only [pauliWinPredicate]
+    rw [if_pos (rfl : tA = tA), if_pos (rfl : tA = tA)]
     rw [Bool.and_comm (validPauliAnswer tA b) (validPauliAnswer tA a)]
-    by_cases hab : a = b
-    · simp [hab]
-    · simp [hab, Ne.symm hab]
+    exact congrArg (fun c => if validPauliAnswer tA a && validPauliAnswer tA b then c
+      else false) (decide_eq_decide.mpr eq_comm)
   · cases hvA : validPauliAnswer tA a
-    · simp [pauliWinPredicate, hvA]
+    · cases validPauliAnswer tB b <;> rfl
     · cases hvB : validPauliAnswer tB b
-      · simp [pauliWinPredicate, hvB]
-      · simp only [pauliWinPredicate, hvA, hvB, Bool.and_self,
-          if_neg hT, if_neg (Ne.symm hT)]
+      · rfl
+      · rw [Bool.true_and, if_pos (rfl : true = true),
+          if_pos (rfl : true = true), if_neg hT, if_neg (Ne.symm hT)]
         rcases tA with (_|_)|(_|_)|(_|_)|(_|_)|(_|_)|_|(iA|jA) <;>
           rcases a with uA|fA|gA|bitsA|bitA|trA|hhA <;>
           (try exact Bool.noConfusion hvA) <;>

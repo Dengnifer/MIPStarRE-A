@@ -1695,3 +1695,25 @@ hand, and the build log carries the printed axiom sets as the positive record a
 reviewer of the artifact can re-derive. No throughput or timing gain is
 asserted before observation; the added elaboration is one module against a full
 library build.
+
+## 2026-09-21 - Register the real split QPBT comparator tree (#662)
+
+**Trigger:** the owner's four-target publication requirement for issue #662 and
+PR #663, recorded in the 2026-09-21T11:14:09Z event, together with
+`results/telemetry/comparator-post-recovery-validation-20260921.md`. The latter
+found that stale declaration metadata had clipped four modules in the recovered
+31-file expected tree, while the completion protocol still described the old
+two-target state.
+
+**Change:** `local/protocols/completion.md` now describes the registered QPBT
+expected path as the complete split tree. `scripts/completion_gate.py` retains
+the exact expected-copy agreement, all-four-headline coverage, verified-revision
+ancestry and delegated comparator requirements. Its focused tests now bind the
+registry to `scripts/comparator/challenges/qpbt.json`, require split generation,
+derive coverage from the four registered headline targets, and inspect the real
+generated tree rather than accepting a hand-written coverage list.
+
+**Expected effect:** C5 cannot silently regress to a single file or a two-target
+challenge. A completion claim still requires the official comparator evidence,
+only the three permitted standard axioms, an ancestor-or-equal verified library
+revision and a passing drift check on the exact completion commit.
