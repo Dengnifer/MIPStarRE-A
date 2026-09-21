@@ -63,3 +63,33 @@ workflow, run or open PR. The draft branch's workflow supports pull requests
 and dispatch, but a draft-branch push alone is not an official verification
 run. Preserve the worktree and use a coherent current-source candidate before
 running comparison. The final official acceptance record remains absent.
+
+## Published Domain Repair
+
+The repair is published at `71715c4c06b13de3f1d0d4fcb0f698ba472a2f90`.
+MAIN independently checked the public/local head and clean worktree, and the
+two-file delta from bcb03dab:24 insertions,5 deletions. The existing allowance
+now requires the complete matched-text field to end at the permitted domain.
+The author reports21 focused tests and a hook suite of835 total tests with9
+skips. Exact-head normal and anonymized no-PDF snapshots each contained873
+files, with16 raw/16 allowed/0 remaining leak findings. The retained49-PDF
+evidence remains explicitly historical, not an exact-head rerun.
+
+Author `01a0c3ee-22f8-7c30-94db-3445834aa131` finished at12:38:46.061 UTC after
+767.224 seconds, including its checkpoint response, and was closed. MAIN
+released main-fix659 and claimed main-ci659. The detached canonical CI wrapper
+`/tmp/main-ci659-71715c4c-20260921.sh` was verified live as PID1114242; its log
+names the correct head and all nine status contexts were set pending. This
+record does not claim CI or independent verification has finished.
+
+The authorized sixth review observation is prepared in
+`/tmp/main-verify-pr659-domain-boundary-space3-20260921.md` and is bound at
+admission to71715c4c only after complete green CI. It must verify the concrete
+repair independently, retain all five full reviews and describe its actual
+scope honestly. No author approval or carried evidence replaces it.
+
+The sole native slot now belongs to comparator publication author
+`01a0c3fb-2377-7db3-9aa9-c3c6a1a71c21`, freshly verified Sol/ultra. It started
+12:40:10.927 UTC, with checkpoint12:55:10.927 and deadline13:05:10.927. It owns
+only663; the packaging CI is model-free. Source repair publication is followed
+by fresh CI/review and service merge before final official comparator testing.
