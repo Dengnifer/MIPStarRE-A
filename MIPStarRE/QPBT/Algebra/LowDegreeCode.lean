@@ -1,5 +1,4 @@
-import Mathlib.Algebra.CharP.Two
-import Mathlib.Tactic.LinearCombination
+import Mathlib
 import MIPStarRE.LDT.Preliminaries.Polynomials
 
 /-!
@@ -15,6 +14,11 @@ The source-facing nodes are blueprint `def:polynomials-degree`,
 `references/qpbt-paper/04_preliminaries.tex:832-897`.
 The polynomial class `def:polyfunc` is reused from
 `MIPStarRE.LDT.Preliminaries.polyFunc` (the LDT formalization).
+
+Note: this module contributes declarations to the comparator statement closure
+of the QPBT headline theorems, which must elaborate in the same environment as
+the Mathlib-only `ChallengeQPBT.lean`.  Keep the full `import Mathlib`; do not
+narrow it.  See `docs/comparator.md`, "Environment alignment".
 -/
 
 open scoped BigOperators

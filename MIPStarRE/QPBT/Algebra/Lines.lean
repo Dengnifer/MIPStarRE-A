@@ -1,3 +1,4 @@
+import Mathlib
 import MIPStarRE.QPBT.Algebra.Subspaces
 
 /-!
@@ -13,6 +14,11 @@ The source-facing nodes are blueprint `def:line`, `prop:line-equiv`, and
 `def:line-representative`; the formalization support nodes are blueprint
 `lem:line-rep-kernel` and `lem:line-rep-incidence`.
 The paper origin is `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:102-174`.
+
+Note: this module contributes declarations to the comparator statement closure
+of the QPBT headline theorems, which must elaborate in the same environment as
+the Mathlib-only `ChallengeQPBT.lean`.  Keep the full `import Mathlib`; do not
+narrow it.  See `docs/comparator.md`, "Environment alignment".
 -/
 
 namespace MIPStarRE.QPBT
