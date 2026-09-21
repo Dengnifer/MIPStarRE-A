@@ -113,6 +113,12 @@ class MakeArtifactTests(unittest.TestCase):
         return git(self.repo, "rev-parse", "HEAD")
 
     def run_script(self, *args: str) -> subprocess.CompletedProcess:
+        # Start from an empty output directory every time.  A test that runs the
+        # script twice commits in between, so the second run writes a tarball and
+        # a MANIFEST under a *different* commit-derived name beside the first
+        # ones; `self.out.glob(...)` then returns them in an unspecified order
+        # and an assertion about the second run may read the first run's file.
+        shutil.rmtree(self.out, ignore_errors=True)
         return subprocess.run(
             ["bash", str(SCRIPT), *args, "HEAD", str(self.out)],
             capture_output=True, text=True,

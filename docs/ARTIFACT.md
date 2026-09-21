@@ -15,7 +15,7 @@ commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 | `MIPStarRE/`, `MIPStarRE.lean` | the Lean 4 development — the contribution |
 | `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | the pinned build: Lean 4 and all ten dependencies by exact revision |
 | `blueprint/src/` | the LaTeX blueprint, cross-referenced to the Lean names with `\lean{}` / `\leanok` |
-| `docs/` | the mathematical documentation, including `docs/paper-gaps/` (the register of gaps found in the source papers) |
+| `docs/` | the mathematical documentation, including `docs/QPBT-theorem-index.md` (every headline and supporting statement with its Lean name, blueprint label and paper locator) and `docs/paper-gaps/` (the register of gaps found in the source papers) |
 | `references/` | the TeX sources of the five source papers — third-party material, see below — so that every `file.tex:lines` locator in the docstrings resolves inside the snapshot |
 | `scripts/comparator/` | the generator for the self-contained `Challenge.lean` statement file used by the independent challenge repository |
 | `scripts/blueprint_leanok_axioms.py` | the blueprint/axiom consistency check |
@@ -48,9 +48,11 @@ public repository):
 | `references/nv-paper/` | Natarajan–Vidick | arXiv:1610.03574 |
 | `references/cs-paper/` | see `references/cs-paper/SOURCE.md` | — |
 
-**Why they ship.** Lean docstrings, `docs/QPBT-theorem-index.md` and
-`docs/DEVIATIONS.md` cite their source as
-`references/<paper>/<file>.tex:<lines>`. With the sources in the snapshot every
+**Why they ship.** Lean docstrings and `docs/QPBT-theorem-index.md` cite their
+source as `references/<paper>/<file>.tex:<lines>`, and so will
+`docs/DEVIATIONS.md` when it lands (it is pending in another packet, and the
+`README.md` link to it is the one internal link the `MANIFEST.txt` still reports
+as dead). With the sources in the snapshot every
 one of those locators resolves inside the tarball, and a reviewer can read the
 paper statement next to the Lean statement without reconstructing the
 per-section split from arXiv. The directories are plain per-section splits of
@@ -122,8 +124,25 @@ ones — `propext`, `Classical.choice`, `Quot.sound` — and on no `sorry`,
 
 The check that settles the first half is Lean's own `#print axioms`: it reports
 the complete axiom closure of a declaration, and unlike a text search it cannot
-be misled by prose. Put this in a scratch file at the root of the unpacked
-snapshot and elaborate it with `lake env lean scratch.lean`:
+be misled by prose. The snapshot ships two modules that run it at build time and
+**fail the build** when a declaration's closure is not exactly
+`{Classical.choice, Quot.sound, propext}` — one for the Pauli test, one for the
+classical low-individual-degree layer underneath it:
+
+```sh
+lake build MIPStarRE.QPBT.Test.AxiomAudit
+lake build MIPStarRE.LDT.Test.AxiomAudit
+```
+
+`MIPStarRE.QPBT.Test.AxiomAudit` covers the four headline theorems of section 4
+and nine further load-bearing statements; the printed axiom lines stay in the
+build log as the positive record. Neither module is imported from the
+`MIPStarRE.QPBT` umbrella — that keeps the audits out of ordinary downstream
+imports — so a plain `lake build MIPStarRE.QPBT` does not run them and they have
+to be named, as above.
+
+To read the closures directly instead, put this in a scratch file at the root of
+the unpacked snapshot and elaborate it with `lake env lean scratch.lean`:
 
 ```lean
 import MIPStarRE.QPBT
@@ -138,18 +157,6 @@ Each of the four must report exactly `[propext, Classical.choice, Quot.sound]`.
 A `sorryAx` in a closure would mean the theorem is not proved; a project
 `axiom` would appear in the list under its own name.
 
-The snapshot also ships one standing axiom-audit module, for the classical
-low-individual-degree layer underneath the Pauli test. It runs `#print axioms`
-at build time and fails the build when a declaration's closure is not the one
-recorded beside it:
-
-```sh
-lake build MIPStarRE.LDT.Test.AxiomAudit
-```
-
-There is no such module for the QPBT layer yet — the scratch file above is the
-check for the four headline theorems.
-
 `#print axioms` does not report `native_decide`, `unsafe` or `@[extern]`, which
 move trust outside the kernel without leaving an axiom behind. A text search is
 the check for those, and for `axiom` declarations:
@@ -160,11 +167,12 @@ grep -rn --include='*.lean' -E '^[[:space:]]*axiom |\b(sorry|admit|native_decide
 
 **Expected output: a handful of matches, every one of them inside a comment or
 a docstring that discusses an escape hatch rather than using one.** At the
-commit named in `MANIFEST.txt` there are three: two are the word `sorry` in
-backticks (`MIPStarRE/QPBT/Combining/Apply.lean`, describing a source proof
-that was open in the paper, and `MIPStarRE/LDT/Test/AxiomAudit.lean`), and one
-is a docstring line in `MIPStarRE/QPBT/Test/QubitForm.lean` that happens to
-begin with the word "axiom". A match in code position — a bare `sorry` in
+commit named in `MANIFEST.txt` there are four: three are the word `sorry` in
+backticks — `MIPStarRE/QPBT/Combining/Apply.lean`, describing a source proof
+that was open in the paper, and the two audit modules named above, whose prose
+says what they exist to catch — and one is a docstring line in
+`MIPStarRE/QPBT/Test/QubitForm.lean` that happens to begin with the word
+"axiom". A match in code position — a bare `sorry` in
 tactic position, or a line that really begins a declaration with `axiom` —
 would be a genuine escape hatch. `grep` cannot tell prose from code, which is
 why the `#print axioms` run above is the check that counts.
@@ -176,8 +184,9 @@ its qubit form is `pauli_soundness_qubit` in `MIPStarRE/QPBT/Test/QubitForm.lean
 completeness is `exists_spcc_value_one` in `MIPStarRE/QPBT/Test/Completeness.lean`,
 and the low-degree soundness statement is `exists_ld_soundness` in
 `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`. Each carries a docstring
-naming its blueprint label and its paper locator. Where the snapshot ships a
-theorem index (`docs/QPBT-theorem-index.md`), that table is the intended entry
+naming its blueprint label and its paper locator. `docs/QPBT-theorem-index.md`,
+which ships, tabulates these four and the supporting statements with their Lean
+names, blueprint labels and paper locators; that table is the intended entry
 point. The paper locator in each docstring is a path under `references/`, which
 ships, so it can be opened directly in the unpacked snapshot.
 
@@ -268,9 +277,10 @@ re-admits the two shipped top-level files with `-export-ignore`;
 `scripts/comparator/` is never matched and ships under both guards.
 `references/` is named in `.gitattributes` too, as a comment rather than an
 `export-ignore` line, so that the decision to ship it is visible where somebody
-would otherwise add the line back. Checked on 2026-09-19 after that change: a
-plain `git archive` of the repository and `scripts/make_artifact.sh --no-pdf`
-produce the same 864 files, the snapshot adding only its `MANIFEST.txt`. Without
+would otherwise add the line back. Checked again on 2026-09-21: a plain
+`git archive` of the repository produces 870 files and
+`scripts/make_artifact.sh --no-pdf` produces 871, the snapshot adding only its
+`MANIFEST.txt`. Without
 `--no-pdf` the snapshot also carries the 48 gap-note PDFs the script typesets,
 which are not tracked in git and so cannot appear in a plain `git archive`;
 `latexmk`'s intermediates are pruned, both because they are not part of the
