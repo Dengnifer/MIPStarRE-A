@@ -81,3 +81,19 @@ The final comparator worker actually started as thread
 `01a0c52d-732b-7593-bfb1-a17cdd097d70` when that lane freed. An external Actions
 run has not yet been observed. This replaces the earlier queued-only state,
 not the distinction between a started worker and accepted artifact.
+
+The planned resume was refused before a model call: account routing reported
+unknown/mixed resume-model metadata and required a fresh linked assignment.
+No affinity check was bypassed. The same unspent supplemental600-second tranche
+was reissued as fresh orc thread`01a0c531-d01f-7302-9b8a-e5b81f8e9bed`, with the
+prior thread, partial tree, exact cost and authorization explicitly linked.
+
+PR669's900-second second-review repair also timed out124 with unknown usage.
+Its four intended documentation files are dirty at25f6607d; no validation,
+commit or publication is claimed. Main started frozen-diff, model-free
+blueprint rendering/sync/declaration checks at
+`/tmp/main-cpa-check669-draft-20260922.*`, preserving the exact patch and refusing
+changed input. No writer may resume that worktree until the check exits. The
+next bounded repair/validation/publication continuation awaits one of the two
+live cpa lanes; no third model was admitted. Both original review rounds and
+all prior failed/partial author costs remain retained.
