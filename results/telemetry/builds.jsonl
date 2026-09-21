@@ -1632,3 +1632,5 @@
 {"ts": "2026-09-21T11:26:58+0900", "kind": "ci-build", "trigger": "ci.sh pr=660", "seconds": 452, "outcome": "success", "sha": "ab6afdd60741e124c5f32c32fd1441998cf3462d", "note": "branch issue-652-comparator-multi-challenge-20260919"}
 {"ts": "2026-09-21T11:27:17+0900", "kind": "ci-build", "trigger": "ci.sh pr=647", "seconds": 699, "outcome": "success", "sha": "1e88ff948511d117d162d5a074cf14ade72078db", "note": "branch issue-635-completion-protocol-20260919"}
 {"ts": "2026-09-21T12:00:18+0900", "kind": "ci-build", "trigger": "ci.sh pr=647", "seconds": 35, "outcome": "success", "sha": "6c748a82c705b6688072af550b0bd82b624410d2", "note": "branch issue-635-completion-protocol-20260919"}
+{"ts": "2026-09-21T12:24:55+0900", "kind": "ci-build", "trigger": "ci.sh pr=660", "seconds": 33, "outcome": "success", "sha": "418e0271d898b5cee443c48490056ef0bff55eab", "note": "branch issue-652-comparator-multi-challenge-20260919"}
+{"ts": "2026-09-21T12:40:34+0900", "kind": "ci-build", "trigger": "ci.sh pr=668", "seconds": 88, "outcome": "success", "sha": "325e3e24c7a3b5752f65028d8c567695923248ef", "note": "branch issue-665-raw-pauli-effects-20260921"}
