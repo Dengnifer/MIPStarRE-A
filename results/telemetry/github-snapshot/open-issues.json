@@ -62,7 +62,7 @@
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/635",
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
@@ -148,7 +148,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 3,
+   "blocked_by": 2,
    "total_blocked_by": 3,
    "blocking": 0,
    "total_blocking": 0
@@ -168,93 +168,6 @@
    "eyes": 0
   },
   "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/666/timeline",
-  "performed_via_github_app": null,
-  "state_reason": null,
-  "pinned_comment": null
- },
- {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665",
-  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
-  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665/labels{/name}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665/comments",
-  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665/events",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/665",
-  "id": 5522005005,
-  "node_id": "I_kwDOUJyJf88AAAABSSMcDQ",
-  "number": 665,
-  "title": "fix(QPBT/Test): align Pauli soundness with raw answer effects",
-  "user": {
-   "login": "Dengnifer",
-   "id": 89234078,
-   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
-   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
-   "gravatar_id": "",
-   "url": "https://api.github.com/users/Dengnifer",
-   "html_url": "https://github.com/Dengnifer",
-   "followers_url": "https://api.github.com/users/Dengnifer/followers",
-   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
-   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
-   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
-   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
-   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
-   "repos_url": "https://api.github.com/users/Dengnifer/repos",
-   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
-   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
-   "type": "User",
-   "user_view_type": "public",
-   "site_admin": false
-  },
-  "labels": [
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   }
-  ],
-  "state": "open",
-  "locked": false,
-  "assignees": [],
-  "milestone": null,
-  "comments": 0,
-  "created_at": "2026-09-21T02:16:36Z",
-  "updated_at": "2026-09-21T02:16:36Z",
-  "closed_at": null,
-  "assignee": null,
-  "author_association": "OWNER",
-  "active_lock_reason": null,
-  "sub_issues_summary": {
-   "total": 0,
-   "completed": 0,
-   "percent_completed": 0
-  },
-  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/123",
-  "issue_dependencies_summary": {
-   "blocked_by": 0,
-   "total_blocked_by": 0,
-   "blocking": 3,
-   "total_blocking": 3
-  },
-  "body": "<!-- mipstarre-issue-key: qpbt-headline-raw-pauli-effects-20260921 -->\n### Motivation\n\nThe independent scout `scout-123-20260921-01` audited main commit\n`05df4b74fea7d291050909102c737e6b03d85ba6` and reported a headline statement\ndiscrepancy. The paper compares the direct Pauli-question effects, while the\nLean distances use complete measurements obtained by sending malformed answers\nto outcome zero. Rejection by the game does not make those effects zero.\n\nSource: `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`,\n`thm:pauli` and `cor:pauli-binary`, lines 1426-1487; proof in\n`14_analysis_of_the_pauli_basis_test.tex:1666-1876`.\nRelevant Lean definitions are in `Test/SoundnessDefs.lean`, `Test/QubitForm.lean`,\nand `Test/PauliBasisTest.lean` (`pauliAnswerOrZero`).\n\n### Work\n\nValidate the discrepancy against the source and the existing proof API.\nIf confirmed, prove the rejected-answer mass bound and the transfer from the\ncompleted family to the direct effects for both players, including outcome zero.\nExpose the source-faithful conclusions in both headline theorems and absorb\nuniversal constants into the existing existential robustness parameters.\nPreserve useful completed-family lemmas as internal results where needed.\n\nAn explicit proved identification with the paper's answer parsing is also\nacceptable if it actually establishes the source conclusion. A documentation\nchange alone, an extra public hypothesis, or a weakened conclusion does not\ndischarge this issue. Record the precise mathematical comparison in the gap\nregister, update blueprint claims and direct consumers, and finish with a\nstatement-integrity audit. No new proof holes, axioms, or bypasses.\n\n### Acceptance\n\n- Both headline statements compare the paper's operator families.\n- All required transfer estimates are proved from the original hypotheses.\n- The axiom audit remains exactly the standard Lean axioms.\n- Focused checks, complete CI, and a fresh independent review pass.\n- Comparator regeneration is coordinated after the repaired public statements\n  stabilize; PRs #663 and #660 are owned separately and must not be edited here.\n\nThe scout also reports stale README, theorem-index, and blueprint claims.\nThose reviewer-document synchronization findings remain part of artifact\ncompletion and must be checked against this mathematical repair.",
-  "closed_by": null,
-  "reactions": {
-   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665/reactions",
-   "total_count": 0,
-   "+1": 0,
-   "-1": 0,
-   "laugh": 0,
-   "hooray": 0,
-   "confused": 0,
-   "heart": 0,
-   "rocket": 0,
-   "eyes": 0
-  },
-  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/665/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
   "pinned_comment": null
@@ -395,7 +308,7 @@
    "percent_completed": 0
   },
   "issue_dependencies_summary": {
-   "blocked_by": 1,
+   "blocked_by": 0,
    "total_blocked_by": 1,
    "blocking": 0,
    "total_blocking": 0
@@ -3562,17 +3475,17 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 1,
+  "comments": 3,
   "created_at": "2026-09-04T06:49:52Z",
-  "updated_at": "2026-09-21T03:20:58Z",
+  "updated_at": "2026-09-21T04:27:04Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
    "total": 13,
-   "completed": 12,
-   "percent_completed": 92
+   "completed": 13,
+   "percent_completed": 100
   },
   "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/167",
   "issue_dependencies_summary": {
@@ -4150,7 +4063,7 @@
   "milestone": null,
   "comments": 521,
   "created_at": "2026-09-02T08:30:04Z",
-  "updated_at": "2026-09-21T04:10:24Z",
+  "updated_at": "2026-09-21T04:26:45Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
