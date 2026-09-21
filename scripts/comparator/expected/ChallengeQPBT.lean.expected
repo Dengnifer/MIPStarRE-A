@@ -2536,10 +2536,10 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
 
--- source: MIPStarRE/QPBT/Test/Soundness.lean:38-62  (MIPStarRE.QPBT.pauli_soundness)
+-- source: MIPStarRE/QPBT/Test/Soundness.lean:40-65  (MIPStarRE.QPBT.pauli_soundness)
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits
 local isometries and an auxiliary unit state for which the state and both
-operator families are close at scale `deltaQld`.  The theorem uses the
+raw prescribed-answer operator families are close at scale `deltaQld`. The theorem uses the
 once-and-for-all self-dual-normal field model selected by `fixedFieldModel` for
 each admissible size, rather than a freshly quantified field identification.
 Blueprint
@@ -2558,9 +2558,9 @@ theorem pauli_soundness :
             ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ ≤
                 deltaQld a b ε P.m P.d P.q ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
+              rawPauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
+              rawPauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
   sorry
 
 -- source: MIPStarRE/QPBT/Test/QubitForm.lean:411-436  (MIPStarRE.QPBT.pauli_soundness_qubit)
