@@ -104,9 +104,19 @@ class ChallengeConfigLoadingTests(unittest.TestCase):
     def test_qpbt_scopes_carry_line_ranges_and_noncomputable_sections(self) -> None:
         qpbt = challenge_config.load_challenges(["qpbt"])[0]
 
-        self.assertNotIn(
-            "MIPStarRE/Quantum/Measurement.lean", qpbt.module_preludes
-        )
+        submeasurement, measurement = qpbt.module_preludes[
+            "MIPStarRE/Quantum/Measurement.lean"
+        ]
+        for scope, namespace, declaration_line in (
+            (submeasurement, "Submeasurement", 67),
+            (measurement, "Measurement", 128),
+        ):
+            self.assertEqual(scope.namespace, ("MIPStarRE.Quantum", namespace))
+            self.assertTrue(scope.covers(declaration_line))
+            self.assertEqual(scope.lines, (
+                "variable {d : Type*} [Fintype d] [DecidableEq d]",
+                "variable {α β : Type*} [Fintype α] [Fintype β]",
+            ))
 
         (completeness,) = qpbt.module_preludes[
             "MIPStarRE/QPBT/Test/Completeness.lean"

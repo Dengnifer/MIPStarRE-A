@@ -152,19 +152,20 @@ theorem pauliWinPredicate_symm (P : AdmissibleParams)
     pauliWinPredicate P x y a b = pauliWinPredicate P y x b a := by
   obtain ⟨tA, xA⟩ := x
   obtain ⟨tB, xB⟩ := y
+  -- Definitional reduction avoids module-private matcher equations from `simp`.
+  dsimp only [pauliWinPredicate]
   by_cases hT : tA = tB
   · subst hT
-    simp only [pauliWinPredicate]
+    rw [if_pos (rfl : tA = tA), if_pos (rfl : tA = tA)]
     rw [Bool.and_comm (validPauliAnswer tA b) (validPauliAnswer tA a)]
-    by_cases hab : a = b
-    · simp [hab]
-    · simp [hab, Ne.symm hab]
+    exact congrArg (fun c => if validPauliAnswer tA a && validPauliAnswer tA b then c
+      else false) (decide_eq_decide.mpr eq_comm)
   · cases hvA : validPauliAnswer tA a
-    · simp [pauliWinPredicate, hvA]
+    · cases validPauliAnswer tB b <;> rfl
     · cases hvB : validPauliAnswer tB b
-      · simp [pauliWinPredicate, hvB]
-      · simp only [pauliWinPredicate, hvA, hvB, Bool.and_self,
-          if_neg hT, if_neg (Ne.symm hT)]
+      · rfl
+      · rw [Bool.true_and, if_pos (rfl : true = true),
+          if_pos (rfl : true = true), if_neg hT, if_neg (Ne.symm hT)]
         rcases tA with (_|_)|(_|_)|(_|_)|(_|_)|(_|_)|_|(iA|jA) <;>
           rcases a with uA|fA|gA|bitsA|bitA|trA|hhA <;>
           (try exact Bool.noConfusion hvA) <;>

@@ -34,6 +34,11 @@ structure Measurement (α : Type*) [Fintype α] (d : Type*) [Fintype d] [Decidab
   sum_eq_one : ∑ a, effect a = 1
 namespace Submeasurement
 
+-- elaboration context of MIPStarRE/Quantum/Measurement.lean:52-95
+section
+variable {d : Type*} [Fintype d] [DecidableEq d]
+variable {α β : Type*} [Fintype α] [Fintype β]
+
 -- source: MIPStarRE/Quantum/Measurement.lean:63-76  (MIPStarRE.Quantum.Submeasurement.postprocess)
 /--
 Data processing: relabel the answer set by `f : α → β`, summing the effects over
@@ -49,8 +54,14 @@ noncomputable def postprocess {d : Type*} [Fintype d] [DecidableEq d]
       ∑ b, ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
           = ∑ a, M.effect a := Finset.sum_fiberwise Finset.univ f M.effect
       _ ≤ 1 := M.sum_le_one
+end  -- module scope
 end Submeasurement
 namespace Measurement
+
+-- elaboration context of MIPStarRE/Quantum/Measurement.lean:97-225
+section
+variable {d : Type*} [Fintype d] [DecidableEq d]
+variable {α β : Type*} [Fintype α] [Fintype β]
 
 -- source: MIPStarRE/Quantum/Measurement.lean:121-136  (MIPStarRE.Quantum.Measurement.postprocess)
 /--
@@ -69,5 +80,6 @@ noncomputable def postprocess {d : Type*} [Fintype d] [DecidableEq d]
       ∑ b, ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
           = ∑ a, M.effect a := Finset.sum_fiberwise Finset.univ f M.effect
       _ = 1 := M.sum_eq_one
+end  -- module scope
 end Measurement
 end MIPStarRE.Quantum

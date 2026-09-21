@@ -76,6 +76,26 @@
     ]
   },
   "module_preludes": {
+    "MIPStarRE/Quantum/Measurement.lean": [
+      {
+        "namespace": ["MIPStarRE.Quantum", "Submeasurement"],
+        "lines": [
+          "variable {d : Type*} [Fintype d] [DecidableEq d]",
+          "variable {α β : Type*} [Fintype α] [Fintype β]"
+        ],
+        "first": 52,
+        "last": 95
+      },
+      {
+        "namespace": ["MIPStarRE.Quantum", "Measurement"],
+        "lines": [
+          "variable {d : Type*} [Fintype d] [DecidableEq d]",
+          "variable {α β : Type*} [Fintype α] [Fintype β]"
+        ],
+        "first": 97,
+        "last": 225
+      }
+    ],
     "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": {
       "namespace": ["MIPStarRE.Quantum"],
       "lines": [

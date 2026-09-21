@@ -31,7 +31,7 @@ noncomputable def typedCLDistribution {K T ι : Type*}
     (clDistribution (L uv.1) (R uv.2)).map fun xy =>
       ((uv.1, xy.1), (uv.2, xy.2))
 
--- source: MIPStarRE/QPBT/Games/TypedCondLinear.lean:45-114  (MIPStarRE.QPBT.typedCLDistribution_symm)
+-- source: MIPStarRE/QPBT/Games/TypedCondLinear.lean:45-113  (MIPStarRE.QPBT.typedCLDistribution_symm)
 /-- A typed conditionally linear distribution built from a single family is
 symmetric under exchanging the two players: the edge law of
 `def:graph-distribution` is symmetric, and exchanging the two types exchanges
@@ -64,10 +64,9 @@ theorem typedCLDistribution_symm {K T ι : Type*}
         ((Finset.univ : Finset (ι → K)).filter
           fun z => ((v, L v z), (u, L u z)) = w.swap) := by
     rintro u v ⟨w₁, w₂⟩
-    ext z
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.swap_prod_mk,
-      Prod.mk.injEq]
-    exact and_comm
+    apply Finset.filter_congr
+    intro z _
+    exact Prod.swap_inj.symm
   have hbind : ∀ w : (T × (ι → K)) × (T × (ι → K)),
       (typedCLDistribution E hE L L).weight w =
         ∑ uv : T × T, (graphDistribution E hE).weight uv *

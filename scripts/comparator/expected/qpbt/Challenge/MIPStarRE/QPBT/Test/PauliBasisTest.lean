@@ -349,6 +349,14 @@ inductive PauliAnswer (P : AdmissibleParams) where
   | pauliOutcome (a : PauliRegister P)
   deriving DecidableEq
 
+-- source: MIPStarRE/QPBT/Test/PauliBasisTest.lean:491-496  (MIPStarRE.QPBT.pauliAnswerOrZero)
+/-- A formalization-only total relabeling from the global Pauli-test answer
+alphabet to a Pauli register. It folds wrong-form answers into zero so that a
+Pauli question yields a complete `PauliRegister`-indexed measurement. -/
+def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
+  | .pauliOutcome u => u
+  | _ => 0
+
 -- source: MIPStarRE/QPBT/Test/PauliBasisTest.lean:498-508  (MIPStarRE.QPBT.PauliAnswerCode)
 /-- A finite sum code used only to construct the `Fintype` instance for the
 answer alphabet in blueprint

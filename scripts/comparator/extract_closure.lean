@@ -47,6 +47,9 @@ def canon (env : Environment) (closure : NameSet) (n : Name) : Name :=
   let s := n.toString
   let s := (s.splitOn "._proof_").head!
   let s := (s.splitOn ".match_").head!
+  -- A cached sparse matcher can be reused without referencing its original
+  -- parent. Emit that parent's source so elaboration creates the same matcher.
+  let s := (s.splitOn "._sparseCasesOn_").head!
   let s := (s.splitOn "._autoParam").head!
   let c := s.toName
   -- collapse compiler-generated companions into their parent inductive

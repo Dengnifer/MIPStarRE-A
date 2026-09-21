@@ -109,7 +109,7 @@ theorem pauliQuestionDistribution_symm (P : AdmissibleParams)
   rw [pauliQuestionDistribution_eq_typedCL P]
   exact typedCLDistribution_symm _ _ _ (x, y)
 
--- source: MIPStarRE/QPBT/Test/Completeness.lean:148-174  (MIPStarRE.QPBT.pauliWinPredicate_symm)
+-- source: MIPStarRE/QPBT/Test/Completeness.lean:148-175  (MIPStarRE.QPBT.pauliWinPredicate_symm)
 /-- Symmetry of the Pauli decision predicate in the symmetric game appearing in
 `lem:pauli-completeness`. -/
 theorem pauliWinPredicate_symm (P : AdmissibleParams)
@@ -117,19 +117,20 @@ theorem pauliWinPredicate_symm (P : AdmissibleParams)
     pauliWinPredicate P x y a b = pauliWinPredicate P y x b a := by
   obtain ⟨tA, xA⟩ := x
   obtain ⟨tB, xB⟩ := y
+  -- Definitional reduction avoids module-private matcher equations from `simp`.
+  dsimp only [pauliWinPredicate]
   by_cases hT : tA = tB
   · subst hT
-    simp only [pauliWinPredicate]
+    rw [if_pos (rfl : tA = tA), if_pos (rfl : tA = tA)]
     rw [Bool.and_comm (validPauliAnswer tA b) (validPauliAnswer tA a)]
-    by_cases hab : a = b
-    · simp [hab]
-    · simp [hab, Ne.symm hab]
+    exact congrArg (fun c => if validPauliAnswer tA a && validPauliAnswer tA b then c
+      else false) (decide_eq_decide.mpr eq_comm)
   · cases hvA : validPauliAnswer tA a
-    · simp [pauliWinPredicate, hvA]
+    · cases validPauliAnswer tB b <;> rfl
     · cases hvB : validPauliAnswer tB b
-      · simp [pauliWinPredicate, hvB]
-      · simp only [pauliWinPredicate, hvA, hvB, Bool.and_self,
-          if_neg hT, if_neg (Ne.symm hT)]
+      · rfl
+      · rw [Bool.true_and, if_pos (rfl : true = true),
+          if_pos (rfl : true = true), if_neg hT, if_neg (Ne.symm hT)]
         rcases tA with (_|_)|(_|_)|(_|_)|(_|_)|(_|_)|_|(iA|jA) <;>
           rcases a with uA|fA|gA|bitsA|bitA|trA|hhA <;>
           (try exact Bool.noConfusion hvA) <;>
@@ -138,7 +139,7 @@ theorem pauliWinPredicate_symm (P : AdmissibleParams)
           (try exact Bool.noConfusion hvB) <;>
           rfl
 
--- source: MIPStarRE/QPBT/Test/Completeness.lean:176-185  (MIPStarRE.QPBT.pauliBasisTestSymm)
+-- source: MIPStarRE/QPBT/Test/Completeness.lean:177-186  (MIPStarRE.QPBT.pauliBasisTestSymm)
 /-- The symmetric presentation of the Pauli basis test. The field and basis
 are those fixed by `P.model`; no additional model is quantified. -/
 noncomputable def pauliBasisTestSymm (P : AdmissibleParams) : SymmetricGame where
