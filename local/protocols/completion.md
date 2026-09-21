@@ -72,7 +72,12 @@ with a written reason; `scripts/blueprint_leanok_axioms.py --ci` exits 0. A
 node is any environment the repository's blueprint parser recognises: the gate
 reads that list out of `_TEX_ENV_BEGIN_RE` in `scripts/blueprint_lean_sync.py`
 instead of keeping its own, so an `example` or `remark` node with a Lean link
-counts exactly as a theorem does. The
+counts exactly as a theorem does. Which nodes are the track's is read off the
+tree and not off section 6: besides the chapters registered there, the gate
+reads every other `.tex` beside them whose `\lean{...}` names a declaration
+under the track's Lean root, and judges those nodes too, so a node of the track
+that lives in a chapter shared with another track is in scope whether or not
+its chapter is listed. The
 exemption table is the only place a permanently unmarked node may live, and a
 row there is a caveat that must be defensible in the paper.
 
@@ -181,7 +186,7 @@ run of the same commit. Unit tests:
 | Axiom audit | `MIPStarRE/QPBT/Test/AxiomAudit.lean` |
 | `\leanok` exemptions | `docs/completion/qpbt-leanok-exemptions.md` |
 | Comparator record | `docs/comparator.md`, block `track=qpbt` |
-| Expected challenge | `scripts/comparator/expected/qpbt/Challenge.lean.expected` |
+| Expected challenge | `scripts/comparator/expected/ChallengeQPBT.lean.expected` |
 | Truthful docs (C6) | `README.md` |
 | Artifact files (C7) | `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`, `docs/ARTIFACT.md`, `LICENSE` |
 | Artifact script (C7) | `scripts/make_artifact.sh` |
@@ -195,6 +200,13 @@ Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
 | `MIPStarRE.QPBT.pauli_soundness_qubit` | `cor:pauli-binary` |
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `lem:pauli-completeness` |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
+
+The `Blueprint chapters` row is the track's own chapters, read whole; it is
+not the whole of C4's scope. The gate also reads every other `.tex` file in
+those directories whose `\lean{...}` names a declaration under the track's
+Lean root and judges those nodes — today
+`blueprint/src/chapter/ch03_preliminaries.tex` carries one such QPBT node — so
+a chapter missing from the row above narrows nothing.
 
 Adding a track means adding its row set here and its entry in the gate's
 `TRACKS` registry, in one commit; a unit test reads this section and fails if a

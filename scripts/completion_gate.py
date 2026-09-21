@@ -150,7 +150,10 @@ TRACKS: dict[str, Track] = {
         ),
         leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
-        expected_challenge="scripts/comparator/expected/qpbt/Challenge.lean.expected",
+        # The name `scripts/comparator/challenges.py` gives this track's
+        # expected copy; the registry follows the generator rather than
+        # keeping a second opinion about where the file is.
+        expected_challenge="scripts/comparator/expected/ChallengeQPBT.lean.expected",
         truthful_docs=("README.md",),
         artifact_files=(
             "README.md",
@@ -404,6 +407,7 @@ def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
 # C4 while the blueprint tooling still sees it.
 ENV_ALTERNATION_RE = re.compile(r"\\\\begin\\\{\(([^)]+)\)\\\}")
 LABEL_RE = re.compile(r"\\label\{(?P<label>[^}]+)\}")
+LEAN_MACRO_RE = re.compile(r"\\lean\{(?P<names>[^}]*)\}")
 
 
 def blueprint_node_rule() -> re.Pattern[str]:
@@ -435,6 +439,56 @@ def _exemptions(root: Path, track: Track) -> tuple[dict[str, str], str | None]:
     return table, None
 
 
+def track_namespace(track: Track) -> str:
+    """Return the Lean namespace the track's Lean root stands for."""
+
+    return track.lean_root.strip("/").replace("/", ".")
+
+
+def links_to_track(text: str, track: Track) -> bool:
+    """Say whether a ``\\lean{}`` here names a declaration of this track."""
+
+    prefix = track_namespace(track) + "."
+    for macro in LEAN_MACRO_RE.finditer(text):
+        for name in macro.group("names").split(","):
+            if name.strip().startswith(prefix):
+                return True
+    return False
+
+
+def blueprint_scope(root: Path, track: Track) -> list[tuple[str, bool]]:
+    """Return ``(chapter, read_whole)`` for every chapter C4 must read.
+
+    The registered chapters are the track's own, so every Lean link in them is
+    judged.  A hand-written list is not by itself a scope, though: a node of
+    this track in a chapter shared with another track would simply not be seen,
+    and C4 would print a green line for a rule it had not applied to that node.
+    So the directories of the registered chapters are scanned too, and any
+    other ``.tex`` there whose ``\\lean{}`` names a declaration under the
+    track's Lean root is read for exactly those nodes.  The scope is derived
+    from the tree; section 6's list can widen it, never narrow it.
+    """
+
+    registered = list(dict.fromkeys(track.blueprint_chapters))
+    scope: list[tuple[str, bool]] = [(chapter, True) for chapter in registered]
+    known = set(registered)
+    directories = dict.fromkeys(
+        chapter.rsplit("/", 1)[0] for chapter in registered if "/" in chapter
+    )
+    for directory in directories:
+        base = root / directory
+        if not base.is_dir():
+            continue
+        for path in sorted(base.glob("*.tex")):
+            chapter = f"{directory}/{path.name}"
+            if chapter in known:
+                continue
+            text = path.read_text(encoding="utf-8", errors="replace")
+            if links_to_track(text, track):
+                scope.append((chapter, False))
+    return scope
+
+
 def criterion_blueprint(root: Path, track: Track) -> Criterion:
     """C4: every blueprint node with a Lean link is marked or exempted."""
 
@@ -447,7 +501,8 @@ def criterion_blueprint(root: Path, track: Track) -> Criterion:
     exempt, exempt_problem = _exemptions(root, track)
     unmarked: list[str] = []
     nodes = 0
-    for chapter in track.blueprint_chapters:
+    outside = 0
+    for chapter, read_whole in blueprint_scope(root, track):
         path = root / chapter
         if not path.exists():
             crit.status = FAIL
@@ -458,7 +513,10 @@ def criterion_blueprint(root: Path, track: Track) -> Criterion:
             body = match.group("body")
             if "\\lean{" not in body:
                 continue
+            if not read_whole and not links_to_track(body, track):
+                continue
             nodes += 1
+            outside += 0 if read_whole else 1
             if "\\leanok" in body:
                 continue
             label_match = LABEL_RE.search(body)
@@ -479,9 +537,12 @@ def criterion_blueprint(root: Path, track: Track) -> Criterion:
     if crit.status == FAIL:
         crit.summary = "blueprint chapters missing"
         return crit
+    scope_note = (
+        f", {outside} of them in a chapter section 6 does not list" if outside else ""
+    )
     crit.summary = (
-        f"{nodes} linked nodes, {len(exempt)} exempted with a reason; "
-        "the `--ci` run comes from CI"
+        f"{nodes} linked nodes{scope_note}, {len(exempt)} exempted with a "
+        "reason; the `--ci` run comes from CI"
     )
     return crit
 

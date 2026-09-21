@@ -91,6 +91,27 @@ UNMARKED_EXAMPLE_CHAPTER = r"""
 \end{example}
 """
 
+# A chapter shared with another track: only the node whose ``\lean{}`` names a
+# declaration under this track's Lean root is this track's to mark.
+SHARED_CHAPTER = r"""
+\begin{lemma}[Shared chapter, this track]\label{lem:shared-track}
+  \lean{MIPStarRE.Fixture.shared}
+  A node of this track living outside the track's own chapters.
+\end{lemma}
+"""
+
+MARKED_SHARED_CHAPTER = SHARED_CHAPTER.replace(
+    "\\lean{MIPStarRE.Fixture.shared}",
+    "\\lean{MIPStarRE.Fixture.shared}\n  \\leanok",
+)
+
+FOREIGN_CHAPTER = r"""
+\begin{lemma}[Shared chapter, another track]\label{lem:shared-foreign}
+  \lean{MIPStarRE.Other.shared}
+  Another track's node, unmarked; not this track's criterion.
+\end{lemma}
+"""
+
 GOOD_REGISTER = """\
 # Fixture register
 
@@ -391,6 +412,29 @@ class BlueprintTests(GateFixture):
         crit = gate.criterion_blueprint(self.root, self.track)
         self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
 
+    def test_track_node_in_an_unregistered_chapter_is_in_scope(self) -> None:
+        """A node of the track in a shared chapter may not escape C4."""
+        write(self.root, "blueprint/src/chapter/ch03_shared.tex", SHARED_CHAPTER)
+        crit = gate.criterion_blueprint(self.root, self.track)
+        self.assertEqual(crit.status, gate.FAIL)
+        self.assertIn("ch03_shared.tex", crit.evidence[0])
+        self.assertIn("lem:shared-track", crit.evidence[0])
+
+    def test_foreign_node_in_an_unregistered_chapter_is_ignored(self) -> None:
+        """C4 judges this track's nodes, not another track's."""
+        write(self.root, "blueprint/src/chapter/ch03_shared.tex", FOREIGN_CHAPTER)
+        crit = gate.criterion_blueprint(self.root, self.track)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertNotIn("ch03_shared", " ".join(crit.evidence))
+
+    def test_marked_track_node_in_an_unregistered_chapter_is_counted(self) -> None:
+        write(self.root, "blueprint/src/chapter/ch03_shared.tex",
+              MARKED_SHARED_CHAPTER)
+        crit = gate.criterion_blueprint(self.root, self.track)
+        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+        self.assertIn("2 linked nodes", crit.summary)
+        self.assertIn("section 6 does not list", crit.summary)
+
     def test_exemption_without_a_reason_does_not_count(self) -> None:
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", UNMARKED_CHAPTER)
         write(
@@ -637,6 +681,33 @@ class RegisteredTrackTests(unittest.TestCase):
             self.skipTest(f"{track.axiom_audit} is not in this tree yet")
         crit = gate.criterion_headline_axioms(REPO_ROOT, track)
         self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+
+    def test_the_registered_expected_challenge_exists_in_this_repository(self) -> None:
+        """C5 rests on the expected copy, so the registry may not name a ghost."""
+        for track in gate.TRACKS.values():
+            self.assertTrue(
+                (REPO_ROOT / track.expected_challenge).exists(),
+                f"track {track.name} registers an expected challenge that does "
+                f"not exist: {track.expected_challenge}",
+            )
+
+    def test_the_real_qpbt_scope_covers_every_chapter_linking_the_track(self) -> None:
+        """A QPBT node in a chapter section 6 does not list is still in C4."""
+        track = gate.TRACKS["qpbt"]
+        chapters = REPO_ROOT / "blueprint/src/chapter"
+        if not chapters.is_dir():
+            self.skipTest("no blueprint chapters in this tree")
+        scope = {chapter for chapter, _ in gate.blueprint_scope(REPO_ROOT, track)}
+        for path in sorted(chapters.glob("*.tex")):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            if not gate.links_to_track(text, track):
+                continue
+            self.assertIn(
+                f"blueprint/src/chapter/{path.name}",
+                scope,
+                f"{path.name} carries a Lean link under {track.lean_root} and "
+                "is outside C4's scope",
+            )
 
     def test_registry_and_protocol_agree_on_the_registered_paths(self) -> None:
         """§6 rows and the `TRACKS` entry are one commit's work, so they match."""
