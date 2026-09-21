@@ -7,6 +7,7 @@ import MIPStarRE.QPBT.Test.Soundness.NaimarkReduction
 import MIPStarRE.QPBT.Test.Soundness.NaimarkOperatorTransfer
 import MIPStarRE.QPBT.Test.Soundness.NaimarkAssembly
 import MIPStarRE.QPBT.Test.Soundness.EpsReduction
+import MIPStarRE.QPBT.Test.Soundness.RawOperatorTransfer
 
 /-!
 # Pauli basis test soundness
@@ -15,10 +16,10 @@ This module states the source-shaped soundness theorem and provides auxiliary
 range-projection estimates, ancilla isometries, and the transfer of supplied
 extraction data to the three soundness estimates.
 The scalar square-root error bound is in `MIPStarRE.QPBT.Combining.RootErrorBounds`.
-The transfer from arbitrary strategies is supplied by the Naimark reduction in
-`MIPStarRE.QPBT.Test.Soundness.NaimarkAssembly`, and the extension of the error
-domain past one by `MIPStarRE.QPBT.Test.Soundness.EpsReduction`; composing them
-proves the soundness theorem for the full source domain.
+The completed-family estimates are supplied by the Naimark reduction. The
+final transfer bounds the rejected wrong-form mass and restores the raw Pauli
+effects required by the paper before extending the result to the full error
+domain.
 
 ## References
 
@@ -57,12 +58,10 @@ theorem pauli_soundness :
             ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ ≤
                 deltaQld a b ε P.m P.d P.q ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
+              rawPauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
-  obtain ⟨a, b, ha, hb, hb1, hbounds⟩ := exists_arbitrary_strategy_isometry_bounds
-  refine ⟨a, b, ha, hb, hb1, ?_⟩
-  exact pauli_isometry_bounds_extend_epsilon ha hb hbounds
+              rawPauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
+  exact exists_arbitrary_strategy_raw_isometry_bounds
 
 end
 

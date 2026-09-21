@@ -1636,7 +1636,9 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	Theorem~\ref{thm:pauli} performs the same Naimark reduction and is
 	assembled from the formalization-support node
 	Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support} together with
-	the extension of the error domain past one; it is complete under the
+	the rejected-mass transfer from the completed Pauli family to the raw
+	prescribed-answer effects and the extension of the error domain past one;
+	it is complete under the
 	standard axioms, which is what the statement-level formalization mark on
 	Theorem~\ref{thm:pauli} records.  No proof-level mark is placed on this
 	account, because the divisibility obligation disclosed below is neither
@@ -1719,6 +1721,21 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 		\phi_{\mathrm{B}} \, (M^{(\mathrm{Pauli},W)}_h)_{\mathrm{B}} \, \phi_{\mathrm{B}}^\dagger \approx_{\delta_{\mathrm{qld}}} (\tau^W_h)_{\mathrm{B}''}\;,
 	\]
 	where the $\approx$ statements hold with respect to the state $\ket{\mathrm{aux}} \ot \ket{\mathrm{EPR}_q}^{\ot M}$ and the answer summation is over $h \in \F_q^M$; the constant implicit in $\approx_{\delta_{\mathrm{qld}}}$ (Definition~\ref{def:povm-distance}) absorbs the factors accumulated above. The Bob comparison is the corresponding application of Theorem~\ref{thm:pauli-isometry-transfer-bob-support}. This shows that the game $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ is a self-test, with robustness $\delta_{\mathrm{qld}}(\eps,m,d,q)$, for the canonical Pauli strategy of Lemma~\ref{lem:pauli-completeness}. Identifying the registers $\mathrm{A}\mathrm{A}'$ with $\mathrm{A}'$ and $\mathrm{B}\mathrm{B}'$ with $\mathrm{B}'$ matches the statement of Theorem~\ref{thm:pauli}, in which $\phi_{\mathrm{A}}\colon \mathcal{H}_{\mathrm{A}} \to \mathcal{H}_{\mathrm{A}'} \ot \mathcal{H}_{\mathrm{A}''}$. Finally, unpacking the dependence on the parameters $\eps, m, d, q$, the function $\delta_{\mathrm{qld}}(\eps,m,d,q) = O(\delta_P^{1/4} + md/q)$ has the form $a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$ for universal constants $a > 1$ and $0 < b < 1$; here $\delta_P = C(\delta_G + \sqrt{\eps} + md/q)$ and $\delta_G$ already has that form. See Remark~\ref{rem:pauli-robustness-form} for the reconciliation with the statement of Theorem~\ref{thm:pauli}.
+
+	The formal game uses one answer alphabet for all question types.  Its
+	internal Pauli-family construction therefore completes the prescribed
+	answers by folding every malformed answer into outcome zero.  For either
+	player the completed zero effect is the raw zero effect plus the malformed
+	answer effect, while all nonzero effects agree.  Rejection on the two
+	oriented Pauli--point edges bounds the malformed mass by a universal
+	multiple of $\eps$.  Contractivity and the state estimate then bound its
+	action on the ideal state by a universal multiple of
+	$\delta_{\mathrm{qld}}^2+\eps$.  The squared triangle inequality transfers
+	the completed estimates to the raw effects printed in
+	Theorem~\ref{thm:pauli}; enlarging the existential prefactor $a$ absorbs
+	this loss without changing the displayed form or exponent.  This
+	representation correction is documented in
+	\cite{gap:qpbt_raw-pauli-effects}.
 	The range-projection transfer just used, which is omitted in the source,
 	is documented in \cite{gap:qpbt_extraction-transfer}.
 \end{proof}
