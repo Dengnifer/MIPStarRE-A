@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import sys
 import tempfile
@@ -17,6 +18,10 @@ PR_CI = REPO_ROOT / ".github" / "workflows" / "pr-ci.yml"
 CI_SH = REPO_ROOT / "local" / "bin" / "ci.sh"
 README = COMPARATOR / "README.md"
 EXTRACTOR = COMPARATOR / "extract_closure.lean"
+LDT_EXPECTED = COMPARATOR / "expected" / "Challenge.lean.expected"
+LDT_BASELINE_SHA256 = (
+    "cbe5642bb88db75f86bd79936896e684aa407a02108d8259ead71a0738783e73"
+)
 
 # the drift checker imports its sibling `challenge_config`, which a script run
 # finds on `sys.path[0]` and a file-location import does not
@@ -79,8 +84,23 @@ class ComparatorChallengeDriftTests(unittest.TestCase):
             readme,
         )
         self.assertIn("challenge_qpbt_footer.lean", readme)
+        self.assertIn("MIPStarRE/QPBT/Test/Completeness.lean", readme)
+        self.assertIn("MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean", readme)
         self.assertIn("MIPStarRE/QPBT/Test/Soundness.lean", readme)
         self.assertIn("MIPStarRE/QPBT/Test/QubitForm.lean", readme)
+        self.assertIn(LDT_BASELINE_SHA256, readme)
+
+    def test_ldt_expected_matches_original_baseline(self) -> None:
+        actual = hashlib.sha256(LDT_EXPECTED.read_bytes()).hexdigest()
+
+        self.assertEqual(
+            actual,
+            LDT_BASELINE_SHA256,
+            "the checked-in LDT challenge changed from its preserved baseline; "
+            "QPBT-only work must restore the original bytes, while an intentional "
+            "LDT closure change must follow the explicit baseline-update process "
+            "in scripts/comparator/README.md",
+        )
 
     def test_machine_wide_guard_selects_every_configured_challenge(self) -> None:
         # `local/bin/ci.sh` passes no --challenge, so every configuration under

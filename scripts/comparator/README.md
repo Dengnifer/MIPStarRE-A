@@ -10,10 +10,10 @@ with the official
 library proves the target theorems.  Background and trust model:
 `docs/comparator.md`.
 
-A generated file imports only Mathlib and re-declares, verbatim and in
-dependency order, every declaration in the kernel closure of its target
-statements, each with a provenance comment; the targets themselves are stated
-with `sorry`.
+A generated challenge imports only Mathlib and, when split, its own mirror
+modules.  It re-declares, verbatim and in dependency order, every declaration
+in the kernel closure of its target statements, each with a provenance comment;
+the targets themselves are stated with `sorry`.
 
 ## Challenges
 
@@ -24,17 +24,16 @@ Each challenge is one configuration file under `challenges/`:
 | `challenges/ldt.json` | `MIPStarRE.LDT.Test.mainFormal` | `expected/Challenge.lean.expected` | [LDT-comparator](https://github.com/LionSR/LDT-comparator) |
 | `challenges/qpbt.json` | four QPBT headline theorems | `expected/qpbt/` (one module per library module) | [QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator) |
 
+The four QPBT targets are `MIPStarRE.QPBT.exists_spcc_value_one`,
+`MIPStarRE.QPBT.exists_ld_soundness`, `MIPStarRE.QPBT.pauli_soundness`, and
+`MIPStarRE.QPBT.pauli_soundness_qubit`.
+
 A configuration names the Lean modules the extractor imports, the target
 theorems whose statement closure it takes, the header and footer files wrapped
 around the assembled body, the checked-in expected copy, and the per-challenge
 elaboration-context tables (`extras`, `module_preludes`).  The schema, with the
 meaning of every key, is documented at the top of `challenge_config.py`; unknown
 keys are rejected, so a typo fails loudly rather than silently dropping context.
-
-Each generated challenge imports only Mathlib and, when split, its own mirror
-modules. It re-declares every declaration in the kernel closure of the target
-statements, in dependency order and with a provenance comment; the target
-theorems themselves are stated with `sorry`.
 
 `require_expected` distinguishes a challenge that must stay regenerated (`true`,
 a missing expected copy is an error) from one still being developed (`false`,
@@ -76,6 +75,21 @@ in the tree, and reports it as an error while still updating the others: the
 copy it would write omits those statements, and once such a copy exists the
 `require_expected: false` skip no longer applies, so every later drift run
 would report a challenge that states nothing as current.
+
+The regeneration guard and the LDT preservation regression answer different
+questions.  Regeneration checks that the fixture agrees with the current
+library.  `ComparatorChallengeDriftTests.test_ldt_expected_matches_original_baseline`
+also hashes `expected/Challenge.lean.expected` and requires the original LDT
+digest
+`cbe5642bb88db75f86bd79936896e684aa407a02108d8259ead71a0738783e73`.
+Consequently, a QPBT-only change cannot silently update both the library and the
+generated LDT fixture.
+
+For an intentional future LDT change, first regenerate from fresh built
+metadata, audit the exact fixture diff, and verify it in LDT-comparator.  Then
+update `LDT_BASELINE_SHA256` in
+`scripts/tests/test_comparator_challenge_drift.py` explicitly in the same
+reviewed change, with the mathematical reason for changing the LDT closure.
 
 To generate a challenge somewhere else without touching the checked-in copy —
 the usual loop while filling in a new challenge's context tables:
@@ -129,6 +143,15 @@ tree, into the matching comparator repository. Bump the `rev` pin in its
 `lakefile.toml` and `lake-manifest.json` to the library commit from which it was
 generated, and run its `./verify.sh` (its CI also runs on every push).
 
+The four-target tree checked in at
+`a534c7f97ba34fd561ae03134f90b81ee4e395c1` generated and elaborated, and the
+canonical local CI contexts passed.  This is not yet comparator acceptance:
+all-four closure equality, equality of the private completeness auxiliaries, a
+real-landrun run with nanoda, and a verified merged-`main` pin remain pending.
+The only comparator acceptance recorded so far is the narrower historical run
+at `4aec9ebedf6ca401e3f2d7b4bd90bd565d38f90d`, whose configuration contained
+only `pauli_soundness` and `pauli_soundness_qubit` and used fake landrun.
+
 ## Maintenance notes
 
 - A challenge's `extras`/`module_preludes` tables carry elaboration context
@@ -146,10 +169,13 @@ generated, and run its `./verify.sh` (its CI also runs on every push).
 - The target statements in each footer mirror the theorems in the library:
   `challenge_footer.lean` mirrors
   `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean`, and
-  `challenge_qpbt_footer.lean` mirrors `MIPStarRE/QPBT/Test/Soundness.lean`
-  and `MIPStarRE/QPBT/Test/QubitForm.lean`.  If a library statement changes,
-  update the footer too — comparator fails with "theorem statement do not
-  match" until the two agree.
+  `challenge_qpbt_footer.lean` mirrors
+  `MIPStarRE/QPBT/Test/Completeness.lean`,
+  `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean`,
+  `MIPStarRE/QPBT/Test/Soundness.lean`, and
+  `MIPStarRE/QPBT/Test/QubitForm.lean`.  If a library statement changes, update
+  the footer too - comparator fails with "theorem statement do not match" until
+  the two agree.
 - Declarations without a source range (compiler-generated congruence lemmas
   and `autoParam` helpers) are emitted as explanatory comments; they
   regenerate identically during elaboration of the challenge file.
