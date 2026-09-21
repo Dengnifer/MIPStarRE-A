@@ -11,7 +11,7 @@
 
 \title{The Cross-Basis Phase in the Extracted Pauli Observables}
 \author{}
-\date{2026-09-03}
+\date{2026-09-22}
 
 \begin{document}
 \maketitle
@@ -76,10 +76,26 @@ $\widetilde u\mathbin{\cdot}\widetilde v=s$.  The two extracted observables
 then anticommute.  This is a counterexample to the printed cross-basis
 commutation assertion.
 
+For a concrete admissible parameter tuple, take $(q,m,d)=(8,1,2)$.
+The binary basis has three elements, so two distinct indices exist.  With
+$c=e_je_{j'}$, take $s=c^{-1}$; then
+$\operatorname{tr}(cs)=\operatorname{tr}(1)=1$, since the extension degree is
+three.  There are $2^m=2$ register coordinates, enough for the vectors just
+described.  The extracted observables are involutions, so their product is
+invertible on the nonzero strategy space.  Anticommutation therefore cannot
+also be commutation.  The counterexample is within the source domain and does
+not depend on which projective polynomial-pair measurement was constructed.
+
 When $\widetilde u\mathbin{\cdot}\widetilde v$ lies in the prime field, the
 printed distinction is recovered from self-duality.  The chapter quantifies
 over arbitrary vectors, however, so that special case does not repair its
 statement.
+
+The corrected formula follows directly from the product form: the two
+sign-weighted sums of the same orthogonal projectors commute, and the remaining
+Pauli factors contribute exactly the displayed trace phase.  This proof covers
+equal indices, distinct indices, and zero register vectors.  No restriction of
+the field-valued vectors or of their dot product is needed.
 
 \section{Blueprint and formalization status}
 
@@ -107,6 +123,43 @@ recorded in \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.
 This correction changes neither the definition of the extracted observables
 nor the source-faithful consistency and extraction conclusions.  It repairs an
 auxiliary algebraic assertion that is independent of the robustness estimates.
+
+\section{Retention and consumer comparison}
+
+The printed assertion is retained as a proposition, not as a theorem.  Both
+branches of the dichotomy are present: unconditional commutation for distinct
+indices and the printed trace phase for equal indices.  The parameters,
+projective strategy, and global measurement are the ambient objects already
+fixed in the source; the vectors still range over all of $\mathbb F_q^{2^m}$.
+Only the basis indexing changes from one-based to zero-based.\footnote{The
+unasserted definition is
+\leanid{MIPStarRE.QPBT.PrintedCrossBasisCommutationClaim} in
+\path{MIPStarRE/QPBT/Extraction/PrintedClaims.lean}, tracked in
+\ghissue{667}.  It is not a hypothesis of any theorem.  The corrected
+blueprint node and its note citation are unchanged.}
+
+The subsequent source argument has three relevant uses of the extracted
+observables.  The consistency lemma uses their defining spectral sums and
+same-basis measurement consistency.  The swap calculation at lines~1687--1713
+uses the product form and commutation of the original generalized Pauli
+operators, not the false dichotomy for extracted operators.  The EPR-state and
+Pauli-measurement extraction, and then the soundness theorem, use those
+consistency and conjugation conclusions.  Each use is preserved.  In the
+blueprint, the dependence of the swap-conjugation lemma on the product-form
+lemma uses its product formula only; there is no subsequent use of its
+cross-basis assertion.\footnote{The corresponding declarations are
+\path{tildeObs_selfConsistent_ofGlobalPairWitness},
+\path{swapUnitary_conj_tildeObs}, \path{swapUnitary_conj_tildeM},
+\path{exists_extractionWitness}, and the two Pauli soundness theorems.
+A caller search finds no use of \path{tildeObs_twisted_commutation} outside
+its declaration.}
+
+The correction is minimal in the mathematical statement: it restores the
+phase determined by the existing observables, preserves the equal-index branch,
+and changes no construction, hypothesis, error term, or extraction conclusion.
+Retaining the false proposition is a record of the source, not additional
+evidence that it is true.  Independent adoption review remains required by
+the project protocol.
 
 \section{Conclusion}
 
