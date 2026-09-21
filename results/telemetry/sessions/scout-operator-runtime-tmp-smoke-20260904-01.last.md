@@ -1,1 +1,0 @@
-Unable to report the SHA: both read-only attempts failed before execution with `bwrap: setting up uid map: Operation not permitted`. No files were edited and no other agent was invoked.

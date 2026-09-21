@@ -16,7 +16,7 @@ full compliance:
   - the lean-conventions skill (MATHLIB_naming, MATHLIB_doc, MATHLIB_style,
     MATHLIB_pr-review references) — naming, documentation, code style, and
     review checklist
-  - `docs/project_conventions.md` — MIPStarRE-local convention addenda
+  - `docs/project_conventions.md` — PaperLib-local convention addenda
   - `docs/mathematical_language.md` — mathematical prose and banned
     AI/software language
 
@@ -142,11 +142,10 @@ Collect labels to apply (see docs/CONTRIBUTING.md §4 for full taxonomy):
     - New `.lean` files with definitions → add `formalization`
  c. Infer topic labels from file paths if not already covered by
     issue labels:
-    - `LDT/Basic/` or preliminary algebra files → `ldt-basic` or
+    - basic definition or preliminary algebra files → the basic or
       `preliminaries`
-    - `LDT/Commutativity/` → `commutativity`
-    - `LDT/Pasting/` → `pasting`
-    - `LDT/MainTheorem/` → `main-induction` or `proof`
+    - any other chapter directory → that chapter's own label
+    - the main-theorem directory → `main-induction` or `proof`
 
 Apply with:
   `gh pr edit <PR_NUMBER> --repo <REPO> --add-label "label1,label2,..."`
@@ -189,7 +188,7 @@ After completing all steps, post a PR comment summarizing what was changed:
   | **Labels** | added: `<list>` |
   | **Issue** | linked to #<N> / no issue found |
 
-  _Conventions: [CONTRIBUTING.md](../blob/main/docs/CONTRIBUTING.md)_
+  _Conventions: [CONTRIBUTING.md](../../docs/CONTRIBUTING.md)_
   CEOF
   )"
   ```

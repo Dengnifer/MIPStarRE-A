@@ -25,10 +25,10 @@ session record.  Fail closed like every other consumer of the GitHub layer: an
 API failure exits 2 with the layer's message and leaves nothing behind.
 
 Usage:
-    issue_new.py --title "Formalize the Pauli basis test soundness bound" \
+    issue_new.py --title "Formalize the main soundness bound" \
                  --body-file /tmp/body.md --label formalization
-    issue_new.py --title "Tracking - Pauli basis test" --body "..." \
-                 --parent 12 --key qpbt-tracking-pauli
+    issue_new.py --title "Tracking - chapter 3" --body "..." \
+                 --parent 12 --key tracking-chapter-3
     issue_new.py --help
 """
 

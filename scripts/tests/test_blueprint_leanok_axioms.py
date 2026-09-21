@@ -44,9 +44,9 @@ class BlueprintLeanokAxiomsTests(unittest.TestCase):
 
     def test_parse_axiom_output_accepts_single_quoted_primed_decls(self) -> None:
         harness = Path("/tmp/BlueprintLeanokAxioms.lean")
-        decl = "MIPStarRE.LDT.Pasting.gHatTupleOutcomeConsEquiv'"
+        decl = "PaperLib.Core.Pasting.gHatTupleOutcomeConsEquiv'"
         output = (
-            "'MIPStarRE.LDT.Pasting.gHatTupleOutcomeConsEquiv'' "
+            "'PaperLib.Core.Pasting.gHatTupleOutcomeConsEquiv'' "
             "depends on axioms: [propext, Classical.choice, Quot.sound]"
         )
         results = parse_axiom_output(
@@ -120,7 +120,7 @@ class LeanokPlacementClassificationTests(unittest.TestCase):
         """
         fake_lean_decls = {
             entry.lean_decl: LeanDecl(
-                file="MIPStarRE/Fake.lean",
+                file="PaperLib/Fake.lean",
                 line=1,
                 fqn=entry.lean_decl,
                 kind="theorem",

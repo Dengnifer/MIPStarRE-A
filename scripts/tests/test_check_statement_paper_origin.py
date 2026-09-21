@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
+import json
 import sys
 import tempfile
 import unittest
@@ -21,11 +24,18 @@ from check_statement_paper_origin import (  # noqa: E402
     _scan_file,
     _scan_root,
     main,
+    paper_path_re,
+    scan_targets,
 )
+
+#: The placeholder Lean root a repository carries until it is bootstrapped.
+LEAN_ROOT = "PaperLib"
+TRACK_DIR = f"{LEAN_ROOT}/Core"
 
 
 def _make_repo(root: Path) -> Path:
-    (root / "MIPStarRE" / "LDT").mkdir(parents=True)
+    """A tree whose configured scan target exists: Lean root plus a subtree."""
+    (root / TRACK_DIR).mkdir(parents=True)
     return root
 
 
@@ -147,10 +157,10 @@ class SuffixTests(unittest.TestCase):
 
 class HasOriginTests(unittest.TestCase):
     def test_paper_path(self) -> None:
-        self.assertTrue(_has_origin("see references/ldt-paper/orthonormalization.tex"))
+        self.assertTrue(_has_origin("see references/source-paper/section.tex"))
 
     def test_paper_path_with_lines(self) -> None:
-        self.assertTrue(_has_origin("references/ldt-paper/expansion.tex:145-178"))
+        self.assertTrue(_has_origin("references/source-paper/section.tex:145-178"))
 
     def test_paper_gap_path(self) -> None:
         self.assertTrue(_has_origin("see docs/paper-gaps/naimark-dilation.tex"))
@@ -171,9 +181,17 @@ class HasOriginTests(unittest.TestCase):
     def test_no_citation(self) -> None:
         self.assertFalse(_has_origin("Just some prose with no anchor."))
 
-    def test_other_paper_path_rejected(self) -> None:
-        # Only references/ldt-paper/ paths satisfy the rule.
-        self.assertFalse(_has_origin("see references/other-paper/foo.tex"))
+    def test_any_mirror_counts_while_none_is_configured(self) -> None:
+        """Before the paper is split, the rule may not reject every citation."""
+        self.assertTrue(_has_origin("see references/other-paper/foo.tex"))
+
+    def test_a_configured_mirror_list_rejects_a_foreign_mirror(self) -> None:
+        mine = paper_path_re(["source"])
+        self.assertTrue(_has_origin("references/source-paper/x.tex", mine))
+        self.assertFalse(_has_origin("references/other-paper/x.tex", mine))
+
+    def test_a_path_that_is_not_a_paper_mirror_is_rejected(self) -> None:
+        self.assertFalse(_has_origin("see references/notes/foo.tex"))
 
 
 # ── _preceding_docstring: docstring extraction logic ───────────────────────
@@ -280,9 +298,9 @@ class ExcludeTests(unittest.TestCase):
         root = Path("/repo")
         self.assertTrue(_is_excluded(root / "tmp" / "scratch.lean", root))
 
-    def test_allows_lean_in_ldt(self) -> None:
+    def test_allows_lean_under_the_lean_root(self) -> None:
         root = Path("/repo")
-        self.assertFalse(_is_excluded(root / "MIPStarRE" / "LDT" / "Foo.lean", root))
+        self.assertFalse(_is_excluded(root / TRACK_DIR / "Foo.lean", root))
 
 
 # ── _scan_file integration ─────────────────────────────────────────────────
@@ -443,6 +461,32 @@ class ScanFileTests(unittest.TestCase):
 # ── _scan_root: missing target handling ────────────────────────────────────
 
 
+class ScanTargetTests(unittest.TestCase):
+    def test_the_lean_root_is_scanned_when_no_track_is_registered(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = _make_repo(Path(td))
+            self.assertEqual(scan_targets(root), [LEAN_ROOT])
+
+    def test_the_track_subtree_wins_when_it_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / LEAN_ROOT / "main").mkdir(parents=True)
+            self.assertEqual(scan_targets(root), [f"{LEAN_ROOT}/main"])
+
+    def test_registered_tracks_name_the_targets(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            _write(root / "local/project.json", json.dumps({
+                "schema": 1,
+                "project": {"name": "Widget", "lean_root": "Widget", "track": "core"},
+                "tracks": {
+                    "core": {"lean_root": "Widget/Core"},
+                    "extra": {"lean_root": "Widget/Extra"},
+                },
+            }))
+            self.assertEqual(scan_targets(root), ["Widget/Core", "Widget/Extra"])
+
+
 class ScanRootTests(unittest.TestCase):
     def test_missing_target_raises(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -457,12 +501,12 @@ class ScanRootTests(unittest.TestCase):
     def test_finds_violations(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = _make_repo(Path(td))
-            _write(root / "MIPStarRE" / "LDT" / "Foo.lean", (
+            _write(root / TRACK_DIR / "Foo.lean", (
                 "/-- prose -/\n"
                 "structure BadStatement where\n"
             ))
             results = _scan_root(root)
-            self.assertEqual(list(results.keys()), ["MIPStarRE/LDT/Foo.lean"])
+            self.assertEqual(list(results.keys()), [f"{TRACK_DIR}/Foo.lean"])
 
 
 # ── main: exit-code behavior ───────────────────────────────────────────────
@@ -472,7 +516,7 @@ class MainTests(unittest.TestCase):
     def test_main_ok_returns_zero(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = _make_repo(Path(td))
-            _write(root / "MIPStarRE" / "LDT" / "Good.lean", (
+            _write(root / TRACK_DIR / "Good.lean", (
                 "/-- cite `\\label{lem:good}` -/\n"
                 "structure GoodStatement where\n"
             ))
@@ -481,7 +525,7 @@ class MainTests(unittest.TestCase):
     def test_main_violation_returns_nonzero(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = _make_repo(Path(td))
-            _write(root / "MIPStarRE" / "LDT" / "Bad.lean", (
+            _write(root / TRACK_DIR / "Bad.lean", (
                 "/-- prose -/\n"
                 "structure BadStatement where\n"
             ))
@@ -490,20 +534,43 @@ class MainTests(unittest.TestCase):
     def test_main_violation_warn_only_returns_zero(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = _make_repo(Path(td))
-            _write(root / "MIPStarRE" / "LDT" / "Bad.lean", (
+            _write(root / TRACK_DIR / "Bad.lean", (
                 "/-- prose -/\n"
                 "structure BadStatement where\n"
             ))
             self.assertEqual(main(["--root", str(root), "--warn-only"]), 0)
 
-    def test_main_missing_target_fails(self) -> None:
-        """A misspelled --root must not silently pass; CI must fail closed."""
+    def test_main_without_a_lean_tree_passes_with_a_note(self) -> None:
+        """A repository whose Lean tree is not written yet must still commit."""
         with tempfile.TemporaryDirectory() as td:
-            self.assertEqual(main(["--root", str(td)]), 2)
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                self.assertEqual(main(["--root", str(td)]), 0)
+            self.assertIn("nothing to check", err.getvalue())
+            self.assertIn("PaperLib", err.getvalue())
 
     def test_main_missing_target_warn_only_passes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             self.assertEqual(main(["--root", str(td), "--warn-only"]), 0)
+
+    def test_main_reads_the_configured_mirror_list(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = _make_repo(Path(td))
+            _write(root / "local/project.json", json.dumps({
+                "schema": 1,
+                "project": {"name": "PaperLib", "lean_root": LEAN_ROOT, "track": "main"},
+                "paper_mirrors": ["source"],
+            }))
+            _write(root / TRACK_DIR / "Foo.lean", (
+                "/-- see references/other-paper/x.tex -/\n"
+                "structure ForeignStatement where\n"
+            ))
+            self.assertEqual(main(["--root", str(root)]), 1)
+            _write(root / TRACK_DIR / "Foo.lean", (
+                "/-- see references/source-paper/x.tex -/\n"
+                "structure MineStatement where\n"
+            ))
+            self.assertEqual(main(["--root", str(root)]), 0)
 
 
 if __name__ == "__main__":

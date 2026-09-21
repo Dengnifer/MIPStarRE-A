@@ -19,7 +19,7 @@ import ready_packets  # noqa: E402
 
 def _issue(number: int, state: str = "open", title: str = "") -> dict:
     return {"number": number, "state": state,
-            "title": title or f"feat(QPBT): packet {number}"}
+            "title": title or f"feat(core): packet {number}"}
 
 
 #: #47 -> two chapter trackers; #164 nests a chain parent (#77) one level down.
@@ -92,7 +92,7 @@ class ReadyPacketsTests(unittest.TestCase):
     def test_json_output_lists_ready_and_blocked_only_with_all(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            self.assertEqual(ready_packets.main(["--json"]), 0)
+            self.assertEqual(ready_packets.main(["--root", "47", "--json"]), 0)
         payload = json.loads(out.getvalue())
         self.assertEqual(payload["root"], 47)
         self.assertEqual([row["issue"] for row in payload["ready"]], [97, 105])
@@ -101,14 +101,14 @@ class ReadyPacketsTests(unittest.TestCase):
         ready_packets._CACHE.clear()
         out = io.StringIO()
         with redirect_stdout(out):
-            self.assertEqual(ready_packets.main(["--json", "--all"]), 0)
+            self.assertEqual(ready_packets.main(["--root", "47", "--json", "--all"]), 0)
         payload = json.loads(out.getvalue())
         self.assertEqual([row["issue"] for row in payload["blocked"]], [106, 107])
 
     def test_table_shows_blockers_and_hides_them_without_all(self) -> None:
         out = io.StringIO()
         with redirect_stdout(out):
-            self.assertEqual(ready_packets.main([]), 0)
+            self.assertEqual(ready_packets.main(["--root", "47"]), 0)
         text = out.getvalue()
         self.assertIn("READY (2)", text)
         self.assertIn("#105", text)
@@ -117,10 +117,25 @@ class ReadyPacketsTests(unittest.TestCase):
         ready_packets._CACHE.clear()
         out = io.StringIO()
         with redirect_stdout(out):
-            self.assertEqual(ready_packets.main(["--all"]), 0)
+            self.assertEqual(ready_packets.main(["--root", "47", "--all"]), 0)
         text = out.getvalue()
         self.assertIn("BLOCKED (2)", text)
         self.assertRegex(text, r"#107\s+.*#164\s+#97, #106")
+
+    def test_without_a_configured_tracker_root_it_says_so(self) -> None:
+        """A repository whose tracker tree does not exist yet."""
+        err = io.StringIO()
+        with mock.patch.object(ready_packets, "DEFAULT_ROOT", None):
+            with redirect_stdout(io.StringIO()), mock.patch.object(sys, "stderr", err):
+                self.assertEqual(ready_packets.main([]), 2)
+        self.assertIn("issues.tracker_root", err.getvalue())
+
+    def test_the_configured_tracker_root_is_the_default(self) -> None:
+        out = io.StringIO()
+        with mock.patch.object(ready_packets, "DEFAULT_ROOT", 47):
+            with redirect_stdout(out):
+                self.assertEqual(ready_packets.main(["--json"]), 0)
+        self.assertEqual(json.loads(out.getvalue())["root"], 47)
 
     def test_api_failure_exits_two(self) -> None:
         def boom(path: str, **kwargs):
@@ -129,7 +144,7 @@ class ReadyPacketsTests(unittest.TestCase):
         with mock.patch.object(ready_packets.gh_common, "api", boom):
             err = io.StringIO()
             with redirect_stdout(io.StringIO()), mock.patch.object(sys, "stderr", err):
-                self.assertEqual(ready_packets.main([]), 2)
+                self.assertEqual(ready_packets.main(["--root", "47"]), 2)
             self.assertIn("offline", err.getvalue())
 
 

@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+# codex-shim — the PATH shim every dispatched worker and reviewer runs INSTEAD of the
+# real codex.  keyrot-install.sh copies it to <cache_root>/owner-bin/codex, and that
+# directory goes first on PATH, so `codex` means this file.
+#
+# What it does, in order:
+#   1. account mode: <state>/account-mode is `primary` or `both`; in primary-only mode a
+#      non-default CODEX_HOME is refused (exit 4) so an old thread is not resumed on the
+#      wrong account.
+#   2. argument policy: the fan-out guard stays — `features.multi_agent` and
+#      `agents.max_concurrent_threads_per_session` are forced, whole `features=`/`agents=`
+#      table overrides are refused, and the task is prefixed with a no-collaboration
+#      instruction.  Multi-agent fan-out hit the account's agent-thread limit and killed
+#      long reviews; that is why it may not be re-enabled from the command line.
+#   3. model and effort come from the project configuration (KIT_WORKER_MODEL /
+#      KIT_WORKER_EFFORT, or the caller's -m / -c).  No model name is baked in.  When
+#      <state>/models-allowed exists, only the models it lists may be used; that file is
+#      `session.workers.models_allowed` of local/project.json, rendered into the state
+#      directory by keyrot-install.sh (empty list = no file = no restriction).  The shim
+#      reads the rendered file rather than the checkout, so a worker started anywhere on
+#      the machine gets the same answer without a repository on disk.
+#   4. key rotation: pick the least-loaded live rotation home under <cache_root>/keyrot/,
+#      respecting each home's `.limit`, cleaning up markers of dead pids, and `exec` so
+#      the process id equals the marker file name.
+#   5. the no-default-home guard: when <state>/no-default-home exists and no rotation slot
+#      is free, exit 75 instead of silently falling back to ~/.codex (which may hold a
+#      retired key).  keyrot-install.sh owns that file and writes it when the default
+#      CODEX_HOME is not one of the keys in local/project.json; nothing in
+#      local/bin/session/ touches it.
+#
+# The real codex is found on PATH with this shim's own directory removed — never a
+# hard-coded install path.  MIPSTARRE_CODEX_BIN overrides it.
+#
+# Provenance: kit-src/owner-bin/codex (77 lines), which hard-coded two model names, one
+# cache directory, one home-naming scheme and one codex install path.
+set -uo pipefail
+
+self_dir="$(cd "$(dirname "$0")" && pwd -P)"
+# Installed at <cache_root>/owner-bin/codex, so the cache root is one level up.
+CACHE_ROOT="${MIPSTARRE_CACHE_ROOT:-${KIT_CACHE_ROOT:-$(dirname "$self_dir")}}"
+STATE="${KIT_STATE_DIR:-$CACHE_ROOT/watchdog}"
+ROT="$CACHE_ROOT/keyrot"
+DEFAULT_HOME="${CODEX_DEFAULT_HOME:-$HOME/.codex}"
+
+die() { echo "codex-shim: $1" >&2; exit "${2:-4}"; }
+
+# --- 1. account mode --------------------------------------------------------
+mode=primary
+[ -f "$STATE/account-mode" ] && mode="$(cat "$STATE/account-mode")"
+case "$mode" in primary|both) ;; *) die "invalid account mode '$mode'" ;; esac
+if [ "$mode" = primary ] && [ "${CODEX_HOME:-$DEFAULT_HOME}" != "$DEFAULT_HOME" ]; then
+  die "primary-only policy: preserve the old thread; use a checkpoint continuation"
+fi
+
+# --- 2./3. argument policy, model and effort --------------------------------
+allowed=""
+[ -s "$STATE/models-allowed" ] && allowed="$(tr '\n' ' ' < "$STATE/models-allowed")"
+check_model() {
+  [ -n "$allowed" ] || return 0
+  case " $allowed " in *" $1 "*) return 0 ;; esac
+  die "model '$1' is not in $STATE/models-allowed"
+}
+model="${KIT_WORKER_MODEL:-}"
+effort="${KIT_WORKER_EFFORT:-}"
+
+args=(); task=0
+while [ "$#" -gt 0 ]; do
+  argument="$1"; shift
+  if [ "$argument" = -- ]; then args+=(-- "$@"); task=1; break; fi
+  case "$argument" in
+    --enable|--enable=*)
+      feature="${argument#--enable=}"
+      if [ "$argument" = --enable ]; then feature="${1:?--enable needs a feature}"; shift; fi
+      case "$feature" in *multi_agent*) die "fan-out must remain disabled" ;; esac
+      args+=(--enable "$feature"); continue ;;
+    -m|--model) model="${1:?-m needs a model}"; check_model "$model"; shift; continue ;;
+    --model=*) model="${argument#--model=}"; check_model "$model"; continue ;;
+    -c|--config) value="${1:?-c needs a config value}"; shift ;;
+    --config=*) value="${argument#--config=}" ;;
+    -c?*) value="${argument#-c}" ;;
+    *) args+=("$argument"); continue ;;
+  esac
+  normalized="${value//[[:space:]]/}"; normalized="${normalized//\"/}"; normalized="${normalized//\'/}"
+  case "$normalized" in
+    features=*|agents=*) die "whole feature/agent table overrides are forbidden" ;;
+    model=*) model="${normalized#*=}"; check_model "$model"; continue ;;
+    model_reasoning_effort=*) effort="${normalized#*=}"; continue ;;
+    features.multi_agent=*|agents.max_concurrent_threads_per_session=*) continue ;;
+  esac
+  args+=(-c "$value")
+done
+if [ "$task" -eq 1 ] && [ "${#args[@]}" -gt 0 ]; then
+  last=$(( ${#args[@]} - 1 ))
+  args[$last]="Complete this task in the current session. Do not use collaboration tools or spawn subagents.
+
+${args[$last]}"
+fi
+
+# --- 4. key rotation --------------------------------------------------------
+# Marker files are named after the process id, so liveness is `kill -0` and a crashed
+# session frees its slot by itself.
+if [ "${CODEX_HOME:-$DEFAULT_HOME}" = "$DEFAULT_HOME" ] && [ -d "$ROT" ] && ls -d "$ROT"/*/ >/dev/null 2>&1; then
+  exec 9>"$ROT/.lock"; flock 9
+  best=""; besthome=""; bestlive=999
+  for h in "$ROT"/*/; do
+    n="$(basename "$h")"
+    lim="$(cat "$h/.limit" 2>/dev/null || echo 1)"
+    live=0
+    for m in "$h"/[0-9]*; do
+      [ -e "$m" ] || continue
+      if kill -0 "$(basename "$m")" 2>/dev/null; then live=$((live+1)); else rm -f "$m"; fi
+    done
+    # The key's CODEX_HOME is recorded beside its limit, so no naming convention is needed.
+    home="$(cat "$h/home" 2>/dev/null || echo "$CACHE_ROOT/codex-home-$n")"
+    if [ "$live" -lt "$lim" ] && [ "$live" -lt "$bestlive" ] && [ -d "$home" ]; then
+      best="$n"; besthome="$home"; bestlive="$live"
+    fi
+  done
+  if [ -n "$best" ]; then
+    export CODEX_HOME="$besthome"; : > "$ROT/$best/$$"
+    echo "$(date -u +%FT%TZ) pid=$$ -> $best (live before: $bestlive)" >> "$STATE/keyrot.log" 2>/dev/null || true
+  else
+    echo "$(date -u +%FT%TZ) pid=$$ -> no free rotation home; staying on the default" >> "$STATE/keyrot.log" 2>/dev/null || true
+  fi
+  flock -u 9; exec 9>&-
+fi
+
+# --- 5. the no-default-home guard -------------------------------------------
+if [ "${CODEX_HOME:-$DEFAULT_HOME}" = "$DEFAULT_HOME" ] && [ -e "$STATE/no-default-home" ]; then
+  echo 'codex-shim: no free rotation slot and the default home is retired; not started' >&2
+  exit 75
+fi
+
+# --- run the real codex -----------------------------------------------------
+real="${MIPSTARRE_CODEX_BIN:-}"
+if [ -z "$real" ]; then
+  stripped=""
+  IFS=':' read -r -a parts <<< "$PATH"
+  for p in "${parts[@]}"; do
+    [ "$p" = "$self_dir" ] && continue
+    stripped="${stripped:+$stripped:}$p"
+  done
+  real="$(PATH="$stripped" command -v codex 2>/dev/null || true)"
+fi
+[ -n "$real" ] || die "cannot find the real codex on PATH (set MIPSTARRE_CODEX_BIN)" 4
+
+forced=(-c 'features.multi_agent=false' -c 'agents.max_concurrent_threads_per_session=1')
+[ -n "$model" ] && forced=(-m "$model" "${forced[@]}")
+[ -n "$effort" ] && forced+=(-c "model_reasoning_effort=\"$effort\"")
+exec "$real" "${forced[@]}" "${args[@]}"

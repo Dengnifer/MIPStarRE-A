@@ -22,11 +22,11 @@ inside them.
 2. Apply all relevant labels from the established taxonomy:
    - Area: `formalization`, `infrastructure`, `documentation`,
      `ci`, `cleanup`
-   - Paper: `2009.12982`
-   - Chapter / theorem-family labels: `ldt-basic`, `preliminaries`,
-     `commutativity`, `pasting`, `main-induction`, `proof`,
-     `proof-infra`, `sorry-elimination`, `statement-fix`, `mismatch`,
-     `blueprint`, `blueprint-sync`
+   - Paper: one label per arXiv id in `project.arxiv` of
+     `local/project.json`
+   - Chapter / theorem-family labels: one per blueprint chapter, plus
+     `proof`, `proof-infra`, `sorry-elimination`, `statement-fix`,
+     `mismatch`, `blueprint`, `blueprint-sync`
    - Tracking / operations: `tracking`, `chapter-tracking`, `follow-up`,
      `auto-fix-claude`, `codex`, `standup`
    - Standard labels such as `bug`, `enhancement`, `question`,

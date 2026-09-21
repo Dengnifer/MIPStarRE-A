@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Which Stage 4.3 proof packets are ready to dispatch, and which are blocked.
+"""Which proof packets are ready to dispatch, and which are blocked.
 
-The packet tree is GitHub's: `#47` holds one sub-issue per chapter tracker,
-each tracker holds its packets, and a chain such as Magic Square rigidity nests
-one level deeper.  Readiness is GitHub's too — a packet's prerequisites are its
+The packet tree is GitHub's: one root tracking issue (`issues.tracker_root` of
+`local/project.json`) holds one sub-issue per chapter tracker, each tracker
+holds its packets, and a long chain may nest one level deeper.  Readiness is
+GitHub's too — a packet's prerequisites are its
 `blocked_by` issue dependencies (`local/protocols/issues-prs.md` §1), not the
 prose bullets in its body, which are commentary.  A packet is READY when it is
 an open leaf of that tree and every issue blocking it is closed; a merged PR
@@ -32,8 +33,15 @@ except ModuleNotFoundError as exc:  # pragma: no cover - defensive
 
 from wf_util import LayerError  # noqa: E402
 
-#: Stage 4.3's tracking issue; every proof packet hangs under it.
-DEFAULT_ROOT = 47
+#: The tracking issue every proof packet hangs under, from
+#: `local/project.json` (`issues.tracker_root`).  None until the project has
+#: one: the tree is created during bootstrap, not by this tool.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+import project_config  # noqa: E402
+
+DEFAULT_ROOT = project_config.get(
+    project_config.load(Path(__file__).resolve().parents[2]), "issues.tracker_root"
+)
 
 _CACHE: dict[str, list] = {}
 
@@ -113,7 +121,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         prog="ready_packets.py", description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--root", type=int, default=DEFAULT_ROOT, metavar="N",
-                        help=f"tracking issue to walk (default {DEFAULT_ROOT})")
+                        help="tracking issue to walk (default: issues.tracker_root "
+                             f"of local/project.json, currently {DEFAULT_ROOT or 'unset'})")
     parser.add_argument("--all", action="store_true",
                         help="also list the blocked packets and their open blockers")
     parser.add_argument("--json", action="store_true",
@@ -123,6 +132,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(sys.argv[1:] if argv is None else argv)
+    if args.root is None:
+        sys.stderr.write(
+            "ready_packets.py: no tracking issue to walk. Set issues.tracker_root "
+            "in local/project.json to the number of the issue every proof packet "
+            "hangs under, or pass --root N.\n"
+        )
+        return 2
     try:
         rows = collect(args.root)
     except LayerError as exc:

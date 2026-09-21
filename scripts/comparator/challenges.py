@@ -6,17 +6,28 @@ closure is extracted, the header/footer that frame the generated file, the
 checked-in expected copy, and the elaboration context that the kernel closure
 cannot see.
 
+The registry itself comes from `local/project.json`: one challenge per track
+that names headline theorems (`load_challenges`).  What cannot come from a
+config file — the hand-written elaboration context the kernel closure does not
+carry — stays here, in `EXTRAS` and `MODULE_PRELUDES`, keyed by challenge name;
+both ship empty, with one commented example of their shape.
+
 The extractor (`extract_closure.lean`) is shared and selects its roots from
 the `COMPARATOR_TARGETS` environment variable; `assemble_challenge.py` and
 `check_challenge_drift.py` select the rest from here with `--challenge`.
-Adding a challenge means adding an entry, a header, a footer, and a CI drift
-step — no generator code changes.
+Adding a challenge means adding a track with headline theorems, a header, a
+footer, and a CI drift step — no generator code changes.
 """
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import project_config  # noqa: E402
 
 # extra context commands needed for re-elaboration but absent from the kernel
 # closure (attributes, CoeFun instances that elaboration unfolds), keyed by the
@@ -76,232 +87,141 @@ class Challenge:
         return " ".join(self.targets)
 
 
-# --------------------------------------------------------------------- LDT
-
-FIELD_MODEL_ATTRIBUTE = [
-    "",
-    "-- source: MIPStarRE/LDT/Basic/ParametersBase.lean (attribute command)",
-    "attribute [instance_reducible, instance] FieldModel.instField FieldModel.instFintype",
-    "  FieldModel.instDecidableEq",
-]
-
-LDT_EXTRAS: Extras = {
-    "MIPStarRE.LDT.FieldModel": FIELD_MODEL_ATTRIBUTE,
-    "MIPStarRE.LDT.Polynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LowDegreePolynomial.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (Polynomial params) (fun _ => Point params → Fq params) :=",
-        "  ⟨Polynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.AxisLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (AxisLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨AxisLinePolynomial.toFun⟩",
-    ],
-    "MIPStarRE.LDT.DiagonalLinePolynomial.toFun": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/LinePolynomials.lean (elaboration context)",
-        "noncomputable instance {params : Parameters} [FieldModel params.q] :",
-        "    CoeFun (DiagonalLinePolynomial params) (fun _ => Fq params → Fq params) :=",
-        "  ⟨DiagonalLinePolynomial.toFun⟩",
-    ],
-}
-
-LDT_MODULE_PRELUDES: ModulePreludes = {
-    "MIPStarRE/LDT/Test/StrategyBiProj/Measurements.lean": (
-        Prelude(
-            ns=("MIPStarRE.LDT", "ProjStrat"),
-            lines=(
-                "open MIPStarRE.Quantum",
-                "variable {params : Parameters} [FieldModel params.q]",
-                "variable {ιA : Type*} [Fintype ιA] [DecidableEq ιA]",
-                "variable {ιB : Type*} [Fintype ιB] [DecidableEq ιB]",
-            ),
-        ),
-    ),
-    "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean": (
-        Prelude(
-            ns=("MIPStarRE.Quantum",),
-            lines=(
-                "open scoped Matrix.Norms.Elementwise",
-                "open WithLp",
-                "variable {d : Type*} [Fintype d]",
-            ),
-        ),
-    ),
-}
-
-# -------------------------------------------------------------------- QPBT
-
-QPBT_EXTRAS: Extras = {
-    "MIPStarRE.LDT.FieldModel": FIELD_MODEL_ATTRIBUTE,
-    # `dsimp` discharges `Distribution.support` of `uniformOnFinset`
-    # definitionally, so this rfl-lemma is used by a closure proof without
-    # appearing in the kernel closure
-    "MIPStarRE.LDT.Distribution.uniformOnFinset": [
-        "",
-        "-- source: MIPStarRE/LDT/Basic/Distribution.lean:430-432 (simp context)",
-        "@[simp]",
-        "theorem uniformOnFinset_support {α : Type*} (s : Finset α) :",
-        "    (uniformOnFinset s).support = s := rfl",
-    ],
-    "MIPStarRE.QPBT.Game": [
-        "",
-        "-- source: MIPStarRE/QPBT/Games/Defs.lean (attribute command)",
-        "attribute [instance] Game.questionAFintype Game.questionBFintype",
-        "  Game.answerAFintype Game.answerBFintype Game.questionADecidableEq",
-        "  Game.questionBDecidableEq Game.answerADecidableEq Game.answerBDecidableEq",
-    ],
-    "MIPStarRE.QPBT.Strategy": [
-        "",
-        "-- source: MIPStarRE/QPBT/Games/Defs.lean (attribute command)",
-        "attribute [instance] Strategy.ιAFintype Strategy.ιBFintype",
-        "  Strategy.ιADecidableEq Strategy.ιBDecidableEq",
-    ],
-    "MIPStarRE.QPBT.PauliSoundnessWitness": [
-        "",
-        "-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean (attribute command)",
-        "attribute [instance] PauliSoundnessWitness.ιAFintype"
-        " PauliSoundnessWitness.ιBFintype",
-        "  PauliSoundnessWitness.ιADecidableEq PauliSoundnessWitness.ιBDecidableEq",
-    ],
-    "MIPStarRE.QPBT.QubitSoundnessWitness": [
-        "",
-        "-- source: MIPStarRE/QPBT/Test/QubitForm.lean (attribute command)",
-        "attribute [instance] QubitSoundnessWitness.ιAFintype",
-        "  QubitSoundnessWitness.ιBFintype QubitSoundnessWitness.ιADecidableEq",
-        "  QubitSoundnessWitness.ιBDecidableEq",
-    ],
-}
-
-QPBT_MODULE_PRELUDES: ModulePreludes = {
-    "MIPStarRE/QPBT/Algebra/FieldBasis.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("variable {G : Type*} [CommGroup G]",),
-            first=88,
-            last=117,
-        ),
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=(
-                "variable {K : Type*} [Field K] [Fintype K] [Algebra (ZMod 2) K]",
-                'local notation "G" => Gal(K/(ZMod 2))',
-            ),
-            first=119,
-            last=385,
-        ),
-    ),
-    "MIPStarRE/QPBT/Algebra/Subspaces.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=(
-                "variable {K ι : Type*} [Field K] [Fintype ι] [DecidableEq ι]",
-            ),
-        ),
-    ),
-    "MIPStarRE/QPBT/Algebra/Lines.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("variable {K : Type*} [Field K]",),
-        ),
-    ),
-    "MIPStarRE/QPBT/Algebra/LowDegreeCode.lean": (
-        Prelude(ns=("MIPStarRE.QPBT",), lines=("open MvPolynomial",)),
-    ),
-    "MIPStarRE/QPBT/Algebra/Pauli.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=(
-                "open MIPStarRE.Quantum",
-                "variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]",
-                "  [Algebra (ZMod 2) K]",
-            ),
-        ),
-    ),
-    "MIPStarRE/QPBT/Algebra/PauliTheorems.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT MIPStarRE.Quantum",),
-        ),
-    ),
-    "MIPStarRE/QPBT/Algebra/SelfDualBasisTheorems.lean": (
-        Prelude(ns=("MIPStarRE.QPBT",), lines=("open MIPStarRE.LDT",)),
-    ),
-    "MIPStarRE/QPBT/Games/Defs.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT", "open MIPStarRE.Quantum"),
-        ),
-    ),
-    "MIPStarRE/QPBT/State.lean": (
-        Prelude(ns=("MIPStarRE.QPBT",), lines=("open MIPStarRE.Quantum",)),
-    ),
-    "MIPStarRE/QPBT/Test/LowDegreeGame.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT",),
-            first=31,
-            last=768,
-            noncomputable=True,
-        ),
-    ),
-    "MIPStarRE/QPBT/Test/MagicSquare.lean": (
-        Prelude(ns=("MIPStarRE.QPBT",), lines=("open MIPStarRE.LDT",)),
-    ),
-    "MIPStarRE/QPBT/Test/PauliBasisTest.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT",),
-            first=28,
-            last=741,
-            noncomputable=True,
-        ),
-    ),
-    "MIPStarRE/QPBT/Test/SoundnessDefs.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT", "open MIPStarRE.Quantum"),
-            first=28,
-            last=207,
-            noncomputable=True,
-        ),
-    ),
-    "MIPStarRE/QPBT/Test/QubitForm.lean": (
-        Prelude(
-            ns=("MIPStarRE.QPBT",),
-            lines=("open MIPStarRE.LDT MIPStarRE.Quantum",),
-            first=35,
-            last=447,
-            noncomputable=True,
-        ),
-    ),
-}
 
 
-CHALLENGES: dict[str, Challenge] = {
-    "ldt": Challenge(
-        name="ldt",
-        targets=("MIPStarRE.LDT.Test.mainFormal",),
-        header=Path("scripts/comparator/challenge_header.lean"),
-        footer=Path("scripts/comparator/challenge_footer.lean"),
-        expected=Path("scripts/comparator/expected/Challenge.lean.expected"),
-        extras=LDT_EXTRAS,
-        module_preludes=LDT_MODULE_PRELUDES,
-    ),
-    "qpbt": Challenge(
-        name="qpbt",
-        targets=(
-            "MIPStarRE.QPBT.pauli_soundness",
-            "MIPStarRE.QPBT.pauli_soundness_qubit",
-        ),
-        header=Path("scripts/comparator/challenge_qpbt_header.lean"),
-        footer=Path("scripts/comparator/challenge_qpbt_footer.lean"),
-        expected=Path("scripts/comparator/expected/ChallengeQPBT.lean.expected"),
-        extras=QPBT_EXTRAS,
-        module_preludes=QPBT_MODULE_PRELUDES,
-    ),
-}
+# --------------------------------------------------------------- the registry
+
+#: Hand-written elaboration context, keyed by challenge name.  The kernel
+#: closure cannot see attribute commands or `CoeFun` instances that elaboration
+#: unfolds, so the assembler replays them after the declaration they belong to.
+#: Only the formalizer can write these, and they grow with the project.  One
+#: example of the shape:
+#:
+#: EXTRAS = {
+#:     "core": {
+#:         "MyLib.Core.Polynomial.toFun": [
+#:             "",
+#:             "-- source: MyLib/Core/Polynomial.lean (elaboration context)",
+#:             "noncomputable instance {p : Parameters} :",
+#:             "    CoeFun (Polynomial p) (fun _ => Point p → F p) :=",
+#:             "  ⟨Polynomial.toFun⟩",
+#:         ],
+#:     },
+#: }
+EXTRAS: dict[str, Extras] = {}
+
+#: Per-module elaboration scopes, keyed by challenge name and then by module
+#: path.  A module needs one `Prelude` per source section whose context differs
+#: (a section that opens namespaces or binds `variable`s the snippets rely on).
+#: One example of the shape:
+#:
+#: MODULE_PRELUDES = {
+#:     "core": {
+#:         "MyLib/Core/Basic.lean": (
+#:             Prelude(
+#:                 ns=("MyLib.Core",),
+#:                 lines=("open scoped BigOperators", "variable {p : Parameters}"),
+#:                 first=1,
+#:                 last=420,
+#:                 noncomputable=True,
+#:             ),
+#:         ),
+#:     },
+#: }
+MODULE_PRELUDES: dict[str, ModulePreludes] = {}
+
+
+def _challenge_paths(name: str, default_track: str) -> tuple[Path, Path]:
+    """Header and footer of one challenge.
+
+    The project's default track uses the plain names, so a one-track project
+    edits `challenge_header.lean` and `challenge_footer.lean`; a second track
+    gets its own `challenge_<track>_header.lean` / `_footer.lean` pair.
+    """
+
+    stem = "" if name == default_track else f"_{name}"
+    return (
+        Path(f"scripts/comparator/challenge{stem}_header.lean"),
+        Path(f"scripts/comparator/challenge{stem}_footer.lean"),
+    )
+
+
+def load_challenges(root: Path | None = None) -> dict[str, Challenge]:
+    """Build the registry from `local/project.json`.
+
+    One challenge per track that names headline theorems: the theorems are the
+    challenge's targets, and the track's `expected_challenge` is the checked-in
+    copy the drift check compares against.  A repository whose tracks are not
+    written yet has no challenge, and the generators say so instead of failing.
+    """
+
+    cfg = project_config.load(root)
+    default_track = project_config.get(cfg, "project.track", "")
+    out: dict[str, Challenge] = {}
+    for name in project_config.track_names(cfg):
+        entry = project_config.track(cfg, name) or {}
+        targets = tuple(theorem for theorem, _label in entry.get("headline", []))
+        if not targets:
+            continue
+        header, footer = _challenge_paths(name, default_track)
+        expected = entry.get("expected_challenge") or (
+            "scripts/comparator/expected/Challenge"
+            + ("" if name == default_track else name.upper())
+            + ".lean.expected"
+        )
+        out[name] = Challenge(
+            name=name,
+            targets=targets,
+            header=header,
+            footer=footer,
+            expected=Path(expected),
+            extras=EXTRAS.get(name, {}),
+            module_preludes=MODULE_PRELUDES.get(name, {}),
+        )
+    return out
+
+
+CHALLENGES: dict[str, Challenge] = load_challenges()
+
+
+def default_challenge_name(root: Path | None = None) -> str | None:
+    """The challenge of the project's default track, if it has one."""
+
+    name = project_config.get(project_config.load(root), "project.track", "")
+    return name if name in CHALLENGES else None
+
+
+def main(argv: "list[str] | None" = None) -> int:
+    """Small CLI so shell steps need not parse `local/project.json` themselves.
+
+    `names` prints one challenge name per line (nothing when none is
+    configured); `targets` and `expected` print one challenge's target list and
+    checked-in copy, defaulting to the project's default track.
+    """
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="comparator challenge registry")
+    parser.add_argument("command", choices=("names", "targets", "expected"))
+    parser.add_argument("--challenge", default=None, help="challenge name")
+    args = parser.parse_args(argv)
+
+    if args.command == "names":
+        for name in sorted(CHALLENGES):
+            print(name)
+        return 0
+
+    name = args.challenge or default_challenge_name()
+    if name is None or name not in CHALLENGES:
+        print(
+            "no comparator challenge is configured in local/project.json",
+            file=sys.stderr,
+        )
+        return 2
+    challenge = CHALLENGES[name]
+    print(challenge.target_env if args.command == "targets" else challenge.expected)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

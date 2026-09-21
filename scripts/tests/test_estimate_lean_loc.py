@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Unit tests for ``results/telemetry/owner-tools/lean-loc.py``.
 
-The owner asked (2026-09-18) that every completion-estimate update on issue #168
-also carry the total Lean code-line count of the QPBT project, counted with the
-same rule as the merge-title Lean delta: blank lines and comment-only lines do
-not count.  These tests pin that behaviour on a tiny fixture tree and pin the
-wording of the clause ``estimate.sh`` appends to the posted comment.
+Every completion-estimate update carries the total Lean code-line count of the
+project, counted with the same rule as the merge-title Lean delta: blank lines
+and comment-only lines do not count.  These tests pin that behaviour on a tiny
+fixture tree and pin the wording of the clause ``estimate.sh`` appends to the
+posted comment — including that the project name in it comes from the
+configuration rather than from a constant in the helper.
 
 They are offline: the helper is driven through its ``--paths`` and
 ``--format-clause`` entry points, which never touch git, gh, or the telemetry
@@ -82,18 +83,27 @@ class LeanLocFailureTests(unittest.TestCase):
 
 
 class ClauseFormattingTests(unittest.TestCase):
-    def clause(self, files: int, code_lines: int) -> str:
-        proc = run("--format-clause", str(files), str(code_lines))
+    def clause(self, files: int, code_lines: int, name: str = "Demo") -> str:
+        proc = run("--format-clause", str(files), str(code_lines), "--name", name)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         return proc.stdout.strip()
 
     def test_thousands_separators(self):
         self.assertEqual(
-            self.clause(311, 75906), "QPBT Lean code: 75,906 lines in 311 files"
+            self.clause(311, 75906), "Demo Lean code: 75,906 lines in 311 files"
         )
 
     def test_one_file_is_singular(self):
-        self.assertEqual(self.clause(1, 7), "QPBT Lean code: 7 lines in 1 file")
+        self.assertEqual(self.clause(1, 7), "Demo Lean code: 7 lines in 1 file")
+
+    def test_the_project_name_comes_from_the_configuration(self):
+        """No project name is baked into the helper: it reads project.name."""
+        import json
+
+        proc = run("--format-clause", "1", "7")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        configured = json.loads((ROOT / "local" / "project.json").read_text())["project"]["name"]
+        self.assertEqual(proc.stdout.strip(), f"{configured} Lean code: 7 lines in 1 file")
 
 
 class EstimateWiringTests(unittest.TestCase):

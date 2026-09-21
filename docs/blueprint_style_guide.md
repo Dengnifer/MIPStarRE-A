@@ -30,7 +30,7 @@ formulae should be punctuated as part of the sentences in which they occur.
 ## Proof Sketches Must Match Lean
 This is the most important rule. Every proof in the blueprint must faithfully describe what the Lean proof does:
 
-- **Reference the actual lemmas used.** If the Lean proof calls `LDT.selfImprovement`, the blueprint proof should say "By Lemma X.Y (self-improvement)..." and list it in `\uses`.
+- **Reference the actual lemmas used.** If the Lean proof calls `Ns.selfImprovement`, the blueprint proof should say "By Lemma X.Y (self-improvement)..." and list it in `\uses`.
 - **Do not use `\cref` or `\Cref`.** The blueprint does not load `cleveref`.
   Spell out the kind of object and use ordinary references, for example
   `Lemma~\ref{lem:self-improvement}` or `Theorem~\ref{thm:main-formal}`.
@@ -46,7 +46,7 @@ paper, the linked Lean declaration must state the same theorem, up to faithful
 formal encoding of the paper's domain.  Do not use `\lean{...}` and `\leanok`
 on the source-labelled statement to point to a conditional helper whose
 additional assumptions supply an unproved part of the paper proof.
-Changing the Lean statement away from `references/ldt-paper/` is strongly
+Changing the Lean statement away from `references/<key>-paper/` is strongly
 discouraged unless faithful formal encoding or a documented mathematical
 necessity requires it; the blueprint should make any such necessity explicit.
 
@@ -98,12 +98,12 @@ lemma supports, and should avoid making the auxiliary name look like a named
 result from the source article.
 
 ## What NOT to Put in the Blueprint
-- **Lean identifier names in math text.** Write "the self-improvement lemma", never "the `selfImprovement` step". The `\lean{LDT.selfImprovement}` tag handles the linking.
+- **Lean identifier names in math text.** Write "the self-improvement lemma", never "the `selfImprovement` step". The `\lean{Ns.selfImprovement}` tag handles the linking.
 - **Implementation details.** Don't say "bundled as an element of the Euclidean space" or "using `EuclideanSpace.equiv`". Describe the mathematical object.
 - **Ad-hoc notation.** Don't invent superscripts or subscripts to distinguish from existing notation. Use standard conventions.
 - **Function-call syntax.** Use mathematical notation, not programming notation.
 - **Redundant definitions.** If two blueprint definitions describe the same mathematical object, consolidate them. Each definition should introduce genuinely new mathematical content.
-- **Lean namespace prefixes in prose.** Don't write "the `LDT.PastingLemma`" — write "the pasting lemma".
+- **Lean namespace prefixes in prose.** Don't write "the `Ns.PastingLemma`" — write "the pasting lemma".
 
 ## Banned AI/Software Language (enforced in both blueprint AND Lean code)
 The blueprint reads as a **mathematical document**, not software documentation. The following patterns are banned in ALL reader-facing text (section titles, theorem names, proof sketches, remarks, chapter preambles) and in ALL Lean docstrings, comments, and section names:
@@ -186,7 +186,7 @@ Excerpt from `blueprint/src/chapter/ch08_commutativity.tex:8-19`:
 
 ```latex
 \begin{theorem}[Commutativity of the point measurements]\label{thm:commutativity-points}
-  \lean{MIPStarRE.LDT.CommutativityPoints.commutativityPoints}
+  \lean{PaperLib.CommutativityPoints.commutativityPoints}
   \leanok
   \uses{def:good-strategy, def:approx_delta}
   Let $(\psi,A,B,L)$ be an $(\eps,\delta,\gamma)$-good symmetric strategy.
@@ -197,7 +197,7 @@ Excerpt from `blueprint/src/chapter/ch08_commutativity.tex:8-19`:
 \end{proof}
 ```
 
-**Current CI behavior.** The advisory Blueprint ↔ Lean sync check in [`docs/ci-blueprint-sync.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/ci-blueprint-sync.md) distinguishes the two placements. Only proof-level `\leanok` whose axiom closure contains `sorryAx` (or whose harness output cannot be parsed) is reported as an **error**. Statement-level-only `\leanok` with the same finding is downgraded to a **warning**, because statement-level does not claim proof completeness. Each audit line is annotated with the observed placement so reviewers can tell statement-sync work apart from proof-completion work.
+**Current CI behavior.** The advisory Blueprint ↔ Lean sync check in [`docs/ci-blueprint-sync.md`](https://github.com/OWNER/REPO/blob/main/docs/ci-blueprint-sync.md) distinguishes the two placements. Only proof-level `\leanok` whose axiom closure contains `sorryAx` (or whose harness output cannot be parsed) is reported as an **error**. Statement-level-only `\leanok` with the same finding is downgraded to a **warning**, because statement-level does not claim proof completeness. Each audit line is annotated with the observed placement so reviewers can tell statement-sync work apart from proof-completion work.
 
 `leanblueprint` does not use distinct macro names for these two claims, so audits must distinguish them by environment context rather than by raw `\leanok` counts. A future split such as `\leanokstmt` / `\leanokproof` could make that distinction explicit, but that is only a possible later cleanup; the current convention is to keep `\leanok` and rely on placement.
 
@@ -226,7 +226,7 @@ paper statement unless a separate construction supplies that data.
 3. Run `leanblueprint web` (plasTeX reads `web.bbl`)
 4. The PDF build needs no separate step: `leanblueprint pdf` runs bibtex on
    `print.tex` itself, and `print.bbl` never feeds the web build.
-5. Citation key format: e.g., `Ji2020MIPStar`, `Natarajan2020Quantum`
+5. Citation key format: `<FirstAuthor><Year><ShortTitle>`, for example `Euler1736Bridges`
 6. Paper-gap notes: blueprint prose cites `\cite{gap:<slug>}` (never the raw
    `docs/paper-gaps/<slug>.tex` path); each cited note has a `@techreport`
    entry in `blueprint/src/references.bib` with `type = {Paper-gap note}`,

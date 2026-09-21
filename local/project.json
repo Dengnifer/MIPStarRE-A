@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "project": {
+    "name": "PaperLib",
+    "lean_root": "PaperLib",
+    "track": "main",
+    "title": "",
+    "arxiv": [],
+    "github_slug": "OWNER/REPO",
+    "comparator_slug": "OWNER/REPO-comparator"
+  },
+  "paths": {
+    "cache_root": "~/.cache/paperlib-dev",
+    "full_build_lock": "~/.cache/lean-full-build.lock"
+  },
+  "issues": {
+    "progress": null,
+    "owner_inbox": null,
+    "tracker_root": null
+  },
+  "session": {
+    "tmux": "paperlib",
+    "turn_max_minutes": 25,
+    "main": {
+      "model": "",
+      "effort": "",
+      "key": "default",
+      "native_delegates": 1
+    },
+    "workers": {
+      "model": "",
+      "hard_model": "",
+      "effort": "",
+      "lanes": 0,
+      "models_allowed": []
+    }
+  },
+  "keys": {
+    "default": {
+      "codex_home": "~/.codex",
+      "limit": 2
+    }
+  },
+  "paper_mirrors": [],
+  "tracks": {}
+}

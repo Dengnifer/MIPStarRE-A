@@ -19,7 +19,7 @@ do
   [ "$#" -eq 3 ] || continue
   [ "$2" = "$OLD_OBJECT" ] || continue
 
-  echo "MIPStarRE reference transaction: checking merge for silent incoming loss."
+  echo "PaperLib reference transaction: checking merge for silent incoming loss."
   python3 "$HOOK_ROOT/local/bin/merge_loss_guard.py" \
     --repo "$ROOT" --commit "$NEW_OBJECT"
 done

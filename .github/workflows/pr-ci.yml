@@ -67,8 +67,7 @@ jobs:
       pull-requests: read
     outputs:
       lean: ${{ steps.filter.outputs.lean }}
-      mip_lean: ${{ steps.filter.outputs.mip_lean }}
-      ldt_lean: ${{ steps.filter.outputs.ldt_lean }}
+      lib_lean: ${{ steps.filter.outputs.lib_lean }}
       blueprint: ${{ steps.filter.outputs.blueprint }}
       blueprint_src: ${{ steps.filter.outputs.blueprint_src }}
       tex_chapter: ${{ steps.filter.outputs.tex_chapter }}
@@ -86,10 +85,11 @@ jobs:
               - 'lakefile.*'
               - 'lean-toolchain'
               - 'lake-manifest.json'
-            mip_lean:
-              - 'MIPStarRE/**/*.lean'
-            ldt_lean:
-              - 'MIPStarRE/LDT/**/*.lean'
+            # Every Lean file of the library: which subtree carries statements
+            # is a project decision (local/project.json), not a CI one, so the
+            # statement-origin guard below sees every change and decides.
+            lib_lean:
+              - 'PaperLib/**/*.lean'
             blueprint:
               - 'blueprint/**'
             blueprint_src:
@@ -102,7 +102,7 @@ jobs:
               # Trees the paper-gap reference check scans (texra-blueprint
               # paper-gaps check); without these the check skips pull
               # requests that only touch a scanned file.
-              - 'MIPStarRE/**/*.lean'
+              - 'PaperLib/**/*.lean'
               - 'blueprint/src/**'
               - 'docs/**/*.md'
             scripts:
@@ -138,7 +138,7 @@ jobs:
       # lean-action's built-in GitHub cache is disabled because it saved a
       # ~2.6 GB entry per PR run; those entries cycle through the 10 GB
       # repository cache budget and evict the main-branch entry, so no run
-      # ever restored usable MIPStarRE oleans and every run rebuilt the
+      # ever restored usable PaperLib oleans and every run rebuilt the
       # whole library.
       - name: Restore Lean build cache
         uses: actions/cache/restore@v4
@@ -152,16 +152,28 @@ jobs:
         with:
           use-github-cache: false
 
+      # The audit modules are the `axiom_audit` files of the registered
+      # tracks (local/project.json).  A repository that registers none builds
+      # nothing extra here, which is correct: there is no headline theorem yet.
       - name: Build axiom audit regression checks
-        run: lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
-
-      - name: Check comparator challenge regeneration drift (LDT)
         run: |
-          python3 scripts/comparator/check_challenge_drift.py --root . --challenge ldt
+          modules=$(python3 scripts/completion_gate.py list | while read -r track; do
+            audit=$(python3 scripts/project_config.py get "tracks.$track.axiom_audit")
+            [ -n "$audit" ] || continue
+            printf '%s\n' "${audit%.lean}" | tr '/' '.'
+          done)
+          if [ -n "$modules" ]; then
+            echo "+ lake build $modules"
+            lake build $modules
+          else
+            echo "no axiom-audit module is registered in local/project.json; nothing to build"
+          fi
 
-      - name: Check comparator challenge regeneration drift (QPBT)
+      # No `--challenge`: the guard walks every challenge the project
+      # registers, so adding a track never means editing this workflow.
+      - name: Check comparator challenge regeneration drift
         run: |
-          python3 scripts/comparator/check_challenge_drift.py --root . --challenge qpbt
+          python3 scripts/comparator/check_challenge_drift.py --root .
 
       # Save even when the build failed: a partial cache still spares the
       # next run the modules that did compile.
@@ -326,7 +338,7 @@ jobs:
     needs: changes
     if: |
       !cancelled() && github.event_name == 'pull_request' && (
-        needs.changes.outputs.mip_lean == 'true' ||
+        needs.changes.outputs.lib_lean == 'true' ||
         needs.changes.outputs.scripts == 'true' ||
         needs.changes.outputs.workflow == 'true'
       )
@@ -349,7 +361,7 @@ jobs:
     needs: changes
     if: |
       !cancelled() && github.event_name == 'pull_request' && (
-        needs.changes.outputs.mip_lean == 'true' ||
+        needs.changes.outputs.lib_lean == 'true' ||
         needs.changes.outputs.tex_chapter == 'true' ||
         needs.changes.outputs.scripts == 'true' ||
         needs.changes.outputs.workflow == 'true'
@@ -395,7 +407,7 @@ jobs:
     needs: changes
     if: |
       !cancelled() && github.event_name == 'pull_request' && (
-        needs.changes.outputs.mip_lean == 'true' ||
+        needs.changes.outputs.lib_lean == 'true' ||
         needs.changes.outputs.scripts == 'true' ||
         needs.changes.outputs.workflow == 'true'
       )
@@ -454,7 +466,7 @@ jobs:
     needs: changes
     if: |
       !cancelled() && github.event_name == 'pull_request' && (
-        needs.changes.outputs.ldt_lean == 'true' ||
+        needs.changes.outputs.lib_lean == 'true' ||
         needs.changes.outputs.scripts == 'true' ||
         needs.changes.outputs.workflow == 'true'
       )
@@ -487,6 +499,6 @@ jobs:
             echo '```'
             echo
             echo 'This is a blocking check. New statement-like declarations'
-            echo 'must cite `references/ldt-paper/`, a paper `\label{...}`,'
+            echo 'must cite `references/<mirror>-paper/`, a paper `\label{...}`,'
             echo 'or a documented paper gap at their definition site.'
           } >> "$GITHUB_STEP_SUMMARY"

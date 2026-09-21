@@ -12,6 +12,12 @@ Every pattern here is **castle-in-the-air in spirit**: a theorem named after a
 paper result that doesn't actually prove it. The named offenders below all
 cross-reference a concrete issue or PR so reviewers can see a real example.
 
+> **About the examples.** The named offenders, file paths and `[#NNN]` links
+> below come from the project this kit was extracted from: they point at that
+> project's issue tracker and its Lean tree, and they are kept as concrete
+> evidence that each pattern is real. Read them as examples from the origin
+> project, not as facts about this repository.
+
 ## Why this matters
 
 Kernel checks are necessary but not sufficient. A theorem can:
@@ -162,7 +168,7 @@ anywhere in Lean.
 
 ### Concrete example
 
-From `MIPStarRE/LDT/ExpansionHypercubeGraph/Defs/Fourier.lean`:
+From the origin project's `<LeanRoot>/<Chapter>/Defs/Fourier.lean`:
 
 ```lean
 /-- The exact inner-product formula for the hypercube Fourier basis. -/
@@ -254,9 +260,9 @@ match.
 - Functions that return `Polynomial params` but can return the zero polynomial
   on inputs that shouldn't be in the domain.
 
-### Concrete example (historical; resolved by PR #561)
+### Concrete example (historical, from the origin project; since resolved)
 
-Until PR #561, `MIPStarRE/LDT/Pasting/Defs/Interpolation.lean` contained:
+Until one of its PRs, the origin project's `<LeanRoot>/<Chapter>/Defs/Interpolation.lean` contained:
 
 ```lean
 /-- Extract the polynomial from a completed slice outcome; returns 0 on ⊥. -/
@@ -311,11 +317,11 @@ that silently use `Classical.dec` to fill in decidability that should be
 constructive. The historical `interpolationEligibleSandwichFamily`
 implementation was exactly such a case: it used `open Classical in ...` to
 gate a predicate that is actually decidable by a finite-support check. PR
-#561 fixed that example by adding `interpolationEligible_decidablePred`.
+That example was fixed by adding `interpolationEligible_decidablePred`.
 Those classical instances are acceptable only when the predicate is genuinely
 non-constructive; if a constructive instance is plausible, write it, don't
 bottom out in `Classical.dec`. See [#495] for the full catalogue of
-classical-logic uses in `LDT/Pasting/`.
+classical-logic uses in one chapter directory.
 
 ### Related issues
 
@@ -453,7 +459,7 @@ Before writing a new lemma, spend one minute on:
 If Mathlib has it, use it. If it doesn't, consider whether the missing
 lemma should be upstreamed (file an issue against Mathlib, or at least a
 TODO pointing at the gap). The project already has this mandate — see the
-"Mathlib Integration" section of [`AGENTS.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/AGENTS.md):
+"Mathlib Integration" section of [`AGENTS.md`](https://github.com/OWNER/REPO/blob/main/AGENTS.md):
 
 > Scout Mathlib first (`exact?`, `apply?`, `#find?`, grep Mathlib source)
 
@@ -516,12 +522,14 @@ Grep for these suffixes: `*Statement`, `*Witness`, `*Claim`,
 
 If any answer is "no", the structure is an unacceptable smuggle.
 
-### Current status (audited 2026-05-08)
+### Keeping a status ledger
 
-The May 2026 re-audit
-([`audits/2026-05-08_statement-smuggle-reaudit.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/audits/2026-05-08_statement-smuggle-reaudit.md))
-classified 39 `*Statement` structures (102 declarations total across the
-extended suffix sweep of `*Witness`/`*Conclusion`/`*Input`/etc.).
+A project that carries `*Statement` structures keeps a dated re-audit under
+`audits/` classifying every one of them, and a live ledger issue that the audit
+points at. The origin project's last such sweep classified 39 `*Statement`
+structures, 102 declarations in all, across the extended
+`*Witness`/`*Conclusion`/`*Input` suffixes — a useful order of magnitude, not a
+fact about this repository.
 
 The live ledger is [#1379], replacing the now-closed [#449] (2026-05-01) and
 [#451] (2026-04-30). Headline counts from the re-audit: 33 grounded, 2 tracked

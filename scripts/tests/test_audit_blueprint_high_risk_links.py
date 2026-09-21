@@ -19,7 +19,9 @@ def write_minimal_tree(root: Path, *, tex: str, axiom_audit: str) -> None:
     chapter.mkdir(parents=True)
     (chapter / "ch_test.tex").write_text(tex, encoding="utf-8")
 
-    audit_dir = root / "MIPStarRE" / "LDT" / "Test"
+    # The audit reads the project's configured axiom-audit file; with no track
+    # registered that is <lean-root>/Test/AxiomAudit.lean.
+    audit_dir = root / "PaperLib" / "Test"
     audit_dir.mkdir(parents=True)
     (audit_dir / "AxiomAudit.lean").write_text(axiom_audit, encoding="utf-8")
 
@@ -32,13 +34,13 @@ class BlueprintHighRiskLinkAuditTests(unittest.TestCase):
                 root,
                 tex=r"""
 \begin{lemma}\label{lem:repair}
-\lean{MIPStarRE.LDT.RepairThing}
+\lean{PaperLib.Core.RepairThing}
 \leanok
 This is a test statement.
 \end{lemma}
 """,
                 axiom_audit="""
-assert_no_sorry_axiom MIPStarRE.LDT.RepairThing
+assert_no_sorry_axiom PaperLib.Core.RepairThing
 """,
             )
 
@@ -56,17 +58,17 @@ assert_no_sorry_axiom MIPStarRE.LDT.RepairThing
                 root,
                 tex=r"""
 \begin{lemma}\label{lem:slackness}
-\lean{MIPStarRE.LDT.SelfImprovement.PairWithSlackness.toStatementWithSlackness}
+\lean{PaperLib.Core.SelfImprovement.PairWithSlackness.toStatementWithSlackness}
 \leanok
 This is a test statement.
 \end{lemma}
 """,
                 axiom_audit="""
-namespace MIPStarRE.LDT.SelfImprovement
+namespace PaperLib.Core.SelfImprovement
 
 assert_no_sorry_axiom PairWithSlackness.toStatementWithSlackness
 
-end MIPStarRE.LDT.SelfImprovement
+end PaperLib.Core.SelfImprovement
 """,
             )
 
@@ -84,7 +86,7 @@ end MIPStarRE.LDT.SelfImprovement
                 root,
                 tex=r"""
 \begin{proposition}\label{prop:bridge}
-\lean{MIPStarRE.LDT.MainBridgeHypotheses}
+\lean{PaperLib.Core.MainBridgeHypotheses}
 This is a test statement.
 \end{proposition}
 """,
@@ -96,7 +98,7 @@ This is a test statement.
         self.assertFalse(result.ok)
         self.assertEqual(result.high_risk_entries, 1)
         self.assertEqual(len(result.findings), 1)
-        self.assertEqual(result.findings[0].decl, "MIPStarRE.LDT.MainBridgeHypotheses")
+        self.assertEqual(result.findings[0].decl, "PaperLib.Core.MainBridgeHypotheses")
         self.assertEqual(result.findings[0].label, "prop:bridge")
 
     def test_non_high_risk_link_is_ignored(self) -> None:
@@ -106,7 +108,7 @@ This is a test statement.
                 root,
                 tex=r"""
 \begin{theorem}\label{thm:ordinary}
-\lean{MIPStarRE.LDT.ordinaryTheorem}
+\lean{PaperLib.Core.ordinaryTheorem}
 \leanok
 This is a test statement.
 \end{theorem}
@@ -127,7 +129,7 @@ This is a test statement.
                 root,
                 tex=r"""
 \begin{lemma}\label{lem:statement}
-\lean{MIPStarRE.LDT.SomeStatement}
+\lean{PaperLib.Core.SomeStatement}
 This is a test statement.
 \end{lemma}
 """,
@@ -138,7 +140,7 @@ This is a test statement.
 
         self.assertFalse(result.ok)
         self.assertEqual(result.high_risk_entries, 1)
-        self.assertEqual(result.findings[0].decl, "MIPStarRE.LDT.SomeStatement")
+        self.assertEqual(result.findings[0].decl, "PaperLib.Core.SomeStatement")
 
 
 if __name__ == "__main__":

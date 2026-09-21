@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 #
-# github-sync.sh — push the named refs to this repository's GitHub home,
-# git@github.com:Dengnifer/MIPStarRE-A.git (standalone repo since the
-# 2026-08-31 restructure; the old subtree-into-monorepo flow is retired, see
-# EVOLUTION.md), then refresh the read-only record snapshot.
+# github-sync.sh — push the named refs to this repository's GitHub home
+# (git@github.com:<project.github_slug>.git, from local/project.json), then
+# refresh the read-only record snapshot.
 #
 # Usage: local/bin/github-sync.sh [ref ...]      (default: main)
 #
@@ -29,8 +28,23 @@ LOCAL_BIN="$ROOT/local/bin"
 REFS=("$@")
 [ "${#REFS[@]}" -gt 0 ] || REFS=(main)
 
-git remote get-url github >/dev/null 2>&1 ||
-  git remote add github git@github.com:Dengnifer/MIPStarRE-A.git
+# An existing `github` remote is authoritative; otherwise the remote is built
+# from the configured slug, and a repository that has not been given one yet
+# must not invent it.
+if ! git remote get-url github >/dev/null 2>&1; then
+  SLUG=$(python3 "$ROOT/scripts/project_config.py" --root "$ROOT" get project.github_slug 2>/dev/null || true)
+  case "$SLUG" in
+    ""|OWNER/*)
+      echo "$PROG: this repository has no 'github' remote, and local/project.json" >&2
+      echo "$PROG: still carries the placeholder name '${SLUG:-<empty>}'." >&2
+      echo "$PROG: Set project.github_slug to the owner/repo of this project's" >&2
+      echo "$PROG: GitHub home (creating that repository is a step the owner" >&2
+      echo "$PROG: approves once), then run this again." >&2
+      exit 1
+      ;;
+  esac
+  git remote add github "git@github.com:$SLUG.git"
+fi
 
 RC=0
 MAIN_PUSHED=0

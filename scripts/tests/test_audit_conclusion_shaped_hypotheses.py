@@ -26,7 +26,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_let_assignment_inside_binder(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -50,7 +50,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_line_ignores_preceding_masked_whitespace(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             source = textwrap.dedent(
                 """\
@@ -83,7 +83,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_inline_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -116,7 +116,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_nested_bracket_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -138,7 +138,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_nonrec_modifiers(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -170,7 +170,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_strict_implicit_binders(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -198,7 +198,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_multiline_attributes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -222,7 +222,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_accepts_unicode_declaration_names(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -244,7 +244,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_keeps_prime_and_question_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -277,7 +277,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_skips_top_level_let_assignments_in_conclusion(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -302,7 +302,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_comment_colons_before_conclusion(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -327,7 +327,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_nested_block_comment_terminators(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -351,7 +351,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_commented_out_declarations(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -380,7 +380,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_string_literal_declarations(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -416,7 +416,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_raw_string_literal_declarations(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -449,7 +449,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_ignores_interpolated_string_declarations(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -475,7 +475,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_header_parser_resynchronizes_after_interpolated_string(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -499,7 +499,7 @@ class ParseDeclarationTests(unittest.TestCase):
     def test_binder_extraction_ignores_comments_and_strings(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 textwrap.dedent(
@@ -525,7 +525,7 @@ class ParseDeclarationTests(unittest.TestCase):
 
 class AuditHeuristicTests(unittest.TestCase):
     def _write_fake(self, root: Path, body: str) -> Path:
-        mod = root / "MIPStarRE" / "Fake.lean"
+        mod = root / "PaperLib" / "Fake.lean"
         mod.parent.mkdir(exist_ok=True)
         mod.write_text(textwrap.dedent(body), encoding="utf-8")
         return mod
@@ -853,7 +853,7 @@ class MainTests(unittest.TestCase):
     def test_ci_fails_for_unapproved_review_finding(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 "theorem bad (h : ∃ G : Measurement, ConsRel G) : "
@@ -869,7 +869,7 @@ class MainTests(unittest.TestCase):
     def test_ci_passes_for_allowed_witness_adapter(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "Fake.lean"
+            mod = root / "PaperLib" / "Fake.lean"
             mod.parent.mkdir()
             mod.write_text(
                 "theorem okOfWitness (h : ∃ G : Measurement, ConsRel G) : "

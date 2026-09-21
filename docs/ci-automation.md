@@ -198,7 +198,7 @@ maintainers to triage. Use the guarded manual auto-fix wrapper below when the
 report shows a focused cleanup worth attempting.
 
 **Follow-up convention**: If the report shows non-trivial cleanup, open a normal
-cleanup PR with the `auto-fix-claude`, `cleanup`, `formalization`, `2009.12982`,
+cleanup PR with the `auto-fix-claude`, `cleanup`, `formalization`, `paper-<arxiv-id>`,
 `ci`, and `infrastructure` labels as appropriate. Any automated or manual
 follow-up must fix warnings rather than hide them behind broad
 `set_option linter.<name> false` blocks; see
@@ -241,7 +241,7 @@ The workflow then re-runs `lake build -q --log-level=info`, re-checks that the
 post-validation diff still has the same tracked Lean-file list and no forbidden
 proof-integrity tokens, stages only that guarded file list, commits to
 `autofix/lean-linter-warning-sweep-<run-id>-<run-attempt>`, opens a PR, and adds
-the `auto-fix-claude`, `cleanup`, `formalization`, `2009.12982`, `ci`, and
+the `auto-fix-claude`, `cleanup`, `formalization`, `paper-<arxiv-id>`, `ci`, and
 `infrastructure` labels. It is intentionally not triggered on `pull_request`,
 so untrusted PR contexts cannot access the write token or Claude secret.
 
@@ -282,15 +282,15 @@ linter-warning path is the manual `workflow_dispatch` wrapper described above.
 
 **What it does**: Runs a weekly report-only audit of `README.md` so the
 repository overview does not drift from the current layout. The audit checks
-local README path references, the documented `MIPStarRE/LDT/` submodule count,
+local README path references, the documented library submodule counts,
 and hard-coded Lean / Mathlib version mentions against `lean-toolchain` and
 `lakefile.toml`.
 
 **When it runs**: Every Monday at 09:30 UTC, after the stale-issue and Lean
 linter-warning maintenance sweeps, and on manual `workflow_dispatch`.
 
-**Why it is report-only**: Issue #671 asks for weekly README synchronization,
-but the safe repository convention for scheduled maintenance jobs is to avoid
+**Why it is report-only**: weekly README synchronization is wanted, but the
+safe repository convention for scheduled maintenance jobs is to avoid
 write-token PR creation unless explicitly needed. The workflow keeps
 `contents: read`, uploads JSON/text artifacts, and leaves any README edit to a
 focused documentation PR after human review.
@@ -307,7 +307,7 @@ python3 scripts/audit_readme_freshness.py --root . --readme README.md
 
 **When it runs**: On every PR that touches ``.lean`` files, the check script, its tests, or the workflow itself.
 
-**Current status (2026-05-03)**: ``main`` still has ~19 files exceeding the threshold (tracked in issue #1127), so the workflow uses ``continue-on-error: true`` until all files are split.  Once the split wave (#1127) is complete, remove that line to make the check blocking.
+**Making it blocking**: while a project still has files over the threshold, the workflow may use ``continue-on-error: true`` and track the split wave in an issue.  Once no file exceeds the limit, remove that line so the check blocks.
 
 **Local command**:
 
@@ -430,6 +430,14 @@ python3 scripts/audit_lean_axiom_declarations.py --root . --ci
 These checks are intended to catch theorem-statement drift before a PR spends
 GitHub runner time.  They do not replace mathematical review.
 
+The two per-declaration audits, `audit_paper_facing_proof_debt.py` and
+`audit_green_node_integrity.py`, read their exemption registers from the
+optional file `local/audit-registers.json` (sections `paper_facing_proof_debt`
+and `green_node`), never from constants inside the scripts.  The file ships
+absent and absent means empty, so on a fresh project every finding is
+reported; the shape of each section is documented in the header of the script
+that reads it, and each entry's value is the citation that justifies it.
+
 ### Pre-push hook
 
 The pre-push hook examines the refs being pushed.  For changed Lean files it
@@ -474,7 +482,7 @@ This is a local warning, not the merge authority.  It is meant to catch a
 missing `\lean{...}` discussion before the pull request spends a full blueprint
 or Lean CI cycle.
 
-For changed LDT Lean declarations, pre-push also compares public headers of
+For changed Lean declarations of the library, pre-push also compares public headers of
 source-labelled blueprint declarations against `origin/main`:
 
 ```bash
@@ -488,7 +496,7 @@ declaration cited by a source-labelled theorem, lemma, proposition, corollary,
 or definition, and asks the author to record the statement-integrity audit in
 the PR.
 
-For changed LDT Lean declarations, pre-push also audits newly added
+For changed Lean declarations of the library, pre-push also audits newly added
 proof-obligation and conditional-helper declarations:
 
 ```bash
@@ -553,14 +561,14 @@ remains the authoritative merge gate.  The responsibilities are:
 |---|---|---|---|
 | Whitespace in staged patches | `pre-commit`: `git diff --cached --check` | ordinary PR review / workflow logs | Fast local-only guard. |
 | Changed paper-gap notes follow the local note structure | `pre-commit` and relevant `pre-push`: `check_paper_gap_note_style.py --ci` | review prompts and ordinary PR review | Diff-scoped local guard.  It checks the template-level structure and traceability macros before a reviewer sees the note. |
-| Statement-like declarations cite paper origin | `pre-commit` and relevant `pre-push`: `check_statement_paper_origin.py` | `pr-ci.yml` (`statement-origin` job) | Blocking CI, path-filtered to LDT Lean files and the guard implementation. |
-| New proof-obligation declarations carry role metadata | `pre-commit`: `audit_new_proof_obligation_metadata.py --staged --ci`; relevant `pre-push`: `audit_new_proof_obligation_metadata.py --base origin/main --changed-files ... --ci` | proof-debt review prompts and local hook policy | Local blocking guard for issue #1579.  It is diff-based and complements the global paper-origin audit. |
+| Statement-like declarations cite paper origin | `pre-commit` and relevant `pre-push`: `check_statement_paper_origin.py` | `pr-ci.yml` (`statement-origin` job) | Blocking CI, path-filtered to the library's Lean files and the guard implementation. |
+| New proof-obligation declarations carry role metadata | `pre-commit`: `audit_new_proof_obligation_metadata.py --staged --ci`; relevant `pre-push`: `audit_new_proof_obligation_metadata.py --base origin/main --changed-files ... --ci` | proof-debt review prompts and local hook policy | Local blocking guard: a new proof-obligation declaration without role metadata is invisible to the later audits.  It is diff-based and complements the global paper-origin audit. |
 | Lean files stay below the oversized-file limit | `pre-push`: `check_oversized_lean_files.py` for Lean changes | `pr-ci.yml` (`file-length` job) | Path-filtered to Lean files and the guard implementation. |
 | Paper-facing theorem headers avoid bridge-debt vocabulary | `pre-commit` and relevant `pre-push`: `audit_paper_facing_proof_debt.py --ci` | `pr-ci.yml` (`proof-debt` job) | Blocking CI for Lean and blueprint statement surfaces. |
 | Conclusion-shaped hypotheses are rejected | `pre-commit` and relevant `pre-push`: `audit_conclusion_shaped_hypotheses.py --ci` | `pr-ci.yml` (`proof-evasion` job) | Blocking CI. |
 | `**Unfaithful:**` markers carry citations and an elimination plan | `pre-commit` and relevant `pre-push`: `audit_unfaithful_markers.py --ci` | `pr-ci.yml` (`proof-evasion` job) | Blocking CI. |
-| Explicit `axiom` and `constant` declarations stay out of the LDT tree | `pre-commit` and relevant `pre-push`: `audit_lean_axiom_declarations.py --ci` | `pr-ci.yml` (`proof-evasion` job) | Blocking CI; ordinary `sorry` sites are tracked separately by their `sorryAx` closure. |
-| Source-labelled Lean declaration headers do not change silently | `pre-push`: `check_source_statement_changes.py --base origin/main` for changed LDT Lean files | Paper-facing proof-debt audit and review prompts | Local blocking guard for issue #1578.  Intentional paper-realignment changes should carry a statement-integrity audit in the PR. |
+| Explicit `axiom` and `constant` declarations stay out of the library tree | `pre-commit` and relevant `pre-push`: `audit_lean_axiom_declarations.py --ci` | `pr-ci.yml` (`proof-evasion` job) | Blocking CI; ordinary `sorry` sites are tracked separately by their `sorryAx` closure. |
+| Source-labelled Lean declaration headers do not change silently | `pre-push`: `check_source_statement_changes.py --base origin/main` for changed library Lean files | Paper-facing proof-debt audit and review prompts | Local blocking guard: a source-labelled header that changes silently is how a statement drifts away from its paper. Intentional paper-realignment changes should carry a statement-integrity audit in the PR. |
 | Edited Lean files type-check | `pre-push`: `lake env lean` on changed Lean files | `pr-ci.yml` (`build` job) | CI remains the full repository authority. |
 | Blueprint declarations and `blueprint/lean_decls` stay synchronized | `pre-push`: regenerate, diff, `blueprint_lean_sync.py --ci`, reverse coverage warning for changed Lean declarations, rebuild changed Lean modules, `checkdecls` | `pr-ci.yml` (`blueprint-sync` job); best-effort checks in `pr-ci.yml` (`blueprint-render` job) | The PR workflow is the authoritative check; the reverse coverage step is a local warning.  The local rebuild prevents stale `.olean` files from making an existing declaration look missing. |
 | Proof-level `\leanok` entries do not depend on `sorryAx` | `pre-push` full mode: `blueprint_leanok_axioms.py --ci` | `pr-ci.yml` (`blueprint-sync` job) | The axiom audit needs compiled local `.olean` artifacts on a cold runner.  The workflow therefore keeps one explicit `lake build` before the audit, but only when `blueprint_axiom_audit_needed.py` sees Lean source, Lean-facing project metadata, the audit implementation, or blueprint `\lean{}` / `\leanok` / `\notready` / `\proves{}` marker changes. |
@@ -699,7 +707,7 @@ CI-failure and blueprint auto-fix workflows run automatically on every PR. No se
 ### To ask Claude for help directly
 
 Write a comment on any issue or PR that includes `@claude` followed by your request. For example:
-- `@claude fix the sorry in line 42 of MIPStarRE/LDT/SelfImprovement.lean`
+- `@claude fix the sorry in line 42 of <LeanRoot>/<Chapter>/<File>.lean`
 - `@claude why does this tactic fail?`
 - `@claude refactor this proof to use simp instead`
 

@@ -5,6 +5,12 @@ blueprint, documentation and badge components are built, versioned, and
 assembled into the served site. Read `local/protocols/meta.md` first; this
 document is normative until amended through the procedure there.
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 Replaces, in the frozen `.github/` reference tree:
 
 | Parent mechanism | Local replacement |
@@ -18,7 +24,7 @@ Replaces, in the frozen `.github/` reference tree:
 | `scripts/assemble-pages-site.sh` | unchanged — ported as-is and invoked by `site.sh assemble` |
 
 Nothing here calls `gh`, needs `GH_TOKEN`/`GITHUB_REPOSITORY`, or produces
-GitHub annotations. All runtime state lives under `~/.cache/mipstarre-dev/`
+GitHub annotations. All runtime state lives under `$MIPSTARRE_CACHE_ROOT/`
 (`local/DESIGN.md:37-38`); generated output never enters git history, exactly as
 `deploy-pages.yml:3-5` states for the parent.
 
@@ -34,7 +40,7 @@ product of three independently refreshed components.
 The local store is the same object with the API removed:
 
 ```
-~/.cache/mipstarre-dev/site-components/
+$MIPSTARRE_CACHE_ROOT/site-components/
   site-blueprint/
     20260830T012532Z/          payload: homepage/ blueprint/ blueprint.pdf
     20260830T012532Z.stamp     provenance (key=value; never inside the payload)
@@ -84,7 +90,7 @@ served site.
    that the gates below apply to exactly the text the parent gates on.
 2. `leanblueprint pdf`, then a non-empty check on `print/print.pdf`
    (`blueprint.yml:63-66`), then `texra-blueprint web`, all teed to
-   `~/.cache/mipstarre-dev/site/logs/blueprint-<timestamp>.log`.
+   `$MIPSTARRE_CACHE_ROOT/site/logs/blueprint-<timestamp>.log`.
 3. Two gates on that log, both fatal (`blueprint.yml:73-80`): a line matching
    `^ERROR:` means unresolved labels; `WARNING: File not found:` means missing
    files. These are *exit-code* gates. GitHub's `::error::`/`::warning::`
@@ -155,9 +161,9 @@ Consequences that must hold together:
 `scripts/assemble-pages-site.sh components <staging>`, and installs the result:
 
 ```
-~/.cache/mipstarre-dev/site/_site           served tree
-~/.cache/mipstarre-dev/site/_site.prev      previous tree (rollback)
-~/.cache/mipstarre-dev/site/deployed.stamp  component version per name
+$MIPSTARRE_CACHE_ROOT/site/_site           served tree
+$MIPSTARRE_CACHE_ROOT/site/_site.prev      previous tree (rollback)
+$MIPSTARRE_CACHE_ROOT/site/deployed.stamp  component version per name
 ```
 
 The assembler begins with `rm -rf "$OUT"` (`assemble-pages-site.sh:45`). In CI
@@ -171,14 +177,14 @@ gap of microseconds rather than seconds; the displaced tree is kept as
 Serve it however you like; the site is static:
 
 ```bash
-python3 -m http.server --directory ~/.cache/mipstarre-dev/site/_site 8000
+python3 -m http.server --directory $MIPSTARRE_CACHE_ROOT/site/_site 8000
 ```
 
 **Rollback.** Repoint a component at a known-good version and redeploy:
 
 ```bash
-cd ~/.cache/mipstarre-dev/site-components/site-blueprint
-ln -sfn 20260830T012532Z latest      # or restore ~/.cache/mipstarre-dev/site/_site.prev
+cd $MIPSTARRE_CACHE_ROOT/site-components/site-blueprint
+ln -sfn 20260830T012532Z latest      # or restore $MIPSTARRE_CACHE_ROOT/site/_site.prev
 local/bin/site.sh assemble
 ```
 
@@ -198,7 +204,7 @@ preserved:
   immediately (`.blueprint-lock`, zero wait) instead of cancelling the first.
   Never kill a running build to start a newer one; let it finish and rebuild.
 - **Deploys queue.** `github-pages-deploy` has `cancel-in-progress: false`, so
-  `site.sh assemble` waits on `~/.cache/mipstarre-dev/site/.deploy-lock`
+  `site.sh assemble` waits on `$MIPSTARRE_CACHE_ROOT/site/.deploy-lock`
   (`MIPSTARRE_SITE_LOCK_WAIT`, default 600 s) rather than failing fast.
 
 Both locks are `mkdir(2)` directories holding the owner's pid; a lock whose
@@ -216,7 +222,7 @@ generator resolve the wrong repository.
 
 `site.sh docs` prints a SKIP and exits 0. The upstream producer
 (`docgen.yml`) spends a weekly 330-minute budget on a full `lake build`, a
-second Lake project (`cd docbuild && lake build MIPStarRE:docs`,
+second Lake project (`cd docbuild && lake build PaperLib:docs`,
 `docgen.yml:142-145`), the paper-gap site (`docgen.yml:127-133`), and packaging
 (`docgen.yml:150-153`). That work belongs to the build layer
 (`local/protocols/build-cache.md`), not to the site assembler; duplicating it
@@ -225,7 +231,7 @@ here would violate the no-duplicate-compilation rule.
 To publish a version, build out of band and hand the tree to the same command:
 
 ```bash
-cd docbuild && lake build MIPStarRE:docs        # one full-build lock holder
+cd docbuild && lake build PaperLib:docs        # one full-build lock holder
 mkdir -p /tmp/site-docs
 cp -R docbuild/.lake/build/doc /tmp/site-docs/docs
 texra-blueprint --root . paper-gaps site /tmp/site-docs/paper-gaps   # optional
@@ -274,12 +280,12 @@ workflow.
    previous tree is retained.
 7. Deploys are serialized by a lock; builds refuse rather than cancel.
 8. External tools run without the git hook environment.
-9. Runtime state stays under `~/.cache/mipstarre-dev/`; the repository holds
+9. Runtime state stays under `$MIPSTARRE_CACHE_ROOT/`; the repository holds
    only these scripts and this protocol.
 
 ## 9. Telemetry
 
-Render logs live in `~/.cache/mipstarre-dev/site/logs/` and are referenced from
+Render logs live in `$MIPSTARRE_CACHE_ROOT/site/logs/` and are referenced from
 the component stamps. Site builds are deliberately **not** written to
 `results/telemetry/builds.jsonl`: `meta.md` fixes that schema's `kind` to
 `warm|rebuild|cache-get|ci-build`, and a `site` kind is a protocol amendment,
@@ -301,7 +307,7 @@ local/bin/fetch-latest-component.sh site-blueprint /tmp/c/site-blueprint
 
 | Variable | Default | Effect |
 |---|---|---|
-| `MIPSTARRE_CACHE_ROOT` | `~/.cache/mipstarre-dev` | runtime state root |
+| `MIPSTARRE_CACHE_ROOT` | `paths.cache_root` of `local/project.json` | runtime state root |
 | `MIPSTARRE_SITE_SOURCE_ROOT` | this checkout | tree to build from; point it at the hot-main checkout once the warmer publishes one |
 | `MIPSTARRE_SITE_KEEP` | `3` | versions kept per component (minimum 1) |
 | `MIPSTARRE_SITE_LOCK_WAIT` | `600` | seconds to queue for the deploy lock |

@@ -65,6 +65,7 @@ from typing import Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import project_config  # noqa: E402
 from audit_lean_axiom_declarations import DECL_RE, strip_lean_comments  # noqa: E402
 from blueprint_lean_sync import _TEX_ENV_BEGIN_RE  # noqa: E402
 from lean_header_utils import line_number  # noqa: E402
@@ -85,7 +86,7 @@ NATIVE_RE = re.compile(
 )
 
 # ``DECL_RE`` anchors at the start of a line, so a continuation line that opens
-# with the ordinary local name ``constant`` — the QPBT error-bound proofs use it
+# with the ordinary local name ``constant`` — an error-bound proof may use it
 # for the constant of an estimate — parses as a declaration whose "name" is the
 # next token, often ``*``.  A declaration name is a Lean identifier; anything
 # else is such a continuation line and is dropped.  Narrowing this way can only
@@ -95,12 +96,12 @@ DECL_NAME_RE = re.compile(r"[^\W\d]\S*")
 EVIDENCE_LIMIT = 10
 STANDARD_AXIOMS = ("propext", "Classical.choice", "Quot.sound")
 
-# The repository has two axiom-audit commands: `assert_standard_axioms`
-# (`MIPStarRE/LDT/Test/AxiomAudit.lean`) and `audit_standard_axioms`, which
-# `MIPStarRE/QPBT/Test/AxiomAudit.lean` defines for its own tree.  Both print
-# the axiom set of a declaration and fail elaboration unless it is exactly the
-# three standard axioms, which is the whole of what C2 delegates to the build,
-# so the gate accepts either instead of making one tree rename its command.
+# Two spellings of the axiom-audit command are accepted, `assert_standard_axioms`
+# and `audit_standard_axioms`: a repository with several tracks may have one
+# audit module per track, written at different times.  Both print the axiom set
+# of a declaration and fail elaboration unless it is exactly the three standard
+# axioms, which is the whole of what C2 delegates to the build, so the gate
+# accepts either instead of making one tree rename its command.
 AUDIT_COMMAND_RE = re.compile(r"\b(?:assert|audit)_standard_axioms\s+(\S+)")
 
 PASS, FAIL, DELEGATED, DEFERRED = "PASS", "FAIL", "DELEGATED", "DEFERRED"
@@ -128,43 +129,69 @@ class Track:
     artifact_script: str
 
 
-TRACKS: dict[str, Track] = {
-    "qpbt": Track(
-        name="qpbt",
-        lean_root="MIPStarRE/QPBT",
-        headline=(
-            ("MIPStarRE.QPBT.pauli_soundness", "thm:pauli"),
-            ("MIPStarRE.QPBT.pauli_soundness_qubit", "cor:pauli-binary"),
-            ("MIPStarRE.QPBT.exists_spcc_value_one", "lem:pauli-completeness"),
-            ("MIPStarRE.QPBT.exists_ld_soundness", "lem:ld-soundness"),
-        ),
-        gap_register="docs/paper-gaps/qpbt-gap-register.md",
-        axiom_audit="MIPStarRE/QPBT/Test/AxiomAudit.lean",
-        blueprint_chapters=(
-            "blueprint/src/chapter/ch11_qpbt_algebra.tex",
-            "blueprint/src/chapter/ch12_qpbt_games.tex",
-            "blueprint/src/chapter/ch13_qpbt_test.tex",
-            "blueprint/src/chapter/ch14_qpbt_observables.tex",
-            "blueprint/src/chapter/ch15_qpbt_combining.tex",
-            "blueprint/src/chapter/ch16_qpbt_extraction.tex",
-        ),
-        leanok_exemptions="docs/completion/qpbt-leanok-exemptions.md",
-        comparator_doc="docs/comparator.md",
-        # The name `scripts/comparator/challenges.py` gives this track's
-        # expected copy; the registry follows the generator rather than
-        # keeping a second opinion about where the file is.
-        expected_challenge="scripts/comparator/expected/ChallengeQPBT.lean.expected",
-        truthful_docs=("README.md",),
-        artifact_files=(
-            "README.md",
-            "docs/QPBT-theorem-index.md",
-            "docs/DEVIATIONS.md",
-            "docs/ARTIFACT.md",
-            "LICENSE",
-        ),
-        artifact_script="scripts/make_artifact.sh",
+#: Tracks live in `local/project.json` ("tracks"), one entry per track with
+#: exactly the fields of `Track` above; `scripts/project_config.py` documents
+#: the shape and fills missing fields with empty values.  This dict is the
+#: in-process overlay on top of that file (a test installs its fixture track
+#: here); `registered_tracks()` is what every caller should read.
+TRACKS: dict[str, Track] = {}
+
+
+def _track_from_config(name: str, entry: dict) -> Track:
+    """Build a `Track` from one `tracks.<name>` entry of the project config."""
+
+    def pairs(value) -> tuple[tuple[str, str], ...]:
+        return tuple((str(a), str(b)) for a, b in value)
+
+    return Track(
+        name=entry.get("name") or name,
+        lean_root=entry["lean_root"],
+        headline=pairs(entry["headline"]),
+        gap_register=entry["gap_register"],
+        axiom_audit=entry["axiom_audit"],
+        blueprint_chapters=tuple(entry["blueprint_chapters"]),
+        leanok_exemptions=entry["leanok_exemptions"],
+        comparator_doc=entry["comparator_doc"],
+        expected_challenge=entry["expected_challenge"],
+        truthful_docs=tuple(entry["truthful_docs"]),
+        artifact_files=tuple(entry["artifact_files"]),
+        artifact_script=entry["artifact_script"],
     )
-}
+
+
+def load_tracks(root: Path | None = None) -> dict[str, Track]:
+    """Every track registered in `local/project.json` under `root`."""
+
+    cfg = project_config.load(root)
+    out: dict[str, Track] = {}
+    for name in project_config.track_names(cfg):
+        out[name] = _track_from_config(name, project_config.track(cfg, name))
+    return out
+
+
+def registered_tracks(root: Path | None = None) -> dict[str, Track]:
+    """`load_tracks` plus anything registered in this process.
+
+    A caller that points `--repo-root` at another tree gets that tree's
+    registry; a test that installs a fixture track into `TRACKS` keeps it.
+    """
+
+    merged = dict(TRACKS)
+    if root is None or (Path(root) / project_config.CONFIG_RELPATH).exists():
+        merged.update(load_tracks(root))
+    return merged
+
+
+NO_TRACK_MESSAGE = (
+    "no track is registered in local/project.json, so there is nothing to "
+    "check yet. A track is one paper's formalization: its Lean root, its "
+    "headline theorems and the blueprint chapters, gap register, axiom audit, "
+    "comparator record and artifact files that belong to it. Add a `tracks` "
+    "entry (the fields are listed in scripts/project_config.py, and section 6 "
+    "of local/protocols/completion.md explains what each one means) once the "
+    "project has a Lean root and at least one headline theorem; "
+    "local/protocols/bootstrap.md says at which stage that happens."
+)
 
 
 @dataclass
@@ -849,6 +876,8 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     check.add_argument("--repo-root", type=Path, default=None, help="repository root")
     check.add_argument("--commit", default=None, help="commit being declared (default HEAD)")
     check.add_argument("--json", action="store_true", help="machine-readable output")
+    listing = sub.add_parser("list", help="print the registered track names, one per line")
+    listing.add_argument("--repo-root", type=Path, default=None, help="repository root")
     return parser.parse_args(argv)
 
 
@@ -856,12 +885,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     root = (args.repo_root or Path(__file__).resolve().parent.parent).resolve()
     try:
-        track = TRACKS[args.track]
+        tracks = registered_tracks(root)
+    except project_config.ConfigError as exc:
+        print(f"completion gate cannot run: {exc}", file=sys.stderr)
+        return 2
+
+    if args.command == "list":
+        for name in sorted(tracks):
+            print(name)
+        if not tracks:
+            print(NO_TRACK_MESSAGE, file=sys.stderr)
+        return 0
+
+    try:
+        track = tracks[args.track]
     except KeyError:
-        print(
-            f"unknown track {args.track!r}; registered: {', '.join(sorted(TRACKS))}",
-            file=sys.stderr,
-        )
+        if not tracks:
+            print(NO_TRACK_MESSAGE, file=sys.stderr)
+        else:
+            print(
+                f"unknown track {args.track!r}; registered: {', '.join(sorted(tracks))}",
+                file=sys.stderr,
+            )
         return 2
     try:
         commit = resolve_commit(root, args.commit)

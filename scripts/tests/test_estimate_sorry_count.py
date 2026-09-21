@@ -26,7 +26,7 @@ ESTIMATE_SH = (
 )
 
 # One prose mention inside a docstring plus one real ``sorry`` tactic.  The
-# prose line is copied from the shape used in MIPStarRE/QPBT/Games/
+# prose line is copied from the shape used in PaperLib/Sample/Games/
 # StrategyClasses.lean, which is what the unanchored counter mis-counted.
 FIXTURE = """import Mathlib
 

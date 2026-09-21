@@ -27,13 +27,13 @@ import dup_scan  # noqa: E402
 LEMMA_A = """\
 import Mathlib
 
-namespace MIPStarRE.QPBT
+namespace PaperLib.Sample
 
 /-- A doc comment that must not reach the normal form. -/
 theorem foo_bar (n : Nat) (hn : 0 < n) : n + 0 = n := by
   simp
 
-end MIPStarRE.QPBT
+end PaperLib.Sample
 """
 
 # Same statement as `foo_bar`, different name, different binder names and
@@ -41,35 +41,35 @@ end MIPStarRE.QPBT
 LEMMA_A_RENAMED = """\
 import Mathlib
 
-namespace MIPStarRE.QPBT
+namespace PaperLib.Sample
 
 theorem foo_bar_alt   (m : Nat)   (hm : 0 < m) :
     m + 0 = m := by
   omega
 
-end MIPStarRE.QPBT
+end PaperLib.Sample
 """
 
 LEMMA_B = """\
 import Mathlib
 
-namespace MIPStarRE.QPBT
+namespace PaperLib.Sample
 
 theorem unrelated (n : Nat) : n * 1 = n := by
   simp
 
-end MIPStarRE.QPBT
+end PaperLib.Sample
 """
 
-# Same short name as `foo_bar`, different namespace, still inside MIPStarRE.
+# Same short name as `foo_bar`, different namespace, still inside PaperLib.
 LEMMA_SHORT = """\
 import Mathlib
 
-namespace MIPStarRE.Games
+namespace PaperLib.Games
 
 theorem foo_bar (s : String) : s = s := rfl
 
-end MIPStarRE.Games
+end PaperLib.Games
 """
 
 
@@ -139,11 +139,11 @@ class NormalizationTests(unittest.TestCase):
 
 class ParsingTests(unittest.TestCase):
     def test_namespace_is_applied_and_doc_comments_dropped(self):
-        records = dup_scan.decls_from_text(LEMMA_A, "MIPStarRE/QPBT/A.lean")
-        self.assertEqual([r.fqn for r in records], ["MIPStarRE.QPBT.foo_bar"])
+        records = dup_scan.decls_from_text(LEMMA_A, "PaperLib/Sample/A.lean")
+        self.assertEqual([r.fqn for r in records], ["PaperLib.Sample.foo_bar"])
         record = records[0]
         self.assertEqual(record.short_name, "foo_bar")
-        self.assertEqual(record.file, "MIPStarRE/QPBT/A.lean")
+        self.assertEqual(record.file, "PaperLib/Sample/A.lean")
         self.assertNotIn("doc comment", record.normalized)
 
 
@@ -151,44 +151,44 @@ class RefSearchTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = init_repo(Path(self.tmp.name) / "repo")
-        write(self.repo, "MIPStarRE/QPBT/A.lean", LEMMA_A)
-        write(self.repo, "MIPStarRE/QPBT/B.lean", LEMMA_B)
+        write(self.repo, "PaperLib/Sample/A.lean", LEMMA_A)
+        write(self.repo, "PaperLib/Sample/B.lean", LEMMA_B)
         commit(self.repo, "main content")
         git(self.repo, "branch", "-f", "github/main", "main")
         self.addCleanup(self.tmp.cleanup)
 
     def test_exact_name_match(self):
         code, out = run_cli("check", "--repo", str(self.repo),
-                            "--name", "MIPStarRE.QPBT.foo_bar")
+                            "--name", "PaperLib.Sample.foo_bar")
         self.assertEqual(code, 3)
-        self.assertIn("MIPStarRE/QPBT/A.lean:6", out)
+        self.assertIn("PaperLib/Sample/A.lean:6", out)
         self.assertIn("fqn", out)
 
     def test_short_name_match_in_project_namespace(self):
         code, out = run_cli("check", "--repo", str(self.repo), "--name", "foo_bar")
         self.assertEqual(code, 3)
         self.assertIn("short", out)
-        self.assertIn("MIPStarRE.QPBT.foo_bar", out)
+        self.assertIn("PaperLib.Sample.foo_bar", out)
 
     def test_no_match_exits_zero(self):
         code, out = run_cli("check", "--repo", str(self.repo),
-                            "--name", "MIPStarRE.QPBT.never_declared")
+                            "--name", "PaperLib.Sample.never_declared")
         self.assertEqual(code, 0)
         self.assertIn("no duplicate", out)
 
     def test_json_mode_reports_locations(self):
         code, out = run_cli("check", "--repo", str(self.repo), "--json",
-                            "--name", "MIPStarRE.QPBT.foo_bar")
+                            "--name", "PaperLib.Sample.foo_bar")
         self.assertEqual(code, 3)
         payload = json.loads(out)
         self.assertEqual(payload["queried"], 1)
         self.assertEqual(payload["duplicates"][0]["match"], "fqn")
         self.assertEqual(payload["duplicates"][0]["location"],
-                         "MIPStarRE/QPBT/A.lean:6")
+                         "PaperLib/Sample/A.lean:6")
 
     def test_branch_statement_match_finds_a_renamed_copy(self):
         git(self.repo, "checkout", "-q", "-b", "topic")
-        write(self.repo, "MIPStarRE/QPBT/C.lean", LEMMA_A_RENAMED)
+        write(self.repo, "PaperLib/Sample/C.lean", LEMMA_A_RENAMED)
         commit(self.repo, "re-prove the same statement under a new name")
         code, out = run_cli("check", "--repo", str(self.repo), "--json",
                             "--branch", "topic")
@@ -197,11 +197,11 @@ class RefSearchTests(unittest.TestCase):
         kinds = {row["match"] for row in payload["duplicates"]}
         self.assertEqual(kinds, {"statement"})
         self.assertEqual(payload["duplicates"][0]["location"],
-                         "MIPStarRE/QPBT/A.lean:6")
+                         "PaperLib/Sample/A.lean:6")
 
     def test_branch_with_only_new_mathematics_is_clean(self):
         git(self.repo, "checkout", "-q", "-b", "fresh")
-        write(self.repo, "MIPStarRE/QPBT/D.lean",
+        write(self.repo, "PaperLib/Sample/D.lean",
               LEMMA_B.replace("unrelated", "genuinely_new").replace("n * 1 = n",
                                                                     "n + 1 = 1 + n"))
         commit(self.repo, "new lemma")
@@ -211,7 +211,7 @@ class RefSearchTests(unittest.TestCase):
     def test_missing_ref_is_advisory_and_never_reported_clean(self):
         code, out = run_cli("check", "--repo", str(self.repo),
                             "--ref", "github/nope",
-                            "--name", "MIPStarRE.QPBT.foo_bar")
+                            "--name", "PaperLib.Sample.foo_bar")
         self.assertEqual(code, 4)
         self.assertIn("duplicate check skipped", out)
         self.assertNotIn("no duplicate", out)
@@ -229,25 +229,25 @@ class SweepTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = init_repo(Path(self.tmp.name) / "repo")
-        write(self.repo, "MIPStarRE/QPBT/A.lean", LEMMA_A)
+        write(self.repo, "PaperLib/Sample/A.lean", LEMMA_A)
         commit(self.repo, "main content")
         git(self.repo, "branch", "-f", "github/main", "main")
 
         # PR 1: a renamed copy of a statement main already proves.
         git(self.repo, "checkout", "-q", "-b", "github/issue-1-copy")
-        write(self.repo, "MIPStarRE/QPBT/Copy.lean", LEMMA_A_RENAMED)
+        write(self.repo, "PaperLib/Sample/Copy.lean", LEMMA_A_RENAMED)
         commit(self.repo, "duplicate statement")
 
         # PR 2: the same short name in another namespace.
         git(self.repo, "checkout", "-q", "main")
         git(self.repo, "checkout", "-q", "-b", "github/issue-2-shortname")
-        write(self.repo, "MIPStarRE/Games/S.lean", LEMMA_SHORT)
+        write(self.repo, "PaperLib/Games/S.lean", LEMMA_SHORT)
         commit(self.repo, "same short name")
 
         # PR 3: genuinely new mathematics.
         git(self.repo, "checkout", "-q", "main")
         git(self.repo, "checkout", "-q", "-b", "github/issue-3-new")
-        write(self.repo, "MIPStarRE/QPBT/New.lean", LEMMA_B)
+        write(self.repo, "PaperLib/Sample/New.lean", LEMMA_B)
         commit(self.repo, "new lemma")
         git(self.repo, "checkout", "-q", "main")
 
@@ -324,10 +324,10 @@ class ReportColumnTests(unittest.TestCase):
             "number": 11, "title": "one declaration, two matches", "url": "",
             "head_ref": "topic", "new_declarations": 1,
             "duplicates": [
-                {"query": "MIPStarRE.QPBT.foo_bar", "match": "fqn",
-                 "fqn": "MIPStarRE.QPBT.foo_bar", "location": "A.lean:6"},
-                {"query": "MIPStarRE.QPBT.foo_bar", "match": "short",
-                 "fqn": "MIPStarRE.Games.foo_bar", "location": "S.lean:5"},
+                {"query": "PaperLib.Sample.foo_bar", "match": "fqn",
+                 "fqn": "PaperLib.Sample.foo_bar", "location": "A.lean:6"},
+                {"query": "PaperLib.Sample.foo_bar", "match": "short",
+                 "fqn": "PaperLib.Games.foo_bar", "location": "S.lean:5"},
             ],
             "by_kind": {"fqn": 1, "statement": 0, "short": 1},
             "skipped": "",

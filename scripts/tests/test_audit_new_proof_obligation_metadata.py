@@ -40,12 +40,12 @@ def _make_repo(root: Path) -> Path:
     _git(root, "init")
     _git(root, "config", "user.email", "test@example.com")
     _git(root, "config", "user.name", "Test User")
-    (root / "MIPStarRE" / "LDT").mkdir(parents=True)
+    (root / "PaperLib" / "Core").mkdir(parents=True)
     return root
 
 
 def _commit_base(root: Path) -> None:
-    _write(root / "MIPStarRE" / "LDT" / "Base.lean", "namespace MIPStarRE.LDT\n")
+    _write(root / "PaperLib" / "Core" / "Base.lean", "namespace PaperLib.Core\n")
     _git(root, "add", ".")
     _git(root, "commit", "-m", "base")
 
@@ -53,15 +53,15 @@ def _commit_base(root: Path) -> None:
 class DiffLineTests(unittest.TestCase):
     def test_changed_lines_from_diff(self) -> None:
         diff = (
-            "diff --git a/MIPStarRE/LDT/Foo.lean b/MIPStarRE/LDT/Foo.lean\n"
-            "+++ b/MIPStarRE/LDT/Foo.lean\n"
+            "diff --git a/PaperLib/Core/Foo.lean b/PaperLib/Core/Foo.lean\n"
+            "+++ b/PaperLib/Core/Foo.lean\n"
             "@@ -0,0 +4,2 @@\n"
             "+def FooBridge : Prop := True\n"
             "+def Bar : Nat := 0\n"
         )
         self.assertEqual(
             _changed_lines_from_diff(diff),
-            {"MIPStarRE/LDT/Foo.lean": {4, 5}},
+            {"PaperLib/Core/Foo.lean": {4, 5}},
         )
 
 
@@ -96,9 +96,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- Generic prose. -/\n"
                     "structure FooBridge where\n"
                     "  h : True\n"
@@ -114,9 +114,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- **Source:** This is the faithful encoding of "
                     "`\\label{lem:foo}`. -/\n"
                     "structure FooBridge where\n"
@@ -131,9 +131,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- Generic prose. -/\n"
                     "theorem main_ofObligations : True := by\n"
                     "  trivial\n"
@@ -149,9 +149,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- **Proof obligation:** Internal construction for "
                     "`\\label{lem:foo}`.  See issue #1579.  Elimination: "
                     "prove it from the paper hypotheses. -/\n"
@@ -166,9 +166,9 @@ class GitAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = _make_repo(Path(td))
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- Generic prose. -/\n"
                     "structure FooBridge where\n"
                     "  h : True\n"
@@ -177,7 +177,7 @@ class GitAuditTests(unittest.TestCase):
             _git(root, "add", ".")
             _git(root, "commit", "-m", "base")
 
-            path = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            path = root / "PaperLib" / "Core" / "Foo.lean"
             path.write_text(path.read_text() + "\n-- Proof-only edit.\n", encoding="utf-8")
             self.assertEqual(find_metadata_findings(root, base="HEAD"), [])
 
@@ -186,9 +186,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- Generic prose. -/\n"
                     "def FooResidual : Prop := True\n"
                 ),
@@ -203,9 +203,9 @@ class GitAuditTests(unittest.TestCase):
             root = _make_repo(Path(td))
             _commit_base(root)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 (
-                    "namespace MIPStarRE.LDT\n\n"
+                    "namespace PaperLib.Core\n\n"
                     "/-- Generic prose. -/\n"
                     "def FooPackage : Prop := True\n"
                 ),

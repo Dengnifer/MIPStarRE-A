@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-# rerun_review.sh <pr> — run review.sh for a PR once fewer than MAX_CODEX codex sessions are live.
+# rerun_review.sh <pr> — run local/bin/review.sh for one PR as soon as a worker slot is
+# free, then print the summary statuses on the PR's head.  Useful when a review died or
+# a head moved; the lane runner does this by itself.
+# Provenance: the origin's owner-tools/rerun_review.sh (checkout path, cache directory
+# and repository slug hard-coded).
 set -u
-export PATH="$HOME/.cache/mipstarre-dev/owner-bin:$HOME/.local/bin:$HOME/.elan/bin:$PATH"
-PR="$1"; MAX_CODEX="${MAX_CODEX:-7}"
-cap() { if [ -s "$HOME/.cache/mipstarre-dev/watchdog/max-codex" ]; then cat "$HOME/.cache/mipstarre-dev/watchdog/max-codex"; return; fi; if [ -n "${MAX_CODEX_FIXED:-}" ]; then echo "$MAX_CODEX_FIXED"; return; fi; b=$(pgrep -fa codex | grep "MIPStarRE-auto\|/tmp/qpbt-" | grep -o "\-C /[^ ]*" | sort -u | wc -l); b=$((b+1)); c=$((9-b)); [ "$c" -lt 4 ] && c=4; echo "$c"; }
-L="$HOME/.cache/mipstarre-dev/watchdog/lanes"; mkdir -p "$L"; rm -f "$L/pr$PR.review.done"
-cd "$HOME/MIPStarRE-qpbt" || exit 1
-live() { pgrep -fa 'codex exec' | grep -o '\-C [^ ]*' | sort -u | wc -l; }
-exec 9>"$HOME/.cache/mipstarre-dev/watchdog/launch.lock"; flock 9
-for _ in $(seq 1 720); do [ "$(live)" -lt "$(cap)" ] && break; sleep 30; done
-echo "== $(date -u +%FT%TZ) review.sh $PR (live sessions before: $(live))"
-local/bin/review.sh "$PR" & RPID=$!; sleep 25; flock -u 9; wait "$RPID"; echo "REVIEW_EXIT=$?"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+SERVICE="$HERE/../../../local/bin/service"
+# shellcheck source=/dev/null
+. "$SERVICE/service-lib.sh"
+cd "$KIT_REPO_ROOT" || exit 1
+
+PR="${1:?usage: rerun_review.sh <pr>}"
+mkdir -p "$KIT_LANE_DIR"; rm -f "$KIT_LANE_DIR/pr$PR.review.done"
+kit_wait_for_slot
+kit_log "review.sh $PR (live sessions before: $(kit_live_workers))"
+local/bin/review.sh "$PR" & RPID=$!
+sleep 25; flock -u 9; wait "$RPID"; echo "REVIEW_EXIT=$?"
 H=$(gh pr view "$PR" --json headRefOid --jq .headRefOid)
-gh api "repos/Dengnifer/MIPStarRE-A/commits/$H/status" --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
-touch "$L/pr$PR.review.done"
+SLUG="$(kit_slug)" && gh api "repos/$SLUG/commits/$H/status" \
+  --jq '.statuses[] | select(.context|endswith("summary")) | .context+" "+.state+" "+(.description // "")'
+touch "$KIT_LANE_DIR/pr$PR.review.done"

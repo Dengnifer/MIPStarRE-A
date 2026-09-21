@@ -16,11 +16,10 @@
 
 \section{Purpose}
 
-This note fixes terminology for a recurring failure mode in the formalization
-of the low individual degree test paper, \path{arXiv:2009.12982}.  It
-complements the note-writing policy in \path{docs/paper-gaps/policy.tex} and
-the source-statement audit tracked historically in \ghissue{1458}.  The current
-source-boundary proof holes are tracked in \ghissue{1507} and \ghissue{422}.
+This note fixes terminology for a recurring failure mode in any
+source-faithful formalization.  It complements the note-writing policy in
+\path{docs/paper-gaps/policy.tex}; the project's own source-boundary proof
+holes are tracked in its issue tracker.
 A proof may be blocked at
 an intermediate mathematical assertion.  If that assertion is added as a new
 hypothesis to a theorem labelled as a paper theorem, the resulting \Lean{}
@@ -42,7 +41,7 @@ source statement or a documented faithful encoding of its ambient hypotheses.
 
 \paragraph{Source theorem.}
 A source theorem is a theorem, lemma, proposition, or corollary in the paper
-source under \path{references/ldt-paper/}.  Its hypotheses and conclusion are
+source under \path{references/<key>-paper/}.  Its hypotheses and conclusion are
 the mathematical ground truth, subject only to faithful formal encoding and to
 documented paper-gap corrections.
 
@@ -113,7 +112,7 @@ public statement of a source theorem.
 \paragraph{Repair.}
 A repair is a mathematical construction which replaces an approximate or
 partial object by a better object, usually with a quantitative estimate.  In
-the low individual degree test formalization, projectivization and
+one formalization, projectivization and
 orthonormalization repairs are genuine mathematical operations.  A repair
 should therefore appear as a construction or as a theorem discharging the
 corresponding obligation.  If a theorem assumes the output of the repair instead
@@ -232,7 +231,7 @@ When a source-labelled proof is blocked, use the following order.
 
 \begin{enumerate}
   \item Read the cited source statement and the proof passage in
-  \path{references/ldt-paper/}.
+  \path{references/<key>-paper/}.
   \item Write the paper theorem form, the current \Lean{} theorem form, and the
   first missing intermediate assertion.
   \item Decide whether the missing assertion is a faithful boundary condition,

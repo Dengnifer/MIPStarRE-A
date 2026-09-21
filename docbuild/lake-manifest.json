@@ -3,7 +3,7 @@
  "packages":
  [{"type": "path",
    "scope": "",
-   "name": "MIPStarRE",
+   "name": "PaperLib",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
    "dir": "../",

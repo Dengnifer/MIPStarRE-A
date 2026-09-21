@@ -51,7 +51,7 @@ import pr_merge  # noqa: E402
 from wf_util import LayerError  # noqa: E402
 
 #: Fixed slug so no test depends on the machine's git remotes (gh_common.py:70-86).
-REPO = "Dengnifer/MIPStarRE-A"
+REPO = "OWNER/REPO"
 HEAD = "a" * 40
 BASE_SHA = "b" * 40
 MERGE_SHA = "c" * 40
@@ -336,7 +336,7 @@ class GitHubLayerTests(LayerTestCase):
             self.assertEqual(self.gh.payloads("POST", r"^issues$"), [])
         with self.subTest("ambiguous create -> adopt the keyed issue"):
             self.gh.reset()
-            marker = "<!-- mipstarre-issue-key: qpbt-pauli -->"
+            marker = "<!-- mipstarre-issue-key: sample-pauli -->"
             self.gh.route(r"^labels", [{"name": "formalization"}])
             self.gh.route(r"^issues\?state=all", [], once=True)
             self.gh.route(r"^issues$", fail=True, method="POST")
@@ -345,7 +345,7 @@ class GitHubLayerTests(LayerTestCase):
                 {"number": 42, "body": marker + "\nbody"},
             ])
             number = gh_common.issue_create("Title", "body", labels=("formalization",),
-                                            key="qpbt-pauli")
+                                            key="sample-pauli")
             self.assertEqual(number, 42, "a pull request row must never be adopted")
             self.assertEqual(len(self.gh.payloads("POST", r"^issues$")), 1)
 
@@ -431,7 +431,7 @@ class CiBlueprintRenderTests(LayerTestCase):
         _git(self.repo, "init", "-q", f"--template={templates}")
         _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
         _git(self.repo, "config", "user.email", "tests@example.invalid")
-        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "user.name", "PaperLib tests")
         _git(self.repo, "config", "commit.gpgsign", "false")
 
         local_bin = self.repo / "local" / "bin"
@@ -615,7 +615,7 @@ class ReviewRoundCounterTests(LayerTestCase):
         _git(self.repo, "init", "-q", f"--template={templates}")
         _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
         _git(self.repo, "config", "user.email", "tests@example.invalid")
-        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "user.name", "PaperLib tests")
         _git(self.repo, "config", "commit.gpgsign", "false")
 
         local_bin = self.repo / "local" / "bin"
@@ -991,7 +991,7 @@ class MergeGateTests(LayerTestCase):
         _git(self.repo, "init", "-q", f"--template={templates}")
         _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
         _git(self.repo, "config", "user.email", "tests@example.invalid")
-        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "user.name", "PaperLib tests")
         _git(self.repo, "config", "commit.gpgsign", "false")
         (self.repo / "README.md").write_text("base\n", encoding="utf-8")
         fixtures = {
@@ -1032,7 +1032,7 @@ class MergeGateTests(LayerTestCase):
         self.gh.route(r"^commits/[0-9a-f]+/statuses", rows)
         self.gh.route(r"^pulls/7/reviews", [
             {"id": 5, "state": "COMMENTED", "commit_id": self.head,
-             "body": marker + "\n" + self.REVIEW_BODY, "user": {"login": "Dengnifer"}}])
+             "body": marker + "\n" + self.REVIEW_BODY, "user": {"login": "an-author"}}])
 
     def _check_only(self) -> subprocess.CompletedProcess:
         env = dict(os.environ, MIPSTARRE_CACHE_ROOT=str(self.tmp / "cache"))
@@ -1085,7 +1085,7 @@ class MergeGateTests(LayerTestCase):
         with self.subTest("Lean lines are counted from the merge base"):
             self.gh.reset()
             _git(self.repo, "checkout", "-q", self.BRANCH)
-            lean = self.repo / "MIPStarRE" / "QPBT" / "Subject.lean"
+            lean = self.repo / "PaperLib" / "Sample" / "Subject.lean"
             lean.parent.mkdir(parents=True, exist_ok=True)
             lean.write_text("theorem a : True := trivial\ntheorem b : True := trivial\n",
                             encoding="utf-8")
@@ -1176,7 +1176,7 @@ class MergeGateTests(LayerTestCase):
         self.assertIn("predates only tolerated passive telemetry changes", result.stderr)
 
     def test_freshness_rejects_non_telemetry_base_changes(self) -> None:
-        self._advance_main("MIPStarRE/QPBT/FreshnessTest.lean", "change Lean source")
+        self._advance_main("PaperLib/Sample/FreshnessTest.lean", "change Lean source")
         self.assertFalse(pr_merge.head_is_fresh(self.repo, "github/main", self.head))
         self._arm()
         result = self._check_only()
@@ -1382,9 +1382,9 @@ class MergeSubjectTests(unittest.TestCase):
         _git(self.repo, "init", "-q", f"--template={templates}")
         _git(self.repo, "symbolic-ref", "HEAD", "refs/heads/main")
         _git(self.repo, "config", "user.email", "tests@example.invalid")
-        _git(self.repo, "config", "user.name", "MIPStarRE tests")
+        _git(self.repo, "config", "user.name", "PaperLib tests")
         _git(self.repo, "config", "commit.gpgsign", "false")
-        lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
+        lean = self.repo / "PaperLib" / "Sample" / "Base.lean"
         lean.parent.mkdir(parents=True)
         lean.write_text("".join(f"line {n}\n" for n in range(1, 6)), encoding="utf-8")
         # A second base-side module mixing comments with code, so the delete and the
@@ -1405,10 +1405,10 @@ class MergeSubjectTests(unittest.TestCase):
         # Two of the five Lean lines go, three arrive, and a new Lean file two
         # directories down adds one more — the pathspec is not anchored.  The
         # Markdown churn beside them is four added lines that must not be counted.
-        (self.repo / "MIPStarRE" / "QPBT" / "Base.lean").write_text(
+        (self.repo / "PaperLib" / "Sample" / "Base.lean").write_text(
             "line 1\nline 2\nline 3\nnew a\nnew b\nnew c\n", encoding="utf-8")
-        (self.repo / "MIPStarRE" / "QPBT" / "Deep").mkdir()
-        (self.repo / "MIPStarRE" / "QPBT" / "Deep" / "Extra.lean").write_text(
+        (self.repo / "PaperLib" / "Sample" / "Deep").mkdir()
+        (self.repo / "PaperLib" / "Sample" / "Deep" / "Extra.lean").write_text(
             "theorem extra : True := trivial\n", encoding="utf-8")
         (self.repo / "README.md").write_text("a\nb\nc\nd\n", encoding="utf-8")
         head = self._commit("touch Lean and Markdown together")
@@ -1455,7 +1455,7 @@ class MergeSubjectTests(unittest.TestCase):
 
     def test_delta_counts_only_the_code_lines_a_change_touched(self) -> None:
         # Two code lines leave; five lines arrive of which exactly one is code.
-        (self.repo / "MIPStarRE" / "QPBT" / "Base.lean").write_text(
+        (self.repo / "PaperLib" / "Sample" / "Base.lean").write_text(
             "line 1\nline 2\nline 3\n-- a line comment\n/- block\n   comment -/\n"
             "\nline 4 changed\n", encoding="utf-8")
         head = self._commit("comment churn around a single changed code line")
@@ -1463,7 +1463,7 @@ class MergeSubjectTests(unittest.TestCase):
 
     def test_delta_counts_code_after_a_multiline_string_containing_comment_opener(self) -> None:
         # Lean accepts this ordinary multiline string; /- on its second line is text.
-        lean = self.repo / "MIPStarRE" / "QPBT" / "Base.lean"
+        lean = self.repo / "PaperLib" / "Sample" / "Base.lean"
         prefix = 'def s : String := "hello\n/-"\n'
         lean.write_text(prefix + "theorem t : True := trivial\n", encoding="utf-8")
         base = self._commit("add a multiline Lean string")
@@ -1472,23 +1472,23 @@ class MergeSubjectTests(unittest.TestCase):
         self.assertEqual(pr_merge.lean_line_delta(self.repo, base, head), (1, 1))
 
     def test_delta_reads_an_added_file_as_the_code_lines_it_brings(self) -> None:
-        qpbt = self.repo / "MIPStarRE" / "QPBT"
-        (qpbt / "Notes.lean").write_text("/-!\n# Only prose\n-/\n\n-- and a remark\n",
+        sample = self.repo / "PaperLib" / "Sample"
+        (sample / "Notes.lean").write_text("/-!\n# Only prose\n-/\n\n-- and a remark\n",
                                          encoding="utf-8")
-        (qpbt / "New.lean").write_text("-- header\ntheorem new : True := trivial\n\n",
+        (sample / "New.lean").write_text("-- header\ntheorem new : True := trivial\n\n",
                                        encoding="utf-8")
         head = self._commit("add a prose-only module beside a one-theorem module")
         self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (1, 0))
 
     def test_delta_reads_a_deleted_file_as_the_code_lines_it_takes(self) -> None:
-        (self.repo / "MIPStarRE" / "QPBT" / "Doc.lean").unlink()
+        (self.repo / "PaperLib" / "Sample" / "Doc.lean").unlink()
         head = self._commit("drop the doc module")
         self.assertEqual(pr_merge.lean_line_delta(self.repo, self.merge_base, head), (0, 2))
 
     def test_delta_follows_a_rename_and_counts_only_the_code_it_added(self) -> None:
-        qpbt = self.repo / "MIPStarRE" / "QPBT"
-        moved = qpbt / "Renamed.lean"
-        (qpbt / "Doc.lean").rename(moved)
+        sample = self.repo / "PaperLib" / "Sample"
+        moved = sample / "Renamed.lean"
+        (sample / "Doc.lean").rename(moved)
         moved.write_text(DOC_MODULE + "-- one more remark\ntheorem doc_c : True := trivial\n",
                          encoding="utf-8")
         head = self._commit("rename the doc module and extend it")

@@ -6,12 +6,16 @@ companion challenge repositories to verify, with the official
 library proves the headline theorems.  Background and trust model:
 `docs/comparator.md`.
 
-Two challenges are configured today, one entry each in `challenges.py`:
+One challenge is generated per track that names headline theorems in
+`local/project.json`; `challenges.py` turns those tracks into the registry.
+The default track uses `challenge_header.lean` / `challenge_footer.lean`, a
+second track `challenge_<track>_header.lean` / `_footer.lean`.  The challenge
+repository is `project.comparator_slug`.  A repository whose tracks are not
+written yet has no challenge, and every command below says so and exits 0.
 
 | Challenge | Target theorems | Generated file | Challenge repository |
 |---|---|---|---|
-| `ldt` | `MIPStarRE.LDT.Test.mainFormal` | `expected/Challenge.lean.expected` | [LDT-comparator](https://github.com/LionSR/LDT-comparator) |
-| `qpbt` | `MIPStarRE.QPBT.pauli_soundness`, `MIPStarRE.QPBT.pauli_soundness_qubit` | `expected/ChallengeQPBT.lean.expected` | [QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator) |
+| `<track>` | the track's headline theorems | the track's `expected_challenge` | `<comparator_slug>` |
 
 Each generated file imports only Mathlib and re-declares, verbatim and in
 dependency order, every declaration in the kernel closure of the target
@@ -20,17 +24,18 @@ stated with `sorry`.
 
 ## Adding or changing a challenge
 
-`challenges.py` is the single source of truth: one `Challenge` entry carries
-the target theorem names, the header and footer that frame the generated file,
-the path of the checked-in expected copy, and the two elaboration-context
-tables described under *Maintenance notes*.  A new challenge therefore needs an
-entry, a header, a footer, and one CI drift step — no generator code changes.
+The registry is derived: a track in `local/project.json` with headline
+theorems becomes a challenge whose targets are those theorems and whose
+checked-in copy is the track's `expected_challenge`.  What a config file cannot
+hold — the elaboration-context tables described under *Maintenance notes* —
+lives in `EXTRAS` and `MODULE_PRELUDES` of `challenges.py`, keyed by challenge
+name.  A new challenge therefore needs a track, a header, a footer, and one CI
+drift step — no generator code changes.
 
-The extractor is shared.  It imports the root module of every configured
-challenge and reads its roots from the `COMPARATOR_TARGETS` environment
-variable (whitespace-separated, defaulting to the LDT root), so a new challenge
-whose targets live outside the current imports also needs its root module added
-to `extract_closure.lean`.
+The extractor is shared.  It imports the library root and reads its roots from
+the `COMPARATOR_TARGETS` environment variable (whitespace-separated; empty by
+default), so a challenge whose targets live outside the root's imports also
+needs its module added to `extract_closure.lean`.
 
 ## Drift guard and regeneration
 
@@ -46,7 +51,7 @@ library).  With no `--challenge` every configured challenge is checked:
 
 ```sh
 python3 scripts/comparator/check_challenge_drift.py --root .
-python3 scripts/comparator/check_challenge_drift.py --root . --challenge qpbt
+python3 scripts/comparator/check_challenge_drift.py --root . --challenge <track>
 ```
 
 To update the checked-in expected copies after an intentional statement or
@@ -56,24 +61,24 @@ dependency change, run the exact maintenance command:
 python3 scripts/comparator/check_challenge_drift.py --root . --update
 ```
 
-or, for one challenge only, add `--challenge ldt` / `--challenge qpbt`.
+or, for one challenge only, add `--challenge <track>`.
 
-The update command performs the documented extraction and assembly pipeline in a
-temporary directory (shown here for the QPBT challenge):
+The update command performs the documented extraction and assembly pipeline in
+a temporary directory (shown here for the default track, whose challenge files
+carry no track in their name):
 
 ```sh
 # 1. extract the closure of the statements of the challenge's targets
 #    (a Lean metaprogram mirroring comparator's runForUsedConsts traversal)
-COMPARATOR_TARGETS="MIPStarRE.QPBT.pauli_soundness MIPStarRE.QPBT.pauli_soundness_qubit" \
+COMPARATOR_TARGETS="$(python3 scripts/comparator/challenges.py targets)" \
   lake env lean scripts/comparator/extract_closure.lean > closure.tsv
 awk -F'\t' 'NF==4' closure.tsv > closure.clean.tsv
 
 # 2. assemble the challenge file (topological order, namespace handling)
-python3 scripts/comparator/assemble_challenge.py closure.clean.tsv \
-    --challenge qpbt > draft.lean
-cat scripts/comparator/challenge_qpbt_header.lean draft.lean \
-    scripts/comparator/challenge_qpbt_footer.lean \
-    > scripts/comparator/expected/ChallengeQPBT.lean.expected
+python3 scripts/comparator/assemble_challenge.py closure.clean.tsv > draft.lean
+cat scripts/comparator/challenge_header.lean draft.lean \
+    scripts/comparator/challenge_footer.lean \
+    > "$(python3 scripts/comparator/challenges.py expected)"
 ```
 
 Then copy the expected file into the challenge repository as `Challenge.lean`,
@@ -87,13 +92,13 @@ generated from, and run its `./verify.sh` (its CI also runs on every push).
   kernel closure cannot see.  Extend them if regeneration produces compile
   errors in the generated file; the script fails loudly if a table key no
   longer matches any extracted declaration.
-- The target statements in each footer mirror the theorems in the library:
-  `challenge_footer.lean` mirrors
-  `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean`, and
-  `challenge_qpbt_footer.lean` mirrors `MIPStarRE/QPBT/Test/Soundness.lean`
-  and `MIPStarRE/QPBT/Test/QubitForm.lean`.  If a library statement changes,
-  update the footer too — comparator fails with "theorem statement do not
-  match" until the two agree.
+- The target statements in each footer mirror the theorems in the library,
+  character for character: `challenge_footer.lean` mirrors the file that
+  declares the default track's headline theorem.  If a library statement
+  changes, update the footer too — comparator fails with "theorem statement do
+  not match" until the two agree.  The footer is also the repository's one
+  intentional `sorry`: keep the `theorem mainFormal` / `:= by` / `sorry` shape
+  that `scripts/generate_badges.py` subtracts from the sorry count.
 - Declarations without a source range (compiler-generated congruence lemmas
   and `autoParam` helpers) are emitted as explanatory comments; they
   regenerate identically during elaboration of the challenge file.

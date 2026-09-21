@@ -13,13 +13,14 @@ done without caveat, and satisfies the lean comparator"*; earlier the same day,
 
 A **track** is a Lean subtree, the blueprint chapters describing it, its
 paper-gap register, its axiom-audit file, its blueprint exemption table, its
-comparator record and its artifact file set. The per-track data is §6; QPBT is
-the only track registered
-today, but nothing here is QPBT-specific.
+comparator record and its artifact file set. The per-track data is §6. A
+repository has one track by default (`project.track`); nothing here is specific
+to any project or any paper.
 
 **Declaring finished** means any public statement that the track is complete: a
-completion comment on its umbrella issues (27/168 for QPBT), closing those
-issues, tagging a release, or a README/status page that says the track is done.
+completion comment on the track's umbrella issues (the ones §6 registers),
+closing those issues, tagging a release, or a README/status page that says the
+track is done.
 
 ## 2. Finished without caveat
 
@@ -38,9 +39,9 @@ rather than copied.
 **C2 — Headline axioms.** Every headline theorem of §6 depends only on
 `propext`, `Classical.choice` and `Quot.sound`. The check is a committed
 `AxiomAudit` Lean file for the track that carries one audit command per
-headline theorem — `assert_standard_axioms` (LDT) or `audit_standard_axioms`
-(the command QPBT's audit module defines); both print the axiom set and fail
-elaboration unless it is exactly those three — and is built in CI. The gate
+headline theorem — an `assert_standard_axioms`-style command that prints the
+axiom set and fails elaboration unless it is exactly those three — and is built
+in CI. The gate
 checks that the file
 exists and covers the table; the axiom values themselves come from the build
 and are reported as delegated.
@@ -55,8 +56,8 @@ carries a `Terminal status` cell reading exactly `corrected` or
   with no unnecessary hypothesis or weakened conclusion and no change to the
   source semantics") and Lean convergence — and carries its three artifacts: a
   gap note, a corrected blueprint node citing it, and, where the printed claim
-  is not proved, the printed claim preserved as a non-asserted `Prop` (the
-  `lem:symmetric-strat` and `lem:qld-4-13` pattern of 2026-09-19). The
+  is not proved, the printed claim preserved as a non-asserted `Prop` beside
+  the corrected one, so a reader can see both. The
   artifacts are evidence that a correction was adopted; they are not a route
   around those conditions, and a row whose correction weakens a conclusion is
   not terminal however complete its artifacts are.
@@ -93,6 +94,14 @@ ancestor-or-equal of the commit being declared finished, with no Lean change to
 the statement closure in between — which is exactly what a passing drift check
 proves.
 
+The record is a block in `docs/comparator.md` that opens with the exact marker
+`<!-- completion-gate: track=<name> -->` and continues with `- key: value`
+lines until the first line that does not begin with `-`. The five keys the
+gate requires, all non-empty, are `challenge-repository`,
+`verified-library-commit` (a full 40-character hash), `expected-challenge`,
+`drift-check` and `covered-theorems`; §3 of
+[`../../docs/comparator.md`](../../docs/comparator.md) carries the empty form.
+
 The coverage half of C5 is decided against the challenge, never against the
 record alone. The record's `expected-challenge` must be exactly the expected
 copy §6 registers for the track, and every headline theorem of §6 must occur in
@@ -111,10 +120,8 @@ being skipped, so the criterion can never report a green run over zero docs.
 
 **C7 — Artifact readiness.** "Done" means ready to be attached as an artifact
 to an ITP submission (owner, 2026-09-19), so every file such a submission needs
-is committed at the declared commit: the files §6 registers for the track —
-today `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`,
-`docs/ARTIFACT.md` and `LICENSE` — and the snapshot script
-`scripts/make_artifact.sh`. The gate checks that each of them exists and fails
+is committed at the declared commit: the files §6 registers for the track
+(`artifact_files`) and the snapshot script it registers (`artifact_script`). The gate checks that each of them exists and fails
 closed naming the missing ones; that the script *produces* a snapshot whose
 leak scan passes is a run, and is reported as delegated like C2, C4 and C5.
 A missing artifact file is main's to-do list, not a caveat that may be carried
@@ -122,9 +129,9 @@ into a completion statement.
 
 ## 3. Where the comparator challenge lives
 
-The challenge repository lives **outside** this repository and outside the
-umbrella repository: a separate repository of its own, as `LDT-comparator`
-already is for `MIPStarRE.LDT.Test.mainFormal` (`docs/comparator.md`). Three
+The challenge repository lives **outside** this repository and outside any
+umbrella repository: a separate repository of its own, named by
+`project.comparator_slug` in `local/project.json` (`docs/comparator.md`). Three
 reasons, in order of weight:
 
 1. *Validating Proofs* level 4 requires the statement to be written in a
@@ -133,8 +140,8 @@ reasons, in order of weight:
 2. The challenge must depend on this library **pinned by commit**. A repository
    cannot meaningfully pin a commit of itself, and the pin is the evidence C5
    rests on.
-3. `Dengnifer/MIPStarRE-qpbt` is the umbrella repository and is not the main
-   session's to modify (`local/personas/main.md`).
+3. An umbrella repository, where one exists, is not the main session's to
+   modify (`local/personas/main.md`).
 
 What stays here: the generator (`scripts/comparator/`), the expected copy, the
 drift check, and the comparator record. Creating the challenge repository is an
@@ -176,53 +183,79 @@ run of the same commit. Unit tests:
 
 ## 6. Registered tracks
 
-### QPBT
+**The registry is `local/project.json`, under `tracks.<name>`.** This section
+says what a track's row set means; the values live in that file, and the gate
+reads them from there. A repository with no registered track is a valid,
+freshly instantiated repository: the gate says so in one line and exits
+non-zero, rather than crashing or reporting a green run over nothing.
 
-| Field | Value |
+### The fields
+
+| Field in `tracks.<name>` | What it names |
 |---|---|
-| Lean root | `MIPStarRE/QPBT` |
-| Blueprint chapters | `blueprint/src/chapter/ch11_qpbt_algebra.tex`, `blueprint/src/chapter/ch12_qpbt_games.tex`, `blueprint/src/chapter/ch13_qpbt_test.tex`, `blueprint/src/chapter/ch14_qpbt_observables.tex`, `blueprint/src/chapter/ch15_qpbt_combining.tex`, `blueprint/src/chapter/ch16_qpbt_extraction.tex` |
-| Paper-gap register | `docs/paper-gaps/qpbt-gap-register.md` |
-| Axiom audit | `MIPStarRE/QPBT/Test/AxiomAudit.lean` |
-| `\leanok` exemptions | `docs/completion/qpbt-leanok-exemptions.md` |
-| Comparator record | `docs/comparator.md`, block `track=qpbt` |
-| Expected challenge | `scripts/comparator/expected/ChallengeQPBT.lean.expected` |
-| Truthful docs (C6) | `README.md` |
-| Artifact files (C7) | `README.md`, `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`, `docs/ARTIFACT.md`, `LICENSE` |
-| Artifact script (C7) | `scripts/make_artifact.sh` |
-| Umbrella issues | 27, 168 |
+| `lean_root` | the track's Lean subtree, relative to the repository root |
+| `headline` | the track's headline results: a list of `[lean name, blueprint label]` pairs |
+| `blueprint_chapters` | the chapter files that describe the track |
+| `gap_register` | the register of gaps found in the source paper for this track |
+| `axiom_audit` | the committed Lean file whose build asserts C2 |
+| `leanok_exemptions` | the table of blueprint nodes exempt from `\leanok`, each with a written reason |
+| `comparator_doc` | the document, and the block inside it, holding the comparator record |
+| `expected_challenge` | the checked-in expected assembly of the challenge statement file |
+| `truthful_docs` | the status documents C6 holds to the truth |
+| `artifact_files` | the files an artifact submission needs, C7 |
+| `artifact_script` | the snapshot script, C7 |
+| `umbrella_issues` | the issues a completion statement would be posted on |
 
-Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
+Every path-valued field is a repository-relative path that must exist at the
+declared commit; a registered path that has been renamed or deleted **fails**
+the criterion that reads it, and is never skipped.
 
-| Lean name | Blueprint node |
-|---|---|
-| `MIPStarRE.QPBT.pauli_soundness` | `thm:pauli` |
-| `MIPStarRE.QPBT.pauli_soundness_qubit` | `cor:pauli-binary` |
-| `MIPStarRE.QPBT.exists_spcc_value_one` | `lem:pauli-completeness` |
-| `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
+### Example
 
-The `Expected challenge` row and this table do not agree yet, and C5
-cannot go green until they do. The generator that writes that copy
-(`scripts/comparator/challenges.py`, the `targets` of its `qpbt` entry)
-covers two of the four headline theorems today — `pauli_soundness` and
-`pauli_soundness_qubit` — so the registered copy names neither
-`exists_spcc_value_one` nor `exists_ld_soundness`, and the coverage rule
-of C5 above fails against it by construction. Widening `targets` to all
-four headline theorems and regenerating the expected copy is therefore
-part of C5's remaining work, beside the absent comparator record itself;
-the table above is the paper's headline set and does not shrink to meet
-the generator.
+```jsonc
+// local/project.json — EXAMPLE, invented, for shape only
+"tracks": {
+  "main": {
+    "lean_root": "WeakDep",
+    "headline": [
+      ["WeakDep.TailBounds.tail_bound", "thm:tail"],
+      ["WeakDep.Limits.clt", "thm:clt"]
+    ],
+    "blueprint_chapters": [
+      "blueprint/src/chapter/ch04_tail_bounds.tex",
+      "blueprint/src/chapter/ch05_limits.tex"
+    ],
+    "gap_register": "docs/paper-gaps/main-gap-register.md",
+    "axiom_audit": "WeakDep/Test/AxiomAudit.lean",
+    "leanok_exemptions": "docs/completion/main-leanok-exemptions.md",
+    "comparator_doc": "docs/comparator.md",
+    "expected_challenge": "scripts/comparator/expected/Challenge.lean.expected",
+    "truthful_docs": ["README.md"],
+    "artifact_files": ["README.md", "docs/theorem-index.md", "docs/DEVIATIONS.md",
+                       "docs/ARTIFACT.md", "LICENSE"],
+    "artifact_script": "scripts/make_artifact.sh",
+    "umbrella_issues": [12]
+  }
+}
+```
 
-The `Blueprint chapters` row is the track's own chapters, read whole; it is
-not the whole of C4's scope. The gate also reads every other `.tex` file in
-those directories whose `\lean{...}` names a declaration under the track's
-Lean root and judges those nodes — today
-`blueprint/src/chapter/ch03_preliminaries.tex` carries one such QPBT node — so
-a chapter missing from the row above narrows nothing.
+### Invariants the registry must hold
 
-Adding a track means adding its row set here and its entry in the gate's
-`TRACKS` registry, in one commit; a unit test reads this section and fails if a
-registry entry names a path these rows do not. That test reads every
-path-valued field of `Track` — every row above but the umbrella issues — and
-fails as well when `Track` gains or loses a field without a line in the test,
-so the rule cannot quietly stop covering part of the registry.
+1. **The headline set is the paper's, and the challenge generator's `targets`
+   equal it.** They are two names for one set, and C5 checks the coverage: a
+   generator that covers a subset of the headline table fails C5 *by
+   construction*. Widen the generator; never shrink the table to meet it.
+2. **The blueprint-chapter list is the track's own chapters, not the whole of
+   C4's scope.** The gate also judges any node in another chapter whose
+   `\lean{...}` names a declaration under the track's Lean root, so a chapter
+   missing from the list narrows nothing — it only hides the chapter from
+   whoever reads this registry.
+3. **Adding a track** means adding one `tracks.<name>` object with every field
+   above, in one commit, together with whatever new files it names. Nothing
+   else changes: no gate code, no protocol text.
+4. **The gate never invents a default.** A missing field, an unknown track name
+   or an empty registry is an error with a message naming what is missing.
+
+A unit test under `scripts/tests/` reads this section's field table and fails
+when the registry's per-track object gains or loses a field without a matching
+row here, so the registry and this protocol cannot drift apart silently.

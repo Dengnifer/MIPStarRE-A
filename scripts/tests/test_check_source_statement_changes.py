@@ -40,12 +40,12 @@ def _make_repo(root: Path) -> Path:
     _git(root, "init")
     _git(root, "config", "user.email", "test@example.com")
     _git(root, "config", "user.name", "Test User")
-    (root / "MIPStarRE" / "LDT").mkdir(parents=True)
+    (root / "PaperLib" / "Core").mkdir(parents=True)
     (root / "blueprint" / "src" / "chapter").mkdir(parents=True)
     return root
 
 
-def _write_blueprint(root: Path, decl: str = "MIPStarRE.LDT.paperThm") -> None:
+def _write_blueprint(root: Path, decl: str = "PaperLib.Core.paperThm") -> None:
     _write(
         root / "blueprint" / "src" / "chapter" / "ch01_test.tex",
         (
@@ -60,13 +60,13 @@ def _write_blueprint(root: Path, decl: str = "MIPStarRE.LDT.paperThm") -> None:
 
 def _write_lean(root: Path, statement: str) -> None:
     _write(
-        root / "MIPStarRE" / "LDT" / "Foo.lean",
+        root / "PaperLib" / "Core" / "Foo.lean",
         (
-            "namespace MIPStarRE.LDT\n\n"
+            "namespace PaperLib.Core\n\n"
             "/-- Paper theorem. -/\n"
             f"theorem paperThm {statement} := by\n"
             "  trivial\n\n"
-            "end MIPStarRE.LDT\n"
+            "end PaperLib.Core\n"
         ),
     )
 
@@ -112,7 +112,7 @@ class BlueprintSourceRefsTests(unittest.TestCase):
             root = Path(td)
             _write_blueprint(root)
             refs = _source_labelled_refs(root)
-            self.assertIn("MIPStarRE.LDT.paperThm", refs)
+            self.assertIn("PaperLib.Core.paperThm", refs)
 
     def test_remark_labels_are_not_source_statement_refs(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -120,12 +120,12 @@ class BlueprintSourceRefsTests(unittest.TestCase):
             _write(
                 root / "blueprint" / "src" / "chapter" / "ch01_test.tex",
                 (
-                    "\\begin{remark}\\label{rem:paper}\\lean{MIPStarRE.LDT.paperThm}\n"
+                    "\\begin{remark}\\label{rem:paper}\\lean{PaperLib.Core.paperThm}\n"
                     "Remark.\n"
                     "\\end{remark}\n"
                 ),
             )
-            self.assertNotIn("MIPStarRE.LDT.paperThm", _source_labelled_refs(root))
+            self.assertNotIn("PaperLib.Core.paperThm", _source_labelled_refs(root))
 
 
 class GitComparisonTests(unittest.TestCase):
@@ -141,10 +141,10 @@ class GitComparisonTests(unittest.TestCase):
             findings = find_header_changes(
                 root,
                 "HEAD",
-                ["MIPStarRE/LDT/Foo.lean"],
+                ["PaperLib/Core/Foo.lean"],
             )
             self.assertEqual(len(findings), 1)
-            self.assertEqual(findings[0].declaration, "MIPStarRE.LDT.paperThm")
+            self.assertEqual(findings[0].declaration, "PaperLib.Core.paperThm")
             self.assertIn("(h : True)", findings[0].new_header)
 
     def test_proof_only_change_is_not_reported(self) -> None:
@@ -155,13 +155,13 @@ class GitComparisonTests(unittest.TestCase):
             _git(root, "add", ".")
             _git(root, "commit", "-m", "base")
 
-            text = (root / "MIPStarRE" / "LDT" / "Foo.lean").read_text()
-            (root / "MIPStarRE" / "LDT" / "Foo.lean").write_text(
+            text = (root / "PaperLib" / "Core" / "Foo.lean").read_text()
+            (root / "PaperLib" / "Core" / "Foo.lean").write_text(
                 text.replace("  trivial", "  exact True.intro"),
                 encoding="utf-8",
             )
             self.assertEqual(
-                find_header_changes(root, "HEAD", ["MIPStarRE/LDT/Foo.lean"]),
+                find_header_changes(root, "HEAD", ["PaperLib/Core/Foo.lean"]),
                 [],
             )
 
@@ -187,7 +187,7 @@ class GitComparisonTests(unittest.TestCase):
             findings = find_header_changes(
                 root,
                 "HEAD",
-                ["MIPStarRE/LDT/Foo.lean"],
+                ["PaperLib/Core/Foo.lean"],
             )
             self.assertEqual(len(findings), 1)
             self.assertIn("True ∧ True", findings[0].new_header)
@@ -209,7 +209,7 @@ class GitComparisonTests(unittest.TestCase):
                         "--base",
                         "HEAD",
                         "--changed-files",
-                        "MIPStarRE/LDT/Foo.lean",
+                        "PaperLib/Core/Foo.lean",
                         "--warn-only",
                     ]
                 ),

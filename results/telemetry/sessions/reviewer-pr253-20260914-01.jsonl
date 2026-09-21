@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a09ef8-4313-7f31-8c53-5d5b9b5c0748"}
-{"type":"turn.started"}
-{"type":"error","message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 8a34ae80-6621-41f2-b626-6d0f2d606c47"}
-{"type":"turn.failed","error":{"message":"exceeded retry limit, last status: 429 Too Many Requests, request id: 8a34ae80-6621-41f2-b626-6d0f2d606c47"}}

@@ -49,6 +49,19 @@ class RequiredCommandTests(unittest.TestCase):
 '''
 
 
+# Stand-ins for the two project-configuration tools ci.sh consults to learn
+# what to build.  The real ones read `local/project.json`; here they answer for
+# a repository with one registered track, so the build targets in the assertion
+# below are derived, not hard-coded, exactly as they are in a real project.
+STUB_GATE = "print('core')\n"
+STUB_CONFIG = r'''import sys
+print({
+    "project.lean_root": "PaperLib",
+    "tracks.core.axiom_audit": "PaperLib/Core/Test/AxiomAudit.lean",
+}.get(sys.argv[-1], ""))
+'''
+
+
 class CiStepFailureTests(workflow.LayerTestCase):
     """Required errors survive later commands, publication, and parent cleanup."""
 
@@ -76,6 +89,8 @@ class CiStepFailureTests(workflow.LayerTestCase):
                      "audit_conclusion_shaped_hypotheses", "audit_unfaithful_markers",
                      "check_duplicate_private_helpers", "check_statement_paper_origin"):
             (self.repo / f"scripts/{name}.py").write_text(FAKE_COMMAND, encoding="utf-8")
+        (self.repo / "scripts/completion_gate.py").write_text(STUB_GATE, encoding="utf-8")
+        (self.repo / "scripts/project_config.py").write_text(STUB_CONFIG, encoding="utf-8")
         for name in ("required", "audit_paper_facing_proof_debt", "audit_unfaithful_markers",
                      "check_duplicate_private_helpers", "audit_conclusion_shaped_hypotheses",
                      "audit_lean_axiom_declarations"):
@@ -149,7 +164,7 @@ class CiStepFailureTests(workflow.LayerTestCase):
         manifest, commands = self.run_ci()
         self.assertEqual(manifest["conclusion"], "success")
         self.assertTrue(all(step["outcome"] == "success" for step in manifest["steps"]))
-        for command in ("lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit",
+        for command in ("lake build PaperLib.Core.Test.AxiomAudit",
                         "texra-blueprint web",
                         "blueprint_lean_sync.py --root . --ci"):
             self.assertIn(command, commands)

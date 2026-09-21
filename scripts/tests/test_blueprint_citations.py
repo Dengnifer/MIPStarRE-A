@@ -77,7 +77,7 @@ class BlueprintCitationTests(unittest.TestCase):
         self.assertEqual(len(index["lem:alpha"]), 2)
 
     def test_scan_finds_known_tokens_and_unknown_blueprint_labels(self) -> None:
-        lean = self.root / "MIPStarRE" / "Example.lean"
+        lean = self.root / "PaperLib" / "Example.lean"
         fixture = self.root / "scripts" / "fixture.py"
         _write(
             lean,
@@ -101,14 +101,14 @@ class BlueprintCitationTests(unittest.TestCase):
         )
 
     def test_scan_ignores_explicit_blueprint_filenames_and_numeric_locators(self) -> None:
-        lean = self.root / "MIPStarRE" / "Example.lean"
+        lean = self.root / "PaperLib" / "Example.lean"
         _write(
             lean,
             "/-- This is the field representation of\n"
-            "`def:beta`, blueprint `ch13_qpbt_test.tex`; paper origin elsewhere.\n"
-            "See blueprint `ch13_qpbt_test.tex:63`,\n"
-            "Blueprint node `ch13_qpbt_test.tex:63-70`, and\n"
-            "blueprint `blueprint/src/chapter/ch13_qpbt_test.tex:63-70`. -/\n",
+            "`def:beta`, blueprint `ch13_sample_test.tex`; paper origin elsewhere.\n"
+            "See blueprint `ch13_sample_test.tex:63`,\n"
+            "Blueprint node `ch13_sample_test.tex:63-70`, and\n"
+            "blueprint `blueprint/src/chapter/ch13_sample_test.tex:63-70`. -/\n",
         )
 
         uses, unknown = find_citation_uses(
@@ -127,7 +127,7 @@ class BlueprintCitationTests(unittest.TestCase):
         self.assertNotIn("UNRESOLVED", output.getvalue())
 
     def test_scan_reports_unknown_explicit_label_families(self) -> None:
-        lean = self.root / "MIPStarRE" / "Example.lean"
+        lean = self.root / "PaperLib" / "Example.lean"
         _write(
             lean,
             "/-- Blueprint `eq:missing-equation`, blueprint node `sec:missing-section`, "
@@ -225,39 +225,39 @@ class BlueprintCitationTests(unittest.TestCase):
     def test_rewrite_does_not_guess_from_decoding_docstring_proximity(self) -> None:
         index = {
             "lem:qld-decoder-linearity": [LabelLocation(
-                "lem:qld-decoder-linearity", "blueprint/src/chapter/ch16_qpbt_analysis.tex",
+                "lem:qld-decoder-linearity", "blueprint/src/chapter/ch16_sample_analysis.tex",
                 30, 30, 46,
             )],
             "lem:qld-construct-the-paulis": [LabelLocation(
-                "lem:qld-construct-the-paulis", "blueprint/src/chapter/ch16_qpbt_analysis.tex",
+                "lem:qld-construct-the-paulis", "blueprint/src/chapter/ch16_sample_analysis.tex",
                 193, 193, 261,
             )],
         }
         text = (
             "/-- This is blueprint `lem:qld-decoder-linearity`, used in the symmetry "
-            "step at blueprint `ch16_qpbt_analysis.tex:239-244`. -/\n"
+            "step at blueprint `ch16_sample_analysis.tex:239-244`. -/\n"
         )
 
         rewritten, unresolved = rewrite_text(text, index)
 
-        self.assertIn("`ch16_qpbt_analysis.tex:239-244`", rewritten)
+        self.assertIn("`ch16_sample_analysis.tex:239-244`", rewritten)
         self.assertEqual(rewritten.count("`lem:qld-decoder-linearity`"), 1)
-        self.assertEqual(unresolved, ["`ch16_qpbt_analysis.tex:239-244`"])
+        self.assertEqual(unresolved, ["`ch16_sample_analysis.tex:239-244`"])
 
     def test_rewrite_uses_exact_given_strategy_support_node(self) -> None:
         index = {
             "lem:symmetric-strat": [LabelLocation(
-                "lem:symmetric-strat", "blueprint/src/chapter/ch12_qpbt_games.tex",
+                "lem:symmetric-strat", "blueprint/src/chapter/ch12_sample_games.tex",
                 116, 116, 134,
             )],
             "lem:symmetric-strat-given-strategy": [LabelLocation(
                 "lem:symmetric-strat-given-strategy",
-                "blueprint/src/chapter/ch12_qpbt_games.tex", 140, 140, 154,
+                "blueprint/src/chapter/ch12_sample_games.tex", 140, 140, 154,
             )],
         }
         text = (
             "/-- Formalization-only form of `lem:symmetric-strat`; blueprint "
-            "`ch12_qpbt_games.tex:140-154`. -/\n"
+            "`ch12_sample_games.tex:140-154`. -/\n"
         )
 
         rewritten, unresolved = rewrite_text(text, index)
@@ -297,7 +297,7 @@ class BlueprintCitationTests(unittest.TestCase):
         )
 
     def test_resolve_scan_fails_for_bare_and_list_unknown_labels(self) -> None:
-        lean = self.root / "MIPStarRE" / "Example.lean"
+        lean = self.root / "PaperLib" / "Example.lean"
         _write(
             lean,
             "/-- Blueprint `lem:alpha`, `def:missing`; bare `rem:missing`. -/\n",
@@ -307,7 +307,7 @@ class BlueprintCitationTests(unittest.TestCase):
         with contextlib.redirect_stdout(stdout):
             result = main([
                 "--root", str(self.root), "resolve", "--path",
-                "MIPStarRE/Example.lean", "--format", "plain",
+                "PaperLib/Example.lean", "--format", "plain",
             ])
 
         self.assertEqual(result, 1)
@@ -403,7 +403,7 @@ class BlueprintCitationTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), "lem:missing\tUNRESOLVED\n")
 
     def test_rewrite_cli_refuses_partial_writes_without_opt_in(self) -> None:
-        lean = self.root / "MIPStarRE" / "Example.lean"
+        lean = self.root / "PaperLib" / "Example.lean"
         original = (
             "/-- See `lem:alpha`, blueprint "
             "`blueprint/src/chapter/ch12_example.tex:80-90`. -/\n"
@@ -414,7 +414,7 @@ class BlueprintCitationTests(unittest.TestCase):
 
         with contextlib.redirect_stderr(stderr):
             refused = main([
-                "--root", str(self.root), "rewrite", "MIPStarRE/Example.lean", "--write"
+                "--root", str(self.root), "rewrite", "PaperLib/Example.lean", "--write"
             ])
 
         self.assertEqual(refused, 1)
@@ -424,7 +424,7 @@ class BlueprintCitationTests(unittest.TestCase):
         stderr = io.StringIO()
         with contextlib.redirect_stderr(stderr):
             accepted = main([
-                "--root", str(self.root), "rewrite", "MIPStarRE/Example.lean",
+                "--root", str(self.root), "rewrite", "PaperLib/Example.lean",
                 "--write", "--allow-unresolved",
             ])
 
@@ -443,7 +443,7 @@ class BlueprintCitationTests(unittest.TestCase):
     def test_markdown_resolution_compacts_repeated_origins(self) -> None:
         origins = {
             "lem:alpha": [
-                CitationUse("lem:alpha", "MIPStarRE/Example.lean", line)
+                CitationUse("lem:alpha", "PaperLib/Example.lean", line)
                 for line in range(1, 7)
             ]
         }

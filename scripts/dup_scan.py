@@ -14,7 +14,7 @@ Three match kinds, from strongest to weakest:
 ``statement``
     a different name whose statement normalises to the same string;
 ``short``
-    the same last name component elsewhere inside the ``MIPStarRE`` namespace.
+    the same last name component elsewhere inside the ``PaperLib`` namespace.
 
 The normal form strips comments, cuts the proof at the top-level
 ``:=``/``by``/``where``, renames binder names positionally and collapses
@@ -38,6 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import project_config  # noqa: E402
 from blueprint_lean_sync import (  # noqa: E402
     LeanDecl,
     collect_blueprint_entries,
@@ -45,12 +46,14 @@ from blueprint_lean_sync import (  # noqa: E402
     strip_lean_comments_preserve_lines,
 )
 
-#: The namespace whose short names are project-owned; a bare last component is
-#: only interesting as a duplicate inside it (Mathlib reuses short names).
-PROJECT_NAMESPACE = "MIPStarRE"
+#: Lean source root, relative to the repository root (`project.lean_root` of
+#: `local/project.json`).
+LEAN_ROOT_NAME = project_config.get(project_config.load(), "project.lean_root")
 
-#: Lean source root, relative to the repository root.
-LEAN_ROOT_NAME = "MIPStarRE"
+#: The namespace whose short names are project-owned; a bare last component is
+#: only interesting as a duplicate inside it (Mathlib reuses short names).  It
+#: is the Lean root read as a namespace, so the two can never disagree.
+PROJECT_NAMESPACE = LEAN_ROOT_NAME.strip("/").replace("/", ".")
 
 #: Declaration kinds worth guarding: the ones a prover task produces.
 GUARDED_KINDS = frozenset({"theorem", "lemma", "def", "abbrev", "instance"})

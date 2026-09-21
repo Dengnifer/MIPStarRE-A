@@ -1,7 +1,7 @@
 # `local/registry/`
 
 Small append-only registries that keep two workers from producing the same
-result twice (issue #576).
+result twice.
 
 ## `declaration-claims.jsonl`
 
@@ -9,7 +9,7 @@ One JSON object per line, newest last, written only by
 `local/bin/dup_check.py claim` / `claims-release`:
 
 ```json
-{"action": "claim", "by": "meta", "issue": 576, "names": ["MIPStarRE.QPBT.foo"], "nodes": ["lem:foo"], "note": "…", "ts": "2026-09-17T12:00:00Z"}
+{"action": "claim", "by": "meta", "issue": 576, "names": ["PaperLib.Chapter.foo"], "nodes": ["lem:foo"], "note": "…", "ts": "2026-09-17T12:00:00Z"}
 {"action": "release", "issue": 576, "note": "merged", "ts": "2026-09-17T18:00:00Z"}
 ```
 

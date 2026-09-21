@@ -5,12 +5,12 @@ Stale-issue audit for theorem / sorry tracking tickets.
 Scans exported GitHub issue JSON (from ``gh issue list --json``) and flags
 references whose state on current ``main`` looks outdated:
 
-  * ``MIPStarRE/**/*.lean`` paths that no longer exist;
+  * ``PaperLib/**/*.lean`` paths that no longer exist;
   * cited ``file.lean:LINE`` or ``line NNN`` markers where the line is no
     longer a ``sorry`` / ``admit``;
   * backtick-quoted declaration names that no longer resolve to any
     ``def`` / ``theorem`` / ``lemma`` / ``structure`` / ``instance`` /
-    ``class`` / ``abbrev`` / ``inductive`` declaration under ``MIPStarRE/``.
+    ``class`` / ``abbrev`` / ``inductive`` declaration under ``PaperLib/``.
 
 The tool is **report-only**: it never edits or closes issues.  It is intended
 as a triage aid for humans who will decide whether a flagged issue is truly
@@ -35,22 +35,31 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
+
+#: Lean source root of this project (`project.lean_root` of
+#: `local/project.json`); the regexes below recognise a citation by it.
+LEAN_ROOT = project_config.get(project_config.load(), "project.lean_root")
+_LR = re.escape(LEAN_ROOT)
+
 
 # ---------------------------------------------------------------------------
 # Regexes
 # ---------------------------------------------------------------------------
 
 # Lean file path under the project. ``:LINE`` suffix captured when present.
-# The outer ``(?:/…)*`` also matches the root ``MIPStarRE.lean`` file.  A
+# The outer ``(?:/…)*`` also matches the root ``PaperLib.lean`` file.  A
 # leading ``\b`` keeps the match from starting mid-identifier.
-_FILE_RE = re.compile(r"\b(MIPStarRE(?:/[A-Za-z0-9_.\-]+)*\.lean)(?::(\d+))?")
+_FILE_RE = re.compile(rf"\b({_LR}(?:/[A-Za-z0-9_.\-]+)*\.lean)(?::(\d+))?")
 
 # GitHub blob URLs often appear in issue bodies; normalize them to plain
-# ``MIPStarRE/...`` citations before scanning so we don't greedily match the
-# repo-name prefix (``.../MIPStarRE/blob/main/...``) as part of the path.
+# ``PaperLib/...`` citations before scanning so we don't greedily match the
+# repo-name prefix (``.../PaperLib/blob/main/...``) as part of the path.
 _GITHUB_BLOB_RE = re.compile(
     r"https?://github\.com/[^/\s]+/[^/\s]+/blob/[^\s#]+?/"
-    r"(MIPStarRE(?:/[A-Za-z0-9_.\-]+)*\.lean)(?:#L(\d+)(?:-L\d+)?)?"
+    rf"({_LR}(?:/[A-Za-z0-9_.\-]+)*\.lean)(?:#L(\d+)(?:-L\d+)?)?"
 )
 
 # "line 141" / "Line 131" — used when a path is mentioned nearby without the
@@ -101,7 +110,7 @@ _DECL_STOPLIST = frozenset({
 
 @dataclass(frozen=True)
 class FileCitation:
-    """A ``MIPStarRE/...`` path (with optional line) cited in an issue body."""
+    """A ``PaperLib/...`` path (with optional line) cited in an issue body."""
     path: str
     line: int | None
 
@@ -134,7 +143,7 @@ class IssueReport:
 # ---------------------------------------------------------------------------
 
 def _normalize_github_blob_urls(body: str) -> str:
-    """Rewrite GitHub blob URLs to plain ``MIPStarRE/...[:LINE]`` citations."""
+    """Rewrite GitHub blob URLs to plain ``PaperLib/...[:LINE]`` citations."""
 
     def repl(match: re.Match[str]) -> str:
         path = match.group(1)
@@ -145,7 +154,7 @@ def _normalize_github_blob_urls(body: str) -> str:
 
 
 def extract_file_citations(body: str) -> list[FileCitation]:
-    """Pull ``MIPStarRE/.../file.lean[:LINE]`` references out of ``body``.
+    """Pull ``PaperLib/.../file.lean[:LINE]`` references out of ``body``.
 
     When the path appears in a table row that separately lists ``line NNN``
     (the common convention in sorry-site trackers), we attach the nearest
@@ -272,7 +281,7 @@ def _repo_file_path(repo_root: Path, citation_path: str) -> Path | None:
     """Resolve a cited file path, rejecting paths that escape ``repo_root``.
 
     Issue text is untrusted input.  The path regex intentionally recognizes
-    broad ``MIPStarRE/...``-shaped strings, so normalize away any ``..``
+    broad ``PaperLib/...``-shaped strings, so normalize away any ``..``
     segments before opening the file.  A citation that resolves outside the
     checkout is treated as an invalid/missing in-repository file instead of
     letting the audit inspect arbitrary host files.
@@ -349,7 +358,7 @@ def run_audit(
     issues: Iterable[dict],
     repo_root: Path,
 ) -> list[IssueReport]:
-    decl_index = build_decl_index(repo_root / "MIPStarRE")
+    decl_index = build_decl_index(repo_root / LEAN_ROOT)
     reports: list[IssueReport] = []
     for issue in issues:
         reports.append(audit_issue(issue, repo_root, decl_index))
@@ -395,7 +404,7 @@ def render_text_report(reports: list[IssueReport], only_flagged: bool) -> str:
             for path, ln in r.non_sorry_lines:
                 lines.append(f"    - {path}:{ln}")
         if r.missing_decls:
-            lines.append("  declarations not found under MIPStarRE/:")
+            lines.append(f"  declarations not found under {LEAN_ROOT}/:")
             for name in r.missing_decls:
                 lines.append(f"    - {name}")
         lines.append("")
@@ -496,7 +505,7 @@ def _self_test(repo_root: Path) -> int:
         "title": "[self-test] synthetic audit fixture",
         "url": "https://example.invalid/issue/0",
         "body": (
-            "Refers to `MIPStarRE/LDT/Does/Not/Exist.lean:10` and to "
+            f"Refers to `{LEAN_ROOT}/Does/Not/Exist.lean:10` and to "
             "`definitely_not_a_real_declaration`.\n"
             "Also mentions `scripts/audit_stale_issues.py` (should be ignored)."
         ),
@@ -504,7 +513,7 @@ def _self_test(repo_root: Path) -> int:
     reports = run_audit([synthetic], repo_root)
     r = reports[0]
     problems: list[str] = []
-    if "MIPStarRE/LDT/Does/Not/Exist.lean:10" not in r.missing_files:
+    if f"{LEAN_ROOT}/Does/Not/Exist.lean:10" not in r.missing_files:
         problems.append(
             f"expected missing-file flag, got: {r.missing_files!r}"
         )
@@ -526,8 +535,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     repo_root = args.repo_root.resolve()
-    if not (repo_root / "MIPStarRE").is_dir():
-        parser.error(f"--repo-root {repo_root} has no MIPStarRE/ subdirectory")
+    if not (repo_root / LEAN_ROOT).is_dir():
+        parser.error(f"--repo-root {repo_root} has no {LEAN_ROOT}/ subdirectory")
 
     if args.self_test:
         return _self_test(repo_root)

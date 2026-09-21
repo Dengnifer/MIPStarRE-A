@@ -33,9 +33,9 @@ SECTION_RE = re.compile(r"\\section(?P<star>\*)?\{(?P<title>[^}]*)\}")
 CITE_RE = re.compile(r"\\cite(?:\[[^\]]*\])?\{[^}]+\}")
 XURL_RE = re.compile(r"\\usepackage(?:\[[^\]]*\])?\{[^}]*\bxurl\b[^}]*\}")
 COMMAND_INPUT_RE = re.compile(r"\\input\{(?:\./)?command\}")
-RAW_LEAN_ID_RE = re.compile(r"(?<!\\leanid\{)MIPStarRE\.[A-Za-z]")
-RAW_PAPER_PATH_RE = re.compile(r"(?<!\\path\{)references/(?:ldt|qpbt|neexp)-paper/")
-TEXTTT_TRACE_RE = re.compile(r"\\texttt\{(?:MIPStarRE|references/[a-z0-9-]+-paper)")
+RAW_LEAN_ID_RE = re.compile(r"(?<!\\leanid\{)PaperLib\.[A-Za-z]")
+RAW_PAPER_PATH_RE = re.compile(r"(?<!\\path\{)references/[A-Za-z0-9._-]+-paper/")
+TEXTTT_TRACE_RE = re.compile(r"\\texttt\{(?:PaperLib|references/[a-z0-9-]+-paper)")
 
 
 @dataclass(frozen=True)

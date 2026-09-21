@@ -70,7 +70,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_detects_private_duplicate_with_comment_whitespace_normalization(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -93,7 +93,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_private_public_duplicate_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -114,7 +114,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_inline_attribute_private_duplicate_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -134,7 +134,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_top_level_commands_terminate_previous_proof_body(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -165,7 +165,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_equation_style_duplicate_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -187,7 +187,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_indented_mutual_declarations_terminate_previous_body(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -211,7 +211,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_unicode_and_question_identifier_boundaries_do_not_split_keywords(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -231,7 +231,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_public_public_duplicate_is_not_reported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -248,7 +248,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_short_duplicates_are_ignored_by_default_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -266,7 +266,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_assignment_in_binder_is_not_taken_as_proof_body(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -285,7 +285,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
     def test_top_level_let_in_proposition_is_not_taken_as_proof_body(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            mod = root / "MIPStarRE" / "LDT" / "Foo.lean"
+            mod = root / "PaperLib" / "Core" / "Foo.lean"
             _write(
                 mod,
                 """\
@@ -326,7 +326,7 @@ class ParseHelperDeclarationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _write(
-                root / ".worktrees" / "audit" / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / ".worktrees" / "audit" / "PaperLib" / "Core" / "Foo.lean",
                 """\
                 private lemma first (h : True ∧ True) : True := by
                   exact And.left h
@@ -341,9 +341,9 @@ class ParseHelperDeclarationTests(unittest.TestCase):
 
 class RenderTests(unittest.TestCase):
     def test_text_report_can_emit_github_warning(self) -> None:
-        decl = audit.HelperDecl("MIPStarRE/A.lean", 7, "dup", "lemma", True, "body" * 20)
+        decl = audit.HelperDecl("PaperLib/A.lean", 7, "dup", "lemma", True, "body" * 20)
         other = audit.HelperDecl(
-            "MIPStarRE/A.lean",
+            "PaperLib/A.lean",
             11,
             "other",
             "lemma",
@@ -355,13 +355,13 @@ class RenderTests(unittest.TestCase):
             duplicate_groups=(audit.DuplicateGroup(80, (decl, other)),),
         )
         text = audit.render_text_report(report, github_annotations=True)
-        self.assertIn("::warning file=MIPStarRE/A.lean,line=7", text)
+        self.assertIn("::warning file=PaperLib/A.lean,line=7", text)
         self.assertIn(
-            "dup has the same normalized proof body as MIPStarRE/A.lean:11 other",
+            "dup has the same normalized proof body as PaperLib/A.lean:11 other",
             text,
         )
         self.assertNotIn(
-            "dup has the same normalized proof body as MIPStarRE/A.lean:7 dup",
+            "dup has the same normalized proof body as PaperLib/A.lean:7 dup",
             text,
         )
 
@@ -369,7 +369,7 @@ class RenderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _write(
-                root / "MIPStarRE" / "LDT" / "Foo.lean",
+                root / "PaperLib" / "Core" / "Foo.lean",
                 """\
                 private lemma first (h : True ∧ True) : True := by
                   exact And.left h

@@ -1,7 +1,11 @@
 # Mathematical Language Guidelines
 
-MIPStarRE Lean names and documentation should be written for readers comparing
-the formalization with the paper and blueprint.
+Lean names and documentation in this repository should be written for readers
+comparing the formalization with the paper and blueprint.
+
+> **About the examples.** File paths, declaration names and the `[#NNN]` link
+> below come from the project this kit was extracted from and are kept as
+> examples; read them as shapes, not as facts about this repository.
 
 This is a project-local supplement to the Mathlib-derived documentation,
 naming, and style guides in the lean-conventions skill's `MATHLIB_doc`,
@@ -24,7 +28,7 @@ These guidelines apply to:
 
 Use terminology from the following sources, in this order:
 
-1. `references/ldt-paper/`
+1. the paper mirrors under `references/`
 2. `blueprint/src/chapter/`
 3. established local conventions in nearby Lean files
 
@@ -131,8 +135,8 @@ Procedure:
    explicit argument.
 2. **Find the right home.**  Prefer a module that is already imported by
    both call sites.  Typical candidates:
-   - `MIPStarRE/LDT/Basic/` for parameter-free operators and bounds,
-   - `MIPStarRE/LDT/Preliminaries/` for polynomial/field/character lemmas,
+   - a `Basic/` directory for parameter-free objects and bounds,
+   - a `Preliminaries/` directory for the background lemmas,
    - The highest chapter that is a common dependency of the two sites.
 3. **Name mathematically.**  Give the shared helper a name that describes
    what it states, not which chapter it originally came from.
@@ -168,7 +172,7 @@ documentation prose.  Flag any item that fails.
       formalization was assembled (paper line numbers, workflow steps,
       implementation-phase labels)?
 - [ ] **Source alignment.**  For the mathematical content under review, does
-      the prose use the terminology in `references/ldt-paper/` or the
+      the prose use the terminology in the paper mirror under `references/` or the
       blueprint?  Are process words such as `pipeline`, `wrapper`, `package`,
       `raw`, `oneShot`, or `liveBlock` used as mathematical terms when the
       source does not use them that way?

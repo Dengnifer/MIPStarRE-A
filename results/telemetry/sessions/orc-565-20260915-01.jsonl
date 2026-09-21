@@ -1,9 +1,0 @@
-{"type":"thread.started","thread_id":"01a0a4a0-d705-7802-90f2-2d32af9cd31a"}
-{"type":"turn.started"}
-{"type":"error","message":"Reconnecting... 1/5 (unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: 77597c59-2529-411e-a303-0d01096c94c0)"}
-{"type":"error","message":"Reconnecting... 2/5 (unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: ac24c373-ed88-45cf-9c57-63242fd5fa19)"}
-{"type":"error","message":"Reconnecting... 3/5 (unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: 79272881-5492-4880-8517-d55ee802b6e2)"}
-{"type":"error","message":"Reconnecting... 4/5 (unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: dc263279-a35d-4736-9425-789b2ac9ec94)"}
-{"type":"error","message":"Reconnecting... 5/5 (unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: 90b86333-a367-4a04-9ff5-aaeb9316c028)"}
-{"type":"error","message":"unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: 9d14a1ec-4a8a-4b3c-b7ad-e113896ed938"}
-{"type":"turn.failed","error":{"message":"unexpected status 403 Forbidden: {\"code\":\"INSUFFICIENT_BALANCE\",\"message\":\"Insufficient account balance\"}, url: http://relay-us7.virvm.com:39479/responses, request id: 9d14a1ec-4a8a-4b3c-b7ad-e113896ed938"}}

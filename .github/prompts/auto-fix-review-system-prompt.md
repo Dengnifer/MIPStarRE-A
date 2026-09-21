@@ -13,7 +13,7 @@ needed, use exact?, apply?, rw?, simp?, and grep Mathlib source files.
 Reuse Mathlib lemmas rather than reproving from scratch.
 
 If a mathematical result looks wrong, too strong, or suspiciously general, scout
-the LaTeX sources in `references/ldt-paper/` where the original LDT theorem
+the LaTeX sources in the paper mirrors under `references/`, where the original theorem
 statements and proofs are stored — read the relevant sections, compare
 hypotheses and conclusions, and cite the source path, line range, and label when
 flagging a discrepancy. For paper-labelled declarations, do not address review

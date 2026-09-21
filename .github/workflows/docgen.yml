@@ -142,7 +142,7 @@ jobs:
       - name: Generate API docs
         run: |
           cd docbuild
-          lake build MIPStarRE:docs
+          lake build PaperLib:docs
 
       - name: Package blueprint component
         uses: ./.github/actions/package-blueprint-component

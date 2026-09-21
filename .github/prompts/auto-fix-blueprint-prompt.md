@@ -9,7 +9,7 @@ Instructions:
    - Unresolved `\ref` or `\label`: check for typos in label names (e.g., `\uses{def:foo}` where the label is `def:bar`). Search the `.tex` files for the correct label.
    - Duplicate labels: two environments share the same `\label{...}`. Rename one to be unique.
    - Mismatched `\begin`/`\end` environments: ensure every `\begin{theorem}` has a matching `\end{theorem}`, etc.
-   - Invalid `\lean{DeclName}`: the declaration name in `\lean{}` must match a real Lean declaration. Check `MIPStarRE/` sources for the correct name.
+   - Invalid `\lean{DeclName}`: the declaration name in `\lean{}` must match a real Lean declaration. Check `PaperLib/` sources for the correct name.
    - Missing `\lean{DeclName}` for a changed Lean declaration: find the
      corresponding paper-facing blueprint statement in `blueprint/src/chapter/`
      and add the Lean declaration tag. If the declaration is genuinely only an
@@ -20,7 +20,7 @@ Instructions:
      paper theorem, lemma, or proposition to a conditional helper with bridge,
      residual, repair, package, producer, witness, wrapper, proof-obligation input, hypotheses bundle,
      assumptions bundle, or arbitrary hypothesis inputs that are not in
-     `references/ldt-paper/`. Such helpers may be mentioned only in separate
+     `references/<key>-paper/`. Such helpers may be mentioned only in separate
      non-`\leanok` notes, and only when they are already useful quarantined
      proof content with an explicit unresolved source obligation.
    - Do not add `\leanok` merely because a renamed Lean declaration exists.  If

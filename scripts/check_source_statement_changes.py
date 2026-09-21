@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Detect public-header changes to source-labelled Lean declarations.
 
-This is a local hook guard for issue #1578.  It compares changed Lean files
-against a Git base revision and reports changes to the public header of any
-declaration referenced by a source-labelled blueprint entry.  The guard does
-not try to decide whether the new statement is mathematically faithful.  Its
-purpose is narrower: a source-labelled theorem, lemma, proposition, corollary,
-or definition whose Lean header changed must be reviewed against
-``references/ldt-paper/`` before the branch spends CI time.
+A local hook guard.  It compares changed Lean files against a Git base
+revision and reports changes to the public header of any declaration
+referenced by a source-labelled blueprint entry.  The guard does not try to
+decide whether the new statement is mathematically faithful.  Its purpose is
+narrower: a source-labelled theorem, lemma, proposition, corollary, or
+definition whose Lean header changed must be reviewed against the paper
+mirrors under ``references/`` before the branch spends CI time.
+
+Which files are compared and which mirrors are named come from
+``local/project.json`` (``project.lean_root``/``project.track``, and
+``paper_mirrors``).
 """
 
 from __future__ import annotations
@@ -19,13 +23,42 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from blueprint_lean_sync import (
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
+from blueprint_lean_sync import (  # noqa: E402
     BlueprintEntry,
     collect_blueprint_entries,
     collect_file_lean_decls,
     strip_lean_comments_preserve_lines,
 )
-from lean_header_utils import advance_depth, starts_keyword
+from lean_header_utils import advance_depth, starts_keyword  # noqa: E402
+
+
+def scanned_prefixes(root: Path) -> tuple[str, ...]:
+    """Path prefixes whose Lean files carry source-labelled statements.
+
+    The Lean root of every registered track, or the library root before any
+    track exists — the same decision `check_statement_paper_origin.py` makes,
+    read from the same place.
+    """
+
+    cfg = project_config.load(root)
+    roots = [
+        entry["lean_root"]
+        for name in project_config.track_names(cfg)
+        if (entry := project_config.track(cfg, name)) and entry.get("lean_root")
+    ]
+    if not roots:
+        roots = [project_config.get(cfg, "project.lean_root", "")]
+    return tuple(f"{r.rstrip('/')}/" for r in roots if r)
+
+
+def paper_mirror_note(root: Path) -> str:
+    """How to name the paper mirrors in a message."""
+
+    mirrors = project_config.paper_mirror_dirs(project_config.load(root))
+    return ", ".join(mirrors) if mirrors else "references/<mirror>-paper"
 
 SOURCE_LABEL_PREFIXES = ("thm:", "lem:", "prop:", "cor:", "def:")
 SOURCE_ENV_TYPES = {"theorem", "lemma", "proposition", "corollary", "definition"}
@@ -116,7 +149,7 @@ def _source_labelled_refs(root: Path) -> dict[str, list[BlueprintEntry]]:
 def _collect_headers_from_file(path: Path, root: Path) -> dict[str, Header]:
     """Collect normalized public headers from one Lean file."""
 
-    lean_root = root / "MIPStarRE"
+    lean_root = root / project_config.get(project_config.load(root), "project.lean_root")
     if not path.exists():
         return {}
     text = path.read_text(encoding="utf-8", errors="replace")
@@ -167,7 +200,7 @@ def _collect_headers_from_base(root: Path, base: str, rel_path: str) -> dict[str
 
 
 def _changed_lean_files(root: Path, base: str) -> list[str]:
-    """Return changed LDT Lean files relative to ``base``."""
+    """Return the changed Lean files under the scanned prefixes, since ``base``."""
 
     proc = subprocess.run(
         ["git", "diff", "--name-only", "--diff-filter=ACMR", base, "--"],
@@ -176,10 +209,11 @@ def _changed_lean_files(root: Path, base: str) -> list[str]:
         stdout=subprocess.PIPE,
         text=True,
     )
+    prefixes = scanned_prefixes(root)
     return [
         line
         for line in proc.stdout.splitlines()
-        if line.startswith("MIPStarRE/LDT/") and line.endswith(".lean")
+        if line.startswith(prefixes) and line.endswith(".lean")
     ]
 
 
@@ -192,10 +226,11 @@ def find_header_changes(
 
     source_refs = _source_labelled_refs(root)
     rel_paths = changed_files if changed_files is not None else _changed_lean_files(root, base)
+    prefixes = scanned_prefixes(root)
     findings: list[HeaderChange] = []
 
     for rel_path in sorted(set(rel_paths)):
-        if not (rel_path.startswith("MIPStarRE/LDT/") and rel_path.endswith(".lean")):
+        if not (rel_path.startswith(prefixes) and rel_path.endswith(".lean")):
             continue
         new_headers = _collect_headers_from_file(root / rel_path, root)
         old_headers = _collect_headers_from_base(root, base, rel_path)
@@ -272,7 +307,7 @@ def main(argv: list[str] | None = None) -> int:
         file=sys.stderr,
     )
     print(
-        "Compare each changed statement with references/ldt-paper before "
+        f"Compare each changed statement with {paper_mirror_note(args.root)} before "
         "pushing.  Do not add non-paper bridge, residual, repair, package, "
         "producer, proof-obligation input, hypotheses-bundle, "
         "assumptions-bundle, or arbitrary implication hypotheses to a "

@@ -116,7 +116,7 @@ and make sure \$HOME/.elan/bin is on PATH:
 
 ensure_toolchain() { # <worktree>
   local tree="$1" pin
-  [ -f "$tree/lean-toolchain" ] || die "$tree/lean-toolchain is missing; this is not a MIPStarRE worktree"
+  [ -f "$tree/lean-toolchain" ] || die "$tree/lean-toolchain is missing; this is not a PaperLib worktree"
   pin="$(tr -d ' \t\r\n' < "$tree/lean-toolchain")"
   [ -n "$pin" ] || die "$tree/lean-toolchain is empty"
   if elan toolchain list 2>/dev/null | grep -qF "$pin"; then

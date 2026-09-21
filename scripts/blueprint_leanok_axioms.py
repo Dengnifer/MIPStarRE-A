@@ -13,7 +13,7 @@ For each unique declaration referenced by ``\lean{...}`` in
   lacks any ``\leanok`` tag (enable ``--warn-missing-leanok``).
 
 The checker imports only the Lean modules that define the referenced
-blueprint declarations, rather than importing the top-level ``MIPStarRE``
+blueprint declarations, rather than importing the top-level ``PaperLib``
 barrel. This keeps the rebuild scope small and avoids stale-barrel issues.
 
 Use ``--skip-axiom-check`` for a fast parse-only smoke test.
@@ -144,7 +144,7 @@ def _decl_leanok_placement(entries: list[BlueprintEntry]) -> str:
 
 
 def module_name_from_decl(decl: LeanDecl) -> str:
-    """Turn ``MIPStarRE/Foo/Bar.lean`` into ``MIPStarRE.Foo.Bar``."""
+    """Turn ``PaperLib/Foo/Bar.lean`` into ``PaperLib.Foo.Bar``."""
     return ".".join(Path(decl.file).with_suffix("").parts)
 
 
@@ -458,7 +458,7 @@ def audit_blueprint(
     warn_missing_leanok: bool,
 ) -> AuditResult:
     blueprint_src = repo_root / "blueprint" / "src"
-    lean_root = repo_root / "MIPStarRE"
+    lean_root = repo_root / "PaperLib"
 
     entries = collect_blueprint_entries(blueprint_src)
     print(

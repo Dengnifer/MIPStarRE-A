@@ -1,0 +1,147 @@
+{
+  "_readme": [
+    "Chapter plan — the data the blueprint (stage 3) and the tracker tree (stage 4.2) are built from.",
+    "Copy this file to local/chapter-plan.json, replace every {{PLACEHOLDER}}, keep as many chapters",
+    "and packets as the paper needs, then run:",
+    "    python3 local/bin/tracker_tree.py local/chapter-plan.json --dry-run",
+    "    python3 local/bin/tracker_tree.py local/chapter-plan.json",
+    "The plan file is POSITIONAL. The authority on this schema is the docstring of",
+    "local/bin/tracker_tree.py; scripts/tests/fixtures/kit/chapter-plan.json is the tested minimum.",
+    "",
+    "What the tracker tool reads:",
+    "  key       — optional prefix of the issue keys; without it the tracker title is slugified",
+    "  tracker   — the root tracking issue: title, body or body_file, labels",
+    "  chapters  — one issue per blueprint chapter, each a sub-issue of the tracker",
+    "  packets   — one issue per unit of work, each a sub-issue of its \"chapter\"",
+    "Per node: id (local to this file, and what blocked_by refers to), title (bracket-free),",
+    "exactly one of body / body_file (body_file is relative to this file), labels, blocked_by.",
+    "A run writes \"created\": {\"tracker\": 12, \"ch01\": 13, ...} back into the file and sets",
+    "issues.tracker_root in local/project.json, so an interrupted run adopts instead of duplicating.",
+    "",
+    "The remaining fields are ignored by the tracker tool and carried for the blueprint stage:",
+    "  sources   — source locators this chapter formalizes: 'references/<key>-paper/<file>.tex:<first>-<last>'",
+    "  lean      — the Lean subpath under project.lean_root this chapter's declarations live in",
+    "  nodes     — one entry per blueprint node: label, kind, the Lean declaration it will carry,",
+    "              the source locator, and 'headline': true for a node of the track's headline set",
+    "The headline set registered in tracks.<name>.headline must equal the set of nodes marked",
+    "'headline': completion.md C2 and C5 read it, and the comparator's targets come from it."
+  ],
+  "schema": 1,
+  "track": "{{TRACK}}",
+  "key": "{{plan-key}}",
+  "tracker": {
+    "title": "Tracking - {{WHAT THE PAPER PROVES}}",
+    "body": "Root of the chapter and packet tree for {{PAPER TITLE}} ({{arXiv id}}).",
+    "labels": ["tracking"]
+  },
+  "chapters": [
+    {
+      "id": "ch01",
+      "title": "{{CHAPTER 1 TITLE}}",
+      "body": "Blueprint chapter ch01. {{what it contains, in one or two sentences}}",
+      "labels": ["formalization"],
+      "sources": ["references/{{key}}-paper/{{FILE}}.tex:{{FIRST}}-{{LAST}}"],
+      "lean": "{{SUBPATH}}",
+      "nodes": [
+        {
+          "label": "{{def:name}}",
+          "kind": "definition",
+          "lean": "{{LeanRoot}}.{{Namespace}}.{{decl}}",
+          "source": "references/{{key}}-paper/{{FILE}}.tex:{{FIRST}}-{{LAST}}",
+          "headline": false
+        }
+      ]
+    },
+    {
+      "id": "ch02",
+      "title": "{{CHAPTER 2 TITLE}}",
+      "body": "Blueprint chapter ch02. {{what it contains}} Depends on ch01.",
+      "labels": ["formalization"],
+      "blocked_by": ["ch01"],
+      "sources": ["references/{{key}}-paper/{{FILE}}.tex:{{FIRST}}-{{LAST}}"],
+      "lean": "{{SUBPATH}}",
+      "nodes": [
+        {
+          "label": "{{thm:name}}",
+          "kind": "theorem",
+          "lean": "{{LeanRoot}}.{{Namespace}}.{{decl}}",
+          "source": "references/{{key}}-paper/{{FILE}}.tex:{{FIRST}}-{{LAST}}",
+          "headline": true
+        }
+      ]
+    }
+  ],
+  "packets": [
+    {
+      "id": "p01a",
+      "chapter": "ch01",
+      "title": "Packet - {{THE DEFINITIONS OF CHAPTER 1}}",
+      "body": "Formalize {{the nodes}}. Blueprint labels: {{def:name}}.",
+      "labels": ["formalization"],
+      "nodes": ["{{def:name}}"]
+    },
+    {
+      "id": "p02a",
+      "chapter": "ch02",
+      "title": "Packet - {{THE MAIN ESTIMATE}}",
+      "body": "Formalize {{the nodes}}. Blueprint labels: {{thm:name}}.",
+      "labels": ["formalization"],
+      "blocked_by": ["p01a"],
+      "nodes": ["{{thm:name}}"]
+    }
+  ],
+  "_example": {
+    "_comment": "EXAMPLE, invented, for shape only; this key is ignored by every tool.",
+    "tracker": {
+      "title": "Tracking - tail bounds for weakly dependent sums",
+      "body": "Root of the packet tree for arXiv:0000.00000.",
+      "labels": ["tracking"]
+    },
+    "chapters": [
+      {
+        "id": "ch04",
+        "title": "Chapter 4 - tail bounds",
+        "body": "Blueprint chapter ch04: the mixing coefficient, block decoupling and the tail bound.",
+        "labels": ["formalization"],
+        "blocked_by": ["ch03"],
+        "sources": ["references/wd-paper/04_tail_bounds.tex:1-338"],
+        "lean": "TailBounds",
+        "nodes": [
+          {
+            "label": "def:alpha-mixing",
+            "kind": "definition",
+            "lean": "WeakDep.TailBounds.alphaMixing",
+            "source": "references/wd-paper/04_tail_bounds.tex:22-39",
+            "headline": false
+          },
+          {
+            "label": "thm:tail",
+            "kind": "theorem",
+            "lean": "WeakDep.TailBounds.tail_bound",
+            "source": "references/wd-paper/04_tail_bounds.tex:198-241",
+            "headline": true
+          }
+        ]
+      }
+    ],
+    "packets": [
+      {
+        "id": "p04a",
+        "chapter": "ch04",
+        "title": "Packet - the mixing coefficient and its basic properties",
+        "body": "Formalize def:alpha-mixing and the lemmas it needs.",
+        "labels": ["formalization"],
+        "nodes": ["def:alpha-mixing"]
+      },
+      {
+        "id": "p04b",
+        "chapter": "ch04",
+        "title": "Packet - the tail bound",
+        "body": "Formalize thm:tail on top of the decoupling lemma.",
+        "labels": ["formalization"],
+        "blocked_by": ["p04a"],
+        "nodes": ["thm:tail"]
+      }
+    ]
+  }
+}

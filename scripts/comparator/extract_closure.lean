@@ -1,5 +1,7 @@
-import MIPStarRE.LDT.Test.MainTheorem.MainFormal
-import MIPStarRE.QPBT.Test.QubitForm
+-- The library root, so that every declaration of this repository is in scope.
+-- A challenge whose target lives in a module the root does not import needs
+-- that module imported here as well.
+import PaperLib
 
 /-!
 # Comparator closure extractor
@@ -13,11 +15,10 @@ constants they use).  Auto-generated auxiliaries (`_proof_`, `match_`,
 declarations.
 
 The targets are read from the `COMPARATOR_TARGETS` environment variable
-(whitespace-separated fully qualified names) and default to the LDT challenge
-root `MIPStarRE.LDT.Test.mainFormal`, so the extractor is shared by every
-challenge configured in `check_challenge_drift.py`.  This file imports the
-root module of every configured challenge; targets outside those imports are
-reported as errors.
+(whitespace-separated fully qualified names), which `check_challenge_drift.py`
+sets from the challenge registry, so the extractor is shared by every
+challenge.  With no targets given it extracts nothing.  This file imports the
+library root; targets outside those imports are reported as errors.
 
 Output: one TSV row per declaration — name, module path, start line, end
 line (`NORANGE` for compiler-generated declarations without a source range)
@@ -27,7 +28,9 @@ the full regeneration pipeline.
 
 open Lean
 
-def defaultTargets : List Name := [`MIPStarRE.LDT.Test.mainFormal]
+-- No target unless `COMPARATOR_TARGETS` names one: the registry in
+-- `challenges.py` is the single source of truth about what a challenge covers.
+def defaultTargets : List Name := []
 
 /-- Targets of this extraction run, from `COMPARATOR_TARGETS`. -/
 def readTargets : IO (List Name) := do
@@ -41,7 +44,7 @@ def readTargets : IO (List Name) := do
 
 def isLocal (env : Environment) (n : Name) : Bool :=
   match env.getModuleIdxFor? n with
-  | some idx => (`MIPStarRE).isPrefixOf env.header.moduleNames[idx.toNat]!
+  | some idx => (`PaperLib).isPrefixOf env.header.moduleNames[idx.toNat]!
   | none => true
 
 /-- Name tails of compiler-generated companions of an inductive/structure

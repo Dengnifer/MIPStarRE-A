@@ -1,1 +1,0 @@
-Current short HEAD SHA: `5cfb2eb`

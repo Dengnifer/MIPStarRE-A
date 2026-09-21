@@ -1,9 +1,0 @@
-{
-  "main_exit": 0,
-  "pr_exit": 0,
-  "byte_identical": true,
-  "main_sha256": "6923033c77798ac0ede3766d9b5ed7f4853e1f1094dd79ed4cf5406a39de2ba2",
-  "pr_sha256": "6923033c77798ac0ede3766d9b5ed7f4853e1f1094dd79ed4cf5406a39de2ba2",
-  "main_bytes": 1090154,
-  "pr_bytes": 1090154
-}

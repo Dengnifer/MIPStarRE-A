@@ -1,7 +1,7 @@
-# Contributing to MIPStarRE
+# Contributing to PaperLib
 
 This document codifies the conventions for pull requests, issues, code review,
-Lean style, and CI automation used in the MIPStarRE project.
+Lean style, and CI automation used in the PaperLib project.
 
 ---
 
@@ -25,13 +25,14 @@ type(scope): short description
 | `ci`       | CI/CD workflow changes                            |
 | `chore`    | Dependency bumps, linting, toolchain updates      |
 
-**Scope** is a shortened module path: `LDT/SelfImprovement`, `Quantum`, `blueprint`,
-`LDT/Pasting`, etc. Omit the `MIPStarRE/` prefix.
+**Scope** is a shortened module path under the Lean root — a chapter directory
+such as `Preliminaries` or `MainTheorem/Induction`, or `blueprint`. Omit the
+Lean root prefix itself.
 
-Examples:
-- `feat(LDT/SelfImprovement): add self-improvement induction step`
+Examples (the module names are this project's own):
+- `feat(Induction): add the induction step of the main theorem`
 - `fix(blueprint): resolve broken labels in chapter 7`
-- `refactor(LDT): extract shared preliminaries into Basic module`
+- `refactor(Preliminaries): extract shared lemmas into a Basic module`
 
 ### Body template
 
@@ -51,8 +52,9 @@ and state the mathematical assertion precisely.
 
 ### Testing
 - What was verified and how.
-- Examples: `lake env lean MIPStarRE/LDT/Basic.lean`, `lake build MIPStarRE`,
-  `rg -n "sorry|axiom" MIPStarRE/LDT/Basic.lean || true`.
+- Examples: `lake env lean <LeanRoot>/<Chapter>/Basic.lean`,
+  `lake build <LeanRoot>`,
+  `rg -n "sorry|axiom" <LeanRoot>/<Chapter>/Basic.lean || true`.
 
 ---
 Addresses #N
@@ -91,7 +93,7 @@ gate before opening the long-lived push transport; `pr_open.py`,
 `github-sync.sh`, and `autofix.sh` use it automatically.  For a direct branch
 publication, pass one full branch mapping to the helper instead of invoking
 `git push` directly.
-These hooks also reject explicit `axiom` and `constant` declarations in the LDT
+These hooks also reject explicit `axiom` and `constant` declarations in the library
 tree; use a tracked `sorry` for an unfinished source-faithful proof instead of
 turning the missing proof into a new ambient assumption.
 For larger PRs, set `MIPSTARRE_HOOK_FULL=1` when invoking the checked-push helper.
@@ -128,31 +130,31 @@ Chapter 9 — finish the sandwich-chain corollaries in ComparisonLemmas
 
 Avoid prefixes like `[Chapter 9] ...`: bot-generated branch names inherit those
 characters, and `]` breaks part of the PR automation stack. See
-[`docs/pr_review_management.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/pr_review_management.md)
+[`docs/pr_review_management.md`](https://github.com/OWNER/REPO/blob/main/docs/pr_review_management.md)
 for the rationale.
 
-For formalization issues, usually start with `formalization` + `2009.12982`,
-then add the most specific live chapter or theorem-family labels that apply (for
-example `ldt-basic`, `preliminaries`, `commutativity`, `pasting`,
-`main-induction`, `proof`, `proof-infra`, `statement-fix`,
-`sorry-elimination`, `mismatch`, `follow-up`, `blueprint`, or
-`blueprint-sync`). Documentation-only or tooling issues should use
-`documentation`, `ci`, `cleanup`, and/or `refactor` instead of
-`formalization`.
+For formalization issues, usually start with `formalization` plus the label of
+the paper it belongs to (one label per arXiv id in `project.arxiv`), then add
+the most specific live chapter or theorem-family labels that apply, and finally
+the work-type labels `proof`, `proof-infra`, `statement-fix`,
+`sorry-elimination`, `mismatch`, `follow-up`, `blueprint` or `blueprint-sync`.
+Documentation-only or tooling issues should use `documentation`, `ci`,
+`cleanup` and/or `refactor` instead of `formalization`.
 
-When the work concerns content that exists only in the blueprint and not in
-the original paper (arXiv:2009.12982), apply the `blueprint-only` label
-alongside the chapter or theorem-family labels.  Omit `blueprint-only` when the
-work concerns a statement or definition that appears in the paper.  An issue
-may need both `2009.12982` and `blueprint-only` when it spans paper-present
-content and blueprint-exclusive scaffolding or auxiliary lemmas; in that case
-apply both labels so the scope is explicit.
+When the work concerns content that exists only in the blueprint and not in the
+original paper, apply the `blueprint-only` label alongside the chapter or
+theorem-family labels.  Omit `blueprint-only` when the work concerns a
+statement or definition that appears in the paper.  An issue may need both the
+paper label and `blueprint-only` when it spans paper-present content and
+blueprint-exclusive scaffolding or auxiliary lemmas; in that case apply both so
+the scope is explicit.
 
 Every formalization issue must give enough mathematical source information to
 make the issue self-contained:
 
-- Paper source: a path under `references/ldt-paper/`, line number, theorem or
-  equation label when available, and a short quotation or precise paraphrase.
+- Paper source: a path under the paper mirror (`references/<key>-paper/`), line
+  number, theorem or equation label when available, and a short quotation or
+  precise paraphrase.
 - Blueprint source: a path under `blueprint/src/chapter/`, line number, label,
   and the matching `\lean{...}` status when relevant.
 - Lean target: the expected declaration name and file path, if already known.
@@ -163,9 +165,9 @@ For issues or PRs touching a source-labelled theorem, include a statement
 integrity check.  List the paper assumptions, the Lean assumptions, the paper
 conclusion, the Lean conclusion, and a verdict: exact, faithful boundary
 hypotheses, extra assumptions, weakened conclusion, or strengthened conclusion.
-Changing a Lean theorem away from the statement in `references/ldt-paper/` is
-strongly discouraged unless it is forced by faithful formal encoding or by a
-documented mathematical necessity.
+Changing a Lean theorem away from the statement in its paper mirror under
+`references/` is strongly discouraged unless it is forced by faithful formal
+encoding or by a documented mathematical necessity.
 Faithful boundary hypotheses include formal domain data such as nonemptiness,
 decidability, field-model instances, positivity of parameters, or denominator
 nonvanishing when these are implicit in the source.  Extra bridge, residual,
@@ -268,7 +270,8 @@ proof-closing round (or periodically as maintenance), run the audit script to
 list open issues whose citations no longer resolve:
 
 ```bash
-gh issue list --repo LionSR/MIPStarRE --state open --limit 500 \
+gh issue list --repo "$(python3 local/bin/gh_common.py repo-slug)" \
+  --state open --limit 500 \
   --json number,title,body,url,labels > /tmp/open-issues.json
 python3 scripts/audit_stale_issues.py --issues /tmp/open-issues.json
 ```
@@ -276,9 +279,8 @@ python3 scripts/audit_stale_issues.py --issues /tmp/open-issues.json
 The tool is report-only. Human review decides which flags warrant closing
 the issue, updating its body, or dismissing as a false positive. A weekly
 read-only GitHub Actions wrapper runs the same export-and-audit sequence and
-uploads an artifact only when citations are flagged. See
-[`docs/stale_issue_audit.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/stale_issue_audit.md) for
-the full workflow.
+uploads an artifact only when citations are flagged; the `stale-audit` job of
+`local/bin/housekeeping.sh` is the local equivalent.
 
 ---
 
@@ -296,11 +298,11 @@ the full workflow.
 This section mirrors the labels that currently exist in the GitHub repository.
 If this file and `gh label list` diverge, treat GitHub as the source of truth
 and update this guide in the same PR. Most formalization issues combine
-`formalization` + `2009.12982` with one or more chapter or theorem-family labels.
-Documentation- or tooling-only issues usually skip the paper label. Do **not**
-apply legacy labels such as `self-improvement`, `expansion-graph`,
-`quantum-foundations`, or `automation`: those names are not part of the live
-label set.
+`formalization` and the paper's own label with one or more chapter or
+theorem-family labels. Documentation- or tooling-only issues usually skip the
+paper label. Do **not** apply a label that is not in the live set: a label that
+once existed and was retired is a silent mis-filing, so check `gh label list`
+before inventing one.
 
 ### Core work-type labels
 
@@ -317,11 +319,9 @@ label set.
 
 | Label               | Description                                                     |
 |---------------------|-----------------------------------------------------------------|
-| `ldt-basic`         | Early LDT definitions and low-degree-test scaffolding           |
+| `<chapter-slug>`    | One label per blueprint chapter, named after the chapter        |
 | `preliminaries`     | Preliminaries chapter / section work                            |
-| `commutativity`     | Commutativity chapters and related lemmas                       |
-| `pasting`           | Pasting chapter and downstream chains                           |
-| `main-induction`    | Main induction step                                             |
+| `main-induction`    | The main induction or main-theorem chapter                      |
 | `proof`             | Issue is primarily about proving an existing result             |
 | `proof-infra`       | Intermediate lemmas or definitions that mainly support proofs   |
 | `sorry-elimination` | Explicitly aimed at discharging remaining `sorry` sites         |
@@ -332,9 +332,12 @@ label set.
 
 ### Paper labels
 
-| Label        | Description                                          |
-|--------------|------------------------------------------------------|
-| `2009.12982` | The main LDT paper tracked in this repository        |
+One label per arXiv id in `project.arxiv` of `local/project.json`, named after
+the id itself.
+
+| Label          | Description                                        |
+|----------------|----------------------------------------------------|
+| `<arxiv-id>`   | The paper that id names, as mirrored under `references/` |
 
 ### Blueprint provenance labels
 
@@ -386,13 +389,13 @@ Every PR touching Lean code should be reviewed against these criteria:
    names that encode historical formalization status rather than mathematical
    content. When an old public identifier cannot be renamed in the current PR,
    record the required migration in the issue, PR description, or an audit file
-   under [audits/](https://github.com/Dengnifer/MIPStarRE-A/tree/main/audits).
+   under [audits/](https://github.com/OWNER/REPO/tree/main/audits).
    New and substantively updated audit files should follow the term norm and
-   format in
-   [audits/2026-04-29_audit-document-format.md](https://github.com/Dengnifer/MIPStarRE-A/blob/main/audits/2026-04-29_audit-document-format.md).
+   format the project's own audit-document-format note sets out, kept beside
+   them under `audits/`.
    Do not add an empty pass-through abbreviation merely to introduce a second
    public name.
-   Review-fix PRs must read the relevant audit files under [audits/](https://github.com/Dengnifer/MIPStarRE-A/tree/main/audits)
+   Review-fix PRs must read the relevant audit files under [audits/](https://github.com/OWNER/REPO/tree/main/audits)
    before changing names or prose. If an audit marks a naming migration or
    historical-formalization term as in scope for the fix, addressing it or
    explicitly updating the audit trail is a merge blocker.
@@ -501,7 +504,7 @@ texra-ai/texra-lean-skills, auto-installed via `.claude/settings.json`):
 - **Review guide**: the `MATHLIB_pr-review` reference -- detailed examples of
   style, documentation, location, and improvement considerations.
 
-MIPStarRE-local references:
+PaperLib-local references:
 
 - **Mathematical language**: [mathematical_language.md](mathematical_language.md)
   -- project-local terminology rules for Lean names and documentation.
@@ -561,13 +564,13 @@ The following workflows run automatically:
 | **Issue Automation** (`issue-automation.yml`) | Issue opened/labeled/closed/reopened; PR opened/merged | Classifies new issues, posts Mathlib scouting reports, keeps tracking issues current via a deterministic script (progress comments, sub-issue counts, and a ready-to-close notice when every sub-issue is resolved), and scans merged PRs for genuine deferred mathematical obligations, filing `follow-up` issues |
 | **Blueprint Lint** (`pr-ci.yml` (`blueprint-render` job)) | PRs touching blueprint files | Builds `leanblueprint pdf` / `web` to catch broken labels, undefined macros, and plasTeX errors, then runs the blueprint ↔ Lean sync checks. The LaTeX convention scan and the `scripts/tests` helper unit tests both run locally in the pre-commit hook. |
 | **Blueprint Sync & Prose Review** (`pr-review.yml`, `prose-review` job) | After a successful PR CI run | Reviews blueprint synchronization, source-faithfulness, and mathematical prose for formalization changes. |
-| **README Freshness Audit** (`housekeeping.yml`, `readme-freshness` job) | Weekly + manual dispatch | Report-only audit for README local paths, LDT submodule count, and hard-coded Lean/Mathlib versions |
+| **README Freshness Audit** (`housekeeping.yml`, `readme-freshness` job) | Weekly + manual dispatch | Report-only audit for README local paths, library submodule counts, and hard-coded Lean/Mathlib versions |
 | **PR Mathematical Description** (`pr-cleanup.yml`) | PR opened from `claude/*` or `codex/*` branches | Normalizes title to `type(scope): desc`, rewrites the PR body as a self-contained mathematical note, preserves source citations from the linked issue, copies labels, adds `Addresses #N`, and comments on the issue |
 | **Mathlib Scout** (`issue-automation.yml`, `scout` job) | Formalization issue opened/labeled | Scouts Mathlib for relevant lemmas and posts a scouting report |
 
 ### What CI checks before merge
 
-- `lake build MIPStarRE` must succeed (no type errors, no broken imports).
+- `lake build <LeanRoot>` must succeed (no type errors, no broken imports).
 - No new `sorry` without explicit justification.
 - Blueprint labels must resolve (no broken `\ref` or `\label`).
 - Claude Code Review should not flag critical issues (proof correctness,

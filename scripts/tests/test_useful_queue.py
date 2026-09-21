@@ -227,7 +227,7 @@ class QueueTests(unittest.TestCase):
         self.assertFalse({'CODEX_HOME', 'MIPSTARRE_PERSONA_REF'} & environment.keys())
         self.assertEqual([environment[key] for key in ('MIPSTARRE_CODEX_ACCOUNT',
             'MIPSTARRE_CODEX_MODEL', 'MIPSTARRE_ACCOUNT_WAIT', 'LOCAL_REVIEW_ENABLED')],
-            ['primary', 'gpt-6-astra', '0', 'false'])
+            ['primary', 'auto', '0', 'false'])
     def test_parent_merge_binding_task_integrity_and_dirty_worktree(self):
         api = self.api()
         self.patch(queue, 'git', side_effect=self.fake_git)

@@ -83,6 +83,17 @@ fi
 TEXRA_BLUEPRINT_VERSION="${TEXRA_BLUEPRINT_VERSION:-v0.3.8}"
 TEXRA_BLUEPRINT_PIN="git+https://github.com/LionSR/texra-blueprint@${TEXRA_BLUEPRINT_VERSION}"
 
+# Site identity.  GitHub Pages serves a project site under `/<repo>`, so the
+# homepage has to be rendered with that prefix.  It is derived from
+# `project.github_slug` (local/project.json) rather than written into
+# `home_page/_config.yml`, so one checkout can be published under any name and
+# an unbootstrapped repository keeps whatever the file says.
+SITE_SLUG="$(python3 "$REPO_ROOT/scripts/project_config.py" --root "$REPO_ROOT" get project.github_slug 2>/dev/null || true)"
+case "$SITE_SLUG" in
+  ""|OWNER/*) SITE_BASEURL="" ;;
+  *) SITE_BASEURL="/${SITE_SLUG#*/}" ;;
+esac
+
 KEEP="${MIPSTARRE_SITE_KEEP:-3}"
 LOCK_WAIT="${MIPSTARRE_SITE_LOCK_WAIT:-600}"
 
@@ -347,16 +358,21 @@ build_homepage() {
   local src="$1" dest="$2"
   [ -d "$src" ] || die "homepage source $src not found"
 
+  local baseurl_args=()
+  [ -z "$SITE_BASEURL" ] || baseurl_args=(--baseurl "$SITE_BASEURL")
+
   if command -v bundle >/dev/null 2>&1 && [ -f "$src/Gemfile" ] \
       && ( cd "$src" && run_clean_git_env bundle exec jekyll --version >/dev/null 2>&1 ); then
-    log "==> Homepage (bundle exec jekyll)..."
-    ( cd "$src" && run_clean_git_env bundle exec jekyll build --source . --destination "$dest" )
+    log "==> Homepage (bundle exec jekyll${SITE_BASEURL:+, baseurl $SITE_BASEURL})..."
+    ( cd "$src" && run_clean_git_env bundle exec jekyll build --source . \
+        --destination "$dest" "${baseurl_args[@]}" )
     HOMEPAGE_KIND="jekyll-bundle"
     return 0
   fi
   if command -v jekyll >/dev/null 2>&1; then
-    log "==> Homepage (jekyll)..."
-    ( cd "$src" && run_clean_git_env jekyll build --source . --destination "$dest" )
+    log "==> Homepage (jekyll${SITE_BASEURL:+, baseurl $SITE_BASEURL})..."
+    ( cd "$src" && run_clean_git_env jekyll build --source . --destination "$dest" \
+        "${baseurl_args[@]}" )
     HOMEPAGE_KIND="jekyll"
     return 0
   fi
@@ -515,7 +531,7 @@ cmd_docs() {
 ==> SKIP site-docs: the doc-gen4 documentation build is not run by this script.
 
     Upstream (.github/workflows/docgen.yml) spends a weekly 330-minute budget on
-    a full 'lake build', 'cd docbuild && lake build MIPStarRE:docs'
+    a full 'lake build', 'cd docbuild && lake build PaperLib:docs'
     (docgen.yml:142-145), the paper-gaps site (docgen.yml:127-133), and packs
     the result as site-docs (docgen.yml:150-153). That belongs to the build
     layer (local/protocols/build-cache.md), not to the site assembler.
@@ -523,7 +539,7 @@ cmd_docs() {
     To publish a site-docs version, build it out of band and hand this command
     the tree:
 
-      cd $SOURCE_ROOT/docbuild && lake build MIPStarRE:docs
+      cd $SOURCE_ROOT/docbuild && lake build PaperLib:docs
       mkdir -p /tmp/site-docs
       cp -R $SOURCE_ROOT/docbuild/.lake/build/doc /tmp/site-docs/docs
       # optional: texra-blueprint --root . paper-gaps site /tmp/site-docs/paper-gaps
@@ -712,7 +728,7 @@ main() {
   esac
 
   [ -f "$SOURCE_ROOT/scripts/assemble-pages-site.sh" ] \
-    || die "$SOURCE_ROOT does not look like the MIPStarRE checkout (no scripts/assemble-pages-site.sh)"
+    || die "$SOURCE_ROOT does not look like the PaperLib checkout (no scripts/assemble-pages-site.sh)"
 
   mkdir -p "$STORE" "$SITE_DIR"
 

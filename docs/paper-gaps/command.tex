@@ -1,29 +1,34 @@
 % Shared commands for notes in docs/paper-gaps/.
-% All notation matches the LDT paper's wright.sty + multilinearity.tex.
-% DO NOT define a command here differently from wright.sty.
+%
+% Two halves.  The link commands below are project identity: OWNER/REPO is the
+% placeholder that scripts/bootstrap_project.py replaces with this project's
+% GitHub slug and Pages site.  Everything after them is NOTATION, and notation
+% belongs to the source paper: the definitions here are an example set, and a
+% project replaces them with the macros of its own paper's style file.  The one
+% rule that never changes: a command defined here must mean exactly what the
+% source paper's macro means, or a note silently says something else.
 
 \newcommand{\Lean}{\textsc{Lean}}
 \newcommand{\leanid}[1]{\textsf{#1}}
-\newcommand{\ghissue}[1]{\href{https://github.com/LionSR/MIPStarRE/issues/#1}{GitHub issue \##1}}
-\newcommand{\ghpr}[1]{\href{https://github.com/LionSR/MIPStarRE/pull/#1}{PR \##1}}
+\newcommand{\ghissue}[1]{\href{https://github.com/OWNER/REPO/issues/#1}{GitHub issue \##1}}
+\newcommand{\ghpr}[1]{\href{https://github.com/OWNER/REPO/pull/#1}{PR \##1}}
 % Local issue tracker (issues/NNNN-*.md in this repository); no remote URL.
 \newcommand{\localissue}[1]{issue \##1 (\path{issues/})}
-\newcommand{\doclink}[1]{\href{https://sirui-lu.com/MIPStarRE/docs/#1.html}{\path{#1}}}
+\newcommand{\doclink}[1]{\href{https://OWNER.github.io/REPO/docs/#1.html}{\path{#1}}}
 
-% --- Notation matching wright.sty exactly ---
+% --- Notation: replace with the source paper's own macros --------------------
 % \F, \N, \C, \R, \tr, \ot, \eps, \E, \bx, \bu, \bv, \by
-% are all defined identically to wright.sty.
 
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\R}{\mathbb{R}}
-\newcommand{\tr}{\mathrm{tr}}          % wright.sty line 56
-\newcommand{\eps}{\epsilon}            % wright.sty line 99
-\newcommand{\ot}{\otimes}             % wright.sty line 114
-\newcommand{\E}{\mathop{\bf E\/}}     % wright.sty line 44
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\ot}{\otimes}
+\newcommand{\E}{\mathop{\bf E\/}}
 
-% bold random variables (wright.sty uses \boldsymbol, lines 183-187)
+% bold random variables
 \newcommand{\bu}{\boldsymbol{u}}
 \newcommand{\bv}{\boldsymbol{v}}
 \newcommand{\bx}{{\boldsymbol{x}}}
@@ -32,10 +37,10 @@
 % T1 so literal < and > in \texttt placeholders typeset as themselves
 \usepackage[T1]{fontenc}
 
-% bra-ket (wright.sty loads braket package)
+% bra-ket
 \usepackage{braket}
 
-% --- Polynomial spaces matching multilinearity.tex exactly ---
+% --- Example structured spaces ---
 \newcommand{\polyfunc}[3]{\mathcal{P}(#1, #2, #3)}
 \newcommand{\polymeas}[3]{\mathrm{PolyMeas}(#1, #2, #3)}
 \newcommand{\polysub}[3]{\mathrm{PolySub}(#1, #2, #3)}

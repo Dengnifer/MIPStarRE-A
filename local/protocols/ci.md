@@ -5,6 +5,12 @@ Normative protocol for `local/bin/ci.sh`, the local replacement for
 Read `meta.md` first; `build-cache.md` owns the hot-main cache this protocol
 consumes but never writes.
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 `ci.sh <pr-number>` is the **only** thing allowed to publish the `local-ci/*`
 commit statuses. Everything downstream — `review.sh` (invariant 2: review only
 after green CI on the same head SHA), `autofix.sh` (invariant 3: sync/audit
@@ -60,14 +66,14 @@ blueprint-fix, everything else → never auto-fixed) ports without translation.
 
 | Step | Parent job | What it runs (in the worktree) | Gate |
 |---|---|---|---|
-| `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
+| `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, then `lake build` of one axiom-audit module per registered track (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
 | `blueprint-render` | `blueprint-render` (`:173-243`) | remove the prior PDF, run the project `latexmk` configuration noninteractively, require its exit zero and a fresh non-empty `blueprint/print/print.pdf` (`:210-218`), `texra-blueprint bbl` (`:222-223`), `texra-blueprint web` with `grep '^ERROR:'` (`:225-243`) | `blueprint_src ∨ workflow` |
 | `paper-gaps` | `paper-gaps` (`:248-271`) | `texra-blueprint --root . paper-gaps check` | `paper_gaps ∨ workflow` |
 | `blueprint-sync` | `blueprint-sync` (`:273-317`) | `python3 -m unittest discover -s scripts/tests`, `blueprint_lean_sync.py --update-lean-decls`, `blueprint_lean_sync.py --ci`, `blueprint_axiom_audit_needed.py --base-ref` | `lean ∨ blueprint ∨ scripts ∨ workflow` |
-| `file-length` | `file-length` (`:319-340`) | `check_oversized_lean_files.py --root .` (>1000 lines) | `mip_lean ∨ scripts ∨ workflow` |
-| `proof-debt` | `proof-debt` (`:342-386`) | `unittest test_audit_paper_facing_proof_debt.py`, `audit_paper_facing_proof_debt.py --ci` | `mip_lean ∨ tex_chapter ∨ scripts ∨ workflow` |
-| `proof-evasion` | `proof-evasion` (`:388-445`) | four regression tests, then `audit_lean_axiom_declarations.py --ci`, `audit_conclusion_shaped_hypotheses.py --ci`, `audit_unfaithful_markers.py --ci`, and `check_duplicate_private_helpers.py --ci` (advisory) | `mip_lean ∨ scripts ∨ workflow` |
-| `statement-origin` | `statement-origin` (`:447-487`) | `check_statement_paper_origin.py --root .` | `ldt_lean ∨ scripts ∨ workflow` |
+| `file-length` | `file-length` (`:319-340`) | `check_oversized_lean_files.py --root .` (>1000 lines) | `lib_lean ∨ scripts ∨ workflow` |
+| `proof-debt` | `proof-debt` (`:342-386`) | `unittest test_audit_paper_facing_proof_debt.py`, `audit_paper_facing_proof_debt.py --ci` | `lib_lean ∨ tex_chapter ∨ scripts ∨ workflow` |
+| `proof-evasion` | `proof-evasion` (`:388-445`) | four regression tests, then `audit_lean_axiom_declarations.py --ci`, `audit_conclusion_shaped_hypotheses.py --ci`, `audit_unfaithful_markers.py --ci`, and `check_duplicate_private_helpers.py --ci` (advisory) | `lib_lean ∨ scripts ∨ workflow` |
+| `statement-origin` | `statement-origin` (`:447-487`) | `check_statement_paper_origin.py --root .` | `lib_lean ∨ scripts ∨ workflow` |
 
 Every step is blocking. The single advisory sub-check is
 `check_duplicate_private_helpers.py`: exit 1 means "candidates reported" and is
@@ -108,12 +114,11 @@ minimatch's `**`.
 | Area | Globs | Parent |
 |---|---|---|
 | `lean` | `*.lean`, `lakefile.*`, `lean-toolchain`, `lake-manifest.json` | `pr-ci.yml:84-88` |
-| `mip_lean` | `MIPStarRE/*.lean` | `:89-90` |
-| `ldt_lean` | `MIPStarRE/LDT/*.lean` | `:91-92` |
+| `lib_lean` | `<lean_root>/*.lean`, where `<lean_root>` is `project.lean_root` of `local/project.json` | `:89-92` |
 | `blueprint` | `blueprint/*` | `:93-94` |
 | `blueprint_src` | `blueprint/src/*` | `:95-96` |
 | `tex_chapter` | `blueprint/src/chapter/*.tex` | `:97-98` |
-| `paper_gaps` | `docs/paper-gaps/*`, `texra-blueprint.toml`, `MIPStarRE/*.lean`, `blueprint/src/*`, `docs/*.md` | `:99-107` |
+| `paper_gaps` | `docs/paper-gaps/*`, `texra-blueprint.toml`, `<lean_root>/*.lean`, `blueprint/src/*`, `docs/*.md` | `:99-107` |
 | `scripts` | `scripts/*` | `:108-109` |
 | `comparator` | `scripts/comparator/*` | `:110-111` |
 | `workflow` | `.github/workflows/pr-ci.yml`, `local/bin/*`, `local/protocols/*`, `.githooks/*` | `:112-113`, extended |
@@ -142,15 +147,15 @@ Built in runtime storage (same-directory tempfile + `os.replace`) and then
 posted as the manifest PR comment (§5):
 
 ```
-~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.json          complete run
-~/.cache/mipstarre-dev/ci-manifests/pr<pr>-<head_sha>.partial.json  partial run
+$MIPSTARRE_CACHE_ROOT/ci-manifests/pr<pr>-<head_sha>.json          complete run
+$MIPSTARRE_CACHE_ROOT/ci-manifests/pr<pr>-<head_sha>.partial.json  partial run
 ```
 
 A run is **partial** when it was given `--only`, `--skip-build`, or `--base`;
 `--dry-run` writes nothing at all.
 
 Step logs live outside the repository, under
-`~/.cache/mipstarre-dev/ci-logs/<pr-id>/<head_sha>/<step>.log`.
+`$MIPSTARRE_CACHE_ROOT/ci-logs/<pr-id>/<head_sha>/<step>.log`.
 
 ```jsonc
 {
@@ -158,7 +163,7 @@ Step logs live outside the repository, under
   "generator": "local/bin/ci.sh",
   "replaces": ".github/workflows/pr-ci.yml",
   "pr": 7,                       // GitHub PR number
-  "branch": "issue-7-qpbt-basis",
+  "branch": "issue-7-<slug>",
   "base": "main",                // from the GitHub PR
   "base_ref": "origin/main",     // what actually resolved
   "merge_base": "<sha>",
@@ -170,14 +175,14 @@ Step logs live outside the repository, under
   "conclusion": "success",       // success | failure | error
   "partial": false,              // true ⇒ not a merge-gate verdict
   "areas": { "lean": true, "blueprint_src": false, ... },
-  "changed_files": ["MIPStarRE/Quantum/PauliBasis.lean", ...],
+  "changed_files": ["<LeanRoot>/<Chapter>/<File>.lean", ...],
   "warnings": ["texra-blueprint not installed; skipped ...", ...],
   "steps": [
     {
       "step": "build",           // one of the eight job ids, always all eight
       "outcome": "success",      // success | failure | error | skipped
       "seconds": 883,
-      "log_path": "/Users/…/.cache/mipstarre-dev/ci-logs/0007/<sha>/build.log",
+      "log_path": "<cache root>/ci-logs/0007/<sha>/build.log",
       "blocking": true,
       "note": ""                 // skip reason, exit code, or degradation cause
     }
@@ -227,7 +232,7 @@ they must not clobber a complete manifest for the same SHA.
 ## 6. Concurrency and locks
 
 Two advisory `mkdir`-based lease directories, both under
-`~/.cache/mipstarre-dev/` (`MIPSTARRE_CACHE_ROOT` overrides the root). Each
+`$MIPSTARRE_CACHE_ROOT/` (`MIPSTARRE_CACHE_ROOT` overrides the root). Each
 holds an `owner` file: pid, ISO timestamp, tag. A lock is broken only when its
 owner pid is dead or its stamp is older than `MIPSTARRE_FULL_BUILD_LOCK_STALE_S`
 (default 3 h).
@@ -277,21 +282,22 @@ worktree writes into the shared snapshot, so it does not.
    prune workaround lives, and a package-free tree is exactly the state that
    triggers it. `MIPSTARRE_CI_ALLOW_COLD_FETCH=1` overrides for a tree you know
    is clean.
-4. `lake build`, then `lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit`,
-   then the comparator drift check.  Both audit modules are compile-time
-   checks, not reports: each `audit_standard_axioms` /
-   `assert_standard_axioms` command calls `Lean.collectAxioms` and throws
-   unless the declaration's axioms are exactly `propext`,
-   `Classical.choice` and `Quot.sound`, so a `sorryAx` reaching a headline
-   theorem fails the build step.  They are built as explicit targets
-   rather than imported from the umbrella libraries, so they stay out of
-   normal downstream imports.
+4. `lake build`, then `lake build` of the registered tracks' axiom-audit modules,
+   then the comparator drift check.  The audit modules come from
+   `tracks.<name>.axiom_audit` in `local/project.json` (the list is empty
+   until the first track is registered) and are compile-time checks, not
+   reports: each `audit_standard_axioms` / `assert_standard_axioms` command
+   calls `Lean.collectAxioms` and throws unless the declaration's axioms are
+   exactly `propext`, `Classical.choice` and `Quot.sound`, so a `sorryAx`
+   reaching a headline theorem fails the build step.  They are built as
+   explicit targets rather than imported from the umbrella libraries, so they
+   stay out of normal downstream imports.
 
 For reviewed trains, `--integration-head SHA --worktree PATH --base SHA` runs
 every step without publishing PR evidence. Its single locked Lake invocation is
-`lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit`:
-the complete library, including its root and downstream modules, plus both
-axiom audits. No warm project
+`lake build <lean_root>` followed by each registered track's axiom-audit module:
+the complete library, including its root and downstream modules, plus every
+axiom audit. No warm project
 artifacts may be assumed by publication's dynamic `checkdecls` import. Skip flags
 are rejected; the exact head, base ancestry, and clean worktree are checked.
 
@@ -328,7 +334,7 @@ When `build` actually ran (any outcome but `skipped`), one line is appended to
 
 ```json
 {"ts":"…","kind":"ci-build","trigger":"ci.sh pr=0007","seconds":883,
- "outcome":"success","sha":"…","note":"branch issue-7-qpbt-basis"}
+ "outcome":"success","sha":"…","note":"branch issue-7-<slug>"}
 ```
 
 This satisfies the `meta.md` duty that every full build be accounted for, and

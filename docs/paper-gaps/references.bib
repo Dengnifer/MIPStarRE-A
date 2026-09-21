@@ -1,76 +1,25 @@
-@misc{Ji2020LowIndividualDegree,
-  author = {Ji, Zhengfeng and Natarajan, Anand and Vidick, Thomas and Wright, John and Yuen, Henry},
-  title = {Quantum soundness of the classical low individual degree test},
-  year = {2020},
-  note = {arXiv:2009.12982}
-}
-
-@misc{MIPStarREBlueprint,
-  author = {{MIPStarRE Project}},
-  title = {Blueprint for arXiv:2009.12982: Quantum Soundness of the Classical Low Individual Degree Test},
-  year = {2026},
-  howpublished = {\url{https://sirui-lu.com/MIPStarRE}},
-  note = {Lean blueprint for the MIPStarRE formalization}
-}
-
-@misc{Ji2020MIPStar,
-  author        = {Ji, Zhengfeng and Natarajan, Anand and Vidick, Thomas and Wright, John and Yuen, Henry},
-  title         = {{$\mathsf{MIP}^*=\mathsf{RE}$}},
-  year          = {2020},
-  note          = {arXiv:2001.04383},
-}
-
-@misc{Ji2021Quantum,
-  author        = {Ji, Zhengfeng and Natarajan, Anand and Vidick, Thomas and Wright, John and Yuen, Henry},
-  title         = {Quantum soundness of testing tensor codes},
-  year          = {2021},
-  note          = {arXiv:2111.08131},
-}
-
-@misc{Natarajan2018NEEXP,
-  author        = {Natarajan, Anand and Wright, John},
-  title         = {{$\mathsf{NEEXP} \subseteq \mathsf{MIP}^*$}},
-  year          = {2019},
-  eprint        = {1904.05870},
-  archivePrefix = {arXiv},
-  primaryClass  = {quant-ph},
-  note          = {arXiv:1904.05870},
-}
-
-@inproceedings{Natarajan2017Linearity,
-  author    = {Natarajan, Anand and Vidick, Thomas},
-  title     = {A quantum linearity test for robustly verifying entanglement},
-  booktitle = {Proceedings of the 49th Annual {ACM} {SIGACT} Symposium on Theory of Computing},
-  series    = {STOC 2017},
-  pages     = {1003--1015},
-  year      = {2017},
-  publisher = {ACM},
-}
-
-@misc{Coladangelo2017Robust,
-  author        = {Coladangelo, Andrea and Stark, Jalex},
-  title         = {Robust self-testing for linear constraint system games},
-  year          = {2017},
-  eprint        = {1709.09267},
-  archivePrefix = {arXiv},
-  primaryClass  = {quant-ph},
-  note          = {arXiv:1709.09267},
+% Bibliography for the paper-gap notes.
+%
+% One entry per source this project cites.  `SourcePaper` is the key
+% `docs/paper-gaps/template.tex` cites; fill it in with the paper being
+% formalized (scripts/bootstrap_project.py knows its title and arXiv id) and add
+% one entry per further source as the notes start citing it.
+@misc{SourcePaper,
+  author       = {{The authors}},
+  title        = {{The paper this project formalizes}},
+  year         = {2026},
+  note         = {arXiv:0000.00000},
 }
 
 % Cross-references between paper-gap notes.  texra-blueprint resolves the
 % "gap:<slug>" keys from the index it generates when the notes are published as
-% a site; these entries let the same \cite commands resolve in the standalone
-% latexmk build driven by the Makefile in this directory.
-@misc{gap:qpbt_ld-dimension-divisibility,
-  author       = {{MIPStarRE Project}},
-  title        = {Dimension Divisibility in the Classical Test Instantiation of the Pauli Basis Analysis},
-  year         = {2026},
-  howpublished = {Paper-gap note \path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}},
-}
-
-@misc{gap:qpbt_ld-simultaneous-sandwich,
-  author       = {{MIPStarRE Project}},
-  title        = {Simultaneous Polynomial Measurements Are Not Obtained Coordinatewise},
-  year         = {2026},
-  howpublished = {Paper-gap note \path{docs/paper-gaps/qpbt_ld-simultaneous-sandwich.tex}},
-}
+% a site; an entry here lets the same \cite command resolve in the standalone
+% latexmk build driven by the Makefile in this directory.  One per note that is
+% cited by another note, for example:
+%
+% @misc{gap:some-topic,
+%   author       = {{The project}},
+%   title        = {What the note establishes},
+%   year         = {2026},
+%   howpublished = {Paper-gap note \path{docs/paper-gaps/some-topic.tex}},
+% }

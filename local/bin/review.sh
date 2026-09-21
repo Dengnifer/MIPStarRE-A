@@ -893,7 +893,7 @@ Your final message IS the review.  It must contain, in this order:
 1. A section headed exactly \`## Findings\`.  Every issue you would have posted
    as an inline review comment becomes exactly one line, in exactly this shape:
 
-       - [ ] F1 (blocker) \`MIPStarRE/Path/File.lean:123\` — one-line summary
+       - [ ] F1 (blocker) \`PaperLib/Path/File.lean:123\` — one-line summary
 
    Severity is one of: blocker, changes, advisory.  Use \`-\` in place of
    \`path:line\` for a finding that is not tied to a specific line.  Keep the

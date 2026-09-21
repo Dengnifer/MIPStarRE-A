@@ -1,0 +1,39 @@
+{
+  "key": "fixture-plan",
+  "tracker": {
+    "title": "Tracking - the miniature paper",
+    "body": "Root of the packet tree for the miniature paper.",
+    "labels": ["tracking"]
+  },
+  "chapters": [
+    {
+      "id": "ch02",
+      "title": "Chapter 2 - the main estimate",
+      "body": "Blueprint chapter ch02. Depends on the definitions of ch01.",
+      "labels": ["formalization"],
+      "blocked_by": ["ch01"]
+    },
+    {
+      "id": "ch01",
+      "title": "Chapter 1 - definitions",
+      "body": "Blueprint chapter ch01.",
+      "labels": ["formalization"]
+    }
+  ],
+  "packets": [
+    {
+      "id": "p02a",
+      "chapter": "ch02",
+      "title": "Packet - the estimate itself",
+      "body": "Formalize the main estimate.",
+      "blocked_by": ["p01a"],
+      "labels": ["formalization"]
+    },
+    {
+      "id": "p01a",
+      "chapter": "ch01",
+      "title": "Packet - the basic definitions",
+      "body": "Formalize the definitions of chapter 1."
+    }
+  ]
+}

@@ -4,6 +4,12 @@ Normative. This document specifies the local replacement for the parent
 workflow's GitHub Actions build cache, and the rules every worktree must obey to
 avoid duplicate compilation. It is the protocol behind three executables:
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 | script | role |
 |---|---|
 | `local/bin/cache-warmer.sh` | the **single writer**: builds `main`, publishes read-only snapshots |
@@ -24,7 +30,7 @@ failure. The load-bearing citations:
 | parent mechanism | citation | what it encodes |
 |---|---|---|
 | Split restore/save, save only on `main` | `.github/workflows/pr-ci.yml:137-167` | *"The cache is saved only from main and restored everywhere."* |
-| `lean-action`'s own cache disabled | `.github/workflows/pr-ci.yml:138-142` | The post-mortem: a ~2.6 GB entry saved **per PR run** cycled through the 10 GB repository cache budget and evicted the main-branch entry, *"so no run ever restored usable MIPStarRE oleans and every run rebuilt the whole library."* |
+| `lean-action`'s own cache disabled | `.github/workflows/pr-ci.yml:138-142` | The post-mortem: a ~2.6 GB entry saved **per PR run** cycled through the 10 GB repository cache budget and evicted the main-branch entry, *"so no run ever restored usable PaperLib oleans and every run rebuilt the whole library."* |
 | Same policy restated in the weekly job | `.github/workflows/docgen.yml:75-77` | *"See pr-ci.yml: per-run lake caches evict the main build cache from the repository cache budget."* |
 | Main runs exempt from cancellation | `.github/workflows/pr-ci.yml:50` | *"Do not cancel main-branch runs: they seed the build cache."* |
 | Save runs `if: always()` on main | `.github/workflows/pr-ci.yml:161-162` | *"Save even when the build failed: a partial cache still spares the next run the modules that did compile."* |
@@ -54,7 +60,7 @@ plus canonical-equal ownership by another worktree. Export it before setup or
 warming and through dispatch and cleanup; only its target gets `--add-dir`.
 
 **Tier 1 — `.lake/build`** — this project's own compiled artifacts (`.olean`,
-`.ilean`, `.c`, `.trace` for `MIPStarRE` modules). This is *exactly* what the
+`.ilean`, `.c`, `.trace` for `PaperLib` modules). This is *exactly* what the
 parent cached, and only from `main`. Locally it is produced by the warmer and
 distributed as copy-on-write clones. Each worktree owns a **private, writable**
 copy.
@@ -120,7 +126,7 @@ Shared packages and `hot-main` use `MIPSTARRE_CACHE_ROOT`; branch products may
 use `MIPSTARRE_LAKE_ROOT` as in §2. Neither runtime tree is committed.
 
 ```
-~/.cache/mipstarre-dev/
+$MIPSTARRE_CACHE_ROOT/
 ├── .full-build-lock/            # machine-wide: one full `lake build` at a time
 │   └── info                     # pid, host, started, started_epoch, purpose
 ├── .telemetry-lock/             # short-lived; serializes JSONL appends
@@ -208,7 +214,7 @@ re-acquire, while the loser loops and finds the lock freshly held. A
 4. `lake exe cache get` (failure is a warning, not fatal — the build simply
    compiles more from source), then `lake build`, then any `--targets`.
    **No `lake update`.**
-5. Everything is logged to `~/.cache/mipstarre-dev/logs/warm-<utc>-<sha12>.log`.
+5. Everything is logged to `$MIPSTARRE_CACHE_ROOT/logs/warm-<utc>-<sha12>.log`.
    Telemetry records the log *path*, never log *content* — build output is
    untrusted text (`DESIGN.md` #6) and does not belong in a data file that agent
    prompts may later read.
@@ -461,7 +467,7 @@ local/bin/cache-warmer.sh --ref main
 local/bin/cache-warmer.sh --status
 
 # Bootstrap a brand-new agent worktree end to end.
-local/bin/worktree-setup.sh /path/to/.worktrees/issue-0042-qpbt-basis
+local/bin/worktree-setup.sh /path/to/.worktrees/issue-0042-<slug>
 
 # Verify an existing worktree without touching it.
 local/bin/worktree-setup.sh /path/to/worktree --check

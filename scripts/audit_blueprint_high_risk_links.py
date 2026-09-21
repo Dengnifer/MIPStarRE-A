@@ -12,7 +12,7 @@ theorem:
 Such declarations are not automatically wrong.  Some are faithful construction
 theorems or internal interfaces.  The required invariant is that every such
 blueprint-linked declaration is explicitly covered in
-``MIPStarRE/LDT/Test/AxiomAudit.lean``.  This keeps the classification
+the project's axiom-audit file.  This keeps the classification
 reviewable and prevents a high-risk name from entering the blueprint without a
 corresponding axiom-closure assertion.
 """
@@ -27,6 +27,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Sequence
 
+import project_config
 from blueprint_lean_sync import BlueprintEntry, collect_blueprint_entries
 
 
@@ -90,6 +91,25 @@ def declaration_is_asserted(decl: str, asserted: set[str]) -> bool:
     return any(decl == candidate or decl.endswith(f".{candidate}") for candidate in asserted)
 
 
+def axiom_audit_file(root: Path) -> Path:
+    """Where this project keeps its axiom-audit assertions.
+
+    The registered track names it (`tracks.<name>.axiom_audit` in
+    `local/project.json`); before a track is registered it is
+    `<lean-root>/Test/AxiomAudit.lean` under the first Lean scan target, which is
+    what `bootstrap_project.py` and `local/protocols/completion.md` describe.
+    """
+
+    cfg = project_config.load(root)
+    entry = project_config.track(cfg) or {}
+    registered = entry.get("axiom_audit") or ""
+    if registered:
+        return root / registered
+    targets = project_config.lean_scan_targets(root, cfg)
+    base = targets[0] if targets else project_config.get(cfg, "project.lean_root", "")
+    return root / base / "Test" / "AxiomAudit.lean"
+
+
 def run_audit(
     root: Path,
     *,
@@ -97,7 +117,7 @@ def run_audit(
 ) -> HighRiskAuditResult:
     """Run the high-risk blueprint-link audit under ``root``."""
     blueprint_src = root / "blueprint" / "src"
-    axiom_audit_path = root / "MIPStarRE" / "LDT" / "Test" / "AxiomAudit.lean"
+    axiom_audit_path = axiom_audit_file(root)
     entries = collect_blueprint_entries(blueprint_src)
     asserted = asserted_declarations(axiom_audit_path)
 
@@ -145,9 +165,9 @@ def render_text(result: HighRiskAuditResult) -> str:
             f" in {finding.env_type} {finding.label or '<unlabelled>'}"
         )
         lines.append(
-            "  Add an explicit assertion for this declaration to "
-            "MIPStarRE/LDT/Test/AxiomAudit.lean, or remove the misleading "
-            "blueprint link."
+            "  Add an explicit assertion for this declaration to the project's "
+            "axiom-audit file (tracks.<track>.axiom_audit in local/project.json), "
+            "or remove the misleading blueprint link."
         )
     return "\n".join(lines)
 

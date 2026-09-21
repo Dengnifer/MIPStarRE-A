@@ -42,7 +42,7 @@ def _normalize_path(path: str) -> str:
 
 def _is_lean_source(path: str) -> bool:
     return path.endswith(".lean") and (
-        path.startswith("MIPStarRE/") or path.startswith("scripts/")
+        path.startswith("PaperLib/") or path.startswith("scripts/")
     )
 
 

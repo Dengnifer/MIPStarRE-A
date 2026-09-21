@@ -3,7 +3,12 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
 
 
 OPEN_TO_CLOSE = {"(": ")", "{": "}", "[": "]", "⦃": "⦄"}
@@ -16,13 +21,23 @@ def line_number(text: str, offset: int) -> int:
     return text.count("\n", 0, offset) + 1
 
 
-def ldt_lean_files(root: Path) -> list[Path]:
-    """Return Lean files in the active LDT tree."""
+def project_lean_files(root: Path) -> list[Path]:
+    """Return the Lean files of this project's own tree.
 
-    base = root / "MIPStarRE" / "LDT"
-    if not base.exists():
-        return []
-    return sorted(path for path in base.rglob("*.lean") if path.is_file())
+    The subtrees come from `local/project.json` (`project_config.lean_scan_targets`),
+    so an audit that used to be pinned to one directory name now follows whatever
+    library root and track the project registered.  A target that is not there
+    contributes nothing, which is what a repository whose Lean tree is not
+    written yet needs.
+    """
+
+    files: list[Path] = []
+    for target in project_config.lean_scan_targets(root):
+        base = root / target
+        if not base.is_dir():
+            continue
+        files.extend(path for path in base.rglob("*.lean") if path.is_file())
+    return sorted(set(files))
 
 
 def advance_depth(ch: str, stack: list[str]) -> None:

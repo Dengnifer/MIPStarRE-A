@@ -20,7 +20,19 @@ from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "make_artifact.sh"
 
-LEAN_MAIN = """import MIPStarRE.Bar
+# A fictional identity for the fixture repository.  The script reads the owner
+# from `local/project.json` and takes any personal rule from the environment,
+# so no real name, address or repository slug belongs in this file.
+FIXTURE_SLUG = "some-owner/some-repo"
+FIXTURE_OWNER = FIXTURE_SLUG.split("/", 1)[0]
+FIXTURE_AUTHOR = "Ada Lovelace"
+FIXTURE_CONTACT = "ada@private.example"
+EXTRA_ANON_RULES = (
+    f"{FIXTURE_AUTHOR} :: Anonymous Author\n"
+    f"{FIXTURE_CONTACT} :: anonymous@example.invalid"
+)
+
+LEAN_MAIN = """import PaperLib.Bar
 
 /-- A doc comment: this line does not count as code.
     Neither does this one. -/
@@ -96,17 +108,26 @@ class MakeArtifactTests(unittest.TestCase):
         self.repo.mkdir()
         git(self.repo, "init", "-q", "-b", "main")
 
-        write(self.repo / "MIPStarRE.lean", "import MIPStarRE.Foo\n")
-        write(self.repo / "MIPStarRE" / "Foo.lean", LEAN_MAIN)
-        write(self.repo / "MIPStarRE" / "Bar.lean", LEAN_BAR)
+        write(self.repo / "PaperLib.lean", "import PaperLib.Foo\n")
+        write(self.repo / "PaperLib" / "Foo.lean", LEAN_MAIN)
+        write(self.repo / "PaperLib" / "Bar.lean", LEAN_BAR)
         write(self.repo / "lean-toolchain", "leanprover/lean4:v4.32.0\n")
-        write(self.repo / "lakefile.toml", 'name = "MIPStarRE"\n')
+        write(self.repo / "lakefile.toml", 'name = "PaperLib"\n')
         write(self.repo / "lake-manifest.json", json.dumps(
             {"packages": [{"name": "mathlib", "rev": "deadbeefcafe"}]}))
-        write(self.repo / "README.md", "See https://github.com/Dengnifer/MIPStarRE-A\n")
+        write(self.repo / "README.md", f"See https://github.com/{FIXTURE_SLUG}\n")
+        write(self.repo / "local" / "project.json", json.dumps({
+            "schema": 1,
+            "project": {
+                "name": "Widget",
+                "lean_root": "PaperLib",
+                "track": "main",
+                "github_slug": FIXTURE_SLUG,
+            },
+        }))
         write(self.repo / "docs" / "comparator.md", "trust model\n")
         # Third-party paper sources: they ship (owner decision, 2026-09-19).
-        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+        write(self.repo / "references" / "source-paper" / "frontmatter.tex",
               "\\title{A paper}\n")
         # The workflow layer: excluded by the allow-list, and carrying exactly
         # the kind of home path the leak scan exists to catch.
@@ -130,7 +151,8 @@ class MakeArtifactTests(unittest.TestCase):
             ["bash", str(SCRIPT), *args, "HEAD", str(self.out)],
             capture_output=True, text=True,
             env={"PATH": "/usr/bin:/bin:/usr/local/bin", "HOME": str(self.tmp),
-                 "MIPSTARRE_REPO_ROOT": str(self.repo)},
+                 "MIPSTARRE_REPO_ROOT": str(self.repo),
+                 "MIPSTARRE_ANON_RULES": EXTRA_ANON_RULES},
         )
 
     def install_packaging_script(self, suffix: str = "") -> Path:
@@ -153,7 +175,7 @@ class MakeArtifactTests(unittest.TestCase):
         result = self.run_script()
         self.assertEqual(result.returncode, 0, result.stderr)
         names = self.members()
-        for shipped in ("MIPStarRE/Foo.lean", "MIPStarRE/Bar.lean", "MIPStarRE.lean",
+        for shipped in ("PaperLib/Foo.lean", "PaperLib/Bar.lean", "PaperLib.lean",
                         "lean-toolchain", "README.md", "MANIFEST.txt"):
             self.assertIn(shipped, names)
         for excluded in ("local/bin/tool.sh", "results/telemetry/builds.jsonl"):
@@ -164,7 +186,7 @@ class MakeArtifactTests(unittest.TestCase):
     def test_the_paper_sources_ship(self) -> None:
         """They are what the docstring `file.tex:lines` locators point at."""
         self.assertEqual(self.run_script().returncode, 0)
-        self.assertIn("references/qpbt-paper/frontmatter.tex", self.members())
+        self.assertIn("references/source-paper/frontmatter.tex", self.members())
 
     def test_manifest_records_toolchain_mathlib_and_lean_code_lines(self) -> None:
         self.assertEqual(self.run_script().returncode, 0)
@@ -173,16 +195,16 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertIn("deadbeefcafe", manifest)
         self.assertIn("Lean files        : 3", manifest)
         # Foo.lean: import + theorem are code, the two doc-comment lines and the
-        # blank lines are not; Bar.lean and MIPStarRE.lean are one line each.
+        # blank lines are not; Bar.lean and PaperLib.lean are one line each.
         self.assertIn("Lean code lines   : 4 ", manifest)
 
     def test_reports_an_import_that_is_not_in_the_snapshot(self) -> None:
-        (self.repo / "MIPStarRE" / "Bar.lean").unlink()
+        (self.repo / "PaperLib" / "Bar.lean").unlink()
         self.commit("drop Bar")
         self.assertEqual(self.run_script().returncode, 0)
         manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
         self.assertIn("self-contained    : NO", manifest)
-        self.assertIn("MIPStarRE.Bar", manifest)
+        self.assertIn("PaperLib.Bar", manifest)
 
     # -- the leak scan ------------------------------------------------------
 
@@ -210,7 +232,7 @@ class MakeArtifactTests(unittest.TestCase):
 
     def test_placeholder_domain_suffix_is_rejected_in_both_modes(self) -> None:
         """A reserved-domain prefix does not make the complete address safe."""
-        contact = "ruixuan.deng@icloud.com"
+        contact = FIXTURE_CONTACT
         unrelated = "reviewer@example.com.private-mail.net"
         self.install_packaging_script(
             f"\n# planted mixed address line: {contact} {unrelated}\n")
@@ -231,7 +253,7 @@ class MakeArtifactTests(unittest.TestCase):
         The papers print their corresponding authors' addresses; an address in a
         file of ours is still a leak, and the scan has to keep catching it.
         """
-        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+        write(self.repo / "references" / "source-paper" / "frontmatter.tex",
               "\\email{someone@some-university.edu}\n")
         self.commit("an address in the paper source")
         self.assertEqual(self.run_script().returncode, 0)
@@ -241,7 +263,7 @@ class MakeArtifactTests(unittest.TestCase):
         result = self.run_script()
         self.assertEqual(result.returncode, 2, result.stdout)
         self.assertIn("docs/notes.md", result.stderr)
-        self.assertNotIn("references/qpbt-paper/frontmatter.tex", result.stderr)
+        self.assertNotIn("references/source-paper/frontmatter.tex", result.stderr)
 
     def test_an_unrelated_address_in_the_shipped_script_fails_the_run(self) -> None:
         """Only the configured rule contact, not every script address, is safe."""
@@ -258,7 +280,7 @@ class MakeArtifactTests(unittest.TestCase):
 
     def test_anonymize_rejects_an_unrelated_address_beside_the_rule_contact(self) -> None:
         """One permitted match on a line must not launder another address."""
-        contact = "ruixuan.deng@icloud.com"
+        contact = FIXTURE_CONTACT
         unrelated = "unrelated.person@private.example"
         self.install_packaging_script(
             f"\n# planted mixed address line: {contact} {unrelated}\n")
@@ -274,12 +296,12 @@ class MakeArtifactTests(unittest.TestCase):
 
     def test_a_home_path_in_the_paper_sources_still_fails_the_run(self) -> None:
         """The forgiveness is scoped by content too: only addresses."""
-        write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
+        write(self.repo / "references" / "source-paper" / "frontmatter.tex",
               "%% typeset in /home/somebody/tex\n")
         self.commit("a home path in the paper source")
         result = self.run_script()
         self.assertEqual(result.returncode, 2, result.stdout)
-        self.assertIn("references/qpbt-paper/frontmatter.tex", result.stderr)
+        self.assertIn("references/source-paper/frontmatter.tex", result.stderr)
 
     def test_a_home_path_inside_a_pdf_fails_the_run(self) -> None:
         """The scan must read the PDFs it ships, not skip them as binaries."""
@@ -336,8 +358,8 @@ class MakeArtifactTests(unittest.TestCase):
 
     def test_the_manifest_reports_a_paper_locator_that_does_not_resolve(self) -> None:
         """A docstring locator is now a path a reviewer can open."""
-        write(self.repo / "MIPStarRE" / "Bar.lean",
-              "/-- Paper origin: `references/qpbt-paper/frontmatter.tex`. -/\n"
+        write(self.repo / "PaperLib" / "Bar.lean",
+              "/-- Paper origin: `references/source-paper/frontmatter.tex`. -/\n"
               "theorem bar : True := trivial\n")
         self.commit("a locator that resolves")
         self.assertEqual(self.run_script().returncode, 0)
@@ -345,14 +367,14 @@ class MakeArtifactTests(unittest.TestCase):
         self.assertIn("paper locators    : all 1 cited files are in the snapshot",
                       manifest)
 
-        write(self.repo / "MIPStarRE" / "Bar.lean",
-              "/-- Paper origin: `references/qpbt-paper/no-such-section.tex`. -/\n"
+        write(self.repo / "PaperLib" / "Bar.lean",
+              "/-- Paper origin: `references/source-paper/no-such-section.tex`. -/\n"
               "theorem bar : True := trivial\n")
         self.commit("a locator that does not resolve")
         self.assertEqual(self.run_script().returncode, 0)
         manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
         self.assertIn("1 of 1 cited files absent", manifest)
-        self.assertIn("references/qpbt-paper/no-such-section.tex", manifest)
+        self.assertIn("references/source-paper/no-such-section.tex", manifest)
 
     # -- anonymization ------------------------------------------------------
 
@@ -364,22 +386,22 @@ class MakeArtifactTests(unittest.TestCase):
         with tarfile.open(tarball) as archive:
             member = next(m for m in archive.getnames() if m.endswith("README.md"))
             text = archive.extractfile(member).read().decode("utf-8")
-        self.assertNotIn("Dengnifer", text)
+        self.assertNotIn(FIXTURE_OWNER, text)
         self.assertIn("ANONYMIZED", text)
 
-    def test_anonymize_rewrites_the_rules_inside_the_shipped_script(self) -> None:
+    def test_no_identity_survives_in_the_shipped_script(self) -> None:
         """The script ships, so the pass runs over its own rules block.
 
-        The rules used to be stored pre-escaped for `sed`, which meant each one
+        The rules were once stored pre-escaped for `sed`, which meant each one
         matched the plain string everywhere else in the tree and never its own
         spelling here: the address the rule exists to remove rode out in the
-        rules list of the shipped copy, and nothing said so.
+        rules list of the shipped copy, and nothing said so.  They are now read
+        from the configuration and the environment instead, so the shipped copy
+        carries no identity at all — and this test fails again the day one is
+        written back into the script.
         """
         self.install_packaging_script()
         self.commit("ship the packaging script, as the real repository does")
-        # Plain run first: the rules name the owner's address literally now, so
-        # the path-scoped allow-list entry for this one file has to hold, or no
-        # release could be cut at all.
         self.assertEqual(self.run_script().returncode, 0)
         result = self.run_script("--anonymize")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -387,16 +409,44 @@ class MakeArtifactTests(unittest.TestCase):
             member = next(m for m in archive.getnames()
                           if m.endswith("scripts/make_artifact.sh"))
             text = archive.extractfile(member).read().decode("utf-8")
-        for rule_text in ("Dengnifer", "LionSR", "Ruixuan Deng",
-                          "ruixuan.deng@icloud.com", "sirui-lu.com"):
+        for rule_text in (FIXTURE_OWNER, FIXTURE_AUTHOR, FIXTURE_CONTACT):
             self.assertNotIn(rule_text, text, f"{rule_text!r} survived in the shipped script")
             escaped = rule_text.replace(".", r"\.")
             self.assertNotIn(escaped, text,
                              f"escaped spelling {escaped!r} survived in the shipped script")
 
+    def test_the_manifest_names_the_configured_repository_and_anonymizes_it(self) -> None:
+        """`SOURCE_REPO` is the project's slug, and `--anonymize` rewrites it."""
+        self.assertEqual(self.run_script().returncode, 0)
+        manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
+        self.assertIn(f"source repository : {FIXTURE_SLUG}", manifest)
+        self.assertEqual(self.run_script("--anonymize").returncode, 0)
+        manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
+        self.assertNotIn(FIXTURE_OWNER, manifest)
+        self.assertIn("ANONYMIZED", manifest)
+
+    def test_the_tarball_is_named_after_the_configured_project(self) -> None:
+        self.assertEqual(self.run_script().returncode, 0)
+        tarball = next(self.out.glob("*.tar.gz"))
+        self.assertTrue(
+            tarball.name.startswith("widget-artifact-"),
+            f"unexpected artifact name: {tarball.name}",
+        )
+
+    def test_a_malformed_environment_rule_is_refused(self) -> None:
+        result = subprocess.run(
+            ["bash", str(SCRIPT), "--anonymize", "HEAD", str(self.out)],
+            capture_output=True, text=True,
+            env={"PATH": "/usr/bin:/bin:/usr/local/bin", "HOME": str(self.tmp),
+                 "MIPSTARRE_REPO_ROOT": str(self.repo),
+                 "MIPSTARRE_ANON_RULES": "no separator here"},
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("without ' :: '", result.stderr)
+
     def test_anonymize_rejects_an_escaped_rule_in_the_shipped_script(self) -> None:
         """A regex-escaped identity is still readable and must fail the run."""
-        rule_text = "ruixuan.deng@icloud.com"
+        rule_text = FIXTURE_CONTACT
         escaped = rule_text.replace(".", r"\.")
         self.install_packaging_script(f"\n# planted escaped rule spelling: {escaped}\n")
         self.commit("plant an escaped anonymization rule in the shipped script")
@@ -421,7 +471,7 @@ class MakeArtifactTests(unittest.TestCase):
             self.skipTest("pdftotext (poppler-utils) is not installed")
         pdf = self.repo / "docs" / "paper-gaps" / "note.pdf"
         pdf.parent.mkdir(parents=True, exist_ok=True)
-        pdf.write_bytes(minimal_pdf("Ruixuan Deng"))
+        pdf.write_bytes(minimal_pdf(FIXTURE_AUTHOR))
         self.commit("a name baked into a binary")
         self.assertEqual(self.run_script().returncode, 0,
                          "without --anonymize the name is not a leak")

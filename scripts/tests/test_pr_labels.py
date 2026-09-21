@@ -16,7 +16,7 @@ class PublicationLabelsTest(unittest.TestCase):
     def run_open(self, *, issue_labels=(), explicit=(), existing=None, dry_run=False):
         args = pr_open._parse_args([
             "--branch", "issue-42-pauli", "--issue", "42",
-            "--title", "feat(QPBT): prove a lemma",
+            "--title", "feat(Sample): prove a lemma",
             *[arg for label in explicit for arg in ("--label", label)],
             *(["--dry-run"] if dry_run else []),
         ])

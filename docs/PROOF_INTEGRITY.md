@@ -14,7 +14,7 @@ rather than duplicating the rules inline.
 > Consult it alongside this file during review.
 
 > **Paper-realignment exception:** When a PR is explicitly realigning a
-> source-labelled declaration with `references/ldt-paper/`, the `sorry`
+> source-labelled declaration with `references/<key>-paper/`, the `sorry`
 > blocker below may be temporarily relaxed for the affected proof bodies.  The
 > PR must restore the source-faithful public statement, name the remaining proof
 > obligation as a theorem or lemma, and cite the paper passage plus the
@@ -57,7 +57,7 @@ When an external mathematical result must remain unformalized temporarily,
 prefer a caller-supplied `Prop` hypothesis over a global `axiom`
 declaration, and add a regression check (for example a
 `Lean.collectAxioms`-based assertion, as in
-`MIPStarRE.LDT.Test.AxiomAudit`) so later refactors cannot silently widen
+the track's `AxiomAudit` module) so later refactors cannot silently widen
 the axiomatic base.
 
 This preference does not license proposition inputs on source-labelled paper
@@ -133,7 +133,7 @@ progress rather than enabling it.
 
 A theorem advertised as the Lean formalization of a paper theorem is a blocker
 if its public statement has drifted from the cited paper statement.
-Changing a theorem away from the statement in `references/ldt-paper/` is
+Changing a theorem away from the statement in `references/<key>-paper/` is
 strongly discouraged unless it is forced by faithful formal encoding or by a
 documented mathematical necessity.
 
@@ -232,6 +232,21 @@ acceptable with justification.
 ```
 
 **For manual review**: Use this as a checklist when reviewing Lean PRs.
+
+**Exemptions from the per-declaration audits** — the decisions that say "this
+`…Hypotheses` field really is a faithful encoding of a paper hypothesis", or
+"this warning declaration under a green node is the interface of a theorem the
+paper quotes" — are **data about one development, not rules**, so they do not
+live in the audit scripts. They live in the optional file
+`local/audit-registers.json`, one section per audit
+(`green_node` for `scripts/audit_green_node_integrity.py`,
+`paper_facing_proof_debt` for `scripts/audit_paper_facing_proof_debt.py`), and
+the exact shape of each section is documented in the header of the script that
+reads it. Every entry's value is the evidence the audit prints: a paper or
+blueprint citation with line numbers, so a reader can check the decision
+instead of trusting it. **The file ships absent, and absent means empty**: with
+no registers every finding is reported, which is the right default for a new
+project. Adding an entry is a reviewed change like any other.
 
 **Updating rules**: Edit this file and all referencing workflows will
 automatically pick up the changes.

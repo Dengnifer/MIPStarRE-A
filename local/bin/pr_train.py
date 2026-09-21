@@ -31,9 +31,16 @@ SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 
 def claim_script(repo: Path) -> Path:
-    """The shared atomic claim list every writer in this project uses."""
-    local = repo / "local/bin/claim.sh"
-    return local if local.exists() else Path.home() / ".cache/mipstarre-dev/owner-bin/qpbt-claim.sh"
+    """The shared atomic claim list every writer in this project uses.
+
+    The in-repo tool, unless `MIPSTARRE_CLAIM_TOOL` names another one — the
+    escape hatch for a machine that keeps the claim list outside the checkout,
+    shared by several worktrees.
+    """
+    override = os.environ.get("MIPSTARRE_CLAIM_TOOL", "").strip()
+    if override:
+        return Path(override).expanduser()
+    return repo / "local/bin/claim.sh"
 
 
 def claim_call(repo: Path, *args: str) -> tuple[int, str]:

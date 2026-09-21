@@ -8,7 +8,7 @@ to supply an unproved part of the proof.  This script is a conservative
 review aid for that boundary:
 
 * read theorem-like ``\lean{...}`` references from the active blueprint;
-* resolve those references to public Lean declarations under ``MIPStarRE/``;
+* resolve those references to public Lean declarations under ``PaperLib/``;
 * inspect only the public input portion of the declaration header after the
   declaration name and before the result type;
 * report occurrences of blocking proof-debt vocabulary such as
@@ -52,6 +52,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Sequence
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
 from blueprint_lean_sync import (  # noqa: E402
     BlueprintEntry,
     LEAN_DECL_RE,
@@ -155,197 +158,78 @@ BROAD_DEBT_TOKEN_RE = _debt_token_re(
     STRICT_LOWER_TOKENS + BROAD_EXTRA_LOWER_TOKENS,
 )
 
-# The following tokens are deliberately not treated as proof-debt findings.
-# Each entry is a small public structure whose fields are visible in the
-# corresponding source statement, or are scalar side conditions used to make an
-# implicit paper regime explicit.
+# Four per-declaration registers, EMPTY in a fresh repository.
 #
-# * CascadeHypotheses contains only the numeric regime used by the final error
-#   cascade: k >= 1, m >= 1, 0 <= eps <= 1, d <= q, and q > 0.  These are not
-#   bridge data.  The paper calculation at inductive_step.tex:187-234 uses the
-#   unit-scale assumptions when comparing fractional powers and absorbing lower
-#   powers into k^2 m^4; the blueprint states them explicitly in
-#   ch10_induction.tex:545-564.
-# * SliceBoundednessInput contains the boundedness item from
-#   commutativity-G.tex:29-36 and ld-pasting.tex:28-35: positive witnesses Z^x,
-#   the averaged residual bound, and the pointwise domination
-#   Z^x >= E_u A^{u,x}_{g(u)}.  It must not contain an additional Lean-only
-#   identification field; issue #1556 removed the former
-#   dominationTargetAgrees bridge from this public input.
-FAITHFUL_BOUNDARY_TOKENS = {
-    "CascadeHypotheses": (
-        "faithful encoding of the standing numeric regime for the error cascade; "
-        "see blueprint/src/chapter/ch10_induction.tex:588-689 and "
-        "references/ldt-paper/inductive_step.tex:187-234"
-    ),
-    "SliceBoundednessInput": (
-        "faithful encoding of the paper boundedness hypothesis; see "
-        "references/ldt-paper/commutativity-G.tex:29-36 and "
-        "references/ldt-paper/ld-pasting.tex:28-35"
-    ),
+# The audit reports every paper-facing declaration whose public interface
+# carries proof-debt vocabulary.  A project accumulates decisions about
+# particular declarations — this one is a faithful encoding of a hypothesis the
+# paper states, that one is the interface of an external theorem the paper
+# quotes — and records them here so the audit can classify instead of repeating
+# them.  They are data about one development, never rules, so they live outside
+# the code, in an optional JSON file:
+#
+#   local/audit-registers.json
+#   {
+#     "paper_facing_proof_debt": {
+#       "faithful_boundary_tokens": {
+#         "CascadeHypotheses": "faithful encoding of the numeric regime; see
+#            blueprint/src/chapter/ch10.tex:588-689 and
+#            references/<mirror>-paper/inductive_step.tex:187-234"
+#       },
+#       "external_citation_tokens": { "<Type or field name>": "<evidence>" },
+#       "source_context_tokens": { "<Type or field name>": "<evidence>" },
+#       "source_context_conditional_decl_names": {
+#         "<Fully.Qualified.declaration>": "<evidence>"
+#       }
+#     }
+#   }
+#
+# The value of each entry is the evidence the audit prints: a paper or
+# blueprint citation with line numbers, so a reader can check the decision
+# without trusting it.  With no file, every register is empty and every finding
+# is reported, which is the right default for a new project.
+REGISTER_PATH = "local/audit-registers.json"
+REGISTER_SECTION = "paper_facing_proof_debt"
+
+FAITHFUL_BOUNDARY_TOKENS: dict[str, str] = {}
+EXTERNAL_CITATION_TOKENS: dict[str, str] = {}
+SOURCE_CONTEXT_TOKENS: dict[str, str] = {}
+SOURCE_CONTEXT_CONDITIONAL_DECL_NAMES: dict[str, str] = {}
+
+#: Register name in the JSON file -> the dict it fills.
+_REGISTERS: dict[str, dict[str, str]] = {
+    "faithful_boundary_tokens": FAITHFUL_BOUNDARY_TOKENS,
+    "external_citation_tokens": EXTERNAL_CITATION_TOKENS,
+    "source_context_tokens": SOURCE_CONTEXT_TOKENS,
+    "source_context_conditional_decl_names": SOURCE_CONTEXT_CONDITIONAL_DECL_NAMES,
 }
 
-# These broad-mode findings are not internal bridge debt.  They are explicit
-# interfaces for the external classical theorems quoted in the overview.  The
-# corresponding blueprint entries must remain unmarked by \leanok unless the
-# external theorem itself is formalized, but they should not be counted with
-# internal proof obligations such as witnesses, data packages, or wrappers.
-EXTERNAL_CITATION_TOKENS = {
-    "PolishchukSpielmanClassicalSoundnessStatement": (
-        "external Polishchuk--Spielman theorem quoted in "
-        "references/ldt-paper/introduction.tex:69-92; the blueprint entry is "
-        "not marked as formalized"
-    ),
-}
 
-# Source-construction context is the formal counterpart of a paper passage that
-# says "henceforth let ..." and then proves several local lemmas in that fixed
-# context.  These tokens still appear in broad mode so reviewers can see the
-# context boundary, but they are not unresolved proof-debt hypotheses.
-SOURCE_CONTEXT_TOKENS = {
-    "AlmostProjMeasStatement": (
-        "internal projectivization statement in the proof of the "
-        "projective-non-measurement lemma; see "
-        "references/ldt-paper/orthonormalization.tex:414-658"
-    ),
-    "AnswerSelfImprovementData": (
-        "answer-valued version of the slice-wise self-improvement data in the "
-        "successor step; see references/ldt-paper/inductive_step.tex:461-551"
-    ),
-    "AveragedPastingData": (
-        "internal successor-step data collecting the averaged fields needed "
-        "for the induction-section pasting invocation; see "
-        "references/ldt-paper/inductive_step.tex:541-570"
-    ),
-    "NaimarkData": (
-        "standard one-measurement Naimark construction data; see "
-        "references/ldt-paper/orthonormalization.tex:121-187 and "
-        "docs/paper-gaps/naimark-dilation.tex"
-    ),
-    "OneMeasNaimarkData": (
-        "standard one-measurement Naimark construction data; see "
-        "references/ldt-paper/orthonormalization.tex:121-187 and "
-        "docs/paper-gaps/naimark-dilation.tex"
-    ),
-    "leftData": (
-        "left-hand one-measurement Naimark data in the two-sided trace "
-        "identity; see references/ldt-paper/orthonormalization.tex:161-187 "
-        "and docs/paper-gaps/naimark-dilation.tex"
-    ),
-    "rightData": (
-        "right-hand one-measurement Naimark data in the two-sided trace "
-        "identity; see references/ldt-paper/orthonormalization.tex:161-187 "
-        "and docs/paper-gaps/naimark-dilation.tex"
-    ),
-    "hresidual": (
-        "local residual-mass comparison for restricting an Option-completed "
-        "projective submeasurement; see docs/reports/"
-        "issue-1642-restrictsome-residual-domination-obstruction.md"
-    ),
-    "hdata": (
-        "local data-processing comparison in the final fields of the "
-        "self-improvement proof; see references/ldt-paper/"
-        "self_improvement.tex:635-671"
-    ),
-    "OrthonormalizeAndCompleteStatement": (
-        "internal Section 5 projectivization-chain statement used for "
-        "left/right completion transport; see references/ldt-paper/"
-        "orthonormalization.tex:282-538"
-    ),
-    "PerSliceInductionData": (
-        "internal Section 6 data recording recursive induction conclusions "
-        "for restricted slices; see references/ldt-paper/"
-        "inductive_step.tex:441-454"
-    ),
-    "projectiveCompletionWitness": (
-        "local variable for the constructed final Step 6 completion-transport "
-        "witness; see references/ldt-paper/inductive_step.tex:130-185"
-    ),
-    "roleInductionWitness": (
-        "local variable for the constructed symmetric-induction witness in "
-        "the final theorem proof; see references/ldt-paper/"
-        "test_definition.tex:180-202"
-    ),
-    "roleWitness": (
-        "local variable for the constructed role-register measurement witness "
-        "inside Step 6; see references/ldt-paper/inductive_step.tex:130-185"
-    ),
-    "orthWitness": (
-        "local variable for the constructed orthonormalization witness inside "
-        "Step 6; see references/ldt-paper/inductive_step.tex:130-149"
-    ),
-    "SdpStatementWithSlackness": (
-        "source-shaped SDP slackness statement used in the self-improvement "
-        "proof; see references/ldt-paper/self_improvement.tex:86-126 and "
-        "docs/reports/selfimprovement-bridge-integrity-audit.md"
-    ),
-    "SelfImprovementConclusion": (
-        "source-shaped conclusion record for the self-improvement theorem; "
-        "see references/ldt-paper/self_improvement.tex:635-671"
-    ),
-    "SelfImprovementData": (
-        "slice-wise self-improvement data in the successor step; see "
-        "references/ldt-paper/inductive_step.tex:461-551"
-    ),
-    "SelfImprovementHelperConclusion": (
-        "internal helper-output record for the self-improvement proof; see "
-        "references/ldt-paper/self_improvement.tex:86-126 and 635-671"
-    ),
-    "selfImprovementDataProcessingError": (
-        "named scalar error term for the data-processing step in "
-        "self-improvement; see references/ldt-paper/"
-        "self_improvement.tex:635-671"
-    ),
-    "SliceRestrictionData": (
-        "internal Section 6 successor-stage data for restricted-probability "
-        "estimates; see references/ldt-paper/inductive_step.tex:374-454"
-    ),
-    "SpectralTruncationStatement": (
-        "internal spectral-truncation statement in the "
-        "projective-non-measurement proof; see references/ldt-paper/"
-        "orthonormalization.tex:414-658"
-    ),
-    "AnswerSliceRestrictionData": (
-        "internal Section 6 successor-stage restriction data for the "
-        "answer-valued recursive-slice route; see "
-        "references/ldt-paper/inductive_step.tex:374-454"
-    ),
-    "AnswerPerSliceInductionData": (
-        "internal Section 6 successor-stage data recording the recursive "
-        "answer-valued induction conclusions for restricted slices; see "
-        "references/ldt-paper/inductive_step.tex:441-454"
-    ),
-    "QLayerData": (
-        "source construction context for the fixed rank-reduced Q family and "
-        "auxiliary projectors; see "
-        "references/ldt-paper/orthonormalization.tex:658-795"
-    ),
-    "RankReductionWitness": (
-        "source construction context recording the conclusion of "
-        "lem:projective-low-rank-sum; see "
-        "references/ldt-paper/orthonormalization.tex:540-658"
-    ),
-    "QXPLayerData": (
-        "source construction context for the matrix decomposition and "
-        "X/XHat/P layer; see "
-        "references/ldt-paper/orthonormalization.tex:775-940"
-    ),
-}
+def load_registers(root: Path) -> None:
+    """Fill the registers from ``root``; leave them empty when there is no file.
 
-# Exact conditional-looking declaration names which are safe only in
-# informational blueprint entries.  These are Lean-only construction or
-# transport lemmas displayed near the proof, not replacements for source
-# theorem statements.  If one of these names is linked from a theorem-like
-# entry, it should still be reported as a conditional declaration-name finding.
-SOURCE_CONTEXT_CONDITIONAL_DECL_NAMES = {
-    "MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements": (
-        "Lean-only construction from two already constructed "
-        "orthonormalize-and-complete statements and a pre-projective consistency "
-        "proof; see references/ldt-paper/orthonormalization.tex:282-538 and "
-        "the informational blueprint entry "
-        "rem:lean-right-register-completion-helpers"
-    ),
-}
+    Called once per run, before anything is classified, so a newly recorded
+    exemption takes effect without restarting anything.
+    """
+
+    path = root / REGISTER_PATH
+    data: dict = {}
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"{REGISTER_PATH}: not valid JSON ({exc})")
+    section = data.get(REGISTER_SECTION) or {}
+    for name, register in _REGISTERS.items():
+        register.clear()
+        entries = section.get(name) or {}
+        if not isinstance(entries, dict):
+            raise SystemExit(
+                f"{REGISTER_PATH}: {REGISTER_SECTION}.{name} must be an object "
+                'mapping "name" to the evidence for it'
+            )
+        register.update({str(k): str(v) for k, v in entries.items()})
+
 
 # Broad mode should classify mathematical interfaces, not double-count a local
 # variable name whose type is already reported, for example
@@ -685,8 +569,9 @@ def run_audit(
 ) -> AuditResult:
     """Run the paper-facing proof-debt audit for ``root``."""
     root = root.resolve()
+    load_registers(root)
     blueprint_src = root / "blueprint" / "src"
-    lean_root = root / "MIPStarRE"
+    lean_root = root / project_config.get(project_config.load(root), "project.lean_root")
 
     entries = paper_facing_entries(
         blueprint_src,

@@ -1,50 +1,65 @@
 # Local Operations Layer — Architecture
 
-This repository is a local-only continuation of the workflow that
-[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE) evolved on GitHub while
-formalizing the low individual degree test (LDT, arXiv:2009.12982). The active
-track here is the **quantum Pauli basis test (QPBT)** from MIP\*=RE
-(arXiv:2001.04383, primary) and NEEXP in MIP\* (arXiv:1904.05870, secondary).
+This `local/` tree is the operative workflow of the repository: a local
+replacement for a GitHub-Actions-hosted development workflow, plus the session
+layer that lets the whole thing run unattended.
 
-Every GitHub-hosted operation of the parent workflow is replaced by a local
-equivalent that *executes* here. Since 2026-09-01 the issue, PR, evidence and
-merge **records** live on GitHub again (`Dengnifer/MIPStarRE-A`,
-`protocols/issues-prs.md`); what runs is still local. The `.github/` tree is
-kept **frozen as reference** — it documents the mechanisms being localized and
-is never executed here. The operative layer is this `local/` tree plus the
-(already-local) `scripts/` audits and `.githooks/` gates, which port
-unchanged.
+Every hosted operation of that original workflow is replaced by a local
+equivalent that *executes* here, while the issue, pull-request, evidence and
+merge **records** live on GitHub (`project.github_slug` in
+[`project.json`](project.json), `protocols/issues-prs.md`). The `.github/` tree
+is kept **frozen as reference** — it documents the mechanisms being localized
+and is never executed here. The operative layer is this `local/` tree plus the
+(already-local) `scripts/` audits and `.githooks/` gates.
+
+Everything project-specific — the library name, the Lean root, the repository
+slugs, the cache root, the tmux session, the issue numbers, the caps and the
+model names — lives in [`project.json`](project.json) and is exported as
+`KIT_*` variables by `bin/session/config.sh`. No script and no protocol in this
+tree hard-codes any of it.
 
 ## Layout
 
 ```
 local/
-├── DESIGN.md          # this file — architecture and invariants
-├── README.md          # operator's entry point: commands, lifecycle walkthrough
-├── protocols/         # normative protocol documents
-│   ├── meta.md        # how protocols evolve; telemetry duties (read first)
-│   ├── build-cache.md # hot main cache; no-duplicate-compilation rules
-│   ├── ci.md          # local PR CI gate
-│   ├── review.md      # reviewer dispatch and gating
-│   ├── autofix.md     # auto-fix loop, iteration caps
-│   ├── issues-prs.md  # GitHub-backed issue and PR lifecycle
-│   ├── sessions.md    # agent session naming, dispatch, archiving
-│   └── EVOLUTION.md   # dated protocol-amendment ledger (research data)
-├── personas/          # system prompts for locally dispatched agents
-└── bin/               # executables (the workflow engine)
-local/briefs/          # per-issue design briefs (committed)
-results/telemetry/     # sessions/stages/builds logs, GitHub snapshot (committed)
+├── DESIGN.md           # this file — architecture and invariants
+├── README.md           # operator's entry point: commands, lifecycle walkthrough
+├── project.json        # the project's identity: names, paths, issues, caps, keys
+├── protocols/          # normative protocol documents
+│   ├── meta.md         # how protocols evolve; telemetry duties (read first)
+│   ├── meta-session.md # the supervising session's playbook
+│   ├── main-cycle.md   # the main session's standing operating cycle
+│   ├── bootstrap.md    # arXiv URL -> running project, stage by stage
+│   ├── build-cache.md  # hot main cache; no-duplicate-compilation rules
+│   ├── ci.md           # local PR CI gate
+│   ├── review.md       # reviewer dispatch and gating
+│   ├── autofix.md      # auto-fix loop, iteration caps
+│   ├── issues-prs.md   # GitHub-backed issue and PR lifecycle
+│   ├── sessions.md     # agent session naming, dispatch, archiving
+│   ├── completion.md   # the definition of done
+│   ├── site.md         # the published site
+│   └── EVOLUTION.md    # dated protocol-amendment ledger (research data)
+├── personas/           # system prompts: meta, main, and each worker role
+├── templates/          # goal, briefing, stand-down, handover, briefs, reports
+├── briefs/             # per-issue design briefs (committed)
+├── kit/                # provenance of this tree: origin commit + extraction script
+└── bin/                # executables (the workflow engine)
+    ├── session/        # start, message, keep alive, watch keys, pause, stand down
+    └── service/        # merge daemon, lanes, gate, trains, records — model-free
+results/telemetry/      # sessions/stages/builds logs, GitHub snapshot (committed)
 ```
 
-Runtime state that must never be committed lives in `~/.cache/mipstarre-dev/`
-(hot cache, snapshots, locks, served site) and `.worktrees/` (gitignored). An
-absolute `MIPSTARRE_LAKE_ROOT` may instead hold branch-private `.lake` products.
+Runtime state that must never be committed lives under
+`$MIPSTARRE_CACHE_ROOT` (`paths.cache_root` in `project.json`: hot cache,
+snapshots, locks, served site, and the session state directory
+`$KIT_STATE_DIR`) and in `.worktrees/` (gitignored). An absolute
+`MIPSTARRE_LAKE_ROOT` may instead hold branch-private `.lake` products.
 
 ## GitHub → local mapping
 
 | GitHub mechanism | Local replacement |
 |---|---|
-| PR CI (`pr-ci.yml`) on push/PR events | `local/bin/ci.sh <pr-id>` run by the PR lifecycle scripts |
+| PR CI (`pr-ci.yml`) on push/PR events | `local/bin/ci.sh <pr-number>` run by the PR lifecycle scripts |
 | Main-build actions cache (main-only save, PR restore) | Hot main cache: single-writer warmer + read-only snapshots + APFS copy-on-write clones per worktree (`build-cache.md`) |
 | `lake exe cache get` (Mathlib cloud cache) | Unchanged — already local |
 | Model-backed PR review chained on CI success | `local/bin/review.sh <pr-number>`: codex CLI with the same `.github/prompts/` review personas, invoked only from green exact-head CI statuses; one COMMENT review plus `local-review/summary` |
@@ -54,7 +69,7 @@ absolute `MIPSTARRE_LAKE_ROOT` may instead hold branch-private `.lake` products.
 | GitHub PRs | GitHub PRs, branch-per-issue, merge gate in `pr_merge.py` (REST merge with the exact-SHA guard) |
 | Issue automation (classify/scout/track/followups) | `local/bin/` Python ports; LLM steps optional behind `MIPSTARRE_LLM_ENABLED` |
 | Housekeeping crons (standup, stale audit, linter sweep, README freshness) | `local/bin/housekeeping.sh <job>` on demand |
-| Badges + Pages site (blueprint/docs/badges components) | `local/bin/site.sh` → component store + assembled site in `~/.cache/mipstarre-dev/site/` |
+| Badges + Pages site (blueprint/docs/badges components) | `local/bin/site.sh` → component store + assembled site under `$MIPSTARRE_CACHE_ROOT/site/` |
 | Codex cloud env setup (`.codex/setup.sh`) | `local/bin/worktree-setup.sh` per worktree |
 | Reviewer/bot identity via tokens | codex CLI sessions; `results/telemetry/sessions.jsonl` registry |
 
@@ -94,8 +109,8 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
     freshness never mutate state; write-mode is a separate human-invoked
     command.
 11. **Faithfulness policy is unchanged.** AGENTS.md's faithful-formalization
-    rules, anti-pattern catalog, and statement-integrity audits apply to QPBT
-    exactly as to LDT.
+    rules, anti-pattern catalog and statement-integrity audits apply to every
+    track of every project built on this workflow.
 12. **Merge inputs do not disappear silently.** Before a merge commit, the
     merge-loss guard compares the staged result with the pre-merge branch,
     every best merge base, and `MERGE_HEAD`. An incoming path may be absent
@@ -104,20 +119,24 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
     only when Git recorded a conflict. The pending-index check and the
     pre-update reference transaction together cover manual and automatic
     merge commits.
-13. **The owner inbox is permissions-only.** Pinned issue #500 receives a
-    blocker only when owner permission is needed because the risk extends
-    beyond project development, such as owner files, the machine or its
-    accounts, spending money, or action outside this repository. Main decides
-    and records every question whose only risk is failure to finish the
-    project. Changing the stated project goal is outside main's authority and
-    requires an owner decision on #500. Each blocker is one comment with at
-    most ten visible plain-language lines: what is stuck, lettered options,
-    one recommendation, and the literal `DECISION B<n>: <letter>` reply. Ids
-    continue after B11;
-    details are folded. Its immutable `<!-- owner-inbox id=B<n> -->` identity
-    marker keys every `ensure-pr-comment` update; resolution changes the
-    separate status field to `<!-- owner-inbox-status=closed -->` and adds
-    `RESOLVED B<n>`. Issue #26 is archived and receives no new traffic.
+13. **The owner inbox is permissions-only.** The pinned issue named by
+    `issues.owner_inbox` receives a blocker only when owner permission is
+    needed because the risk extends beyond project development, such as owner
+    files, the machine or its accounts, spending money, or action outside this
+    repository. Main decides and records every question whose only risk is
+    failure to finish the project. Changing the stated project goal is outside
+    main's authority and needs an owner decision there. Each blocker is one
+    comment with at most ten visible plain-language lines: what is stuck,
+    lettered options, one recommendation, and the literal
+    `DECISION B<n>: <letter>` reply; details are folded. Its immutable
+    `<!-- owner-inbox id=B<n> -->` identity marker keys every
+    `ensure-pr-comment` update; resolution changes the separate status field to
+    `<!-- owner-inbox-status=closed -->` and adds `RESOLVED B<n>`. Once a
+    blocker is posted, the operator does not act on its own recommendation
+    while it is open.
+14. **The meta session supervises and does not prove.** It decides everything
+    inside project development, holds the keys and the pause machinery, and is
+    the only party that talks to the owner (`protocols/meta-session.md`).
 
 ## Naming and identity conventions
 
@@ -132,16 +151,16 @@ documented failure modes. Sources are cited in `local/protocols/*.md`.
 - **Fix commits**: `autofix.sh`'s subjects are prefixed `[codex-auto-fix]` /
   `[codex-review-fix]` exactly (the review-gate skip regex depends on them);
   operator and worker repairs use plain `fix(...)` subjects and are reviewed.
-- **Codex sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
-  `orc, prover, reviewer, simplifier, blueprint, splitter, scout`, plus
-  `mathfix` for Astra source-statement repair under `issues-prs.md` section 6.
+- **Worker sessions**: `<role>-<issue|scope>-<yyyymmdd>-<seq>` with roles
+  `orc, prover, reviewer, simplifier, blueprint, splitter, scout, inventory`,
+  plus `mathfix` for source-statement repair under `issues-prs.md` section 6.
   External sessions use `local/bin/dispatch.sh`, which records the codex `thread_id`,
   captures the `--json` event stream to
   `results/telemetry/sessions/<name>.jsonl`, and appends a summary line to
   `results/telemetry/sessions.jsonl`. Archiving a session = final status line
   in the registry + worktree removal; the JSONL capture is the archive.
   Historical native-descendant rows remain readable, but lease-backed native
-  dispatch is retired (`sessions.md`, issue #505).
+  dispatch is retired (`sessions.md`).
 
 ## Telemetry (research-paper data)
 
@@ -164,14 +183,19 @@ All appends are one-line JSON; schemas documented in `protocols/meta.md`.
 
 ## Model policy
 
-- Main remains `gpt-6-astra`/`ultra`. Published `local/model-policy.json`
-  selects exact `gpt-5.6-sol`/`ultra` for routine/bounded subagents, including
-  routine independent reviewers; genuinely hard/escalated work uses Astra with
-  an explicit reason. Unknown classes/models and other efforts fail closed.
-  External dispatch keeps fan-out off. Native lease admission and the useful queue
-  are retired (#505). Worker reservations use only the two configured account caps;
-  missing caps disable admission. They do not measure provider throughput or unmarked use.
-- See `protocols/sessions.md` for marker accounting, resume affinity and checkpoint
-  continuations. Historical Sol/Fable measurements are unchanged.
+- The main session's model and effort come from `session.main` in
+  `project.json`; workers' from `session.workers` and `local/model-policy.json`,
+  which routes routine, bounded jobs — including routine independent reviews —
+  to the cheaper model and reserves the stronger one for genuinely hard or
+  escalated work, with a recorded reason. An empty model string means "the
+  CLI's default". Unknown classes, models and efforts fail closed.
+- Worker admission uses only the configured account caps under
+  `$KIT_STATE_DIR`; missing caps disable admission. A cap is a ceiling, not a
+  measurement of provider throughput.
+- Verify a new model's effort before trusting it: a configured effort level the
+  provider silently downgrades has cost this workflow a week of sessions
+  running below the level their logs claimed.
+- External dispatch keeps agent fan-out off; see `protocols/sessions.md` for
+  marker accounting, resume affinity and checkpoint continuations.
 - Reviewer and prover roles must be **different sessions** — a session never
   reviews its own diff.

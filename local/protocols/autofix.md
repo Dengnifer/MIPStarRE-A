@@ -4,6 +4,12 @@ Normative for `local/bin/autofix.sh`.  Read `local/protocols/meta.md` first,
 and `local/protocols/review.md` alongside this: the two documents describe one
 loop seen from its two ends.
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 Replaces `.github/workflows/auto-fix.yml` — the `setup`, `auto-fix-ci`,
 `auto-fix-blueprint` and `auto-fix-review` jobs, together with the reusable
 `_ci-auto-fix-shared.yml` they delegated to and the `bot-fix-guard`,
@@ -83,13 +89,15 @@ job and the audit guards are deliberately excluded.*  Those audits
 (`scripts/audit_*.py`, `check_statement_paper_origin.py`,
 `blueprint_lean_sync.py`, …) exist to catch statement drift, proof-evasion
 patterns and blueprint desynchronisation — exactly the failures whose "fix" is
-a mathematical judgement about faithfulness to `references/ldt-paper/`.  An
+a mathematical judgement about faithfulness to the paper mirrors under
+`references/`.  An
 agent told to make such a guard pass will make it pass, and the cheapest way to
 do that is to weaken the statement.  Excluding them is not a limitation of the
 tooling; it is the tooling refusing to auto-fix a mathematical decision. Main
-owns that decision under `issues-prs.md` §6 (2026-09-06T05:05Z), with the
-faithfulness requirements unchanged. Only actual access/permission blockers
-requiring human action go to #26; sync and audit failures remain excluded.
+owns that decision under `issues-prs.md` §6, with the faithfulness
+requirements unchanged. Only an actual access or permission blocker that needs
+a human goes to the owner inbox issue (`issues.owner_inbox` in
+`local/project.json`); sync and audit failures remain excluded.
 
 One local refinement: `ci.sh` distinguishes `failure` (the step ran and the
 code is wrong) from `error` (the step could not run — a missing tool, or a
@@ -119,7 +127,7 @@ same requirement trivially.  A phase that fails stops the ones after it; the
 branch is not handed to a second fixer in an unknown state.
 
 **Lock.**  A per-branch lock directory under
-`~/.cache/mipstarre-dev/locks/fix-<branch>.lock` holds the running fix.  A
+`$MIPSTARRE_CACHE_ROOT/locks/fix-<branch>.lock` holds the running fix.  A
 second invocation for the same branch writes a `cancel` sentinel into that
 directory and waits: the holder checks the sentinel at every phase boundary and
 exits cleanly if it is there.  That is `cancel-in-progress: true`
@@ -299,8 +307,8 @@ Artefacts:
 |---|---|---|
 | the fix commits on the branch | yes | the fix itself |
 | the PR on GitHub | on GitHub | auto-fix label state and the cap-reached comment |
-| `~/.cache/mipstarre-dev/autofix/<pr>/<sha>/` | no | prompts, sanitized logs, raw agent output, commit messages |
-| `~/.cache/mipstarre-dev/locks/fix-<branch>.lock` | no | the fix lock and its `cancel` sentinel |
+| `$MIPSTARRE_CACHE_ROOT/autofix/<pr>/<sha>/` | no | prompts, sanitized logs, raw agent output, commit messages |
+| `$MIPSTARRE_CACHE_ROOT/locks/fix-<branch>.lock` | no | the fix lock and its `cancel` sentinel |
 
 Sessions go through `local/bin/dispatch.sh` when present, so each fix appears in
 `results/telemetry/sessions.jsonl` with its thread id, wall time and token usage

@@ -1,5 +1,5 @@
 You are an AI coding assistant running in a GitHub Actions CI context. Work only on
-the MIPStarRE repository and make changes that are mathematically correct, minimal, and
+the PaperLib repository and make changes that are mathematically correct, minimal, and
 compatible with the existing Lean style.
 
 Core operating rules:
@@ -10,7 +10,7 @@ Core operating rules:
   lean-conventions `PROOF_INTEGRITY` reference), and
   `docs/paper-gaps/proof-gap-protocol.tex` before changing a paper-facing
   theorem, a blueprint `\leanok` link, or a proof-debt record.
-- Read the corresponding statement in `references/ldt-paper/` before changing a
+- Read the corresponding statement in `references/<key>-paper/` before changing a
   theorem cited as a paper theorem.
 - Do not add bridge, residual, repair, package, producer, witness, wrapper, proof-obligation input,
   hypotheses bundle, assumptions bundle, or arbitrary implication hypotheses to

@@ -16,8 +16,8 @@ from audit_unfaithful_markers import run_audit  # noqa: E402
 
 
 def write_lean(root: Path, text: str) -> None:
-    """Create a minimal LDT Lean file for an audit fixture."""
-    path = root / "MIPStarRE" / "LDT" / "Fixture.lean"
+    """Create a minimal Lean file for an audit fixture."""
+    path = root / "PaperLib" / "Core" / "Fixture.lean"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
 
@@ -121,14 +121,14 @@ class UnfaithfulMarkerAuditTests(unittest.TestCase):
             root = Path(tmp)
             write_lean(
                 root,
-                "namespace MIPStarRE.LDT\n"
+                "namespace PaperLib.Core\n"
                 f"{COMPLETE_UNFAITHFUL_DOCSTRING}"
                 "theorem bad : True := by trivial\n"
-                "end MIPStarRE.LDT\n",
+                "end PaperLib.Core\n",
             )
             write_blueprint(
                 root,
-                r"""\begin{theorem}\label{thm:bad}\lean{MIPStarRE.LDT.bad}
+                r"""\begin{theorem}\label{thm:bad}\lean{PaperLib.Core.bad}
 This is a fixture theorem.
 \end{theorem}
 \begin{proof}
@@ -143,7 +143,7 @@ This proof is asserted complete.
         self.assertEqual(result.findings, ())
         self.assertEqual(len(result.proof_link_findings), 1)
         finding = result.proof_link_findings[0]
-        self.assertEqual(finding.lean_decl, "MIPStarRE.LDT.bad")
+        self.assertEqual(finding.lean_decl, "PaperLib.Core.bad")
         self.assertEqual(finding.label, "thm:bad")
 
     def test_allows_statement_level_leanok_to_unfaithful_declaration(self) -> None:
@@ -151,14 +151,14 @@ This proof is asserted complete.
             root = Path(tmp)
             write_lean(
                 root,
-                "namespace MIPStarRE.LDT\n"
+                "namespace PaperLib.Core\n"
                 f"{COMPLETE_UNFAITHFUL_DOCSTRING}"
                 "theorem frontier : True := by trivial\n"
-                "end MIPStarRE.LDT\n",
+                "end PaperLib.Core\n",
             )
             write_blueprint(
                 root,
-                r"""\begin{theorem}\label{thm:frontier}\lean{MIPStarRE.LDT.frontier}\leanok
+                r"""\begin{theorem}\label{thm:frontier}\lean{PaperLib.Core.frontier}\leanok
 This is a statement-level frontier.
 \end{theorem}
 """,
@@ -174,14 +174,14 @@ This is a statement-level frontier.
             root = Path(tmp)
             write_lean(
                 root,
-                "namespace MIPStarRE.LDT\n"
+                "namespace PaperLib.Core\n"
                 "/-- A clean fixture theorem. -/\n"
                 "theorem clean : True := by trivial\n"
-                "end MIPStarRE.LDT\n",
+                "end PaperLib.Core\n",
             )
             write_blueprint(
                 root,
-                r"""\begin{theorem}\label{thm:clean}\lean{MIPStarRE.LDT.clean}
+                r"""\begin{theorem}\label{thm:clean}\lean{PaperLib.Core.clean}
 This is a fixture theorem.
 \end{theorem}
 \begin{proof}
@@ -205,15 +205,15 @@ This proof is asserted complete.
 **Unfaithful:** this module discusses `hbridge`, which is not derived
 from `thm:main-formal`.  This proof debt is tracked by #1458.
 Elimination: prove `bridgeProducer` from the paper hypotheses. -/
-namespace MIPStarRE.LDT
+namespace PaperLib.Core
 /-- A clean fixture theorem. -/
 theorem firstDecl : True := by trivial
-end MIPStarRE.LDT
+end PaperLib.Core
 """,
             )
             write_blueprint(
                 root,
-                r"""\begin{theorem}\label{thm:first}\lean{MIPStarRE.LDT.firstDecl}
+                r"""\begin{theorem}\label{thm:first}\lean{PaperLib.Core.firstDecl}
 This is a fixture theorem.
 \end{theorem}
 \begin{proof}

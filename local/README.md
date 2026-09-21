@@ -1,9 +1,40 @@
 # Local operations — operator guide
 
 This directory is the operative workflow of the repository: the local
-replacement for the parent project's GitHub Actions layer. Architecture and
-invariants: [`DESIGN.md`](DESIGN.md). Protocol changes: follow
+replacement for a hosted CI/review/merge layer, plus the session layer that
+runs the project unattended. Architecture and invariants:
+[`DESIGN.md`](DESIGN.md). Protocol changes: follow
 [`protocols/meta.md`](protocols/meta.md).
+
+**Start here, depending on who you are.**
+
+| You are | Read |
+|---|---|
+| the supervising session a human is talking to | [`personas/meta.md`](personas/meta.md) → [`protocols/meta-session.md`](protocols/meta-session.md) |
+| bootstrapping a new paper | [`protocols/bootstrap.md`](protocols/bootstrap.md) |
+| the main session | [`personas/main.md`](personas/main.md) → [`protocols/main-cycle.md`](protocols/main-cycle.md) |
+| a dispatched worker | `AGENTS.md`, then your role's page under [`personas/`](personas) |
+
+**Everything project-specific is in [`project.json`](project.json)** — the
+library name, the Lean root, the track, the repository slugs, the cache root,
+the tmux session, the issue numbers, the session layout and the key names. Read
+it with `python3 scripts/project_config.py get <dotted.key>`, or source
+`bin/session/config.sh` and use the `KIT_*` variables. Never hard-code a value
+this file already holds.
+
+## The directories
+
+| Path | What is in it |
+|---|---|
+| `bin/` | the workflow engine: issues, pull requests, CI, review, auto-fix, merge, cache, site |
+| `bin/session/` | starting and supervising the main session: launch, message, goal keeper, key watch, pause, resume, stand-down, status |
+| `bin/service/` | the model-free services: merge daemon, lanes, review gate, trains, records |
+| `protocols/` | the normative documents; `meta.md` governs how they change |
+| `personas/` | one page per role, including the supervising session and the main session |
+| `templates/` | goal, briefing, stand-down, handover section, skeleton brief, chapter plan, owner report |
+| `briefs/` | one design brief per issue, committed |
+| `registry/` | the declaration-claim registry that guards against duplicate work |
+| `kit/` | provenance: the origin commit this tree was extracted from, and the extraction script |
 
 ## The lifecycle at a glance
 
@@ -25,21 +56,26 @@ issue  →  branch + worktree  →  agent session(s)  →  local CI  →  review
    --issue NNNN --worktree .worktrees/<name> -- "task"`. Session telemetry
    lands in `results/telemetry/`. Lease-backed native descendants are retired;
    `protocols/sessions.md` retains their history separately.
-4. **CI**: `local/bin/ci.sh PPPP` (build via hot cache + audits + blueprint
-   checks) → per-step `local-ci/*` statuses and the manifest PR comment.
-5. **Review**: `local/bin/review.sh PPPP` — runs only after green CI; publishes
-   one exact-head COMMENT review plus the `local-review/summary` status.
+4. **CI**: `local/bin/ci.sh <pr-number>` (build via hot cache + audits +
+   blueprint checks) → per-step `local-ci/*` statuses and the manifest PR
+   comment.
+5. **Review**: `local/bin/review.sh <pr-number>` — runs only after green CI;
+   publishes one exact-head COMMENT review plus the `local-review/summary`
+   status.
 6. **Auto-fix** (optional, the repository's auto-fix label on the PR):
-   `local/bin/autofix.sh PPPP --mode auto`, capped, serialized.
-7. **Merge**: `local/bin/pr_merge.py PPPP` — the gate; refuses on red CI,
+   `local/bin/autofix.sh <pr-number> --mode {ci|blueprint|review|auto}`, capped,
+   serialized.
+7. **Merge**: `local/bin/pr_merge.py <pr-number>` — the gate; refuses on red CI,
    missing review, or unresolved findings, and merges via GitHub with the
    exact-SHA guard. Then pokes the cache warmer.
-8. **Housekeeping / site**: `local/bin/housekeeping.sh all`,
-   `local/bin/site.sh all`.
+8. **Housekeeping / site**:
+   `local/bin/housekeeping.sh {standup|stale-audit|linter-sweep|readme-freshness|all}`
+   and `local/bin/site.sh {blueprint|badges|docs|assemble|all}` (each script's
+   `--help` is the authority on its subcommands).
 
 **Choosing the next packet.** `local/bin/ready_packets.py` walks the packet tree
-under the Stage 4.3 tracker #47 — chapter trackers, their packets, and nested
-chains such as Magic Square rigidity — and prints the open leaf packets whose
+under the tracker named by `issues.tracker_root` — chapter trackers, their
+packets and nested chains — and prints the open leaf packets whose
 GitHub issue dependencies (`blocked_by`) are all closed. `--all` adds the
 blocked packets with their open blockers, `--json` feeds the lane launcher, and
 `--root N` restricts the walk to one tracker. Prerequisites live in those edges
@@ -48,8 +84,6 @@ only: the "Dependencies" bullets in a packet body are commentary
 unblocks its dependents with no edit anywhere.
 
 ## Telemetry
-
-Retired useful-work queue: [historical protocol](protocols/useful-queue.md).
 
 Session, stage, build, and incident records live under `results/telemetry/` as
 described in [`protocols/meta.md`](protocols/meta.md). The
@@ -60,8 +94,8 @@ pointed event or owner log rather than expanding the index into a second log.
 
 ## Ground rules for agents
 
-- Read `AGENTS.md` first; the faithfulness policy and proof-integrity
-  blockers are unchanged from the parent project.
+- Read `AGENTS.md` first: the faithfulness policy and the proof-integrity
+  blockers are normative for every agent in this repository.
 - Never run `lake update`. Never write to the hot cache. Full `lake build`
   goes through the machine-wide lock (`warm-worktree.sh`/`ci.sh` handle it).
 - Publish branches through `checked-push.sh` (used internally by `pr_open.py`,
@@ -70,9 +104,9 @@ pointed event or owner log rather than expanding the index into a second log.
 - One session never reviews its own diff.
 - Worker sessions use `dispatch.sh`; the native lease and review transport in
   `sessions.md` are historical and must not be used for new work.
-- Invoke workflow tools through the primary checkout's path
-  (`/…/MIPStarRE-dev/local/bin/…`), never through a worktree's copy — a
-  branch's copy can predate protocol fixes (EVOLUTION.md, 2026-08-30).
+- Invoke workflow tools through the **primary checkout's** path
+  (`$KIT_REPO_ROOT/local/bin/…`), never through a worktree's copy — a branch's
+  copy can predate a protocol fix.
 - After merging `main` or a stack parent, preserve every incoming-only path.
   The reference-transaction hook checks the exact merge object before the
   branch ref moves, while the pre-commit hook checks the pending index when a

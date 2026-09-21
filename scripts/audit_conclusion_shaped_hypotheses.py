@@ -916,8 +916,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "paths",
         nargs="*",
-        default=["MIPStarRE"],
-        help="Lean files or directories to scan (default: MIPStarRE)",
+        default=["PaperLib"],
+        help="Lean files or directories to scan (default: PaperLib)",
     )
     parser.add_argument(
         "--root",

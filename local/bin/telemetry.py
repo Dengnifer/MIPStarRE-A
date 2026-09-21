@@ -11,7 +11,7 @@ Subcommands::
 
     telemetry.py session-summarize CAPTURE.jsonl [--name N] [--role R] ...
     telemetry.py session-status --name N --status archived [--note TEXT]
-    telemetry.py stage --stage 4.3-proofs --event start [--note TEXT]
+    telemetry.py stage --stage 3-blueprint --event start [--note TEXT]
     telemetry.py build --kind warm --outcome success --seconds 812
     telemetry.py event --text "symptom -> diagnosis -> fix -> lesson"
 
@@ -71,13 +71,19 @@ USAGE_KEYS = list(USAGE_MAP.values())
 # Documented vocabularies (meta.md).  Unknown values are written anyway but
 # warned about: refusing them would let a peer script lose telemetry entirely,
 # which is the worse failure.
+#: The stages `local/protocols/bootstrap.md` documents, plus the one
+#: `scripts/bootstrap_project.py` opens the project with.  meta.md allows
+#: extending the list; an unlisted stage is recorded with a warning, not refused.
 KNOWN_STAGES = (
-    "1-skeleton",
-    "2-references",
+    "0-bootstrap",
+    "0-preflight",
+    "1-references",
+    "2-inventory",
     "3-blueprint",
-    "4.1-minimal",
+    "4.1-minimal-skeleton",
     "4.2-full-skeleton",
     "4.3-proofs",
+    "4.4-completion",
 )
 KNOWN_BUILD_KINDS = ("warm", "rebuild", "cache-get", "ci-build")
 KNOWN_OUTCOMES = ("success", "failed", "partial", "skipped")
@@ -898,7 +904,10 @@ def _build_parser() -> argparse.ArgumentParser:
     summarize.add_argument('--dispatch-kind', choices=('new', 'resume', 'grandfathered'))
     summarize.add_argument('--activation-at')
     summarize.add_argument("--account", choices=("primary", "second"))
-    summarize.add_argument('--key-label', choices=('relay-1', 'space', 'unknown'))
+    # A key label is a KEY NAME from local/project.json (or 'unknown'); the kit
+    # knows no fixed set of keys, so the value is recorded as given.
+    summarize.add_argument('--key-label', default='unknown',
+                           help="name of the key this session ran on, or 'unknown'")
     summarize.add_argument("--continuation-json", help="validated checkpoint and shared budget link")
     summarize.add_argument(
         "--requested-effort",
@@ -949,7 +958,8 @@ def _build_parser() -> argparse.ArgumentParser:
     for option in ('name', 'thread-id', 'root-thread-id', 'issue'):
         native.add_argument('--' + option, required=True)
     native.add_argument('--role', choices=ROLES, required=True)
-    native.add_argument('--key-label', choices=('relay-1', 'space'), required=True)
+    native.add_argument('--key-label', required=True,
+                        help='name of the key this thread ran on (local/project.json)')
     native.add_argument('--worktree', type=Path, required=True)
     native.add_argument('--pr')
     native.add_argument('--job-class', default='general')
@@ -957,7 +967,8 @@ def _build_parser() -> argparse.ArgumentParser:
     native.add_argument('--dispatch-kind', choices=('new', 'resume', 'grandfathered'),
                         default='grandfathered')
     native.add_argument('--activation-at')
-    native.add_argument('--requested-model', choices=('gpt-6-astra', 'gpt-5.6-sol', 'auto'))
+    native.add_argument('--requested-model',
+                        help="the model the dispatch asked for, or 'auto'")
     native.add_argument('--status', choices=('active', 'done', 'failed'), required=True)
     native.set_defaults(func=record_native)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Audit ``**Unfaithful:**`` proof-debt markers in LDT Lean docstrings.
+r"""Audit ``**Unfaithful:**`` proof-debt markers in the project's Lean docstrings.
 
 An unfaithful dependency marker is meaningful only if it tells a later reader
 what has been assumed, where the source statement lives, where the gap is
@@ -32,11 +32,11 @@ from pathlib import Path
 from typing import Sequence
 
 from blueprint_lean_sync import collect_blueprint_entries, collect_lean_decls
-from lean_header_utils import ldt_lean_files, line_number
+from lean_header_utils import line_number, project_lean_files
 
 
 PAPER_CITATION_RE = re.compile(
-    r"(?:\b(?:thm|lem|prop|cor|def|rem):[A-Za-z0-9_.:-]+|references/(?:ldt|qpbt|neexp)-paper/)"
+    r"(?:\b(?:thm|lem|prop|cor|def|rem):[A-Za-z0-9_.:-]+|references/[A-Za-z0-9._-]+-paper/)"
 )
 TRACKER_RE = re.compile(r"(?:#\d+|docs/paper-gaps/[A-Za-z0-9_.:/-]+\.tex)")
 
@@ -171,7 +171,7 @@ def direct_doc_comment_before_decl(text: str, decl_line: int) -> tuple[int, str]
 def proof_leanok_unfaithful_findings(root: Path) -> tuple[ProofLeanokUnfaithfulFinding, ...]:
     r"""Find proof-level ``\leanok`` links to directly unfaithful declarations."""
     blueprint_src = root / "blueprint" / "src"
-    lean_root = root / "MIPStarRE"
+    lean_root = root / "PaperLib"
     if not blueprint_src.exists() or not lean_root.exists():
         return ()
 
@@ -219,7 +219,7 @@ def run_audit(root: Path) -> MarkerAuditResult:
     """Run the marker audit under ``root``."""
     findings: list[MarkerFinding] = []
     scanned = 0
-    for path in ldt_lean_files(root):
+    for path in project_lean_files(root):
         text = path.read_text(encoding="utf-8", errors="replace")
         for offset, block in marker_blocks(text):
             scanned += 1

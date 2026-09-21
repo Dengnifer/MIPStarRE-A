@@ -1,1 +1,0 @@
-Unable to retrieve the SHA: `git rev-parse --short HEAD` was blocked by a read-only sandbox mount-lock error. No edits were made and no other agent was invoked.

@@ -316,7 +316,7 @@ class CollectLeanDeclsTests(unittest.TestCase):
     def test_collect_file_lean_decls_ignores_comments_and_marks_private(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            lean_root = root / "MIPStarRE"
+            lean_root = root / "PaperLib"
             lean_root.mkdir()
             lean_file = lean_root / "Fake.lean"
             lean_file.write_text(
@@ -410,7 +410,7 @@ class CollectLeanDeclsTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            lean_root = root / "MIPStarRE"
+            lean_root = root / "PaperLib"
             lean_root.mkdir()
             blueprint_chapter = root / "blueprint" / "src" / "chapter"
             blueprint_chapter.mkdir(parents=True)
@@ -451,7 +451,7 @@ class CollectLeanDeclsTests(unittest.TestCase):
 
             missing = find_changed_decls_missing_from_blueprint(
                 root,
-                changed_files=["MIPStarRE/Fake.lean"],
+                changed_files=["PaperLib/Fake.lean"],
                 diff_base=base,
                 diff_head="HEAD",
             )
@@ -466,7 +466,7 @@ class CollectLeanDeclsTests(unittest.TestCase):
 class MissingBlueprintStepSummaryTests(unittest.TestCase):
     def _decl(self, name: str) -> LeanDecl:
         return LeanDecl(
-            file="MIPStarRE/Fake.lean",
+            file="PaperLib/Fake.lean",
             line=17,
             fqn=name,
             kind="theorem",
@@ -485,7 +485,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
                     command=(
                         "python3 scripts/blueprint_lean_sync.py --root . "
                         "--warn-missing-blueprint --diff-base origin/main "
-                        "--changed-files MIPStarRE/Fake.lean"
+                        "--changed-files PaperLib/Fake.lean"
                     ),
                 )
             finally:
@@ -497,7 +497,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
             summary = summary_path.read_text()
             self.assertIn("## Blueprint reverse-coverage warnings", summary)
             self.assertIn("`Foo.paperFacing`", summary)
-            self.assertIn("`MIPStarRE/Fake.lean:17`", summary)
+            self.assertIn("`PaperLib/Fake.lean:17`", summary)
             self.assertIn(r"`\lean{Foo.paperFacing}`", summary)
             self.assertIn("--warn-missing-blueprint", summary)
 
@@ -520,7 +520,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
         command = _missing_blueprint_summary_command(
             diff_base="origin/main",
             diff_head="feature/head",
-            changed_files=["MIPStarRE/Fake.lean"],
+            changed_files=["PaperLib/Fake.lean"],
         )
 
         self.assertIn("--diff-head feature/head", command)
@@ -529,7 +529,7 @@ class MissingBlueprintStepSummaryTests(unittest.TestCase):
         command = _missing_blueprint_summary_command(
             diff_base="origin/main",
             diff_head="HEAD",
-            changed_files=["MIPStarRE/Fake.lean"],
+            changed_files=["PaperLib/Fake.lean"],
         )
 
         self.assertNotIn("--diff-head", command)
@@ -574,7 +574,7 @@ class LeanokPlacementReportingTests(unittest.TestCase):
 
     def _fake_decl(self, name: str) -> LeanDecl:
         return LeanDecl(
-            file="MIPStarRE/Fake.lean",
+            file="PaperLib/Fake.lean",
             line=1,
             fqn=name,
             kind="theorem",
@@ -830,7 +830,7 @@ class PRCommentTests(unittest.TestCase):
 
     def _decl(self, name: str) -> LeanDecl:
         return LeanDecl(
-            file="MIPStarRE/Fake.lean",
+            file="PaperLib/Fake.lean",
             line=17,
             fqn=name,
             kind="theorem",
@@ -847,7 +847,7 @@ class PRCommentTests(unittest.TestCase):
     def test_comment_body_with_warnings_contains_decl_and_location(self) -> None:
         body = _pr_comment_body([self._decl("Foo.bar")])
         self.assertIn("`Foo.bar`", body)
-        self.assertIn("`MIPStarRE/Fake.lean:17`", body)
+        self.assertIn("`PaperLib/Fake.lean:17`", body)
         self.assertIn(r"`\lean{Foo.bar}`", body)
         self.assertIn("## Blueprint reverse-coverage warnings", body)
 

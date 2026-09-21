@@ -12,8 +12,9 @@ blueprint labels updated, and any deliberate difference from the paper statement
 
 ### Testing
 <!-- What was verified and how. -->
-<!-- Examples: `lake env lean MIPStarRE/LDT/Basic.lean`, `lake build MIPStarRE`,
-     `rg -n "sorry|axiom" MIPStarRE/LDT/Basic.lean || true`. -->
+<!-- Examples: `lake env lean <LeanRoot>/<Chapter>/Basic.lean`,
+     `lake build <LeanRoot>`,
+     `rg -n "sorry|axiom" <LeanRoot>/<Chapter>/Basic.lean || true`. -->
 <!-- If this PR adds or changes a proof-integrity, statement-integrity, or
      blueprint-sync guard, state its local-hook tier decision here:
      pre-commit, pre-push, full pre-push, or CI-only.  Mention whether

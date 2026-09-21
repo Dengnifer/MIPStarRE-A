@@ -710,11 +710,18 @@ if [ "$DRY_RUN" -eq 1 ]; then ROUTER_ARGS+=(--dry-run); fi
 ACCOUNT_ROUTING=1
 ROUTING="$(python3 "$SCRIPT_DIR/account_router.py" "${ROUTER_ARGS[@]}")"
 ACCOUNT="${ROUTING%%$'\n'*}"
-MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
+# The router prints the account and then the model.  With no model configured the
+# second line is empty and command substitution drops it, so the one-line case
+# means "no model": without this the account name would be used as a model name.
+if [ "$ROUTING" = "$ACCOUNT" ]; then
+  MIPSTARRE_CODEX_MODEL=""
+else
+  MIPSTARRE_CODEX_MODEL="${ROUTING#*$'\n'}"
+fi
 export MIPSTARRE_DISPATCH_PID="$$" MIPSTARRE_DISPATCH_ACCOUNT="$ACCOUNT"
 ACCOUNT_ENV=(env -u CODEX_HOME -u MIPSTARRE_QUEUE_TICKET -u MIPSTARRE_QUEUE_EXPECTED_HEAD)
 if [ "$ACCOUNT" = second ]; then
-  ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-yxy}")
+  ACCOUNT_ENV+=("CODEX_HOME=${MIPSTARRE_CODEX_HOME_SECOND:-$HOME/.cache/mipstarre-dev/codex-home-second}")
 fi
 
 CODEX_ARGS=(exec)
@@ -818,10 +825,11 @@ DISPATCH_KIND=new
 TELEM_ARGS+=(--dispatch-kind "$DISPATCH_KIND")
 [ -z "${MIPSTARRE_MODEL_POLICY_ACTIVATION_AT:-}" ] ||
   TELEM_ARGS+=(--activation-at "$MIPSTARRE_MODEL_POLICY_ACTIVATION_AT")
+# A key label is a key NAME from local/project.json; the kit fixes no list of
+# keys, so only the shape is checked and anything else is recorded as unknown.
 TELEM_KEY_LABEL="${MIPSTARRE_KEY_LABEL:-${MIPSTARRE_NATIVE_KEY_LABEL:-unknown}}"
 case "$TELEM_KEY_LABEL" in
-  relay-1|space|unknown) ;;
-  *) TELEM_KEY_LABEL=unknown ;;
+  *[!A-Za-z0-9._-]*|"") TELEM_KEY_LABEL=unknown ;;
 esac
 TELEM_ARGS+=(--key-label "$([ "$ACCOUNT" = primary ] && printf '%s' "$TELEM_KEY_LABEL" || printf unknown)")
 

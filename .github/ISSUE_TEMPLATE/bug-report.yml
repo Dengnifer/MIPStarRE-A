@@ -7,7 +7,7 @@ body:
     attributes:
       label: File(s) affected
       description: Path to the Lean file(s) with the issue
-      placeholder: "e.g., MIPStarRE/LDT/Preliminaries.lean"
+      placeholder: "e.g., PaperLib/Core/Preliminaries.lean"
     validations:
       required: true
 

@@ -9,5 +9,5 @@ name = "doc-gen4"
 rev = "v4.32.0"
 
 [[require]]
-name = "MIPStarRE"
+name = "PaperLib"
 path = "../"

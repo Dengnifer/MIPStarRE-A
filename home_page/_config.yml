@@ -1,9 +1,12 @@
-title: "MIP* = RE"
+# Placeholders until the project is instantiated: scripts/bootstrap_project.py
+# rewrites title, baseurl, url, github_username and repository from
+# local/project.json, and local/bin/site.sh passes the same baseurl to jekyll.
+title: "PaperLib"
 description: A formal verification in Lean 4 using Mathlib
-baseurl: "/MIPStarRE"
-url: "https://lionsr.github.io"
-github_username: LionSR
-repository: LionSR/MIPStarRE
+baseurl: "/REPO"
+url: "https://OWNER.github.io"
+github_username: OWNER
+repository: OWNER/REPO
 
 # Build settings
 remote_theme: pages-themes/cayman@v0.2.0

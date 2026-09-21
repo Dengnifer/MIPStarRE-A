@@ -15,7 +15,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from audit_readme_freshness import (  # noqa: E402
     PathReference,
-    audit_ldt_submodule_count,
+    audit_submodule_counts,
     audit_readme,
     audit_toolchain_versions,
     extract_path_references,
@@ -29,8 +29,8 @@ from audit_readme_freshness import (  # noqa: E402
 
 def _make_repo(root: Path, readme_text: str) -> Path:
     """Create a minimal repository fixture for README audits."""
-    (root / "MIPStarRE" / "LDT" / "Basic").mkdir(parents=True)
-    (root / "MIPStarRE" / "LDT" / "Pasting").mkdir(parents=True)
+    (root / "PaperLib" / "Core" / "Basic").mkdir(parents=True)
+    (root / "PaperLib" / "Core" / "Pasting").mkdir(parents=True)
     (root / "docs").mkdir()
     (root / "docs" / "CONTRIBUTING.md").write_text("docs\n")
     (root / "lean-toolchain").write_text("leanprover/lean4:v4.28.0\n")
@@ -56,12 +56,12 @@ class ExtractPathReferencesTests(unittest.TestCase):
         text = textwrap.dedent(
             """\
             See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md).
-            The active source is `MIPStarRE/LDT/` and `lean-toolchain`.
-            Ignore Lean names like `MIPStarRE.LDT.Basic` and `lake build`.
+            The active source is `PaperLib/Core/` and `lean-toolchain`.
+            Ignore Lean names like `PaperLib.Core.Basic` and `lake build`.
             ```bash
-            lake env lean MIPStarRE/Missing.lean
+            lake env lean PaperLib/Missing.lean
             python3 ./scripts/audit_readme_freshness.py --readme ./README.md
-            cat MIPStarRE.lean
+            cat PaperLib.lean
             ```
             """
         )
@@ -70,12 +70,12 @@ class ExtractPathReferencesTests(unittest.TestCase):
             [
                 PathReference("docs/CONTRIBUTING.md", 1, "markdown-link"),
                 PathReference("docs/CONTRIBUTING.md", 1, "inline-code"),
-                PathReference("MIPStarRE/LDT/", 2, "inline-code"),
+                PathReference("PaperLib/Core/", 2, "inline-code"),
                 PathReference("lean-toolchain", 2, "inline-code"),
-                PathReference("MIPStarRE/Missing.lean", 5, "fenced-code"),
+                PathReference("PaperLib/Missing.lean", 5, "fenced-code"),
                 PathReference("scripts/audit_readme_freshness.py", 6, "fenced-code"),
                 PathReference("README.md", 6, "fenced-code"),
-                PathReference("MIPStarRE.lean", 7, "fenced-code"),
+                PathReference("PaperLib.lean", 7, "fenced-code"),
             ],
         )
 
@@ -84,10 +84,10 @@ class ExtractPathReferencesTests(unittest.TestCase):
         text = textwrap.dedent(
             """\
             ```text
-            MIPStarRE/
+            PaperLib/
             ├── Quantum/
             │   └── Measurement.lean
-            └── LDT/
+            └── Core/
                 └── Basic/
             ```
             """
@@ -95,11 +95,11 @@ class ExtractPathReferencesTests(unittest.TestCase):
         self.assertEqual(
             extract_path_references(text),
             [
-                PathReference("MIPStarRE/", 2, "fenced-code"),
-                PathReference("MIPStarRE/Quantum/", 3, "fenced-tree"),
-                PathReference("MIPStarRE/Quantum/Measurement.lean", 4, "fenced-tree"),
-                PathReference("MIPStarRE/LDT/", 5, "fenced-tree"),
-                PathReference("MIPStarRE/LDT/Basic/", 6, "fenced-tree"),
+                PathReference("PaperLib/", 2, "fenced-code"),
+                PathReference("PaperLib/Quantum/", 3, "fenced-tree"),
+                PathReference("PaperLib/Quantum/Measurement.lean", 4, "fenced-tree"),
+                PathReference("PaperLib/Core/", 5, "fenced-tree"),
+                PathReference("PaperLib/Core/Basic/", 6, "fenced-tree"),
             ],
         )
 
@@ -125,26 +125,28 @@ class ExtractPathReferencesTests(unittest.TestCase):
 
 
 class LayoutAuditTests(unittest.TestCase):
-    def test_ldt_submodule_count_flags_mismatch(self) -> None:
+    def test_submodule_count_flags_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            (root / "MIPStarRE" / "LDT" / "Basic").mkdir(parents=True)
-            (root / "MIPStarRE" / "LDT" / "Pasting").mkdir(parents=True)
-            report = audit_ldt_submodule_count(
+            (root / "PaperLib" / "Core" / "Basic").mkdir(parents=True)
+            (root / "PaperLib" / "Core" / "Pasting").mkdir(parents=True)
+            report = audit_submodule_counts(
                 root,
-                "└── LDT/                   # Low individual degree test (13 submodules)\n",
+                "└── Core/                   # the core development (13 submodules)\n",
             )
-            self.assertEqual(report["actual"], 2)
-            self.assertEqual(report["mismatches"], [{"line": 1, "count": 13}])
+            self.assertEqual(
+                report["mismatches"],
+                [{"line": 1, "directory": "PaperLib/Core", "count": 13, "actual": 2}],
+            )
 
-    def test_ldt_submodule_count_accepts_current_count(self) -> None:
+    def test_submodule_count_accepts_current_count(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            (root / "MIPStarRE" / "LDT" / "Basic").mkdir(parents=True)
-            (root / "MIPStarRE" / "LDT" / "Pasting").mkdir(parents=True)
-            report = audit_ldt_submodule_count(
+            (root / "PaperLib" / "Core" / "Basic").mkdir(parents=True)
+            (root / "PaperLib" / "Core" / "Pasting").mkdir(parents=True)
+            report = audit_submodule_counts(
                 root,
-                "└── LDT/                   # Low individual degree test (2 submodules)\n",
+                "└── Core/                   # the core development (2 submodules)\n",
             )
             self.assertEqual(report["mismatches"], [])
 
@@ -223,7 +225,7 @@ class EndToEndAuditTests(unittest.TestCase):
                     """\
                     # Fake
                     See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md).
-                    └── LDT/ # Low individual degree test (2 submodules)
+                    └── Core/ # the core development (2 submodules)
                     Toolchain: See `lean-toolchain` and `lakefile.toml`.
                     """
                 ),
@@ -243,7 +245,7 @@ class EndToEndAuditTests(unittest.TestCase):
             root = Path(td)
             _make_repo(
                 root,
-                "└── LDT/ # Low individual degree test (13 submodules)\n",
+                "└── Core/ # the core development (13 submodules)\n",
             )
             self.assertEqual(main(["--root", str(root), "--fail-on-stale"]), 1)
 

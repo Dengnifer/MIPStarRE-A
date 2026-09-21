@@ -163,6 +163,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     names = sorted(CHALLENGES) if args.challenge == "all" else [args.challenge]
+    if not names:
+        print(
+            "no comparator challenge is configured in local/project.json; "
+            "nothing to check",
+            file=sys.stderr,
+        )
+        return 0
     if args.expected is not None and len(names) != 1:
         parser.error("--expected requires a single --challenge")
 

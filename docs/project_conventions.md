@@ -1,11 +1,11 @@
-# MIPStarRE-local convention addenda
+# PaperLib-local convention addenda
 
 The canonical convention documents live in the `lean-conventions` skill of
 [texra-ai/texra-lean-skills](https://github.com/texra-ai/texra-lean-skills)
 (auto-installed for Claude Code sessions via `.claude/settings.json`; other
 agents: clone the repository and symlink the skill directories, per its
 README). This file holds only
-MIPStarRE's project-local facts — it restates no shared rule, and shared
+PaperLib's project-local facts — it restates no shared rule, and shared
 rules never move here.
 
 ## Style (MATHLIB_style)
@@ -37,7 +37,7 @@ the main mechanism for a linter-warning cleanup PR.
 ### Source-faithfulness checks
 
 For this repository, the first review question is whether a paper-facing Lean
-statement still represents the cited result in `references/ldt-paper/`.  Before
+statement still represents the cited result in `references/<key>-paper/`.  Before
 applying the general mathlib review checklist in the lean-conventions
 `MATHLIB_pr-review` reference, compare every changed
 source-labelled theorem, lemma, proposition, corollary, or definition with the
@@ -76,7 +76,7 @@ follows (the protocol and the `**Unfaithful:**` marker are described in
 `AGENTS.md`):
 
 > **Paper-realignment exception:** When a PR is explicitly realigning a
-> source-labelled declaration with `references/ldt-paper/`, the `sorry`
+> source-labelled declaration with `references/<key>-paper/`, the `sorry`
 > blocker of the lean-conventions `PROOF_INTEGRITY` reference may be
 > temporarily relaxed for the affected proof bodies.  The
 > PR must restore the source-faithful public statement, name the remaining proof
@@ -94,7 +94,7 @@ When an external mathematical result must remain unformalized temporarily,
 prefer a caller-supplied `Prop` hypothesis over a global `axiom`
 declaration, and add a regression check (for example a
 `Lean.collectAxioms`-based assertion, as in
-`MIPStarRE.LDT.Test.AxiomAudit`) so later refactors cannot silently widen
+the track's `AxiomAudit` module) so later refactors cannot silently widen
 the axiomatic base.
 
 This preference does not license proposition inputs on source-labelled paper
@@ -135,7 +135,7 @@ progress rather than enabling it.
 
 A theorem advertised as the Lean formalization of a paper theorem is a blocker
 if its public statement has drifted from the cited paper statement.
-Changing a theorem away from the statement in `references/ldt-paper/` is
+Changing a theorem away from the statement in `references/<key>-paper/` is
 strongly discouraged unless it is forced by faithful formal encoding or by a
 documented mathematical necessity.
 

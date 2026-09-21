@@ -24,11 +24,11 @@ import dup_check  # noqa: E402
 LEMMA = """\
 import Mathlib
 
-namespace MIPStarRE.QPBT
+namespace PaperLib.Core
 
 theorem settled_already (n : Nat) : n = n := rfl
 
-end MIPStarRE.QPBT
+end PaperLib.Core
 """
 
 
@@ -51,12 +51,12 @@ class DispatchDupCheckTests(unittest.TestCase):
         shutil.copy2(REPO_ROOT / "local" / "model-policy.json",
                      self.repo / "local" / "model-policy.json")
         for name in ("blueprint_lean_sync.py", "tex_utils.py", "lean_header_utils.py",
-                     "dup_scan.py"):
+                     "dup_scan.py", "project_config.py"):
             source = REPO_ROOT / "scripts" / name
             if source.exists():
                 shutil.copy2(source, self.repo / "scripts" / name)
         (self.repo / "AGENTS.md").write_text("# fixture\n")
-        lean = self.repo / "MIPStarRE" / "QPBT" / "A.lean"
+        lean = self.repo / "PaperLib" / "Core" / "A.lean"
         lean.parent.mkdir(parents=True)
         lean.write_text(LEMMA)
 
@@ -119,20 +119,20 @@ class DispatchDupCheckTests(unittest.TestCase):
         self.assertIn("no declaration claim registered for issue #700", result.stderr)
 
     def test_duplicate_claim_warns_with_the_location(self):
-        self.claim(701, "MIPStarRE.QPBT.settled_already", force=True)
+        self.claim(701, "PaperLib.Core.settled_already", force=True)
         result = self.dispatch(issue="701")
         self.assert_proceeded(result)
         self.assertIn("already has", result.stderr)
-        self.assertIn("MIPStarRE/QPBT/A.lean:5", result.stderr)
+        self.assertIn("PaperLib/Core/A.lean:5", result.stderr)
 
     def test_fatal_mode_refuses_the_dispatch(self):
-        self.claim(702, "MIPStarRE.QPBT.settled_already", force=True)
+        self.claim(702, "PaperLib.Core.settled_already", force=True)
         result = self.dispatch(issue="702", mode="fatal")
         self.assertEqual(result.returncode, 3)
         self.assertIn("MIPSTARRE_DUP_CHECK=fatal", result.stderr)
 
     def test_clean_claim_reports_no_duplicate(self):
-        self.claim(703, "MIPStarRE.QPBT.still_to_prove")
+        self.claim(703, "PaperLib.Core.still_to_prove")
         result = self.dispatch(issue="703")
         self.assert_proceeded(result)
         self.assertIn("no duplicate", result.stderr)

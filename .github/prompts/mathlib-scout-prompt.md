@@ -11,7 +11,7 @@ Instructions:
    formalized. Check that the issue identifies a mathematical
    source: paper or book citation, theorem/lemma label when available,
    and repository file path plus line number when the source is in
-   `references/ldt-paper/` or `blueprint/src/chapter/`. If this information is
+   `references/<key>-paper/` or `blueprint/src/chapter/`. If this information is
    missing, say so in the report.
 2. Scout Mathlib thoroughly:
    a. Grep Mathlib source files (under .lake/packages/mathlib/) for
@@ -23,7 +23,7 @@ Instructions:
    c. Look for closely related results that could be reused or adapted.
    d. Identify any gaps -- things that are NOT yet in Mathlib and would
       need to be built from scratch.
-3. Also check the existing MIPStarRE/ codebase for related definitions and
+3. Also check the existing PaperLib/ codebase for related definitions and
    lemmas that are already formalized in this project.
 4. Post a single comment on the issue with a structured scouting report in
    this format:
@@ -40,14 +40,14 @@ Instructions:
    ### Relevant Mathlib lemmas/theorems
    - `Namespace.lemma_name` -- what it says (from `Mathlib/Path/File.lean`)
 
-   ### Relevant MIPStarRE definitions (already in this project)
-   - `Namespace.def` -- brief description (from `MIPStarRE/Path/File.lean`)
+   ### Relevant PaperLib definitions (already in this project)
+   - `Namespace.def` -- brief description (from `PaperLib/Path/File.lean`)
 
    ### Suggested approach
    Brief recommendation on how to structure the proof using the above.
 
    ### Gaps to fill
-   - Things not yet in Mathlib or MIPStarRE that will need new
+   - Things not yet in Mathlib or PaperLib that will need new
      definitions/lemmas.
 
 5. Do NOT create any files, branches, or PRs. Only post the scouting comment.

@@ -14,6 +14,9 @@
 *.prof
 *.icloud
 .DS_Store
+# macOS writes an AppleDouble sidecar per file when a tree is copied over a
+# protocol that cannot carry extended attributes; they are not sources.
+._*
 *.swp
 *~
 .vscode/

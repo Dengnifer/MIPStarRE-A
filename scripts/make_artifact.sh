@@ -17,9 +17,8 @@
 # removes every tracked file that mentions the build host's home path, without
 # rewriting history.
 #
-# INCLUDED on purpose: the third-party paper sources under references/ (owner
-# decision, 2026-09-19, following the companion LDT repository, which keeps its
-# paper sources in the public repository).  They are what the Lean docstrings,
+# INCLUDED on purpose: the third-party paper sources under references/.  They
+# are what the Lean docstrings,
 # the theorem index and the deviations page cite by `<file>.tex:<lines>`, so a
 # snapshot without them cannot be checked against its sources.  They are
 # third-party material kept for reference and are NOT covered by the Apache-2.0
@@ -42,8 +41,8 @@ set -euo pipefail
 # revision are dropped before the call, so an optional file such as LICENSE
 # costs nothing while it is still missing.
 INCLUDE=(
-  MIPStarRE
-  MIPStarRE.lean
+  PaperLib
+  PaperLib.lean
   lakefile.toml
   lake-manifest.json
   lean-toolchain
@@ -121,38 +120,11 @@ LEAK_ALLOW_IN=(
 # exists to remove would ride out in the rules list.  Stored plainly, each rule
 # rewrites its own entry too.  The escaping for `sed` happens at the point of
 # use, and step 4b fails the run if any of these strings survives.
-ANON_RULES=(
-  'Dengnifer :: ANONYMIZED'
-  'LionSR :: ANONYMIZED-UPSTREAM'
-  'Ruixuan Deng :: Anonymous Author'
-  'ruixuan.deng@icloud.com :: anonymous@example.invalid'
-  'sirui-lu.com :: anonymized-upstream.example.invalid'
-)
-
-SOURCE_REPO='Dengnifer/MIPStarRE-A'
-
 # --------------------------------------------------------------------------
 
 PROG=${0##*/}
 die() { printf '%s: %s\n' "$PROG" "$*" >&2; exit 1; }
 log() { printf '[%s] %s\n' "$PROG" "$*" >&2; }
-
-# The authored snapshot must ship the one contact address that is the literal
-# source of an anonymization rule. Derive it instead of spelling an escaped copy
-# elsewhere in this script: an escaped copy would survive `sed`, while a generic
-# script-wide e-mail exception would forgive unrelated addresses. Fail closed if
-# the rules ever contain zero or multiple e-mail-valued source fields.
-ANON_CONTACT=''
-ANON_CONTACT_COUNT=0
-for rule in "${ANON_RULES[@]}"; do
-  literal=${rule%% :: *}
-  if printf '%s\n' "$literal" | grep -qxE "$EMAIL_LEAK_PATTERN"; then
-    ANON_CONTACT=$literal
-    ANON_CONTACT_COUNT=$(( ANON_CONTACT_COUNT + 1 ))
-  fi
-done
-[ "$ANON_CONTACT_COUNT" -eq 1 ] \
-  || die "ANON_RULES must contain exactly one literal e-mail source field"
 
 # Turn a literal ANON_RULES field into something `sed` reads as itself: the
 # pattern side escapes the basic-regex metacharacters, the replacement side the
@@ -211,11 +183,57 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=${MIPSTARRE_REPO_ROOT:-$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)}
 git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1 || die "not a git repository: $REPO_ROOT"
 
+# Project identity, read from the repository being packaged, not from the
+# checkout this script happens to live in.
+CONFIG_GET="python3 $SCRIPT_DIR/project_config.py --root $REPO_ROOT get"
+SOURCE_REPO=$($CONFIG_GET project.github_slug)
+PROJECT_NAME=$($CONFIG_GET project.name)
+
+# The owner's GitHub name, taken from the configured slug, is the identifying
+# string that necessarily appears in the snapshot (URLs, the MANIFEST).  A
+# submitter who must also remove a personal name, address or website adds those
+# rules through MIPSTARRE_ANON_RULES — one `<literal> :: <replacement>` per
+# line — so that no personal datum is ever written into this repository:
+#
+#   MIPSTARRE_ANON_RULES='Ada Lovelace :: Anonymous Author
+#   ada@example.org :: anonymous@example.invalid' scripts/make_artifact.sh --anonymize ...
+ANON_RULES=("${SOURCE_REPO%%/*} :: ANONYMIZED")
+if [ -n "${MIPSTARRE_ANON_RULES:-}" ]; then
+  while IFS= read -r _extra_rule; do
+    case "$_extra_rule" in
+      '') continue ;;
+      *' :: '*) ANON_RULES+=("$_extra_rule") ;;
+      *) echo "make_artifact.sh: MIPSTARRE_ANON_RULES entry without ' :: ': $_extra_rule" >&2; exit 1 ;;
+    esac
+  done <<< "$MIPSTARRE_ANON_RULES"
+fi
+
+# If a rule's source field is an e-mail address, and that rule was written into
+# this script rather than passed in the environment, the shipped copy of the
+# script contains the address and the leak scan would flag it. Derive it instead
+# of spelling an escaped copy elsewhere: an escaped copy would survive `sed`,
+# while a generic script-wide e-mail exception would forgive unrelated
+# addresses. At most one such rule; none is the normal case.
+ANON_CONTACT=''
+ANON_CONTACT_COUNT=0
+for rule in "${ANON_RULES[@]}"; do
+  literal=${rule%% :: *}
+  if printf '%s\n' "$literal" | grep -qxE "$EMAIL_LEAK_PATTERN"; then
+    ANON_CONTACT=$literal
+    ANON_CONTACT_COUNT=$(( ANON_CONTACT_COUNT + 1 ))
+  fi
+done
+[ "$ANON_CONTACT_COUNT" -le 1 ] \
+  || die "ANON_RULES must contain at most one literal e-mail source field"
+
+
 COMMIT=$(git -C "$REPO_ROOT" rev-parse --verify "${REF}^{commit}" 2>/dev/null) \
   || die "cannot resolve git ref: $REF"
 SHORT=$(git -C "$REPO_ROOT" rev-parse --short=12 "$COMMIT")
 
-NAME="mipstarre-qpbt-artifact-$SHORT"
+# Lower-cased project name, so the tarball is recognisable without naming a
+# person or a host: `<project>-artifact-<short sha>[-anon].tar.gz`.
+NAME="$(printf '%s' "${PROJECT_NAME:-artifact}" | tr '[:upper:]' '[:lower:]')-artifact-$SHORT"
 [ "$ANONYMIZE" -eq 1 ] && NAME="$NAME-anon"
 
 mkdir -p "$OUT_DIR"
@@ -372,7 +390,7 @@ fi
 # snapshot tool does not depend on the excluded workflow layer — from
 # local/bin/pr_merge.py:lean_code_line_mask, by way of
 # results/telemetry/owner-tools/lean-loc.py (issues #574 and #168).
-LEAN_STATS=$(find "$SNAP/MIPStarRE" "$SNAP/MIPStarRE.lean" -name '*.lean' -print0 2>/dev/null \
+LEAN_STATS=$(find "$SNAP/PaperLib" "$SNAP/PaperLib.lean" -name '*.lean' -print0 2>/dev/null \
   | python3 -c '
 import sys
 files = code = total = 0
@@ -436,10 +454,10 @@ else:
 
 # ---- 6. import self-containment ------------------------------------------
 
-# Every `import MIPStarRE.…` in the snapshot must resolve to a file that is in
+# Every `import PaperLib.…` in the snapshot must resolve to a file that is in
 # the snapshot; imports of Mathlib and friends are supplied by lake.
-MISSING_IMPORTS=$(grep -rhoE '^import +MIPStarRE[A-Za-z0-9_.]*' \
-    "$SNAP/MIPStarRE" "$SNAP/MIPStarRE.lean" 2>/dev/null \
+MISSING_IMPORTS=$(grep -rhoE '^import +PaperLib[A-Za-z0-9_.]*' \
+    "$SNAP/PaperLib" "$SNAP/PaperLib.lean" 2>/dev/null \
   | awk '{print $2}' | sort -u \
   | while read -r module; do
       rel=${module//.//}
@@ -448,7 +466,7 @@ MISSING_IMPORTS=$(grep -rhoE '^import +MIPStarRE[A-Za-z0-9_.]*' \
 if [ -n "$MISSING_IMPORTS" ]; then
   SELF_CONTAINED="NO — unresolved: $MISSING_IMPORTS"
 else
-  SELF_CONTAINED="yes — every MIPStarRE import resolves inside the snapshot"
+  SELF_CONTAINED="yes — every PaperLib import resolves inside the snapshot"
 fi
 
 # ---- 7. internal Markdown links -------------------------------------------
@@ -499,12 +517,12 @@ log "internal Markdown links: $DEAD_LINKS"
 # that it cannot rot unnoticed.
 # The mirrors' file names are lower case throughout, so a locator whose file
 # component carries a capital is a fill-in placeholder rather than a citation --
-# `references/ldt-paper/FILE.tex` in the gap-note template and the row for it in
+# `references/<mirror>-paper/FILE.tex` in the gap-note template and the row for it in
 # the gap-note README.  Those are dropped here instead of being reported as
 # absent every time.
 LOC_LIST="$WORK/paper-locators"
 grep -rhoE 'references/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+\.tex' \
-    "$SNAP/MIPStarRE" "$SNAP/blueprint/src" "$SNAP/docs" 2>/dev/null \
+    "$SNAP/PaperLib" "$SNAP/blueprint/src" "$SNAP/docs" 2>/dev/null \
   | grep -vE '/[A-Za-z0-9_.-]*[A-Z][A-Za-z0-9_.-]*\.tex$' \
   | sort -u > "$LOC_LIST" || true
 LOC_TOTAL=$(wc -l < "$LOC_LIST" | tr -d ' ')
@@ -524,7 +542,7 @@ log "paper locators: $PAPER_LOCATORS"
 FILE_COUNT=$(( $(find "$SNAP" -type f | wc -l | tr -d ' ') + 1 ))  # + this MANIFEST
 MANIFEST="$SNAP/MANIFEST.txt"
 {
-  echo "MIPStarRE — QPBT formalization: artifact snapshot"
+  echo "$PROJECT_NAME — formalization artifact snapshot"
   echo
   echo "source repository : $SOURCE_REPO"
   echo "source ref        : $REF"
@@ -533,7 +551,7 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "anonymized        : $([ "$ANONYMIZE" -eq 1 ] && echo yes || echo no)"
   echo
   echo "files             : $FILE_COUNT (including this MANIFEST)"
-  echo "Lean files        : $LEAN_FILES (all of MIPStarRE/)"
+  echo "Lean files        : $LEAN_FILES (all of PaperLib/)"
   echo "Lean code lines   : $LEAN_CODE (of $LEAN_TOTAL physical lines)"
   echo "toolchain         : $TOOLCHAIN"
   echo "mathlib revision  : $MATHLIB_REV"
@@ -549,7 +567,7 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "  layer that produced the development but is not part of it."
   echo
   echo "Third-party material included, on purpose:"
-  echo "  references/ — the TeX sources of the five source papers.  The Lean"
+  echo "  references/ — the TeX sources of the source papers.  The Lean"
   echo "  docstrings, the theorem index and the deviations page cite them as"
   echo "  references/<paper>/<file>.tex:<lines>.  Most resolve inside this snapshot;"
   echo "  the paper-locator report above names any exceptions.  These files are kept"
@@ -606,7 +624,7 @@ done
 # `grep -o` emits one scanner finding per matched address. Forgive only the
 # exact contact text derived from ANON_RULES in the shipped script; if the same
 # source line also contains another address, its separate finding remains.
-drop_exact_finding 'scripts/make_artifact.sh' "$ANON_CONTACT"
+[ -z "$ANON_CONTACT" ] || drop_exact_finding 'scripts/make_artifact.sh' "$ANON_CONTACT"
 
 RAW=$(wc -l < "$HITS" | tr -d ' ')
 KEPT=$(wc -l < "$KEPT_HITS" | tr -d ' ')

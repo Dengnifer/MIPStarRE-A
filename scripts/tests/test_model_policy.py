@@ -21,7 +21,13 @@ import telemetry
 from scripts.tests import test_native_workflow as native_tests
 from scripts.tests import test_dispatch as dispatch_tests
 
-ACTIVE = dict(schema_version=2, default_model=policy.SOL, hard_model=policy.ASTRA, effort='ultra')
+#: The fixture models (see `test_dispatch`): the kit configures none, so every
+#: assertion about a concrete model names one of these two.
+ROUTINE_MODEL = dispatch_tests.ROUTINE_MODEL
+HARD_MODEL = dispatch_tests.HARD_MODEL
+ACTIVE = dict(schema_version=2, default_model=ROUTINE_MODEL, hard_model=HARD_MODEL,
+              main_model=dispatch_tests.MAIN_MODEL, effort='ultra',
+              dispatch_ratio=dict(target=20, minimum=10, maximum=50))
 ACTIVATION = '2026-09-06T13:00:00Z'
 
 
@@ -36,54 +42,54 @@ class ModelPolicyTests(unittest.TestCase):
             if role != 'mathfix':
                 for job in ('general', 'routine', 'bounded'):
                     decision = policy.select_model(role, job)
-                    self.assertEqual(decision['model'], policy.SOL)
+                    self.assertEqual(decision['model'], ROUTINE_MODEL)
                     self.assertEqual(decision['requested_model'], 'auto')
-        self.assertEqual(policy.select_model('reviewer', 'independent_review')['model'], policy.SOL)
+        self.assertEqual(policy.select_model('reviewer', 'independent_review')['model'], ROUTINE_MODEL)
         self.assertEqual(policy.select_model('prover', 'review_directed_nonsemantic_cleanup')[
-            'model'], policy.SOL)
+            'model'], ROUTINE_MODEL)
 
-    def test_dispatch_command_selects_routine_sol_and_reasoned_hard_astra(self):
+    def test_dispatch_command_selects_the_routine_model_and_a_reasoned_hard_one(self):
         fixture = dispatch_tests.DispatchCommandTests()
         argv = fixture.dispatch_command('--role', 'prover', '--job-class', 'bounded',
                                         model='auto', policy_data=ACTIVE)
-        self.assertEqual(argv[argv.index('-m') + 1], policy.SOL)
+        self.assertEqual(argv[argv.index('-m') + 1], ROUTINE_MODEL)
         argv = fixture.dispatch_command('--role', 'reviewer', '--job-class', 'hard_review',
             '--hardness-reason', 'Control-policy review', model='auto', policy_data=ACTIVE)
-        self.assertEqual(argv[argv.index('-m') + 1], policy.ASTRA)
+        self.assertEqual(argv[argv.index('-m') + 1], HARD_MODEL)
 
-    def test_hard_astra_needs_reason_and_unknown_or_conflicting_choices_fail(self):
+    def test_hard_work_needs_a_reason_and_unknown_or_conflicting_choices_fail(self):
         for role, job in [('reviewer', 'hard_review'), ('orc', 'control_policy'),
                           ('prover', 'source_semantic'), ('mathfix', 'hard')]:
             decision = policy.select_model(role, job, hardness_reason='Explicit difficult obligation')
-            self.assertEqual(decision['model'], policy.ASTRA)
+            self.assertEqual(decision['model'], HARD_MODEL)
             self.assertTrue(decision['hardness_reason'])
             with self.assertRaises(ValueError):
                 policy.select_model(role, job)
         for args in [('bad',), ('prover', 'bad'), ('prover', 'independent_review'),
-                     ('prover', 'routine', policy.ASTRA), ('prover', 'general', 'gpt-5.6'),
-                     ('prover', 'general', 'gpt-6-sol'), ('prover', 'general', policy.SOL, 'max')]:
+                     ('prover', 'routine', HARD_MODEL), ('prover', 'general', 'unconfigured-a'),
+                     ('prover', 'general', 'unconfigured-b'), ('prover', 'general', ROUTINE_MODEL, 'max')]:
             with self.subTest(args=args), self.assertRaises(ValueError):
                 policy.select_model(*args)
 
     def test_native_model_mismatch_and_missing_request_are_distinct(self):
-        observed = policy.observe_model('prover', 'bounded', policy.SOL, 'ultra')
+        observed = policy.observe_model('prover', 'bounded', ROUTINE_MODEL, 'ultra')
         self.assertIsNone(observed['requested_model'])
         with self.assertRaises(ValueError):
-            policy.observe_model('prover', 'bounded', policy.ASTRA, 'ultra', policy.SOL)
+            policy.observe_model('prover', 'bounded', HARD_MODEL, 'ultra', ROUTINE_MODEL)
         with self.assertRaises(ValueError):
-            policy.observe_model('reviewer', 'hard_review', policy.SOL, 'ultra',
-                                 policy.ASTRA, 'Control-policy review')
+            policy.observe_model('reviewer', 'hard_review', ROUTINE_MODEL, 'ultra',
+                                 HARD_MODEL, 'Control-policy review')
 
     def test_resume_affinity_uses_observation_not_requested_model(self):
         with tempfile.TemporaryDirectory() as directory:
             registry = Path(directory) / 'sessions.jsonl'
-            registry.write_text(json.dumps(dict(thread_id='old', model=policy.ASTRA)) + '\n')
+            registry.write_text(json.dumps(dict(thread_id='old', model=HARD_MODEL)) + '\n')
             with self.assertRaisesRegex(ValueError, 'unknown'):
                 account_router.resume_model('old', registry, {})
-            registry.write_text(json.dumps(dict(thread_id='old', effective_model=policy.ASTRA)) + '\n')
-            self.assertEqual(account_router.resume_model('old', registry, {}), policy.ASTRA)
+            registry.write_text(json.dumps(dict(thread_id='old', effective_model=HARD_MODEL)) + '\n')
+            self.assertEqual(account_router.resume_model('old', registry, {}), HARD_MODEL)
 
-    def test_native_resume_does_not_turn_old_astra_into_routine_sol(self):
+    def test_native_resume_does_not_relabel_an_old_hard_thread_as_routine(self):
         fixture = native_tests.NativeWorkflowTests()
         fixture.setUp()
         self.addCleanup(fixture.doCleanups)
@@ -94,12 +100,12 @@ class ModelPolicyTests(unittest.TestCase):
                 row['payload']['turn_id'] = 'turn'
         rows += [dict(type='event_msg', timestamp='2026-09-06T13:15:00Z',
                       payload=dict(type='task_started', turn_id='resumed')),
-                 dict(type='turn_context', payload=dict(turn_id='resumed', model=policy.SOL,
+                 dict(type='turn_context', payload=dict(turn_id='resumed', model=ROUTINE_MODEL,
                                                        effort='ultra'))]
         fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
         with self.assertRaisesRegex(ValueError, 'cannot switch'):
             telemetry.native_rollout(fixture.rollout, native_tests.CHILD, role='prover',
-                                     job_class='routine', requested_model=policy.SOL)
+                                     job_class='routine', requested_model=ROUTINE_MODEL)
 
     def test_all_child_turns_need_consistent_bound_contexts(self):
         fixture = native_tests.NativeWorkflowTests()
@@ -107,15 +113,15 @@ class ModelPolicyTests(unittest.TestCase):
         self.addCleanup(fixture.doCleanups)
         fixture.write_rollout()
         meta = json.loads(fixture.rollout.read_text().splitlines()[0])
-        cases = [([policy.SOL, policy.ASTRA, policy.SOL], policy.SOL, False),
-                 ([policy.SOL, None, policy.SOL], policy.SOL, False),
-                 ([None, policy.SOL], policy.SOL, False),
-                 ([policy.SOL, None], policy.SOL, False), ([None], policy.ASTRA, False),
-                 ([policy.ASTRA, None], policy.ASTRA, False),
-                 ([policy.SOL, policy.SOL], policy.SOL, True)]
+        cases = [([ROUTINE_MODEL, HARD_MODEL, ROUTINE_MODEL], ROUTINE_MODEL, False),
+                 ([ROUTINE_MODEL, None, ROUTINE_MODEL], ROUTINE_MODEL, False),
+                 ([None, ROUTINE_MODEL], ROUTINE_MODEL, False),
+                 ([ROUTINE_MODEL, None], ROUTINE_MODEL, False), ([None], HARD_MODEL, False),
+                 ([HARD_MODEL, None], HARD_MODEL, False),
+                 ([ROUTINE_MODEL, ROUTINE_MODEL], ROUTINE_MODEL, True)]
         for models, requested, valid in cases:
-            rows = [meta, dict(type='turn_context', payload=dict(model=policy.ASTRA, effort='ultra')),
-                    dict(type='turn_context', payload=dict(turn_id='parent', model=policy.ASTRA,
+            rows = [meta, dict(type='turn_context', payload=dict(model=HARD_MODEL, effort='ultra')),
+                    dict(type='turn_context', payload=dict(turn_id='parent', model=HARD_MODEL,
                                                           effort='ultra'))]
             for index, model in enumerate(models):
                 turn, ts = f'child-{index}', f'2026-09-06T13:14:{index + 1:02}Z'
@@ -129,8 +135,8 @@ class ModelPolicyTests(unittest.TestCase):
             fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
             with self.subTest(models=models):
                 args = dict(role='reviewer', requested_model=requested,
-                    job_class='hard_review' if requested == policy.ASTRA else 'independent_review',
-                    hardness_reason='Control-policy review' if requested == policy.ASTRA else None)
+                    job_class='hard_review' if requested == HARD_MODEL else 'independent_review',
+                    hardness_reason='Control-policy review' if requested == HARD_MODEL else None)
                 if valid:
                     self.assertEqual(telemetry.native_rollout(fixture.rollout, native_tests.CHILD,
                                      **args)['effective_model'], requested)
@@ -138,7 +144,7 @@ class ModelPolicyTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         telemetry.native_rollout(fixture.rollout, native_tests.CHILD, **args)
 
-    def test_routine_sol_review_keeps_independence_binding_and_mixed_context_guards(self):
+    def test_a_routine_review_keeps_its_independence_binding_and_mixed_context_guards(self):
         fixture = native_tests.NativeWorkflowTests()
         fixture.setUp()
         self.addCleanup(fixture.doCleanups)
@@ -147,7 +153,7 @@ class ModelPolicyTests(unittest.TestCase):
         rows = [json.loads(line) for line in fixture.rollout.read_text().splitlines()]
         for row in rows:
             if row['type'] == 'turn_context':
-                row['payload'].update(model=policy.SOL, turn_id='turn')
+                row['payload'].update(model=ROUTINE_MODEL, turn_id='turn')
         def write():
             fixture.rollout.write_text(''.join(json.dumps(row) + '\n' for row in rows))
         write()
@@ -161,11 +167,11 @@ class ModelPolicyTests(unittest.TestCase):
             with mock.patch.dict(fixture.request, head='b' * 40), self.assertRaises(ValueError):
                 native_tests.review.completed_review(fixture.request, native_tests.CHILD)
         rows.append(dict(type='turn_context', payload=dict(turn_id='turn',
-                         model=policy.ASTRA, effort='ultra')))
+                         model=HARD_MODEL, effort='ultra')))
         write()
         with self.assertRaises(ValueError):
             telemetry.native_rollout(fixture.rollout, native_tests.CHILD, role='reviewer',
-                job_class='hard_review', requested_model=policy.ASTRA, hardness_reason='Hard review')
+                job_class='hard_review', requested_model=HARD_MODEL, hardness_reason='Hard review')
 
     def test_grandfathering_requires_pre_activation_task_and_new_rejects_resume(self):
         fixture = native_tests.NativeWorkflowTests()
@@ -177,12 +183,12 @@ class ModelPolicyTests(unittest.TestCase):
                                      activation_at=ACTIVATION)
         old = telemetry.native_rollout(fixture.rollout, native_tests.CHILD, grandfathered=True,
                                       activation_at='2026-09-07T00:00:00Z')
-        self.assertEqual(old['model'], policy.ASTRA)
+        self.assertEqual(old['model'], HARD_MODEL)
         args = argparse.Namespace(rollout=fixture.rollout, thread_id=native_tests.CHILD,
             root_thread_id=native_tests.ROOT, role='prover', job_class='hard',
-            hardness_reason='Difficult source obligation', requested_model=policy.ASTRA,
+            hardness_reason='Difficult source obligation', requested_model=HARD_MODEL,
             dispatch_kind='new', activation_at=ACTIVATION, status='done', repo_root=fixture.root,
-            name='new', issue='301', pr=None, key_label='space', worktree=fixture.root)
+            name='new', issue='301', pr=None, key_label='default', worktree=fixture.root)
         with mock.patch.object(telemetry, 'native_rollout', return_value=old | {
                 'turn_start': '2026-09-06T13:15:00Z'}), self.assertRaisesRegex(ValueError, 'resumed'):
             telemetry.record_native(args)
@@ -197,24 +203,24 @@ class ModelPolicyTests(unittest.TestCase):
             return dict(thread_id=thread, root_thread_id='root', dispatch_kind=kind,
                 start='2026-09-06T13:14:00Z', activation_at=ACTIVATION,
                 selected_model=model, effective_model=model, **kwargs)
-        rows = [row(f'sol-{i:03}', policy.SOL) for i in range(20)] + [row('astra', policy.ASTRA)]
-        rows += [rows[0], row('resume', policy.ASTRA, 'resume'), row('root', policy.ASTRA),
-                 row('old', policy.ASTRA, 'grandfathered')]
+        rows = [row(f'routine-{i:03}', ROUTINE_MODEL) for i in range(20)] + [row('hard', HARD_MODEL)]
+        rows += [rows[0], row('resume', HARD_MODEL, 'resume'), row('root', HARD_MODEL),
+                 row('old', HARD_MODEL, 'grandfathered')]
         result = policy.dispatch_ratio(rows, ACTIVATION)
-        self.assertEqual((result['sol'], result['astra'], result['ratio']), (20, 1, 20))
-        rows += [row('unknown', policy.SOL) | {'effective_model': None}, row('unknown', policy.SOL)]
+        self.assertEqual((result['routine'], result['hard'], result['ratio']), (20, 1, 20))
+        rows += [row('unknown', ROUTINE_MODEL) | {'effective_model': None}, row('unknown', ROUTINE_MODEL)]
         self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION)['unknown'], 0)
-        rows += [row('unknown', policy.ASTRA)]
+        rows += [row('unknown', HARD_MODEL)]
         self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION)['unknown'], 1)
         self.assertEqual(policy.dispatch_ratio(rows, ACTIVATION, window=10)['sampled_dispatches'], 10)
-        self.assertIsNone(policy.dispatch_ratio([row('only-sol', policy.SOL)], ACTIVATION)['ratio'])
-        good = row('contradictory', policy.SOL)
-        bad = good | {'effective_model': policy.ASTRA}
+        self.assertIsNone(policy.dispatch_ratio([row('only-routine', ROUTINE_MODEL)], ACTIVATION)['ratio'])
+        good = row('contradictory', ROUTINE_MODEL)
+        bad = good | {'effective_model': HARD_MODEL}
         for observations in ([good, bad], [bad, good]):
             with self.subTest(observations=observations):
                 result = policy.dispatch_ratio(observations, ACTIVATION)
-                self.assertEqual((result['sol'], result['astra'], result['unknown']), (0, 0, 1))
-                self.assertEqual(result['cumulative'], {policy.SOL: 0, policy.ASTRA: 0})
+                self.assertEqual((result['routine'], result['hard'], result['unknown']), (0, 0, 1))
+                self.assertEqual(result['cumulative'], {ROUTINE_MODEL: 0, HARD_MODEL: 0})
 
     def test_external_selected_model_is_not_fabricated_observation(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -223,30 +229,30 @@ class ModelPolicyTests(unittest.TestCase):
             capture.write_text(json.dumps(dict(type='thread.started', thread_id='fixture')) + '\n')
             snapshot.write_text(json.dumps(policy.select_model('prover', 'bounded')))
             args = telemetry._build_parser().parse_args(['--repo-root', directory,
-                'session-summarize', str(capture), '--role', 'prover', '--model', policy.SOL,
+                'session-summarize', str(capture), '--role', 'prover', '--model', ROUTINE_MODEL,
                 '--requested-effort', 'ultra', '--model-policy-file', str(snapshot),
                 '--no-rollout-scan', '--dispatch-kind', 'new', '--activation-at', ACTIVATION])
             output = io.StringIO()
             with redirect_stdout(output):
                 telemetry.cmd_session_summarize(args)
             record = json.loads(output.getvalue())
-            self.assertEqual(record['selected_model'], policy.SOL)
+            self.assertEqual(record['selected_model'], ROUTINE_MODEL)
             self.assertEqual(record['requested_model'], 'auto')
             self.assertIsNone(record['effective_model'])
             capture.write_text(capture.read_text() + json.dumps(dict(type='turn_context',
-                payload=dict(model=policy.ASTRA))) + '\n')
+                payload=dict(model=HARD_MODEL))) + '\n')
             output = io.StringIO()
             with redirect_stdout(output):
                 self.assertEqual(telemetry.cmd_session_summarize(args), 4)
             mismatch = json.loads(output.getvalue())
-            self.assertEqual(mismatch['effective_model'], policy.ASTRA)
+            self.assertEqual(mismatch['effective_model'], HARD_MODEL)
             self.assertEqual(mismatch['status'], 'failed')
 
-    def test_missing_worker_caps_block_routine_sol(self):
+    def test_missing_worker_caps_block_a_routine_dispatch(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'watchdog').mkdir()
-            with mock.patch.dict(os.environ, MIPSTARRE_CODEX_MODEL=policy.SOL,
+            with mock.patch.dict(os.environ, MIPSTARRE_CODEX_MODEL=ROUTINE_MODEL,
                                  MIPSTARRE_DISPATCH_ROLE='prover'), \
                  mock.patch('sys.argv', ['account_router.py', 'reserve', directory, 'auto', '123', '0',
                                         str(root / 'registry')]), self.assertRaises(SystemExit) as error:
@@ -261,6 +267,7 @@ class ModelPolicyTests(unittest.TestCase):
             for name in ('model_policy.py', 'account_router.py', 'codex-policy-shim.sh'):
                 shutil.copy2(ROOT / 'local/bin' / name, local / name)
             (local.parent / 'model-policy.json').write_text(json.dumps(ACTIVE))
+            dispatch_tests.write_project_config(root)
             subprocess.run(['git', 'init', '-qb', 'main', str(root)], check=True)
             subprocess.run(['git', '-C', str(root), 'add', 'local'], check=True)
             subprocess.run(['git', '-C', str(root), '-c', 'user.name=Test', '-c',
@@ -276,10 +283,11 @@ class ModelPolicyTests(unittest.TestCase):
                 MIPSTARRE_CACHE_ROOT=str(root / 'cache'), MIPSTARRE_DISPATCH_ROLE='prover',
                 MIPSTARRE_JOB_CLASS='bounded', MIPSTARRE_HARDNESS_REASON='',
                 MIPSTARRE_CODEX_MODEL='auto', MIPSTARRE_DISPATCH_ACCOUNT='primary',
-                MIPSTARRE_DISPATCH_PID='123')
+                MIPSTARRE_DISPATCH_PID='123',
+                PATH=f"{binary.parent}{os.pathsep}{os.environ.get('PATH', '')}")
             args = ['bash', str(local / 'codex-policy-shim.sh'), 'exec', '--', 'fixture']
             result = subprocess.run(args, env=env, capture_output=True, text=True, check=True)
-            self.assertIn(policy.SOL, json.loads(result.stdout))
+            self.assertIn(ROUTINE_MODEL, json.loads(result.stdout))
             (root / 'cache/watchdog').mkdir()
             (root / 'cache/watchdog/primary-external-admission').write_text('0')
             self.assertEqual(subprocess.run(args, env=env, capture_output=True).returncode, 0)

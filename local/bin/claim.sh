@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # claim.sh — ONE atomic claim list for the main session and the Opus helpers.
 #
-# Repository copy of the meta session's ~/.cache/mipstarre-dev/owner-bin/qpbt-claim.sh
-# (written 2026-09-17 after two workers repaired PR 577 at the same time).  The
-# file format and the claim semantics are unchanged; only the file location is
-# now configurable, so the unit test can drive the script without touching the
-# operator's live list.
+# Repository copy of the operator's out-of-repo claim script (written after two
+# workers repaired the same pull request at the same time).  The file format and
+# the claim semantics are unchanged; the file location is configurable, so a unit
+# test can drive the script without touching the operator's live list.
 #
 #   claim.sh claim   <main|opus> <fix|review|update|feature|report> <PR> "<note>"
 #       -> exit 0 claimed, exit 3 held by someone else

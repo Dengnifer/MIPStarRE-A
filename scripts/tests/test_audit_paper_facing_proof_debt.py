@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 import tempfile
@@ -16,8 +17,17 @@ sys.path.insert(0, str(SCRIPT_DIR))
 import audit_paper_facing_proof_debt as audit  # noqa: E402
 
 
+def _write_register(root: Path, **registers) -> None:
+    """Write the optional per-declaration register this repository may carry."""
+    path = root / audit.REGISTER_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({audit.REGISTER_SECTION: registers}, indent=2), encoding="utf-8"
+    )
+
+
 def _write_repo(root: Path, lean_source: str, tex_source: str) -> None:
-    lean_file = root / "MIPStarRE" / "Foo.lean"
+    lean_file = root / "PaperLib" / "Foo.lean"
     lean_file.parent.mkdir(parents=True)
     lean_file.write_text(textwrap.dedent(lean_source).strip() + "\n", encoding="utf-8")
 
@@ -46,16 +56,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -70,18 +80,18 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hBridge : SomeBridgeHypotheses)
                     (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -99,15 +109,15 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 def bridgeDefinition (hBridge : SomeBridgeHypotheses) : Q := q
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{definition}\label{def:bridge}
-                  \lean{MIPStarRE.bridgeDefinition}
+                  \lean{PaperLib.bridgeDefinition}
                 \end{definition}
                 """,
             )
@@ -121,15 +131,15 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 def bridgeDefinition (hBridge : SomeBridgeHypotheses) : Q := q
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{definition}\label{def:bridge}
-                  \lean{MIPStarRE.bridgeDefinition}
+                  \lean{PaperLib.bridgeDefinition}
                 \end{definition}
                 """,
             )
@@ -151,7 +161,7 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem cleanTheorem (h : P) : Q := by
                   sorry
@@ -159,11 +169,11 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
                 theorem repairedTheorem (repair : RepairInput) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:two}
-                  \lean{MIPStarRE.cleanTheorem, MIPStarRE.repairedTheorem}
+                  \lean{PaperLib.cleanTheorem, PaperLib.repairedTheorem}
                 \end{lemma}
                 """,
             )
@@ -181,16 +191,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem mainFormal_ofRepairedBridge (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:helper}
-                  \lean{MIPStarRE.mainFormal_ofRepairedBridge}
+                  \lean{PaperLib.mainFormal_ofRepairedBridge}
                 \end{lemma}
                 """,
             )
@@ -204,16 +214,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem mainFormal_ofRepairedBridge (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:main-formal}
-                  \lean{MIPStarRE.mainFormal_ofRepairedBridge}
+                  \lean{PaperLib.mainFormal_ofRepairedBridge}
                 \end{theorem}
                 """,
             )
@@ -229,20 +239,25 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE.LDT.MakingMeasurementsProjective
+                namespace PaperLib.Core
 
-                theorem ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements
+                theorem SelfConsistencyHandoff.ofCompleteStatements
                     (h : P) : Q := by
                   sorry
 
-                end MIPStarRE.LDT.MakingMeasurementsProjective
+                end PaperLib.Core
                 """,
                 r"""
-                \begin{remark}\label{rem:lean-right-register-completion-helpers}
-                  \lean{MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements}
+                \begin{remark}\label{rem:lean-only-helpers}
+                  \lean{PaperLib.Core.SelfConsistencyHandoff.ofCompleteStatements}
                 \end{remark}
                 """,
             )
+            _write_register(root, source_context_conditional_decl_names={
+                "PaperLib.Core.SelfConsistencyHandoff.ofCompleteStatements":
+                    "Lean-only construction displayed near the proof; see the "
+                    "informational blueprint entry rem:lean-only-helpers"
+            })
             theorem_like_result = audit.run_audit(root)
             self.assertEqual(theorem_like_result.scanned_refs, 0)
 
@@ -256,7 +271,7 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             self.assertEqual(len(broad_result.source_context_findings), 1)
             self.assertEqual(
                 broad_result.source_context_findings[0].token,
-                "ofOrthonormalizeAndCompleteStatements",
+                "ofCompleteStatements",
             )
 
     def test_known_construction_name_in_theorem_like_entry_is_still_reported(self) -> None:
@@ -265,17 +280,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE.LDT.MakingMeasurementsProjective
+                namespace PaperLib.Core
 
-                theorem ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements
+                theorem SelfConsistencyHandoff.ofCompleteStatements
                     (h : P) : Q := by
                   sorry
 
-                end MIPStarRE.LDT.MakingMeasurementsProjective
+                end PaperLib.Core
                 """,
                 r"""
                 \begin{theorem}\label{thm:main-formal}
-                  \lean{MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationSelfConsistencyHandoff.ofOrthonormalizeAndCompleteStatements}
+                  \lean{PaperLib.Core.SelfConsistencyHandoff.ofCompleteStatements}
                 \end{theorem}
                 """,
             )
@@ -284,7 +299,7 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             self.assertEqual(len(result.conditional_decl_findings), 1)
             self.assertEqual(
                 result.conditional_decl_findings[0].token,
-                "ofOrthonormalizeAndCompleteStatements",
+                "ofCompleteStatements",
             )
 
     def test_internal_obligation_name_in_paper_facing_entry_is_reported(self) -> None:
@@ -293,16 +308,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem mainFormal_ofInternalObligations (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.mainFormal_ofInternalObligations}
+                  \lean{PaperLib.mainFormal_ofInternalObligations}
                 \end{theorem}
                 """,
             )
@@ -318,16 +333,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem_ofCompletionResidual (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:paper}
-                  \lean{MIPStarRE.paperTheorem_ofCompletionResidual}
+                  \lean{PaperLib.paperTheorem_ofCompletionResidual}
                 \end{lemma}
                 """,
             )
@@ -343,16 +358,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem_ofProjectivizationProducer (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem_ofProjectivizationProducer}
+                  \lean{PaperLib.paperTheorem_ofProjectivizationProducer}
                 \end{theorem}
                 """,
             )
@@ -371,16 +386,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem_ofBridgeHypothesis (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:paper}
-                  \lean{MIPStarRE.paperTheorem_ofBridgeHypothesis}
+                  \lean{PaperLib.paperTheorem_ofBridgeHypothesis}
                 \end{lemma}
                 """,
             )
@@ -399,16 +414,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem_ofExtraAssumption (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{corollary}\label{cor:paper}
-                  \lean{MIPStarRE.paperTheorem_ofExtraAssumption}
+                  \lean{PaperLib.paperTheorem_ofExtraAssumption}
                 \end{corollary}
                 """,
             )
@@ -427,16 +442,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem conditionalPaperTheorem (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{corollary}\label{cor:paper}
-                  \lean{MIPStarRE.conditionalPaperTheorem}
+                  \lean{PaperLib.conditionalPaperTheorem}
                 \end{corollary}
                 """,
             )
@@ -452,16 +467,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem cascadeBound (h : ExtraHypotheses params k eps) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:cascade}
-                  \lean{MIPStarRE.cascadeBound}
+                  \lean{PaperLib.cascadeBound}
                 \end{theorem}
                 """,
             )
@@ -478,16 +493,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem (hinput : OrthonormalizationInput params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -504,25 +519,29 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
-                theorem paperTheorem (hbound : SliceBoundednessInput strategy family zeta) :
+                theorem paperTheorem (hbound : BoundednessInput strategy family zeta) :
                     Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
+            _write_register(root, faithful_boundary_tokens={
+                "BoundednessInput": "faithful encoding of the paper's boundedness "
+                "hypothesis; see references/source-paper/commutativity.tex:29-36"
+            })
             result = audit.run_audit(root)
             self.assertEqual(result.scanned_refs, 1)
             self.assertEqual(result.findings, ())
             self.assertEqual(len(result.faithful_boundary_findings), 1)
-            self.assertEqual(result.faithful_boundary_findings[0].token, "SliceBoundednessInput")
+            self.assertEqual(result.faithful_boundary_findings[0].token, "BoundednessInput")
 
     def test_cascade_hypotheses_is_classified_as_faithful_boundary(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -530,25 +549,36 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem (h : CascadeHypotheses params k eps) :
                     Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
+            _write_register(root, faithful_boundary_tokens={
+                "CascadeHypotheses": "faithful encoding of the standing numeric "
+                "regime; see references/source-paper/inductive_step.tex:187-234"
+            })
             result = audit.run_audit(root)
             self.assertEqual(result.scanned_refs, 1)
             self.assertEqual(result.findings, ())
             self.assertEqual(len(result.faithful_boundary_findings), 1)
             self.assertEqual(result.faithful_boundary_findings[0].token, "CascadeHypotheses")
+
+            # Without the register the same header is a finding: the register
+            # is what classifies it, and it is empty in a fresh repository.
+            (root / audit.REGISTER_PATH).unlink()
+            plain = audit.run_audit(root)
+            self.assertEqual(plain.faithful_boundary_findings, ())
+            self.assertEqual(len(plain.findings), 1)
 
     def test_assumptions_bundle_in_paper_facing_header_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -556,17 +586,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hasExtraAssumptions : ExtraAssumptions params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -583,17 +613,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hasExtraAssumption : ExtraAssumption params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -609,17 +639,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (h : InternalObligationWrapper params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -636,17 +666,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (bundle : CompletionBundle params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -662,17 +692,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (h : UnfaithfulCompletion params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -688,17 +718,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hwitness : CompletionWitness params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -714,17 +744,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hcompat : CompletionCompatibilityData params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -740,17 +770,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (data : CompletionData params) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -766,20 +796,24 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (data : QXPLayerData Outcome ι) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
+            _write_register(root, source_context_tokens={
+                "QXPLayerData": "layer data of the fixed construction context; "
+                "see references/source-paper/self_improvement.tex:635-671"
+            })
             result = audit.run_audit(root, broad_vocabulary=True)
             self.assertEqual(result.findings, ())
             self.assertEqual(len(result.source_context_findings), 1)
@@ -791,20 +825,24 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hRank : RankReductionWitness psi A zeta qLayer) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{lemma}
                 """,
             )
+            _write_register(root, source_context_tokens={
+                "RankReductionWitness": "witness of the rank-reduction step; "
+                "see references/source-paper/rank_reduction.tex:12-48"
+            })
             result = audit.run_audit(root, broad_vocabulary=True)
             self.assertEqual(result.findings, ())
             self.assertEqual(len(result.source_context_findings), 1)
@@ -816,27 +854,31 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem classicalTestSoundness
-                    (hPS : PolishchukSpielmanClassicalSoundnessStatement params a eps kappa) :
+                    (hPS : ExternalClassicalSoundnessStatement params a eps kappa) :
                     Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:classical-test-soundness}
-                  \lean{MIPStarRE.classicalTestSoundness}
+                  \lean{PaperLib.classicalTestSoundness}
                 \end{theorem}
                 """,
             )
+            _write_register(root, external_citation_tokens={
+                "ExternalClassicalSoundnessStatement": "interface of the external "
+                "theorem quoted in references/source-paper/introduction.tex:69-92"
+            })
             result = audit.run_audit(root, broad_vocabulary=True)
             self.assertEqual(result.findings, ())
             self.assertEqual(len(result.external_citation_findings), 1)
             self.assertEqual(
                 result.external_citation_findings[0].token,
-                "PolishchukSpielmanClassicalSoundnessStatement",
+                "ExternalClassicalSoundnessStatement",
             )
 
     def test_external_statement_interface_is_not_hidden_in_strict_mode(self) -> None:
@@ -845,18 +887,18 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem classicalTestSoundness
-                    (hPS : PolishchukSpielmanClassicalSoundnessStatement params a eps kappa) :
+                    (hPS : ExternalClassicalSoundnessStatement params a eps kappa) :
                     Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:classical-test-soundness}
-                  \lean{MIPStarRE.classicalTestSoundness}
+                  \lean{PaperLib.classicalTestSoundness}
                 \end{theorem}
                 """,
             )
@@ -870,16 +912,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem_ofCompletionBundle (h : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:paper}
-                  \lean{MIPStarRE.paperTheorem_ofCompletionBundle}
+                  \lean{PaperLib.paperTheorem_ofCompletionBundle}
                 \end{lemma}
                 """,
             )
@@ -894,16 +936,16 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem (reproducer : P) (repackaged : Q) : R := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -917,18 +959,18 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem paperTheorem
                     (hbaseBridge : BaseBridgeHypotheses)
                     (residualDomination : P) : Q := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{theorem}\label{thm:paper}
-                  \lean{MIPStarRE.paperTheorem}
+                  \lean{PaperLib.paperTheorem}
                 \end{theorem}
                 """,
             )
@@ -944,17 +986,17 @@ class PaperFacingProofDebtAuditTests(unittest.TestCase):
             _write_repo(
                 root,
                 """
-                namespace MIPStarRE
+                namespace PaperLib
 
                 theorem collisionResidualBound (h : P) :
                     generalizeBCollisionResidual params strategy G g ≤ error := by
                   sorry
 
-                end MIPStarRE
+                end PaperLib
                 """,
                 r"""
                 \begin{lemma}\label{lem:collision}
-                  \lean{MIPStarRE.collisionResidualBound}
+                  \lean{PaperLib.collisionResidualBound}
                 \end{lemma}
                 """,
             )

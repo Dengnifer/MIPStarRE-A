@@ -112,11 +112,13 @@ def pr_create(title: str, head: str, base: str, body: str) -> int:
 
 # Descriptive labels only: never inherit scheduling, approval or owner state.
 # GitHub remains authoritative for existence; see issues-prs.md section 1.
+# Work-kind labels, which every project of the kit shares.  A project that also
+# labels by paper or chapter (`paper-<arxiv-id>`, `<chapter>-analysis`, ...) adds
+# those names here; a label that is not listed is simply not inherited.
 DESCRIPTIVE_LABELS = frozenset({
     "formalization", "documentation", "infrastructure", "cleanup", "refactor",
     "ci", "proof", "proof-infra", "sorry-elimination", "statement-fix", "mismatch",
-    "blueprint", "blueprint-sync", "blueprint-only", "2009.12982",
-    "paper-1904.05870", "paper-2001.04383", "qpbt-analysis", "qpbt-test",
+    "blueprint", "blueprint-sync", "blueprint-only",
     "bug", "enhancement",
 })
 

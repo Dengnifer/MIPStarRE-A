@@ -13,6 +13,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import io
+import json
 import shutil
 import subprocess
 import sys
@@ -95,19 +96,19 @@ UNMARKED_EXAMPLE_CHAPTER = r"""
 # declaration under this track's Lean root is this track's to mark.
 SHARED_CHAPTER = r"""
 \begin{lemma}[Shared chapter, this track]\label{lem:shared-track}
-  \lean{MIPStarRE.Fixture.shared}
+  \lean{PaperLib.Fixture.shared}
   A node of this track living outside the track's own chapters.
 \end{lemma}
 """
 
 MARKED_SHARED_CHAPTER = SHARED_CHAPTER.replace(
-    "\\lean{MIPStarRE.Fixture.shared}",
-    "\\lean{MIPStarRE.Fixture.shared}\n  \\leanok",
+    "\\lean{PaperLib.Fixture.shared}",
+    "\\lean{PaperLib.Fixture.shared}\n  \\leanok",
 )
 
 FOREIGN_CHAPTER = r"""
 \begin{lemma}[Shared chapter, another track]\label{lem:shared-foreign}
-  \lean{MIPStarRE.Other.shared}
+  \lean{PaperLib.Other.shared}
   Another track's node, unmarked; not this track's criterion.
 \end{lemma}
 """
@@ -134,7 +135,7 @@ import Mathlib
 
 namespace Fixture
 
--- source: MIPStarRE/Fixture/Good.lean:6-6  (Fixture.good)
+-- source: PaperLib/Fixture/Good.lean:6-6  (Fixture.good)
 theorem good : True := sorry
 
 end Fixture
@@ -144,10 +145,10 @@ end Fixture
 def track_for(root: Path) -> gate.Track:
     return gate.Track(
         name="fixture",
-        lean_root="MIPStarRE/Fixture",
+        lean_root="PaperLib/Fixture",
         headline=(("Fixture.good", "thm:fixture"),),
         gap_register="docs/paper-gaps/fixture-register.md",
-        axiom_audit="MIPStarRE/Fixture/AxiomAudit.lean",
+        axiom_audit="PaperLib/Fixture/AxiomAudit.lean",
         blueprint_chapters=("blueprint/src/chapter/ch99_fixture.tex",),
         leanok_exemptions="docs/completion/fixture-leanok-exemptions.md",
         comparator_doc="docs/comparator.md",
@@ -184,8 +185,8 @@ class GateFixture(unittest.TestCase):
 
         (self.root / "results/telemetry/owner-tools").mkdir(parents=True)
         shutil.copy(ESTIMATE, self.root / gate.ESTIMATE_SH)
-        write(self.root, "MIPStarRE/Fixture/Good.lean", GOOD_LEAN)
-        write(self.root, "MIPStarRE/Fixture/AxiomAudit.lean", GOOD_AUDIT)
+        write(self.root, "PaperLib/Fixture/Good.lean", GOOD_LEAN)
+        write(self.root, "PaperLib/Fixture/AxiomAudit.lean", GOOD_AUDIT)
         write(self.root, "docs/paper-gaps/fixture-register.md", GOOD_REGISTER)
         write(self.root, "blueprint/src/chapter/ch99_fixture.tex", GOOD_CHAPTER)
         write(
@@ -245,7 +246,7 @@ class SharedRuleTests(GateFixture):
 
     @unittest.skipUnless(shutil.which("bash"), "bash is required")
     def test_agrees_with_the_estimate_on_a_plain_file(self) -> None:
-        lean = write(self.root, "MIPStarRE/Fixture/Sites.lean", BAD_LEAN)
+        lean = write(self.root, "PaperLib/Fixture/Sites.lean", BAD_LEAN)
         counted = subprocess.run(
             ["bash", str(ESTIMATE), "--count-sorry-sites", str(lean)],
             check=True, capture_output=True, text=True,
@@ -261,7 +262,7 @@ class SharedRuleTests(GateFixture):
     def test_never_counts_more_than_the_estimate(self) -> None:
         """Stronger comment stripping may drop sites; it may never add any."""
         text = GOOD_LEAN + "\n/-\ntheorem commented : True := sorry\n-/\n"
-        lean = write(self.root, "MIPStarRE/Fixture/Commented.lean", text)
+        lean = write(self.root, "PaperLib/Fixture/Commented.lean", text)
         counted = int(
             subprocess.run(
                 ["bash", str(ESTIMATE), "--count-sorry-sites", str(lean)],
@@ -280,20 +281,20 @@ class ProofIntegrityTests(GateFixture):
         self.assertEqual(crit.status, gate.PASS, crit.evidence)
 
     def test_every_kind_of_debt_is_reported_with_file_and_line(self) -> None:
-        write(self.root, "MIPStarRE/Fixture/Sites.lean", BAD_LEAN)
+        write(self.root, "PaperLib/Fixture/Sites.lean", BAD_LEAN)
         crit = gate.criterion_proof_integrity(self.root, self.track)
         self.assertEqual(crit.status, gate.FAIL)
         kinds = {line.split(": ")[1] for line in crit.evidence}
         self.assertEqual(kinds, {"sorry", "admit", "native", "axiom declaration"})
         for line in crit.evidence:
             path, number, _ = line.split(":", 2)
-            self.assertEqual(path, "MIPStarRE/Fixture/Sites.lean")
+            self.assertEqual(path, "PaperLib/Fixture/Sites.lean")
             self.assertGreater(int(number), 0)
 
     def test_local_name_constant_on_a_continuation_line_is_not_a_declaration(self) -> None:
         write(
             self.root,
-            "MIPStarRE/Fixture/Bounds.lean",
+            "PaperLib/Fixture/Bounds.lean",
             "theorem bound (constant error : Nat) : 0 ≤ 8 * error +\n"
             "    constant * (error + error) := by\n"
             "  omega\n",
@@ -302,7 +303,7 @@ class ProofIntegrityTests(GateFixture):
         self.assertEqual(crit.status, gate.PASS, crit.evidence)
 
     def test_empty_tree_fails_rather_than_passing_vacuously(self) -> None:
-        shutil.rmtree(self.root / "MIPStarRE/Fixture")
+        shutil.rmtree(self.root / "PaperLib/Fixture")
         crit = gate.criterion_proof_integrity(self.root, self.track)
         self.assertEqual(crit.status, gate.FAIL)
 
@@ -317,21 +318,21 @@ class HeadlineAxiomTests(GateFixture):
         self.assertTrue(crit.notes)
 
     def test_missing_audit_file_fails(self) -> None:
-        (self.root / "MIPStarRE/Fixture/AxiomAudit.lean").unlink()
+        (self.root / "PaperLib/Fixture/AxiomAudit.lean").unlink()
         crit = gate.criterion_headline_axioms(self.root, self.track)
         self.assertEqual(crit.status, gate.FAIL)
 
     def test_uncovered_headline_theorem_fails(self) -> None:
-        write(self.root, "MIPStarRE/Fixture/AxiomAudit.lean", "import Fixture\n")
+        write(self.root, "PaperLib/Fixture/AxiomAudit.lean", "import Fixture\n")
         crit = gate.criterion_headline_axioms(self.root, self.track)
         self.assertEqual(crit.status, gate.FAIL)
         self.assertIn("Fixture.good", crit.evidence[0])
 
-    def test_the_qpbt_audit_command_also_counts(self) -> None:
-        """`MIPStarRE/QPBT/Test/AxiomAudit.lean` defines `audit_standard_axioms`."""
+    def test_the_other_audit_command_spelling_also_counts(self) -> None:
+        """Either `assert_standard_axioms` or `audit_standard_axioms` covers it."""
         write(
             self.root,
-            "MIPStarRE/Fixture/AxiomAudit.lean",
+            "PaperLib/Fixture/AxiomAudit.lean",
             "import Fixture\n\naudit_standard_axioms Fixture.good\n",
         )
         crit = gate.criterion_headline_axioms(self.root, self.track)
@@ -340,7 +341,7 @@ class HeadlineAxiomTests(GateFixture):
     def test_commented_assertion_does_not_count(self) -> None:
         write(
             self.root,
-            "MIPStarRE/Fixture/AxiomAudit.lean",
+            "PaperLib/Fixture/AxiomAudit.lean",
             "-- assert_standard_axioms Fixture.good\n",
         )
         crit = gate.criterion_headline_axioms(self.root, self.track)
@@ -534,7 +535,7 @@ class ComparatorTests(GateFixture):
 
 class DocsTruthfulTests(GateFixture):
     def test_deferred_while_proof_debt_remains(self) -> None:
-        write(self.root, "MIPStarRE/Fixture/Sites.lean", BAD_LEAN)
+        write(self.root, "PaperLib/Fixture/Sites.lean", BAD_LEAN)
         integrity = gate.criterion_proof_integrity(self.root, self.track)
         crit = gate.criterion_docs_truthful(self.root, self.track, integrity)
         self.assertEqual(crit.status, gate.DEFERRED)
@@ -610,7 +611,7 @@ class DriverTests(GateFixture):
         self.assertIn('"exit": 0', text)
 
     def test_failing_tree_exits_one(self) -> None:
-        write(self.root, "MIPStarRE/Fixture/Sites.lean", BAD_LEAN)
+        write(self.root, "PaperLib/Fixture/Sites.lean", BAD_LEAN)
         code, text = self.run_gate(
             "check", "--track", "fixture", "--repo-root", str(self.root),
             "--commit", self.head,
@@ -619,10 +620,16 @@ class DriverTests(GateFixture):
         self.assertIn("FAIL: C1", text)
 
     def test_unknown_track_exits_two(self) -> None:
-        code, _ = self.run_gate(
+        code, text = self.run_gate(
             "check", "--track", "nope", "--repo-root", str(self.root)
         )
         self.assertEqual(code, 2)
+        self.assertIn("unknown track", text)
+
+    def test_list_prints_the_registered_track_names(self) -> None:
+        code, text = self.run_gate("list", "--repo-root", str(self.root))
+        self.assertEqual(code, 0)
+        self.assertIn("fixture", text)
 
     def test_broken_shared_rule_exits_two(self) -> None:
         (self.root / gate.ESTIMATE_SH).write_text("#!/bin/sh\n", encoding="utf-8")
@@ -655,62 +662,167 @@ class DriverTests(GateFixture):
         self.assertIn("FAIL: C7", text)
 
 
-class RegisteredTrackTests(unittest.TestCase):
-    def test_qpbt_track_is_registered_with_its_headline_theorems(self) -> None:
-        track = gate.TRACKS["qpbt"]
-        names = [name for name, _ in track.headline]
-        self.assertIn("MIPStarRE.QPBT.pauli_soundness", names)
-        self.assertIn("MIPStarRE.QPBT.pauli_soundness_qubit", names)
-        self.assertIn("MIPStarRE.QPBT.exists_spcc_value_one", names)
-        self.assertIn("MIPStarRE.QPBT.exists_ld_soundness", names)
+@unittest.skipUnless(shutil.which("git"), "git is required")
+class NoTrackRegisteredTests(unittest.TestCase):
+    """A freshly bootstrapped repository: the gate explains, it does not crash."""
 
-    def test_registered_truthful_docs_exist_in_this_repository(self) -> None:
-        """C6 now fails on a missing doc, so the registry may not name a ghost."""
-        for track in gate.TRACKS.values():
-            for doc in track.truthful_docs:
+    def run_gate(self, *argv: str) -> tuple[int, str, str]:
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = gate.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="completion-gate-empty-")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        write(self.root, "local/project.json", json.dumps({"schema": 1}))
+
+    def test_check_exits_two_and_points_at_the_bootstrap_protocol(self) -> None:
+        code, _, err = self.run_gate(
+            "check", "--track", "main", "--repo-root", str(self.root)
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("no track is registered in local/project.json", err)
+        self.assertIn("local/protocols/bootstrap.md", err)
+
+    def test_list_prints_no_track_name_and_exits_zero(self) -> None:
+        code, out, err = self.run_gate("list", "--repo-root", str(self.root))
+        self.assertEqual(code, 0)
+        self.assertEqual(out.strip(), "")
+        self.assertIn("no track is registered", err)
+
+    def test_a_broken_project_file_exits_two_with_a_message(self) -> None:
+        write(self.root, "local/project.json", "{not json")
+        code, _, err = self.run_gate(
+            "check", "--track", "main", "--repo-root", str(self.root)
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("not valid JSON", err)
+
+
+class RegisteredTrackTests(unittest.TestCase):
+    """The registry is `local/project.json`; these tests hold for any project.
+
+    A freshly bootstrapped repository registers no track, so most of them are
+    vacuous there and gain teeth as soon as the first track is written.
+    """
+
+    def tracks(self) -> dict[str, gate.Track]:
+        """The tracks of THIS repository whose mathematics has started.
+
+        `scripts/bootstrap_project.py` registers the project's track on the first
+        commit with `headline: []` and `blueprint_chapters: []` — the blueprint
+        stage fills them, and the paths it will name (the gap register, the
+        exemption table, the axiom audit) are written with it.  Holding a track
+        to those rows before then would fail every freshly instantiated project
+        on its own first commit, so an unstarted track is out of scope here; the
+        completion gate still reports it as unfinished, which is what it is.
+        """
+        started = {}
+        for name, track in gate.load_tracks(REPO_ROOT).items():
+            if not track.headline:
+                continue
+            started[name] = track
+        return started
+
+    def test_a_registered_track_is_either_started_or_empty_by_construction(self) -> None:
+        """An unstarted track carries no half-filled mathematics."""
+        for name, track in gate.load_tracks(REPO_ROOT).items():
+            if track.headline:
+                continue
+            self.assertEqual(
+                track.blueprint_chapters, (),
+                f"track {name} lists blueprint chapters but no headline theorem: "
+                "the two are written together by the blueprint stage",
+            )
+
+    def test_every_registered_track_names_paths_that_exist_here(self) -> None:
+        """Each criterion rests on its registered path, so none may be a ghost."""
+        for name, track in self.tracks().items():
+            for field_name in (
+                "gap_register",
+                "axiom_audit",
+                "leanok_exemptions",
+                "comparator_doc",
+                "expected_challenge",
+                "artifact_script",
+            ):
+                value = getattr(track, field_name)
+                if not value:
+                    continue
                 self.assertTrue(
-                    (REPO_ROOT / doc).exists(),
-                    f"track {track.name} registers a truthful doc that does "
-                    f"not exist: {doc}",
+                    (REPO_ROOT / value).exists(),
+                    f"track {name} registers {field_name} {value}, which is not "
+                    "in this repository",
+                )
+            for rel in (*track.truthful_docs, *track.artifact_files, *track.blueprint_chapters):
+                self.assertTrue(
+                    (REPO_ROOT / rel).exists(),
+                    f"track {name} registers {rel}, which is not in this repository",
                 )
 
-    def test_the_real_qpbt_audit_covers_every_headline_theorem(self) -> None:
-        """C2 must see the audit module this repository actually ships."""
-        track = gate.TRACKS["qpbt"]
-        if not (REPO_ROOT / track.axiom_audit).exists():
-            self.skipTest(f"{track.axiom_audit} is not in this tree yet")
-        crit = gate.criterion_headline_axioms(REPO_ROOT, track)
-        self.assertEqual(crit.status, gate.DELEGATED, crit.evidence)
+    def test_every_registered_track_names_its_headline_theorems(self) -> None:
+        for name, track in self.tracks().items():
+            self.assertTrue(track.headline, f"track {name} registers no headline theorem")
+            for theorem, label in track.headline:
+                self.assertIn(".", theorem, f"track {name}: {theorem} is not a full name")
+                self.assertIn(":", label, f"track {name}: {label} is not a blueprint label")
 
-    def test_the_registered_expected_challenge_exists_in_this_repository(self) -> None:
-        """C5 rests on the expected copy, so the registry may not name a ghost."""
-        for track in gate.TRACKS.values():
-            self.assertTrue(
-                (REPO_ROOT / track.expected_challenge).exists(),
-                f"track {track.name} registers an expected challenge that does "
-                f"not exist: {track.expected_challenge}",
-            )
+    def test_a_repository_with_no_track_registers_none(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            self.assertEqual(gate.load_tracks(Path(td)), {})
 
-    def test_the_real_qpbt_scope_covers_every_chapter_linking_the_track(self) -> None:
-        """A QPBT node in a chapter section 6 does not list is still in C4."""
-        track = gate.TRACKS["qpbt"]
-        chapters = REPO_ROOT / "blueprint/src/chapter"
-        if not chapters.is_dir():
-            self.skipTest("no blueprint chapters in this tree")
-        scope = {chapter for chapter, _ in gate.blueprint_scope(REPO_ROOT, track)}
-        for path in sorted(chapters.glob("*.tex")):
-            text = path.read_text(encoding="utf-8", errors="replace")
-            if not gate.links_to_track(text, track):
-                continue
-            self.assertIn(
-                f"blueprint/src/chapter/{path.name}",
-                scope,
-                f"{path.name} carries a Lean link under {track.lean_root} and "
-                "is outside C4's scope",
+    def test_a_track_written_into_the_project_file_is_registered(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            write(
+                root,
+                "local/project.json",
+                json.dumps(
+                    {
+                        "schema": 1,
+                        "project": {"name": "Widget", "lean_root": "Widget", "track": "core"},
+                        "tracks": {
+                            "core": {
+                                "lean_root": "Widget/Core",
+                                "headline": [["Widget.Core.main", "thm:main"]],
+                                "gap_register": "docs/paper-gaps/core.md",
+                                "axiom_audit": "Widget/Core/Test/AxiomAudit.lean",
+                                "blueprint_chapters": ["blueprint/src/chapter/ch01.tex"],
+                                "leanok_exemptions": "docs/completion/core.md",
+                                "expected_challenge": "scripts/comparator/expected/C.expected",
+                                "truthful_docs": ["README.md"],
+                                "artifact_files": ["README.md"],
+                            }
+                        },
+                    }
+                ),
             )
+            tracks = gate.load_tracks(root)
+            self.assertEqual(sorted(tracks), ["core"])
+            track = tracks["core"]
+            self.assertEqual(track.name, "core")
+            self.assertEqual(track.lean_root, "Widget/Core")
+            self.assertEqual(track.headline, (("Widget.Core.main", "thm:main"),))
+            self.assertEqual(track.blueprint_chapters, ("blueprint/src/chapter/ch01.tex",))
+            # Unset fields fall back to the documented defaults rather than
+            # failing the load half-way through a bootstrap.
+            self.assertEqual(track.comparator_doc, "docs/comparator.md")
+            self.assertEqual(track.artifact_script, "scripts/make_artifact.sh")
+
+    def test_the_track_fields_are_the_ones_the_project_file_documents(self) -> None:
+        import project_config
+
+        self.assertEqual(
+            {f.name for f in dataclasses.fields(gate.Track)},
+            set(project_config.TRACK_FIELDS),
+            "`Track` gained or lost a field: name it in "
+            "scripts/project_config.py TRACK_FIELDS too",
+        )
 
     def test_registry_and_protocol_agree_on_the_registered_paths(self) -> None:
-        """§6 rows and the `TRACKS` entry are one commit's work, so they match."""
+        """Section 6 rows and the registry are one commit's work, so they match."""
         protocol = (REPO_ROOT / "local/protocols/completion.md").read_text(
             encoding="utf-8"
         )
@@ -735,7 +847,7 @@ class RegisteredTrackTests(unittest.TestCase):
             "`Track` gained or lost a field: name it here (and in section 6 of "
             "the protocol) so every path-valued field is still checked",
         )
-        for track in gate.TRACKS.values():
+        for name, track in self.tracks().items():
             registered: list[str] = []
             for fieldname in path_fields:
                 value = getattr(track, fieldname)
@@ -743,10 +855,12 @@ class RegisteredTrackTests(unittest.TestCase):
                     value if isinstance(value, tuple) else (value,)
                 )
             for rel in registered:
+                if not rel:
+                    continue
                 self.assertIn(
                     f"`{rel}`",
                     protocol,
-                    f"track {track.name} registers {rel}, which section 6 of "
+                    f"track {name} registers {rel}, which section 6 of "
                     "the protocol does not name",
                 )
 

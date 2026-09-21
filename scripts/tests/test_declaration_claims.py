@@ -22,11 +22,11 @@ import dup_scan  # noqa: E402
 LEMMA = """\
 import Mathlib
 
-namespace MIPStarRE.QPBT
+namespace PaperLib.Sample
 
 theorem already_on_main (n : Nat) : n = n := rfl
 
-end MIPStarRE.QPBT
+end PaperLib.Sample
 """
 
 
@@ -66,10 +66,10 @@ class RegistryUnitTests(unittest.TestCase):
     def test_conflict_detection_uses_short_names_too(self):
         dup_check.append_claim(self.path, dup_check.ClaimRow(
             ts="2026-09-17T10:00:00Z", action="claim", issue=100,
-            names=("MIPStarRE.QPBT.shared_name",)))
+            names=("PaperLib.Sample.shared_name",)))
         rows = dup_check.read_claims(self.path)
         conflicts = dup_check.claim_conflicts(
-            rows, 200, ["MIPStarRE.Games.shared_name"])
+            rows, 200, ["PaperLib.Games.shared_name"])
         self.assertEqual([issue.issue for _, issue in conflicts], [100])
         self.assertEqual(dup_check.claim_conflicts(rows, 200, ["Other.name"]), [])
 
@@ -96,7 +96,7 @@ class RegistryCliTests(unittest.TestCase):
         git(self.repo, "config", "user.email", "test@example.invalid")
         git(self.repo, "config", "user.name", "claims test")
         git(self.repo, "config", "commit.gpgsign", "false")
-        target = self.repo / "MIPStarRE" / "QPBT" / "A.lean"
+        target = self.repo / "PaperLib" / "Sample" / "A.lean"
         target.parent.mkdir(parents=True)
         target.write_text(LEMMA)
         git(self.repo, "add", "-A")
@@ -111,7 +111,7 @@ class RegistryCliTests(unittest.TestCase):
 
     def test_first_claim_of_a_new_name_is_recorded(self):
         code, out = self._claim("--issue", "601", "--name",
-                                "MIPStarRE.QPBT.brand_new", "--by", "meta")
+                                "PaperLib.Sample.brand_new", "--by", "meta")
         self.assertEqual(code, 0, out)
         rows = dup_check.read_claims(Path(self.registry))
         self.assertEqual(rows[0].issue, 601)
@@ -119,7 +119,7 @@ class RegistryCliTests(unittest.TestCase):
 
     def test_claim_of_a_name_main_already_has_is_refused(self):
         code, out = self._claim("--issue", "602", "--name",
-                                "MIPStarRE.QPBT.already_on_main")
+                                "PaperLib.Sample.already_on_main")
         self.assertEqual(code, 3)
         self.assertIn("DUPLICATE", out)
         self.assertIn("refusing", out)
@@ -127,31 +127,31 @@ class RegistryCliTests(unittest.TestCase):
 
     def test_force_records_the_refused_claim_but_still_exits_three(self):
         code, _ = self._claim("--issue", "602", "--name",
-                              "MIPStarRE.QPBT.already_on_main", "--force")
+                              "PaperLib.Sample.already_on_main", "--force")
         self.assertEqual(code, 3)
         self.assertEqual(len(dup_check.read_claims(Path(self.registry))), 1)
 
     def test_second_issue_claiming_the_same_name_is_refused(self):
         self.assertEqual(
-            self._claim("--issue", "603", "--name", "MIPStarRE.QPBT.shared")[0], 0)
-        code, out = self._claim("--issue", "604", "--name", "MIPStarRE.QPBT.shared")
+            self._claim("--issue", "603", "--name", "PaperLib.Sample.shared")[0], 0)
+        code, out = self._claim("--issue", "604", "--name", "PaperLib.Sample.shared")
         self.assertEqual(code, 3)
         self.assertIn("CONFLICT", out)
         self.assertIn("#603", out)
 
     def test_claims_check_is_read_only(self):
-        self._claim("--issue", "605", "--name", "MIPStarRE.QPBT.taken")
+        self._claim("--issue", "605", "--name", "PaperLib.Sample.taken")
         before = Path(self.registry).read_text()
         code, out = run_cli("claims-check", "--repo", str(self.repo),
                             "--registry", self.registry, "--json",
-                            "--issue", "606", "--name", "MIPStarRE.QPBT.taken")
+                            "--issue", "606", "--name", "PaperLib.Sample.taken")
         self.assertEqual(code, 3)
         self.assertEqual(json.loads(out)["claim_conflicts"][0]["issue"], 605)
         self.assertEqual(Path(self.registry).read_text(), before)
 
     def test_claim_against_an_absent_ref_is_advisory_not_clean(self):
         code, out = self._claim("--issue", "610", "--ref", "github/nope",
-                                "--name", "MIPStarRE.QPBT.already_on_main")
+                                "--name", "PaperLib.Sample.already_on_main")
         self.assertEqual(code, 4)
         self.assertIn("duplicate check skipped", out)
         self.assertNotIn("DUPLICATE", out)
@@ -161,17 +161,17 @@ class RegistryCliTests(unittest.TestCase):
         code, out = run_cli("claims-check", "--repo", str(self.repo),
                             "--registry", self.registry, "--ref", "github/nope",
                             "--issue", "611", "--name",
-                            "MIPStarRE.QPBT.already_on_main")
+                            "PaperLib.Sample.already_on_main")
         self.assertEqual(code, 4)
         self.assertIn("duplicate check skipped", out)
         self.assertNotIn("no duplicate", out)
 
     def test_claims_check_absent_ref_still_reports_a_registry_conflict(self):
-        self._claim("--issue", "612", "--name", "MIPStarRE.QPBT.contested")
+        self._claim("--issue", "612", "--name", "PaperLib.Sample.contested")
         code, out = run_cli("claims-check", "--repo", str(self.repo),
                             "--registry", self.registry, "--ref", "github/nope",
                             "--json", "--issue", "613", "--name",
-                            "MIPStarRE.QPBT.contested")
+                            "PaperLib.Sample.contested")
         self.assertEqual(code, 3)
         payload = json.loads(out)
         self.assertEqual(payload["claim_conflicts"][0]["issue"], 612)
@@ -185,29 +185,29 @@ class RegistryCliTests(unittest.TestCase):
 
     def test_predispatch_flags_a_claim_main_already_satisfies(self):
         self._claim("--issue", "608", "--name",
-                    "MIPStarRE.QPBT.already_on_main", "--force")
+                    "PaperLib.Sample.already_on_main", "--force")
         code, out = run_cli("predispatch", "--repo", str(self.repo),
                             "--registry", self.registry, "--issue", "608")
         self.assertEqual(code, 3)
-        self.assertIn("MIPStarRE/QPBT/A.lean:5", out)
+        self.assertIn("PaperLib/Sample/A.lean:5", out)
 
     def test_predispatch_on_a_clean_claim_exits_zero(self):
-        self._claim("--issue", "609", "--name", "MIPStarRE.QPBT.not_yet")
+        self._claim("--issue", "609", "--name", "PaperLib.Sample.not_yet")
         code, out = run_cli("predispatch", "--repo", str(self.repo),
                             "--registry", self.registry, "--issue", "609")
         self.assertEqual(code, 0, out)
 
     def test_release_then_reclaim_by_another_issue(self):
-        self._claim("--issue", "610", "--name", "MIPStarRE.QPBT.handover")
+        self._claim("--issue", "610", "--name", "PaperLib.Sample.handover")
         code, _ = run_cli("claims-release", "--repo", str(self.repo),
                           "--registry", self.registry, "--issue", "610")
         self.assertEqual(code, 0)
         self.assertEqual(
-            self._claim("--issue", "611", "--name", "MIPStarRE.QPBT.handover")[0], 0)
+            self._claim("--issue", "611", "--name", "PaperLib.Sample.handover")[0], 0)
 
     def test_claims_list_shows_open_claims_only(self):
-        self._claim("--issue", "612", "--name", "MIPStarRE.QPBT.one")
-        self._claim("--issue", "613", "--name", "MIPStarRE.QPBT.two")
+        self._claim("--issue", "612", "--name", "PaperLib.Sample.one")
+        self._claim("--issue", "613", "--name", "PaperLib.Sample.two")
         run_cli("claims-release", "--repo", str(self.repo),
                 "--registry", self.registry, "--issue", "612")
         code, out = run_cli("claims-list", "--repo", str(self.repo),

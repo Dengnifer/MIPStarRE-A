@@ -1,0 +1,35 @@
+% Fixture: a miniature paper with the structure the splitter cares about —
+% a preamble, frontmatter, three sections, an \appendix switch and a
+% bibliography block. Not mathematics; shape only.
+\documentclass{article}
+\usepackage{amsmath}
+\newcommand{\eps}{\varepsilon}
+
+\begin{document}
+\title{A miniature paper}
+\author{Fixture}
+\maketitle
+
+\begin{abstract}
+One paragraph of abstract.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+We state the problem and fix $\eps > 0$.
+
+\section{The main estimate}
+\label{sec:main}
+\begin{theorem}
+Every fixture is small.
+\end{theorem}
+
+\appendix
+
+\section{Deferred proofs}
+\label{sec:appendix}
+The proof of the theorem, deferred.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+\end{document}

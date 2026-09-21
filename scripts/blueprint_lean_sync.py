@@ -26,6 +26,11 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path as _Path  # noqa: E402  (path setup below needs it)
+
+sys.path.insert(0, str(_Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -897,7 +902,7 @@ def find_changed_decls_missing_from_blueprint(
     diff_head: str,
 ) -> list[LeanDecl]:
     """Return changed `def`/`theorem`/`lemma` declarations missing from blueprint."""
-    lean_root = root / "MIPStarRE"
+    lean_root = root / project_config.get(project_config.load(root), "project.lean_root")
     blueprint_src = root / "blueprint" / "src"
 
     blueprint_decl_names = {
@@ -1090,7 +1095,7 @@ def _github_api_request(
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "blueprint-lean-sync (MIPStarRE CI)",
+        "User-Agent": "blueprint-lean-sync (PaperLib CI)",
     }
     body = None
     if data is not None:
@@ -1334,7 +1339,7 @@ def run_sync(
     report_file: Path | None = None,
     update_lean_decls: bool = False,
 ) -> SyncReport:
-    lean_root = root / "MIPStarRE"
+    lean_root = root / project_config.get(project_config.load(root), "project.lean_root")
     blueprint_src = root / "blueprint" / "src"
     lean_decls_path = root / "blueprint" / "lean_decls"
 

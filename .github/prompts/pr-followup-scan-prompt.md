@@ -1,7 +1,6 @@
-A pull request has just been merged in the MIPStarRE repository — a Lean 4
-formalization of the MIP* = RE theorem and low-degree tests built on
-Mathlib. Scan the merged PR for
-genuine follow-up work and file it as issues.
+A pull request has just been merged in this repository — a Lean 4, Mathlib-based
+formalization of the research paper named in `local/project.json`. Scan the
+merged PR for genuine follow-up work and file it as issues.
 
 Use the GitHub MCP tools (not gh CLI) for all GitHub operations. The PR
 number and metadata are supplied in the runtime context appended to this
@@ -17,9 +16,8 @@ mining.
 Consult `docs/CONTRIBUTING.md` if you need context beyond this summary.
 
 **Prose norm.** Issue text should read like concise working notes by
-mathematicians and mathematical physicists. Use terminology from the
-MIP* = RE proof, low-degree tests, finite-field algebra, projective
-measurements, and operator algebras. Avoid automation slang such as "agent", "bot",
+mathematicians. Use the terminology of the paper being formalized, as the
+blueprint chapters use it. Avoid automation slang such as "agent", "bot",
 "AI-generated", "prompt", "handoff", "spin up", "nit", and "cleanup pass",
 unless the issue itself is explicitly about CI or repository automation.
 No emoji.
@@ -33,10 +31,10 @@ lecture-note location instead.
 
 **Label taxonomy** (see `docs/CONTRIBUTING.md`):
 - Area: `formalization`, `infrastructure`, `documentation`, `ci`, `cleanup`
-- Paper: `2009.12982`
-- Chapter / theorem-family: `ldt-basic`, `preliminaries`, `commutativity`,
-  `pasting`, `main-induction`, `proof`, `proof-infra`, `sorry-elimination`,
-  `statement-fix`, `mismatch`, `blueprint`, `blueprint-sync`
+- Paper: one label per arXiv id in `project.arxiv` of `local/project.json`
+- Chapter / theorem-family: one label per blueprint chapter, plus `proof`,
+  `proof-infra`, `sorry-elimination`, `statement-fix`, `mismatch`,
+  `blueprint`, `blueprint-sync`
 - Follow-ups: `follow-up` (create the label if it doesn't exist)
 
 ## Scan

@@ -19,7 +19,7 @@
 # name.
 #
 # Three of the four jobs are report-only, and that contract is load-bearing:
-# docs/stale_issue_audit.md:143-144 states "Do **not** let the script close
+# The stale-issue audit is report-only by contract: "do not let the script close
 # issues automatically", and DESIGN.md:88-90 generalizes it to the sweep and the
 # freshness audit.  Nothing in this script closes, edits or labels an issue.
 # `standup` is the sole writer, and it writes only its own digest file.
@@ -58,7 +58,7 @@ ${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/ and are never committed.
 External Lake cleanup uses MIPSTARRE_LAKE_ROOT when configured.
 
 Only `standup` writes anything into the repository, and only its own digest.
-The three audits are report-only by contract (docs/stale_issue_audit.md:143-144,
+The three audits are report-only by contract (see local/protocols/issues-prs.md,
 DESIGN.md:88-90): they never close, edit, or label an issue.
 USAGE
 }
@@ -380,7 +380,7 @@ PY
 #
 # Ports housekeeping.yml:216-309.  The export step is the only GitHub-dependent
 # part; it is back on GitHub, read through gh_common.py's snapshot, and
-# scripts/audit_stale_issues.py runs unchanged.  docs/stale_issue_audit.md:157-159
+# scripts/audit_stale_issues.py runs unchanged.  Citations are audited against
 # asks for a clean checkout of current main, so the working tree is checked and a
 # dirty tree is reported — a flagged citation is only meaningful against
 # committed code.
@@ -394,7 +394,7 @@ job_stale_audit() {
   local issues_json="${CACHE_ROOT}/open-issues.json"
 
   if command -v git >/dev/null 2>&1 && [ -n "$(git -C "${REPO_ROOT}" status --porcelain 2>/dev/null || true)" ]; then
-    printf 'note: the working tree is dirty; citations are audited against the files on disk, not against committed main (docs/stale_issue_audit.md:157-159).\n' >&2
+    printf 'note: the working tree is dirty; citations are audited against the files on disk, not against committed main.\n' >&2
   fi
 
   note "stale-audit: reading open issues from GitHub"
@@ -451,7 +451,7 @@ for issue in flagged:
     for decl in issue.get("missing_decls", []):
         print(f"      unresolved declaration: {decl}")
 print("Report-only: nothing was closed, edited or labelled. "
-      "Human triage decides (docs/stale_issue_audit.md:143-144).")
+      "Human triage decides; this audit never closes anything.")
 PY
   note "stale-audit: reports in ${REPORT_DIR}/stale-issue-audit.{json,txt}"
 }
@@ -555,7 +555,7 @@ with open(sys.argv[1], encoding="utf-8") as handle:
     data = json.load(handle)
 missing = data.get("missing_paths", [])
 toolchain = (data.get("toolchain") or {}).get("mismatches", [])
-submodules = (data.get("ldt_submodule_count") or {}).get("mismatches", [])
+submodules = (data.get("submodule_counts") or {}).get("mismatches", [])
 print(f"flagged: {bool(data.get('flagged'))}; missing paths: {len(missing)}; "
       f"toolchain mismatches: {len(toolchain)}; submodule-count mismatches: "
       f"{len(submodules)}")

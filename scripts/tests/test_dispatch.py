@@ -31,9 +31,38 @@ router = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(router)
 
 
+#: Two model names for the fixtures.  The kit itself configures none, so every
+#: test that wants a concrete model writes a `local/project.json` naming these
+#: and points the policy at it with MIPSTARRE_PROJECT_ROOT.
+ROUTINE_MODEL = "demo-routine-model"
+HARD_MODEL = "demo-hard-model"
+MAIN_MODEL = "demo-main-model"
+
+
+def write_project_config(root: Path) -> Path:
+    """Write a `local/project.json` that names a routine and a hard worker model."""
+    (root / "local").mkdir(parents=True, exist_ok=True)
+    (root / "local" / "project.json").write_text(json.dumps({
+        "schema": 1,
+        "session": {"main": {"model": MAIN_MODEL},
+                    "workers": {"model": ROUTINE_MODEL, "hard_model": HARD_MODEL}},
+    }), encoding="utf-8")
+    return root
+
+
+def git_init_with_commit(repo: Path) -> None:
+    """A throwaway repository with exactly one commit, for tests that need a HEAD."""
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    (repo / "AGENTS.md").write_text("# Test repository\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo), "add", "AGENTS.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "-c", "user.name=Test", "-c",
+                    "user.email=test@test", "commit", "-qm", "initial fixture"], check=True)
+
+
 def copy_model_policy(local_bin: Path) -> None:
     shutil.copy2(DISPATCH.with_name('model_policy.py'), local_bin / 'model_policy.py')
     shutil.copy2(REPO_ROOT / 'local/model-policy.json', local_bin.parent / 'model-policy.json')
+    write_project_config(local_bin.parent.parent)
 
 
 
@@ -76,7 +105,7 @@ class DispatchCommandTests(unittest.TestCase):
             primary = home / ".codex"
             primary.mkdir()
             (primary / "config.toml").write_text('model = "gpt-config-default"\n')
-            second = (home / ".cache/mipstarre-dev/codex-home-yxy"
+            second = (home / ".cache/mipstarre-dev/codex-home-second"
                       if empty_second_home else root / "second")
             second.mkdir(parents=True)
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
@@ -162,9 +191,17 @@ class DispatchCommandTests(unittest.TestCase):
             return record
 
     def dispatch_command(
-        self, *extra: str, model: str = "gpt-6-astra", effort: str | None = "ultra",
+        self, *extra: str, model: str = HARD_MODEL, effort: str | None = "ultra",
         include_persona: bool = False, registry_rows: str = "", policy_data: dict | None = None,
     ) -> list[str]:
+        """Run dispatch.sh with --dry-run and return the codex command line.
+
+        `include_persona` needs a repository whose `main` CARRIES the persona
+        file: dispatch.sh reads personas from the trusted ref, never from the
+        working tree (DESIGN invariant 5), and a freshly instantiated project has
+        no commit yet.  So that case builds its own fixture repository, and
+        `self.last_worktree` says which root the command ran against.
+        """
         with tempfile.TemporaryDirectory() as cache_root:
             fake_bin = Path(cache_root) / "bin"
             fake_bin.mkdir()
@@ -174,7 +211,7 @@ class DispatchCommandTests(unittest.TestCase):
             home = Path(cache_root) / "home"
             rollout = home / ".codex/sessions/2026/09/06" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='demo-hard-model'))))
             env = os.environ.copy()
             env.update(
                 {
@@ -186,12 +223,14 @@ class DispatchCommandTests(unittest.TestCase):
                     "PATH": f"{fake_bin}{os.pathsep}{env.get('PATH', '')}",
                 }
             )
+            # The kit configures no model, so the policy is pointed at a fixture.
+            env["MIPSTARRE_PROJECT_ROOT"] = str(write_project_config(Path(cache_root) / "policy"))
             (Path(cache_root) / 'watchdog').mkdir()
             for account in router.ACCOUNTS:
                 (Path(cache_root) / 'watchdog' / f'max-codex-{account}').write_text('8')
             worktree = REPO_ROOT
             dispatch = DISPATCH
-            if registry_rows or policy_data is not None:
+            if registry_rows or policy_data is not None or include_persona:
                 worktree = Path(cache_root) / 'repo'
                 registry = worktree / 'results/telemetry/sessions.jsonl'
                 registry.parent.mkdir(parents=True)
@@ -201,6 +240,7 @@ class DispatchCommandTests(unittest.TestCase):
                 subprocess.run(['git', '-C', str(worktree), 'add', 'AGENTS.md'], check=True)
                 subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
                     'user.email=test@test', 'commit', '-qm', 'initial fixture'], check=True)
+                env["MIPSTARRE_PROJECT_ROOT"] = str(worktree)
                 dispatch = worktree / 'local/bin/dispatch.sh'
                 dispatch.parent.mkdir(parents=True)
                 for source in (DISPATCH, ROUTER, TELEMETRY):
@@ -208,9 +248,17 @@ class DispatchCommandTests(unittest.TestCase):
                 copy_model_policy(dispatch.parent)
                 if policy_data is not None:
                     (dispatch.parent.parent / 'model-policy.json').write_text(json.dumps(policy_data))
+                if include_persona:
+                    # dispatch.sh reads the persona from the trusted ref, so the
+                    # fixture repository has to carry it on `main`.
+                    personas = worktree / 'local' / 'personas'
+                    personas.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(REPO_ROOT / 'local/personas/mathfix.md',
+                                 personas / 'mathfix.md')
+                if policy_data is not None or include_persona:
                     subprocess.run(['git', '-C', str(worktree), 'add', 'local'], check=True)
                     subprocess.run(['git', '-C', str(worktree), '-c', 'user.name=Test', '-c',
-                        'user.email=test@test', 'commit', '-qm', 'policy fixture'], check=True)
+                        'user.email=test@test', 'commit', '-qm', 'fixture layer'], check=True)
                     subprocess.run(['git', '-C', str(worktree), 'branch', '-M', 'main'], check=True)
             dispatch_args = [str(dispatch), '--role', 'scout', '--issue', 'dispatch-argv',
                              '--worktree', str(worktree), '--sandbox', 'read-only',
@@ -231,6 +279,7 @@ class DispatchCommandTests(unittest.TestCase):
                 text=True,
             )
         self.last_dispatch_stdout = result.stdout
+        self.last_worktree = worktree
         command_line = next(
             line.removeprefix("command: ")
             for line in result.stdout.splitlines()
@@ -247,7 +296,7 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertTrue(argv[12].endswith(".last.md"))
         self.assertEqual(
             argv[13:17],
-            ["-m", "gpt-6-astra", "-c", "model_reasoning_effort=ultra"],
+            ["-m", "demo-hard-model", "-c", "model_reasoning_effort=ultra"],
         )
 
     def test_fresh_argv_keeps_all_exec_options_before_prompt(self) -> None:
@@ -262,7 +311,7 @@ class DispatchCommandTests(unittest.TestCase):
         self.assert_common_exec_options(argv)
         self.assertEqual(argv[17:], ["resume", "--", THREAD_ID, "<prompt>"])
 
-    def test_astra_preserves_selected_effort_for_every_role_and_resume(self) -> None:
+    def test_every_role_and_resume_keeps_the_selected_effort(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             for effort in (None, 'ultra'):
@@ -271,22 +320,23 @@ class DispatchCommandTests(unittest.TestCase):
                         argv = self.dispatch_command('--role', role, *extra, effort=effort)
                         self.assertIn('model_reasoning_effort=ultra', argv)
 
-    def test_sol_is_rejected_for_control_policy_jobs(self) -> None:
+    def test_the_routine_model_is_rejected_for_control_policy_jobs(self) -> None:
         for role in ('orc', 'prover', 'reviewer', 'simplifier', 'blueprint', 'splitter',
                      'scout', 'mathfix'):
             with self.assertRaises(subprocess.CalledProcessError):
-                self.dispatch_command('--role', role, model='gpt-5.6-sol')
+                self.dispatch_command('--role', role, model='demo-routine-model')
 
-    def test_astra_mathfix_selects_persona(self) -> None:
+    def test_mathfix_selects_its_persona(self) -> None:
         argv = self.dispatch_command('--role', 'mathfix', '--sandbox', 'workspace-write',
                                      '--persona-ref', 'main', include_persona=True)
-        self.assertEqual(argv[3:7], ['-C', str(REPO_ROOT), '--sandbox', 'workspace-write'])
+        self.assertEqual(argv[3:7],
+                         ['-C', str(self.last_worktree), '--sandbox', 'workspace-write'])
         self.assertIn('persona: main:local/personas/mathfix.md', self.last_dispatch_stdout)
         self.assertIn('# Persona: mathematical-gap repair', self.last_dispatch_stdout)
 
-    def test_mathfix_rejects_non_astra_dispatches(self) -> None:
-        for model, effort in (("gpt-5.6-sol", "ultra"),
-                              ("test-model", "ultra"), ("astra", "ultra")):
+    def test_mathfix_rejects_a_non_hard_model(self) -> None:
+        for model, effort in (("demo-routine-model", "ultra"),
+                              ("test-model", "ultra"), ("unconfigured-model", "ultra")):
             with self.subTest(model=model, effort=effort):
                 with self.assertRaises(subprocess.CalledProcessError) as failure:
                     self.dispatch_command("--role", "mathfix", model=model, effort=effort)
@@ -304,11 +354,12 @@ class DispatchCommandTests(unittest.TestCase):
         self.assertIn("mathfix", result.stdout)
 
     def test_registry_records_effective_requested_effort(self) -> None:
-        for model, effort in ((None, None), ('', 'ultra'), ('gpt-6-astra', 'ultra')):
+        # No --job-class: a routine dispatch, so the routine model is selected.
+        for model, effort in ((None, None), ('', 'ultra'), (ROUTINE_MODEL, 'ultra')):
             record = self.recorded_dispatch(model, effort=effort)
             self.assertEqual(record['requested_effort'], 'ultra')
             self.assertEqual(record['key_label'], 'unknown')
-            self.assertEqual(record['model'], 'gpt-6-astra')
+            self.assertEqual(record['model'], ROUTINE_MODEL)
             self.assertEqual(record['account'], 'primary')
 
     def test_secondary_checkpoint_continuation_preserves_budget_and_history(self) -> None:
@@ -320,13 +371,13 @@ class DispatchCommandTests(unittest.TestCase):
     def test_second_account_environment_and_failed_session_cleanup(self) -> None:
         record = self.recorded_dispatch(None, "second", exit_code=7)
         self.assertEqual(record["account"], "second")
-        self.assertEqual(record["model"], "gpt-6-astra")
+        self.assertEqual(record["model"], ROUTINE_MODEL)
         self.assertEqual(record["status"], "failed")
 
     def test_empty_secondary_home_uses_default_for_model_and_execution(self) -> None:
         record = self.recorded_dispatch(None, "second", empty_second_home=True)
         self.assertEqual(record["account"], "second")
-        self.assertEqual(record["model"], "gpt-6-astra")
+        self.assertEqual(record["model"], ROUTINE_MODEL)
 
     def test_account_argument_validation_and_override(self) -> None:
         for value in ("invalid", "", "secondary"):
@@ -462,7 +513,7 @@ class AgentEntrypointTests(unittest.TestCase):
             env = os.environ.copy()
             env.update(HOME=str(root), MIPSTARRE_CACHE_ROOT=str(root / 'cache'),
                        MIPSTARRE_AUTOMATION='', MIPSTARRE_AUTOFIX_ACTIVE='',
-                       MIPSTARRE_TRUSTED_REF='main', MIPSTARRE_AGENT_MODEL='gpt-6-astra',
+                       MIPSTARRE_TRUSTED_REF='main', MIPSTARRE_AGENT_MODEL='demo-hard-model',
                        PATH=f'{fake_bin}{os.pathsep}{env.get("PATH", "")}')
             result = subprocess.run([str(agent), '268', 'fixture task', '--role', 'scout',
                                      '--read-only'], cwd=repo, env=env, capture_output=True,
@@ -485,7 +536,7 @@ class AgentEntrypointTests(unittest.TestCase):
                 result, codex_launched, dispatched = self.run_agent('executable', exit_code)
                 self.assertEqual(result.returncode, exit_code, result.stderr)
                 self.assertFalse(codex_launched)
-                self.assertEqual(dispatched['model'], 'gpt-6-astra')
+                self.assertEqual(dispatched['model'], 'demo-hard-model')
                 args = dispatched['args']
                 for option, value in (('--role', 'scout'), ('--issue', 'pr268'),
                                       ('--pr', '268'), ('--sandbox', 'read-only'),
@@ -496,6 +547,20 @@ class AgentEntrypointTests(unittest.TestCase):
 
 
 class AccountRouterTests(unittest.TestCase):
+    def test_a_checkpoint_in_a_repository_without_a_commit_is_refused_clearly(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(['git', 'init', '-q', '-b', 'main', str(root)], check=True)
+            registry, budget, handoff = (root / name for name in ('registry', 'budget', 'handoff'))
+            budget.write_text(json.dumps(dict(anchor='original', attempts=8, attempt_limit=10,
+                                              working_seconds=15052, sessions=['prior'])))
+            registry.write_text(json.dumps(dict(name='prior', thread_id='thread',
+                account='primary', issue='scope', status='done', wall_s=2600)))
+            handoff.write_text(json.dumps(dict(previous_session='prior', checkpoint='HEAD',
+                                               budget_file=str(budget))))
+            with self.assertRaisesRegex(ValueError, 'not a commit reachable from HEAD'):
+                router.continuation(handoff, registry, root, 'scope')
+
     def test_resume_continuation_accepts_unnamed_legacy_affinity_in_memory(self) -> None:
         legacy = dict(thread_id=THREAD_ID, account='primary')
         registry = Path('/unused-registry')
@@ -531,6 +596,11 @@ class AccountRouterTests(unittest.TestCase):
     def test_continuation_charges_completed_time_even_after_a_legacy_resume(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            # Its own repository with one commit: a freshly instantiated project has
+            # no HEAD yet, and this test must not depend on the kit's own history.
+            worktree = root / 'worktree'
+            worktree.mkdir()
+            git_init_with_commit(worktree)
             registry, budget, handoff = (root / name for name in ('registry', 'budget', 'handoff'))
             original = dict(anchor='original', attempts=7, attempt_limit=10,
                             working_seconds=12452, sessions=['prior', 'resumed'])
@@ -550,19 +620,24 @@ class AccountRouterTests(unittest.TestCase):
                                {'anchor': 'reset'}, {'attempts': 1}):
                     budget.write_text(json.dumps(charged | change))
                     with self.assertRaises(ValueError):
-                        router.continuation(handoff, registry, REPO_ROOT, 'scope')
+                        router.continuation(handoff, registry, worktree, 'scope')
                 budget.write_text(json.dumps(charged))
-                self.assertEqual(router.continuation(handoff, registry, REPO_ROOT, 'scope')[
+                self.assertEqual(router.continuation(handoff, registry, worktree, 'scope')[
                     'budget']['working_seconds'], required)
                 other = root / 'reset-budget'
                 other.write_text(budget.read_text())
                 handoff.write_text(json.dumps(request | {'budget_file': str(other)}))
                 with self.assertRaises(ValueError):
-                    router.continuation(handoff, registry, REPO_ROOT, 'scope')
+                    router.continuation(handoff, registry, worktree, 'scope')
 
     def setUp(self) -> None:
+        # The kit configures no model, so the router's policy reads a fixture project.
+        fixture = tempfile.TemporaryDirectory()
+        self.addCleanup(fixture.cleanup)
+        write_project_config(Path(fixture.name))
         policy_context = mock.patch.dict(os.environ, MIPSTARRE_JOB_CLASS='control_policy',
-                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture')
+                                         MIPSTARRE_HARDNESS_REASON='Routing-control test fixture',
+                                         MIPSTARRE_PROJECT_ROOT=fixture.name)
         policy_context.start()
         self.addCleanup(policy_context.stop)
 
@@ -615,14 +690,16 @@ class AccountRouterTests(unittest.TestCase):
             binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
             binary.chmod(0o755)
             environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
-                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'),
+                               MIPSTARRE_PROJECT_ROOT=str(write_project_config(home)),
+                               PATH=f"{binary.parent}{os.pathsep}{os.environ.get('PATH', '')}")
             shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
             for arguments, expected in (([], 'ultra'), (['-c', 'model_reasoning_effort="ultra"'], 'ultra'),
                     (['--config=model_reasoning_effort=ultra'], 'ultra'),
-                    (['-m=gpt-6-astra', '-c=model_reasoning_effort=ultra'], 'ultra'),
+                    (['-m=demo-hard-model', '-c=model_reasoning_effort=ultra'], 'ultra'),
                     (['-cmodel_reasoning_effort=ultra'], 'ultra'),
                     (['--config', "model_reasoning_effort='ultra'"], 'ultra')):
-                result = subprocess.run(['bash', shim, 'exec', '-mgpt-6-astra', *arguments,
+                result = subprocess.run(['bash', shim, 'exec', '-mdemo-hard-model', *arguments,
                                          '--config', 'features.multi_agent=true',
                                          '-c', 'agents.max_concurrent_threads_per_session=2',
                                          '--', 'prompt with model_reasoning_effort=ultra'],
@@ -633,9 +710,9 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertIn('features.multi_agent=false', argv)
                 self.assertIn('agents.max_concurrent_threads_per_session=1', argv)
                 self.assertTrue(argv[-1].endswith('prompt with model_reasoning_effort=ultra'))
-            for arguments in (['-m', 'gpt-5.6-sol'], ['-c', 'model="gpt-5.6-sol"'],
-                              ['-mgpt-5.6-sol'],
-                              ['-m=gpt-5.6-sol'], ['-c=model_reasoning_effort=xhigh'],
+            for arguments in (['-m', 'demo-routine-model'], ['-c', 'model="demo-routine-model"'],
+                              ['-mdemo-routine-model'],
+                              ['-m=demo-routine-model'], ['-c=model_reasoning_effort=xhigh'],
                               ['-c', 'model_reasoning_effort=max'],
                               ['--config=model_reasoning_effort=xhigh'],
                               ['-c', 'model_reasoning_effort=low'],
@@ -645,7 +722,7 @@ class AccountRouterTests(unittest.TestCase):
                 self.assertEqual(subprocess.run(['bash', shim, *arguments], env=environment,
                     capture_output=True).returncode, 4)
             environment['CODEX_HOME'] = str(home / 'second')
-            self.assertEqual(subprocess.run(['bash', shim, 'exec', '-m', 'gpt-6-astra'], env=environment,
+            self.assertEqual(subprocess.run(['bash', shim, 'exec', '-m', 'demo-hard-model'], env=environment,
                 capture_output=True).returncode, 0)
 
     def test_runtime_shim_normalizes_attached_config_options(self) -> None:
@@ -656,7 +733,9 @@ class AccountRouterTests(unittest.TestCase):
             binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
             binary.chmod(0o755)
             environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
-                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'),
+                               MIPSTARRE_PROJECT_ROOT=str(write_project_config(home)),
+                               PATH=f"{binary.parent}{os.pathsep}{os.environ.get('PATH', '')}")
             shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
             prompt = 'literal -c=model_reasoning_effort=low\n-c=model="other-model"'
             configs = ['sandbox_mode="read-only"', 'log_dir="logs with spaces=a=b"']
@@ -665,7 +744,7 @@ class AccountRouterTests(unittest.TestCase):
                     for effort, expected in (('ultra', 'ultra'), ('"ultra"', 'ultra')):
                         with self.subTest(command=command, prefix=prefix, effort=effort):
                             result = subprocess.run(
-                                ['bash', shim, *command, prefix + 'model="gpt-6-astra"',
+                                ['bash', shim, *command, prefix + 'model="demo-hard-model"',
                                  prefix + f'model_reasoning_effort={effort}',
                                  prefix + 'features.multi_agent=true',
                                  prefix + 'agents.max_concurrent_threads_per_session=2',
@@ -673,7 +752,7 @@ class AccountRouterTests(unittest.TestCase):
                                 env=environment, capture_output=True, text=True, check=True)
                             argv = json.loads(result.stdout)
                             self.assertEqual(argv[:-1], [
-                                '-m', 'gpt-6-astra', '-c', f'model_reasoning_effort="{expected}"',
+                                '-m', 'demo-hard-model', '-c', f'model_reasoning_effort="{expected}"',
                                 '-c', 'features.multi_agent=false',
                                 '-c', 'agents.max_concurrent_threads_per_session=1',
                                 *command, '-c', configs[0], '-c', configs[1], '--'])
@@ -699,9 +778,11 @@ class AccountRouterTests(unittest.TestCase):
             binary.write_text('#!/usr/bin/env python3\nimport json, sys\nprint(json.dumps(sys.argv[1:]))')
             binary.chmod(0o755)
             environment = dict(os.environ, HOME=directory, CODEX_HOME=str(home / '.codex'),
-                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'))
+                               MIPSTARRE_CACHE_ROOT=str(home / 'cache'),
+                               MIPSTARRE_PROJECT_ROOT=str(write_project_config(home)),
+                               PATH=f"{binary.parent}{os.pathsep}{os.environ.get('PATH', '')}")
             shim = str(DISPATCH.with_name('codex-policy-shim.sh'))
-            prompt = 'prompt with -mgpt-5.6-sol and -m=gpt-5.6-sol'
+            prompt = 'prompt with -mdemo-routine-model and -m=demo-routine-model'
             reservation = home / 'cache/accounts/primary' / str(os.getpid())
             reservation.parent.mkdir(parents=True)
             reservation.touch()
@@ -711,16 +792,16 @@ class AccountRouterTests(unittest.TestCase):
                 for option in ('-mother-model', '-m=other-model', '-m='):
                     with self.subTest(command=command, rejected=option):
                         result = subprocess.run(
-                            ['bash', shim, '-m', 'gpt-6-astra', *command, option,
-                             '--model=gpt-6-astra', '--', prompt],
+                            ['bash', shim, '-m', 'demo-hard-model', *command, option,
+                             '--model=demo-hard-model', '--', prompt],
                             env=environment, capture_output=True, text=True)
                         self.assertEqual(result.returncode, 4, result.stderr)
                         self.assertEqual(result.stdout, '')
-                for model in ('gpt-6-astra', 'gpt-5.6-sol'):
+                for model in ('demo-hard-model', 'demo-routine-model'):
                     environment.update(
-                        MIPSTARRE_JOB_CLASS='control_policy' if model == 'gpt-6-astra' else 'general',
+                        MIPSTARRE_JOB_CLASS='control_policy' if model == 'demo-hard-model' else 'general',
                         MIPSTARRE_HARDNESS_REASON=(
-                            'Routing-control test fixture' if model == 'gpt-6-astra' else ''))
+                            'Routing-control test fixture' if model == 'demo-hard-model' else ''))
                     for option in ('-m' + model, '-m=' + model):
                         effort = 'ultra'
                         with self.subTest(command=command, accepted=option, effort=effort):
@@ -747,10 +828,10 @@ class AccountRouterTests(unittest.TestCase):
     def test_empty_secondary_home_resume_uses_default_rollout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            second = root / ".cache/mipstarre-dev/codex-home-yxy"
+            second = root / ".cache/mipstarre-dev/codex-home-second"
             rollout = second / "sessions" / f"rollout-{THREAD_ID}.jsonl"
             rollout.parent.mkdir(parents=True)
-            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='gpt-6-astra'))))
+            rollout.write_text(json.dumps(dict(type='turn_context', payload=dict(model='demo-hard-model'))))
             (second / "config.toml").write_text('model = "gpt-second-default"\n')
             (root / 'cache/watchdog').mkdir(parents=True)
             (root / 'cache/watchdog/max-codex-second').write_text('8')
@@ -763,7 +844,7 @@ class AccountRouterTests(unittest.TestCase):
             ]), mock.patch("builtins.print") as output:
                 router.main()
             self.assertEqual(output.call_args_list,
-                             [mock.call("second"), mock.call("gpt-6-astra")])
+                             [mock.call("second"), mock.call("demo-hard-model")])
 
     def test_resume_skips_bad_rows_without_losing_affinity_or_conflicts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -16,8 +16,8 @@ from audit_lean_axiom_declarations import run_audit  # noqa: E402
 
 
 def write_lean(root: Path, text: str) -> None:
-    """Create a minimal LDT Lean file for an audit fixture."""
-    path = root / "MIPStarRE" / "LDT" / "Fixture.lean"
+    """Create a minimal Lean file for an audit fixture."""
+    path = root / "PaperLib" / "Core" / "Fixture.lean"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
 

@@ -33,7 +33,7 @@ review file and one verdict.
 Local surgery on the primary pair: `gh pr diff`, `gh api graphql`, and every
 `mcp__github__*` step in it is inert. Read the diff with
 `git diff $(git merge-base <base> <head>) <head>`, read earlier feedback from
-the code lane's ledger (runtime storage, `~/.cache/mipstarre-dev/reviews/`), and cite `path:line` instead of
+the code lane's ledger (runtime storage, `$MIPSTARRE_CACHE_ROOT/reviews/`), and cite `path:line` instead of
 posting inline comments.
 
 ## Operating rules
@@ -44,11 +44,12 @@ posting inline comments.
    `docs/blueprint_style_guide.md` for notation conventions. Read them; do not
    paraphrase their tables into your findings.
 2. **Canonical source order:** `references/` (in-repo paper TeX mirror) >
-   `blueprint/src/` > `MIPStarRE/`. A blueprint entry that disagrees with the
-   paper is a defect even when it agrees with Lean. The active track is the
-   quantum Pauli basis test of MIP\*=RE (arXiv:2001.04383; arXiv:1904.05870
-   secondary): read "the active track's mirror under `references/`" wherever
-   `AGENTS.md` says `references/ldt-paper/`. If that mirror is missing, say so
+   `blueprint/src/` > `PaperLib/`. A blueprint entry that disagrees with the
+   paper is a defect even when it agrees with Lean. The active track and its paper
+   mirrors are named in `local/project.json` (`project.track`,
+   `paper_mirrors`): read "the active track's mirror under `references/`"
+   wherever an example elsewhere names a concrete mirror directory. If that
+   mirror is missing, say so
    rather than judging a statement from memory.
 3. **The faithfulness policy binds** (`AGENTS.md`, *Faithful Formalization
    Policy*). An extra bridge, residual, repair, package, producer, witness,
@@ -87,7 +88,7 @@ posting inline comments.
 ## Workflow
 
 1. Read the PR title/body (`gh_common.py pr-view N`), the linked issue, and any
-   ledger already in `~/.cache/mipstarre-dev/reviews/pr<N>/`. Do not re-raise what the code review already covers.
+   ledger already in `$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/`. Do not re-raise what the code review already covers.
 2. List every `\lean{...}`, `\leanok`, `\notready`, and `\uses{...}` the diff
    touches, and every Lean declaration in the diff that has a blueprint entry.
 3. For each, run the primary persona's four checks in order: A.1 mathematical
@@ -103,8 +104,8 @@ posting inline comments.
 
 ## Output contract
 
-Write exactly one file, `~/.cache/mipstarre-dev/reviews/pr<N>/<head_sha>-prose.md`; touch
-nothing else in the tree, and keep scratch in `~/.cache/mipstarre-dev/`.
+Write exactly one file, `$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/<head_sha>-prose.md`; touch
+nothing else in the tree, and keep scratch in `$MIPSTARRE_CACHE_ROOT`.
 Severity 1–5 and confidence 1–5, same scale as the code reviewer:
 an equivalence mismatch on a paper-labelled entry or an invalid `\leanok` is S5
 or S4; a stale `\notready`, a wrong `\uses{...}`, or Lean jargon in a statement
@@ -117,10 +118,10 @@ reviewer_session: <session-name>   ci_status: success   base: <base>
 ## Summary
 <counts, e.g. 1 equivalence mismatch, 2 stale \leanok, 4 prose issues>
 ## Findings
-- [ ] **S5/C5** `blueprint/src/chapter/pauli.tex:88` vs
-      `MIPStarRE/Quantum/Measurement.lean:212` — <the mathematical discrepancy>.
+- [ ] **S5/C5** `blueprint/src/chapter/chNN_<slug>.tex:88` vs
+      `<LeanRoot>/<Path>/File.lean:212` — <the mathematical discrepancy>.
       Fix: <the concrete correction>.
-- [ ] **S2/C5** `blueprint/src/chapter/pauli.tex:104` — Lean jargon in prose:
+- [ ] **S2/C5** `blueprint/src/chapter/chNN_<slug>.tex:104` — Lean jargon in prose:
       "<exact phrase>". Replace with: "<substitute text>".
 - [x] **S3/C5** resolved in <sha> — <what the earlier finding was>.
 ## Not verified

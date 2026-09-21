@@ -1,223 +1,156 @@
-# MIPStarRE — the quantum Pauli basis test, formalized in Lean 4
+# Formalization kit — point an agent session at a paper and walk away
 
-This repository contains a machine-checked formalization of the **quantum
-Pauli basis test** of *MIP\* = RE* ([arXiv:2001.04383](https://arxiv.org/abs/2001.04383)),
-together with the classical **low individual degree test** it is built on
-(*Quantum soundness of the classical low individual degree test*,
-[arXiv:2009.12982](https://arxiv.org/abs/2009.12982)). The source sections are
-mirrored in-repo under `references/`; the Pauli basis test is developed in
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`.
+This repository is a **kit for formalizing a mathematics paper in Lean 4**, not
+a formalization. It holds the machinery: a bootstrap path from an arXiv URL to
+a Lean skeleton and a blueprint, a local issue/pull-request/CI/review/merge
+workflow, a session layer that starts and supervises an autonomous main session
+with detached workers, a model-free completion gate, and the protocols the
+whole thing follows — including the rule by which those protocols change.
 
-| | |
+You clone it, open an agent session in the folder, and say which paper.
+
+---
+
+## Quickstart
+
+```bash
+git clone --depth 1 --branch <tag> <this-repository> my-paper
+cd my-paper
+```
+
+Open a Claude Code (or codex) session at the repository root and say:
+
+> formalize https://arxiv.org/abs/XXXX.XXXXX
+
+The session reads `CLAUDE.md`, becomes the **meta session**
+(`local/personas/meta.md` → `local/protocols/meta-session.md`), runs the
+machine preflight, asks you the three questions below, instantiates the project
+under the name you choose, and then follows `local/protocols/bootstrap.md`:
+fetch and split the paper → statement inventory → blueprint → Lean skeleton →
+proofs → completion gate → independent comparator check.
+
+After that it contacts you only when something is genuinely yours to decide,
+and when the project is finished.
+
+## Prerequisites
+
+The kit asserts these; it never installs them for you. `python3
+scripts/preflight.py` checks each one separately, by exercising it.
+
+| What | Why |
 |---|---|
-| Headline theorem | `MIPStarRE.QPBT.pauli_soundness`, `MIPStarRE/QPBT/Test/Soundness.lean:52` |
-| Proof debt | none — **0 `sorry`**, 0 `admit`, 0 project `axiom` declarations |
-| Axioms used | `propext`, `Classical.choice`, `Quot.sound` only |
-| Toolchain | Lean `v4.32.0`, Mathlib `v4.32.0` (rev `81a5d257c8e4`), pinned in `lean-toolchain` and `lake-manifest.json` |
-| Size | Pauli development 330 Lean files / 105,319 lines; `MIPStarRE/LDT/` 326 files; `MIPStarRE/Quantum/` 11 files |
+| `elan` + `lake` | Lean 4 and the pinned dependency set (`lean-toolchain`, `lake-manifest.json`) |
+| `python3` (3.10+) | every tool in `scripts/` and `local/bin/` — standard library only, no third-party packages |
+| `git` | fresh history, hooks, worktrees |
+| `gh` **and** an authenticated GitHub API credential | issues, pull requests, statuses, merges. A working git transport is a *separate* prerequisite from an authenticated API |
+| `tmux` | the main session runs in a pane the supervisor can read |
+| a coding-agent CLI on `PATH` | the main session and the workers |
+| LaTeX + `leanblueprint` | the blueprint's PDF and web output |
+| disk and RAM | a Mathlib-scale build; budget tens of gigabytes and several hours for the first one |
 
-## What is formalized
+A many-core machine is not required but changes the wall-clock story
+completely; the workflow is written for one machine with a shared, warm build
+cache.
 
-The Pauli basis test is a two-player nonlocal game whose soundness is one of the
-rigidity ingredients of *MIP\* = RE*. The headline results:
+## What the meta session will ask you
 
-| Result | Lean declaration | File |
+Once, at the start, in one message — and, after that, only for things outside
+the project:
+
+1. **The library name and the GitHub repository** to use.
+2. **Which keys or logins it may use, and the limit on each.** A key is a
+   *name* in `local/project.json` mapped to a directory that already holds the
+   login. No credential ever enters this repository, a log or a message.
+3. **Permission to create the two GitHub repositories** (the project and its
+   comparator challenge) and to push to them.
+
+Everything else — the chapter plan, the Lean architecture, which packet is
+next, the review policy, the merge contract, the model mix within the keys you
+allowed — it decides itself, records, and tells you in one line. The rule it
+follows is in `local/protocols/meta-session.md` §12: ask only when the risk
+goes beyond the project's development.
+
+## What runs where
+
+| Layer | Where it lives | What it does |
 |---|---|---|
-| Soundness of the Pauli basis test (blueprint `thm:pauli`) | `pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:52` |
-| Qubit form of soundness (`cor:pauli-binary`) | `pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` |
-| Completeness: a value-one strategy exists (`lem:pauli-completeness`) | `exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` |
-| Quantum soundness of the low-degree game (`lem:ld-soundness`) | `exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` |
+| meta session | your terminal | supervises; talks to you; never proves |
+| main session | a `tmux` pane on the work machine | the operator: briefs, dispatches, gates, records |
+| workers | detached processes, own worktrees | the mathematics |
+| session layer | `local/bin/session/` | launch, message, goal keeper, key watch, pause, stand-down, status |
+| service layer | `local/bin/service/` | merge daemon, lanes, review gate, trains, records — all model-free |
+| project workflow | `local/bin/`, `scripts/`, `.githooks/` | issues, pull requests, CI, review, audits, completion gate |
+| project identity | `local/project.json` | names, paths, issues, caps, keys — read by everything |
+| runtime state | `$KIT_STATE_DIR` (outside the repository) | goal text, markers, claims, logs, the running handoff file |
 
-`pauli_soundness` states: there are constants `a ≥ 1` and `0 < b < 1` such that
-for every admissible parameter tuple `P` and every `ε ≥ 0`, every strategy for
-the Pauli basis test with value at least `1 - ε` admits local isometries and an
-auxiliary state under which the strategy's state is within
-`deltaQld a b ε P.m P.d P.q` of the ideal state, and both players' operator
-families are within the same bound of the ideal Pauli observables. The error
-scale carries the admissible sizes as explicit arguments —
-`deltaQld (a b ε : ℝ) (m d q : ℕ)`, `MIPStarRE/QPBT/Test/SoundnessDefs.lean:35` —
-because it is `a · (m·d)^a · (ε^b + q^(-b) + 2^(-b·m·d))`: the bound depends on
-the admissible sizes `m`, `d` and `q` as well as on `ε`, which is what the
-`q^(-b)` and `2^(-b·m·d)` terms express. As in the source, the constants are
-existentially quantified and no regime in which `deltaQld < 1` is exhibited;
-see [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
+CI, reviews and merges **execute locally**; GitHub holds the record. The
+`.github/` tree is kept as frozen reference for the mechanisms the local
+scripts replace, and is not executed here.
 
-Every headline declaration carries a docstring naming both its blueprint node
-and the exact source line range it formalizes, for example
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`
-for `pauli_soundness`.
+## How the rules evolve
 
-The classical low individual degree test underneath is
-`MIPStarRE.LDT.Test.mainFormal`; the Pauli development imports it and does not
-re-derive it.
+The protocols under `local/protocols/` are normative until amended. An agent
+that finds one wrong does not deviate: it records the friction in
+`results/telemetry/events.md`, and an amendment is made with a cited trigger
+and an entry in `local/protocols/EVOLUTION.md`. No trigger, no amendment. That
+is `local/protocols/meta.md`, and it is what makes the kit improve instead of
+drifting.
 
-## Status
+## Honest status
 
-- **No proof debt.** There is no `sorry`, `admit`, `native_decide`, `unsafe`
-  declaration or project-introduced `axiom` anywhere in the Lean sources under
-  `MIPStarRE/`. In the `.lean` files of the whole tree the word `sorry` occurs
-  exactly four times: twice in prose inside docstrings
-  (`MIPStarRE/LDT/Test/AxiomAudit.lean:81`,
-  `MIPStarRE/QPBT/Combining/Apply.lean:57`), once in prose in
-  `scripts/comparator/challenge_header.lean:14`, and once as real syntax in
-  `scripts/comparator/challenge_footer.lean:44` — the footer of a
-  statement-only challenge template that is supposed to be unproved (see
-  "Independent checking" below). One further file is Lean-shaped without
-  carrying the `.lean` extension: `scripts/comparator/expected/Challenge.lean.expected`,
-  the checked-in expected assembly of that same template, repeats the prose
-  mention (line 14) and the template's `sorry` (line 802);
-  `scripts/comparator/README.md:14` mentions it in prose as well. These counts
-  are about source files: the string also
-  occurs throughout the development records under `results/telemetry/` and in
-  the documentation, so a bare `git grep sorry` over the whole tree returns
-  thousands of lines.
-- **Standard axioms only.** The headline theorems depend on `propext`,
-  `Classical.choice` and `Quot.sound` and on nothing else. There is no
-  dedicated Pauli-test axiom-audit module yet — the existing
-  [`MIPStarRE/LDT/Test/AxiomAudit.lean`](MIPStarRE/LDT/Test/AxiomAudit.lean)
-  covers the classical low-degree track only — so the check is made by asking
-  Lean directly; the command is under "Build and check" below. Repository-wide,
-  the pre-push gate (`.githooks/pre-push`) runs
-  [`scripts/blueprint_leanok_axioms.py`](scripts/blueprint_leanok_axioms.py)
-  `--ci`, which runs `#print axioms` on every blueprint declaration marked
-  `\leanok` and fails if any of them depends on `sorryAx`.
-- **Statement corrections are documented, not hidden.** Where the source
-  paper's printed statement is wrong, or where its printed proof does not
-  establish the printed claim, the deviation is recorded rather than papered
-  over. There are 20 Pauli-test gap notes (45 notes in total; the directory
-  also holds `command.tex`, `template.tex`, `policy.tex` and
-  `proof-gap-protocol.tex`, which are not notes) under
-  `docs/paper-gaps/`, summarized in the register linked below. Two printed
-  claims that are not established are carried as `Prop`-valued definitions
-  which state the source sentence without asserting it, so the printed form
-  stays visible and stays unproved.
-- **Independent checking.** There is no comparator challenge for
-  `pauli_soundness` yet. What can be re-checked outside this repository today
-  is the classical low individual degree test underneath: the statement
-  `MIPStarRE.LDT.Test.mainFormal` has a challenge repository at
-  [LionSR/LDT-comparator](https://github.com/LionSR/LDT-comparator), which
-  re-declares the statement against Mathlib alone and runs the Lean comparator
-  against this library; the setup is described in
-  [`docs/comparator.md`](docs/comparator.md), and the template it is assembled
-  from lives under `scripts/comparator/`. The analogous challenge for the
-  Pauli statement has not been built: `Dengnifer/QPBT-comparator` is so far a
-  placeholder holding only a licence and a toolchain pin.
+- The workflow this kit is made of was **proven on exactly one project**: a
+  Lean formalization of a research paper, taken from an empty repository to
+  zero `sorry` with an independent comparator check, over about three weeks,
+  by a supervised autonomous session with detached workers.
+- The **bootstrap path itself is new**, and it was deliberately tested lightly.
+  What was exercised: the unit tests under `scripts/tests/` (about 1,140, all
+  offline); the live fetch and the byte-exact split on one real arXiv e-print
+  (a 200-page paper, 16 section files); and, on a scratch copy, the whole
+  instantiation path — rename, fresh git history, first commit with the hooks
+  installed, a second commit passing the pre-commit hook.
+- What was **not** exercised: the session layer and the service layer have
+  only ever run against stand-ins (a stub `tmux`, a stub agent CLI, a stub
+  `gh`). No live main session has been started from this tree, no pull request
+  has gone through its merge service, and nobody has followed the playbook
+  from an arXiv URL to a finished project a second time. Expect to fix small
+  things in the first hours; record each one in `results/telemetry/events.md`
+  and amend the protocol that misled you (`local/protocols/meta.md`). The first
+  project built from this kit is the experiment.
+- Nothing here removes the need for a human who understands the mathematics.
+  The kit's own protocols say where a source paper is wrong, not whether the
+  formalization is worth having.
 
-## Build and check
+### Relation to `LionSR/oh-my-formalization`
 
-Install [elan](https://github.com/leanprover/elan); it reads `lean-toolchain`
-and fetches Lean `v4.32.0` automatically. From the repository root:
+`oh-my-formalization` is a **starter template**: a Lean package, a blueprint, a
+paper-gap mechanism and CI, with a human in the loop deciding each step. This
+kit is the **autonomy layer** on the same blueprint and paper-gap lineage
+(`texra-blueprint`): a supervising meta session, a main session with detached
+workers, merge and review gates, a completion gate, a comparator challenge, and
+protocols that amend themselves.
 
-```bash
-lake exe cache get              # fetch the pinned Mathlib build cache (required)
-lake build MIPStarRE.QPBT       # build the Pauli basis test development
-lake build MIPStarRE            # build everything (QPBT, LDT, Quantum)
-```
+## Provenance
 
-To reproduce the axiom claim, ask Lean for the axiom closure of a headline
-declaration:
+The commit of the project this kit was extracted from is recorded in
+[`local/kit/ORIGIN_COMMIT`](local/kit/ORIGIN_COMMIT), and the script that
+performed the extraction is `local/kit/extract.sh`. The origin project's own
+protocol-amendment ledger is kept under `docs/origin/` as **evidence, not
+law**: nothing there is normative for a project built from this kit, and no
+rule may be cited from it.
 
-```bash
-lake build MIPStarRE.QPBT.Test.Soundness
-printf 'import MIPStarRE.QPBT.Test.Soundness\n#print axioms MIPStarRE.QPBT.pauli_soundness\n' > AxiomCheck.lean
-lake env lean AxiomCheck.lean
-```
-
-`propext`, `Classical.choice` and `Quot.sound` are the only axioms that should
-appear; in particular `sorryAx` must not. The same recipe applies to the other
-three headline declarations, with their own modules imported.
-
-To type-check a single file, which is the fastest iteration loop:
-
-```bash
-lake env lean MIPStarRE/QPBT/Test/Soundness.lean
-```
-
-### Build time and machine requirements
-
-Timings below are the recorded ones from `results/telemetry/builds.jsonl`
-(1,608 rows), all measured on one machine: a 128-core Intel Xeon Platinum 8358P
-at 2.60 GHz with 503 GiB of RAM.
-
-| Kind of build | Rows | Median | Range |
-|---|---|---|---|
-| Incremental build of touched modules | 1,248 | 37 s | 17 s – 4,428 s |
-| Fresh worktree seeded from a warm local cache | 172 | 75 s | 5 s – 25,052 s |
-
-Recent fresh-worktree builds of the full tree took 219 s, 227 s, 229 s and
-502 s. The 25,052 s (≈ 7 h) outlier is a single from-scratch run of
-2026-08-30 that also compiled 20 Mathlib files the cache failed to deliver;
-it predates most of the Pauli development and is not a measurement of the
-current tree.
-
-**A clean-clone build of `MIPStarRE.QPBT` has not yet been timed and recorded.**
-All rows above were produced with a warm local build cache, so they are lower
-bounds on what a fresh clone costs. Budget accordingly, and expect the
-`lake exe cache get` download of Mathlib to dominate the first build. 23 files
-raise `maxHeartbeats` and 17 raise `synthInstance.maxSize`; these are
-elaboration-budget options, not soundness escapes.
-
-The blueprint is built with [`leanblueprint`](https://github.com/PatrickMassot/leanblueprint):
-
-```bash
-leanblueprint pdf     # PDF output
-leanblueprint web     # HTML output
-```
-
-`leanblueprint` also generates `blueprint/lean_decls`, the list of declarations
-the blueprint cross-references; `lake exe checkdecls blueprint/lean_decls`
-verifies that each one exists.
-
-## Repository layout
-
-```
-MIPStarRE/
-├── QPBT/          # Quantum Pauli basis test — the contribution
-│   ├── Algebra/        # finite fields, low-degree codes, lines, Pauli matrices
-│   ├── Games/          # nonlocal games, strategies, operator distances
-│   ├── Observables/    # observable algebra for the test
-│   ├── Combining/      # combining lines and points into global objects
-│   ├── Extraction/     # extracting Pauli observables from a strategy
-│   ├── Test/           # the test, completeness, soundness, qubit form
-│   └── State.lean
-├── LDT/           # Classical low individual degree test (12 submodules)
-└── Quantum/       # Reusable finite-dimensional Hilbert space and POVM layer
-```
-
-`MIPStarRE.lean` re-exports `MIPStarRE.Quantum`, `MIPStarRE.LDT` and
-`MIPStarRE.QPBT`.
-
-Top-level directories:
-
-| Path | Contents |
-|---|---|
-| `MIPStarRE/` | Lean sources (above) |
-| `blueprint/src/` | LaTeX blueprint, 16 chapters; `ch11`–`ch16` cover the Pauli basis test |
-| `references/` | In-repo TeX mirrors of the source papers (`qpbt-paper`, `ldt-paper`, `neexp-paper`, `nv-paper`, `cs-paper`), used as line-precise citation targets |
-| `docs/` | Artifact documentation, gap notes, contributor guides, style rules |
-| `audits/` | Dated dependency-scouting reports written during development |
-| `scripts/` | Reference-paper splitter, declaration checker, comparator tooling |
-| `local/` | The AI-assisted development workflow (issue, PR, CI and review drivers) |
-| `results/telemetry/` | Session, build and stage records produced by that workflow |
-
-`local/` and `results/telemetry/` document **how** the formalization was
-produced. They are research data about an AI-assisted development process and
-are not part of the mathematical artifact; nothing in `MIPStarRE/` depends on
-them, and they can be ignored when evaluating the proofs.
-
-## Where to read more
+## Where to read next
 
 | Document | What it covers |
 |---|---|
-| [`docs/ARTIFACT.md`](docs/ARTIFACT.md) | How to evaluate this repository as an artifact: what to check and in what order |
-| [`docs/QPBT-theorem-index.md`](docs/QPBT-theorem-index.md) | Every headline result: paper statement → Lean name → file:line → blueprint node → axioms |
-| [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) | Where the formalization departs from the printed source, and why |
-| [`docs/paper-gaps/qpbt-gap-register.md`](docs/paper-gaps/qpbt-gap-register.md) | The gap register: 18 of the 20 Pauli-test notes, each linking a source statement, its blueprint label, the correction and the Lean status. `qpbt_combined-points-field-valued.tex` and `qpbt_subline-claims-line-marginal.tex` have no row yet |
-| [`docs/comparator.md`](docs/comparator.md) | Independent re-checking with the official Lean comparator |
-| [`blueprint/src/`](blueprint/src/) | The LaTeX blueprint: the informal argument, node by node, cross-referenced to Lean |
-| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | PR and issue conventions, review checklist |
-| [`docs/PROOF_INTEGRITY.md`](docs/PROOF_INTEGRITY.md) | The rules the development holds itself to about faithful statements |
+| [`local/protocols/meta-session.md`](local/protocols/meta-session.md) | the supervising session's playbook |
+| [`local/protocols/bootstrap.md`](local/protocols/bootstrap.md) | the stage plan, with entry and exit criteria |
+| [`local/protocols/main-cycle.md`](local/protocols/main-cycle.md) | the main session's standing cycle |
+| [`local/protocols/completion.md`](local/protocols/completion.md) | the definition of done |
+| [`local/README.md`](local/README.md) | the operator's tour of the workflow |
+| [`local/DESIGN.md`](local/DESIGN.md) | why the workflow is shaped the way it is |
+| [`AGENTS.md`](AGENTS.md) | the conventions every agent in the repository follows |
 
 ## Licence
 
-Licence: to be added by the repository owner before submission.
+See [`LICENSE`](LICENSE). A project instantiated from this kit chooses its own
+licence for the mathematics it produces.

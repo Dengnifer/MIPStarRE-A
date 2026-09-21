@@ -12,6 +12,7 @@ hypothesis is not silently treated as genuinely green.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -40,173 +41,62 @@ WARNING_TERMS = (
 
 SOURCE_PREFIXES = ("thm:", "lem:", "prop:", "cor:", "clm:")
 
-ALLOWED_SOURCE_WARNINGS = {
-    (
-        "lem:orthonormalization-main-lemma-formalized-envelope",
-        "MIPStarRE.LDT.MakingMeasurementsProjective."
-        "orthonormalizationMeasurement_of_consistency_from_projectivizationRepair",
-    ),
-    (
-        "lem:locality-preserving-projectivization",
-        "MIPStarRE.LDT.MakingMeasurementsProjective.leftLiftedProjectivizationRepair",
-    ),
-    (
-        "clm:g-comm-stability",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "storedBoundedResidualBound",
-    ),
-    (
-        "clm:g-comm-stability",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "averagedPoint_le_witness",
-    ),
-    (
-        "clm:g-comm-stability2",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "storedBoundedResidualBound",
-    ),
-    (
-        "clm:g-comm-stability2",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "averagedPoint_le_witness",
-    ),
-    (
-        "prop:main-formal-source-reduction",
-        "MIPStarRE.LDT.Test.mainFormalConclusion",
-    ),
-    (
-        "prop:main-formal-source-small-error",
-        "MIPStarRE.LDT.Test.mainFormal_smallErrorConclusion",
-    ),
-}
+#: Per-declaration exemption registers, empty in a fresh repository.
+#:
+#: A green (`\leanok`) source node whose Lean link names a declaration with
+#: obligation-shaped wording is a finding by default.  Some of them are
+#: justified — the wording is the paper's own, or the shape is a construction
+#: the paper performs — and a project records those decisions here rather than
+#: silencing the audit.  The register is an optional JSON file:
+#:
+#:   local/audit-registers.json
+#:   {
+#:     "green_node": {
+#:       "allowed_source_warnings": [
+#:         ["lem:some-paper-label", "MyLib.Core.someRepairDeclaration"]
+#:       ],
+#:       "allowed_source_signature_warnings": [
+#:         ["thm:another-label", "MyLib.Core.anotherDeclaration"]
+#:       ]
+#:     }
+#:   }
+#:
+#: Each entry is a `[blueprint label, fully-qualified declaration]` pair, and
+#: each one should be justified in the commit that adds it.  With no file, or
+#: no `green_node` section, every register is empty and the audit reports every
+#: warning it finds — which is the right default for a new project.
+REGISTER_PATH = "local/audit-registers.json"
+REGISTER_SECTION = "green_node"
 
-ALLOWED_SOURCE_SIGNATURE_WARNINGS = {
-    (
-        "lem:comm-data-processed-g",
-        "MIPStarRE.LDT.Commutativity.commDataProcessedG",
-    ),
-    (
-        "clm:g-comm-stability",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "storedBoundedResidualBound",
-    ),
-    (
-        "clm:g-comm-stability",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "averagedPoint_le_witness",
-    ),
-    (
-        "clm:g-comm-stability",
-        "MIPStarRE.LDT.Commutativity.gCommStability_scalar",
-    ),
-    (
-        "clm:g-comm-stability2",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "storedBoundedResidualBound",
-    ),
-    (
-        "clm:g-comm-stability2",
-        "MIPStarRE.LDT.IdxPolyFamily.SliceBoundednessInput."
-        "averagedPoint_le_witness",
-    ),
-    (
-        "clm:g-comm-stability2",
-        "MIPStarRE.LDT.Commutativity.gCommStabilityTwo_scalar",
-    ),
-    (
-        "thm:com-main",
-        "MIPStarRE.LDT.Commutativity.comMain",
-    ),
-    (
-        "thm:ld-pasting",
-        "MIPStarRE.LDT.Pasting.ldPasting",
-    ),
-    (
-        "prop:main-induction-successor-answer-valued-pasting",
-        "MIPStarRE.LDT.MainInductionStep."
-        "answerLdPastingInInductionSectionOfSmallError",
-    ),
-    (
-        "lem:ld-pasting-sub-measurement",
-        "MIPStarRE.LDT.Pasting.ldPastingSubMeas",
-    ),
-    (
-        "cor:commuting-with-G-complete",
-        "MIPStarRE.LDT.Pasting.commutingWithGComplete",
-    ),
-    (
-        "cor:commuting-with-G-incomplete",
-        "MIPStarRE.LDT.Pasting.commutingWithGIncomplete",
-    ),
-    (
-        "cor:G-hat-facts",
-        "MIPStarRE.LDT.Pasting.gHatFacts",
-    ),
-    (
-        "lem:commute-g-half-sandwich",
-        "MIPStarRE.LDT.Pasting.commuteGHalfSandwich",
-    ),
-    (
-        "lem:line-interpolation-averaging-estimates",
-        "MIPStarRE.LDT.Pasting.avgOver_uniform_badMass_le_k_mul_ldSandwichLineOnePointError",
-    ),
-    (
-        "lem:line-interpolation-averaging-estimates",
-        "MIPStarRE.LDT.Pasting.avgOver_distinct_badMass_le_hBConsistencyError",
-    ),
-    (
-        "lem:ld-sandwich-line-one-point",
-        "MIPStarRE.LDT.Pasting.ldSandwichLineOnePoint",
-    ),
-    (
-        "lem:h-b-consistency",
-        "MIPStarRE.LDT.Pasting.hBConsistency",
-    ),
-    (
-        "cor:h-a-consistency",
-        "MIPStarRE.LDT.Pasting.hAConsistency_submeas",
-    ),
-    (
-        "lem:over-all-outcomes",
-        "MIPStarRE.LDT.Pasting.overAllOutcomes",
-    ),
-    (
-        "lem:from-H-to-G",
-        "MIPStarRE.LDT.Pasting.fromHToG",
-    ),
-    (
-        "cor:ld-pasting-N-completeness",
-        "MIPStarRE.LDT.Pasting.ldPastingNCompleteness",
-    ),
-    (
-        "thm:ld-pasting-in-induction-section",
-        "MIPStarRE.LDT.MainInductionStep.ldPastingInInductionSection",
-    ),
-    (
-        "thm:sigma-bound-main-formal",
-        "MIPStarRE.LDT.Test.sigma_bound",
-    ),
-    (
-        "thm:zeta-bounds-main-formal",
-        "MIPStarRE.LDT.Test.zeta1_bound",
-    ),
-    (
-        "thm:zeta-bounds-main-formal",
-        "MIPStarRE.LDT.Test.zeta2_bound",
-    ),
-    (
-        "thm:zeta-bounds-main-formal",
-        "MIPStarRE.LDT.Test.zeta3_bound",
-    ),
-    (
-        "thm:zeta-bounds-main-formal",
-        "MIPStarRE.LDT.Test.zeta4_bound",
-    ),
-    (
-        "thm:error-cascade-main-formal",
-        "MIPStarRE.LDT.Test.errorCascade_le_mainFormalError",
-    ),
-}
+
+def _load_register(root: Path, key: str) -> set[tuple[str, str]]:
+    """Read one pair register, or the empty set when it is not configured."""
+
+    path = root / REGISTER_PATH
+    if not path.is_file():
+        return set()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"{REGISTER_PATH}: not valid JSON ({exc})")
+    section = data.get(REGISTER_SECTION) or {}
+    entries = section.get(key) or []
+    out: set[tuple[str, str]] = set()
+    for entry in entries:
+        if not (isinstance(entry, list) and len(entry) == 2):
+            raise SystemExit(
+                f"{REGISTER_PATH}: {REGISTER_SECTION}.{key} entries must be "
+                '["blueprint label", "Declaration.name"] pairs'
+            )
+        out.add((entry[0], entry[1]))
+    return out
+
+
+#: Kept as names for anything that imports them; the audit itself reads the
+#: register per run, so a repository never has to restart a tool to pick up a
+#: newly recorded exemption.
+ALLOWED_SOURCE_WARNINGS: set[tuple[str, str]] = set()
+ALLOWED_SOURCE_SIGNATURE_WARNINGS: set[tuple[str, str]] = set()
 
 ALLOWED_SOURCE_UNFAITHFUL = set()
 
@@ -298,7 +188,7 @@ def warning_declarations(declarations: list[str]) -> list[str]:
 def declaration_headers(root: Path) -> dict[str, list[tuple[Path, str]]]:
     """Index Lean declaration headers by qualified and unqualified names."""
     headers: dict[str, list[tuple[Path, str]]] = {}
-    for path in sorted((root / "MIPStarRE").rglob("*.lean")):
+    for path in sorted((root / "PaperLib").rglob("*.lean")):
         text = path.read_text(encoding="utf-8")
         scan_text = mask_lean_comments(text)
         namespace_stack: list[str] = []
@@ -370,7 +260,7 @@ def matching_comment_start(text: str, close_start: int) -> int:
 def declaration_docstrings(root: Path) -> dict[str, list[tuple[Path, str]]]:
     """Index immediate Lean docstrings by qualified and unqualified names."""
     docstrings: dict[str, list[tuple[Path, str]]] = {}
-    for path in sorted((root / "MIPStarRE").rglob("*.lean")):
+    for path in sorted((root / "PaperLib").rglob("*.lean")):
         text = path.read_text(encoding="utf-8")
         scan_text = mask_lean_comments(text)
         namespace_stack: list[str] = []
@@ -455,6 +345,8 @@ def main() -> int:
     source_warning_labels: set[str] = set()
     headers = declaration_headers(args.root)
     docstrings = declaration_docstrings(args.root)
+    allowed_warnings = _load_register(args.root, "allowed_source_warnings")
+    allowed_signatures = _load_register(args.root, "allowed_source_signature_warnings")
 
     for path, _env, label, block in iter_leanok_blocks(chapter_dir):
         leanok_count += 1
@@ -468,7 +360,7 @@ def main() -> int:
             row = (path, label, declaration)
             if source_like:
                 source_warning_labels.add(label)
-                if (label, declaration) in ALLOWED_SOURCE_WARNINGS:
+                if (label, declaration) in allowed_warnings:
                     allowed_source.append(row)
                 else:
                     unexpected_source.append(row)
@@ -482,7 +374,7 @@ def main() -> int:
                     continue
                 source_warning_labels.add(label)
                 row_with_terms = (path, label, declaration, terms)
-                if (label, declaration) in ALLOWED_SOURCE_SIGNATURE_WARNINGS:
+                if (label, declaration) in allowed_signatures:
                     allowed_signature.append(row_with_terms)
                 else:
                     unexpected_signature.append(row_with_terms)

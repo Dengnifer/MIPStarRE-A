@@ -32,7 +32,7 @@ diff --git a/blueprint/src/chapter/ch09_pasting.tex b/blueprint/src/chapter/ch09
         diff = r"""
 diff --git a/blueprint/src/chapter/ch09_pasting.tex b/blueprint/src/chapter/ch09_pasting.tex
 @@ -10,0 +11,2 @@
-+  \lean{MIPStarRE.LDT.Pasting.someTheorem}
++  \lean{PaperLib.Core.Pasting.someTheorem}
 +  \leanok
 """
         self.assertTrue(diff_touches_formalization_markers(diff))
@@ -50,7 +50,7 @@ diff --git a/blueprint/src/chapter/ch09_pasting.tex b/blueprint/src/chapter/ch09
 
     def test_lean_source_requires_heavy_audit(self) -> None:
         self.assertTrue(
-            needs_axiom_audit_for_paths(["MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean"])
+            needs_axiom_audit_for_paths(["PaperLib/Core/Test/MainTheorem/MainFormal.lean"])
         )
 
     def test_workflow_or_audit_script_change_requires_heavy_audit(self) -> None:

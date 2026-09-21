@@ -2,11 +2,17 @@
 
 Normative for the GitHub-backed issue and PR lifecycle and the automation in
 `local/bin/`; read `local/protocols/meta.md` first. The repository is
-`Dengnifer/MIPStarRE-A`, and GitHub is the **single source of truth** for
+`OWNER/REPO`, and GitHub is the **single source of truth** for
 issues, PRs, CI and review evidence, and merges; CI and reviews still *execute*
 here and publish their results there. No active `issues/` or `prs/` tree, no
 shadow record, no write-through cache, no offline mutation mode: a GitHub error
 fails the operation, never a local success (EVOLUTION.md 2026-09-01).
+
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
 
 ## 1. Records, names, tools
 
@@ -179,11 +185,11 @@ PR that changes no Lean code line reads `[lean 0]`. Comment-only lines — line
 comments, and block, doc and module-doc comments, which nest — and blank or
 whitespace-only lines are not counted; a line of code trailed by a comment is.
 An added line is classified in the head blob and a removed line in the merge-base
-blob, and added, deleted and renamed files all count (issue #574). The title is
+blob, and added, deleted and renamed files all count. The title is
 sanitized, collapsed to one line and truncated to 80 characters, and the one-line
 body names the frozen head SHA. They travel as the REST `commit_title` / `commit_message` merge keys, which
 `gh_common.merge_pr` omits entirely when its optional arguments are absent. The
-count is an **approximate** size signal for GitHub's commits page (issue #557),
+count is an **approximate** size signal for GitHub's commits page,
 never evidence: it is measured after every gate, nothing reads it back, its
 comment scanner is deliberately simple and raises nothing, and a failed
 measurement sends no wording at all — GitHub then titles the merge as it
@@ -246,9 +252,9 @@ The primary merge-loss guard checks each accepted merge. Existing developer
 branches and worktrees are preserved. Failed train worktrees remain for diagnosis.
 
 `ci.sh --integration-head SHA --worktree PATH --base SHA` runs all eight steps
-against the combined commit, using one locked build of the complete `MIPStarRE`
-library and both axiom audits, `MIPStarRE.LDT.Test.AxiomAudit` and
-`MIPStarRE.QPBT.Test.AxiomAudit`. This includes the root artifact
+against the combined commit, using one locked build of the complete library
+(`project.lean_root`) and every registered track's axiom-audit module
+(`tracks.<name>.axiom_audit`). This includes the root artifact
 needed by publication's dynamic `checkdecls` import and all downstream modules.
 It rejects skip flags and dirty or moved train
 heads, and publishes no PR evidence. Its manifest and logs stay in the runtime
@@ -290,9 +296,8 @@ because the guarantees differ from one another:
    does not offer; the owner authorized the narrower contract on 2026-09-18
    instead of leaving the train unusable.
 4. *Claims cover the window.* Every writer in this project — the main session,
-   the daemon, and each Opus helper — claims a PR on the shared atomic claim
-   list (`local/bin/claim.sh`, the repository copy of the meta session's
-   `qpbt-claim.sh`) before touching it. The train claims every member with kind
+   the daemon, and each helper — claims a PR on the shared atomic claim
+   list (`local/bin/claim.sh`) before touching it. The train claims every member with kind
    `train` and party `main` before the first gate reads it, refuses to start
    when a member is held by another writer (printing the holder line), and
    releases the claims once the transport and its re-verification have ended,
@@ -321,7 +326,7 @@ An unknown outcome is never a refusal or permission to retry. The runtime
 worktrees and manifests remain available for operator reconciliation. Generated
 branch names are single components accepted by external Lake-root bootstrap.
 Deployment and
-daemon wiring remain separate from development of this tool (issue #502).
+daemon wiring remain separate from development of this tool.
 
 ### Main-cycle integration checkpoint
 
@@ -379,30 +384,32 @@ snapshot of open issues and PRs to `results/telemetry/github-snapshot/`
 finds a clean tree)
 (`open-issues.json`, `open-pulls.json`, `metadata.json`; PRs filtered out of the
 issue endpoint) — audit and recovery telemetry, never lifecycle input. The
-retired trees stay archived under `results/telemetry/registry-archive/` (commit
-c8f1999): read-only research data, never edited or read as active input.
+retired trees stay archived under `results/telemetry/registry-archive/`:
+read-only research data, never edited or read as active input.
 
 ## 6. Access-only owner inbox and main mathematical decisions
 
-Pinned issue #500 is the permissions-only owner inbox: it receives only **actual
+The pinned owner inbox issue (`issues.owner_inbox` in `local/project.json`) is
+permissions-only: it receives only **actual
 access or permission blockers requiring human action**, such as changing the
 owner's files, the machine or its accounts, spending money, an owner-only GitHub
 operation or CLI permission change, or acting outside this repository. Changing
 the stated project goal also requires an owner decision there. Main decides
 mathematical and internal workflow questions, including definition/game
 proposals, review disposition and exhausted budgets, with rationale and evidence
-recorded in `results/telemetry/design-decisions.md` and on #27 before further
-work; a decision whose only risk is failing to finish the project is never a
-blocker. Routine reports, watchdog and poller notes, and progress also go to #27.
+recorded in `results/telemetry/design-decisions.md` and on the progress issue
+(`issues.progress`) before further work; a decision whose only risk is failing
+to finish the project is never a blocker. Routine reports, watchdog and poller
+notes, and progress also go to the progress issue.
 Main owns plans, task selection, decomposition, dispatch order, individual
 worker assignments and pipeline execution; meta provides guidance only.
 Neither main nor a worker may bypass permissions, proof integrity, CI, review or
 merge gates. Internal security questions belong to main; a credential/access
 change that actually requires the human is an owner blocker, never a workaround.
-Issue #26 is archived and receives no new comments.
 
-Use one #500 comment per blocker. The visible part is at most ten lines in
-plain words and has this form; ids continue after B11, so the next id is B12.
+Use one comment per blocker on that issue. The visible part is at most ten
+lines in plain words and has this form; blocker ids are `B<n>`, numbered from
+B1 upwards within this project and never reused.
 
 ```markdown
 <!-- owner-inbox id=B<n> -->
@@ -420,7 +427,7 @@ is an immutable identity marker; pass it unchanged as the marker argument on
 both creation and resolution:
 
 ```bash
-python3 local/bin/gh_common.py ensure-pr-comment 500 \
+python3 local/bin/gh_common.py ensure-pr-comment "$KIT_OWNER_INBOX_ISSUE" \
   "<!-- owner-inbox id=B<n> -->" --body-file BLOCKER.md
 ```
 
@@ -430,13 +437,12 @@ not the identity marker. After an owner reply, update that same body file to
 with the unchanged identity marker. This PATCHes the original comment instead
 of creating a second comment for the blocker.
 
-The owner decision at **2026-09-06T05:05Z**, recorded at **05:17:03Z**, explicitly
-withdraws the posted-#26 human hold, **including B7 and B8** (issue #247/PR #260).
-The 02:55:29Z delegation and its 02:58:41Z withdrawal remain historical records;
-neither is the current rule. This new explicit decision, not quotas or role
-guidance, transfers mathematical and internal workflow decisions to main.
-B7 terminal disposition requires exact-head evidence and `review.md` §12: no
-fifth full review, fabricated carry-forward or CI/proof/merge/access bypass.
+When an owner withdraws a human hold on posted blockers, that decision — not a
+quota or a role guideline — is what transfers mathematical and internal
+workflow decisions to main, and it is recorded with its timestamp in
+`results/telemetry/design-decisions.md`. Terminal disposition of such a blocker
+still requires exact-head evidence and `review.md` §12: no fifth full review,
+no fabricated carry-forward, no CI, proof, merge or access bypass.
 An unresolved evidence requirement stays blocked internally, not automatically
 escalated to the human. No mathematical result is declared solved without proof.
 
@@ -446,24 +452,25 @@ or compaction, and before waiting or ending, without owner/meta prompts.
 Main selects useful, disjoint successors, rechecks dependencies, ownership,
 account capacity, service evidence and cumulative budgets, and reports concrete
 constraints and the next admission condition. Idle reservations, duplicate
-writers, completed sessions and filler do not qualify. The September 6
-eight-to-eleven allocation is historical; current admission uses the configured
-account caps in `sessions.md` section 4. Issue #505 retired queue #257 and native
-leases; replenishment uses external `dispatch.sh` assignments.
+writers, completed sessions and filler do not qualify. Admission uses the
+configured account caps in `sessions.md` section 4; the native lease and the
+useful queue are retired, and replenishment uses external `dispatch.sh`
+assignments.
 
-Main remains Astra Ultra; routine workers use Sol Ultra and hard assignments use
-Astra Ultra with an explicit reason under `local/model-policy.json`. Record
-selection, rationale and observed outcomes separately from provider-measured
-effort. Preserve the historical max/xhigh observations, raw provenance, sample
-counts and unknowns in `results/telemetry/model-comparison/`; no benchmark,
-probe, filler session or gate/budget relaxation follows from this guidance.
+The main session runs the model and effort named in `session.main`; routine
+workers run `session.workers.model`, and hard assignments run
+`session.workers.hard_model` with an explicit reason, under the routing rules
+in `local/model-policy.json`. Record selection, rationale and observed outcomes
+separately from provider-measured effort. Keep raw provenance, sample counts
+and unknowns in `results/telemetry/model-comparison/`; no benchmark, probe,
+filler session or gate or budget relaxation follows from this guidance.
 
 A source statement found to be mathematically false goes to main, not the owner
-inbox, unless actual access or permission requires human action. Astra
-availability has been reported, so main selects Astra Ultra for the
-mathematical-gap lane through
-`MIPSTARRE_CODEX_MODEL=gpt-6-astra local/bin/dispatch.sh --role mathfix --effort ultra`.
-Historical owner-launched Fable measurements remain unchanged. Every request or
+inbox, unless actual access or permission requires human action. Main selects
+the hard model at the required effort for the mathematical-gap lane through
+`MIPSTARRE_CODEX_MODEL=<hard model> local/bin/dispatch.sh --role mathfix --effort ultra`
+(or simply `--job-class hard`, which reads the name from the configuration).
+Every request or
 dispatch carries the exact source path, label and line range; the counterexample
 or obstruction; the paper-gap note; the relevant blueprint dependency graph and
 Lean consumers; and the cumulative session count and elapsed working time.
@@ -489,37 +496,37 @@ A correction is adopted only when it meets all four conditions below.
 
 The ordinary budget is at most ten `mathfix` sessions
 or about one and a half working days per gap, whichever comes first. The budget
-is shared across the historical owner-launched Fable lane and the Astra lane; a
+is shared across every lane working on that gap, whichever model each runs; a
 model or telemetry change does not reset it. If a correction requires changing
 a mathematical definition or game, the worker stops and returns it to main
 immediately. Main decides source-semantic corrections with the preceding evidence
 and independent review; changing the stated project goal is outside main's
-authority and requires an owner decision on #500.
+authority and requires an owner decision on the owner inbox issue.
 At budget exhaustion, stop that lane and record attempted statements,
-counterexamples, proof sketches and unresolved consumers on #27 and in the gap
-note. Main decides whether to stop, rescope or record a separately bounded tranche
+counterexamples, proof sketches and unresolved consumers on the progress issue
+and in the gap note. Main decides whether to stop, rescope or record a separately bounded tranche
 within existing authority. Workers never self-extend or reset attempts or time.
-Owner-only permission, credential, access or scope/resource grants go to #500;
-mathematical difficulty alone is not an owner decision, and recording a main
-decision never substitutes for that owner decision on the goal. Already-posted
-items await the owner unless explicitly returned to main, as B7/B8 were above.
+Owner-only permission, credential, access or scope and resource grants go to
+the owner inbox issue; mathematical difficulty alone is not an owner decision,
+and recording a main decision never substitutes for that owner decision on the
+goal. Already-posted items await the owner unless explicitly returned to main.
 
-**Recorded #118/B8 tranche (September 6 amendment):** main authorized
-attempts **11 and 12**, each at most **2700 seconds**, on primary Astra **max**.
-The carried baseline is **10 completed attempts / 19931 completed seconds**,
-with original anchor **2026-09-05T19:24:00Z**. Attempt 12 is conditional on
-main's recorded evaluation of attempt 11; it is not an automatic dispatch.
-The maximum additional allocation is 5400 seconds, not time already spent.
-Maintain a cumulative ledger of actual attempt times, failures, interruptions
-and original session links. This exception is confined to that recorded tranche;
-it does not grant attempt 13, a new anchor or unlimited renewals. Any later work
-requires a new explicit main decision with evidence and a finite bound, not
-another owner budget question unless actual access/permission is blocked.
-See `sessions.md` §4.1 for unchanged continuation validation; this amendment
-does not authorize editing historical limits or bypassing a dispatcher refusal.
+**Extending an exhausted budget.** Main may authorize a *recorded tranche* of
+further attempts: a fixed number, each with a fixed time limit, on a named
+model and effort, carrying the completed attempt count and seconds forward and
+keeping the original anchor. A later attempt in the tranche is conditional on
+main's recorded evaluation of the previous one, never automatic. The allocation
+is additional time, not time already spent. Maintain a cumulative ledger of
+actual attempt times, failures, interruptions and original session links. Such
+an exception is confined to the tranche it records: it grants no further
+attempt, no new anchor and no unlimited renewal, and any later work needs a new
+explicit main decision with evidence and a finite bound — not another owner
+budget question, unless actual access or permission is blocked. See
+`sessions.md` §4.1 for the unchanged continuation validation; a tranche never
+authorizes editing historical limits or bypassing a dispatcher refusal.
 
 An adopted correction follows the ordinary CI and independent-review gates. The
-operator announces it in one line on progress log #27 and records it in the
+operator announces it in one line on the progress issue and records it in the
 paper-gap note, `results/telemetry/events.md`, and
 `results/telemetry/design-decisions.md`. That announcement informs the owner; it
 is not a request for a decision.
@@ -528,13 +535,13 @@ is not a request for a decision.
 
 Two tasks covering the same mathematics, dispatched weeks apart, cost a prover
 run, reviews, repairs and refresh attempts each before anyone noticed that
-`main` already had the result (issue #576: PRs 212, 296, 398, 488, 539, 289 and
-274 were the examples). Three model-free guards close that hole; all of them
+`main` already had the result — seven pull requests in the origin project, all
+redundant. Three model-free guards close that hole; all of them
 read the local `github/main` ref and the registry, none calls a model.
 
 **Before proof work.** `local/bin/dup_check.py check` searches a reference for
 a declaration by exact fully qualified name, by last name component inside the
-`MIPStarRE` namespace, and by statement after a cheap normalisation (comments
+`PaperLib` namespace, and by statement after a cheap normalisation (comments
 stripped, the proof cut at the top-level `:=`/`by`/`where`, binder names
 renamed positionally, whitespace collapsed). It takes `--name`, a blueprint
 node label with `--node` (its `\lean{...}` names), or a whole branch or open PR
@@ -546,7 +553,7 @@ subcommand that searches a reference (`check`, `sweep`, `claim`,
 `claims-check`, `predispatch`) reports that case the same way. `--json` is the
 machine form.
 
-Every native delegate and every Opus helper runs it before starting or
+Every native delegate and every helper session runs it before starting or
 repairing proof work on a declaration, and records the result in the session
 note. A `statement` match is a signal to read both declarations, never by
 itself a verdict — the tool compares text, not terms.
@@ -582,11 +589,12 @@ repaired. A head branch not present locally is reported as skipped rather than
 silently clean: the sweep never fetches on its own.
 
 **Worker claims are separate.** `local/bin/claim.sh` is the atomic list that
-stops two *workers* touching the same PR at once (the main session and a helper
-both repaired PR 577 on 2026-09-17). It claims a PR or issue number for one
+stops two *workers* touching the same PR at once; it exists because the main
+session and a helper once repaired the same pull request simultaneously. It
+claims a PR or issue number for one
 party and kind, refuses a second claim while one is open, and appends its
 release line; the file is
-`${MIPSTARRE_CLAIM_FILE:-${MIPSTARRE_CACHE_ROOT:-~/.cache/mipstarre-dev}/watchdog/meta-dispatched.txt}`,
+`$MIPSTARRE_CLAIM_FILE`, by default `$MIPSTARRE_CACHE_ROOT/watchdog/meta-dispatched.txt`,
 append-only, in the format the meta session's copy writes. `dup_check.py`
 answers "has this mathematics already been done"; `claim.sh` answers "is
 somebody else doing this right now". Both are cheap and both are run first.

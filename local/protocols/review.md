@@ -3,6 +3,12 @@
 Normative for `local/bin/review.sh`.  Read `local/protocols/meta.md` first: it
 governs how this document changes and what must be recorded when it does.
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 Replaces `.github/workflows/pr-review.yml` — the `gate`, `code-review` and
 `prose-review` jobs — together with the review half of the `@claude` /
 `@codex` mention system documented in `docs/pr_review_management.md`.  The
@@ -173,7 +179,7 @@ three things in order:
 
 1. a `## Findings` section, one line per finding, in exactly this shape:
 
-       - [ ] F1 (blocker) `MIPStarRE/Path/File.lean:123` — one-line summary
+       - [ ] F1 (blocker) `PaperLib/Path/File.lean:123` — one-line summary
 
    with severity in {`blocker`, `changes`, `advisory`} and `-` in place of
    `path:line` when a finding is not tied to a line; or the single line
@@ -185,7 +191,7 @@ three things in order:
 
 A missing or malformed trailer is **not** an approval: `review.sh` exits 4,
 posts a `failure` `local-review/summary`, and keeps the raw output under
-`~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/`.  Nothing in the findings section
+`$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/<sha>/`.  Nothing in the findings section
 is discarded either — a line that does not parse is kept verbatim as a
 `changes`-severity finding labelled `unparsed finding:`, and a non-approving
 verdict with an empty ledger gets one synthesised finding so the merge gate
@@ -235,7 +241,7 @@ The split of keys is inherited (`pr-review.yml:18-20` groups by PR number with
 tokens already spent and produces nothing, whereas cancelling a superseded fix
 saves a write to a branch that has already moved.
 
-Locks are directories under `~/.cache/mipstarre-dev/locks/` holding the
+Locks are directories under `$MIPSTARRE_CACHE_ROOT/locks/` holding the
 holder's pid — `flock(1)` does not exist on macOS.  A lock whose holder is gone
 is reclaimed.  After acquiring the review lock, `review.sh` re-reads the local
 tip and the remote PR head: a fix commit that landed while this run queued
@@ -262,7 +268,7 @@ Locally there is **one** surface.  Every finding lives on one line of the
 `## Findings` section of the exact-head `COMMENT` review body, between
 `<!-- findings:begin -->` and `<!-- findings:end -->`:
 
-    - [ ] F1 (blocker) `MIPStarRE/Basic.lean:120` — adds a non-paper hypothesis
+    - [ ] F1 (blocker) `PaperLib/Basic.lean:120` — adds a non-paper hypothesis
 
 | Box | Meaning | Blocks merge |
 |---|---|---|
@@ -356,14 +362,14 @@ branch and owns the branch-name lint (`local/protocols/issues-prs.md`).
     local/bin/review.sh 7 --dry-run      # build diff and prompts, dispatch nothing
     LOCAL_REVIEW_ENABLED=false local/bin/review.sh 7    # confirm the kill switch
 
-Issue #505 retired lease-backed native review. Before running a current review,
-remove any legacy shell exports so they cannot be mistaken for active routing:
+Lease-backed native review is retired. Before running a current review, remove
+any legacy shell exports so they cannot be mistaken for active routing:
 
     unset MIPSTARRE_NATIVE_REVIEW_ROOT MIPSTARRE_NATIVE_REVIEW_AUTHORS
 
 Standard scripted code and prose reviews run through `local/bin/dispatch.sh`
-and the worker-cap reservations in `sessions.md`. The owner-authorized
-Mac-side exception is recorded below.
+and the worker-cap reservations in `sessions.md`. The operator-run exception is
+recorded below.
 
 Exit codes: `0` reviewed or intentionally skipped · `1` usage/environment ·
 `3` gate blocked (CI not green for this head) · `4` no parseable verdict.
@@ -377,10 +383,10 @@ Artefacts:
 |---|---|---|
 | the exact-head `COMMENT` review on the PR | on GitHub | combined verdict, ledger, prose |
 | `local-review/summary` on the head SHA | on GitHub | the gate-readable verdict |
-| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/` | no | diff, prompts, raw agent output |
-| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.md` | no | bounded, sanitized label-derived blueprint spans |
-| `~/.cache/mipstarre-dev/reviews/pr<N>/<sha>/blueprint-citations.raw.md` | no | complete resolver output retained locally |
-| `~/.cache/mipstarre-dev/locks/review-<pr>.lock` | no | the review lock |
+| `$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/<sha>/` | no | diff, prompts, raw agent output |
+| `$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/<sha>/blueprint-citations.md` | no | bounded, sanitized label-derived blueprint spans |
+| `$MIPSTARRE_CACHE_ROOT/reviews/pr<N>/<sha>/blueprint-citations.raw.md` | no | complete resolver output retained locally |
+| `$MIPSTARRE_CACHE_ROOT/locks/review-<pr>.lock` | no | the review lock |
 
 Every codex invocation made by `review.sh` goes through `local/bin/dispatch.sh`, so
 the session is named, captured to `results/telemetry/sessions/<name>.jsonl` and
@@ -389,26 +395,27 @@ summarised into `results/telemetry/sessions.jsonl`
 `LOCAL_REVIEW_ENABLED` for reviewer-role sessions independently; the two checks
 agreeing is intentional redundancy.
 
-### Owner-authorized mixed-model review (2026-09-17; issue #575)
+### Operator-run helper reviewers (an owner-authorized exception)
 
-The owner authorized six helper slots on the owner's Mac: **three fixers and
-three reviewers**, with no ghz model key. These helpers use neither codex,
-`dispatch.sh`, `review.sh`, `autofix.sh`, nor a ghz Opus runner or lane. This is
-an explicit operator-run exception to the standard dispatch path, not a revival
-of the historical native lease transport below. MAIN remains on relay-1 with
-one native delegate and external lane caps 0/0/0; no key, capacity, permission,
-gate, or project-goal authority changes here.
+An owner may authorize a fixed number of helper sessions that run outside the
+standard dispatch path — on another machine, or on a model the dispatcher does
+not route to — and use neither `dispatch.sh`, `review.sh` nor `autofix.sh`.
+That authorization is an exception to the dispatch path only. It changes no
+key, capacity, permission, gate or project-goal authority, and it is not a
+revival of the retired native lease transport below. Record the authorized
+number and shape in the design-decision register when it is granted.
 
-Before assigning `review <PR>` in
-`~/.cache/mipstarre-dev/watchdog/opus-requests.txt`, MAIN verifies that the
-assigned reviewer session has never authored, repaired, refreshed, or otherwise
-worked on that PR in any role. A fresh independent Opus session may review any
-PR, including one changed by a different Opus session: model-family provenance
-alone does not disqualify a reviewer. This is the same session-independence rule
-as for native Codex reviewers. Cross-model review is preferred when it costs
-nothing, but is not required. For each PR head, the reviewer is fresh and is
-not reused for another head; keep the source-faithfulness policy in `AGENTS.md`,
-the ledger in §9 and the cap in §12.
+Before assigning `review <PR>` in the request file under
+`$MIPSTARRE_CACHE_ROOT/watchdog/`, the main session verifies that the assigned
+reviewer session has never authored, repaired, refreshed, or otherwise worked
+on that PR in any role. A fresh independent helper session may review any PR,
+including one changed by another helper session of the same kind:
+model-family provenance alone does not disqualify a reviewer. This is the same
+session-independence rule as for dispatched reviewers. Cross-model review is
+preferred when it costs nothing, but is not required. For each PR head, the
+reviewer is fresh and is not reused for another head; keep the
+source-faithfulness policy in `AGENTS.md`, the ledger in §9 and the cap in
+§12.
 
 Before a review, confirm green CI for the exact head (§2) and no existing
 marked review for that head. The reviewer reads the personas, checklists
@@ -420,11 +427,12 @@ untrusted data (§4), read-only. It publishes the standard marked exact-head
 parseable `VERDICT` (§§6, 7, 9). A reviewer
 never edits the branch, runs CI, posts a commit status, or merges.
 
-Coordinate exclusive claims in
-`~/.cache/mipstarre-dev/watchdog/meta-dispatched.txt`: an
-`opus-review <PR> claimed ...` line holds the PR, and
-`opus-review <PR> released <VERDICT> head=<sha> review=<id>` hands back the
-published review. MAIN reads the **actual published record** by that id via
+Coordinate exclusive claims through the shared claim list
+(`local/bin/claim.sh`, file `$MIPSTARRE_CLAIM_FILE`): a `<party>-review <PR>
+claimed ...` line holds the PR, and
+`<party>-review <PR> released <VERDICT> head=<sha> review=<id>` hands back the
+published review. The main session reads the **actual published record** by
+that id via
 the primary `local/bin/gh_common.py pr-reviews`, checking its `commit_id`,
 `<!-- mipstarre-review pr=N head=SHA -->` marker,
 final parseable verdict and zero unchecked findings before posting
@@ -437,7 +445,7 @@ condition. On a required conflict-free refresh, the whitespace-sensitive diff
 carry of §13 still applies: a carried review is neither a new round nor a
 source for another carry. Prior reviews and costs remain on record.
 
-### Historical native review transport (retired by #505)
+### Historical native review transport (retired)
 
 The remainder of this subsection records the former transport for interpreting
 archived requests. It is not an operating procedure: `native_review.py` now
@@ -496,13 +504,15 @@ published continuations fail closed. Reviewer reuse and source mutation remain
 held until the canonical publisher consumes the responses; local acceptance of
 one lane alone does not release either hold.
 
-Routine reviews default to Sol through `MIPSTARRE_REVIEW_JOB_CLASS=independent_review`.
-For a genuinely hard/semantic/control-policy review main sets `hard_review` and
-`MIPSTARRE_REVIEW_HARDNESS_REASON`; it selects Astra and records that reason in
-the native request. Explicit conflicting model overrides fail. The model choice
-does not change identity independence, author exclusion, CI or any merge gate.
-Existing Astra reviewers need a fresh explicit Sol spawn for future routine jobs,
-not a follow-up treated as a model switch. This control-policy PR itself requires Astra.
+Routine reviews default to the routine model through
+`MIPSTARRE_REVIEW_JOB_CLASS=independent_review`. For a genuinely hard,
+semantic or control-policy review main sets `hard_review` and
+`MIPSTARRE_REVIEW_HARDNESS_REASON`; that selects the hard model
+(`session.workers.hard_model`) and records the reason in the request. Explicit
+conflicting model overrides fail. The model choice does not change identity
+independence, author exclusion, CI or any merge gate. A reviewer session
+already running on the hard model needs a fresh explicit spawn for a later
+routine job, not a follow-up treated as a model switch.
 
 ### Current failure semantics
 
@@ -554,16 +564,16 @@ Nothing is dropped silently: an adjudicated finding lives on as an issue.
 This mirrors the parent's combined bot-fix iteration cap with a single
 terminal review (pr-review.yml:69-72). See EVOLUTION.md for the trigger.
 
-The 2026-09-06T05:05Z owner decision explicitly withdraws the earlier human hold
-on posted B7/B8. Main may disposition B7 only after verifying the actual final
-head's CI, review and finding evidence under this protocol. This transfers
-decision authority, not review authorship: an author never reviews its own diff.
-No missing evidence may be invented, and no review from a different patch may
-be relabeled as current. If the cap is reached and exact-head evidence is absent,
-keep the gate blocked for main's internal disposition; neither a fifth full
-review nor a permission/CI/proof/merge bypass is authorized. Only actual access
-or permission needing human action goes to #26. This amendment itself publishes
-no B7 disposition and claims no review or proof result.
+When an owner releases a hold on a blocker, that transfers **decision
+authority, not review authorship**: the main session may disposition the item
+only after verifying the actual final head's CI, review and finding evidence
+under this protocol, and an author still never reviews its own diff. No missing
+evidence may be invented, and no review of a different patch may be relabelled
+as current. If the cap is reached and exact-head evidence is absent, keep the
+gate blocked for the main session's internal disposition; neither a fifth full
+review nor a permission, CI, proof or merge bypass is authorized. Only an
+access or permission matter that actually needs a human goes to the owner inbox
+issue (`issues.owner_inbox` in `local/project.json`).
 
 ## 13. Evidence follows the diff: carry-forward across a fresh-base (2026-09-04)
 

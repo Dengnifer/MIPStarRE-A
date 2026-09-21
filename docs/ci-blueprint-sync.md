@@ -7,7 +7,7 @@ defends the **axiom** level when the pull request can affect proof-status
 claims: a `\leanok` tag is only honest if the Lean proof it points to is free
 of `sorryAx` in its transitive closure.
 
-It runs on every pull request that touches `blueprint/**`, `MIPStarRE/**`,
+It runs on every pull request that touches `blueprint/**`, `PaperLib/**`,
 the relevant blueprint-sync scripts, the workflow itself, or the Lean
 toolchain/project files, and on manual dispatch.  The expensive Lean build and
 proof-level axiom audit are skipped for blueprint metadata-only edits such as
@@ -69,7 +69,7 @@ what Lean 4.28 emits with its plain-line format: `'Name' depends on axioms:
 […]` / `'Name' does not depend on any axioms`), and only fall back to a strict
 `<harness-path>:line:col:` location prefix (historical format). Arbitrary
 `file:line:col:` prefixes from imported modules are deliberately **not**
-trusted — a stray warning such as `./MIPStarRE/Foo.lean:4:0: warning: …` would
+trusted — a stray warning such as `./PaperLib/Foo.lean:4:0: warning: …` would
 otherwise misattribute lines to whichever declaration happens to sit on line 4
 of the harness. ANSI colour escapes are stripped before parsing. Pattern
 matching (`Unknown identifier` / `Unknown constant`, `does not depend on any
@@ -80,7 +80,7 @@ axioms`, `depends on axioms: […]`) is performed case-insensitively so both Lea
 
 1. **Global harness failure** — `lake env lean` exits non-zero **and** no
    recognised `#print axioms` output was attributed to any queried
-   declaration (typical symptom of `import MIPStarRE` failing before the
+   declaration (typical symptom of `import PaperLib` failing before the
    body runs). The script prints a warning with the tail of the raw lake
    output to stderr, skips per-declaration classification, and exits 0.
    That way a broken Lean build is not hidden behind cascading false
@@ -99,7 +99,7 @@ axioms`, `depends on axioms: […]`) is performed case-insensitively so both Lea
 
 The `blueprint-render` job of `PR CI` also runs a reverse-coverage check on pull
 requests after the Lean setup step succeeds. It diffs the PR against its base
-ref, restricts attention to changed `MIPStarRE/**/*.lean` files, and runs:
+ref, restricts attention to changed `PaperLib/**/*.lean` files, and runs:
 
 ```bash
 python3 scripts/blueprint_lean_sync.py --root . --warn-missing-blueprint \

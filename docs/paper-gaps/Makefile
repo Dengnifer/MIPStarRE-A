@@ -2,7 +2,7 @@
 #
 # Each note in this directory is a standalone LaTeX document that justifies one
 # correction made to a source-paper statement during formalization.  They are
-# the reviewer-facing half of the qpbt-gap-register.md summary table, so a
+# the reviewer-facing half of the <track>-gap-register.md summary table, so a
 # reviewer must be able to build them with a stock TeX installation and nothing
 # else.  This Makefile is that path: plain latexmk, no external tooling.
 #

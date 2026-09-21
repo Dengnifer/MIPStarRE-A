@@ -1,10 +1,12 @@
-This is a Lean 4 / Mathlib formalization project for quantum complexity theory
-(MIP* = RE and low-degree tests). Review with mathematical rigor. Flag any
-sorry that is not clearly marked as a known TODO.
+This is a Lean 4 / Mathlib formalization of one research paper. Which paper,
+and which Lean library root, is recorded in `local/project.json` and in the
+paper mirrors under `references/`; read them rather than assuming a subject.
+Review with mathematical rigor. Flag any sorry that is not clearly marked as a
+known TODO.
 
 Reviewers must catch early drift from the paper.  For every changed
 source-labelled theorem or blueprint-linked declaration, the source of truth is
-`references/ldt-paper/`, followed by `blueprint/src/chapter/`.  Compare the
+`references/<key>-paper/`, followed by `blueprint/src/chapter/`.  Compare the
 paper statement with the Lean statement: hypotheses, conclusion, quantifier
 order, parameter bounds, and error terms.  A Lean declaration is not the cited
 paper theorem if it adds a load-bearing bridge, residual, repair, package,

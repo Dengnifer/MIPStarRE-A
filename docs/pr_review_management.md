@@ -4,7 +4,13 @@ executionId: 7dfcb0e16ad2
 modifiedAt: 2026-03-24T18:31:28.844Z
 pinned: true
 ---
-# PR Review and Merge Lessons — 2026-03-23
+# PR Review and Merge Lessons
+
+> **About the examples.** The pull-request and issue numbers, the declaration
+> names and the dated observations below come from the project this kit was
+> extracted from. They are kept because each one is the concrete case that
+> bought the lesson; read them as examples from the origin project, not as
+> facts about this repository.
 
 ## Critical Rules
 
@@ -69,7 +75,7 @@ The REST API `line` field is unreliable for determining if a comment is addresse
 **Use GraphQL instead** — it has explicit `isResolved` and `isOutdated` fields:
 
 ```bash
-REPO_OWNER="LionSR"; REPO_NAME="MIPStarRE"; PR=133
+REPO_OWNER="<owner>"; REPO_NAME="<repo>"; PR=133
 gh api graphql -f query='{
   repository(owner: "'$REPO_OWNER'", name: "'$REPO_NAME'") {
     pullRequest(number: '$PR') {
@@ -118,10 +124,10 @@ Three SEPARATE places comments live on a PR. Must check ALL three.
 
 ### Quick check script for all comments on a PR:
 ```bash
-REPO="LionSR/MIPStarRE"; PR=198
+REPO="$(python3 local/bin/gh_common.py repo-slug)"; PR=198
 # 1. Inline (Bugbot line-level findings)
 gh api "repos/$REPO/pulls/$PR/comments" --jq '.[] | "INLINE [\(.user.login)] \(.path):\(.line) — \(.body[:120])"'
-# 2. PR-level (Claude reviews, human comments)  
+# 2. PR-level (Claude reviews, human comments)
 gh api "repos/$REPO/issues/$PR/comments" --jq '.[] | "PR-LEVEL [\(.user.login)] \(.body[:120])"'
 # 3. Review summaries
 gh api "repos/$REPO/pulls/$PR/reviews" --jq '.[] | "REVIEW [\(.user.login)] state=\(.state) \(.body[:120])"'

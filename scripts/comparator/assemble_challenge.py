@@ -30,6 +30,7 @@ from challenges import (  # noqa: E402
     Extras,
     ModulePreludes,
     Prelude,
+    default_challenge_name,
 )
 
 Entry = tuple[str, str, int, int, list[str]]
@@ -104,7 +105,7 @@ class Assembler:
             if p in rank or depth > 200:
                 return
             rank[p] = -1  # in progress
-            local = [d for d in self.imports_of(p) if d.startswith("MIPStarRE/")]
+            local = [d for d in self.imports_of(p) if d.startswith("PaperLib/")]
             for d in local:
                 if rank.get(d) != -1:
                     visit(d, depth + 1)
@@ -238,12 +239,21 @@ def main() -> int:
     parser.add_argument(
         "--challenge",
         choices=sorted(CHALLENGES),
-        default="ldt",
-        help="challenge whose context tables to use (default: ldt)",
+        default=None,
+        help=(
+            "challenge whose context tables to use (default: the project's "
+            "default track, when it has one)"
+        ),
     )
     args = parser.parse_args()
 
-    print(assemble(args.tsv, args.root, CHALLENGES[args.challenge]))
+    name = args.challenge or default_challenge_name()
+    if name is None:
+        parser.error(
+            "no comparator challenge is configured: add a track with headline "
+            "theorems to local/project.json (see scripts/comparator/challenges.py)"
+        )
+    print(assemble(args.tsv, args.root, CHALLENGES[name]))
     return 0
 
 

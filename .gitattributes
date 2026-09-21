@@ -46,24 +46,21 @@ scripts/make_artifact.sh -export-ignore
 .gitattributes          export-ignore
 
 # --- workflow-only docs -----------------------------------------------------
-docs/campaign/                  export-ignore
 docs/reports/                   export-ignore
 docs/ci-automation.md           export-ignore
 docs/ci-blueprint-sync.md       export-ignore
 docs/pr_review_management.md    export-ignore
-docs/stale_issue_audit.md       export-ignore
 docs/blueprint-script-coverage.md export-ignore
 
 # --- third-party paper sources: NOT ignored, on purpose ---------------------
-# `references/` ships with the artifact (owner decision, 2026-09-19, following
-# the companion LDT repository).  The Lean docstrings, the theorem index and the
-# deviations page cite `references/<paper>/<file>.tex:<lines>`, so a snapshot
+# `references/` ships with the artifact: the Lean docstrings, the theorem index
+# and the deviations page cite `references/<paper>/<file>.tex:<lines>`, so a snapshot
 # without them cannot be checked against its sources.  They are third-party
 # material kept for reference, not covered by this repository's licence; see
 # docs/ARTIFACT.md.  Listed here so that nobody adds `export-ignore` back
 # without reading that decision.
 
 # --- generated or workflow-only build products ------------------------------
+# These two do not exist in a fresh checkout; the blueprint build writes them.
 blueprint/web/          export-ignore
 blueprint/lean_decls    export-ignore
-proof-guide-bridge-lemmas-sorry-elim.md export-ignore

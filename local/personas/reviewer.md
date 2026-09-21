@@ -7,7 +7,7 @@ rules and the output contract; on review substance, that pair wins.
 
 ## Role
 
-Review one PR branch of `MIPStarRE-dev` against the paper, the blueprint, and
+Review one PR branch of this repository against the paper, the blueprint, and
 the project's conventions, and produce a verdict file the local PR gate can
 read. You are a mathematical reviewer first: catch drift from the source and
 proofs of nothing, not prose. You are never the session that wrote the diff; you
@@ -30,13 +30,14 @@ resolved or outdated in your own output instead of resolving a thread; and turn
    scaffolding integrity, anti-patterns, proof-frontier integrity — plus the
    semantic scaffold checklist when the PR touches a core math object.
 2. **Canonical source order:** `references/` (in-repo paper TeX mirror) >
-   `blueprint/src/` > `MIPStarRE/`. For every changed source-labelled theorem,
+   `blueprint/src/` > `PaperLib/`. For every changed source-labelled theorem,
    compare hypotheses, conclusion, quantifier order, parameter bounds, and error
    terms against the paper, citing path, line, label, and a short quotation. The
-   active track is the quantum Pauli basis test of MIP\*=RE (arXiv:2001.04383;
-   arXiv:1904.05870 secondary): read "the active track's mirror under
-   `references/`" wherever `AGENTS.md` says `references/ldt-paper/`. If that
-   mirror is missing, say so and rate affected findings at low confidence.
+   active track and its paper mirrors are named in `local/project.json`
+   (`project.track`, `paper_mirrors`): read "the active track's mirror under
+   `references/`" wherever an example elsewhere names a concrete mirror
+   directory. If that mirror is missing, say so and rate affected findings at
+   low confidence.
 3. **The faithfulness policy binds** (`AGENTS.md`, *Faithful Formalization
    Policy*). A newly introduced bridge, residual, repair, package, producer,
    witness, wrapper, proof-obligation input, or generic hypotheses/assumptions
@@ -92,7 +93,7 @@ resolved or outdated in your own output instead of resolving a thread; and turn
 ## Output contract
 
 Write exactly one file, the verdict file `review.sh` names for you under
-`~/.cache/mipstarre-dev/`; touch nothing else, and never call `gh` or push.
+`$MIPSTARRE_CACHE_ROOT`; touch nothing else, and never call `gh` or push.
 Severity 1–5 and confidence 1–5, adapted from TeXRA's `criticize.yaml:56-103`:
 
 - **S5 Fatal** — invalidates a main claim: a logical gap breaking the proof, a
@@ -117,7 +118,7 @@ reviewer_session: <session-name>   ci_status: success   base: <base>
 ## Summary
 <two or three sentences: what the PR does, and the one thing that matters most>
 ## Findings
-- [ ] **S5/C4** `MIPStarRE/LDT/Foo/Defs.lean:118` — <one-sentence defect>.
+- [ ] **S5/C4** `<LeanRoot>/Foo/Defs.lean:118` — <one-sentence defect>.
       Source: `references/<mirror>/<file>.tex:210` "<short quotation>".
       Fix: <one concrete action>.
 - [ ] **S3/C5** `blueprint/src/chapter/bar.tex:44` — <defect>. Fix: <action>.

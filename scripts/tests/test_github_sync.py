@@ -1,14 +1,18 @@
 """Offline publication regressions using an actual local bare Git remote."""
 
 from pathlib import Path
+import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
 
 SOURCE = Path(__file__).resolve().parents[2] / "local/bin/github-sync.sh"
+sys.path.insert(0, str(SOURCE.parents[2] / "scripts"))
+import project_config as pc  # noqa: E402
 
 
 class GithubSyncTests(unittest.TestCase):
@@ -145,3 +149,68 @@ class GithubSyncTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlaceholderSlugTests(unittest.TestCase):
+    """Without a `github` remote the slug decides, and a placeholder refuses."""
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.repo = Path(self.temporary.name) / "repo"
+        (self.repo / "local/bin").mkdir(parents=True)
+        (self.repo / "scripts").mkdir()
+        shutil.copyfile(SOURCE, self.repo / "local/bin/github-sync.sh")
+        shutil.copyfile(
+            SOURCE.parents[2] / "scripts/project_config.py",
+            self.repo / "scripts/project_config.py",
+        )
+        # A push stub: this class is about which remote the script chooses, and
+        # a real push attempt would only retry into the offline timeout.
+        stub = self.repo / "local/bin/checked-push.sh"
+        stub.write_text('#!/usr/bin/env bash\nexit 0\n')
+        stub.chmod(0o755)
+        for args in (("init", "-b", "main"),
+                     ("config", "user.name", "Sync regression"),
+                     ("config", "user.email", "sync-test@example.invalid"),
+                     ("config", "commit.gpgsign", "false")):
+            subprocess.run(["git", "-C", str(self.repo), *args], check=True,
+                           capture_output=True)
+        (self.repo / "README.md").write_text("fixture\n")
+        subprocess.run(["git", "-C", str(self.repo), "add", "-A"], check=True,
+                       capture_output=True)
+        subprocess.run(["git", "-C", str(self.repo), "commit", "-qm", "fixture",
+                        "--no-verify"], check=True, capture_output=True)
+
+    def write_config(self, slug: str) -> None:
+        (self.repo / "local/project.json").write_text(
+            json.dumps({"schema": 1, "project": {"github_slug": slug}}), encoding="utf-8"
+        )
+
+    def run_sync(self):
+        return subprocess.run(
+            ["bash", str(self.repo / "local/bin/github-sync.sh")],
+            cwd=str(self.repo), capture_output=True, text=True,
+            env=dict(os.environ, SYNC_TEST_LOG=str(self.repo / "pushes")),
+        )
+
+    def test_the_placeholder_slug_refuses_with_an_explanation(self):
+        # The placeholder CONSTANT, never the literal (bootstrap rewrites it).
+        self.write_config(pc.PLACEHOLDER_SLUG)
+        result = self.run_sync()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("placeholder name", result.stderr)
+        self.assertIn("project.github_slug", result.stderr)
+        self.assertEqual(
+            subprocess.run(["git", "-C", str(self.repo), "remote"],
+                           capture_output=True, text=True).stdout.strip(),
+            "",
+            "a refused run must not leave a remote behind",
+        )
+
+    def test_a_real_slug_becomes_the_remote_url(self):
+        self.write_config("someone/widget")
+        self.run_sync()  # the push itself fails offline; the remote is the point
+        url = subprocess.run(["git", "-C", str(self.repo), "remote", "get-url", "github"],
+                             capture_output=True, text=True).stdout.strip()
+        self.assertEqual(url, "git@github.com:someone/widget.git")

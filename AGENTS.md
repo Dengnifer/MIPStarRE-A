@@ -1,78 +1,84 @@
 # AGENTS.md
 
-Instructions for coding agents working in `MIPStarRE`. This is the **single
-source of truth** for agent conventions. Claude Code agents should also read
-`CLAUDE.md` for Claude-specific notes.
+Instructions for coding agents working in this repository. This is the
+**single source of truth** for agent conventions. Claude Code agents should
+also read `CLAUDE.md` for Claude-specific notes; a session a human opened at
+the repository root to formalize a paper reads `local/personas/meta.md` first
+instead.
 
-## Project Overview
+> **About the examples below.** This document was written while the workflow it
+> describes formalized one particular paper, and some of its examples still
+> name that project's modules, theorems, directories and issue numbers. The
+> **policy** is paper-agnostic: read every such example as a shape, not as a
+> fact about this repository. Where an example names a Lean module root, read
+> `project.lean_root` from `local/project.json`; where it names a paper mirror,
+> read the mirrors listed in `paper_mirrors`; where it names an issue number,
+> read `issues.*`. If an example contradicts this repository's actual tree,
+> the tree wins — and fixing the example is a welcome, cheap contribution.
 
-This repository is a Lean 4 + Mathlib formalization project for mathematics
-around $MIP^* = RE$. It is the **local-only continuation** of
-[LionSR/MIPStarRE](https://github.com/LionSR/MIPStarRE): the inherited track is
-the **low individual degree test (LDT)** paper (arXiv:2009.12982); the active
-track is the **quantum Pauli basis test (QPBT)** from *MIP\*=RE*
-(arXiv:2001.04383, primary) and *NEEXP in MIP\** (arXiv:1904.05870, secondary).
+## Project overview
 
-CI, review, and auto-fix **execute locally**; issues, PRs, their evidence and
-merges live on GitHub (`Dengnifer/MIPStarRE-A`), reached only through
-`local/bin/gh_common.py`. Read `local/README.md` and `local/DESIGN.md` before
-doing workflow actions; the `## Local Operations` section below summarizes the
-rules.
+This repository is a Lean 4 + Mathlib formalization of one research paper,
+built with an AI-assisted workflow that runs locally. What is being formalized,
+where it lives and what it is called are recorded in
+[`local/project.json`](local/project.json) — the library name, the Lean root
+module, the track, the repository slug, the paper mirrors and the issue
+numbers. Every script and every protocol reads them from there.
+
+Issues, pull requests, their evidence and merges live on GitHub, reached only
+through `local/bin/gh_common.py`; CI, review and auto-fix **execute locally**.
+Read `local/README.md` and `local/DESIGN.md` before doing workflow actions; the
+`## Local Operations` section below is the short version.
 
 Key locations:
 
-- `references/qpbt-paper/` — per-section TeX mirror of MIP\*=RE
-  (arXiv:2001.04383); the QPBT lives in
-  `08_classical_and_quantum_low_degree_tests.tex` and
-  `14_analysis_of_the_pauli_basis_test.tex`
-- `references/neexp-paper/` — per-section TeX mirror of NEEXP in MIP\*
-  (arXiv:1904.05870); secondary source
-  (`07_a_self_test_for_the_pauli_basis.tex`)
-- `references/ldt-paper/` — in-repo TeX source mirror for LDT
-- `blueprint/src/` — active LaTeX blueprint with Lean cross-references
-  (`\lean{}`, `\leanok`)
-- `MIPStarRE/` — Lean codebase matching the blueprint
-- `audits/` — dated audit reports, scouting notes, and repair plans
-- `local/`, `results/telemetry/` — the local workflow layer
-
-A legacy 2111 tensor track exists under `blueprint/legacy/` — do not modify it.
+- `references/<mirror>/` — per-section TeX mirrors of the source papers, used
+  as line-precise citation targets. `SOURCE.md` in each one records the arXiv
+  URL, the date and the copyright position; `README.md` records the split.
+- `blueprint/src/` — the LaTeX blueprint with Lean cross-references
+  (`\lean{}`, `\leanok`, `\uses{}`)
+- `<LeanRoot>/` — the Lean codebase, matching the blueprint
+- `docs/paper-gaps/` — dated notes on defects found in the source papers
+- `audits/` — dated audit reports, scouting notes and repair plans
+- `local/`, `results/telemetry/` — the workflow layer and its records
 
 **Canonical source hierarchy** (use in this order):
 
-1. `references/` paper mirrors — TeX source of the papers
-2. `blueprint/src/chapter/` — active LaTeX blueprint
-3. `MIPStarRE/` — Lean scaffold
+1. `references/` paper mirrors — the TeX source of the papers
+2. `blueprint/src/chapter/` — the active blueprint
+3. `<LeanRoot>/` — the Lean development
 
 Always read the paper source before formalizing or proving a statement. The
-paper contains the precise mathematical definitions, theorem statements, and
-proof strategies that the Lean code must faithfully represent. When stuck on a
-sorry site or proof, go back to the original paper TeX source — the answer is
-almost always there. Do not guess or try random tactics without first
-understanding the paper's proof strategy.
+paper contains the precise definitions, theorem statements and proof strategies
+the Lean code must faithfully represent. When stuck on a `sorry` site or a
+proof, go back to the paper's TeX — the answer is almost always there. Do not
+guess or try random tactics without first understanding the paper's argument.
 
-## Repository Layout
+## Repository layout
 
-```
-MIPStarRE/
-├── Quantum/               # Reusable matrix / measurement infrastructure
-│   ├── FiniteMatrix.lean  # Op d, normalizedTrace, tauNormSq, IsProj, ...
-│   └── Measurement.lean   # POVM, measurement types
-└── LDT/                   # Low individual degree test (13 submodules)
-    ├── Basic/             # Parameters, operators, distributions, submeasurements
-    ├── Test/              # Test definitions & main theorem
-    ├── Preliminaries/
-    ├── MakingMeasurementsProjective/
-    ├── MainInductionStep/
-    ├── ExpansionHypercubeGraph/
-    ├── GlobalVariance/
-    ├── SelfImprovement/
-    ├── CommutativityPoints/
-    ├── Commutativity/
-    └── Pasting/
-```
+The Lean tree mirrors the blueprint's chapters: one subdirectory per chapter
+group, each typically with a `Defs.lean` and a `Theorems.lean`, and a root
+module that re-exports them. `local/project.json` names the root;
+`local/chapter-plan.json` (written at bootstrap) names the chapters and the
+Lean subpath of each.
 
-Each LDT submodule typically has `Defs.lean` and `Theorems.lean`. Root imports
-flow: `MIPStarRE.lean` → `Quantum` + `LDT` → all submodules.
+Top-level directories:
+
+| Path | Contents |
+|---|---|
+| `<LeanRoot>/` | Lean sources |
+| `blueprint/src/` | the LaTeX blueprint, one file per chapter |
+| `references/` | per-section TeX mirrors of the source papers |
+| `docs/` | documentation, gap notes, contributor guides, style rules |
+| `audits/` | dated scouting and audit reports |
+| `scripts/` | paper splitter, audits, comparator tooling, completion gate |
+| `local/` | the AI-assisted development workflow |
+| `results/telemetry/` | session, build and stage records produced by that workflow |
+
+`local/` and `results/telemetry/` document **how** the formalization was
+produced. They are research data about the process, not part of the
+mathematical artifact; nothing under the Lean root depends on them.
+
 
 ## Quick Start — Build and Check Commands
 
@@ -100,19 +106,19 @@ lake build
 ### Fast single-file type-check (default iteration loop)
 
 ```bash
-lake env lean MIPStarRE/LDT/SelfImprovement/Defs.lean
+lake env lean <LeanRoot>/<Chapter>/Defs.lean
 ```
 
 ### Check for proof holes in one file
 
 ```bash
-rg -n "sorry|axiom" MIPStarRE/LDT/SelfImprovement/Defs.lean || true
+rg -n "sorry|axiom" <LeanRoot>/<Chapter>/Defs.lean || true
 ```
 
 ### Check for proof holes in the whole project
 
 ```bash
-rg -n "sorry|axiom" MIPStarRE
+rg -n "sorry|axiom" <LeanRoot>
 ```
 
 ### Declaration checker
@@ -158,8 +164,11 @@ For blueprint changes:
 
 ## Toolchain
 
-- **Lean**: v4.31.0 (from `lean-toolchain`)
-- **Mathlib**: v4.31.0 (from `lakefile.toml`)
+- **Lean**: v4.32.0 (from `lean-toolchain`)
+- **Mathlib**: v4.32.0 (from `lakefile.toml`)
+
+Those two files are the answer, not this prose: if they disagree with the lines
+above, they win and the lines above are the bug. Never run `lake update`.
 
 Important `lakefile.toml` options:
 
@@ -170,24 +179,24 @@ Important `lakefile.toml` options:
 
 ## Proof-Filling Order
 
-Sections must be filled in this dependency order:
+**The order is not written here; it is read off the work.** Fill proofs in the
+dependency order of the blueprint graph — a node's `\uses{}` closure before the
+node — and take the next item from the tracker tree, where a packet is ready
+exactly when it is an open leaf whose every `blocked_by` issue is closed
+(`local/bin/ready_packets.py`). Definitions and preliminaries come before the
+statements that use them; the chapter that wraps the induction or the final
+assembly comes last, because it consumes everything else.
 
-1. Sections 3–4: test setup and preliminaries
-2. Section 5: making measurements projective
-3. Sections 7–8: expansion and global variance
-4. Section 9: self-improvement
-5. Sections 10–11: commutativity
-6. Section 12: pasting
-7. Section 6: main induction wrapper
-
-Do not start from the final theorem and guess intermediate facts.
+Do not start from the final theorem and guess intermediate facts. Do not invent
+a private ordering either: if the blueprint graph and the tracker disagree,
+that disagreement is a defect to report, not a licence to choose.
 
 ## Faithful Formalization Policy
 
 A declaration is a formalization of a paper theorem only when its public Lean
 statement matches the cited paper statement, up to faithful formal encoding.
 Changing a Lean theorem away from the corresponding statement in
-`references/ldt-paper/` is strongly discouraged and should occur only when a
+`references/<key>-paper/` is strongly discouraged and should occur only when a
 faithful formal encoding or a documented mathematical necessity requires it.
 This applies to every declaration advertised as a formalization of a paper
 result, not only to theorems currently undergoing repair.  The check is on the
@@ -219,7 +228,7 @@ from the blueprint by `\lean{...}` and `\leanok`.
 Before editing any theorem tagged with a paper label (`thm:*`, `lem:*`,
 `prop:*`):
 
-1. Read the corresponding statement in `references/ldt-paper/`.
+1. Read the corresponding statement in `references/<key>-paper/`.
 2. Preserve the public Lean theorem statement, except for hypotheses that are
    genuinely part of the faithful encoding of the paper's domain.
 3. Do not add bridge inputs, residual packages, repair hypotheses, producer
@@ -259,7 +268,7 @@ paper theorem does not assume.  These assumptions
 should not be introduced merely to keep a file compiling or to avoid a `sorry`;
 they require explicit mathematical justification and a planned discharge.
 
-For the current LDT final theorem, `mainFormal` is reserved for the statement of
+In the origin project's tree, for instance, the final theorem `mainFormal` was reserved for the statement of
 `\Cref{thm:main-formal}`: from a projective strategy passing the low individual
 degree test, it produces the three final consistency conclusions.  A theorem
 with an extra hypothesis such as
@@ -281,7 +290,7 @@ integrity audit:
 ### Paper-realignment mode
 
 When a theorem, definition, or hypothesis field has already drifted away from
-`references/ldt-paper/`, a repair PR may temporarily reintroduce `sorry` in
+`references/<key>-paper/`, a repair PR may temporarily reintroduce `sorry` in
 order to restore the source-faithful statement.  In this mode, statement
 faithfulness is the first invariant: keeping a divergent proof intact merely to
 avoid `sorry` preserves a theorem that the paper does not state.
@@ -345,7 +354,7 @@ paper hypotheses.
 - One import per line
 - Follow existing local import style
 - Prefer the smallest correct import set, but do not churn imports unnecessarily
-- Preserve re-export-file structure: `MIPStarRE.lean`, `MIPStarRE/LDT.lean`
+- Preserve re-export-file structure: `<LeanRoot>.lean` and each track's `<LeanRoot>/<Track>.lean`
 - Before adding a new import, check whether the needed declaration already
   comes from an existing local re-export import
 
@@ -422,7 +431,7 @@ and `\leanok` tags in the relevant `blueprint/src/chapter/*.tex` file.
 ### Search before proving
 
 - Prefer existing Mathlib lemmas
-- Reuse local API from `Quantum/` and `LDT/Basic/`
+- Reuse local API from the library's own shared directories (`Basic/`, `Preliminaries/`, …)
 - Use file-local helper lemmas only when they genuinely reduce duplication
 - Scout Mathlib first: `exact?`, `apply?`, `#find?`, grep Mathlib source
 - See `audits/` for chapter-by-chapter Mathlib dependency analysis
@@ -470,8 +479,8 @@ from conclusions, and avoid informal process language when a standard
 mathematical phrase is available.
 
 When writing docstrings, audit notes, PR descriptions, or blueprint-adjacent
-comments, use terminology from the standard mathematical literature, the LDT
-paper, and the local formalization. Do not invent slang or private shorthand for
+comments, use terminology from the standard mathematical literature, the paper
+being formalized, and the local formalization. Do not invent slang or private shorthand for
 mathematical objects. The goal is prose that a third-party reader can understand
 without having read the agent conversation that produced the change.
 
@@ -555,8 +564,8 @@ type(scope): short description
 | `ci`       | CI/CD workflow changes                            |
 | `chore`    | Dependency bumps, linting, toolchain updates      |
 
-**Scope** is a shortened module path: `LDT/SelfImprovement`, `Quantum`,
-`blueprint`, etc. Omit the `MIPStarRE/` prefix.
+**Scope** is a shortened module path under the Lean root — a chapter directory,
+or `blueprint`. Omit the Lean root prefix itself.
 
 ### PR body template
 
@@ -643,7 +652,7 @@ canonical Mathlib-style, proof-integrity, and prose convention texts as the
 `.claude/settings.json`; other agents install it by cloning the
 repository and symlinking the skill directories into their skill
 location, as described in its README.
-MIPStarRE-local addenda to those conventions live in
+PaperLib-local addenda to those conventions live in
 `docs/project_conventions.md`, which restates no shared rule.
 
 Use this file together with:
@@ -653,7 +662,7 @@ Use this file together with:
 | `CLAUDE.md` | Claude Code-specific notes (minimal pointer to this file) |
 | `docs/CONTRIBUTING.md` | PR format, issue templates, label taxonomy, review checklist |
 | `lean-conventions` skill | Mathlib style, naming, documentation, PR review, proof integrity, prose style (canonical; installed) |
-| `docs/project_conventions.md` | MIPStarRE-local addenda to the shared conventions |
+| `docs/project_conventions.md` | PaperLib-local addenda to the shared conventions |
 | `docs/anti_patterns.md` | Subtler proof-evasion patterns |
 | `docs/proof_frontier_review.md` | Review checklist for construction theorems and residual inputs |
 | `docs/mathematical_language.md` | Project-local terminology rules |
@@ -676,7 +685,9 @@ Use this file together with:
 This repository runs its whole workflow locally. The short version every
 agent must know:
 
-- **Build reuse.** A hot main cache lives under `~/.cache/mipstarre-dev/`;
+- **Build reuse.** A hot main cache lives under `$MIPSTARRE_CACHE_ROOT`
+  (`paths.cache_root` in `local/project.json`, exported by
+  `local/bin/session/config.sh`);
   fresh worktrees get it via `local/bin/worktree-setup.sh` (which also
   installs git hooks and resets dirty vendored packages). Never run
   `lake update`; never write to the cache; at most one full `lake build`
@@ -687,20 +698,23 @@ agent must know:
   exact-head commit statuses (`local-ci/*`, `local-review/summary`); merges go
   through GitHub with an exact-SHA guard. Details: `local/README.md`,
   `local/protocols/issues-prs.md`.
-- **Sessions.** Worker Codex sessions use `local/bin/dispatch.sh` (roles: orc,
-  prover, reviewer, simplifier, blueprint, splitter, scout; `mathfix` is
-  reserved for Astra source-statement repair under `local/protocols/issues-prs.md`
-  section 6) so token/time telemetry stays complete. Lease-backed native
-  descendants are retired by issue #505; `local/protocols/sessions.md` retains
-  their history. Historical Fable 5.1 math-fix sessions use `owner-sessions.jsonl`.
-- **Owner inbox.** Pinned issue #500 receives only permission blockers whose
-  risk extends beyond project development; main decides and records questions
-  whose only risk is failure to finish the project. Changing the stated project
-  goal is outside main's authority and requires an owner decision on #500. Use
-  one comment per blocker and at most ten visible plain-language lines: what is
-  stuck, lettered options, one recommendation, and `DECISION B<n>: <letter>`.
-  Ids continue after B11 and details are folded. Issue #26 is archived and
-  receives no new comments.
+- **Sessions.** Worker sessions start only through `local/bin/dispatch.sh`
+  (roles: orc, prover, reviewer, simplifier, blueprint, splitter, scout;
+  `mathfix` is the source-statement repair lane under
+  `local/protocols/issues-prs.md` section 6), so token and time telemetry stays
+  complete. Which model and effort each role gets is `session.workers` in
+  `local/project.json` plus the routing rules in `local/model-policy.json` — no
+  model name belongs in this document. Lease-backed native descendants are
+  retired; `local/protocols/sessions.md` retains their history.
+- **Owner inbox.** The pinned owner-inbox issue (`issues.owner_inbox` in
+  `local/project.json`) receives only permission blockers whose risk extends
+  beyond project development; main decides and records questions whose only
+  risk is failure to finish the project. Changing the stated project goal is
+  outside main's authority and needs an owner decision there. Use one comment
+  per blocker and at most ten visible plain-language lines: what is stuck,
+  lettered options, one recommendation, and `DECISION B<n>: <letter>`; details
+  are folded. Routine progress goes to the progress issue
+  (`issues.progress`), never to the owner inbox.
 - **Telemetry duty.** Incidents go to `results/telemetry/events.md`;
   protocol changes follow `local/protocols/meta.md` and are ledgered in
   `local/protocols/EVOLUTION.md`.

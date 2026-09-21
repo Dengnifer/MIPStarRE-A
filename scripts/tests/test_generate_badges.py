@@ -98,12 +98,12 @@ class GenerateBadgesTests(unittest.TestCase):
         self, check_output: mock.Mock
     ) -> None:
         check_output.return_value = (
-            "MIPStarRE/Incomplete.lean\n"
+            "PaperLib/Incomplete.lean\n"
             "scripts/comparator/challenge_footer.lean\n"
         )
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
-            project_file = repo_root / "MIPStarRE/Incomplete.lean"
+            project_file = repo_root / "PaperLib/Incomplete.lean"
             challenge_file = repo_root / "scripts/comparator/challenge_footer.lean"
             project_file.parent.mkdir(parents=True)
             challenge_file.parent.mkdir(parents=True)
@@ -136,6 +136,18 @@ class GenerateBadgesTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(RuntimeError, "expected mainFormal"):
                 sorry_badge_count(repo_root, files)
+
+    @mock.patch("generate_badges.subprocess.check_output")
+    def test_no_challenge_footer_subtracts_nothing(self, check_output) -> None:
+        """A repository whose comparator challenge does not exist yet."""
+        check_output.return_value = "PaperLib/Incomplete.lean\n"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            project_file = repo_root / "PaperLib/Incomplete.lean"
+            project_file.parent.mkdir(parents=True)
+            project_file.write_text("theorem openGoal : True := by sorry\n")
+            files = tracked_lean_files(repo_root)
+            self.assertEqual(sorry_badge_count(repo_root, files), 1)
 
 
 class BlueprintBadgeCountsTests(unittest.TestCase):

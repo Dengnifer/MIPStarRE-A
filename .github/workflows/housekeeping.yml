@@ -425,16 +425,16 @@ jobs:
               summary.write("## README freshness audit\n\n")
               summary.write(
                   "This scheduled workflow is report-only. It checks `README.md` "
-                  "for local path references, the documented `MIPStarRE/LDT/` "
-                  "submodule count, and hard-coded Lean/Mathlib versions.\n\n"
+                  "for local path references, the documented submodule counts, "
+                  "and hard-coded Lean/Mathlib versions.\n\n"
               )
               summary.write(f"- Flagged stale content: {report['flagged']}\n")
               summary.write(f"- Local paths checked: {len(report['path_references'])}\n")
               summary.write(f"- Missing paths: {len(report['missing_paths'])}\n")
-              ldt = report["ldt_submodule_count"]
+              counts = report["submodule_counts"]
               summary.write(
-                  f"- LDT submodule count: actual={ldt['actual']}, "
-                  f"mismatches={len(ldt['mismatches'])}\n"
+                  f"- Submodule counts mentioned: {len(counts['mentions'])}, "
+                  f"mismatches={len(counts['mismatches'])}\n"
               )
               toolchain = report["toolchain"]
               summary.write(

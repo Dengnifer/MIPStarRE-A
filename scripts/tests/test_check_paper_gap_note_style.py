@@ -49,7 +49,7 @@ GOOD_NOTE = r"""
 \section{Key theorem forms}
 
 The source theorem form is displayed here.  The Lean declaration is
-\(\leanid{MIPStarRE.LDT.Test.example}\).%
+\(\leanid{PaperLib.Core.Test.example}\).%
 \footnote{Tracked in \ghissue{9999}.  The paper source is
 \path{references/ldt-paper/example.tex}.}
 
@@ -127,8 +127,8 @@ class PaperGapNoteStyleTests(unittest.TestCase):
 
     def test_rejects_raw_fully_qualified_lean_identifier(self) -> None:
         bad = GOOD_NOTE.replace(
-            r"\(\leanid{MIPStarRE.LDT.Test.example}\)",
-            "MIPStarRE.LDT.Test.example",
+            r"\(\leanid{PaperLib.Core.Test.example}\)",
+            "PaperLib.Core.Test.example",
         )
         findings = _scan_note_text("docs/paper-gaps/issue-9999-example.tex", bad)
         messages = [finding.message for finding in findings]

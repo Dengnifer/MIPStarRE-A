@@ -359,8 +359,8 @@ def child_environment(root: Path) -> dict:
                    if key == 'MIPSTARRE_LAKE_ROOT' or
                    (not key.startswith('MIPSTARRE_') and key != 'CODEX_HOME')}
     environment.update(MIPSTARRE_CACHE_ROOT=str(root), MIPSTARRE_CODEX_ACCOUNT='primary',
-                       MIPSTARRE_CODEX_MODEL='gpt-6-astra', MIPSTARRE_REVIEW_MODEL='gpt-6-astra',
-                       MIPSTARRE_PROSE_MODEL='gpt-6-astra', MIPSTARRE_ACCOUNT_WAIT='0',
+                       MIPSTARRE_CODEX_MODEL='auto', MIPSTARRE_REVIEW_MODEL='auto',
+                       MIPSTARRE_PROSE_MODEL='auto', MIPSTARRE_ACCOUNT_WAIT='0',
                        MIPSTARRE_REVIEW_LOCK_WAIT='0', MIPSTARRE_DISPATCH_LOCK_WAIT='0',
                        MIPSTARRE_SESSION=os.environ.get('MIPSTARRE_SESSION', 'main-useful-queue'),
                        LOCAL_AUTO_FIX_ENABLED='false')

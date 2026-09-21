@@ -18,7 +18,7 @@ alongside (or printed with ``--manifest-only``).
 
 Usage:
     python3 scripts/split_reference_paper.py INPUT.tex OUTDIR \\
-        --arxiv 2001.04383 --title "MIP*=RE" [--force]
+        --arxiv 1234.56789 --title "The paper title" [--force]
 """
 
 from __future__ import annotations

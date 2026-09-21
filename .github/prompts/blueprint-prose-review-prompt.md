@@ -31,7 +31,7 @@ blueprint counterpart, do the following four checks:
 ### A.1 — Mathematical equivalence
 
 Read the blueprint statement in `blueprint/src/chapter/*.tex` and the
-corresponding Lean declaration in `MIPStarRE/...`. Compare them on every
+corresponding Lean declaration in `PaperLib/...`. Compare them on every
 axis that matters:
 
 - **Quantifiers and hypotheses.** Does every blueprint hypothesis appear
@@ -96,7 +96,7 @@ Lean theorem in the diff that should bear one):
 - **Proof `\leanok`** is valid iff the corresponding Lean proof contains
   **no `sorry`, `admit`, `native_decide` on non-trivial goals**, and no
   `axiom` introduced in this PR. Read the Lean proof body and check.
-  `grep -n 'sorry\|admit' MIPStarRE/...` is a quick first pass.
+  `grep -n 'sorry\|admit' PaperLib/...` is a quick first pass.
 - **Missing `\leanok`** is also a sync bug only when the Lean declaration
   is fully formalized, contains no proof-evasion device, and is
   source-faithful under A.1.  Do not recommend `\leanok` for a
@@ -147,7 +147,7 @@ authoritative source for:
 Apply judgment for context-sensitive entries (the doc lists which).
 Scope: blueprint `.tex` and Lean docstrings/comments/`section`
 `/`namespace` names. Out of scope: `docs/`, workflow YAML, and
-`references/ldt-paper/`.
+`references/<key>-paper/`.
 
 For each finding, cite the exact phrase, link to the line, and propose
 a concrete replacement from the table (or "drop").

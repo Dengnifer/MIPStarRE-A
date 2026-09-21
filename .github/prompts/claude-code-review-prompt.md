@@ -19,13 +19,13 @@ that determines whether the PR can be approved with outstanding issues.
    strategy, or are they brute-forced with `simp` / `omega` / `ring` chains? Are `calc` blocks
    and `conv` rewrites correctly chained? Are hypotheses used or dangling?
    If a mathematical result looks wrong, too strong, or suspiciously general, **scout** the
-   source hierarchy: first `references/ldt-paper/`, then the corresponding blueprint material
+   source hierarchy: first `references/<key>-paper/`, then the corresponding blueprint material
    in `blueprint/src/chapter/`. Read the relevant sections, compare hypotheses and conclusions,
    and cite the specific source path, label, and line when flagging a discrepancy.
 3. 🔴 **Source-statement fidelity**: For every changed theorem, lemma, or definition that is
    named after a paper result, linked from the blueprint by `\lean{...}`, or described as a
    formalization of a cited result, compare its public Lean statement with the corresponding
-   statement in `references/ldt-paper/`. Flag any added load-bearing hypothesis, weakened
+   statement in `references/<key>-paper/`. Flag any added load-bearing hypothesis, weakened
    conclusion, changed error parameter, or altered quantifier structure. In particular,
    bridge, residual, repair, package, producer, witness, wrapper, proof-obligation input,
    hypotheses bundle, assumptions bundle, or
@@ -71,7 +71,7 @@ that determines whether the PR can be approved with outstanding issues.
    correction.
 9. 🟡 **Blueprint coverage for changed declarations**: If the PR has the label
    `enforce-blueprint-coverage` and changes a public paper-facing `def`,
-   `theorem`, or `lemma` under `MIPStarRE/`, the corresponding blueprint item
+   `theorem`, or `lemma` under `PaperLib/`, the corresponding blueprint item
    should carry the appropriate `\lean{...}` tag. You may run
    `python3 scripts/blueprint_lean_sync.py --root . --warn-missing-blueprint
    --fail-on-missing-blueprint --diff-base origin/<base-ref> --changed-files <files>`

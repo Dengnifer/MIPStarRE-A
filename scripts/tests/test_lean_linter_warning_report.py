@@ -26,35 +26,35 @@ class LeanLinterWarningReportTests(unittest.TestCase):
     def test_parse_uses_followup_linter_note_for_category(self) -> None:
         log = textwrap.dedent(
             """\
-            MIPStarRE/LDT/Foo.lean:10:4: warning: declaration uses 'sorry'
+            PaperLib/Core/Foo.lean:10:4: warning: declaration uses 'sorry'
             Note: This linter can be disabled with `set_option linter.unusedVariables false`
-            MIPStarRE/LDT/Bar.lean:20:8: warning: try 'simp' instead of 'simpa'
+            PaperLib/Core/Bar.lean:20:8: warning: try 'simp' instead of 'simpa'
             """
         )
         self.assertEqual(
             parse_warnings(log),
             [
                 LeanWarning(
-                    path="MIPStarRE/LDT/Foo.lean",
+                    path="PaperLib/Core/Foo.lean",
                     line=10,
                     column=4,
                     category="unusedVariables",
                     message="declaration uses 'sorry'",
-                    raw="MIPStarRE/LDT/Foo.lean:10:4: warning: declaration uses 'sorry'",
+                    raw="PaperLib/Core/Foo.lean:10:4: warning: declaration uses 'sorry'",
                 ),
                 LeanWarning(
-                    path="MIPStarRE/LDT/Bar.lean",
+                    path="PaperLib/Core/Bar.lean",
                     line=20,
                     column=8,
                     category="other",
                     message="try 'simp' instead of 'simpa'",
-                    raw="MIPStarRE/LDT/Bar.lean:20:8: warning: try 'simp' instead of 'simpa'",
+                    raw="PaperLib/Core/Bar.lean:20:8: warning: try 'simp' instead of 'simpa'",
                 ),
             ],
         )
 
     def test_parse_falls_back_to_known_linter_name_in_message(self) -> None:
-        log = "MIPStarRE/LDT/Foo.lean:7:1: warning: try 'simp' instead of 'simpa'; linter.unnecessarySimpa\n"
+        log = "PaperLib/Core/Foo.lean:7:1: warning: try 'simp' instead of 'simpa'; linter.unnecessarySimpa\n"
         warnings = parse_warnings(log)
         self.assertEqual(len(warnings), 1)
         self.assertEqual(warnings[0].category, "unnecessarySimpa")
@@ -63,8 +63,8 @@ class LeanLinterWarningReportTests(unittest.TestCase):
         warnings = parse_warnings(
             textwrap.dedent(
                 """\
-                MIPStarRE/A.lean:1:1: warning: linter.flexible: declaration uses flexible syntax
-                MIPStarRE/B.lean:2:1: warning: linter.flexible: declaration uses flexible syntax
+                PaperLib/A.lean:1:1: warning: linter.flexible: declaration uses flexible syntax
+                PaperLib/B.lean:2:1: warning: linter.flexible: declaration uses flexible syntax
                 """
             )
         )
@@ -81,7 +81,7 @@ class LeanLinterWarningReportTests(unittest.TestCase):
             text_path = root / "report.txt"
             output_path = root / "github-output.txt"
             log_path.write_text(
-                "MIPStarRE/LDT/Foo.lean:3:5: warning: linter.style.setOption: set_option command should appear after imports\n",
+                "PaperLib/Core/Foo.lean:3:5: warning: linter.style.setOption: set_option command should appear after imports\n",
                 encoding="utf-8",
             )
             self.assertEqual(

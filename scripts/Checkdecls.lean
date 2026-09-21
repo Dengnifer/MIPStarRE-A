@@ -46,7 +46,7 @@ unsafe def main (args : List String) : IO UInt32 := do
       let contents ← IO.FS.readFile path
       let decls := parseDecls contents
       -- Import the root module to get all declarations.
-      let modules := #[{ module := `MIPStarRE : Import }]
+      let modules := #[{ module := `PaperLib : Import }]
       initSearchPath (← findSysroot)
       enableInitializersExecution
       let env ← importModules modules {} (trustLevel := 1024)

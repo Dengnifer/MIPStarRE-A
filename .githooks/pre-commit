@@ -21,7 +21,7 @@ run_without_git_local_env() (
 # missing incoming path is valid only when the branch deleted a base path.
 MERGE_HEAD_PATH="$(git rev-parse --git-path MERGE_HEAD)"
 if [ -f "$MERGE_HEAD_PATH" ]; then
-  echo "MIPStarRE pre-commit: checking the merge result for silent incoming loss."
+  echo "PaperLib pre-commit: checking the merge result for silent incoming loss."
   python3 "$HOOK_ROOT/local/bin/merge_loss_guard.py" --repo "$ROOT"
 fi
 
@@ -44,15 +44,15 @@ fi
 if [ -f "$MERGE_HEAD_PATH" ] &&
     git merge-base --is-ancestor MERGE_HEAD refs/remotes/github/main 2>/dev/null; then
   BUDGET_BASE="$(git rev-parse MERGE_HEAD)"
-  echo "MIPStarRE pre-commit: main-history merge; budget measured against MERGE_HEAD."
+  echo "PaperLib pre-commit: main-history merge; budget measured against MERGE_HEAD."
 elif [ -f "$MERGE_HEAD_PATH" ] &&
     git merge-base --is-ancestor refs/remotes/github/main MERGE_HEAD 2>/dev/null; then
   BUDGET_BASE="$(git rev-parse refs/remotes/github/main)"
-  echo "MIPStarRE pre-commit: non-main merge carrying github/main; workflow-layer content beyond github/main is budgeted."
+  echo "PaperLib pre-commit: non-main merge carrying github/main; workflow-layer content beyond github/main is budgeted."
 else
   BUDGET_BASE=""
   if [ -f "$MERGE_HEAD_PATH" ]; then
-    echo "MIPStarRE pre-commit: non-main merge; workflow-layer merge content is budgeted."
+    echo "PaperLib pre-commit: non-main merge; workflow-layer merge content is budgeted."
   fi
 fi
 INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
@@ -61,7 +61,7 @@ INFRA_CHANGED="$(git diff --cached --numstat $BUDGET_BASE -- local/ .githooks/ \
   scripts/tests/test_ready_packets.py scripts/tests/test_merge_loss_guard.py \
   | awk '{added=$1; deleted=$2; if (added != "-") total+=added+deleted} END {print total+0}')"
 if [ "${INFRA_CHANGED:-0}" -gt 1000 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1" ]; then
-  echo "MIPStarRE pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 1000)."
+  echo "PaperLib pre-commit: staged workflow-layer change is ${INFRA_CHANGED} lines (budget: 1000)."
   echo "Scope control (local/personas/main.md): the budget is PER EPISODE, not per"
   echo "commit — serial oversized commits are the same violation and show in the"
   echo "telemetry. Shrink the change, or stop for a recorded main decision that"
@@ -70,7 +70,7 @@ if [ "${INFRA_CHANGED:-0}" -gt 1000 ] && [ "${MIPSTARRE_INFRA_OVERRIDE:-}" != "1
 fi
 
 if [ "${MIPSTARRE_SKIP_HOOKS:-}" = "1" ]; then
-  echo "MIPStarRE pre-commit hook skipped by MIPSTARRE_SKIP_HOOKS=1."
+  echo "PaperLib pre-commit hook skipped by MIPSTARRE_SKIP_HOOKS=1."
   exit 0
 fi
 
@@ -79,7 +79,7 @@ if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
-echo "MIPStarRE pre-commit: checking staged whitespace."
+echo "PaperLib pre-commit: checking staged whitespace."
 # Paper mirrors under references/ are byte-faithful captures of external
 # arXiv sources (see references/*/README.md); their inherited trailing
 # whitespace is part of the fidelity claim and must not be "fixed", so they
@@ -88,42 +88,42 @@ echo "MIPStarRE pre-commit: checking staged whitespace."
 git diff --cached --check -- ':(exclude)references/'
 
 if printf '%s\n' "$STAGED_FILES" | grep -Eq '^scripts/(.*\.py|tests/.*)$'; then
-  echo "MIPStarRE pre-commit: running scripts/tests unit tests."
+  echo "PaperLib pre-commit: running scripts/tests unit tests."
   run_without_git_local_env python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 fi
 
 if printf '%s\n' "$STAGED_FILES" | grep -Eq \
   '^(blueprint/src/.*\.(tex|sty|cls)|scripts/(check_blueprint_latex|tex_utils)\.py|scripts/tests/test_check_blueprint_latex\.py|\.githooks/pre-commit)$'; then
-  echo "MIPStarRE pre-commit: checking blueprint LaTeX conventions."
+  echo "PaperLib pre-commit: checking blueprint LaTeX conventions."
   python3 scripts/check_blueprint_latex.py --root blueprint/src
 fi
 
 if ! printf '%s\n' "$STAGED_FILES" | grep -Eq \
-  '^(MIPStarRE/|MIPStarRE\.lean|blueprint/src/|blueprint/lean_decls|scripts/(audit_new_proof_obligation_metadata|audit_paper_facing_proof_debt|audit_conclusion_shaped_hypotheses|audit_unfaithful_markers|audit_lean_axiom_declarations|check_blueprint_latex|check_paper_gap_note_style|check_statement_paper_origin|check_source_statement_changes|blueprint_lean_sync|lean_header_utils|tex_utils)\.py|docs/(CONTRIBUTING|project_conventions|anti_patterns|blueprint_style_guide|formalization-patterns|proof_frontier_review)\.md|docs/paper-gaps/|\.github/(actions|prompts|workflows)/|AGENTS\.md)'; then
-  echo "MIPStarRE pre-commit: no statement-integrity files staged."
+  '^(PaperLib/|PaperLib\.lean|blueprint/src/|blueprint/lean_decls|scripts/(audit_new_proof_obligation_metadata|audit_paper_facing_proof_debt|audit_conclusion_shaped_hypotheses|audit_unfaithful_markers|audit_lean_axiom_declarations|check_blueprint_latex|check_paper_gap_note_style|check_statement_paper_origin|check_source_statement_changes|blueprint_lean_sync|lean_header_utils|tex_utils)\.py|docs/(CONTRIBUTING|project_conventions|anti_patterns|blueprint_style_guide|formalization-patterns|proof_frontier_review)\.md|docs/paper-gaps/|\.github/(actions|prompts|workflows)/|AGENTS\.md)'; then
+  echo "PaperLib pre-commit: no statement-integrity files staged."
   exit 0
 fi
 
-echo "MIPStarRE pre-commit: checking changed paper-gap note structure."
+echo "PaperLib pre-commit: checking changed paper-gap note structure."
 python3 scripts/check_paper_gap_note_style.py --root . --staged --ci
 
-echo "MIPStarRE pre-commit: checking statement-like paper-origin citations."
+echo "PaperLib pre-commit: checking statement-like paper-origin citations."
 python3 scripts/check_statement_paper_origin.py --root .
 
-echo "MIPStarRE pre-commit: checking new proof-obligation metadata."
+echo "PaperLib pre-commit: checking new proof-obligation metadata."
 python3 scripts/audit_new_proof_obligation_metadata.py --root . --staged --ci
 
-echo "MIPStarRE pre-commit: checking paper-facing proof-debt headers."
-echo "MIPStarRE pre-commit: do not close proof gaps by adding non-paper bridge/package hypotheses."
+echo "PaperLib pre-commit: checking paper-facing proof-debt headers."
+echo "PaperLib pre-commit: do not close proof gaps by adding non-paper bridge/package hypotheses."
 python3 scripts/audit_paper_facing_proof_debt.py --root . --ci
 
-echo "MIPStarRE pre-commit: checking conclusion-shaped hypotheses."
+echo "PaperLib pre-commit: checking conclusion-shaped hypotheses."
 python3 scripts/audit_conclusion_shaped_hypotheses.py --root . --ci
 
-echo "MIPStarRE pre-commit: checking unfaithful-dependency markers."
+echo "PaperLib pre-commit: checking unfaithful-dependency markers."
 python3 scripts/audit_unfaithful_markers.py --root . --ci
 
-echo "MIPStarRE pre-commit: checking explicit LDT axiom declarations."
+echo "PaperLib pre-commit: checking explicit axiom declarations."
 python3 scripts/audit_lean_axiom_declarations.py --root . --ci
 
-echo "MIPStarRE pre-commit: ok."
+echo "PaperLib pre-commit: ok."

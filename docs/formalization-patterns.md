@@ -1,7 +1,17 @@
 # Formalization Patterns
 
-Key design patterns used in the MIPStarRE Lean formalization to bridge the
-gap between paper-level mathematics and a compilable Lean proof.
+Key design patterns used in this Lean formalization to bridge the gap between
+paper-level mathematics and a compilable Lean proof.
+
+> **About the examples.** This page was written while the workflow it describes
+> formalized one particular paper, and many of its examples still name that
+> project's modules, theorems, directories and issue numbers — including the
+> `[#NNN]` links at the foot of the page, which point at the origin project's
+> issue tracker and are kept as provenance. Read every such example as a
+> **shape**, not as a fact about this repository: where one names a Lean module
+> root, read `project.lean_root` from `local/project.json`; where it names a
+> paper mirror, read `paper_mirrors`; where it names an issue, read `issues.*`.
+> If an example contradicts this repository's tree, the tree wins.
 
 This document is intended for contributors who need to understand *why* the
 Lean code is structured as it is, and for reviewers who need to recognize
@@ -36,7 +46,7 @@ The project therefore distinguishes three objects.
 
 | Object | Public statement | Blueprint status |
 |--------|------------------|------------------|
-| Paper theorem | Matches the cited result in `references/ldt-paper/` | May be linked by source-labelled `\lean{}`; statement-level `\leanok` only when the statement matches |
+| Paper theorem | Matches the cited result in the paper mirror under `references/` | May be linked by source-labelled `\lean{}`; statement-level `\leanok` only when the statement matches |
 | Internal proof obligation | Proves a missing intermediate mathematical input from paper hypotheses | May contain a tracked `sorry` while the proof is open |
 | Conditional helper | Quarantines an unproved intermediate obligation | Not a paper theorem; no source-labelled `\leanok` |
 
@@ -66,7 +76,7 @@ are being actively removed.
 ### How to proceed when a proof needs an extra input
 
 1. **Check the source statement.**  Read the corresponding TeX in
-   `references/ldt-paper/` before changing a theorem linked from the blueprint.
+   `references/<key>-paper/` before changing a theorem linked from the blueprint.
 2. **Keep the paper-facing declaration source-faithful.**  Boundary hypotheses
    such as positivity, nonemptiness, decidability, field-model instances, or
    type-class assumptions may be faithful encodings when they are needed to
@@ -156,8 +166,8 @@ and leave the missing proof as a tracked `sorry`.
    paper-labelled theorem, the PR should stop and either prove the obligation or
    restore the paper theorem with an explicit unfinished proof.
 
-4. **Final closure at the paper theorem.**  The theorem `mainFormal` in
-   `MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean` is reserved for the
+4. **Final closure at the paper theorem.**  The headline theorem (by convention `mainFormal`, in the track's
+   `Test/MainTheorem/MainFormal.lean`) is reserved for the
    paper-shaped statement.  If the witness needed by the final transport has
    not yet been constructed from the paper hypotheses, the theorem should remain
    an explicit unfinished proof.  Do not replace the missing construction by
@@ -217,7 +227,7 @@ the target of a source-labelled blueprint `\leanok`.
 
 The former direct tracked proof obligations in `MainFormal.lean` and the
 Section 6 successor route have been discharged under the corrected source
-statements.  The theorem `MIPStarRE.LDT.Test.mainFormal` is the corrected
+statements.  The theorem `<LeanRoot>.Test.mainFormal` is the corrected
 two-space source theorem.  The earlier same-carrier auxiliary interface has
 been retired; the headline theorem carries no bridge, residual, repair,
 package, producer, generic hypothesis, or proof-obligation input in its public
@@ -253,7 +263,7 @@ to link to Lean:
 
 | Tag | Meaning | Example |
 |-----|---------|---------|
-| `\lean{Name}` | The corresponding Lean declaration exists | `\lean{MIPStarRE.LDT.Test.mainFormal}` |
+| `\lean{Name}` | The corresponding Lean declaration exists | `\lean{<LeanRoot>.Test.mainFormal}` |
 | `\leanok` (statement-level) | The Lean declaration compiles and its statement matches the source or blueprint statement; it does not certify proof closure | `\leanok` |
 | `\leanok` (proof-level) | The proof block is fully formalized — the theorem or lemma has a complete sorry-free proof | `\lean{...}` plus `\leanok` inside `\begin{proof}` |
 | `\uses{label}` | The statement or proof block depends on the cited result | `\uses{thm:orthonormalization, prop:completing-to-measurement}` |
@@ -265,9 +275,9 @@ data not present in the source.
 
 ### Why some nodes show white in the dep graph
 
-The dependency graph at
-`https://LionSR.github.io/MIPStarRE/blueprint/dep_graph_document.html`
-color-codes theorem nodes:
+The dependency graph, at `<site base>/blueprint/dep_graph_document.html` of the
+published blueprint (`site_base` in `texra-blueprint.toml`), colour-codes
+theorem nodes:
 
 - **Green**: proof-level `\leanok` is present (the proof block is fully formalized)
 - **White** (or white-border): `\lean{}` exists but proof-level `\leanok` is absent; may carry a statement-level `\leanok` during staged development
@@ -292,11 +302,11 @@ standard axiom and proof-debt audits.
 
 - **`thm:ld-pasting`** (ch09) and
   **`thm:ld-pasting-in-induction-section`** (ch10): The paper theorem in
-  `references/ldt-paper/ld-pasting.tex`, lines 12--50, assumes
+  `references/<key>-paper/ld-pasting.tex`, lines 12--50, assumes
   `k >= 400md` but does not state the nontrivial-regime inequalities as
   hypotheses.  The source-facing declaration `Pasting.ldPasting` keeps this
-  unrestricted statement visible, including the direct degree-zero branch
-  formerly tracked by issue #1622.  The restricted declaration
+  unrestricted statement visible, including the direct degree-zero branch.
+  The restricted declaration
   `Pasting.ldPastingNontrivial` belongs in Lean-only remarks because it assumes
   `gamma <= 1`, `zeta <= 1`, `d <= q`, `0 < d`, and `1 <= k`.
 
@@ -334,23 +344,19 @@ always run this locally to verify the graph updates.
 
 ### Directory structure
 
-The Lean codebase is organized into per-chapter subdirectories under
-`MIPStarRE/LDT/`, each with its own internal structure:
+The Lean codebase is organized into one subdirectory per blueprint chapter
+under the library root, each with its own internal structure. The origin
+project's tree looked like this — the chapter names are that paper's, the
+**shape** is the convention:
 
 ```
-MIPStarRE/LDT/
-├── Basic/                    # Parameters, operators, submeasurements, distributions
-├── Test/                     # Test definitions, main theorem, error cascade
-├── Preliminaries/            # Polynomials, finite fields, Cauchy–Schwarz, Fourier
-├── MakingMeasurementsProjective/   # Orthonormalization, projective completion
-├── MainInductionStep/        # Section 6 induction theorem
-├── ExpansionHypercubeGraph/  # Section 7–8 expansion, global variance
-├── GlobalVariance/           # Section 8.5 (and related global variance machinery)
-├── SelfImprovement/          # Section 9 self-improvement
-├── CommutativityPoints/      # Section 10 commutativity setup
-├── Tactic/                   # Section 10 proof orchestration utilities
-├── Commutativity/            # Section 11 commutativity bounds
-└── Pasting/                  # Section 12 pasting
+<LeanRoot>/
+├── Basic/                    # Parameters and the objects every chapter uses
+├── Test/                     # The headline theorem and its error cascade
+├── Preliminaries/            # Background lemmas: algebra, inequalities, analysis
+├── <Chapter>/                # One directory per blueprint chapter
+├── ...
+└── Tactic/                   # Proof-orchestration utilities, if any
 ```
 
 ### Subdirectory layout convention
@@ -368,18 +374,17 @@ SubModule/
     └── Results.lean  # Re-export file for the proof leaves
 ```
 
-Some larger chapters (like `Pasting/` and `SelfImprovement/`) have more
-internal subdivisions (e.g., `Pasting/Bernoulli/`, `Pasting/Sandwich/`,
-`SelfImprovement/Theorems/Results/`).  When an outer `Theorems.lean` module is
-present, it imports the public proof leaves.
+Larger chapters have more internal subdivisions (a chapter directory with its
+own `Bernoulli/`, `Sandwich/` or `Theorems/Results/` subtrees).  When an outer
+`Theorems.lean` module is present, it imports the public proof leaves.
 
 ### Why split instead of monolithic files?
 
 | Reason | Details |
 |--------|---------|
 | **Compilation parallelism** | Lean's per-file compilation is single-threaded per file; smaller files mean faster individual type-checking loops |
-| **Dependency isolation** | A proof leaf in `Pasting/Sandwich/` only depends on `Pasting/Defs.lean` and `Pasting/Statements.lean`, not on the entire pasting proof chain |
-| **Edit locality** | Changing a helper in `SelfImprovement/Theorems/Results/AddInUStep12/Raw.lean` does not re-elaborate unrelated downstream leaves unless the helper's type changed |
+| **Dependency isolation** | A proof leaf in `<Chapter>/<Part>/` only depends on `<Chapter>/Defs.lean` and `<Chapter>/Statements.lean`, not on the entire chapter's proof chain |
+| **Edit locality** | Changing a helper deep under `<Chapter>/Theorems/Results/` does not re-elaborate unrelated downstream leaves unless the helper's type changed |
 | **Reviewability** | A 200-line proof leaf is easier to review than a 4000-line monolithic proof block |
 | **Parallel agent work** | Different agents can work on different proof leaves concurrently without merge conflicts |
 
@@ -405,21 +410,22 @@ below.
 ## Pattern 4: Public re-export pattern
 
 Public subdirectories with several proof leaves may have a root-level
-re-export file that imports the source-facing leaves.  For example, the
-top-level LDT module imports the public section APIs:
+re-export file that imports the source-facing leaves.  A chapter's top-level
+module imports the public section APIs:
 
 ```lean
-import MIPStarRE.LDT.MakingMeasurementsProjective.ProjectivizationChain.Output
-import MIPStarRE.LDT.MainInductionStep.Theorems.MainTheorems.Successor
-import MIPStarRE.LDT.Pasting.Bernoulli.Final
+import <LeanRoot>.<ChapterA>.<Part>.Output
+import <LeanRoot>.<ChapterB>.Theorems.MainTheorems.Successor
+import <LeanRoot>.<ChapterC>.<Part>.Final
 ```
 
 The re-export module itself contains no new mathematical declarations. It is a
 public import convenience.  When no such public module exists, downstream code
 should import the specific leaf module whose declarations it uses.
 
-The top-level re-export file is `MIPStarRE.lean`, which imports all
-subdirectories.  `MIPStarRE/LDT.lean` imports all LDT subdirectories.
+The top-level re-export file is `<LeanRoot>.lean`, which imports all
+subdirectories; a track with its own subtree has a matching
+`<LeanRoot>/<Track>.lean`.
 
 **When to add to a re-export file**: When a new proof leaf is added to a
 public theorem or definition subdirectory and the leaf is part of the intended
@@ -451,7 +457,7 @@ orthonormalization, and final-field transport into a structure named
 `SelfImprovementObligations`, then used a conditional theorem to obtain the
 full self-improvement conclusion.  That made the formalization look more
 complete than it was.  The current code removes that bundle and leaves the
-proof gap in `MIPStarRE.LDT.SelfImprovement.selfImprovement`.
+proof gap in `<LeanRoot>.<Chapter>.<declaration>`.
 
 ### Rules
 

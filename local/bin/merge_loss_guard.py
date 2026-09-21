@@ -214,7 +214,7 @@ def reconstructed_merge(
             detail = os.fsdecode(clone_result.stderr.strip() or clone_result.stdout.strip())
             raise GuardError(f"temporary local clone failed: {detail}")
         run_git(clone, "config", "user.email", "merge-loss-guard@example.invalid")
-        run_git(clone, "config", "user.name", "MIPStarRE merge-loss guard")
+        run_git(clone, "config", "user.name", "PaperLib merge-loss guard")
         run_git(clone, "checkout", "--quiet", "--detach", branch)
         merge_result = subprocess.run(
             ["git", "-C", os.fspath(clone), "merge", "--no-commit", "--no-ff", incoming],
@@ -343,13 +343,13 @@ def report(
 
     if not findings:
         print(
-            "MIPStarRE merge-loss guard: ok "
+            "PaperLib merge-loss guard: ok "
             f"(base {','.join(short(base) for base in bases)}, "
             f"branch {short(branch)}, incoming {short(incoming)})."
         )
         return 0
 
-    print("MIPStarRE merge-loss guard: refusing a result that discards incoming changes.")
+    print("PaperLib merge-loss guard: refusing a result that discards incoming changes.")
     print(f"  merge base(s):   {', '.join(bases)}")
     print(f"  pre-merge branch: {branch}")
     print(f"  incoming head:   {incoming}")
@@ -387,7 +387,7 @@ def main(argv: list[str] | None = None) -> int:
             trees, bases, branch, incoming = committed_trees(repo, args.commit)
         return report(inspect(trees), bases, branch, incoming)
     except GuardError as error:
-        print(f"MIPStarRE merge-loss guard: {error}", file=sys.stderr)
+        print(f"PaperLib merge-loss guard: {error}", file=sys.stderr)
         return 2
 
 

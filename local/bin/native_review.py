@@ -50,7 +50,11 @@ def completed_review(request: dict, thread: str) -> tuple[dict, Path]:
     if len(matches) != 1:
         raise ValueError('a unique canonical child rollout is required')
     rollout = matches[0]
-    selection = request.get('model_policy') or dict(job_class='hard_review', model='gpt-6-astra',
+    # A request made before the policy existed carries no selection: assume the
+    # project's hard model (local/project.json), never a model name written here.
+    from model_policy import load_policy
+    selection = request.get('model_policy') or dict(
+        job_class='hard_review', model=load_policy().get('hard_model') or '',
         hardness_reason='Grandfathered pre-policy review request')
     child = native_rollout(rollout, thread, role='reviewer', job_class=selection['job_class'],
                            requested_model=selection['model'],

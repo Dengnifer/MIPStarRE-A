@@ -1,17 +1,6 @@
 {
   "schema_version": 2,
-  "default_model": "gpt-5.6-sol",
-  "hard_model": "gpt-6-astra",
-  "main_model": "gpt-6-astra",
-  "effort": "ultra",
-  "owner_scope": "Issue #301 comment5573256033; supersedes the former sole-cleanup whitelist",
+  "effort": "",
   "dispatch_ratio": {"target": 20, "minimum": 10, "maximum": 50},
-  "audit": {
-    "reference": "Issue #301; /tmp/qpbt-sol-routing-audit-20260907.md",
-    "sha256": "9a5c4e89bd4e61245ef7df716762deaa3071980fe0c2e3702ea8a248b307d516",
-    "matrix_sha256": "69fd336f92be6b6308c4a65c3ab566a5ad4a818e6d9c0ba5261ba0e5f3bdc05b",
-    "pin": "5924b3acec0d1ad5fe38b8a93ac5e950e2daa071",
-    "validation": "/tmp/qpbt-sol-routing-audit-validation-20260907.md",
-    "runtime_evidence": "ghz qpbt-ultra/codex-models.json advertises both exact models with ultra"
-  }
+  "note": "Routing rules for dispatched workers. No model NAME belongs here: the names come from local/project.json (session.workers.model, session.workers.hard_model, session.main.model), and an empty name means the codex CLI default. Set effort to a literal level (for example ultra) to require it of every dispatch, or leave it empty to accept whatever the caller asks for. dispatch_ratio is the routine:hard band the operator watches; local/bin/model_policy.py reports it, nothing enforces it."
 }

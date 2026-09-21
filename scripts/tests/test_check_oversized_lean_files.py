@@ -23,7 +23,7 @@ from check_oversized_lean_files import (  # noqa: E402
 
 
 def _make_repo(root: Path) -> Path:
-    (root / "MIPStarRE" / "LDT").mkdir(parents=True)
+    (root / "PaperLib" / "Core").mkdir(parents=True)
     return root
 
 
@@ -52,7 +52,7 @@ class ExcludeTests(unittest.TestCase):
 
     def test_excludes_nested_worktrees_dir(self) -> None:
         root = Path("/repo")
-        path = root / ".worktrees" / "audit" / "MIPStarRE" / "LDT" / "Foo.lean"
+        path = root / ".worktrees" / "audit" / "PaperLib" / "Core" / "Foo.lean"
         self.assertTrue(_is_excluded(path, root))
 
     def test_excludes_tmp_dir(self) -> None:
@@ -65,7 +65,7 @@ class ExcludeTests(unittest.TestCase):
 
     def test_allows_lean_in_src(self) -> None:
         root = Path("/repo")
-        self.assertFalse(_is_excluded(root / "MIPStarRE" / "LDT" / "Foo.lean", root))
+        self.assertFalse(_is_excluded(root / "PaperLib" / "Core" / "Foo.lean", root))
 
     def test_tmp_ancestor_not_excluded(self) -> None:
         """``/tmp/project/src/Foo.lean`` must NOT be excluded."""
@@ -93,8 +93,8 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "A.lean", 500)
-            _write_lean(root / "MIPStarRE" / "LDT" / "B.lean", THRESHOLD - 1)
+            _write_lean(root / "PaperLib" / "Core" / "A.lean", 500)
+            _write_lean(root / "PaperLib" / "Core" / "B.lean", THRESHOLD - 1)
             rc = check_files(root, set())
             self.assertEqual(rc, 0)
 
@@ -102,7 +102,7 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Exact.lean", THRESHOLD)
+            _write_lean(root / "PaperLib" / "Core" / "Exact.lean", THRESHOLD)
             rc = check_files(root, set())
             self.assertEqual(rc, 0)
 
@@ -110,7 +110,7 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Big.lean", THRESHOLD + 1)
+            _write_lean(root / "PaperLib" / "Core" / "Big.lean", THRESHOLD + 1)
             rc = check_files(root, set())
             self.assertEqual(rc, 1)
 
@@ -118,8 +118,8 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Big.lean", THRESHOLD + 1)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Bigger.lean", THRESHOLD + 500)
+            _write_lean(root / "PaperLib" / "Core" / "Big.lean", THRESHOLD + 1)
+            _write_lean(root / "PaperLib" / "Core" / "Bigger.lean", THRESHOLD + 500)
             rc = check_files(root, set())
             self.assertEqual(rc, 1)
 
@@ -138,7 +138,7 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            path = root / ".worktrees" / "audit" / "MIPStarRE" / "LDT" / "Big.lean"
+            path = root / ".worktrees" / "audit" / "PaperLib" / "Core" / "Big.lean"
             _write_lean(path, THRESHOLD + 1)
             rc = check_files(root, set())
             self.assertEqual(rc, 0)
@@ -148,7 +148,7 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td) / "repo"
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Good.lean", 50)
+            _write_lean(root / "PaperLib" / "Core" / "Good.lean", 50)
             rc = check_files(root, set())
             self.assertEqual(rc, 0)
 
@@ -159,8 +159,8 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Big.lean", THRESHOLD + 1)
-            rc = check_files(root, {"MIPStarRE/LDT/Big.lean"})
+            _write_lean(root / "PaperLib" / "Core" / "Big.lean", THRESHOLD + 1)
+            rc = check_files(root, {"PaperLib/Core/Big.lean"})
             self.assertEqual(rc, 0)
 
     def test_known_oversized_with_unknown_fails(self) -> None:
@@ -168,9 +168,9 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Known.lean", THRESHOLD + 1)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Unknown.lean", THRESHOLD + 1)
-            rc = check_files(root, {"MIPStarRE/LDT/Known.lean"})
+            _write_lean(root / "PaperLib" / "Core" / "Known.lean", THRESHOLD + 1)
+            _write_lean(root / "PaperLib" / "Core" / "Unknown.lean", THRESHOLD + 1)
+            rc = check_files(root, {"PaperLib/Core/Known.lean"})
             self.assertEqual(rc, 1)
 
     def test_known_oversized_empty_set_same_as_default(self) -> None:
@@ -178,7 +178,7 @@ class CheckFilesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             _make_repo(root)
-            _write_lean(root / "MIPStarRE" / "LDT" / "Big.lean", THRESHOLD + 1)
+            _write_lean(root / "PaperLib" / "Core" / "Big.lean", THRESHOLD + 1)
             rc = check_files(root, set())
             self.assertEqual(rc, 1)
 

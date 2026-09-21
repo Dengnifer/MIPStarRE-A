@@ -1,47 +1,33 @@
 
-namespace MIPStarRE.LDT
+-- Template footer for the comparator challenge of this repository's default
+-- track.  The generated challenge file ends with exactly this text, so it
+-- carries the ONE intentional hole of the whole repository: the headline
+-- theorem, stated here and proved in the library.  Two rules hold it together:
+--
+--   * the declaration must be `theorem mainFormal`, at column zero, and its
+--     proof must be the two lines `:= by` / `sorry` — that is the shape
+--     `scripts/generate_badges.py` recognises when it subtracts this one hole
+--     from the repository's sorry count;
+--   * the statement must be the headline theorem's statement, character for
+--     character as the library declares it, inside the library's namespace.
+--
+-- Replace the placeholder below with this project's headline theorem when it
+-- exists, keeping both rules.  Until then the challenge states `True`, which
+-- is honest: nothing has been claimed yet.
+
+namespace PaperLib
 namespace Test
 
--- source: MIPStarRE/LDT/Test/MainTheorem/MainFormal.lean:288-327  (MIPStarRE.LDT.Test.mainFormal)
+-- source: <the library file and line range that declares this theorem>
 /--
-Corrected source statement of `thm:main-formal`.
+Source statement of `<blueprint label>`.
 
-Paper origin: `references/ldt-paper/test_definition.tex:180-202`.
+Paper origin: `references/<mirror>-paper/<file>.tex:<lines>`.
 
-This theorem records the two-space source theorem with the confirmed large-`k`
-correction `k ≥ 400 m d`.  The paper prints the weaker hypothesis `k ≥ m d`;
-the missing factor `400` is documented in
-`docs/paper-gaps/issue-906-main-formal-k-bound.tex`.  The additional condition
-`0 < k` corrects the zero-sampling boundary where the printed error collapses
-to zero; this boundary is documented in
-`docs/paper-gaps/issue-422-main-formal-zero-k-boundary.tex`. -/
-theorem mainFormal
-    (params : Parameters)
-    [FieldModel params.q]
-    {ιA ιB : Type*}
-    [Fintype ιA] [DecidableEq ιA]
-    [Fintype ιB] [DecidableEq ιB]
-    (strategy : ProjStrat params ιA ιB)
-    (eps : Error)
-    (hpass : strategy.lowIndividualDegreeFailureProbability ≤ eps)
-    (k : ℕ)
-    (hk : 400 * params.m * params.d ≤ k)
-    (hk0 : 0 < k) :
-    ∃ G_A : ProjMeas (Polynomial params) ιA,
-      ∃ G_B : ProjMeas (Polynomial params) ιB,
-        ConsRel strategy.state (uniformDistribution (Point params))
-            (IdxProjMeas.toIdxSubMeas strategy.pointMeasurementA)
-            (polynomialEvaluationFamily params G_B.toSubMeas)
-            (mainFormalError params k eps) ∧
-          ConsRel strategy.state (uniformDistribution (Point params))
-            (polynomialEvaluationFamily params G_A.toSubMeas)
-            (IdxProjMeas.toIdxSubMeas strategy.pointMeasurementB)
-            (mainFormalError params k eps) ∧
-          ConsRel strategy.state (uniformDistribution Unit)
-            (constSubMeasFamily G_A.toSubMeas)
-            (constSubMeasFamily G_B.toSubMeas)
-            (mainFormalError params k eps) := by
+Any difference between the paper's statement and this one belongs in a
+paper-gap note under `docs/paper-gaps/` and must be cited here. -/
+theorem mainFormal : True := by
   sorry
 
 end Test
-end MIPStarRE.LDT
+end PaperLib

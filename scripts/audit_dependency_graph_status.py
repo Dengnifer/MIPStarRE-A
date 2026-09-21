@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-r"""Audit selected LDT dependency-graph node statuses.
+r"""Audit selected dependency-graph node statuses.
 
 The blueprint source is the authoritative mathematical object.  The generated
 ``dep_graph_document.html`` is nevertheless what a reader sees on GitHub Pages,
 so it must not preserve stale green nodes after a source-boundary repair.  This
 audit checks the small set of graph statuses that currently carry mathematical
-meaning for the LDT theorem boundary:
+meaning for the theorem boundary:
 
 * retired successor-boundary nodes must not appear;
 * source-boundary nodes that have since been proved must be displayed as
@@ -156,7 +156,7 @@ def parse_nodes_from_dot(dot: str) -> dict[str, GraphNode]:
 
 
 def audit_nodes(nodes: dict[str, GraphNode]) -> tuple[GraphFinding, ...]:
-    """Check the selected LDT graph-status invariants."""
+    """Check the selected graph-status invariants."""
     findings: list[GraphFinding] = []
 
     for label in sorted(ABSENT_LABELS):

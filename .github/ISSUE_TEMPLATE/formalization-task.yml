@@ -30,7 +30,7 @@ body:
     attributes:
       label: Target Lean declaration
       description: Expected Lean name and file path.
-      placeholder: "e.g., LDT.mainInductionStep in MIPStarRE/LDT/MainInductionStep.lean"
+      placeholder: "e.g., Core.mainInductionStep in PaperLib/Core/MainInductionStep.lean"
     validations:
       required: false
 
@@ -41,7 +41,7 @@ body:
       description: Theorems, definitions, blueprint labels, or GitHub sub-issues needed first.
       placeholder: |
         - Blueprint label `prop:simeq-for-measurements`.
-        - Lean declaration `MIPStarRE.LDT.Preliminaries.simEq_for_measurements`.
+        - Lean declaration `PaperLib.Core.Preliminaries.someLemma`.
         - GitHub sub-issue #42, proving the pasting lemma used in the paper proof.
     validations:
       required: false

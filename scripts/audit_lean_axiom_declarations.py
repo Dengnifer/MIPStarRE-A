@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-r"""Audit explicit Lean axiom declarations in the active LDT tree.
+r"""Audit explicit Lean axiom declarations in this project's Lean tree.
 
 The Lean kernel reports ``sorryAx`` when a declaration depends on an ordinary
 ``sorry``.  That is the expected marker for an unfinished proof.  This audit
 checks a different failure mode: adding explicit project declarations with
-``axiom`` or ``constant`` commands under ``MIPStarRE/LDT``.  Such declarations
+``axiom`` or ``constant`` commands under the project's Lean roots.  Such declarations
 make proof debt look like an ambient mathematical assumption and therefore need
 separate review.
 
@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Sequence
 
-from lean_header_utils import ldt_lean_files, line_number
+from lean_header_utils import line_number, project_lean_files
 
 
 DECL_RE = re.compile(
@@ -185,7 +185,7 @@ def strip_lean_comments(text: str) -> str:
 def run_audit(root: Path) -> AxiomAuditResult:
     """Run the explicit axiom-declaration audit."""
     findings: list[AxiomFinding] = []
-    files = ldt_lean_files(root)
+    files = project_lean_files(root)
     for path in files:
         text = path.read_text(encoding="utf-8", errors="replace")
         stripped = strip_lean_comments(text)

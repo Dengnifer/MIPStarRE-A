@@ -118,10 +118,19 @@ def continuation(path: Path, registry: Path, worktree: Path, issue: str) -> dict
             previous.get('account') not in ACCOUNTS or not previous.get('thread_id') or
             str(previous.get('issue')) != issue):
         raise ValueError('continuation requires a terminal, same-issue predecessor with affinity')
-    checkpoint = subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', '--verify',
-        '--end-of-options', request['checkpoint'] + '^{commit}'], text=True).strip()
-    subprocess.run(['git', '-C', str(worktree), 'merge-base', '--is-ancestor',
-                    checkpoint, 'HEAD'], check=True, capture_output=True)
+    # A repository that has no commit yet (a project between `git init` and its
+    # first commit) cannot carry a checkpoint: say so instead of letting git's
+    # exit status surface as a traceback.
+    try:
+        checkpoint = subprocess.check_output(['git', '-C', str(worktree), 'rev-parse', '--verify',
+            '--end-of-options', request['checkpoint'] + '^{commit}'], text=True,
+            stderr=subprocess.DEVNULL).strip()
+        subprocess.run(['git', '-C', str(worktree), 'merge-base', '--is-ancestor',
+                        checkpoint, 'HEAD'], check=True, capture_output=True)
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise ValueError(
+            f"checkpoint {request['checkpoint']!r} is not a commit reachable from HEAD "
+            f'in {worktree}') from error
     budget_path = Path(request['budget_file']).resolve(strict=True)
     budget = json.loads(budget_path.read_text())
     if (not budget['anchor'] or previous['name'] not in budget['sessions'] or
@@ -185,7 +194,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     homes = {"primary": Path.home() / ".codex", "second": Path(os.environ.get(
-        "MIPSTARRE_CODEX_HOME_SECOND") or Path.home() / ".cache/mipstarre-dev/codex-home-yxy")}
+        "MIPSTARRE_CODEX_HOME_SECOND") or Path.home() / ".cache/mipstarre-dev/codex-home-second")}
     try:
         if args.resume and args.registry is None:
             raise ValueError("resume requires a session registry")

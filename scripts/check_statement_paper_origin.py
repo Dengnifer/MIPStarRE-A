@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-"""Check that every statement-like declaration in ``MIPStarRE/LDT/`` carries a
-paper-origin citation in its def-site docstring.
+"""Check that every statement-like declaration under the project's Lean roots
+carries a paper-origin citation in its def-site docstring.
 
-Scope: this linter only scans ``MIPStarRE/LDT/`` (and excluded build/tmp
-directories) — statement-like declarations elsewhere in the repository
-are intentionally not covered.  If statement-like declarations migrate to a
-sibling top-level (e.g. ``MIPStarRE/Quantum/``), update ``_scan_root``.
-
-This implements the linter requested by ledger #1379 and issue #1384 ("Earn
-your place" backfill).  For every ``structure``, ``def``, or ``abbrev`` whose
+Scope: the roots come from ``local/project.json`` — the Lean root of every
+registered track, or the library root when no track is registered yet (see
+``scan_targets``).  A root that does not exist is reported and skipped, so a
+freshly bootstrapped repository can commit.  For every ``structure``, ``def``, or ``abbrev`` whose
 identifier ends in ``Statement`` (and similar proof-obligation suffixes
 ``Witness``, ``Hypotheses``, ``Conclusion``, ``Output``, ``Input``,
 ``Assumptions``, ``Hypothesis``, ``Assumption``, ``Bridge``, ``Producer``,
@@ -19,7 +16,9 @@ identifier ends in ``Statement`` (and similar proof-obligation suffixes
 for one of three citation forms:
 
 1. A paper line reference of the form ``references/<mirror>-paper/.../*.tex``
-   optionally followed by a colon and line range.
+   optionally followed by a colon and line range.  The accepted mirror names
+   are ``paper_mirrors`` of ``local/project.json``; with none configured any
+   ``references/<name>-paper/`` directory counts.
 2. A LaTeX cross-reference ``\\label{<kind>:...}`` where ``<kind>`` is one of
    ``lem``, ``thm``, ``prop``, ``cor``, ``def``, ``eq``, ``sec``.
 3. A paper-gap reference ``docs/paper-gaps/.../*.tex``.
@@ -58,8 +57,12 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import Sequence
 
-from check_oversized_lean_files import _is_excluded
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import project_config  # noqa: E402
+from check_oversized_lean_files import _is_excluded  # noqa: E402
 
 # Suffixes treated as "statement-like" and thus subject to the paper-origin rule.
 SUFFIXES: tuple[str, ...] = (
@@ -106,15 +109,30 @@ DECL_RE = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_']*)"
 )
 
-PAPER_PATH_RE = re.compile(r"references/(?:ldt|qpbt|neexp)-paper/[^\s`]+\.tex")
+def paper_path_re(mirrors: Sequence[str] = ()) -> re.Pattern[str]:
+    """Regex for ``references/<mirror>-paper/<file>.tex`` citations.
+
+    With no mirror configured any ``<name>-paper`` directory counts: before the
+    paper is split into its mirror the rule would otherwise reject every
+    citation.  Once ``paper_mirrors`` names the project's mirrors, only those
+    are accepted, which is what keeps a citation from pointing at a paper this
+    project does not carry.
+    """
+
+    alternatives = "|".join(re.escape(m) for m in mirrors) if mirrors else r"[A-Za-z0-9._-]+"
+    return re.compile(rf"references/(?:{alternatives})-paper/[^\s`]+\.tex")
+
+
+PAPER_PATH_RE = paper_path_re()
 PAPER_GAP_RE = re.compile(r"docs/paper-gaps/[^\s`]+\.tex")
 LATEX_LABEL_RE = re.compile(r"\\label\{(?:lem|thm|prop|cor|def|eq|sec):[^}]+\}")
 
 
-def _has_origin(window: str) -> bool:
+def _has_origin(window: str, paper_re: re.Pattern[str] | None = None) -> bool:
     """Return True if *window* contains any of the three accepted citation forms."""
+    paper_re = paper_re or PAPER_PATH_RE
     return bool(
-        PAPER_PATH_RE.search(window)
+        paper_re.search(window)
         or PAPER_GAP_RE.search(window)
         or LATEX_LABEL_RE.search(window)
     )
@@ -170,7 +188,7 @@ def _preceding_docstring(lines: list[str], decl_idx: int) -> str:
     return ""
 
 
-def _scan_file(path: Path) -> list[tuple[int, str]]:
+def _scan_file(path: Path, paper_re: re.Pattern[str] | None = None) -> list[tuple[int, str]]:
     """Return a list of (line, name) for declarations in *path* missing a citation."""
     missing: list[tuple[int, str]] = []
     text = path.read_text(encoding="utf-8", errors="replace")
@@ -185,45 +203,65 @@ def _scan_file(path: Path) -> list[tuple[int, str]]:
             continue
 
         window = _preceding_docstring(lines, idx)
-        if not _has_origin(window):
+        if not _has_origin(window, paper_re):
             missing.append((idx + 1, name))
 
     return missing
 
 
 class TargetMissingError(RuntimeError):
-    """Raised when the expected scan target ``MIPStarRE/LDT/`` does not exist."""
+    """Raised when a configured scan target does not exist."""
 
 
-def _scan_root(root: Path) -> dict[str, list[tuple[int, str]]]:
-    """Scan ``root/MIPStarRE/LDT/`` and return a mapping ``rel-path -> missing``.
+def scan_targets(root: Path, cfg: dict | None = None) -> list[str]:
+    """The subtrees that carry statements, relative to *root*.
 
-    Raises :class:`TargetMissingError` if ``root/MIPStarRE/LDT/`` does not
-    exist; callers may downgrade this to a warning under ``--warn-only`` so
-    that a misspelled ``--root`` does not silently disable the CI guard.
+    The Lean root of every registered track, or — before any track exists —
+    ``<lean_root>/<track>`` when that directory is there and ``<lean_root>``
+    otherwise.  "Which subtree carries statements" is a project decision, so it
+    is read, never guessed.
     """
-    target = root / "MIPStarRE" / "LDT"
-    if not target.is_dir():
+
+    return project_config.lean_scan_targets(root, cfg)
+
+
+def _scan_root(
+    root: Path,
+    targets: Sequence[str] | None = None,
+    paper_re: re.Pattern[str] | None = None,
+) -> dict[str, list[tuple[int, str]]]:
+    """Scan each target under *root* and return ``rel-path -> missing``.
+
+    Raises :class:`TargetMissingError` when no target exists at all; `main`
+    reports that and exits 0, because a repository whose Lean tree is not
+    written yet has nothing to check and must still be able to commit.
+    """
+    targets = list(targets) if targets is not None else scan_targets(root)
+    present = [root / rel for rel in targets if (root / rel).is_dir()]
+    if not present:
         raise TargetMissingError(
-            f"scan target {target} does not exist (is --root correct?)"
+            "no scan target exists: "
+            + (", ".join(targets) if targets else "no Lean root is configured")
+            + f" (under {root})"
         )
     results: dict[str, list[tuple[int, str]]] = {}
-    for path in sorted(target.rglob("*.lean")):
-        if _is_excluded(path, root):
-            continue
-        missing = _scan_file(path)
-        if missing:
-            rel = path.relative_to(root).as_posix()
-            results[rel] = missing
+    for target in present:
+        for path in sorted(target.rglob("*.lean")):
+            if _is_excluded(path, root):
+                continue
+            missing = _scan_file(path, paper_re)
+            if missing:
+                rel = path.relative_to(root).as_posix()
+                results[rel] = missing
     return results
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Check that statement-like structures and definitions in "
-            "MIPStarRE/LDT/ carry a paper-origin citation in their def-site "
-            "docstring."
+            "Check that statement-like structures and definitions under the "
+            "project's Lean roots carry a paper-origin citation in their "
+            "def-site docstring."
         )
     )
     parser.add_argument(
@@ -235,23 +273,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--warn-only",
         action="store_true",
-        help=(
-            "Report violations but exit 0.  Use during the issue #1384 backfill; "
-            "drop the flag once the backfill lands so missing citations fail CI."
-        ),
+        help="Report violations but exit 0.  Use during a backfill.",
     )
     args = parser.parse_args(argv)
 
     try:
-        results = _scan_root(args.root)
+        cfg = project_config.load(args.root)
+    except project_config.ConfigError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    targets = scan_targets(args.root, cfg)
+    paper_re = paper_path_re(project_config.get(cfg, "paper_mirrors", []))
+
+    try:
+        results = _scan_root(args.root, targets, paper_re)
     except TargetMissingError as exc:
-        label = "warning" if args.warn_only else "error"
-        print(f"{label}: {exc}", file=sys.stderr)
-        return 0 if args.warn_only else 2
+        # Nothing to scan is not a violation: a repository whose Lean tree is
+        # not written yet must still be able to commit.  A misspelled --root
+        # lands here too, so the note names what was looked for.
+        print(f"note: {exc}; nothing to check", file=sys.stderr)
+        return 0
 
     if not results:
-        print("OK: every statement-like declaration in MIPStarRE/LDT/ carries "
-              "a paper-origin citation.")
+        print("OK: every statement-like declaration under "
+              + ", ".join(targets)
+              + " carries a paper-origin citation.")
         return 0
 
     total = sum(len(items) for items in results.values())

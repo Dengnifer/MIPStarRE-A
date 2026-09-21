@@ -4,7 +4,7 @@
 This is a diff-based local hook guard for issue #1579.  It does not replace the
 global paper-origin audit in ``check_statement_paper_origin.py``.  Its narrower
 purpose is to stop a new bridge, residual, repair, package, producer, input,
-hypotheses bundle, or conditional helper from entering the LDT tree without a
+hypotheses bundle, or conditional helper from entering the Lean tree without a
 def-site explanation of what mathematical assertion it represents.
 
 The audit only checks declarations whose declaration line is new relative to a
@@ -22,6 +22,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import project_config
 from check_statement_paper_origin import (
     PAPER_GAP_RE,
     _has_origin,
@@ -119,10 +120,18 @@ class Finding:
     reason: str
 
 
-def _is_ldt_lean_file(rel_path: str) -> bool:
-    """Return whether ``rel_path`` lies in the active LDT Lean tree."""
+def _is_project_lean_file(root: Path, rel_path: str) -> bool:
+    """Return whether ``rel_path`` lies in one of this project's Lean trees.
 
-    return rel_path.startswith("MIPStarRE/LDT/") and rel_path.endswith(".lean")
+    The trees come from ``local/project.json`` (``lean_scan_targets``), so the
+    guard follows whatever library root and track the project registered instead
+    of one directory name.
+    """
+
+    if not rel_path.endswith(".lean"):
+        return False
+    return any(rel_path.startswith(target.rstrip("/") + "/")
+               for target in project_config.lean_scan_targets(root))
 
 
 def _name_is_high_risk(kind: str, name: str) -> bool:
@@ -242,11 +251,11 @@ def _new_high_risk_declarations(
     root: Path,
     changed_lines: dict[str, set[int]],
 ) -> list[Declaration]:
-    """Return new high-risk declarations from the changed LDT Lean lines."""
+    """Return new high-risk declarations from the changed Lean lines."""
 
     declarations: list[Declaration] = []
     for rel_path, line_numbers in sorted(changed_lines.items()):
-        if not _is_ldt_lean_file(rel_path):
+        if not _is_project_lean_file(root, rel_path):
             continue
         path = root / rel_path
         if not path.exists():

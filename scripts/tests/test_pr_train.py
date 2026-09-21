@@ -61,17 +61,33 @@ class TrainTests(unittest.TestCase):
         pin = (LOCAL_BIN.parents[1] / "lean-toolchain").read_text()
         self.write("lean-toolchain", pin)
         self.write_tool("elan", f"#!/bin/sh\nprintf '%s' {shlex.quote(pin)}\n")
-        self.write("lakefile.toml", 'name = "MIPStarRE"\ndefaultTargets = ["MIPStarRE"]\n'
-                   '[[lean_lib]]\nname = "MIPStarRE"\n[[lean_exe]]\nname = "checkdecls"\n'
+        self.write("lakefile.toml", 'name = "PaperLib"\ndefaultTargets = ["PaperLib"]\n'
+                   '[[lean_lib]]\nname = "PaperLib"\n[[lean_exe]]\nname = "checkdecls"\n'
                    'root = "Checkdecls"\nsrcDir = "scripts"\nsupportInterpreter = true\n')
-        self.write("lake-manifest.json", json.dumps({"version": "1.2.0", "name": "MIPStarRE",
+        self.write("lake-manifest.json", json.dumps({"version": "1.2.0", "name": "PaperLib",
                    "lakeDir": ".lake", "packagesDir": ".lake/packages", "packages": []}))
-        self.write("MIPStarRE.lean", "import MIPStarRE.LDT.Test.SurfaceVsPoint\n")
-        self.write("MIPStarRE/QPBT.lean", "def trainValue : Nat := 1\n")
-        self.write("MIPStarRE/LDT/Test/SurfaceVsPoint.lean",
-                   "import MIPStarRE.QPBT\ndef downstreamValue : Nat := trainValue\n")
-        self.write("MIPStarRE/LDT/Test/AxiomAudit.lean", "import MIPStarRE.QPBT\n")
-        self.write("MIPStarRE/QPBT/Test/AxiomAudit.lean", "import MIPStarRE.QPBT\n")
+        self.write("PaperLib.lean", "import PaperLib.Core.Test.SurfaceVsPoint\n")
+        self.write("PaperLib/Base.lean", "def trainValue : Nat := 1\n")
+        self.write("PaperLib/Core/Test/SurfaceVsPoint.lean",
+                   "import PaperLib.Base\ndef downstreamValue : Nat := trainValue\n")
+        self.write("PaperLib/Core/Test/AxiomAudit.lean", "import PaperLib.Base\n")
+        # The project registry: ci.sh and the pre-push hook derive the build
+        # targets and the axiom audit from it instead of naming modules
+        # themselves.  `completion_gate.py` is stubbed to the one thing they ask
+        # it — which tracks exist — because the real gate imports half of
+        # scripts/, which this fixture only stubs.
+        self.write("local/project.json", json.dumps({
+            "schema": 1,
+            "project": {"name": "PaperLib", "lean_root": "PaperLib", "track": "core"},
+            "tracks": {"core": {
+                "lean_root": "PaperLib/Core",
+                "headline": [["PaperLib.Core.downstreamValue", "thm:train"]],
+                "axiom_audit": "PaperLib/Core/Test/AxiomAudit.lean",
+            }},
+        }))
+        self.write("scripts/completion_gate.py", "print('core')\n")
+        shutil.copy2(LOCAL_BIN.parents[1] / "scripts/project_config.py",
+                     self.repo / "scripts")
         shutil.copy2(LOCAL_BIN.parents[1] / "scripts/Checkdecls.lean", self.repo / "scripts")
         self.write("blueprint/lean_decls", "downstreamValue\n")
         packages = self.tmp / "packages"
@@ -196,7 +212,7 @@ class TrainTests(unittest.TestCase):
         self.assertEqual((self.repo / "shared").read_text(), "accepted\n")
         self.assertEqual((self.repo / "third").read_text(), "third\n")
         self.assertEqual((self.tmp / "build.log").read_text().splitlines(),
-                         ["build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"])
+                         ["build PaperLib PaperLib.Core.Test.AxiomAudit"])
         self.assertEqual(_git(self.repo, "branch", "--list", "train-*"), "")
         posts = [row for row in self.gh.calls() if row["method"] != "GET"]
         self.assertEqual([row["rel"] for row in posts], ["issues/1/comments", "issues/3/comments"])
@@ -272,19 +288,19 @@ class TrainTests(unittest.TestCase):
 
     def test_member_titles_count_only_each_merged_lean_delta(self) -> None:
         _git(self.repo, "switch", "-q", "issue-1")
-        self.write("MIPStarRE/QPBT.lean", "def trainValue : Nat := 2\n"
+        self.write("PaperLib/Base.lean", "def trainValue : Nat := 2\n"
                    "def trainExtra : Nat := 3\n/-- Documentation only. -/\n")
         _git(self.repo, "add", ".")
         _git(self.repo, "commit", "-qm", "edit upstream Lean")
         self.heads[1] = _git(self.repo, "rev-parse", "HEAD")
         _git(self.repo, "switch", "-q", "issue-3")
-        self.write("MIPStarRE/LDT/Test/SurfaceVsPoint.lean",
-                   "import MIPStarRE.QPBT\ndef downstreamValue : Nat := trainValue + 1\n")
+        self.write("PaperLib/Core/Test/SurfaceVsPoint.lean",
+                   "import PaperLib.Base\ndef downstreamValue : Nat := trainValue + 1\n")
         _git(self.repo, "add", ".")
         _git(self.repo, "commit", "-qm", "edit downstream Lean")
         self.heads[3] = _git(self.repo, "rev-parse", "HEAD")
         _git(self.repo, "switch", "-q", "main")
-        self.write("MIPStarRE/MainOnly.lean", "def mainOnly : Nat := 9\n")
+        self.write("PaperLib/MainOnly.lean", "def mainOnly : Nat := 9\n")
         _git(self.repo, "add", ".")
         _git(self.repo, "commit", "-qm", "add newer main Lean unrelated to members")
         self.base = _git(self.repo, "rev-parse", "HEAD")
@@ -303,7 +319,7 @@ class TrainTests(unittest.TestCase):
         for before, number, sha in zip([self.base, commits[0]], [1, 3], commits):
             self.assertEqual(_git(self.repo, "rev-list", "--parents", "-n", "1", sha).split(),
                              [sha, before, self.heads[number]])
-        self.assertEqual(_git(self.repo, "show", f"{commits[-1]}:MIPStarRE/MainOnly.lean"),
+        self.assertEqual(_git(self.repo, "show", f"{commits[-1]}:PaperLib/MainOnly.lean"),
                          "def mainOnly : Nat := 9")
 
     def test_unavailable_member_delta_keeps_existing_subject(self) -> None:
@@ -556,9 +572,9 @@ class TrainTests(unittest.TestCase):
         self.env["MIPSTARRE_CI_BUILD_LOCK_WAIT_S"] = "300"
         self.write_tool("lake", '#!/bin/sh\nset -eu\n'
                         'printf "%s\\n" "$*" >> "$TRAIN_BUILD_LOG"\n'
-                        'if [ "$*" = "build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit" ]; then\n'
+                        'if [ "$*" = "build PaperLib PaperLib.Core.Test.AxiomAudit" ]; then\n'
                         ' test -d "$MIPSTARRE_FULL_BUILD_LOCK"\n'
-                        ' test ! -e .lake/build/lib/lean/MIPStarRE.olean\nfi\n'
+                        ' test ! -e .lake/build/lib/lean/PaperLib.olean\nfi\n'
                         f'exec {shlex.quote(lake)} "$@"\n')
         # The production hook and dynamic checkdecls import run at publication.
         shutil.copy2(LOCAL_BIN.parents[1] / ".githooks/pre-push", self.repo / ".githooks")
@@ -571,10 +587,10 @@ class TrainTests(unittest.TestCase):
         _git(self.repo, "push", "-q", "github", "main")
         _git(self.repo, "update-ref", "refs/remotes/origin/main", self.base)
         _git(self.repo, "switch", "-q", "issue-1")
-        self.write("MIPStarRE/QPBT.lean", 'def trainValue : String := "changed"\n'
+        self.write("PaperLib/Base.lean", 'def trainValue : String := "changed"\n'
                    if broken == "downstream" else "def trainValue : Nat := 2\n")
         if broken == "audit":
-            self.write("MIPStarRE/LDT/Test/AxiomAudit.lean", "example : False := by decide\n")
+            self.write("PaperLib/Core/Test/AxiomAudit.lean", "example : False := by decide\n")
         _git(self.repo, "add", ".")
         _git(self.repo, "commit", "-qm", "change upstream fixture")
         self.heads[1] = _git(self.repo, "rev-parse", "HEAD")
@@ -588,8 +604,7 @@ class TrainTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("All 1 declarations", result.stdout)
         calls = (self.tmp / "build.log").read_text().splitlines()
-        self.assertEqual(calls.count("build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"),
-                         1)
+        self.assertEqual(calls.count("build PaperLib PaperLib.Core.Test.AxiomAudit"), 1)
         self.assertIn("exe checkdecls blueprint/lean_decls", calls)
         self.assertNotEqual(self.remote_main(), self.base)
 

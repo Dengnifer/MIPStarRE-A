@@ -469,6 +469,22 @@ case "$_common" in
 esac
 unset _common
 
+# Project identity (local/project.json): which Lean root the area filters and
+# the build targets talk about, and which axiom-audit modules exist.  A
+# repository that has not been bootstrapped falls back to the placeholder root,
+# which is what its tree carries anyway.
+LEAN_ROOT="$(python3 "$REPO_ROOT/scripts/project_config.py" --root "$REPO_ROOT" get project.lean_root 2>/dev/null || true)"
+[ -n "$LEAN_ROOT" ] || LEAN_ROOT="PaperLib"
+# One module per registered track's axiom audit, empty when none is registered.
+AXIOM_AUDIT_MODULES=""
+for _track in $(python3 "$REPO_ROOT/scripts/completion_gate.py" list 2>/dev/null); do
+  _audit="$(python3 "$REPO_ROOT/scripts/project_config.py" --root "$REPO_ROOT" get "tracks.$_track.axiom_audit" 2>/dev/null || true)"
+  [ -n "$_audit" ] || continue
+  _module="${_audit%.lean}"
+  AXIOM_AUDIT_MODULES="$AXIOM_AUDIT_MODULES ${_module//\//.}"
+done
+unset _track _audit _module
+
 [ -d "$REPO_ROOT/.git" ] || [ -f "$REPO_ROOT/.git" ] || die "$REPO_ROOT is not a git repository"
 
 # Invariant 9 (bracket-free naming): the parent automation broke on ] in ids
@@ -626,8 +642,7 @@ CHANGED_FILES="$RUN_TMP/changed-files.txt"
 git -C "$WORKTREE" diff --name-only --no-renames "$MERGE_BASE" "$HEAD_SHA" > "$CHANGED_FILES"
 
 A_lean=0
-A_mip_lean=0
-A_ldt_lean=0
+A_lib_lean=0
 A_blueprint=0
 A_blueprint_src=0
 A_tex_chapter=0
@@ -652,12 +667,15 @@ match_globs() {
 while IFS= read -r _file; do
   [ -n "$_file" ] || continue
   if match_globs "$_file" '*.lean' 'lakefile.*' 'lean-toolchain' 'lake-manifest.json'; then A_lean=1; fi
-  if match_globs "$_file" 'MIPStarRE/*.lean'; then A_mip_lean=1; fi
-  if match_globs "$_file" 'MIPStarRE/LDT/*.lean'; then A_ldt_lean=1; fi
+  # Any Lean file of the library.  Which subtree carries source statements is a
+  # project decision; the statement-origin guard reads it from
+  # local/project.json and decides, so this filter only has to notice that the
+  # library changed at all.
+  if match_globs "$_file" "$LEAN_ROOT/*.lean"; then A_lib_lean=1; fi
   if match_globs "$_file" 'blueprint/*'; then A_blueprint=1; fi
   if match_globs "$_file" 'blueprint/src/*'; then A_blueprint_src=1; fi
   if match_globs "$_file" 'blueprint/src/chapter/*.tex'; then A_tex_chapter=1; fi
-  if match_globs "$_file" 'docs/paper-gaps/*' 'texra-blueprint.toml' 'MIPStarRE/*.lean' 'blueprint/src/*' 'docs/*.md'; then A_paper_gaps=1; fi
+  if match_globs "$_file" 'docs/paper-gaps/*' 'texra-blueprint.toml' "$LEAN_ROOT/*.lean" 'blueprint/src/*' 'docs/*.md'; then A_paper_gaps=1; fi
   if match_globs "$_file" 'scripts/*'; then A_scripts=1; fi
   if match_globs "$_file" 'scripts/comparator/*'; then A_comparator=1; fi
   # 'workflow' is the local translation of "the CI definition itself changed".
@@ -674,10 +692,10 @@ step_gate() {
     blueprint-render) [ "$A_blueprint_src" = 1 ] || [ "$A_workflow" = 1 ] ;;
     paper-gaps)       [ "$A_paper_gaps" = 1 ] || [ "$A_workflow" = 1 ] ;;
     blueprint-sync)   [ "$A_lean" = 1 ] || [ "$A_blueprint" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
-    file-length)      [ "$A_mip_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
-    proof-debt)       [ "$A_mip_lean" = 1 ] || [ "$A_tex_chapter" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
-    proof-evasion)    [ "$A_mip_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
-    statement-origin) [ "$A_ldt_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
+    file-length)      [ "$A_lib_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
+    proof-debt)       [ "$A_lib_lean" = 1 ] || [ "$A_tex_chapter" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
+    proof-evasion)    [ "$A_lib_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
+    statement-origin) [ "$A_lib_lean" = 1 ] || [ "$A_scripts" = 1 ] || [ "$A_workflow" = 1 ] ;;
     *) return 1 ;;
   esac
 }
@@ -688,10 +706,10 @@ step_gate_paths() {
     blueprint-render) printf 'blueprint_src|workflow\n' ;;
     paper-gaps)       printf 'paper_gaps|workflow\n' ;;
     blueprint-sync)   printf 'lean|blueprint|scripts|workflow\n' ;;
-    file-length)      printf 'mip_lean|scripts|workflow\n' ;;
-    proof-debt)       printf 'mip_lean|tex_chapter|scripts|workflow\n' ;;
-    proof-evasion)    printf 'mip_lean|scripts|workflow\n' ;;
-    statement-origin) printf 'ldt_lean|scripts|workflow\n' ;;
+    file-length)      printf 'lib_lean|scripts|workflow\n' ;;
+    proof-debt)       printf 'lib_lean|tex_chapter|scripts|workflow\n' ;;
+    proof-evasion)    printf 'lib_lean|scripts|workflow\n' ;;
+    statement-origin) printf 'lib_lean|scripts|workflow\n' ;;
   esac
 }
 
@@ -739,7 +757,7 @@ SHORT_SHA="$(git -C "$WORKTREE" rev-parse --short "$HEAD_SHA")"
 info "PR $PR_ID  branch $BRANCH  head $SHORT_SHA  base $BASE_REF"
 info "worktree $WORKTREE"
 info "changed files: $(wc -l < "$CHANGED_FILES" | tr -d ' ')"
-info "areas: lean=$A_lean mip_lean=$A_mip_lean ldt_lean=$A_ldt_lean blueprint=$A_blueprint blueprint_src=$A_blueprint_src tex_chapter=$A_tex_chapter paper_gaps=$A_paper_gaps scripts=$A_scripts comparator=$A_comparator workflow=$A_workflow"
+info "areas: lean=$A_lean lib_lean=$A_lib_lean blueprint=$A_blueprint blueprint_src=$A_blueprint_src tex_chapter=$A_tex_chapter paper_gaps=$A_paper_gaps scripts=$A_scripts comparator=$A_comparator workflow=$A_workflow"
 
 if [ "$DRY_RUN" = 1 ]; then
   info "dry run: planned steps"
@@ -864,14 +882,17 @@ step_build() {
     exit "$EXIT_TOOL_MISSING"
   fi
 
+  # shellcheck disable=SC2086  # the module list is deliberately word-split
   if [ -n "$INTEGRATION_HEAD" ]; then
-    echo "+ lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"
-    run_outside_git_env lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
+    echo "+ lake build $LEAN_ROOT$AXIOM_AUDIT_MODULES"
+    run_outside_git_env lake build "$LEAN_ROOT" $AXIOM_AUDIT_MODULES
   else
     echo "+ lake build"
     run_outside_git_env lake build
-    echo "+ lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit"
-    run_outside_git_env lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit
+    if [ -n "$AXIOM_AUDIT_MODULES" ]; then
+      echo "+ lake build$AXIOM_AUDIT_MODULES"
+      run_outside_git_env lake build $AXIOM_AUDIT_MODULES
+    fi
   fi
 
   # pr-ci.yml:158-159
@@ -1172,8 +1193,7 @@ helper manifest \
   --seconds "$RUN_SECONDS" \
   --conclusion "$CONCLUSION" \
   --area "lean=$A_lean" \
-  --area "mip_lean=$A_mip_lean" \
-  --area "ldt_lean=$A_ldt_lean" \
+  --area "lib_lean=$A_lib_lean" \
   --area "blueprint=$A_blueprint" \
   --area "blueprint_src=$A_blueprint_src" \
   --area "tex_chapter=$A_tex_chapter" \

@@ -45,6 +45,8 @@ SORRY_RE = re.compile(r"\bsorry\b")
 # Comparator challenge scaffolding deliberately presents the target theorem with
 # exactly one ``sorry``; the companion repository replaces that hole with the
 # submitted proof. Additional holes in the same file must still count.
+# A repository without a comparator footer (none is generated before the first
+# headline theorem exists) simply has no hole to subtract.
 INTENTIONAL_SORRY_PATH = "scripts/comparator/challenge_footer.lean"
 MAIN_FORMAL_DECL_RE = re.compile(r"(?m)^theorem\s+mainFormal\b")
 AXIOM_RE = re.compile(
@@ -88,7 +90,8 @@ def sorry_badge_count(repo_root: Path, lean_files: list[Path]) -> int:
     """Count proof debt after validating and subtracting one challenge hole."""
     intentional_path = repo_root / INTENTIONAL_SORRY_PATH
     if intentional_path not in lean_files:
-        raise RuntimeError(f"tracked challenge footer missing: {INTENTIONAL_SORRY_PATH}")
+        # Nothing to exempt, so nothing to subtract: the count is the plain one.
+        return count_pattern(lean_files, SORRY_RE)
 
     source = strip_comments_and_strings(intentional_path.read_text(encoding="utf-8"))
     if not main_formal_has_intentional_sorry(source):

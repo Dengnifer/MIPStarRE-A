@@ -2,6 +2,12 @@
 
 Normative. Read `local/protocols/meta.md` first.
 
+> **Runtime paths.** `$MIPSTARRE_CACHE_ROOT` below is this project's runtime
+> cache and state root: `paths.cache_root` of
+> [`local/project.json`](../project.json), exported by
+> `local/bin/session/config.sh`. Nothing under it is ever committed, and no
+> path here is fixed to one machine or one project.
+
 A *Codex session* is one `codex exec` run: a single model conversation with a
 working root, a sandbox mode, a persona, a task, and a token bill. In the
 parent repository a session was a GitHub Actions job — its identity came from
@@ -41,23 +47,25 @@ asking for a scout) invokes `dispatch.sh` from inside its own session, with
 `MIPSTARRE_SESSION` set to its own name so the registry records the parent in
 the `dispatcher` field. External session prompts prohibit further fan-out.
 
-### Retired native descendants (historical amendments, 2026-09-06 and 2026-09-08)
+### Retired native descendants (historical)
 
-Issue #505 retires the lease-based native entrypoints below and the useful-queue
-supervisor. This subsection records historical episodes, not current admission
+The lease-based native entrypoints below and the useful-queue supervisor are
+retired. This subsection records historical episodes, not current admission
 instructions. Native telemetry remains readable; new work uses external dispatch.
 
 Main may assign useful native work under the published model policy without
-external admission. Main remains Astra Ultra; existing defaults may stay Astra
-during transition, while reviewed future defaults and explicit child choices use Sol. Before
+external admission. The main session keeps the model and effort
+`session.main` names in `local/project.json`; children use the routine model
+unless the job is classified hard. Before
 admitting either kind of worker, reserve the native root's configured descendant cap:
 `account_router.py native-lease CACHE ROOT_THREAD PID CAP`. The cap excludes the root;
 the process census separately charges the root. This command validates the live
-resume thread, process start identity, scoped space route, explicit Astra/Ultra
-main configuration, policy-authorized child default and unchanged shared cap. Python 3.10 needs
+resume thread, process start identity, scoped key route, the explicit main
+model and effort configuration, the policy-authorized child default and the
+unchanged shared cap. Python 3.10 needs
 `tomli` for this native-only TOML validation; Python 3.11 has `tomllib`.
-`watchdog/primary-key-capacity` is the owner allocation, not measured throughput. For
-the current Space episode the owner allocation is ten total sessions: the root plus at
+`watchdog/primary-key-capacity` is the owner allocation, not measured throughput. In
+the episode this text was written for the owner allocation was ten total sessions: the root plus at
 most nine native descendants. The useful target is nine descendants, the floor is eight,
 and external admission is zero. This supersedes the historical five-session episode; it
 does not resize a live lease or create another pool. The
@@ -145,7 +153,7 @@ remains the latter's evidence.
 Children do not write the primary index or shared telemetry concurrently. The primary
 telemetry owner records each child using `telemetry.py native-record ROLLOUT` with
 `--name --role --issue --thread-id --root-thread-id --key-label --worktree --status`
-and `--job-class --requested-model`, plus `--hardness-reason` for hard Astra jobs.
+and `--job-class --requested-model`, plus `--hardness-reason` for hard-model jobs.
 Effective bound-turn contexts must satisfy the recorded classification. Root/parent IDs,
 timestamps, outcome and raw observed counters are retained. Aggregation scope is
 unknown: never sum parent and child counters without independent evidence. Native
@@ -159,24 +167,27 @@ attempt counts and usage survive refreshes and route changes without a budget re
 
 ## 2. Roles and sandboxes
 
-### Sol-first jobs (superseding owner amendment, 2026-09-07)
+### Routine-first jobs
 
-Issue #301 comment5573256033 supersedes the earlier cleanup-only whitelist.
-Routine/bounded jobs default to exact `gpt-5.6-sol`/`ultra`, including routine
-existing-statement proof work, build repairs and independent reviews. Main chooses
+Routine and bounded jobs run on the **routine** model and effort —
+`session.workers.model` and `session.workers.effort` in `local/project.json`,
+with the routing rules in `local/model-policy.json`; no model name belongs in
+this document. Routine covers existing-statement proof work, build repairs and
+independent reviews. Main chooses
 `--job-class hard|escalated|source_semantic|control_policy|hard_review` with an
-explicit `--hardness-reason` for genuinely difficult or escalated Astra work.
-New game/hypothesis/source-semantic decisions and control-policy reviews justify
-Astra; Lean files, prover/reviewer roles, or missing historical samples alone do not.
-Exact edit specifications remain appropriate for mechanical cleanup, not a universal
-Sol gate. The historical C01/C02 audit is retained as evidence, not a role ceiling.
+explicit `--hardness-reason` for genuinely difficult or escalated work, which
+then runs on `session.workers.hard_model`. New game, hypothesis or
+source-semantic decisions and control-policy reviews justify the hard model;
+the mere fact that a task touches Lean files, or is a prover or reviewer role,
+does not. Exact edit specifications remain appropriate for mechanical cleanup,
+not a universal gate on the routine model.
 
 For a model change, create a new explicit-model external assignment with Ultra;
 `dispatch.sh --resume` does not switch an existing thread's model. Link the
 predecessor thread, assignment, worktree, checkpoint and cumulative budget.
 Observed models are not inferred from a requested argument. Independent review
 still binds a different session to the exact head and trusted prompt. Hard
-control-policy review remains Astra.
+control-policy review stays on the hard model.
 
 At reviewed activation, main records one timestamp in
 `MIPSTARRE_MODEL_POLICY_ACTIVATION_AT`. External dispatch records `new` or
@@ -187,11 +198,13 @@ not a caller label. Main is excluded.
 TIMESTAMP` reports the last 100 distinct new dispatches, plus separate cumulative
 counts. Target 20:1 within 10:1..50:1; unknown observations are not invented,
 later known observations resolve them, and contradictory observations stay unknown.
-Zero Astra is not a measurable ratio. Record finite-prefix/availability deviations;
-never add filler or delay necessary hard work to manufacture a ratio.
+Zero hard dispatches is not a measurable ratio. Record finite-prefix and
+availability deviations; never add filler or delay necessary hard work to
+manufacture a ratio.
 
 No live activation until normal CI, independent control-policy review, service
-merge and an explicit new Sol/Ultra runtime observation. Catalog/CLI Ultra is not
+merge and an explicit new runtime observation of the routine model at the
+required effort. An effort named in a catalog or on a command line is not
 provider-measured reasoning. External admission uses the worker caps in section 4.
 Deploy the shim with its adjacent checked helper, never as a stale standalone
 copy. Keep all normal
@@ -220,15 +233,14 @@ exception: the role code `orc` maps to `local/personas/orchestrator.md`.
 Until such a file is committed, `dispatch.sh` warns and falls back to a
 one-line built-in frame — enough to run, not enough for load-bearing work.
 The `mathfix` role is the source-statement repair lane governed by
-`issues-prs.md` section 6: main selects Astra Ultra and supplies cumulative
-per-gap budgets; historical Fable records remain in `owner-sessions.jsonl`.
-Main owns mathematical/internal workflow decisions, including posted B7/B8, and
-records nonconverged project outcomes; only permission whose risk extends beyond
-project development goes to pinned owner inbox #500, and any such blocker uses
-section 6's at-most-ten-line plain-language format with ids continuing after B11.
-The 2026-09-06T05:05Z decision stands and issue #26 is archived, receiving no new
-comments. Workers return decision packets to main and never self-extend. The
-ordinary gap limit and explicit #118 tranche are in §6 there.
+`issues-prs.md` section 6: main selects the hard model and the highest effort
+the policy allows and supplies cumulative per-gap budgets. Main owns the
+mathematical and internal workflow decisions and records nonconverged project
+outcomes; only permission whose risk extends beyond project development goes to
+the owner inbox issue (`issues.owner_inbox` in `local/project.json`), and any
+such blocker uses section 6's at-most-ten-line plain-language format. Workers
+return decision packets to main and never self-extend. The gap limit is in §6
+there.
 
 ## 3. Naming
 
@@ -246,7 +258,7 @@ ordinary gap limit and explicit #118 tranche are in §6 there.
   Rejecting rather than stripping keeps the session name, the branch name and
   the issue id referring to the same string.
 - `seq` is a two-digit counter, allocated under
-  `~/.cache/mipstarre-dev/locks/session-seq.lock` by scanning *both*
+  `$MIPSTARRE_CACHE_ROOT/locks/session-seq.lock` by scanning *both*
   `results/telemetry/sessions.jsonl` and `results/telemetry/sessions/` — a
   session that crashed before its registry line was written still owns its
   number, because its capture file exists.
@@ -260,9 +272,9 @@ ordinary gap limit and explicit #118 tranche are in §6 there.
 
 ```bash
 local/bin/dispatch.sh --role prover --issue 0042 \
-  --worktree .worktrees/issue-0042-pauli-basis \
+  --worktree .worktrees/issue-0042-<slug> \
   --effort ultra \
-  -- "Close the sorry at MIPStarRE/Quantum/PauliBasis.lean:212 ..."
+  -- "Close the sorry at <LeanRoot>/<Chapter>/<File>.lean:212 ..."
 ```
 
 `dispatch.sh` performs, in order: role and scope validation; kill-switch check
@@ -285,9 +297,11 @@ Full accounts poll every 10 seconds for at most `MIPSTARRE_ACCOUNT_WAIT` seconds
 No host census, global cap, account-mode, external-admission, native lease or
 queue ticket participates. Configure worker caps to reflect the operator's allocation;
 this command does not measure provider throughput or account for unmarked processes.
-The installed `qpbt-switch` must be retired or made report-only by the meta session;
-never run it to stop dispatchers, create HOLD/STOP files, or signal routers.
-The repository change does not alter installed home commands or live caps.
+Any out-of-repository "switch" script an operator once installed to stop
+dispatchers, write HOLD/STOP files or signal routers must be retired or made
+report-only by the meta session; the kit's own stop path is
+`local/bin/session/pause.sh`. A change in this repository never alters
+already-installed home commands or live caps.
 Dispatch also supplies its registry to retain model selection and telemetry.
 Resume affinity comes from registry account fields or rollout files in either
 home; unknown, ambiguous, or conflicting selections fail before execution.
@@ -299,8 +313,8 @@ The budget contains `anchor`, `attempt_limit`, `attempts`, `working_seconds`, an
 Continuations retain path, anchor and limit; monotone charges include snapshot plus completed
 segments. Rows link original account/thread, checkpoint and budget. Operators enforce budgets;
 route switches grant no reset/attempt or change to old homes, captures or uncommitted work.
-The #118/B8 authorization does not change this validator: `--continue-from`
-still refuses a changed original limit or exhausted budget. Main must supply a
+An owner authorization to extend a budget does not change this validator:
+`--continue-from` still refuses a changed original limit or an exhausted budget. Main must supply a
 separately bounded ordinary dispatch for an authorized extension, linking its
 checkpoint, predecessor, original ledger/anchor and cumulative charges in the
 task; it is not a fresh gap budget. Preserve the old continuation snapshots and
@@ -315,14 +329,14 @@ skipping malformed/non-object history rows but rejecting invalid relevant metada
 Replay reads the private launch-time `.continuation.json`, never a later budget file.
 The shim rejects multi-agent enable flags and whole `features`/`agents` overrides only.
 Primary unsets inherited `CODEX_HOME`; second sets it for execution and rollout
-lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default
-`~/.cache/mipstarre-dev/codex-home-yxy`). Review and autofix inherit these
-variables unchanged. The published owner policy selects exact Sol for routine jobs
-and Astra for hard jobs with a reason; mathfix remains a hard role. Resumes do not
+lookup to `MIPSTARRE_CODEX_HOME_SECOND` (default: a second home directory under
+`$MIPSTARRE_CACHE_ROOT`). Review and autofix inherit these variables unchanged.
+The published policy selects the routine model for routine jobs and the hard
+model, with a reason, for hard ones; mathfix remains a hard role. Resumes do not
 switch model or reset budgets. Dispatch `--effort`, `MIPSTARRE_REVIEW_EFFORT` and
 `MIPSTARRE_AUTOFIX_EFFORT` default to `ultra`; every other effort fails rather than
-being normalized. The owner's verified space login is not rewritten here; the
-historical scoped-home directory name may still contain `relay1` for continuity.
+being normalized. A login directory an operator created earlier keeps its name;
+nothing here renames one.
 `requested_effort` is configured, not verified; see `meta.md`. Missing dispatchers fail closed.
 
 Preconditions the dispatcher (human or orchestrator) owns:
@@ -486,7 +500,7 @@ An oversized prompt has already cost this project one stalled agent
   (exit 5) if another dispatch holds it; `--lock-wait SECONDS` queues instead.
   Read-only sessions are never blocked. Parallel work means parallel
   worktrees, not parallel sessions in one worktree.
-- **Locks live in `~/.cache/mipstarre-dev/locks/`**, never in the repository,
+- **Locks live in `$MIPSTARRE_CACHE_ROOT/locks/`**, never in the repository,
   and are `mkdir`-based (macOS has no `flock(1)`). A lock whose owning pid is
   gone is broken automatically, with a notice.
 - **Telemetry appends are locked** inside `telemetry.py`, so concurrent
@@ -521,7 +535,7 @@ fix sessions; no role name identifies one, so `dispatch.sh` cannot.
 | registry line | `results/telemetry/sessions.jsonl` | permanent, append-only |
 | codex rollout | `~/.codex/sessions/YYYY/MM/DD/rollout-*-<thread-id>.jsonl` | outside the repo; path recorded, contents not relied on |
 | worktree | `.worktrees/<branch>` | removed at archival |
-| locks | `~/.cache/mipstarre-dev/locks/` | released at exit |
+| locks | `$MIPSTARRE_CACHE_ROOT/locks/` | released at exit |
 
 The registry line schema is in `meta.md`. Beyond it, `dispatch.sh` records
 `turns` (completed model turns), `capture` (repo-relative path to the event
