@@ -149,7 +149,8 @@ class CiStepFailureTests(workflow.LayerTestCase):
         manifest, commands = self.run_ci()
         self.assertEqual(manifest["conclusion"], "success")
         self.assertTrue(all(step["outcome"] == "success" for step in manifest["steps"]))
-        for command in ("lake build MIPStarRE.LDT.Test.AxiomAudit", "texra-blueprint web",
+        for command in ("lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit",
+                        "texra-blueprint web",
                         "blueprint_lean_sync.py --root . --ci"):
             self.assertIn(command, commands)
 

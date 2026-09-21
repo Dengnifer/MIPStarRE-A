@@ -1,4 +1,12 @@
-# Comparator verification of `mainFormal`
+# Comparator verification of the headline theorems
+
+Two challenges are configured, one per headline result: the LDT challenge
+for `MIPStarRE.LDT.Test.mainFormal` and the QPBT challenge for
+`MIPStarRE.QPBT.pauli_soundness` and `MIPStarRE.QPBT.pauli_soundness_qubit`.
+They share the generation tooling in `scripts/comparator/`, the drift guard
+and the trust model below; each lives in its own challenge repository.
+
+## The LDT challenge
 
 The headline theorem `MIPStarRE.LDT.Test.mainFormal` (the corrected source
 statement of `thm:main-formal` from the low individual degree test paper) is
@@ -64,6 +72,84 @@ from a trusted checkout rather than an untrusted submitter.
 Residual trust: Lean's logical soundness, comparator's own plumbing, sandbox
 security, simultaneous bugs in all checkers, and human error in
 `Challenge.lean` itself — keep that file short, notation-free, and reviewed.
+
+## The QPBT challenge
+
+The QPBT headline theorems `MIPStarRE.QPBT.pauli_soundness` (`thm:pauli`) and
+`MIPStarRE.QPBT.pauli_soundness_qubit` (`cor:pauli-binary`) get the same
+treatment, in the separate repository
+**[QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator)**.
+
+- **Targets.**  Both theorems are verified in one comparator run
+  (`theorem_names` lists both), so the challenge re-declares the union of the
+  two statement closures.
+- **Closure size.**  190 declarations from twenty library
+  modules, about 2700 lines — larger than the LDT challenge because the
+  Pauli basis test carries the full question/answer combinatorics
+  (`PauliType`, `PauliAnswer`, the win predicate and the question
+  distribution) into the statement.
+- **Generated file.**  `scripts/comparator/expected/ChallengeQPBT.lean.expected`,
+  regenerated and byte-compared by the same drift guard as the LDT challenge
+  (`--challenge qpbt`).
+
+### Environment alignment for QPBT
+
+Comparator compares the full kernel closure constant by constant, so the
+Mathlib-only challenge file must elaborate to bit-identical terms.  Two
+obstacles had to be removed in the library:
+
+1. **Narrowed imports.**  Four closure modules —
+   `MIPStarRE/QPBT/Algebra/Subspaces.lean`,
+   `MIPStarRE/QPBT/Algebra/Coefficients.lean`,
+   `MIPStarRE/QPBT/Algebra/LowDegreeCode.lean` and
+   `MIPStarRE/QPBT/Algebra/Lines.lean` — imported individual Mathlib files, so
+   tactic elaboration there saw a smaller environment than the challenge file
+   would.  They now use the full `import Mathlib` and carry the same "do not
+   narrow this import" comment as the LDT base modules.  The remaining sixteen
+   closure modules already saw full Mathlib through
+   `MIPStarRE/LDT/Basic/ParametersBase.lean` or
+   `MIPStarRE/Quantum/FiniteMatrix/Basic.lean`.
+2. **Private closure members.**  A `private` declaration's real name is
+   qualified by its defining module (`_private.<module>.0.<name>`), so a
+   challenge file in a different module can never re-declare it under the
+   library's name.  Nineteen closure members were private — twelve in
+   `MIPStarRE/QPBT/Algebra/FieldBasis.lean` (the self-dual normal basis
+   construction that `fixedFieldModel` selects from), six in
+   `MIPStarRE/QPBT/Algebra/Subspaces.lean` (the pivot-rank machinery behind
+   `canonicalComplement`), and `singlePauliVec` in
+   `MIPStarRE/QPBT/Algebra/Pauli.lean`.  Dropping `private` is the smallest
+   faithful edit: no statement, definition body or proof script changes, only
+   the visibility of names that the statement closure already depends on.
+
+No statement of either headline theorem changed, and their axiom closure
+remains `propext`, `Classical.choice`, `Quot.sound`.
+
+The "do not narrow this import" notes on the shared base modules
+(`MIPStarRE/LDT/Basic/ParametersBase.lean`,
+`MIPStarRE/LDT/Basic/Distribution.lean`,
+`MIPStarRE/Quantum/FiniteMatrix/Basic.lean`) still name only `mainFormal`,
+and deliberately so: those modules contribute to both closures, and adding a
+line to a module docstring shifts every declaration below it, which would
+rewrite the `-- source:` provenance comments of the checked-in LDT challenge.
+They are covered by this section instead.
+
+### Regenerating and auditing
+
+Regeneration is the pipeline in `scripts/comparator/README.md` with
+`--challenge qpbt`.  After an intentional change to any definition in the
+closure: regenerate, copy the expected file into QPBT-comparator as
+`Challenge.lean`, bump the `rev` pin in its `lakefile.toml` to the library
+commit it was generated from, and run its `./verify.sh`.
+
+What the human must audit, and what no tool can check: that
+`ChallengeQPBT.lean` really states the intended theorems.  Concretely, that
+the Pauli basis test it defines — `pauliQuestionDistribution`,
+`pauliWinPredicate`, `pauliBasisTest` — is the test of the paper; that
+`deltaQld` is the paper's error functional; that `PauliSoundnessWitness` and
+`QubitSoundnessWitness` package isometries and an auxiliary state without
+smuggling in a hypothesis; and that `Strategy.value` and the operator
+distances mean what their names claim.  Everything else in the file is
+machine-checked to agree with the library.
 
 ## Benchmark use
 

@@ -371,19 +371,35 @@ noncomputable def restrictedDLinePreDist (L : LdParams) (i : Fin L.m) :
     (restrictedLineSeedEvent L i)
     (restrictedDLineSeedEvent_positive L i)
 
-/-- The `i`-th restricted axis-line distribution from
+/-- The `i`-th restricted refined axis-line distribution of blueprint
 `def:ith-restricted-line`.  Restriction precedes decoding so the seed fiber is
-represented faithfully.  Blueprint
-`def:ith-restricted-line`; paper
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`. -/
+represented faithfully.
+
+**Formalization-only auxiliary:** the blueprint node is stated over the
+refined, seed-bearing axis law, so this is an auxiliary restriction of that
+refined law and not a formalization of a source distribution.  The paper
+prose at
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`
+describes the source restriction; identifying this law's push-forward with it
+remains an open obligation recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+`sec:auxiliary-subline-scalars`. -/
 noncomputable def restrictedALineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedALinePreDist L i).map fun sample =>
     (aLineDescOf L sample.1, sample.2.point)
 
-/-- The `i`-th restricted diagonal-line distribution from blueprint
+/-- The `i`-th restricted refined diagonal-line distribution of blueprint
 `def:ith-restricted-line`.  The decoded direction already has all coordinates
-preceding `i` set to zero.  Paper lines 1038--1048. -/
+preceding `i` set to zero.
+
+**Formalization-only auxiliary:** as for `restrictedALineDist`, the blueprint
+node is stated over the refined, seed-bearing diagonal law.  The paper prose
+at `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1038-1048`
+describes the source restriction; identifying this law's push-forward with it
+remains an open obligation recorded in
+`docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`, section
+`sec:auxiliary-subline-scalars`. -/
 noncomputable def restrictedDLineDist (L : LdParams) (i : Fin L.m) :
     Distribution (LineDesc L × (Fin L.m → ScalarQ L)) :=
   (restrictedDLinePreDist L i).map fun sample =>

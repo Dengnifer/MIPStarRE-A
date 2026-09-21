@@ -60,7 +60,7 @@ blueprint-fix, everything else → never auto-fixed) ports without translation.
 
 | Step | Parent job | What it runs (in the worktree) | Gate |
 |---|---|---|---|
-| `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
+| `build` | `build` (`pr-ci.yml:115-168`) | warm `.lake/build`, `lake exe cache get`, `lake build`, `lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit` (`:155-156`), `scripts/comparator/check_challenge_drift.py` (`:158-159`) | `lean ∨ comparator ∨ workflow` |
 | `blueprint-render` | `blueprint-render` (`:173-243`) | remove the prior PDF, run the project `latexmk` configuration noninteractively, require its exit zero and a fresh non-empty `blueprint/print/print.pdf` (`:210-218`), `texra-blueprint bbl` (`:222-223`), `texra-blueprint web` with `grep '^ERROR:'` (`:225-243`) | `blueprint_src ∨ workflow` |
 | `paper-gaps` | `paper-gaps` (`:248-271`) | `texra-blueprint --root . paper-gaps check` | `paper_gaps ∨ workflow` |
 | `blueprint-sync` | `blueprint-sync` (`:273-317`) | `python3 -m unittest discover -s scripts/tests`, `blueprint_lean_sync.py --update-lean-decls`, `blueprint_lean_sync.py --ci`, `blueprint_axiom_audit_needed.py --base-ref` | `lean ∨ blueprint ∨ scripts ∨ workflow` |
@@ -277,13 +277,21 @@ worktree writes into the shared snapshot, so it does not.
    prune workaround lives, and a package-free tree is exactly the state that
    triggers it. `MIPSTARRE_CI_ALLOW_COLD_FETCH=1` overrides for a tree you know
    is clean.
-4. `lake build`, then `lake build MIPStarRE.LDT.Test.AxiomAudit`, then the
-   comparator drift check.
+4. `lake build`, then `lake build MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit`,
+   then the comparator drift check.  Both audit modules are compile-time
+   checks, not reports: each `audit_standard_axioms` /
+   `assert_standard_axioms` command calls `Lean.collectAxioms` and throws
+   unless the declaration's axioms are exactly `propext`,
+   `Classical.choice` and `Quot.sound`, so a `sorryAx` reaching a headline
+   theorem fails the build step.  They are built as explicit targets
+   rather than imported from the umbrella libraries, so they stay out of
+   normal downstream imports.
 
 For reviewed trains, `--integration-head SHA --worktree PATH --base SHA` runs
 every step without publishing PR evidence. Its single locked Lake invocation is
-`lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit`: the complete library,
-including its root and downstream modules, plus the axiom audit. No warm project
+`lake build MIPStarRE MIPStarRE.LDT.Test.AxiomAudit MIPStarRE.QPBT.Test.AxiomAudit`:
+the complete library, including its root and downstream modules, plus both
+axiom audits. No warm project
 artifacts may be assumed by publication's dynamic `checkdecls` import. Skip flags
 are rejected; the exact head, base ancestry, and clean worktree are checked.
 

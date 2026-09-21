@@ -1,15 +1,23 @@
 import MIPStarRE.LDT.Test.MainTheorem.MainFormal
+import MIPStarRE.QPBT.Test.QubitForm
 
 /-!
-# Comparator closure extractor for `mainFormal`
+# Comparator closure extractor
 
 Computes the transitive closure of repository-local constants referenced by
-the statement of `MIPStarRE.LDT.Test.mainFormal`, mirroring comparator's
-`runForUsedConsts` traversal (types, definition bodies, inductive
+the statements of the target theorems of one comparator challenge, mirroring
+comparator's `runForUsedConsts` traversal (types, definition bodies, inductive
 constructors, and recursor rules; theorem proof bodies are traversed for the
 constants they use).  Auto-generated auxiliaries (`_proof_`, `match_`,
 `_autoParam`, constructors, projections) are collapsed into their parent
 declarations.
+
+The targets are read from the `COMPARATOR_TARGETS` environment variable
+(whitespace-separated fully qualified names) and default to the LDT challenge
+root `MIPStarRE.LDT.Test.mainFormal`, so the extractor is shared by every
+challenge configured in `check_challenge_drift.py`.  This file imports the
+root module of every configured challenge; targets outside those imports are
+reported as errors.
 
 Output: one TSV row per declaration — name, module path, start line, end
 line (`NORANGE` for compiler-generated declarations without a source range)
@@ -18,6 +26,18 @@ the full regeneration pipeline.
 -/
 
 open Lean
+
+def defaultTargets : List Name := [`MIPStarRE.LDT.Test.mainFormal]
+
+/-- Targets of this extraction run, from `COMPARATOR_TARGETS`. -/
+def readTargets : IO (List Name) := do
+  match ← IO.getEnv "COMPARATOR_TARGETS" with
+  | none => return defaultTargets
+  | some s =>
+    let flat := ((s.replace "\n" " ").replace "\t" " ").replace "," " "
+    let names := (flat.splitOn " ").filter (· ≠ "")
+    if names.isEmpty then return defaultTargets
+    return names.map String.toName
 
 def isLocal (env : Environment) (n : Name) : Bool :=
   match env.getModuleIdxFor? n with
@@ -89,8 +109,11 @@ partial def collect (env : Environment) (queue : List Name) (seen : NameSet) : N
 
 def runExtract : MetaM Unit := do
   let env ← getEnv
-  let some ci := env.find? `MIPStarRE.LDT.Test.mainFormal | throwError "not found"
-  let roots := ci.type.getUsedConstants.toList.filter (isLocal env ·)
+  let targets ← readTargets
+  let mut roots : List Name := []
+  for t in targets do
+    let some ci := env.find? t | throwError "target not found: {t}"
+    roots := roots ++ ci.type.getUsedConstants.toList.filter (isLocal env ·)
   let closure := collect env roots {}
   let mut canonSet : NameSet := {}
   for n in closure.toArray do

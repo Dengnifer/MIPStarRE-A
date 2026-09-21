@@ -1,4 +1,4 @@
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib
 
 /-!
 # Subspaces for the Pauli basis test
@@ -15,6 +15,11 @@ The statement-level definitions are blueprint `def:register-subspace`,
 `def:dot-product-orthogonal`, `def:canonical-complement`, and
 `def:cl-canonical`;
 the paper origin is `references/qpbt-paper/04_preliminaries.tex:231-384`.
+
+Note: this module contributes declarations to the comparator statement closure
+of the QPBT headline theorems, which must elaborate in the same environment as
+the Mathlib-only `ChallengeQPBT.lean`.  Keep the full `import Mathlib`; do not
+narrow it.  See `docs/comparator.md`, "Environment alignment".
 -/
 
 open scoped BigOperators
@@ -64,7 +69,7 @@ def dotOrthogonal (W : Submodule K (ι → K)) : Submodule K (ι → K) where
 infrastructure for blueprint
 `def:canonical-complement`, paper `references/qpbt-paper/04_preliminaries.tex:231-384`.
 -/
-private def prefixMap (k n : ℕ) (hk : k ≤ n) :
+def prefixMap (k n : ℕ) (hk : k ≤ n) :
     (Fin n → K) →ₗ[K] (Fin k → K) :=
   { toFun := fun x i => x ⟨i.1, lt_of_lt_of_le i.2 hk⟩
     map_add' := by
@@ -75,7 +80,7 @@ private def prefixMap (k n : ℕ) (hk : k ≤ n) :
       rfl }
 
 /-- The rank of a prefix restriction used by the pivot characterization. -/
-private noncomputable def prefixRank {n : ℕ} (W : Submodule K (Fin n → K))
+noncomputable def prefixRank {n : ℕ} (W : Submodule K (Fin n → K))
     (k : ℕ) (hk : k ≤ n) : ℕ :=
   Module.finrank K (W.map (prefixMap k n hk))
 
@@ -93,7 +98,7 @@ noncomputable def canonicalComplement {n : ℕ}
       prefixRank W j.1 j.2.le
 
 /-- The register submodule is the standard coordinate span on its index set. -/
-private lemma registerSubmodule_eq_spanSubset (S : Finset ι) :
+lemma registerSubmodule_eq_spanSubset (S : Finset ι) :
     registerSubmodule K S = Pi.spanSubset K (S : Set ι) := by
   classical
   rw [registerSubmodule, Pi.spanSubset]
@@ -102,7 +107,7 @@ private lemma registerSubmodule_eq_spanSubset (S : Finset ι) :
   simp [Pi.basisFun_apply, eq_comm]
 
 /-- Prefix restriction rank is nondecreasing when one coordinate is added. -/
-private lemma prefixRank_mono_succ {n : ℕ} (W : Submodule K (Fin n → K))
+lemma prefixRank_mono_succ {n : ℕ} (W : Submodule K (Fin n → K))
     (k : ℕ) (hk : k + 1 ≤ n) :
     prefixRank W k (Nat.le_trans (Nat.le_succ k) hk) ≤
       prefixRank W (k + 1) hk := by
@@ -116,7 +121,7 @@ private lemma prefixRank_mono_succ {n : ℕ} (W : Submodule K (Fin n → K))
   exact Submodule.finrank_map_le drop (W.map large)
 
 /-- If a coordinate does not increase prefix rank, it vanishes after all earlier coordinates do. -/
-private lemma coordinate_eq_zero_of_prefixRank_eq {n : ℕ}
+lemma coordinate_eq_zero_of_prefixRank_eq {n : ℕ}
     (W : Submodule K (Fin n → K)) (j : Fin n)
     (hrank : prefixRank W (j.1 + 1) (Nat.succ_le_of_lt j.2) =
       prefixRank W j.1 j.2.le) {w : Fin n → K} (hw : w ∈ W)
@@ -158,7 +163,7 @@ private lemma coordinate_eq_zero_of_prefixRank_eq {n : ℕ}
 
 /-- The number of strict steps in a nondecreasing natural-number sequence is at
 most its endpoint. -/
-private lemma card_strict_steps_le {n : ℕ} (r : ℕ → ℕ)
+lemma card_strict_steps_le {n : ℕ} (r : ℕ → ℕ)
     (hmono : ∀ k, k < n → r k ≤ r (k + 1)) :
     ((Finset.range n).filter fun k => r (k + 1) ≠ r k).card ≤ r n := by
   classical
