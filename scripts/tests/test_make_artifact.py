@@ -337,6 +337,26 @@ class MakeArtifactTests(unittest.TestCase):
         for rule_text in ("Dengnifer", "LionSR", "Ruixuan Deng",
                           "ruixuan.deng@icloud.com", "sirui-lu.com"):
             self.assertNotIn(rule_text, text, f"{rule_text!r} survived in the shipped script")
+            escaped = rule_text.replace(".", r"\.")
+            self.assertNotIn(escaped, text,
+                             f"escaped spelling {escaped!r} survived in the shipped script")
+
+    def test_anonymize_rejects_an_escaped_rule_in_the_shipped_script(self) -> None:
+        """A regex-escaped identity is still readable and must fail the run."""
+        shipped = self.repo / "scripts" / "make_artifact.sh"
+        rule_text = "ruixuan.deng@icloud.com"
+        escaped = rule_text.replace(".", r"\.")
+        write(shipped, SCRIPT.read_text(encoding="utf-8")
+              + f"\n# planted escaped rule spelling: {escaped}\n")
+        self.commit("plant an escaped anonymization rule in the shipped script")
+
+        result = self.run_script("--anonymize")
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("ANONYMIZATION INCOMPLETE", result.stderr)
+        self.assertIn("scripts/make_artifact.sh", result.stderr)
+        self.assertIn(escaped, result.stderr)
+        self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                         "an escaped rule spelling must not be packaged")
 
     def test_a_rule_string_surviving_in_a_pdf_fails_the_run(self) -> None:
         """`sed` cannot reach inside a binary, so the check has to catch it.

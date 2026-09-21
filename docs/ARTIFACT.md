@@ -16,7 +16,7 @@ commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 | `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | the pinned build: Lean 4 and all ten dependencies by exact revision |
 | `blueprint/src/` | the LaTeX blueprint, cross-referenced to the Lean names with `\lean{}` / `\leanok` |
 | `docs/` | the mathematical documentation, including `docs/QPBT-theorem-index.md` (every headline and supporting statement with its Lean name, blueprint label and paper locator) and `docs/paper-gaps/` (the register of gaps found in the source papers) |
-| `references/` | the TeX sources of the five source papers — third-party material, see below — so that every `file.tex:lines` locator in the docstrings resolves inside the snapshot |
+| `references/` | the TeX sources of the five source papers — third-party material, see below — so that the paper locators can be checked inside the snapshot; the report below records two existing exceptions |
 | `scripts/comparator/` | the generator for the self-contained `Challenge.lean` statement file used by the independent challenge repository |
 | `scripts/blueprint_leanok_axioms.py` | the blueprint/axiom consistency check |
 | `scripts/make_artifact.sh` | the script that produced this snapshot, so the packaging is itself auditable |
@@ -51,9 +51,9 @@ public repository):
 **Why they ship.** Lean docstrings and `docs/QPBT-theorem-index.md` cite their
 source as `references/<paper>/<file>.tex:<lines>`, and so will
 `docs/DEVIATIONS.md` when it lands (it is pending in another packet, and the
-`README.md` link to it is the one internal link the `MANIFEST.txt` still reports
-as dead). With the sources in the snapshot every
-one of those locators resolves inside the tarball, and a reviewer can read the
+two `README.md` links to it are the two dead internal-link occurrences that
+`MANIFEST.txt` still reports). With the sources in the snapshot all but the two
+locators listed below resolve inside the tarball, and a reviewer can read the
 paper statement next to the Lean statement without reconstructing the
 per-section split from arXiv. The directories are plain per-section splits of
 the papers' arXiv sources.
@@ -106,10 +106,20 @@ lake build MIPStarRE.QPBT
 ```
 
 **Expected cost.** `lake exe cache get` downloads several GB. Plan on **16 GB
-of RAM** and tens of GB of disk: 38 files in the development raise
-`maxHeartbeats` and 65 raise `synthInstance.maxSize`, so this is not a laptop
-build. Honest statement of the evidence we have: the maintainers' build
-telemetry records 1,608 builds of this development, but every one is an
+of RAM** and tens of GB of disk. At this source commit, these commands count
+occurrences and files, respectively:
+
+```sh
+rg -n -o 'maxHeartbeats' MIPStarRE | wc -l
+rg -l 'maxHeartbeats' MIPStarRE | wc -l
+rg -n -o 'synthInstance\.maxSize' MIPStarRE | wc -l
+rg -l 'synthInstance\.maxSize' MIPStarRE | wc -l
+```
+
+They report 38 occurrences across 23 files for `maxHeartbeats`, and 66 across
+17 files for `synthInstance.maxSize`, so this is not a laptop build. Honest
+statement of the evidence we have: the maintainers' build telemetry records
+1,608 builds of this development, but every one is an
 *incremental, warm-cache* build (the two most recent took 79 s and 556 s); the
 only full-rebuild record, 25,052 s (7 h), is from 2026-08-30 and predates most
 of the QPBT development. **A cold clean-clone build of `MIPStarRE.QPBT` has not
@@ -253,12 +263,12 @@ pass runs over its own rules list as well, and before packaging anything the
 run searches the whole snapshot -- including the text extracted from every
 PDF, which `sed` cannot rewrite -- for each of those strings and exits `2`
 rather than package a survivor. It does **not** touch the source papers under
-`references/`, and it should not: those are published third-party works, and their authors are cited
-authors, not the submitters. It is **not** by itself sufficient: the commit
-history, the issue and PR links in the docs, and the hosted blueprint would
-still identify the authors, so a double-blind submission needs a fresh
-single-commit repository built from the anonymized snapshot, not merely this
-flag.
+`references/`, and it should not: those are published third-party works, and
+their authors are the cited paper authors, not the submitters. It is **not** by itself
+sufficient: the commit history, the issue and PR links in the docs, and the
+hosted blueprint would still identify the authors, so a double-blind
+submission needs a fresh single-commit repository built from the anonymized
+snapshot, not merely this flag.
 
 ## Keeping the two exclusion lists in step
 

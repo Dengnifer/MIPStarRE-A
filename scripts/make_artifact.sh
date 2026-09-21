@@ -99,8 +99,13 @@ LEAK_ALLOW=(
 # blanket entry for the entry below would stop the scan catching a real address
 # of ours anywhere in the development, which is exactly what it is for.
 LEAK_ALLOW_IN=(
-  '^references/ :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: corresponding-author addresses printed in the source papers themselves; third-party material reproduced as published, not a contact address of this development'
-  '^scripts/make_artifact\.sh :: ruixuan\.deng@icloud\.com :: the ANON_RULES entry below, which has to spell the address out in order to remove it; a snapshot cut WITHOUT --anonymize is an authored release, in which the author address is not a leak, and one cut WITH it has this line rewritten like any other'
+  '^references/ :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: '\
+'corresponding-author addresses printed in the source papers themselves; third-party material '\
+'reproduced as published, not a contact address of this development'
+  '^scripts/make_artifact\.sh :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: '\
+'the literal contact address in ANON_RULES; permitted only in the shipped script of an authored '\
+'snapshot, while --anonymize rejects literal and regex-escaped rule spellings before this '\
+'allow-list is applied'
 )
 
 # --------------------------------------------------------------------------
@@ -312,16 +317,23 @@ fi
 # `--anonymize` promises the reader of docs/ARTIFACT.md that the strings in
 # ANON_RULES are gone; nothing but this check makes the promise good, and a
 # silent miss is worse than no flag at all, because a submitter would ship on
-# it.  Every rule's own text is looked for as a FIXED string in everything the
-# leak scan will read: the text files as the pass left them, and the extracted
-# text of every shipped PDF, which `sed` cannot reach at all.  The leak
+# it.  Every rule's literal text and its sed-regex-escaped spelling are looked
+# for as FIXED strings in everything the leak scan will read: the text files as
+# the pass left them, and the extracted text of every shipped PDF, which `sed`
+# cannot reach at all.  Checking the escaped spelling is load-bearing: that was
+# how the address survived in an earlier shipped allow-list entry.  The leak
 # patterns above would not catch these on their own — three of the five are
 # names, not address- or key-shaped.  A survivor stops the run, like a leak.
 if [ "$ANONYMIZE" -eq 1 ]; then
   ANON_LEFT="$WORK/anon-left.txt"
   : > "$ANON_LEFT"
   for rule in "${ANON_RULES[@]}"; do
-    xargs -0 -r grep -HnF -e "${rule%% :: *}" < "$TEXT_LIST" >> "$ANON_LEFT" 2>/dev/null || true
+    literal=${rule%% :: *}
+    escaped=$(sed_escape_pattern "$literal")
+    xargs -0 -r grep -HnF -e "$literal" < "$TEXT_LIST" >> "$ANON_LEFT" 2>/dev/null || true
+    if [ "$escaped" != "$literal" ]; then
+      xargs -0 -r grep -HnF -e "$escaped" < "$TEXT_LIST" >> "$ANON_LEFT" 2>/dev/null || true
+    fi
   done
   if [ -s "$ANON_LEFT" ]; then
     # Same path mapping as the leak-scan report: snapshot-relative, and a PDF's
@@ -524,8 +536,8 @@ MANIFEST="$SNAP/MANIFEST.txt"
   echo "Third-party material included, on purpose:"
   echo "  references/ — the TeX sources of the five source papers.  The Lean"
   echo "  docstrings, the theorem index and the deviations page cite them as"
-  echo "  references/<paper>/<file>.tex:<lines>, so every locator resolves inside"
-  echo "  this snapshot.  These files are the work of their own authors, kept"
+  echo "  references/<paper>/<file>.tex:<lines>.  Most resolve inside this snapshot;"
+  echo "  the paper-locator report above names any exceptions.  These files are kept"
   echo "  here for reference; they are NOT covered by the Apache-2.0 LICENSE"
   echo "  that ships with this snapshot, and their own terms govern any further"
   echo "  use or redistribution."
