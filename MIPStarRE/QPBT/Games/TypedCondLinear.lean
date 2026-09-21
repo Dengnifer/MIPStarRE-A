@@ -74,10 +74,9 @@ theorem typedCLDistribution_symm {K T ι : Type*}
         ((Finset.univ : Finset (ι → K)).filter
           fun z => ((v, L v z), (u, L u z)) = w.swap) := by
     rintro u v ⟨w₁, w₂⟩
-    ext z
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.swap_prod_mk,
-      Prod.mk.injEq]
-    exact and_comm
+    apply Finset.filter_congr
+    intro z _
+    exact Prod.swap_inj.symm
   have hbind : ∀ w : (T × (ι → K)) × (T × (ι → K)),
       (typedCLDistribution E hE L L).weight w =
         ∑ uv : T × T, (graphDistribution E hE).weight uv *

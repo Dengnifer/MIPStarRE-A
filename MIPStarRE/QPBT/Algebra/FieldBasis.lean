@@ -122,8 +122,14 @@ variable {K : Type*} [Field K] [Fintype K] [Algebra (ZMod 2) K]
 
 local notation "G" => Gal(K/(ZMod 2))
 
-noncomputable local instance : CommGroup G := IsCyclic.commGroup
-noncomputable local instance : DecidableEq G := Classical.decEq G
+-- Named, not anonymous: both instances are in the comparator statement
+-- closure, and an anonymous instance is given a generated name that encodes
+-- the defining module, which the Mathlib-only challenge file cannot
+-- reproduce.  See `docs/comparator.md`, "Environment alignment for QPBT".
+noncomputable local instance instCommGroupGaloisZMod2 : CommGroup G :=
+  IsCyclic.commGroup
+noncomputable local instance instDecidableEqGaloisZMod2 : DecidableEq G :=
+  Classical.decEq G
 
 theorem normal_basis_trace_dual_apply (σ : G) :
     (IsGalois.normalBasis (ZMod 2) K).traceDual σ =

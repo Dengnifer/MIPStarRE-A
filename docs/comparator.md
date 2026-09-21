@@ -1,10 +1,12 @@
 # Comparator verification of the headline theorems
 
-Two challenges are configured, one per headline result: the LDT challenge
-for `MIPStarRE.LDT.Test.mainFormal` and the QPBT challenge for
-`MIPStarRE.QPBT.pauli_soundness` and `MIPStarRE.QPBT.pauli_soundness_qubit`.
-They share the generation tooling in `scripts/comparator/`, the drift guard
-and the trust model below; each lives in its own challenge repository.
+Two challenges are configured.  The LDT challenge targets
+`MIPStarRE.LDT.Test.mainFormal`.  The QPBT challenge targets the four registered
+QPBT results: `MIPStarRE.QPBT.exists_spcc_value_one`,
+`MIPStarRE.QPBT.exists_ld_soundness`, `MIPStarRE.QPBT.pauli_soundness`, and
+`MIPStarRE.QPBT.pauli_soundness_qubit`.  They share the generation tooling in
+`scripts/comparator/`, the drift guard, and the trust model below; each lives in
+its own challenge repository.
 
 ## The LDT challenge
 
@@ -75,54 +77,82 @@ security, simultaneous bugs in all checkers, and human error in
 
 ## The QPBT challenge
 
-The QPBT headline theorems `MIPStarRE.QPBT.pauli_soundness` (`thm:pauli`) and
-`MIPStarRE.QPBT.pauli_soundness_qubit` (`cor:pauli-binary`) get the same
-treatment, in the separate repository
-**[QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator)**.
+The QPBT challenge is prepared for the separate repository
+**[QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator)**.  Its current
+configuration supplies these four theorem names to one comparator run:
 
-- **Targets.**  Both theorems are verified in one comparator run
-  (`theorem_names` lists both), so the challenge re-declares the union of the
-  two statement closures.
-- **Closure size.**  190 declarations from twenty library
-  modules, about 2700 lines — larger than the LDT challenge because the
-  Pauli basis test carries the full question/answer combinatorics
-  (`PauliType`, `PauliAnswer`, the win predicate and the question
-  distribution) into the statement.
-- **Generated file.**  `scripts/comparator/expected/ChallengeQPBT.lean.expected`,
-  regenerated and byte-compared by the same drift guard as the LDT challenge
-  (`--challenge qpbt`).
+- `MIPStarRE.QPBT.exists_spcc_value_one` (`lem:pauli-completeness`);
+- `MIPStarRE.QPBT.exists_ld_soundness` (`lem:ld-soundness`);
+- `MIPStarRE.QPBT.pauli_soundness` (`thm:pauli`); and
+- `MIPStarRE.QPBT.pauli_soundness_qubit` (`cor:pauli-binary`).
+
+The checked-in generated tree is `scripts/comparator/expected/qpbt/`.  It has a
+root `Challenge.lean` and thirty Mathlib-only mirror modules under `Challenge/`,
+one for each contributing library module.  The root states all four targets
+with `sorry`; the drift guard regenerates and byte-compares the complete tree
+with `--challenge qpbt`.
+
+### Current verification status
+
+At library commit `a534c7f97ba34fd561ae03134f90b81ee4e395c1`, generation and
+elaboration of this four-target tree passed, as did the canonical local CI
+contexts.  Those checks establish that the generated challenge and library
+compile.  They do **not** establish equality of every declaration in the union
+of the four statement closures.  In particular, equality of the generated
+private auxiliaries reached through the completeness target remains
+unestablished.
+
+The following checks are still pending for the four-target configuration:
+
+- an official comparator run establishing all-four closure equality;
+- equality of the private and compiler-generated completeness auxiliaries;
+- real-landrun verification with nanoda enabled; and
+- a challenge-repository pin to the verified commit after it reaches `main`.
+
+There is a narrower historical result.  At commit
+`4aec9ebedf6ca401e3f2d7b4bd90bd565d38f90d`, the split challenge configured
+only `MIPStarRE.QPBT.pauli_soundness` and
+`MIPStarRE.QPBT.pauli_soundness_qubit`.  On that exact two-target configuration,
+`./verify.sh --fake-landrun` reported acceptance.  Fake landrun disables nanoda,
+and that run did not include `exists_spcc_value_one` or `exists_ld_soundness`, so
+it is not evidence for the current four-target challenge.
 
 ### Environment alignment for QPBT
 
-Comparator compares the full kernel closure constant by constant, so the
-Mathlib-only challenge file must elaborate to bit-identical terms.  Two
-obstacles had to be removed in the library:
+Comparator compares the full kernel closure constant by constant, so each
+Mathlib-only challenge module must elaborate to bit-identical terms.  The
+library and generator use the following alignment measures:
 
-1. **Narrowed imports.**  Four closure modules —
+1. **Full Mathlib imports.**  Four closure modules -
    `MIPStarRE/QPBT/Algebra/Subspaces.lean`,
    `MIPStarRE/QPBT/Algebra/Coefficients.lean`,
-   `MIPStarRE/QPBT/Algebra/LowDegreeCode.lean` and
-   `MIPStarRE/QPBT/Algebra/Lines.lean` — imported individual Mathlib files, so
-   tactic elaboration there saw a smaller environment than the challenge file
-   would.  They now use the full `import Mathlib` and carry the same "do not
-   narrow this import" comment as the LDT base modules.  The remaining sixteen
-   closure modules already saw full Mathlib through
-   `MIPStarRE/LDT/Basic/ParametersBase.lean` or
-   `MIPStarRE/Quantum/FiniteMatrix/Basic.lean`.
-2. **Private closure members.**  A `private` declaration's real name is
-   qualified by its defining module (`_private.<module>.0.<name>`), so a
-   challenge file in a different module can never re-declare it under the
-   library's name.  Nineteen closure members were private — twelve in
-   `MIPStarRE/QPBT/Algebra/FieldBasis.lean` (the self-dual normal basis
-   construction that `fixedFieldModel` selects from), six in
-   `MIPStarRE/QPBT/Algebra/Subspaces.lean` (the pivot-rank machinery behind
-   `canonicalComplement`), and `singlePauliVec` in
-   `MIPStarRE/QPBT/Algebra/Pauli.lean`.  Dropping `private` is the smallest
-   faithful edit: no statement, definition body or proof script changes, only
-   the visibility of names that the statement closure already depends on.
+   `MIPStarRE/QPBT/Algebra/LowDegreeCode.lean`, and
+   `MIPStarRE/QPBT/Algebra/Lines.lean` - use the full `import Mathlib`, so tactic
+   elaboration sees the same environment as the challenge modules.  Other
+   closure modules receive Mathlib through existing shared imports.
+2. **Public closure members.**  A `private` declaration's real name is qualified
+   by its defining module (`_private.<module>.0.<name>`), so a challenge module
+   cannot re-declare it under the library's name.  Closure members needed by the
+   challenge were therefore made public without changing their statements,
+   bodies, or proof scripts.
+3. **Named local instances.**  The group and decidable-equality instances for
+   the Galois group in `MIPStarRE/QPBT/Algebra/FieldBasis.lean` have explicit
+   names.  This avoids generated names that encode the defining module.
+4. **Mirrored module partition.**  Lean caches nested proof and `match`
+   auxiliaries per module, names them after the first declaration in that module
+   that needs them, and limits instance synthesis to the module's imports.  The
+   QPBT challenge therefore mirrors the source module partition and import
+   graph.  This behavior is selected by `"split": true` in
+   `scripts/comparator/challenges/qpbt.json`; `assemble_challenge.py --split-dir`
+   writes the tree under `scripts/comparator/expected/qpbt/`.
 
-No statement of either headline theorem changed, and their axiom closure
-remains `propext`, `Classical.choice`, `Quot.sound`.
+The split layout also avoids adding QPBT-specific global instance wrappers to
+`MIPStarRE/Quantum/FiniteMatrix/Basic.lean`.  The original LDT challenge bytes
+are protected independently by the baseline regression described in
+`scripts/comparator/README.md`.
+
+No public statement of any of the four targets changed as part of this
+comparator alignment.  Comparator equality remains pending as described above.
 
 The "do not narrow this import" notes on the shared base modules
 (`MIPStarRE/LDT/Basic/ParametersBase.lean`,
@@ -138,18 +168,19 @@ They are covered by this section instead.
 Regeneration is the pipeline in `scripts/comparator/README.md` with
 `--challenge qpbt`.  After an intentional change to any definition in the
 closure: regenerate, copy the expected file into QPBT-comparator as
-`Challenge.lean`, bump the `rev` pin in its `lakefile.toml` to the library
-commit it was generated from, and run its `./verify.sh`.
+`Challenge.lean` and `Challenge/`, bump the `rev` pin in its `lakefile.toml`
+and `lake-manifest.json` to the library commit they were generated from, and
+run its `./verify.sh`.
 
-What the human must audit, and what no tool can check: that
-`ChallengeQPBT.lean` really states the intended theorems.  Concretely, that
+What the human must audit, and what no tool can check: that the challenge
+modules really state the intended theorems.  Concretely, that
 the Pauli basis test it defines — `pauliQuestionDistribution`,
 `pauliWinPredicate`, `pauliBasisTest` — is the test of the paper; that
 `deltaQld` is the paper's error functional; that `PauliSoundnessWitness` and
 `QubitSoundnessWitness` package isometries and an auxiliary state without
 smuggling in a hypothesis; and that `Strategy.value` and the operator
-distances mean what their names claim.  Everything else in the file is
-machine-checked to agree with the library.
+distances mean what their names claim.  Agreement of the remaining declarations
+is exactly what the pending four-target comparator run must establish.
 
 ## Benchmark use
 

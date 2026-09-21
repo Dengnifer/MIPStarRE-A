@@ -64,7 +64,8 @@ noncomputable def total (M : Submeasurement α d) : Op d :=
 Data processing: relabel the answer set by `f : α → β`, summing the effects over
 fibers.
 -/
-noncomputable def postprocess [DecidableEq α] [DecidableEq β]
+noncomputable def postprocess {d : Type*} [Fintype d] [DecidableEq d]
+    {α β : Type*} [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β]
     (M : Submeasurement α d) (f : α → β) : Submeasurement β d where
   effect b := ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
   pos b := Finset.sum_nonneg fun a _ => M.pos a
@@ -124,7 +125,8 @@ This formalizes `references/ldt-paper/preliminaries.tex:169--180`: regrouping
 the effects along the fibers of `f` preserves the total operator, so a POVM
 remains a POVM after postprocessing.
 -/
-noncomputable def postprocess [DecidableEq α] [DecidableEq β]
+noncomputable def postprocess {d : Type*} [Fintype d] [DecidableEq d]
+    {α β : Type*} [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β]
     (M : Measurement α d) (f : α → β) : Measurement β d where
   toSubmeasurement := M.toSubmeasurement.postprocess f
   sum_eq_one := by
