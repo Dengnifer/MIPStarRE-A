@@ -57,17 +57,18 @@ class ChallengeConfigLoadingTests(unittest.TestCase):
             (
                 "MIPStarRE.QPBT.pauli_soundness",
                 "MIPStarRE.QPBT.pauli_soundness_qubit",
-                "MIPStarRE.QPBT.exists_spcc_value_one",
             ),
         )
-        # the LDT context tables must not leak into the QPBT closure
+        # the context tables are per challenge: neither challenge's keys may
+        # constrain the other's closure
         self.assertTrue(by_name["ldt"].extras)
-        self.assertFalse(by_name["qpbt"].extras)
-        self.assertFalse(by_name["qpbt"].module_preludes)
-        # only the LDT challenge has a checked-in expected copy so far
+        self.assertTrue(by_name["qpbt"].extras)
+        self.assertFalse(set(by_name["ldt"].module_preludes) & set(by_name["qpbt"].module_preludes))
+        # both challenges have a checked-in expected copy
         self.assertTrue(by_name["ldt"].require_expected)
-        self.assertFalse(by_name["qpbt"].require_expected)
+        self.assertTrue(by_name["qpbt"].require_expected)
         self.assertTrue((REPO_ROOT / by_name["ldt"].expected).exists())
+        self.assertTrue((REPO_ROOT / by_name["qpbt"].expected).exists())
 
     def test_ldt_expected_path_and_tables_are_unchanged(self) -> None:
         ldt = challenge_config.load_challenges(["ldt"])[0]
@@ -86,11 +87,61 @@ class ChallengeConfigLoadingTests(unittest.TestCase):
                 "MIPStarRE.LDT.Polynomial.toFun",
             ],
         )
-        namespace, lines = ldt.module_preludes[
+        (scope,) = ldt.module_preludes[
             "MIPStarRE/Quantum/FiniteMatrix/NormalizedTrace.lean"
         ]
-        self.assertEqual(namespace, ["MIPStarRE.Quantum"])
-        self.assertEqual(lines[0], "open scoped Matrix.Norms.Elementwise")
+        self.assertEqual(scope.namespace, ("MIPStarRE.Quantum",))
+        self.assertEqual(scope.lines[0], "open scoped Matrix.Norms.Elementwise")
+        self.assertTrue(scope.whole_file)
+        self.assertFalse(scope.noncomputable)
+
+    def test_qpbt_scopes_carry_line_ranges_and_noncomputable_sections(self) -> None:
+        qpbt = challenge_config.load_challenges(["qpbt"])[0]
+
+        first, second = qpbt.module_preludes["MIPStarRE/Quantum/Measurement.lean"]
+        self.assertEqual(first.namespace, ("MIPStarRE.Quantum", "Submeasurement"))
+        self.assertEqual((first.first, first.last), (52, 94))
+        self.assertEqual(second.namespace, ("MIPStarRE.Quantum", "Measurement"))
+        self.assertEqual((second.first, second.last), (96, 223))
+        self.assertFalse(first.covers(95))
+        self.assertTrue(second.covers(96))
+
+        (qubit_form,) = qpbt.module_preludes["MIPStarRE/QPBT/Test/QubitForm.lean"]
+        self.assertTrue(qubit_form.noncomputable)
+        self.assertFalse(qubit_form.whole_file)
+
+    def test_overlapping_scopes_of_one_module_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            path = write_config(
+                Path(td),
+                "sample",
+                module_preludes={
+                    "MIPStarRE/Foo.lean": [
+                        {"namespace": ["A"], "lines": [], "first": 1, "last": 20},
+                        {"namespace": ["A"], "lines": [], "first": 20, "last": 40},
+                    ]
+                },
+            )
+
+            with self.assertRaises(challenge_config.ChallengeConfigError) as ctx:
+                challenge_config.load_challenge(path)
+
+            self.assertIn("overlapping", str(ctx.exception))
+
+    def test_unknown_scope_key_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            path = write_config(
+                Path(td),
+                "sample",
+                module_preludes={
+                    "MIPStarRE/Foo.lean": {"namespace": ["A"], "lines": [], "las": 3}
+                },
+            )
+
+            with self.assertRaises(challenge_config.ChallengeConfigError) as ctx:
+                challenge_config.load_challenge(path)
+
+            self.assertIn("las", str(ctx.exception))
 
     def test_challenges_load_in_deterministic_file_name_order(self) -> None:
         with tempfile.TemporaryDirectory() as td:

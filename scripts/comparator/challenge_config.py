@@ -25,10 +25,24 @@ Schema (unknown top-level keys are rejected so typos fail loudly):
   "require_expected": true,            // optional, default true
   "extras": {"Decl.Name": ["line"]},   // optional
   "module_preludes": {                 // optional
-    "MIPStarRE/…/Module.lean": {"namespace": ["A", "B"], "lines": ["open …"]}
+    // one scope covering the whole module …
+    "MIPStarRE/…/Module.lean": {"namespace": ["A", "B"], "lines": ["open …"]},
+    // … or several, each covering a line range of it
+    "MIPStarRE/…/Other.lean": [
+      {"namespace": ["A"], "lines": ["variable …"], "first": 52, "last": 94},
+      {"namespace": ["A"], "lines": ["variable …"], "first": 96, "last": 223,
+       "noncomputable": true}
+    ]
   }
 }
 ```
+
+A module needs one scope per source section whose elaboration context differs:
+the self-dual normal basis file, for instance, has a group-algebra section and
+a trace-dual section binding the same identifier to different things.  A scope
+opened with `noncomputable section` in the source is marked `noncomputable`,
+because the definitions inside such a section carry no `noncomputable` keyword
+of their own and do not re-elaborate outside one.
 """
 
 from __future__ import annotations
@@ -48,6 +62,9 @@ DEFAULT_CHALLENGE = "ldt"
 # Read by `extract_closure.lean`; comma-separated fully qualified names.
 TARGETS_ENV = "MIPSTARRE_COMPARATOR_TARGETS"
 
+# `last` of a scope that runs to the end of its module
+LAST_LINE = 10**9
+
 _NAME_RE = re.compile(r"[a-z0-9][a-z0-9_-]*\Z")
 
 _KEYS = {
@@ -63,9 +80,34 @@ _KEYS = {
     "module_preludes",
 }
 
+_PRELUDE_KEYS = {"namespace", "lines", "first", "last", "noncomputable"}
+
 
 class ChallengeConfigError(ValueError):
     """A challenge configuration is missing a key, or a key has a wrong type."""
+
+
+@dataclass(frozen=True)
+class Prelude:
+    """Elaboration context of one source scope of one module.
+
+    The `open`s, `variable`s and `local notation` that the declarations of a
+    source section were elaborated under, replayed around the snippets taken
+    from lines `first`..`last` of that module.
+    """
+
+    namespace: tuple[str, ...]
+    lines: tuple[str, ...]
+    first: int = 1
+    last: int = LAST_LINE
+    noncomputable: bool = False
+
+    @property
+    def whole_file(self) -> bool:
+        return self.first == 1 and self.last == LAST_LINE
+
+    def covers(self, line: int) -> bool:
+        return self.first <= line <= self.last
 
 
 @dataclass(frozen=True)
@@ -82,7 +124,7 @@ class ChallengeConfig:
     expected: str
     require_expected: bool
     extras: dict[str, list[str]]
-    module_preludes: dict[str, tuple[list[str], list[str]]]
+    module_preludes: dict[str, tuple[Prelude, ...]]
 
     def import_block(self) -> str:
         """The extractor's module header for this challenge."""
@@ -136,25 +178,69 @@ def _extras(data: dict[str, Any], where: Path) -> dict[str, list[str]]:
     return table
 
 
-def _module_preludes(data: dict[str, Any], where: Path) -> dict[str, tuple[list[str], list[str]]]:
+def _prelude(entry: Any, module: str, where: Path) -> Prelude:
+    if not isinstance(entry, dict):
+        raise ChallengeConfigError(
+            f"{where}: module_preludes[{module!r}] must be an object with "
+            "'namespace' and 'lines', or a list of such objects"
+        )
+    unknown = sorted(set(entry) - _PRELUDE_KEYS)
+    if unknown:
+        raise ChallengeConfigError(
+            f"{where}: module_preludes[{module!r}] has unknown key(s) {unknown}"
+        )
+    namespace = entry.get("namespace", [])
+    lines = entry.get("lines", [])
+    for field, value in (("namespace", namespace), ("lines", lines)):
+        if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+            raise ChallengeConfigError(
+                f"{where}: module_preludes[{module!r}][{field!r}] must be a list of strings"
+            )
+    first = entry.get("first", 1)
+    last = entry.get("last", LAST_LINE)
+    for field, value in (("first", first), ("last", last)):
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise ChallengeConfigError(
+                f"{where}: module_preludes[{module!r}][{field!r}] must be a positive integer"
+            )
+    if last < first:
+        raise ChallengeConfigError(
+            f"{where}: module_preludes[{module!r}] has 'last' before 'first'"
+        )
+    noncomputable = entry.get("noncomputable", False)
+    if not isinstance(noncomputable, bool):
+        raise ChallengeConfigError(
+            f"{where}: module_preludes[{module!r}]['noncomputable'] must be a boolean"
+        )
+    return Prelude(
+        namespace=tuple(namespace),
+        lines=tuple(lines),
+        first=first,
+        last=last,
+        noncomputable=noncomputable,
+    )
+
+
+def _module_preludes(data: dict[str, Any], where: Path) -> dict[str, tuple[Prelude, ...]]:
     raw = data.get("module_preludes", {})
     if not isinstance(raw, dict):
         raise ChallengeConfigError(f"{where}: key 'module_preludes' must be an object")
-    table: dict[str, tuple[list[str], list[str]]] = {}
+    table: dict[str, tuple[Prelude, ...]] = {}
     for module, entry in raw.items():
-        if not isinstance(entry, dict):
+        entries = entry if isinstance(entry, list) else [entry]
+        scopes = tuple(_prelude(item, module, where) for item in entries)
+        if not scopes:
             raise ChallengeConfigError(
-                f"{where}: module_preludes[{module!r}] must be an object with "
-                "'namespace' and 'lines'"
+                f"{where}: module_preludes[{module!r}] must name at least one scope"
             )
-        namespace = entry.get("namespace", [])
-        lines = entry.get("lines", [])
-        for field, value in (("namespace", namespace), ("lines", lines)):
-            if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        spans = sorted((scope.first, scope.last) for scope in scopes)
+        for (_, earlier_last), (later_first, _) in zip(spans, spans[1:]):
+            if later_first <= earlier_last:
                 raise ChallengeConfigError(
-                    f"{where}: module_preludes[{module!r}][{field!r}] must be a list of strings"
+                    f"{where}: module_preludes[{module!r}] has overlapping scopes; "
+                    "one line of a module can only be elaborated in one context"
                 )
-        table[module] = (list(namespace), list(lines))
+        table[module] = scopes
     return table
 
 

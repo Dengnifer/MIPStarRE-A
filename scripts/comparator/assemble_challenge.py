@@ -27,6 +27,7 @@ from challenge_config import (
     DEFAULT_CHALLENGE,
     ChallengeConfig,
     ChallengeConfigError,
+    Prelude,
     load_challenges,
 )
 
@@ -55,7 +56,7 @@ class Assembler:
         self,
         repo_root: Path,
         extras: dict[str, list[str]] | None = None,
-        module_preludes: dict[str, tuple[list[str], list[str]]] | None = None,
+        module_preludes: dict[str, tuple[Prelude, ...]] | None = None,
     ) -> None:
         self.repo_root = repo_root
         self.extras = extras or {}
@@ -63,7 +64,8 @@ class Assembler:
         self._file_cache: dict[str, list[str]] = {}
         self.out: list[str] = []
         self.cur_ns: list[str] = []
-        self.open_prelude: tuple[str, list[str]] | None = None
+        self.open_prelude: tuple[str, Prelude] | None = None
+        self.used_preludes: set[tuple[str, int]] = set()
 
     def get_lines(self, path: str) -> list[str]:
         if path not in self._file_cache:
@@ -128,11 +130,28 @@ class Assembler:
             self.out.append(f"namespace {n}")
         self.cur_ns = target
 
+    def prelude_for(self, path: str, line: int) -> Prelude | None:
+        """The configured scope of ``path`` covering ``line``, if any."""
+        for prelude in self.module_preludes.get(path, ()):
+            if prelude.covers(line):
+                return prelude
+        return None
+
     def close_prelude(self) -> None:
         if self.open_prelude:
-            self.switch_ns(self.open_prelude[1])
+            self.switch_ns(list(self.open_prelude[1].namespace))
             self.out.append("end  -- module scope")
             self.open_prelude = None
+
+    def open_prelude_for(self, path: str, prelude: Prelude) -> None:
+        self.switch_ns(list(prelude.namespace))
+        label = path if prelude.whole_file else f"{path}:{prelude.first}-{prelude.last}"
+        self.out.append("")
+        self.out.append(f"-- elaboration context of {label}")
+        self.out.append("noncomputable section" if prelude.noncomputable else "section")
+        self.out.extend(prelude.lines)
+        self.open_prelude = (path, prelude)
+        self.used_preludes.add((path, prelude.first))
 
     def emit(self, entries: list[Entry], generated: list[tuple[str, str]]) -> str:
         # compiler-generated declarations (no source range) regenerate
@@ -145,22 +164,26 @@ class Assembler:
                 self.out.append(f"--   {name}  (from {path})")
 
         emitted_ranges: set[tuple[str, int]] = set()
-        prev_path: str | None = None
+        # widest range emitted so far per module, to swallow the pieces of a
+        # declaration that the closure reports separately
+        enclosing: dict[str, tuple[int, int]] = {}
         for name, path, a, b, src in entries:
             if (path, a) in emitted_ranges:  # deriving twins share the range
                 continue
+            # a constructor's `.elim`/`.noConfusion`/`.injEq` companion and a
+            # `deriving` clause report a range *inside* their inductive's
+            # range; emitting those lines on their own is a syntax error, and
+            # the inductive command regenerates them anyway
+            outer = enclosing.get(path)
+            if outer is not None and outer[0] <= a and b <= outer[1]:
+                continue
             emitted_ranges.add((path, a))
-            if path != prev_path:
+            enclosing[path] = (a, b)
+            prelude = self.prelude_for(path, a)
+            if self.open_prelude and self.open_prelude != (path, prelude):
                 self.close_prelude()
-                if path in self.module_preludes:
-                    base_ns, lines = self.module_preludes[path]
-                    self.switch_ns(base_ns)
-                    self.out.append("")
-                    self.out.append(f"-- elaboration context of {path}")
-                    self.out.append("section")
-                    self.out.extend(lines)
-                    self.open_prelude = (path, base_ns)
-                prev_path = path
+            if prelude is not None and self.open_prelude is None:
+                self.open_prelude_for(path, prelude)
             self.switch_ns(self.ns_stack_at(path, a))
             self.out.append("")
             self.out.append(f"-- source: {path}:{a}-{b}  ({name})")
@@ -200,12 +223,17 @@ def assemble(challenge: ChallengeConfig, root: Path, tsv: Path) -> str:
     body = asm.emit(entries, generated)
 
     unused_extras = set(challenge.extras) - {name for name, *_ in entries}
-    unused_preludes = set(challenge.module_preludes) - {e[1] for e in entries}
+    unused_preludes = {
+        f"{path}:{scope.first}"
+        for path, scopes in challenge.module_preludes.items()
+        for scope in scopes
+        if (path, scope.first) not in asm.used_preludes
+    }
     if unused_extras or unused_preludes:
         raise StaleContextTables(
             f"stale context tables in {challenge.path} — "
             f"unmatched extras keys: {sorted(unused_extras)}; "
-            f"unmatched module_preludes keys: {sorted(unused_preludes)}"
+            f"unmatched module_preludes scopes: {sorted(unused_preludes)}"
         )
     return body
 
