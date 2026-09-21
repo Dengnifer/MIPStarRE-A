@@ -1,5 +1,103 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/674",
+  "id": 5531077335,
+  "node_id": "I_kwDOUJyJf88AAAABSa2K1w",
+  "number": 674,
+  "title": "docs(QPBT): audit and retain printed error contracts",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-21T18:46:18Z",
+  "updated_at": "2026-09-21T18:46:18Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/667",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-error-contracts-adoption-20260922 -->\n## Scope\n\nComplete the missing retention/adoption evidence for the two existing pending\npaper-gap rows `qpbt_polynomial-error-square-root.tex` and\n`qpbt_pasting-product-error.tex`, under #667. This does not authorize changing\nthe completion criterion, mathematical definitions, games or theorem statements.\n\nRead the actual source first:\n- `references/qpbt-paper/04_preliminaries.tex`, lines19-29: global polynomial\n  error convention;\n- `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex`, `lem:pasting`,\n  lines504-525;\n- `references/neexp-paper/05_quantum_preliminaries.tex`, Fact4.35 and its\n  argument at lines1030-1209;\n- the square-root choices in chapter14 lines508-520 and649-676, and every\n  downstream use of the affected global convention.\n\nThe current Lean `IsPolyErr` uses independent prefactor/exponent witnesses;\n`IsPolyErr\u2082` uses an additive bound. The source's coupled single constant cannot\nbound the displayed square root, and the product two-error contract has a\ndocumented counterexample. Existing corrected proofs are not proof of those\nprinted contracts. Review the exact hypotheses/domains, not only the notation.\n\nRequired work:\n1. Locate any already-retained exact printed claims/contracts. If absent,\n   retain their exact well-formed source-domain content as UNASSERTED Prop\n   definitions with precise provenance. Do not replace a printed theorem by\n   only a convenient scalar predicate if that loses its quantifiers, inputs\n   or conclusion. Neither a definition nor its type-check is a proof.\n2. Trace all source/blueprint/Lean consumers of both conventions, including\n   zero-error boundaries, the three pasting comparisons and later line and\n   extraction estimates. Separate the proved one-sided pasting theorem from\n   the conditional register-exchange helper. Keep the printed extended-line\n   rate/source-law gaps open.\n3. Give a precise verdict for correctness, full consumer sufficiency,\n   minimality/source semantics and Lean convergence. In particular, the\n   current completion C3 does NOT permit a weakened scalar conclusion to\n   become terminal merely because useful downstream estimates hold. State\n   explicitly if the existing product-to-sum correction cannot meet that\n   unchanged condition, and identify the exact obstruction. Do not silently\n   reinterpret the condition, change the project goal or mark either row\n   terminal yourself.\n4. Make only the supported retained-claim and two-note/evidence improvements;\n   leave both statuses pending for main's independently reviewed decision.\n   No new proof of a refuted claim, new assumption, axiom, sorry or gate bypass.\n\nUse the existing ErrorFunctions/pasting APIs and normal import conventions.\nDo not change other gap rows, global counts, ch11 general-prime material,\nch13/ch16 documentation under PR669, or phase/decoder material under PR672.\nRead published main and preserve other incoming changes on branch refresh.\nRun the normal duplicate guard, focused type/axiom/style checks, normal hooks\nand checked publication; main handles complete CI and independent review.\n\n## Admission\n\nOne independently owned worktree, Astra/ultra source_semantic, at most1800 model\nseconds with a committed or explicit partial checkpoint by900. Hardness reason:\nthese are global error-contract semantics with a refuted product guarantee;\nexact printed theorem retention and all-consumer minimality cannot be inferred\nfrom the already-proved corrected estimates. Retain all earlier #16/#196/#201\nproof/repair/audit costs; this is missing artifact evidence, not a reset of any\nmathematical repair budget. Main permits no new correction attempt or source\ndefinition change in this packet. Return a genuine adoption obstruction if\none exists, rather than manufacturing a green row.\n\nUse primary local/bin tools and gh_common.py only. No direct codex, native or\nchild agents, proxy, subscription, alternate key, lake update, shared-cache\nwrites, hook skips or manual PR merge. cpa only and total model cap2.\nWrite `/tmp/main-error-contracts-20260922-result.md` early and before any long\npublication. Include exact retained-domain audit, consumer table, four-condition\nverdict, actual tests/head and what remains. Stop at1800s without self-extension.\n\nAddresses #667, #16, #196 and #201; no umbrella closure.",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/674/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/673",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/673/labels{/name}",
@@ -143,7 +241,7 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 1,
+   "total": 2,
    "completed": 0,
    "percent_completed": 0
   },
