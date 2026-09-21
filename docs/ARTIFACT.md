@@ -248,8 +248,12 @@ scripts/make_artifact.sh --anonymize <tag> /tmp/artifact
 This additionally rewrites the author-identifying strings listed in
 `ANON_RULES` in the script (the GitHub owner name inside URLs, the upstream
 project name and host, the author name and address) and tags the tarball
-`-anon`. It does **not** touch the source papers under `references/`, and it
-should not: those are published third-party works, and their authors are cited
+`-anon`. The rewrite is not taken on trust: the script itself ships, so the
+pass runs over its own rules list as well, and before packaging anything the
+run searches the whole snapshot -- including the text extracted from every
+PDF, which `sed` cannot rewrite -- for each of those strings and exits `2`
+rather than package a survivor. It does **not** touch the source papers under
+`references/`, and it should not: those are published third-party works, and their authors are cited
 authors, not the submitters. It is **not** by itself sufficient: the commit
 history, the issue and PR links in the docs, and the hosted blueprint would
 still identify the authors, so a double-blind submission needs a fresh

@@ -100,22 +100,30 @@ LEAK_ALLOW=(
 # of ours anywhere in the development, which is exactly what it is for.
 LEAK_ALLOW_IN=(
   '^references/ :: [A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,} :: corresponding-author addresses printed in the source papers themselves; third-party material reproduced as published, not a contact address of this development'
+  '^scripts/make_artifact\.sh :: ruixuan\.deng@icloud\.com :: the ANON_RULES entry below, which has to spell the address out in order to remove it; a snapshot cut WITHOUT --anonymize is an authored release, in which the author address is not a leak, and one cut WITH it has this line rewritten like any other'
 )
 
 # --------------------------------------------------------------------------
 # Anonymization (--anonymize only)
 # --------------------------------------------------------------------------
 
-# `<regex> :: <replacement>`, applied to every text file in the snapshot.  The
-# repository owner's GitHub name inside URLs is the main one; the rest are the
-# identifying strings the 2026-09-19 readiness audit found outside the excluded
-# workflow layer.
+# `<literal text> :: <replacement>`, applied to every text file in the snapshot.
+# The repository owner's GitHub name inside URLs is the main one; the rest are
+# the identifying strings the 2026-09-19 readiness audit found outside the
+# excluded workflow layer.
+#
+# LITERAL, not a regex, and that is load-bearing: this script itself ships in
+# the snapshot, so the pass runs over this very block, and a rule written in
+# pre-escaped regex form would not match its own spelling here — the string it
+# exists to remove would ride out in the rules list.  Stored plainly, each rule
+# rewrites its own entry too.  The escaping for `sed` happens at the point of
+# use, and step 4b fails the run if any of these strings survives.
 ANON_RULES=(
   'Dengnifer :: ANONYMIZED'
   'LionSR :: ANONYMIZED-UPSTREAM'
   'Ruixuan Deng :: Anonymous Author'
-  'ruixuan\.deng@icloud\.com :: anonymous@example.invalid'
-  'sirui-lu\.com :: anonymized-upstream.example.invalid'
+  'ruixuan.deng@icloud.com :: anonymous@example.invalid'
+  'sirui-lu.com :: anonymized-upstream.example.invalid'
 )
 
 SOURCE_REPO='Dengnifer/MIPStarRE-A'
@@ -125,6 +133,14 @@ SOURCE_REPO='Dengnifer/MIPStarRE-A'
 PROG=${0##*/}
 die() { printf '%s: %s\n' "$PROG" "$*" >&2; exit 1; }
 log() { printf '[%s] %s\n' "$PROG" "$*" >&2; }
+
+# Turn a literal ANON_RULES field into something `sed` reads as itself: the
+# pattern side escapes the basic-regex metacharacters, the replacement side the
+# two `sed` gives meaning to, and both escape `#`, the delimiter used below.
+# The order inside the bracket expression is not free: `[` must not be followed
+# by `.`, `=` or `:`, which would open a collating symbol instead.
+sed_escape_pattern()     { printf '%s' "$1" | sed 's|[][*.^$\&#/]|\\&|g'; }
+sed_escape_replacement() { printf '%s' "$1" | sed 's|[\&#]|\\&|g'; }
 
 usage() {
   cat <<'USAGE'
@@ -136,6 +152,8 @@ and write a gzipped tarball plus its MANIFEST into <out-dir>.
 Options:
   --anonymize   also rewrite the author-identifying strings listed in the
                 script (for a double-blind venue); tags the tarball "-anon".
+                The run stops rather than package a snapshot in which one of
+                those strings survived the rewrite.
   --keep-tree   leave the unpacked snapshot beside the tarball for inspection.
   --no-pdf      skip the gap-note PDF build even when its Makefile is present.
   -h, --help    this text.
@@ -143,7 +161,8 @@ Options:
 Building the gap-note PDFs needs pdftotext (poppler-utils) as well, because a
 PDF in the snapshot is scanned for leaks through its extracted text.
 
-Exit status: 0 packaged, 1 usage or environment error, 2 leak scan failed.
+Exit status: 0 packaged, 1 usage or environment error, 2 the leak scan or the
+anonymization check failed.
 See docs/ARTIFACT.md for what ships, what does not, and why.
 USAGE
 }
@@ -218,7 +237,7 @@ if [ "$ANONYMIZE" -eq 1 ]; then
   log "anonymizing (${#ANON_RULES[@]} rules)"
   SED_ARGS=()
   for rule in "${ANON_RULES[@]}"; do
-    SED_ARGS+=(-e "s#${rule%% :: *}#${rule#* :: }#g")
+    SED_ARGS+=(-e "s#$(sed_escape_pattern "${rule%% :: *}")#$(sed_escape_replacement "${rule#* :: }")#g")
   done
   xargs -0 -r sed -i "${SED_ARGS[@]}" < "$TEXT_LIST"
   SOURCE_REPO=$(printf '%s' "$SOURCE_REPO" | sed "${SED_ARGS[@]}")
@@ -286,6 +305,36 @@ if [ "$PDF_COUNT" -gt 0 ]; then
   done < "$PDF_LIST"
   PDF_SCAN="$PDF_COUNT PDF(s), text extracted with pdftotext and scanned"
   log "$PDF_SCAN"
+fi
+
+# ---- 4b. the anonymization took, and is not taken on trust ----------------
+
+# `--anonymize` promises the reader of docs/ARTIFACT.md that the strings in
+# ANON_RULES are gone; nothing but this check makes the promise good, and a
+# silent miss is worse than no flag at all, because a submitter would ship on
+# it.  Every rule's own text is looked for as a FIXED string in everything the
+# leak scan will read: the text files as the pass left them, and the extracted
+# text of every shipped PDF, which `sed` cannot reach at all.  The leak
+# patterns above would not catch these on their own — three of the five are
+# names, not address- or key-shaped.  A survivor stops the run, like a leak.
+if [ "$ANONYMIZE" -eq 1 ]; then
+  ANON_LEFT="$WORK/anon-left.txt"
+  : > "$ANON_LEFT"
+  for rule in "${ANON_RULES[@]}"; do
+    xargs -0 -r grep -HnF -e "${rule%% :: *}" < "$TEXT_LIST" >> "$ANON_LEFT" 2>/dev/null || true
+  done
+  if [ -s "$ANON_LEFT" ]; then
+    # Same path mapping as the leak-scan report: snapshot-relative, and a PDF's
+    # extracted text named as the PDF that would have shipped.
+    sed -i -e "s|^$PDF_TEXT_DIR/\(.*\)\.txt:|\1 (text extracted from the PDF):|" \
+           -e "s|^$SNAP/||" "$ANON_LEFT"
+    echo "$PROG: ANONYMIZATION INCOMPLETE — the snapshot was not packaged." >&2
+    echo "$PROG: $(wc -l < "$ANON_LEFT" | tr -d ' ') surviving occurrence(s); first 40:" >&2
+    head -n 40 "$ANON_LEFT" >&2
+    echo "$PROG: a binary is the usual cause — rebuild it from the rewritten source, or drop it." >&2
+    exit 2
+  fi
+  log "anonymization check: no rule text survives in the snapshot"
 fi
 
 # ---- 5. measurements ------------------------------------------------------

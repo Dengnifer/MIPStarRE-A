@@ -52,6 +52,13 @@ def minimal_pdf(text: str) -> bytes:
     Its job is to put a binary into the snapshot: the leak scan skips binaries
     by construction, so a PDF is the one shipped file that could otherwise
     carry a home path past it.
+
+    The header carries the binary-marker comment that real PDF writers emit,
+    with a NUL byte in it, and that byte is what makes this a binary at all: a
+    hand-built PDF is otherwise plain ASCII, which the script would classify as
+    text and happily rewrite in place, so a test built on one would exercise
+    the text path and prove nothing about binaries. A comment is ignored by
+    every reader, so the file stays valid.
     """
     stream = ("BT /F1 12 Tf 20 100 Td (%s) Tj ET" % text).encode("ascii")
     objects = [
@@ -62,7 +69,7 @@ def minimal_pdf(text: str) -> bytes:
         b"<< /Length %d >>\nstream\n%s\nendstream" % (len(stream), stream),
         b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
     ]
-    out = bytearray(b"%PDF-1.4\n")
+    out = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\x00\n")
     offsets = []
     for number, body in enumerate(objects, start=1):
         offsets.append(len(out))
@@ -305,6 +312,54 @@ class MakeArtifactTests(unittest.TestCase):
             text = archive.extractfile(member).read().decode("utf-8")
         self.assertNotIn("Dengnifer", text)
         self.assertIn("ANONYMIZED", text)
+
+    def test_anonymize_rewrites_the_rules_inside_the_shipped_script(self) -> None:
+        """The script ships, so the pass runs over its own rules block.
+
+        The rules used to be stored pre-escaped for `sed`, which meant each one
+        matched the plain string everywhere else in the tree and never its own
+        spelling here: the address the rule exists to remove rode out in the
+        rules list of the shipped copy, and nothing said so.
+        """
+        (self.repo / "scripts").mkdir(parents=True, exist_ok=True)
+        shutil.copy(SCRIPT, self.repo / "scripts" / "make_artifact.sh")
+        self.commit("ship the packaging script, as the real repository does")
+        # Plain run first: the rules name the owner's address literally now, so
+        # the path-scoped allow-list entry for this one file has to hold, or no
+        # release could be cut at all.
+        self.assertEqual(self.run_script().returncode, 0)
+        result = self.run_script("--anonymize")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with tarfile.open(next(self.out.glob("*.tar.gz"))) as archive:
+            member = next(m for m in archive.getnames()
+                          if m.endswith("scripts/make_artifact.sh"))
+            text = archive.extractfile(member).read().decode("utf-8")
+        for rule_text in ("Dengnifer", "LionSR", "Ruixuan Deng",
+                          "ruixuan.deng@icloud.com", "sirui-lu.com"):
+            self.assertNotIn(rule_text, text, f"{rule_text!r} survived in the shipped script")
+
+    def test_a_rule_string_surviving_in_a_pdf_fails_the_run(self) -> None:
+        """`sed` cannot reach inside a binary, so the check has to catch it.
+
+        A tracked PDF is the one shipped file the anonymization pass cannot
+        rewrite. Before this guard the run packaged it anyway; the leak scan
+        would not have caught it either, since a name is neither address- nor
+        key-shaped.
+        """
+        if shutil.which("pdftotext") is None:
+            self.skipTest("pdftotext (poppler-utils) is not installed")
+        pdf = self.repo / "docs" / "paper-gaps" / "note.pdf"
+        pdf.parent.mkdir(parents=True, exist_ok=True)
+        pdf.write_bytes(minimal_pdf("Ruixuan Deng"))
+        self.commit("a name baked into a binary")
+        self.assertEqual(self.run_script().returncode, 0,
+                         "without --anonymize the name is not a leak")
+        result = self.run_script("--anonymize")
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("ANONYMIZATION INCOMPLETE", result.stderr)
+        self.assertIn("docs/paper-gaps/note.pdf", result.stderr)
+        self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                         "an incompletely anonymized snapshot must not be packaged")
 
     def test_an_unresolvable_ref_is_a_usage_error(self) -> None:
         result = subprocess.run(
