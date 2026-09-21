@@ -18,6 +18,12 @@ registered targets, and 13 checked axiom assertions in this index refer to that
 commit. The broader external axiom probe from commit
 `838c51b78f30b2dc8b0d9c696ce6f4970731f733` is retained in section 8 as dated
 historical evidence; it is not relabelled as a check of the current snapshot.
+Every unqualified file-and-line locator and blueprint status mark below is
+frozen to the audited snapshot. Post-snapshot changes are confined to paragraphs
+headed "Current branch additions" or to table clauses explicitly prefixed
+`current:`; a mixed cell also prefixes its historical value with `snapshot:`.
+Current additions use stable declaration and blueprint labels rather than being
+attributed retroactively to the audited commit.
 
 ---
 
@@ -80,7 +86,7 @@ that historical probe, whose raw output and scope are preserved explicitly.
 
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
-| `MIPStarRE.QPBT.pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` | There are universal constants `a ≥ 1`, `0 < b < 1` such that every strategy for the Pauli basis test that wins with probability at least `1 - ε` admits local isometries and an auxiliary state under which the state and both players' raw prescribed-answer Pauli effects are within `deltaQld a b ε m d q` of the ideal ones. | `thm:pauli`, `08:1431-1445` | `thm:pauli`, `ch13:1581` (stmt ✓, proof ✓) | S | no [^route] |
+| `MIPStarRE.QPBT.pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` | There are universal constants `a ≥ 1`, `0 < b < 1` such that every strategy for the Pauli basis test that wins with probability at least `1 - ε` admits local isometries and an auxiliary state under which the state and both players' raw prescribed-answer Pauli effects are within `deltaQld a b ε m d q` of the ideal ones. | `thm:pauli`, `08:1431-1445` | `thm:pauli`, `ch13:1581` (stmt ✓, proof —) | S | no [^route] |
 | `MIPStarRE.QPBT.pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` | The same conclusion restated over qubit EPR pairs and qubit Pauli observables, using that the admissible field sizes are powers of two. | `cor:pauli-binary`, `08:1469-1487` | `cor:pauli-binary`, `ch13:1606` (stmt ✓, proof ✓) | S | no [^binary] |
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` | For every admissible parameter tuple the symmetrized Pauli basis test has a symmetric, projective, consistent, commuting strategy of value exactly 1. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` | Quantum soundness of the simultaneous classical low individual degree test, in the source's own **seed-indexed** shape: a projective strategy of value `1 - ε` is close to one measuring simultaneous low-degree polynomials, at the source's error `deltaLd`. Proved separately, for every `k`; it is **not** the low-degree input the soundness chain consumes — that is the directly indexed carrier in [section 6](#6-combining-the-two-bases-and-extraction). | `lem:ld-soundness`, `08:413-440` | `lem:ld-soundness`, `ch13:245` (stmt ✓, proof —) | S | no [^ldroute] |
@@ -90,12 +96,24 @@ challenge. `MIPStarRE.QPBT.honestStrategy_isSPCC` is a supporting completeness
 declaration and is one of the nine additional current axiom-audit assertions;
 it is not a fifth registered headline target.
 
-[^route]: The statement is the printed one. The proof mark records the
-    completed argument through the directly indexed low-degree game, Naimark
-    dilation, and transfer to the raw prescribed-answer effects. The printed
-    seed-indexed derivation remains unmarked in the blueprint. In the completed
-    argument, the carriers corresponding to `lem:qld-sublines`, `lem:qld-4-13`
-    and `lem:qld-4-7` use a **directly indexed** line space at dimension `2m+2`
+### Current branch additions
+
+After the audited snapshot, the `thm:pauli` node acquired a proof-level
+`\leanok`. Its attached proof invokes the formalization-support node
+`thm:pauli-arbitrary-strategy-raw-isometry-support`, linked to
+`MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds`. That helper has
+the full `ε ≥ 0` domain and concludes the state estimate and both raw
+prescribed-answer operator estimates, so it is the direct dependency of the
+certified proof rather than a completed-family surrogate.
+
+[^route]: At the audited snapshot, the statement is the printed one and only
+    the statement-level formalization mark is present. The post-snapshot proof
+    mark records the completed argument through the directly indexed low-degree
+    game, Naimark dilation, and transfer to the raw prescribed-answer effects.
+    The printed seed-indexed derivation remains unmarked in the blueprint. In
+    the completed argument, the carriers corresponding to `lem:qld-sublines`,
+    `lem:qld-4-13` and `lem:qld-4-7` use a **directly indexed** line space at
+    dimension `2m+2`
     instead of the source's seed-indexed one, because the source's own side
     condition `2m+2 ∣ q` is unsatisfiable. Documented in
     [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex).
@@ -190,9 +208,9 @@ is *attained* — is kept visible but not asserted; see section 7.
 | `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/ProjectiveSetting.lean:37` | Completed-family soundness estimates for **projective** strategies. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | `thm:pauli-projective-setting-isometry-support`, `ch16:1467` (stmt ✓, proof ✓) | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 | `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/NaimarkAssembly.lean:47` | The completed-family estimates for an **arbitrary** strategy, via Naimark dilation. | `thm:pauli`, `08:1431-1445` | `thm:pauli-arbitrary-strategy-isometry-support`, `ch16:1585` (stmt ✓, proof ✓) | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 | `MIPStarRE.QPBT.pauli_isometry_bounds_extend_epsilon` | `MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean:101` | Extension of the completed-family estimates to every `ε ≥ 0`. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | — | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:393` | Alice's raw distance is at most twice the completed distance plus the state-error and malformed-answer terms. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:499` | Bob's symmetric completed-to-raw estimate. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:658` | Source-facing arbitrary-strategy estimates for both raw Pauli families, with the transfer loss absorbed into the existential prefactor of `deltaQld` and the full `ε ≥ 0` domain. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | no; repair: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:393` | Alice's raw distance is at most twice the completed distance plus the state-error and malformed-answer terms. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: proof of `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:499` | Bob's symmetric completed-to-raw estimate. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: proof of `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:658` | Source-facing arbitrary-strategy estimates for both raw Pauli families, with the transfer loss absorbed into the existential prefactor of `deltaQld` and the full `ε ≥ 0` domain. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` (stmt ✓, proof ✓) | S | no; repair: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 
 [^vacuity]: A reviewer's fair question is whether the conclusion is ever
     non-trivial. The constants `a, b` are existentially quantified exactly as in

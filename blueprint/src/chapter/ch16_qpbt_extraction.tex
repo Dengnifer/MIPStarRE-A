@@ -1622,6 +1622,49 @@ final soundness argument. The omitted step in the source is discussed in
   $21a^2$ and the same exponent.
 \end{proof}
 
+\begin{theorem}[Formalization support for raw prescribed-answer bounds]
+  \label{thm:pauli-arbitrary-strategy-raw-isometry-support}
+  \lean{MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds}
+  \leanok
+  \uses{def:pauli-win-predicate, def:admissible, def:tensor-product-value,
+    def:EPR, def:povm-distance}
+  This is not a separately named statement of the source article; it isolates
+  the final formalization-support result used in the proof of
+  Theorem~\ref{thm:pauli}. There are universal constants $A\geq1$ and
+  $0<b<1$, chosen before the parameters, error, and strategy, such that for
+  every admissible $(q,m,d)$, every $\eps\geq0$, and every strategy for
+  $\mathfrak{G}^{\mathrm{Pauli}}_{(q,m,d)}$ succeeding with probability at
+  least $1-\eps$, there are local isometries and a unit auxiliary state for
+  which the state norm distance is at most
+  \[
+    A(md)^A\bigl(\eps^b+q^{-b}+2^{-bmd}\bigr).
+  \]
+  For each $W\in\{X,Z\}$, both players' squared Pauli-family distances formed
+  from the effects attached directly to the prescribed answers
+  $u\in\F_q^M$ satisfy the same bound. In these two conclusions malformed
+  answers are not folded into the zero outcome.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:pauli-arbitrary-strategy-isometry-support,
+    lem:delta-qld-scalar-absorption-support,
+    lem:delta-qld-mono-support}
+  First suppose $0\leq\eps\leq1$ and apply
+  Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support}. For either
+  player, the completed zero effect is the prescribed zero effect plus the
+  malformed-answer effect, while every nonzero completed effect equals its
+  prescribed counterpart. Rejection on the two oriented Pauli--point edges
+  bounds the malformed-answer mass by a universal multiple of $\eps$. The two
+  completed-to-raw estimates therefore bound each prescribed-answer distance
+  by $2\delta+4\delta^2+c\eps$ for a universal constant $c$, where $\delta$ is
+  the completed-family robustness bound. Enlarging the universal prefactor
+  absorbs this expression, and monotonicity brings the unchanged state estimate
+  to the same scale. If $\eps>1$, apply the result at error $1$, using
+  nonnegativity of the strategy value, and then use monotonicity in the error
+  parameter. This gives the prescribed-answer estimates on the full domain
+  $\eps\geq0$.
+\end{proof}
+
 The results above complete the directly indexed argument used in the proof of
 Theorem~\ref{thm:pauli} in Chapter~\ref{chap:qpbt-test}. The following remark
 compares that argument with the seed-indexed derivation printed in the source.

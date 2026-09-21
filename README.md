@@ -141,19 +141,11 @@ carrier differences, counterexample scope, and corrected alternatives are in
 
 ### Independent comparator status
 
-Independent four-target comparator acceptance is **pending**. At the September
-21, 2026 audit, open PR #663 at commit
-`85a9181201b3a2323e11063578e1fd58bb2296f4` contained a candidate split challenge
-for the four registered targets: one root plus 30 generated module files, with
-exactly four intentional root theorem stubs. Generation, elaboration, a
-disposable challenge build, and local CI passed.
-
-Those checks are not comparator acceptance. A later diagnostic at source
-`a3683e9b` and candidate `73cb8a3d` reported
-`DIAG-TOTAL 0`, and Lean's default kernel accepted the solution. The diagnostic
-still used the fake-landrun path and ran with nanoda disabled, so it is not an
-official comparator run. A real landrun with nanoda and a final merged-main
-library pin remain pending.
+Independent four-target comparator acceptance is **pending**. Preliminary
+official run `35621468975`, using source revision `a3683e9b`, passed the real
+landrun, nanoda, and Lean-kernel checks. That run did not use the required
+service-merged-main library pin, so it is preliminary evidence rather than
+acceptance of the current artifact. A run with that final pin remains pending.
 
 ## Build and check
 

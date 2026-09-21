@@ -1625,28 +1625,11 @@ We now state the main soundness property of the Pauli basis test; the statement 
 \end{theorem}
 \begin{proof}
 	\leanok
-	\uses{thm:pauli-arbitrary-strategy-isometry-support,
-		lem:delta-qld-mono-support,
-		lem:delta-qld-scalar-absorption-support,
-		def:pauli-win-predicate, def:povm-distance}
-	The directly indexed low-degree argument supplies the global polynomial-pair
-	measurement and the extraction data used in the projective-strategy bounds.
-	Naimark dilation and compression then give local isometries and an auxiliary
-	state for an arbitrary strategy, with the state distance and both completed
-	Pauli-family distances bounded by the displayed robustness function when
-	$0\leq\eps\leq1$.
-
-	For either player, the completed zero effect is the prescribed zero effect
-	plus the effect of malformed answers, while the remaining completed effects
-	agree with their prescribed counterparts. Rejection on the two oriented
-	Pauli--point edges bounds the malformed-answer mass by a universal multiple
-	of $\eps$. Contractivity and the state estimate therefore transfer both
-	completed-family bounds to the prescribed-answer effects. The scalar losses
-	are absorbed by enlarging the universal prefactor. Finally, if $\eps>1$, the
-	strategy-value lower bound at $\eps=1$ follows from nonnegativity of the game
-	value, and monotonicity in $\eps$ carries the same witness to the required
-	error scale. This gives all three conclusions on the full domain
-	$\eps\geq0$.
+	\uses{thm:pauli-arbitrary-strategy-raw-isometry-support}
+	Apply Theorem~\ref{thm:pauli-arbitrary-strategy-raw-isometry-support}. It
+	supplies the universal constants, local isometries, auxiliary state, and all
+	three displayed estimates for every $\eps\geq0$, with the operator estimates
+	formed from the prescribed-answer effects themselves.
 \end{proof}
 
 The argument adapts the analysis of the quantum
