@@ -38,7 +38,7 @@ noncomputable section
 
 /-- Formalization-only auxiliary equivalence splitting an ambient low-degree
 vector into its point, seed, and direction blocks. -/
-private def ldSpaceSplit (L : LdParams) :
+def ldSpaceSplit (L : LdParams) :
     LdSpace L ≃ ((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L) where
   toFun z := ((LdSpace.point z, LdSpace.seed z), LdSpace.direction z)
   invFun p := fun i =>

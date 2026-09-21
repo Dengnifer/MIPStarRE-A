@@ -224,6 +224,14 @@ def mirror_file(path: str) -> str:
     return f"{MIRROR_ROOT}/" + path
 
 
+def optional_part_text(root: Path, relative: str | None) -> str:
+    """A configured challenge part, or empty text when omitted or absent."""
+    if relative is None:
+        return ""
+    path = root / relative
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
 class SplitAssembler(Assembler):
     """Emit one Mathlib-only challenge module per contributing library module.
 
@@ -291,15 +299,13 @@ def assemble_split(
         body = asm.module_body(path, by_module[path])
         files[mirror_file(path)] = "\n".join(head) + "\n" + body + "\n"
 
-    if challenge.header is None or challenge.footer is None:
-        raise ChallengeConfigError(
-            f"split challenge {challenge.name!r} requires a header and footer"
-        )
-    header = (root / challenge.header).read_text(encoding="utf-8")
-    footer = (root / challenge.footer).read_text(encoding="utf-8")
+    header = optional_part_text(root, challenge.header)
+    footer = optional_part_text(root, challenge.footer)
     part_imports = "\n".join(f"import {mirror_module(m)}" for m in ordered)
     marker = "import Mathlib\n"
-    if marker not in header:
+    if not header:
+        header = marker
+    elif marker not in header:
         raise SystemExit("challenge header must start with `import Mathlib`")
     header = header.replace(marker, marker + part_imports + "\n", 1)
 

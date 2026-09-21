@@ -20,10 +20,10 @@ open MIPStarRE.LDT
 open MIPStarRE.LDT.Preliminaries
 open MIPStarRE.Quantum
 
--- source: MIPStarRE/QPBT/Test/LowDegreeGameMeasurements.lean:39-58  (_private.MIPStarRE.QPBT.Test.LowDegreeGameMeasurements.0.MIPStarRE.QPBT.ldSpaceSplit)
+-- source: MIPStarRE/QPBT/Test/LowDegreeGameMeasurements.lean:39-58  (MIPStarRE.QPBT.ldSpaceSplit)
 /-- Formalization-only auxiliary equivalence splitting an ambient low-degree
 vector into its point, seed, and direction blocks. -/
-private def ldSpaceSplit (L : LdParams) :
+def ldSpaceSplit (L : LdParams) :
     LdSpace L ≃ ((Fin L.m → ScalarQ L) × ScalarQ L) × (Fin L.m → ScalarQ L) where
   toFun z := ((LdSpace.point z, LdSpace.seed z), LdSpace.direction z)
   invFun p := fun i =>
