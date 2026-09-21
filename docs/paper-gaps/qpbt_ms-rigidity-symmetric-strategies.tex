@@ -46,11 +46,10 @@
   theorem, its specialization to symmetric consistent strategies, and the
   transfer of the hypothesis to the reflections of the projective dilation,
   about
-  \textbf{350 lines} in total.  Proving the repaired theorem is the remaining
-  task, about \textbf{3--4 interfaces} (the second logical qubit pair, the
-  joint swap-isometry extraction of the two EPR pairs from the anticommutation
-  and the cross-player agreement, and the post-isometry transfers), on the
-  order of \textbf{one to two thousand lines}.
+  \textbf{350 lines} in total. The repaired theorem is now proved, including
+  the second logical qubit pair, joint swap-isometry extraction of the two
+  EPR pairs, and post-isometry transfers. The unrestricted printed statement
+  remains refuted by the examples below.
   \item \textbf{Mathlib/project split:} approximately \textbf{10\% Mathlib} and
   \textbf{90\% project-local}.  Mathlib supplies finite-dimensional inner
   product spaces, Kronecker products, and isometries; games, strategies,
@@ -542,11 +541,14 @@ triangle inequality, and they are worth spelling out.
   measurements $\{M^{(\mathsf{Point},W),u}_a\}$, whose outcomes are field
   elements, whereas the defect \eqref{eq:defect} involves binary measurements:
   the trace postprocessing on the point side and, on the Magic Square side, the
-  relabeling of the game's answers to a bit.  Postprocessing does not increase
-  the state-dependent distance between two families of POVM elements, each
-  postprocessed effect being the sum of the effects over a fibre of the
-  relabeling and the fibres partitioning the alphabet.  The same remark
-  converts between effects and observables, which is what the Lean form of
+  relabeling of the game's answers to a bit. For projective measurements on
+  opposite registers, the summed squared distance is twice the consistency
+  defect. Coarse-graining preserves projectivity and decreases that defect:
+  it removes nonnegative terms from the sum over disagreeing outcomes.
+  Thus it does not increase the distance in this application. This argument
+  does not assert distance monotonicity for arbitrary POVM effects.
+  The passage between effects and observables uses the binary normalization
+  identity, which is what the Lean form of
   item~1 requires: \leanid{MIPStarRE.QPBT.pointObs\_self\_consistent} compares
   the two players' $\pm1$-valued point observables under the uniform
   distribution on the point $u$, while \eqref{eq:defect} is a sum over the two

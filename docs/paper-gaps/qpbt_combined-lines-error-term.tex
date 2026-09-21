@@ -320,8 +320,8 @@ PR \#547 in the historical issue-511 audit. Its $21/32$ bound is a scalar
 average; the $21/256$ X-axis contribution has not been transported to the
 full directly indexed line-point law in Lean. The projective completeness
 entry \path{exists_spcc_value_one} is proved on the current branch.}
-The existing unrestricted auxiliary signatures and their unfinished proofs
-are preserved pending a separately scoped repair. A source-faithful existence
+The unrestricted auxiliary signatures were subsequently repaired or removed,
+as recorded in Section~\ref{sec:supplied-point-realignment}. A source-faithful existence
 proof must construct polynomially controlled points internally and retain their error
 through the line estimates; it cannot cover arbitrary supplied point
 measurements by discarding their error parameter. Even after that domain
@@ -468,8 +468,9 @@ is the polynomial-pair lemma, whose imported error
 $a(md)^a(\delta_{\mathrm{combine}}^b + q^{-b} + 2^{-bmd})$ absorbs
 $m^{O(1)}$ prefactors by enlarging $a$ and shrinking $b$.  The blueprint proof
 records this absorption and the corrected deficit reading of the second claim.
-Two obligations remain: carry out that absorption with explicit constants when
-the lemma is formalized, and prove the three chained estimates.
+The direct-carrier estimates and the absorption into the global-pair error
+are now proved. Transport of the source scalar claims and the stronger
+printed error form remain separate obligations.
 
 \paragraph{Repairing the second route.}
 Strengthen Property~2 of the sub-line lemma to the joint product law: in
@@ -590,18 +591,18 @@ without proving the printed assertion, live tracking of this gap is restored by
 \section{The 2026-09-19 statement correction}
 \label{sec:printed-claim-correction}
 
-The declaration \path{exists_extendedLinesWitness} was a theorem whose
-statement was the printed conclusion of the lemma and whose proof was an open
-\path{sorry}.  That \path{sorry} was the last one in the combining track, and
-it was not a proof obligation: no declaration depended on it, as a search over
-the whole declaration set confirmed, and every consumer routes through
-\path{exists_extendedLinesWitness_established}.
+The declaration \path{exists_extendedLinesWitness} was a theorem carrying
+the printed error expression on the directly indexed, completed-answer domain,
+with an open \path{sorry}. No declaration depended on it, and every Lean
+consumer used \path{exists_extendedLinesWitness_established}. The absence of
+callers did not discharge the mathematical assertion printed in the source.
 
 The correction replaces that theorem by a definition of type \path{Prop} with
 the same binders and the same body,
 \path{PrintedExtendedLinesWitnessClaim}.  Writing a proposition down is not
-asserting it, so the development no longer claims the printed error form, and
-it no longer carries proof debt for it either.  The printed sentence remains
+asserting it, so the development carries no term-level proof hole at this site.
+The printed error form remains an open mathematical obligation for source
+adoption. The printed sentence remains
 readable in Lean, next to the theorem that states what the source proof
 actually gives, which is what this note asks for: the printed form must not be
 asserted, because no route to it is known, and it must not be silently dropped,
