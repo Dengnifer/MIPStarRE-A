@@ -23,7 +23,7 @@ record. The policy that governs when a note must be written is
 [`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). This page is a summary of
 those notes, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `838c51b7`.
+Every row below was checked against `github/main` at commit `05df4b74`.
 Line numbers are from that commit.
 
 ## How to read the table
@@ -391,7 +391,7 @@ except as an explicit hypothesis. Comparator:
 git grep -n "PrintedExtendedLinesWitnessClaim\|PrintedSymmetricProjectiveAttainmentClaim" -- "MIPStarRE/*.lean"
 ```
 
-At commit `838c51b7` this returns eight lines: the two definitions, the
+At commit `05df4b74` this returns eight lines: the two definitions, the
 refutation `not_forall_printedSymmetricProjectiveAttainmentClaim`
 (`StrategyClasses.lean:952–954`, whose hit is on line 954), and five
 docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
@@ -400,9 +400,9 @@ docstring or comment mentions (`Combining/ErrorObstruction.lean:20`,
 
 **2. There is no proof debt.** No `sorry`, `admit`, `axiom` declaration,
 `native_decide`, `unsafe`, `@[extern]`, bodyless `opaque`, `implemented_by`, or
-`backward.*`/`respectTransparency` option occurs anywhere in the 670 Lean files
-under `MIPStarRE/`. (The repository holds 676 `.lean` files in all; the six
-outside `MIPStarRE/` are `MIPStarRE.lean`, `scripts/Checkdecls.lean`, the three
+`backward.*`/`respectTransparency` option occurs anywhere in the 671 Lean files
+under `MIPStarRE/`. (The repository holds 679 `.lean` files in all; the eight
+outside `MIPStarRE/` are `MIPStarRE.lean`, `scripts/Checkdecls.lean`, the five
 `scripts/comparator/*.lean` helpers, and one archived telemetry audit module,
 none of which the development imports.) Comparator:
 
@@ -410,40 +410,68 @@ none of which the development imports.) Comparator:
 git grep -nE "\b(sorry|admit|native_decide|unsafe|implemented_by)\b" -- "MIPStarRE/*.lean"
 ```
 
-At `838c51b7` this returns exactly two lines, both inside a docstring:
-`MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the successor-step
-theorem no longer has a direct `sorry`, and
+At `05df4b74` this returns exactly three lines, every one of them inside a
+docstring: `MIPStarRE/LDT/Test/AxiomAudit.lean:81`, prose recording that the
+successor-step theorem no longer has a direct `sorry`;
 `MIPStarRE/QPBT/Combining/Apply.lean:57`, the docstring of
 `PrintedExtendedLinesWitnessClaim` recording that the former open `sorry` at
-that site was replaced by the unasserted `Prop`. There are **zero** real sites.
-(The regex does not match `sorryAx`. That identifier occurs at eleven sites
+that site was replaced by the unasserted `Prop`; and
+`MIPStarRE/QPBT/Test/AxiomAudit.lean:27`, the module docstring of the QPBT axiom
+audit used by check 3 below, describing what that module does if a `sorry` ever
+reaches a headline theorem. There are **zero** real sites.
+(The regex does not match `sorryAx`. That identifier occurs at sixteen sites
 under `MIPStarRE/`, none of them a use in a proof: once at
-`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean:187`, and
-ten times in the LDT axiom-audit module `MIPStarRE/LDT/Test/AxiomAudit.lean`
-(lines 40, 106, 115, 137, 166, 177, 191, 224, 248, 249). Nine of the eleven are
-prose; `AxiomAudit.lean:248–249` is executable metaprogram code — the
-`collectAxioms` guard that raises an error when an audited declaration depends
-on `sorryAx`. Comparator:
+`MIPStarRE/LDT/MainInductionStep/Theorems/MainTheorems/Successor.lean:187`, ten
+times in the LDT axiom-audit module `MIPStarRE/LDT/Test/AxiomAudit.lean` (lines
+40, 106, 115, 137, 166, 177, 191, 224, 248, 249), and five times in its QPBT
+counterpart `MIPStarRE/QPBT/Test/AxiomAudit.lean` (lines 28, 82, 83, 91, 93).
+Twelve of the sixteen are prose; the remaining four —
+`LDT/Test/AxiomAudit.lean:248–249` and `QPBT/Test/AxiomAudit.lean:91` and `:93`
+— are executable metaprogram code, the `collectAxioms` guards that raise an
+error when an audited declaration depends on `sorryAx`. Comparator:
 `git grep -n "sorryAx" -- "MIPStarRE/*.lean"`.)
 
-**3. Axiom audit.** The intended check is
+**3. Axiom audit.** The check is that
 
 ```lean
 #print axioms pauli_soundness
 ```
 
-which must report exactly `propext`, `Classical.choice`, `Quot.sound` — the three
-standard Lean axioms — and in particular **not** `sorryAx`. This was verified by
-a whole-environment sweep on 2026-09-18.
+reports exactly `propext`, `Classical.choice`, `Quot.sound` — the three standard
+Lean axioms — and in particular **not** `sorryAx`. Since commit `fd7ec313`
+(2026-09-19) this no longer has to be run by hand:
+`MIPStarRE/QPBT/Test/AxiomAudit.lean` collects the axiom set of each headline
+declaration with `Lean.collectAxioms` — the same mechanism `#print axioms` uses
+— logs it, and **fails elaboration** unless the set is exactly those three,
+naming `sorryAx` explicitly when it is the offender. It is a compile-time
+regression test rather than a report. Thirteen declarations are audited: the
+four headline results of the table above, `honestStrategy_isSPCC`, the four
+combining-layer theorems (`exists_combinedLinesWitness`,
+`exists_extendedLinesWitness_established`, `exists_globalPairWitness`,
+`exists_actual_rounded_global_pair_error_bound`), the three extraction-layer
+theorems (`exists_projective_setting_isometry_bounds`,
+`exists_arbitrary_strategy_isometry_bounds`,
+`pauli_soundness_deltaQld_ofExtractionWitness`) and the symmetrization interface
+`exists_symmetric_projective_strategy_approx`. Two of them are the *corrected*
+forms of the section (a) rows — `exists_extendedLinesWitness_established` for
+[a1](#a1-the-error-form-of-the-combined-lines-lemma) and
+`exists_symmetric_projective_strategy_approx` for
+[a2](#a2-attainment-in-the-symmetrization-lemma) — and they are audited
+because a regression in a repaired statement is the one most likely to go
+unnoticed. Comparator:
 
-> **Honest caveat.** That sweep was run from a one-off metaprogram in a
-> throwaway worktree and **is not currently reproducible from this
-> repository**. There are zero `#print axioms` directives in the Lean tree, and
-> the only committed audit module, `MIPStarRE/LDT/Test/AxiomAudit.lean`, covers
-> the LDT track and never mentions QPBT. A reviewer must run the command above
-> by hand. Committing `MIPStarRE/QPBT/Test/AxiomAudit.lean` and building it in CI
-> is a known outstanding task; until it lands, check 3 is a *manual* check,
-> while checks 1 and 2 are fully mechanical.
+```
+lake build MIPStarRE.QPBT.Test.AxiomAudit
+```
+
+This is what CI runs (`.github/workflows/pr-ci.yml`, alongside the LDT
+counterpart `MIPStarRE.LDT.Test.AxiomAudit`), so a `sorryAx` dependency reaching
+any of the thirteen turns the build red. The module is built as an explicit
+target rather than imported from the `MIPStarRE.QPBT` umbrella, so the audits
+stay out of ordinary downstream imports while still acting as regression tests;
+that is also why the tree still contains zero literal `#print axioms`
+directives. All three checks are mechanical, and the reviewer runs them from
+this repository.
 
 **What remains genuinely open**, and where it sits: the two source imports of
 [c2](#c2-dimension-divisibility-in-the-classical-test-instantiation) — the
