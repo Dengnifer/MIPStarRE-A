@@ -24,12 +24,13 @@ No codex exec process remains. Worktrees, commits, dirty fixtures and captured
 evidence were preserved. Do not probe or re-enable cpa until the owner explicitly
 authorizes it; space-3 and the other retired keys remain unavailable.
 
-The only remaining operational job is model-free PR677 publication/CI,
-PID809912, allowed to finish its current work. Its wrapper tests the cpa
-disabled marker before any review dispatch, so it will stop there. A detached
-records flush will preserve its final manifest and automatic telemetry without
+The remaining model-free PR677 publication/CI job, PID809912, was allowed to
+finish and completed full CI successfully by20:30:59Z. Its wrapper stopped at
+the cpa disabled-marker guard before dispatching the second review. A detached
+records flush preserves its final manifest and automatic telemetry without
 starting models or restarting the daemon. Main sends /goal pause through the
 existing tmux session; no completion or blocked-goal status is fabricated.
+The single pause comment on issue27 is5767085909.
 
 ## Exact Work State
 
@@ -40,7 +41,7 @@ existing tmux session; no completion or blocked-goal status is fabricated.
 - PR677: author repair0c87485f30c4be7af0c84b7594708ae9ffd9b251 completed exit0
   with58passing tests. Guarded refreshed head9c3d759b37824449c8844498d07b7dd00d36cb1f
   is checked-published after the normal full build resolved missing
-  PrintedClaims.olean. Complete CI is running; its build step passed41s.
+  PrintedClaims.olean. Complete CI is successful; its build step passed41s.
   Prior adverse review5271230771 remains; a second independent review is
   required and is not authorized while paused. Wrapper/log prefix:
   /tmp/main-build-publish-ci-review677-repair-20260922.
@@ -50,6 +51,8 @@ existing tmux session; no completion or blocked-goal status is fabricated.
   terminal adoption of either correction. Both register rows remain pending;
   main still must adjudicate the reported unchanged-C3 obstruction. Recheck
   freshness and use normal service/train rules after authorization to resume.
+  Main's ordinary gate confirms approval and notes a closing reference to674;
+  check gate7against that issue's actual scope before service merge.
 - Issue673: clean, unpublished head
   dd1e56e8460b0b358799e74b900d400aab77a0c9 over proof4c24f504b60afd3d3b0a128675089f0521bc80f2.
   The note-field repair and normal hooks passed. Author orc-673-20260922-02
