@@ -290,6 +290,7 @@ comment. The gate is model-free and runs no build, so its verdict is
 reproducible by anyone holding the commit. A failing gate is not an owner
 blocker and files no inbox comment: it is your to-do list — today it names the
 paper-gap register's missing terminal-status column, the unmarked blueprint
-nodes, the absent comparator challenge and the artifact files an ITP submission
-would need. The
+nodes, the absent comparator record together with a challenge generator
+that covers two of the four headline theorems (section 6 of the protocol
+says which), and the artifact files an ITP submission would need. The
 gate is not part of the blocking PR CI and must not be added to it.

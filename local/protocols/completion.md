@@ -201,6 +201,18 @@ Headline theorems (blueprint chapter `ch13_qpbt_test.tex`):
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `lem:pauli-completeness` |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
 
+The `Expected challenge` row and this table do not agree yet, and C5
+cannot go green until they do. The generator that writes that copy
+(`scripts/comparator/challenges.py`, the `targets` of its `qpbt` entry)
+covers two of the four headline theorems today — `pauli_soundness` and
+`pauli_soundness_qubit` — so the registered copy names neither
+`exists_spcc_value_one` nor `exists_ld_soundness`, and the coverage rule
+of C5 above fails against it by construction. Widening `targets` to all
+four headline theorems and regenerating the expected copy is therefore
+part of C5's remaining work, beside the absent comparator record itself;
+the table above is the paper's headline set and does not shrink to meet
+the generator.
+
 The `Blueprint chapters` row is the track's own chapters, read whole; it is
 not the whole of C4's scope. The gate also reads every other `.tex` file in
 those directories whose `\lean{...}` names a declaration under the track's
