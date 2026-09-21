@@ -1649,3 +1649,4 @@
 {"ts": "2026-09-22T00:53:17+0900", "kind": "ci-build", "trigger": "ci.sh pr=671", "seconds": 103, "outcome": "success", "sha": "a3683e9b75da4aeb52174af2cccacfde606361ce", "note": "branch issue-662-comparator-closure-20260921"}
 {"ts": "2026-09-22T02:24:55+0900", "kind": "ci-build", "trigger": "ci.sh pr=672", "seconds": 46, "outcome": "success", "sha": "691c2880fe1587d73b36ca82226e64ec343cf8ae", "note": "branch issue-667-retained-source-claims-20260922"}
 {"ts": "2026-09-22T02:33:27+0900", "kind": "ci-build", "trigger": "ci.sh pr=671", "seconds": 38, "outcome": "success", "sha": "dfbaa62b3f4c3428a3c4e94a4758623cdecd64f3", "note": "branch issue-662-comparator-closure-20260921"}
+{"ts": "2026-09-22T03:09:03+0900", "kind": "ci-build", "trigger": "ci.sh pr=671", "seconds": 36, "outcome": "success", "sha": "dfbaa62b3f4c3428a3c4e94a4758623cdecd64f3", "note": "branch issue-662-comparator-closure-20260921"}
