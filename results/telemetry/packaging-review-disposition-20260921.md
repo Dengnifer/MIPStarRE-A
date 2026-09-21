@@ -93,3 +93,18 @@ The sole native slot now belongs to comparator publication author
 12:40:10.927 UTC, with checkpoint12:55:10.927 and deadline13:05:10.927. It owns
 only663; the packaging CI is model-free. Source repair publication is followed
 by fresh CI/review and service merge before final official comparator testing.
+
+## Handover Checkpoint
+
+Canonical CI at71715c4c finished at12:46:50 UTC, exit0, in327 seconds. Its
+manifest is complete (partial=false), and MAIN independently read back all nine
+local-ci statuses as success. The build and blueprint-render steps were skipped
+by the normal change filter; the applicable checks passed. WrapperPID1114242
+has exited. The independent10-minute verification remains pending; the owner
+ordered graceful handover before a reviewer was admitted. The five earlier
+full reviews and the concrete sixth-observation authorization remain in force.
+
+The final663 author finished and was closed without follow-up. The successor
+main will use the cpa key and two space-3 lane subagents, as the owner now
+requires. The old native-only transport wording in prepared tasks is superseded;
+the review scope, independence and recorded budget remain applicable.
