@@ -79,28 +79,46 @@ python3 scripts/comparator/check_challenge_drift.py --root . \
     --challenge qpbt --write /tmp/Challenge.lean
 ```
 
-The update command performs the documented extraction and assembly pipeline in a
-temporary directory (shown here for the QPBT challenge):
+The update command performs the extraction and assembly pipeline below in a
+temporary directory; the same steps run by hand, shown here for the QPBT
+challenge, reproduce the same file:
 
 ```sh
-# 1. extract the closure of the challenge's target statements (a Lean
+# 1. render the extractor with this challenge's own import block.  A Lean module
+#    header cannot be computed at elaboration time, so the checked-in
+#    extract_closure.lean carries the LDT import block and every consumer
+#    substitutes the challenge's `imports` into a copy of it; run unrendered on
+#    a QPBT target it fails with "target not found", because no LDT module
+#    imports QPBT.
+python3 - <<'PY' > extract_closure_qpbt.lean
+import sys
+sys.path.insert(0, "scripts/comparator")
+from challenge_config import load_challenges
+from check_challenge_drift import EXTRACTOR, render_extractor
+(challenge,) = load_challenges(["qpbt"])
+sys.stdout.write(render_extractor(challenge, EXTRACTOR.read_text(encoding="utf-8")))
+PY
+
+# 2. extract the closure of the challenge's target statements (a Lean
 #    metaprogram mirroring comparator's runForUsedConsts traversal).  The
-#    drift checker renders a copy of the extractor with the challenge's
-#    `imports` substituted for the import block, because a Lean module header
-#    cannot be computed at elaboration time, and passes the targets in
-#    MIPSTARRE_COMPARATOR_TARGETS.  With that variable unset the file closes
-#    the LDT main theorem:
+#    targets reach the extractor in MIPSTARRE_COMPARATOR_TARGETS; with that
+#    variable unset it closes the LDT main theorem:
 MIPSTARRE_COMPARATOR_TARGETS="MIPStarRE.QPBT.pauli_soundness,MIPStarRE.QPBT.pauli_soundness_qubit" \
-  lake env lean scripts/comparator/extract_closure.lean > closure.tsv
+  lake env lean extract_closure_qpbt.lean > closure.tsv
 awk -F'\t' 'NF==4' closure.tsv > closure.clean.tsv
 
-# 2. assemble the challenge body (topological order, namespace handling)
+# 3. assemble the challenge body (topological order, namespace handling)
 python3 scripts/comparator/assemble_challenge.py closure.clean.tsv \
     --challenge qpbt > draft.lean
 cat scripts/comparator/challenge_qpbt_header.lean draft.lean \
     scripts/comparator/challenge_qpbt_footer.lean \
     > scripts/comparator/expected/ChallengeQPBT.lean.expected
 ```
+
+For the LDT challenge step 1 is a no-op — the checked-in extractor already
+carries that challenge's import block — so `lake env lean
+scripts/comparator/extract_closure.lean` with no environment variable set is
+step 2 of the LDT pipeline as it stands.
 
 Then copy the expected file into the matching comparator repository as
 `Challenge.lean`, bump the `rev` pin in its `lakefile.toml` to the library
