@@ -115,11 +115,15 @@ The workflow used Lean `v4.32.0` and the official comparator tag at
 theorem names from both `Challenge` and `Solution`, then records that the nanoda
 kernel and Lean's default kernel each accept the solution.  This establishes
 equality of the complete union of the four statement closures at the verified
-library commit, including the private and compiler-generated auxiliaries that
-blocked the earlier run.
+library commit.  Before that run, PR 671 either eliminated the earlier private
+and compiler-generated blockers from the closure or made the affected closure
+declarations public.  The successful comparison verifies the resulting current
+closure; it did not compare those former blockers under their old names.
 
-The completion gate reads the following record.  Its drift half remains a CI
-obligation on every commit that carries the record.
+The completion gate reads the following record.  For an exact-head QPBT
+completion claim, C5's delegated evidence must include a passing drift check
+from CI on that same commit; carrying this documentation record alone does not
+select the comparator build step.
 
 <!-- completion-gate: track=qpbt -->
 - challenge-repository: https://github.com/Dengnifer/QPBT-comparator
