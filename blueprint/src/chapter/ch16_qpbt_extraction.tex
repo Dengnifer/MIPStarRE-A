@@ -1479,8 +1479,9 @@ final soundness argument. The omitted step in the source is discussed in
   for every $W\in\{X,Z\}$ and summed over all $h\in\F_q^M$, bounded by
   $a(md)^a(\eps^b+q^{-b}+2^{-bmd})$. No global polynomial-pair measurement
   or extraction data are assumed. The extension to arbitrary successful
-  strategies and the seed-indexed game correspondence remain open; see
-  \cite{gap:qpbt_extraction-transfer}.
+  strategies is Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support}
+  below. The source's seed-indexed game correspondence remains unresolved;
+  see \cite{gap:qpbt_ld-dimension-divisibility}.
 \end{theorem}
 \begin{proof}
   \leanok
@@ -1656,28 +1657,22 @@ We can now prove the soundness theorem for the Pauli basis test, stated as Theor
 	% individual degree test at dimension 2m+2 without a divisibility
 	% hypothesis; the sentence below records the resulting outstanding
 	% obligation.
-	This invocation is where the analysis of the classical low individual degree
-	test enters. Lemma~\ref{lem:qld-unitary} rests on the polynomial-pair
-	measurement of Lemma~\ref{lem:qld-4-7}, whose proof instantiates the
-	classical test in $2m+2$ variables and at present does so only when $2m+2$
-	divides $q$ --- a divisibility that fails for every admissible tuple with
-	$m \geq 2$. Three further steps of that same chain are likewise unproved.
-	The classical soundness statement invoked there,
-	Theorem~\ref{lem:ld-soundness},
-	is imported from Theorem~4.7 of~\cite{Ji2021Quantum} through an
-	identification of the game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ with
-	the two-prover tensor-code test for $\code^{\ot m}$, and neither that game
-	correspondence nor the bound on the auxiliary parameter of Theorem~4.7 under
-	which the stated error function $\delta_{\mathrm{ld}}$ is obtained has been
-	established. Both, with the divisibility obstruction, are documented in
-	\cite{gap:qpbt_ld-dimension-divisibility}. Furthermore, the combined-lines
-	consistency of Lemma~\ref{lem:qld-4-13}, on which
-	Lemma~\ref{lem:qld-4-7} relies, is established here only with the error
-	$m \cdot \poly(\eps, md/q)$, the error form $\poly(m^2 \eps, md/q)$
-	carried in its statement remaining unproved; the discrepancy and the
-	established form are documented in
-	\cite{gap:qpbt_combined-lines-error-term}. The present proof is therefore
-	complete only modulo these four obligations. Since the
+	This invocation is where the classical low individual degree analysis enters
+	the formal proof. The account printed in the source would instantiate the
+	classical test in $2m+2$ variables under the condition that $2m+2$ divides
+	$q$, a condition that fails for every admissible tuple with $m \geq 2$.
+	That route also leaves unproved the correspondence between
+	$\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the two-prover tensor-code test,
+	the required bound on the auxiliary parameter of Theorem~4.7 of
+	\cite{Ji2021Quantum}, and the printed combined-lines error
+	$\poly(m^2\eps,md/q)$. These four obligations are documented in
+	\cite{gap:qpbt_ld-dimension-divisibility} and
+	\cite{gap:qpbt_combined-lines-error-term}. The Lean proof does not assume
+	them: Lemma~\ref{lem:qld-unitary} is supplied through the proved directly
+	indexed carrier and the established combined-lines error, which the later
+	error-form lemmas absorb into the displayed robustness family. Thus the
+	printed source route remains conditional, while the Lean proof of
+	Theorem~\ref{thm:pauli} described above is complete. Since the
 	expanded state $\ket{\hat\psi}$ of Definition~\ref{def:expanded-state} is
 	exactly $\ket{\psi}$ with the halves of $M$ pairs
 	$\ket{\mathrm{EPR}_q}$ appended locally in registers
