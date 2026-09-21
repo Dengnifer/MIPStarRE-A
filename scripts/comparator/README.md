@@ -8,14 +8,15 @@ library proves the headline theorems.  Background and trust model:
 
 Two challenges are configured today, one entry each in `challenges.py`:
 
-| Challenge | Target theorems | Generated file | Challenge repository |
+| Challenge | Target theorems | Generated copy | Challenge repository |
 |---|---|---|---|
 | `ldt` | `MIPStarRE.LDT.Test.mainFormal` | `expected/Challenge.lean.expected` | [LDT-comparator](https://github.com/LionSR/LDT-comparator) |
-| `qpbt` | `MIPStarRE.QPBT.pauli_soundness`, `MIPStarRE.QPBT.pauli_soundness_qubit` | `expected/ChallengeQPBT.lean.expected` | [QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator) |
+| `qpbt` | `MIPStarRE.QPBT.pauli_soundness`, `MIPStarRE.QPBT.pauli_soundness_qubit` | `expected/qpbt/` (one module per library module) | [QPBT-comparator](https://github.com/Dengnifer/QPBT-comparator) |
 
-Each generated file imports only Mathlib and re-declares, verbatim and in
-dependency order, every declaration in the kernel closure of the target
-statements, each with a provenance comment; the target theorems themselves are
+Each generated challenge imports only Mathlib (and, when it is split, its own
+modules) and re-declares, verbatim and in dependency order, every declaration
+in the kernel closure of the target statements, each with a provenance
+comment; the target theorems themselves are
 stated with `sorry`.
 
 ## Adding or changing a challenge
@@ -68,17 +69,16 @@ COMPARATOR_TARGETS="MIPStarRE.QPBT.pauli_soundness MIPStarRE.QPBT.pauli_soundnes
   lake env lean scripts/comparator/extract_closure.lean > closure.tsv
 awk -F'\t' 'NF==4' closure.tsv > closure.clean.tsv
 
-# 2. assemble the challenge file (topological order, namespace handling)
+# 2. assemble the challenge (topological order, namespace handling).
+# `qpbt` is a split challenge, so the assembler writes a directory:
 python3 scripts/comparator/assemble_challenge.py closure.clean.tsv \
-    --challenge qpbt > draft.lean
-cat scripts/comparator/challenge_qpbt_header.lean draft.lean \
-    scripts/comparator/challenge_qpbt_footer.lean \
-    > scripts/comparator/expected/ChallengeQPBT.lean.expected
+    --challenge qpbt --split-dir scripts/comparator/expected/qpbt
 ```
 
-Then copy the expected file into the challenge repository as `Challenge.lean`,
-bump the `rev` pin in its `lakefile.toml` to the library commit it was
-generated from, and run its `./verify.sh` (its CI also runs on every push).
+Then copy `Challenge.lean` and `Challenge/` into the challenge repository,
+bump the `rev` pin in its `lakefile.toml` and `lake-manifest.json` to the
+library commit they were generated from, and run its `./verify.sh` (its CI
+also runs on every push).
 
 ## Maintenance notes
 

@@ -88,8 +88,11 @@ treatment, in the separate repository
   Pauli basis test carries the full question/answer combinatorics
   (`PauliType`, `PauliAnswer`, the win predicate and the question
   distribution) into the statement.
-- **Generated file.**  `scripts/comparator/expected/ChallengeQPBT.lean.expected`,
-  regenerated and byte-compared by the same drift guard as the LDT challenge
+- **Generated files.**  `scripts/comparator/expected/qpbt/` — a root
+  `Challenge.lean` plus one Mathlib-only module per contributing library
+  module under `Challenge/`, mirroring the library's module partition (see
+  "Environment alignment for QPBT" below).  The whole tree is regenerated and
+  byte-compared by the same drift guard as the LDT challenge
   (`--challenge qpbt`).
 
 ### Environment alignment for QPBT
@@ -210,11 +213,12 @@ They are covered by this section instead.
 Regeneration is the pipeline in `scripts/comparator/README.md` with
 `--challenge qpbt`.  After an intentional change to any definition in the
 closure: regenerate, copy the expected file into QPBT-comparator as
-`Challenge.lean`, bump the `rev` pin in its `lakefile.toml` to the library
-commit it was generated from, and run its `./verify.sh`.
+`Challenge.lean` and `Challenge/`, bump the `rev` pin in its `lakefile.toml`
+and `lake-manifest.json` to the library commit they were generated from, and
+run its `./verify.sh`.
 
-What the human must audit, and what no tool can check: that
-`ChallengeQPBT.lean` really states the intended theorems.  Concretely, that
+What the human must audit, and what no tool can check: that the challenge
+modules really state the intended theorems.  Concretely, that
 the Pauli basis test it defines — `pauliQuestionDistribution`,
 `pauliWinPredicate`, `pauliBasisTest` — is the test of the paper; that
 `deltaQld` is the paper's error functional; that `PauliSoundnessWitness` and
