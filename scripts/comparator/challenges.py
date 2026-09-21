@@ -191,26 +191,6 @@ QPBT_EXTRAS: Extras = {
 }
 
 QPBT_MODULE_PRELUDES: ModulePreludes = {
-    "MIPStarRE/Quantum/Measurement.lean": (
-        Prelude(
-            ns=("MIPStarRE.Quantum", "Submeasurement"),
-            lines=(
-                "variable {d : Type*} [Fintype d] [DecidableEq d]",
-                "variable {α β : Type*} [Fintype α] [Fintype β]",
-            ),
-            first=52,
-            last=94,
-        ),
-        Prelude(
-            ns=("MIPStarRE.Quantum", "Measurement"),
-            lines=(
-                "variable {d : Type*} [Fintype d] [DecidableEq d]",
-                "variable {α β : Type*} [Fintype α] [Fintype β]",
-            ),
-            first=96,
-            last=223,
-        ),
-    ),
     "MIPStarRE/QPBT/Algebra/FieldBasis.lean": (
         Prelude(
             ns=("MIPStarRE.QPBT",),
@@ -299,7 +279,7 @@ QPBT_MODULE_PRELUDES: ModulePreludes = {
             ns=("MIPStarRE.QPBT",),
             lines=("open MIPStarRE.LDT", "open MIPStarRE.Quantum"),
             first=28,
-            last=207,
+            last=229,
             noncomputable=True,
         ),
     ),

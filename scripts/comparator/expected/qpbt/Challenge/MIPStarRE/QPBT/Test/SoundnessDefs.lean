@@ -12,7 +12,7 @@ same names, as the library does. -/
 open scoped BigOperators MatrixOrder Matrix ComplexOrder
 namespace MIPStarRE.QPBT
 
--- elaboration context of MIPStarRE/QPBT/Test/SoundnessDefs.lean:28-207
+-- elaboration context of MIPStarRE/QPBT/Test/SoundnessDefs.lean:28-229
 noncomputable section
 open MIPStarRE.LDT
 open MIPStarRE.Quantum
@@ -137,31 +137,31 @@ structure PauliSoundnessWitness (P : AdmissibleParams)
 attribute [instance] PauliSoundnessWitness.ιAFintype PauliSoundnessWitness.ιBFintype
   PauliSoundnessWitness.ιADecidableEq PauliSoundnessWitness.ιBDecidableEq
 
--- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:182-193  (MIPStarRE.QPBT.pauliOperatorDistanceA)
-/-- The A-side operator-distance quantity appearing in the soundness
-conclusion.  It is the finite-sum realization of `def:povm-distance` from
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
--/
-noncomputable def pauliOperatorDistanceA
+-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:205-216  (MIPStarRE.QPBT.rawPauliOperatorDistanceA)
+/-- Alice's source-facing Pauli operator distance. The strategy effect is the
+raw effect of the prescribed answer `.pauliOutcome u`, exactly as in
+`thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
+The sum is the finite realization of blueprint `def:povm-distance`. -/
+noncomputable def rawPauliOperatorDistanceA
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedAEffect S w.φA
-        (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+        ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
       pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
 
--- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:195-205  (MIPStarRE.QPBT.pauliOperatorDistanceB)
-/-- The symmetric B-side operator-distance quantity from blueprint
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
+-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:218-228  (MIPStarRE.QPBT.rawPauliOperatorDistanceB)
+/-- Bob's source-facing Pauli operator distance, using the raw prescribed
+answer effect from `thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
 -/
-noncomputable def pauliOperatorDistanceB
+noncomputable def rawPauliOperatorDistanceB
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedBEffect S w.φB
-        (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+        ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
       pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
 end  -- module scope
 end MIPStarRE.QPBT

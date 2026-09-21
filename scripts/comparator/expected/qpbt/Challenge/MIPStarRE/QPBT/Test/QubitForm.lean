@@ -116,7 +116,7 @@ noncomputable def qubitOperatorDistanceA
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitAEffect S w.φA
-          (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnA'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -128,7 +128,7 @@ noncomputable def qubitOperatorDistanceB
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitBEffect S w.φB
-          (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnB'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 end  -- module scope
