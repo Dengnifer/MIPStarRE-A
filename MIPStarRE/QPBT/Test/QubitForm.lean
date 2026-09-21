@@ -125,7 +125,7 @@ noncomputable def qubitOperatorDistanceA
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitAEffect S w.φA
-          (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnA'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -136,7 +136,7 @@ noncomputable def qubitOperatorDistanceB
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitBEffect S w.φB
-          (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnB'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -376,13 +376,13 @@ evaluated on their ideal auxiliary-EPR state. No soundness bound is assumed. -/
 theorem qubit_operator_distance_a_to_qubit
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) :
-    qubitOperatorDistanceA P S w.toQubit W = pauliOperatorDistanceA P S w W := by
-  unfold qubitOperatorDistanceA pauliOperatorDistanceA
+    qubitOperatorDistanceA P S w.toQubit W = rawPauliOperatorDistanceA P S w W := by
+  unfold qubitOperatorDistanceA rawPauliOperatorDistanceA
   refine Finset.sum_congr rfl fun label _ => ?_
   have hnorm := BinaryWitnessTransport.operator_error_reindex
     (BinaryWitnessTransport.jointEquiv P w.ιA' w.ιB')
     (liftedAEffect S w.φA
-      (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect label))
+      ((S.A (pauliQuestion P W)).effect (.pauliOutcome label)))
     (pauliProjOnA'' P W label) (idealState P w.aux)
   rw [BinaryWitnessTransport.lifted_effect_a_reindex,
     BinaryWitnessTransport.ideal_projector_a_reindex,
@@ -395,13 +395,13 @@ existence conclusion of `cor:pauli-binary`. -/
 theorem qubit_operator_distance_b_to_qubit
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) :
-    qubitOperatorDistanceB P S w.toQubit W = pauliOperatorDistanceB P S w W := by
-  unfold qubitOperatorDistanceB pauliOperatorDistanceB
+    qubitOperatorDistanceB P S w.toQubit W = rawPauliOperatorDistanceB P S w W := by
+  unfold qubitOperatorDistanceB rawPauliOperatorDistanceB
   refine Finset.sum_congr rfl fun label _ => ?_
   have hnorm := BinaryWitnessTransport.operator_error_reindex
     (BinaryWitnessTransport.jointEquiv P w.ιA' w.ιB')
     (liftedBEffect S w.φB
-      (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect label))
+      ((S.B (pauliQuestion P W)).effect (.pauliOutcome label)))
     (pauliProjOnB'' P W label) (idealState P w.aux)
   rw [BinaryWitnessTransport.lifted_effect_b_reindex,
     BinaryWitnessTransport.ideal_projector_b_reindex,

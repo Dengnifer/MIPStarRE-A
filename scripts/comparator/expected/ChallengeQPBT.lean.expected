@@ -1122,58 +1122,6 @@ in item 3 of blueprint `lem:downsize_field`, paper lines 509-550. -/
 noncomputable def basisCoordVec {F K ι κ : Type*} [Field F] [Field K]
     [Algebra F K] [Fintype κ] (b : Module.Basis κ F K) (v : ι → K) : ι × κ → F :=
   fun p => b.equivFun (v p.1) p.2
-end MIPStarRE.QPBT
-namespace MIPStarRE.Quantum
-namespace Submeasurement
-
--- elaboration context of MIPStarRE/Quantum/Measurement.lean:52-94
-section
-variable {d : Type*} [Fintype d] [DecidableEq d]
-variable {α β : Type*} [Fintype α] [Fintype β]
-
--- source: MIPStarRE/Quantum/Measurement.lean:63-75  (MIPStarRE.Quantum.Submeasurement.postprocess)
-/--
-Data processing: relabel the answer set by `f : α → β`, summing the effects over
-fibers.
--/
-noncomputable def postprocess [DecidableEq α] [DecidableEq β]
-    (M : Submeasurement α d) (f : α → β) : Submeasurement β d where
-  effect b := ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
-  pos b := Finset.sum_nonneg fun a _ => M.pos a
-  sum_le_one := by
-    calc
-      ∑ b, ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
-          = ∑ a, M.effect a := Finset.sum_fiberwise Finset.univ f M.effect
-      _ ≤ 1 := M.sum_le_one
-end  -- module scope
-end Submeasurement
-namespace Measurement
-
--- elaboration context of MIPStarRE/Quantum/Measurement.lean:96-223
-section
-variable {d : Type*} [Fintype d] [DecidableEq d]
-variable {α β : Type*} [Fintype α] [Fintype β]
-
--- source: MIPStarRE/Quantum/Measurement.lean:120-134  (MIPStarRE.Quantum.Measurement.postprocess)
-/--
-Postprocess a complete measurement by relabeling outcomes.
-
-This formalizes `references/ldt-paper/preliminaries.tex:169--180`: regrouping
-the effects along the fibers of `f` preserves the total operator, so a POVM
-remains a POVM after postprocessing.
--/
-noncomputable def postprocess [DecidableEq α] [DecidableEq β]
-    (M : Measurement α d) (f : α → β) : Measurement β d where
-  toSubmeasurement := M.toSubmeasurement.postprocess f
-  sum_eq_one := by
-    calc
-      ∑ b, ∑ a ∈ Finset.univ.filter (fun a => f a = b), M.effect a
-          = ∑ a, M.effect a := Finset.sum_fiberwise Finset.univ f M.effect
-      _ = 1 := M.sum_eq_one
-end  -- module scope
-end Measurement
-end MIPStarRE.Quantum
-namespace MIPStarRE.QPBT
 
 -- elaboration context of MIPStarRE/QPBT/Algebra/Pauli.lean
 section
@@ -2054,14 +2002,6 @@ inductive PauliAnswer (P : AdmissibleParams) where
   | pauliOutcome (a : PauliRegister P)
   deriving DecidableEq
 
--- source: MIPStarRE/QPBT/Test/PauliBasisTest.lean:491-496  (MIPStarRE.QPBT.pauliAnswerOrZero)
-/-- A formalization-only total relabeling from the global Pauli-test answer
-alphabet to a Pauli register. It folds wrong-form answers into zero so that a
-Pauli question yields a complete `PauliRegister`-indexed measurement. -/
-def pauliAnswerOrZero {P : AdmissibleParams} : PauliAnswer P → PauliRegister P
-  | .pauliOutcome u => u
-  | _ => 0
-
 -- source: MIPStarRE/QPBT/Test/PauliBasisTest.lean:498-508  (MIPStarRE.QPBT.PauliAnswerCode)
 /-- A finite sum code used only to construct the `Fintype` instance for the
 answer alphabet in blueprint
@@ -2442,33 +2382,33 @@ structure PauliSoundnessWitness (P : AdmissibleParams)
 attribute [instance] PauliSoundnessWitness.ιAFintype PauliSoundnessWitness.ιBFintype
   PauliSoundnessWitness.ιADecidableEq PauliSoundnessWitness.ιBDecidableEq
 
--- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:182-193  (MIPStarRE.QPBT.pauliOperatorDistanceA)
-/-- The A-side operator-distance quantity appearing in the soundness
-conclusion.  It is the finite-sum realization of `def:povm-distance` from
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
--/
-noncomputable def pauliOperatorDistanceA
+-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:205-216  (MIPStarRE.QPBT.rawPauliOperatorDistanceA)
+/-- Alice's source-facing Pauli operator distance. The strategy effect is the
+raw effect of the prescribed answer `.pauliOutcome u`, exactly as in
+`thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
+The sum is the finite realization of blueprint `def:povm-distance`. -/
+noncomputable def rawPauliOperatorDistanceA
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedAEffect S w.φA
-        (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+        ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
       pauliProjOnA'' P W u) (idealState P w.aux)‖ ^ 2
+end  -- module scope
 
--- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:195-205  (MIPStarRE.QPBT.pauliOperatorDistanceB)
-/-- The symmetric B-side operator-distance quantity from blueprint
-`def:povm-distance`, paper origin
-`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:258-271`.
+-- source: MIPStarRE/QPBT/Test/SoundnessDefs.lean:218-228  (MIPStarRE.QPBT.rawPauliOperatorDistanceB)
+/-- Bob's source-facing Pauli operator distance, using the raw prescribed
+answer effect from `thm:pauli`, paper
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1438-1443`.
 -/
-noncomputable def pauliOperatorDistanceB
+noncomputable def rawPauliOperatorDistanceB
     (P : AdmissibleParams) (S : Strategy (pauliBasisTest P))
     (w : PauliSoundnessWitness P S) (W : PauliKind) : ℝ :=
   ∑ u : PauliRegister P,
       ‖applyOperatorToState (liftedBEffect S w.φB
-        (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+        ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
       pauliProjOnB'' P W u) (idealState P w.aux)‖ ^ 2
-end  -- module scope
 
 -- elaboration context of MIPStarRE/QPBT/Test/QubitForm.lean:35-447
 noncomputable section
@@ -2574,7 +2514,7 @@ noncomputable def qubitOperatorDistanceA
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitAEffect S w.φA
-          (((S.A (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.A (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnA'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 
@@ -2586,7 +2526,7 @@ noncomputable def qubitOperatorDistanceB
   ∑ u : PauliRegister P,
     ‖applyOperatorToState
       (liftedQubitBEffect S w.φB
-          (((S.B (pauliQuestion P W)).postprocess pauliAnswerOrZero).effect u) -
+          ((S.B (pauliQuestion P W)).effect (.pauliOutcome u)) -
         qubitProjOnB'' P W u)
       (idealQubitState P w.aux)‖ ^ 2
 end  -- module scope
@@ -2596,10 +2536,10 @@ namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT MIPStarRE.Quantum
 
--- source: MIPStarRE/QPBT/Test/Soundness.lean:38-62  (MIPStarRE.QPBT.pauli_soundness)
+-- source: MIPStarRE/QPBT/Test/Soundness.lean:40-65  (MIPStarRE.QPBT.pauli_soundness)
 /-- `thm:pauli`: every sufficiently successful Pauli basis test strategy admits
 local isometries and an auxiliary unit state for which the state and both
-operator families are close at scale `deltaQld`.  The theorem uses the
+raw prescribed-answer operator families are close at scale `deltaQld`. The theorem uses the
 once-and-for-all self-dual-normal field model selected by `fixedFieldModel` for
 each admissible size, rather than a freshly quantified field identification.
 Blueprint
@@ -2618,9 +2558,9 @@ theorem pauli_soundness :
             ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ ≤
                 deltaQld a b ε P.m P.d P.q ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
+              rawPauliOperatorDistanceA P S w W ≤ deltaQld a b ε P.m P.d P.q) ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
+              rawPauliOperatorDistanceB P S w W ≤ deltaQld a b ε P.m P.d P.q) := by
   sorry
 
 -- source: MIPStarRE/QPBT/Test/QubitForm.lean:411-436  (MIPStarRE.QPBT.pauli_soundness_qubit)

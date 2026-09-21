@@ -46,9 +46,9 @@ combined `pauli_soundness_nontrivial`).
 `deltaQld` for a *chosen* parameter family, not a uniform rate: it does not
 locate a threshold `ε₀ > 0` below which the bound is small for a *fixed*
 parameter tuple, and it does not compare `deltaQld` against the trivial bound
-on `pauliOperatorDistanceA`/`pauliOperatorDistanceB` at fixed parameters.  It
-also does not assert anything about the numerical size of the constants `a`
-and `b`, which the source theorem leaves implicit
+on `rawPauliOperatorDistanceA`/`rawPauliOperatorDistanceB` at fixed
+parameters. It also does not assert anything about the numerical size of the
+constants `a` and `b`, which the source theorem leaves implicit
 (`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`).
 Continuity of `deltaQld` in `ε` at `0` is recorded separately
 (`tendsto_deltaQld_eps_zero`) so that a reader can see that the `ε = 0`
@@ -135,9 +135,9 @@ theorem pauli_soundness_applies_to_honest_strategy :
           ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ ≤
               deltaQld a b 0 P.m P.d P.q ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceA P S w W ≤ deltaQld a b 0 P.m P.d P.q) ∧
+              rawPauliOperatorDistanceA P S w W ≤ deltaQld a b 0 P.m P.d P.q) ∧
             (∀ W : PauliKind,
-              pauliOperatorDistanceB P S w W ≤ deltaQld a b 0 P.m P.d P.q) := by
+              rawPauliOperatorDistanceB P S w W ≤ deltaQld a b 0 P.m P.d P.q) := by
   obtain ⟨a, b, ha, hb, hb1, hmain⟩ := pauli_soundness
   refine ⟨a, b, ha, hb, hb1, fun P => ?_⟩
   obtain ⟨S, hS⟩ := exists_pauliBasisTest_strategy_value_one P
@@ -280,8 +280,8 @@ theorem pauli_soundness_nontrivial :
         S.value = 1 ∧ deltaQld a b 0 P.m P.d P.q < η ∧
         ∃ w : PauliSoundnessWitness P S,
           ‖isometryTensor w.φA w.φB S.ψ - idealState P w.aux‖ <  η ∧
-            (∀ W : PauliKind, pauliOperatorDistanceA P S w W < η) ∧
-            (∀ W : PauliKind, pauliOperatorDistanceB P S w W < η) := by
+            (∀ W : PauliKind, rawPauliOperatorDistanceA P S w W < η) ∧
+            (∀ W : PauliKind, rawPauliOperatorDistanceB P S w W < η) := by
   obtain ⟨a, b, ha, hb, hb1, hmain⟩ := pauli_soundness
   refine ⟨a, b, ha, hb, hb1, fun η hη => ?_⟩
   obtain ⟨n, hn⟩ :=
