@@ -283,3 +283,46 @@ reservation and space-d enabled. Main admitted the prepared first independent
 review wrapper, with900 seconds and the normal two-worker cap. The remaining
 669 phase keeps its slot. The 678 and 680 publication/build/CI jobs continue
 without models; their new-head re-reviews still require complete green CI.
+
+## Full Speed Owner Instruction and Successors
+
+At07:06 UTC main received the owner's full-speed instruction: every new
+subagent uses gpt-6-astra/ultra through the explicit hard/hard_review escalation
+with reason `owner 2026-09-22 full speed mode: all subagents on astra`.
+Existing Sol assignments finished with their original identity and costs.
+The owner-relayed handoff subsequently records six lanes, adjusted at07:09:46
+to space-d2, space-3 2, relay-1 2, with relay-3 out. The live rotation agrees;
+main did not alter keys, model defaults or caps. The shim selects a home.
+Builds remain on ghz under the machine-wide lock; no parked infra PR is needed.
+
+PR669's fourth and final ordinary review5275002951 at
+`d9350aed3cd1c6355067db49d3ac188dad7171c8` approves prose and confirms all prior
+findings resolved, but finds one theorem-index error. Main verified this exact
+head and its complete green CI, accepted F1, and created issue682 to correct
+the deltaQld_mono description and add deltaQld_mono_epsilon. Terminal
+adjudication defers only this documentation finding to682; no fifth full review,
+invented approval or current-head mutation is admitted. The artifact remains
+incomplete until the separately reviewed index correction lands. The frozen
+adjudication template is `/tmp/adjudication-669-template-20260922.md`.
+
+PR681's first independent review5275058228 found a missing Python dependency
+closure in the packaged blueprint audit and an incorrect physical-core count.
+Main admitted a600-second Astra repair in its existing worktree, retaining the
+900-second initial timeout,600-second finisher and first review. Ownership
+extends narrowly to the artifact allow-list/export rules and an extracted
+snapshot regression, alongside the guide. Packet:
+`/tmp/main-fullspeed-fix681-20260922.md`.
+
+Main also admitted the prepared1800-second canonical-complement proof successor
+in `.worktrees/issue-676-rref-correspondence-20260922`, based on PR678 head
+`bff84964581fd85bfa7d52d6a5fc97b1406d0df3`, warmed through worktree-setup.
+It proves the conventional RREF correspondence, including existence, without
+changing source semantics or adding completion marks. Publication waits for678.
+Prior900+385+480+300-second bounds and all actual charges remain attached;
+this is not a budget reset. Packet: `/tmp/main-fullspeed-rref676-20260922.md`.
+
+The issue682 index-only successor has its own worktree based on669's frozen
+head and a300-second bound; publication waits for669. The second independent
+678 and680 reviews are ready for admission as their complete new-head CI
+finishes. Review wrappers use Astra/hard_review and preserve their first rounds.
+No read-only reviewer may become a second author in either worktree.
