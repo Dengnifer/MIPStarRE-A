@@ -9,3 +9,4 @@
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_naimark_comparison"], "ts": "2026-09-22T12:29:57Z"}
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_measurement_transport"], "ts": "2026-09-22T12:40:01Z"}
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_error_transport", "MIPStarRE.QPBT.linearity_padding_average_error_transport"], "ts": "2026-09-22T12:43:37Z"}
+{"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_rounding_transport"], "ts": "2026-09-22T12:48:25Z"}
