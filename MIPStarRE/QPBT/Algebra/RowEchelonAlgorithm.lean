@@ -195,6 +195,75 @@ theorem findPivot_spec (A : StoredMatrix K m n) (r : ℕ) (c : Fin n)
     · simp [findPivot, hi]
     · simpa [findPivot, hi] using ih
 
+/-- Computational elimination state. Only the first `rank` pivot entries are
+used; the other entries are storage that has not yet been assigned a pivot. -/
+structure State (K : Type*) (m n : ℕ) where
+  entries : StoredMatrix K m n
+  rank : ℕ
+  pivots : Vector ℕ m
+  operations : ℕ
+
+/-- Initial state, before any column has been inspected. -/
+def initialState (A : StoredMatrix K m n) : State K m n :=
+  ⟨A, 0, Vector.replicate m 0, 0⟩
+
+/-- Process one column, selecting the first available nonzero row. A column
+without a pivot leaves the matrix unchanged and still charges for its search. -/
+def step (S : State K m n) (c : Fin n) : State K m n :=
+  if hr : S.rank < m then
+    let search := findPivot S.entries S.rank c (List.finRange m)
+    match search.1 with
+    | none => { S with operations := S.operations + search.2 }
+    | some s =>
+      let result := eliminateColumnCounted S.entries ⟨S.rank, hr⟩ s c
+      ⟨result.1, S.rank + 1, S.pivots.set S.rank c.val hr,
+        S.operations + search.2 + result.2⟩
+  else S
+
+/-- Run the first `k` column iterations. Calls at `k > n` remain at the final
+state; the public algorithm calls this function at exactly `k = n`. -/
+def runColumns (A : StoredMatrix K m n) : ℕ → State K m n
+  | 0 => initialState A
+  | k + 1 =>
+    let S := runColumns A k
+    if hk : k < n then step S ⟨k, hk⟩ else S
+
+/-- Partial RREF invariant after `k` columns. Completed pivots are ordered and
+reduced; unprocessed rows vanish in the inspected columns. This is a loop
+invariant for the executable program, not an assumption on the input matrix. -/
+structure Invariant (A : StoredMatrix K m n) (k : ℕ) (S : State K m n) : Prop where
+  rank_le : S.rank ≤ m
+  pivot_lt : ∀ i : Fin m, i.val < S.rank → S.pivots[i.val] < k
+  pivot_strict : ∀ i j : Fin m, i < j → j.val < S.rank →
+    S.pivots[i.val] < S.pivots[j.val]
+  pivot_entry : ∀ t : Fin m, t.val < S.rank → ∀ c : Fin n,
+    S.pivots[t.val] = c.val → ∀ i,
+      toMatrix S.entries i c = if i = t then 1 else 0
+  zero_before : ∀ i : Fin m, i.val < S.rank → ∀ c : Fin n,
+    c.val < S.pivots[i.val] → toMatrix S.entries i c = 0
+  remaining_zero : ∀ i : Fin m, S.rank ≤ i.val → ∀ c : Fin n,
+    c.val < k → toMatrix S.entries i c = 0
+  span_eq : Submodule.span K (Set.range (toMatrix S.entries).row) =
+    Submodule.span K (Set.range (toMatrix A).row)
+  cost_le : S.operations ≤ k * (m + n + m * (2 * n))
+
+omit [DecidableEq K] in
+/-- The initial state satisfies the invariant for every matrix, including empty
+row and column index types. No independence or rank certificate is required. -/
+theorem initialState_invariant (A : StoredMatrix K m n) :
+    Invariant A 0 (initialState A) := by
+  refine ⟨Nat.zero_le _, ?_, ?_, ?_, ?_, ?_, rfl, by simp [initialState]⟩
+  · intro i hi
+    exact (Nat.not_lt_zero _ hi).elim
+  · intro i j hij hj
+    exact (Nat.not_lt_zero _ hj).elim
+  · intro t ht
+    exact (Nat.not_lt_zero _ ht).elim
+  · intro i hi
+    exact (Nat.not_lt_zero _ hi).elim
+  · intro i hi c hc
+    exact (Nat.not_lt_zero _ hc).elim
+
 end GaussianElimination
 
 end MIPStarRE.QPBT
