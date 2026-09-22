@@ -15,8 +15,9 @@ CI/review. The main checkpoint records live assignments.
    def:generalized-pauli, lem:twisted-commutation, lem:pauli-observable-expansion.
    Exit: general-prime eigenbasis/projectors and both Fourier identities with
    correct phases/normalization and source domain, all downstream consumers,
-   truthful linked marks. Owner: issue673/PR680, fourth review completed; its
-   source-faithful mathematics is checked, final reuse finding tracked separately.
+   truthful linked marks. Completed by merged issue673/PR680; its separately
+   deferred reuse finding is resolved by reviewed and merged PR693. Current
+   completion check7b455187 no longer counts this row as unresolved.
 2. **Combined-lines error term.** Source14:1020-1034, lem:qld-4-13. Exit:
    uniform vanishing bound in m^2 epsilon and md/q on the source domain,
    field-valued evaluations and source distribution, without a witness premise;
@@ -37,11 +38,15 @@ CI/review. The main checkpoint records live assignments.
    consumers, or document the necessary factor2 with minimality, printed-claim
    retention and independently reviewed adoption. The existing O(delta) use
    does not by itself certify literal equality with delta. Keep counterexamples.
+   Active whole-task evidence owner: issue694, admitted3600s with all historical
+   costs retained; a partial or weaker theorem does not close the row.
 5. **Linearity theorem quotation.** Same source, lem:linearity-common-ancilla.
    Exit: derive state/measurement-preserving padding absorption into the
    prescribed expanded strategy spaces, including every family/ancilla
    quantifier; uniform ancilla alone is insufficient. Preserve the already
    proved common-ancilla theorem and avoid duplicating it.
+   Active whole-task construction owner: issue697, admitted3600s with preserved
+   costs and a separate decision required before any source-space correction.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean
@@ -82,16 +87,19 @@ CI/review. The main checkpoint records live assignments.
 1. **def:canonical-complement.** Source04:303-320. Exit: prefix-rank object
    equals conventional RREF nonpivot object and every retained algorithmic
    assertion in the source-labelled entry is formalized truthfully. Abstract
-   existence is not an executable/complexity proof. Issue676 successor owns it.
+   existence is not an executable/complexity proof. Issue690's implementation
+   and integration are complete; publication waits for691's actual merge.
 2. **lem:canonical-complement.** Source04:342-373. Exit: source-domain
    complementarity for that same canonical object with correspondence derived,
    no assumed bridge. Reuse approved685, not another RREF proof. Can close
    separately if the definition's algorithmic claim remains explicitly open.
+   PR691's completed repair awaits new-head CI and second independent review.
 3. **def:generalized-pauli.** Exit: all linked eigenvectors/projectors cover
-   arbitrary prime characteristic and match source phases/domain. Owned680;
-   no duplicate worker while its review/merge disposition is in progress.
+   arbitrary prime characteristic and match source phases/domain. Completed
+   by merged680; the current completion check confirms the node is marked.
 4. **lem:pauli-observable-expansion.** Exit: both source Fourier identities
-   in arbitrary prime characteristic with no extra bridge. Owned680.
+   in arbitrary prime characteristic with no extra bridge. Completed by
+   merged680; the current completion check confirms the node is marked.
 5. **lem:qld-xz-lines.** Exit: completed-to-field evaluation comparison of
    the proved unconditioned line measurement on the source domain, including
    zero-direction POVM convention; no witness hypothesis. Ties to rows3/11.
@@ -99,6 +107,8 @@ CI/review. The main checkpoint records live assignments.
    and compatibility from source projection inclusion, then prove evaluation
    on degenerate lines. Reuse global polynomial and individual-degree bounds;
    existing explicit compatibility assumptions do not discharge this target.
+   Active whole-task construction owner: issue695, admitted3600s; any needed
+   source definition/game correction returns to main before implementation.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
