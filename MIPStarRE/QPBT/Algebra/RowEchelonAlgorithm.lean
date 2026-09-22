@@ -166,6 +166,35 @@ theorem eliminateColumn_entries (A : StoredMatrix K m n) (r s : Fin m) (c : Fin 
         simp [hir, hr, hs]
       · simp [hir, Equiv.swap_apply_of_ne_of_ne hir his]
 
+variable [DecidableEq K]
+
+/-- Scan a supplied row list in order. Each inspected row is charged one zero
+test, including a conservative charge when its index is below `r` and the field
+test is skipped. The caller uses `List.finRange m`, so this is a bounded search. -/
+def findPivot (A : StoredMatrix K m n) (r : ℕ) (c : Fin n) :
+    List (Fin m) → Option (Fin m) × ℕ
+  | [] => (none, 0)
+  | i :: is =>
+    if r ≤ i.val ∧ toMatrix A i c ≠ 0 then (some i, 1)
+    else
+      let rest := findPivot A r c is
+      (rest.1, rest.2 + 1)
+
+/-- The search returns the first eligible row, and charges at most the list
+length. Its specification reuses Lean's list search rather than an existence
+oracle or enumeration of candidate reduced matrices. -/
+theorem findPivot_spec (A : StoredMatrix K m n) (r : ℕ) (c : Fin n)
+    (is : List (Fin m)) :
+    (findPivot A r c is).1 =
+        is.find? (fun i => decide (r ≤ i.val ∧ toMatrix A i c ≠ 0)) ∧
+      (findPivot A r c is).2 ≤ is.length := by
+  induction is with
+  | nil => simp [findPivot]
+  | cons i is ih =>
+    by_cases hi : r ≤ i.val ∧ toMatrix A i c ≠ 0
+    · simp [findPivot, hi]
+    · simpa [findPivot, hi] using ih
+
 end GaussianElimination
 
 end MIPStarRE.QPBT
