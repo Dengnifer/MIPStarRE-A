@@ -164,3 +164,29 @@ review at `e8a8bc3e`, then began reading 680's published findings. PR 680 cannot
 be gated or merged until those findings receive a bounded repair and normal
 new-head CI/review. Current useful model work is 669 completion and 678 review;
 679 completion and the eventual 680 repair wait for a real vacancy.
+
+## Committed Truthfulness Repair
+
+The fresh linked 669 finisher completed successfully at
+`64735d1269266deea769932e92b08030d0851e0b`. Its receipt is
+`/tmp/main-space-d-fix669-20260922-result.md`; the committed two-file patch has
+SHA-256 `9ba718861c93ca6771365882d5d981f63df9487368739e6bd06bdaf95a245027`.
+The historical commands reproduce 332 files and 106,458 lines at the stated
+snapshot, normal hooks pass, and the predecessor's passed render, declaration
+and axiom checks apply to identical bytes. The author reports all five
+third-round findings addressed. Independent validation remains required.
+
+Main started `/tmp/main-space-d-publish669-finalrepair-20260922.sh`: guarded
+refresh, normal locked build for the incoming source imports, checked PR
+publication, public-head readback and complete CI. It does not start the fourth
+review; main must admit that review after green CI and an actual vacancy.
+The PR description covers the complete four-file documentation change.
+
+At the actual finisher completion, main admitted the prepared 600-second fresh
+linked 679 completion as `orc-679-20260922-02`, thread
+`01a0c7ce-6a2d-7c53-a8d0-83571ce134d7`. Its original 900 seconds and unknown
+usage remain charged. Current useful model work is the independent 678 review
+and 679 completion. The 680 six-finding repair is fully prepared at
+`/tmp/main-space-d-fix680-prepared-20260922.md` but not admitted. This packet
+preserves the verified source-facing signatures and requires honest comparator
+drift reporting if the shared Fourier cleanup changes the registered closure.
