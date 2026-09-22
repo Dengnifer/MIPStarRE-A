@@ -19,6 +19,7 @@ commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 | `references/` | the TeX sources of the five source papers — third-party material, see below — so that the paper locators can be checked inside the snapshot; the report below records two existing exceptions |
 | `scripts/comparator/` | the generator and checked-in Mathlib-only challenge tree used by the independent comparator repository |
 | `scripts/blueprint_leanok_axioms.py` | the blueprint/axiom consistency check |
+| `scripts/blueprint_lean_sync.py`, `scripts/tex_utils.py` | the Python helpers imported by the blueprint/axiom consistency check |
 | `scripts/make_artifact.sh` | the script that produced this snapshot, so the packaging is itself auditable |
 | `MANIFEST.txt` | source commit, file count, Lean code-line total, toolchain, Mathlib revision, leak-scan and self-containment results |
 
@@ -139,8 +140,9 @@ which `python3 scripts/blueprint_leanok_axioms.py --ci` passed 1,837
 declarations. This historical run did not include the separately named LDT
 axiom-audit target.
 
-The host was a 128-core Intel Xeon Platinum 8358P at 2.60 GHz with 503 GiB of
-RAM. Lake scheduled up to 21 Lean processes despite `LEAN_NUM_THREADS=16`; the
+The host had two Intel Xeon Platinum 8358P sockets at 2.60 GHz, with 32 physical
+cores per socket: 64 physical cores and 128 logical CPUs in total, with 503 GiB
+of RAM. Lake scheduled up to 21 Lean processes despite `LEAN_NUM_THREADS=16`; the
 largest single-process RSS was 5.10 GB and the sampled sum across Lean and Lake
 processes peaked at 84.3 GB. These are measurements, not minimum hardware
 requirements. A reviewer starting without cached dependencies must additionally
@@ -337,12 +339,13 @@ What ships is decided twice, on purpose:
 A path excluded in one should be excluded in the other, and the second guard is
 the weaker of the two: it is a deny-list, so a new workflow-only file has to be
 added to it by hand, whereas the allow-list drops anything it has not been told
-about. `scripts/` is the one mixed directory: the comparator directory and two
-top-level scripts ship, while workflow-only entries do not. `git archive` does
+about. `scripts/` is the one mixed directory: the comparator directory, the
+blueprint axiom audit and its two Python helpers, and the packaging script ship,
+while workflow-only entries do not. `git archive` does
 not descend into a directory it has been told to ignore, so a child of an
 ignored directory cannot be re-admitted. The deny-list therefore excludes the
 workflow-only scripts by glob (`scripts/*.py`, `scripts/*.sh`,
-`scripts/*.lean`, `scripts/tests/`) and re-admits the two shipped top-level
+`scripts/*.lean`, `scripts/tests/`) and re-admits the four shipped top-level
 files with `-export-ignore`; `scripts/comparator/` is never matched and ships
 under both guards. `references/` is named in `.gitattributes` too, as a comment
 rather than an `export-ignore` line, so that the decision to ship it is visible
