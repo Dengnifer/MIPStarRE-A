@@ -1185,25 +1185,64 @@ $4$, respectively.
 
 \begin{definition}[Prescribed Magic Square distances]
   \label{def:ms-prescribed-distances}
-  \lean{MIPStarRE.QPBT.msPrescribedOperatorDistanceA, MIPStarRE.QPBT.msPrescribedOperatorDistanceB, MIPStarRE.QPBT.msPrescribedObservable, MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceA, MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceB, MIPStarRE.QPBT.msConstraintOperatorDistanceA}
+  \lean{MIPStarRE.QPBT.msPrescribedOperatorDistanceA}
+  \lean{MIPStarRE.QPBT.msPrescribedOperatorDistanceB}
+  \lean{MIPStarRE.QPBT.msPrescribedObservable}
+  \lean{MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceA}
+  \lean{MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceB}
+  \lean{MIPStarRE.QPBT.msConstraintOperatorDistanceA}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msPauliCell}
   \leanok
-  \uses{def:ms-game, def:povm-distance, def:EPR}
-  Given local isometries and a unit auxiliary state, write $\Theta$ for their
-  ideal two-EPR-pair state. Let $d^{\mathrm{pre}}_{A,j}$ be the summed squared
-  distance on $\Theta$ between Alice's transported prescribed effects
-  $A^{\mathsf{Variable}_j}_{\mathsf{bit}(b)}$ and the ideal Pauli effects,
-  using $X$ for $j=1$ and $Z$ for $j=5$. Define $d^{\mathrm{pre}}_{B,j}$
-  similarly. Define $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B$ as the squared
-  anticommutator norms on $\Theta$ of the differences of those prescribed
-  effects. These are the six operator quantities in the printed claim.
-  Completed constraint-read distances instead use the binary postprocessing
-  of a constraint answer at a specified cell, assigning malformed single-bit
-  answers to zero. They are distinct from the prescribed-variable distances.
+  \uses{def:ms-game, def:povm-distance, def:EPR, def:ms-variable-agreement}
+  Let $\mathcal S=(\psi,A,B)$ be a finite-dimensional POVM strategy with
+  $\|\psi\|=1$. An extraction witness consists of local isometries
+  $\phi_A,\phi_B$ into two-qubit registers tensored with finite-dimensional
+  auxiliary spaces and a unit auxiliary vector $r$. Write
+  $\Theta(r)=\mathrm{EPR}_2^{\ot 2}\ot r$, with tensor factors reordered
+  by player, and $s_w=\|(\phi_A\ot\phi_B)\psi-\Theta(r)\|$.
+  For any local operator $M$, put $\widetilde M=\phi M\phi^\dagger$ on
+  the corresponding player's space. Let $P^W_b$ be the ideal Pauli effect
+  on extracted register coordinate $0$, with identities on coordinate $1$
+  and on all other factors; superscripts $A,B$ specify its placement.
+
+  For every cell $j\in\{1,\ldots,9\}$ and $W\in\{X,Z\}$, define
+  \[
+    d^{\mathrm{pre}}_{A,j}(W)=\sum_{b\in\F_2}
+      \|((\widetilde{A^{\mathsf{Variable}_j}_{\mathsf{bit}(b)}}\ot I)
+          -P^{W,A}_b)\Theta(r)\|^2,
+  \]
+  and define $d^{\mathrm{pre}}_{B,j}(W)$ by placing Bob's transported
+  effects on the second factor. For any Magic Square measurement $M$, put
+  $O(M)=M_{\mathsf{bit}(0)}-M_{\mathsf{bit}(1)}$; in particular write
+  $O_{A,j}=O(A^{\mathsf{Variable}_j})$ and similarly for Bob. Define
+  \[
+    a^{\mathrm{pre}}_A=
+      \|((\widetilde O_{A,1}\widetilde O_{A,5}
+          +\widetilde O_{A,5}\widetilde O_{A,1})\ot I)\Theta(r)\|^2,
+  \]
+  and similarly $a^{\mathrm{pre}}_B$ on the second factor.
+
+  Write $c(i,k)$ for the cell in position $k$ of constraint $i$, using
+  $1\le i\le6$ and $1\le k\le3$. Let $C^A_{i,k,b}$ be the binary
+  effect obtained from Alice's constraint-$i$ answer by reading coordinate
+  $k$ of a triple and sending a single-bit answer to zero. Define
+  \[
+    d^c_{A,i,k}(W)=\sum_b
+      \|((\widetilde C^A_{i,k,b}\ot I)-P^{W,A}_b)\Theta(r)\|^2.
+  \]
+  Use $C^B$ for the analogous completed constraint effects. Write
+  $d_{A,j}(W),d_{B,j}(W)$ for the distances using the completed variable
+  effects $\hat A,\hat B$ of Definition~\ref{def:ms-variable-agreement}.
+  Set $j_X=1$ and $j_Z=5$; these are cells $0,4$ in zero-based indexing.
+  At these two cells suppress $W$ when it is the corresponding Pauli kind.
+  Thus the six prescribed operator quantities in the printed claim are
+  $d^{\mathrm{pre}}_{A,j},d^{\mathrm{pre}}_{B,j}$ for $j=1,5$ and
+  $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B$.
 \end{definition}
 
 \begin{lemma}[Value-only one-way Magic Square extraction]
   \label{lem:ms-one-way-rigidity}
-  \lean{MIPStarRE.QPBT.exists_ms_one_way_rigidity, MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_constraints, MIPStarRE.QPBT.MagicSquareRigidity.ms_one_way_dilated_state_estimate}
+  \lean{MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_constraints}
   \leanok
   \uses{def:ms-game, def:tensor-product-value, def:EPR, def:ms-prescribed-distances}
   Let $\eps\ge0$ and let an arbitrary Magic Square strategy have value at
@@ -1211,31 +1250,28 @@ $4$, respectively.
   which the Euclidean state distance is at most $155904\sqrt\eps$, Bob's
   completed variable measurements at cells $1,5$ have squared distances at
   most $2\cdot10^{12}\eps$, and Alice's completed constraint-read
-  counterparts, from the first and second rows, have squared distances at
-  most $7\cdot10^{12}\eps$. Every operator comparison is on the ideal state.
+  counterparts satisfy
+  $d^c_{A,1,1}(X),d^c_{A,2,2}(Z)\le7\cdot10^{12}\eps$.
+  Every operator comparison is on the ideal state.
   No variable-agreement hypothesis is assumed. The statement with players
   interchanged may use a different witness.
 \end{lemma}
 \begin{proof}
   \leanok
-  \uses{thm:naimark, lem:ms-rigidity-support-second-pair, lem:ms-rigidity-support-joint-state, lem:ms-rigidity-support-marginals, lem:ms-rigidity-support-transfer}
-  Use Alice's constraint reflections at cells $1,5,2,4$ and Bob's variable
-  reflections at those cells in the two-pair swap construction. All four
-  cross-player comparisons are tested incidences. Product transfer gives
-  Alice's first-pair anticommutator bound $672\sqrt\eps$ and the inter-pair
-  commutator bounds $144\sqrt\eps$. The joint estimate and normalization
-  give $2\cdot116\cdot672\sqrt\eps$. Bob's intertwining bounds and
-  compression give his measurements; tested incidence agreement gives
-  Alice's constraint-read comparisons. These are auxiliary statements in
-  the one-way scope of the cited self-test; see
+  \uses{thm:ms-one-way-variable-extraction, thm:ms-constraint-distance-transfer}
+  Take the witness of Theorem~\ref{thm:ms-one-way-variable-extraction}.
+  Theorem~\ref{thm:ms-constraint-distance-transfer}, applied to positions
+  $(1,1)$ and $(2,2)$ of the first two rows, gives Alice's bounds since
+  $216+24\cdot155904^2+3\cdot2\cdot10^{12}\le7\cdot10^{12}$.
+  This is an auxiliary statement in the one-way scope of the self-test; see
   \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
 \end{proof}
 
 \begin{lemma}[Prescribed extraction with explicit agreement error]
   \label{lem:ms-prescribed-separate-errors}
-  \lean{MIPStarRE.QPBT.exists_ms_prescribed_rigidity_separate_errors, MIPStarRE.QPBT.ms_variable_distance_le_agreement, MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_agreement}
+  \lean{MIPStarRE.QPBT.exists_ms_prescribed_rigidity_separate_errors}
   \leanok
-  \uses{lem:ms-one-way-rigidity, def:ms-variable-agreement, def:ms-prescribed-distances}
+  \uses{def:ms-variable-agreement, def:ms-prescribed-distances, def:tensor-product-value}
   Let $\eps\ge0$ and let an arbitrary strategy have value at least
   $1-\eps$. There is one witness with state distance $s$ and all six
   prescribed operator distances satisfying
@@ -1247,31 +1283,23 @@ $4$, respectively.
   \]
   and $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B\le4\cdot10^{12}\eps$.
   Here $\Delta_j$ is the completed-variable agreement distance on the
-  original state; it is not required to be small. More generally, for any
-  witness, its completed distances satisfy
-  $d_{A,j}\le24s^2+3\Delta_j+3d_{B,j}$.
+  original state; it is not required to be small.
 \end{lemma}
 \begin{proof}
   \leanok
-  \uses{lem:ms-one-way-rigidity, lem:qld-ms-anticommutator-original-state, def:ms-prescribed-distances}
-  The two ideal Pauli effects act identically on the EPR state. Insert the
-  transported original state and apply the squared three-term triangle
-  inequality to obtain the agreement transfer. Wrong-form effects have
-  original squared action at most $36\eps$; removing them at bit zero costs
-  $144\eps+4s^2$ and doubles a completed distance. For products, first move
-  the other variable to its opposite-player constraint observable. The
-  anticommutator changes by at most $60\sqrt\eps$ on the original state,
-  giving prescribed norm at most $1148\sqrt\eps$. Transport to the ideal
-  state costs at most $8s$ in norm. The gap note gives the calculations and
-  the restricted sense in which the linear agreement term is necessary.
+  \uses{thm:ms-prescribed-measurement-extraction, thm:ms-prescribed-ideal-anticommutators}
+  Take the witness of Theorem~\ref{thm:ms-prescribed-measurement-extraction}
+  and apply Theorem~\ref{thm:ms-prescribed-ideal-anticommutators} on that
+  same witness. Both anticommutator distances are at most
+  $(1148+8\cdot155904)^2\eps\le4\cdot10^{12}\eps$.
 \end{proof}
 
 \begin{corollary}[Prescribed extraction under variable agreement]
   \label{cor:ms-rigidity-prescribed-answers}
   \lean{MIPStarRE.QPBT.exists_ms_rigidity_prescribed_answers}
   \leanok
-  \uses{lem:ms-prescribed-separate-errors, def:ms-variable-agreement}
-  There is a universal constant $C=2\cdot10^{13}$ such that, for every
+  \uses{def:ms-prescribed-distances, def:ms-variable-agreement, def:tensor-product-value}
+  There is a universal constant $C\ge1$ such that, for every
   $\eps,\delta\ge0$ and every strategy of value at least $1-\eps$ with
   $\Delta_1,\Delta_5\le\delta$, one witness satisfies all seven printed
   quantities, using prescribed effects, at most
@@ -1282,10 +1310,525 @@ $4$, respectively.
 \end{corollary}
 \begin{proof}
   \leanok
-  \uses{lem:ms-prescribed-separate-errors}
+  \uses{lem:ms-prescribed-separate-errors, lem:ms-rigidity-support-constants}
+  Choose $C=2\cdot10^{13}$.
   Apply the preceding lemma with $\min(\eps,1)\le\sqrt\eps$.
-  The completed agreement distances are at most $8$, so the two agreement
+  Nonnegativity of the value permits this replacement of $\eps$, and
+  $\sqrt{\min(\eps,1)}\le\sqrt\eps$ controls the state distance.
+  Lemma~\ref{lem:ms-rigidity-support-constants} bounds the completed
+  agreement distances by $8$, so the two agreement
   hypotheses imply $\Delta_j\le8\sqrt\delta$ for every $\delta\ge0$.
+\end{proof}
+
+The following auxiliary results isolate the finite-dimensional steps in the
+two extraction statements above. They are not named results of
+\cite{Ji2020MIPStar}. Their relation to the printed rigidity assertion is
+explained in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}; source adoption
+and global quantitative optimality remain pending.
+Throughout these entries, cells, constraints, and positions use the
+one-based paper indexing of Definition~\ref{def:ms-prescribed-distances}.
+Every strategy is an arbitrary finite-dimensional POVM strategy with a unit
+state; no projectivity, symmetry, or well-formedness condition is implicit.
+% tracked in issue #701; continues issues #105, #172, and #688.
+
+\begin{theorem}[Formalization support: squared vector estimates]
+  \label{thm:ms-squared-vector-estimates}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.sum_sq_single_sub_le}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_sq_on_close_state_le}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.binary_difference_norm_sq_le}
+  \leanok
+  For arbitrary vectors $f_0,f_1,t$ in a finite-dimensional complex
+  Hilbert space,
+  \[
+    \sum_{b\in\F_2}\|f_b-\mathbf1_{b=0}t\|^2
+      \le2\sum_b\|f_b\|^2+2\|t\|^2.
+  \]
+  If $K^\dagger K\le I$, $\|Ku\|^2\le r$, and $\|u-v\|\le s$,
+  where $r,s$ are real, then $\|Kv\|^2\le2r+2s^2$.
+  Finally, for arbitrary binary operator families $P_b,Q_b$ and vector
+  $\psi$, with no positivity or normalization assumption,
+  \[
+    \|((P_0-P_1)-(Q_0-Q_1))\psi\|^2
+      \le2\sum_b\|(P_b-Q_b)\psi\|^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  The first and third inequalities follow from the parallelogram identity
+  after discarding a nonnegative squared norm. For the second, write
+  $Kv=K(v-u)+Ku$ and use contractivity and the squared triangle inequality.
+\end{proof}
+
+\begin{definition}[The wrong-form effect]
+  \label{def:ms-wrong-form-effect}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msWrongFormEffect}
+  \leanok
+  \uses{def:ms-game}
+  For a measurement $M$ with the Magic Square answer alphabet, define
+  $R(M)=\sum_{\beta\in\F_2^3}M_{\mathsf{triple}(\beta)}$.
+  This is the effect for receiving a triple rather than a bit. Write
+  $R_{A,j}=R(A^{\mathsf{Variable}_j})$ and similarly for Bob.
+\end{definition}
+
+\begin{theorem}[Formalization support: completion identities]
+  \label{thm:ms-completion-identities}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_completed_effect_eq}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_prescribed_effect_eq}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_prescribed_observable_eq}
+  \leanok
+  \uses{def:ms-wrong-form-effect, def:ms-prescribed-distances, def:ms-variable-agreement}
+  Let $M$ be any Magic Square measurement and $\hat M_b$ its binary
+  completion, assigning triples to zero. For each $b\in\F_2$,
+  \[
+    \hat M_b=M_{\mathsf{bit}(b)}+\mathbf1_{b=0}R(M),\qquad
+    M_{\mathsf{bit}(b)}=\hat M_b-\mathbf1_{b=0}R(M).
+  \]
+  Consequently $O(M)=(\hat M_0-\hat M_1)-R(M)$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:ms-wrong-form-effect, def:ms-variable-agreement}
+  Split the fibre of each binary outcome into bit and triple answers.
+  Rearranging gives the second identity, and subtracting the two outcomes
+  gives the observable identity.
+\end{proof}
+
+\begin{theorem}[Formalization support: wrong-form bounds]
+  \label{thm:ms-wrong-form-bounds}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msWrongFormEffect_bounds}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_wrong_form_norm_sq_A}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_wrong_form_norm_sq_B}
+  \leanok
+  \uses{def:ms-wrong-form-effect, def:tensor-product-value}
+  For every Magic Square measurement $M$, $0\le R(M)\le I$.
+  If $\eps\in\mathbb R$ and $\mathcal S$ has value at least $1-\eps$,
+  then at every cell $j$,
+  \[
+    \|(R_{A,j}\ot I)\psi\|^2\le36\eps,\qquad
+    \|(I\ot R_{B,j})\psi\|^2\le36\eps.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:ms-game, def:ms-wrong-form-effect, def:tensor-product-value}
+  The wrong-form effect is an effect of a binary postprocessing, hence a
+  positive contraction. Each cell occurs in a tested incidence of weight
+  $1/36$, where a triple answer on the variable side is rejected. Thus its
+  expectation is at most $36\eps$; the squared-action bounds follow from
+  $R^2\le R$ on either tensor factor.
+\end{proof}
+
+\begin{theorem}[Formalization support: tested incidences on the original state]
+  \label{thm:ms-original-incidence-estimates}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_original_cell_distance_forward}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_original_cell_distance_reverse}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_original_variable_close_constraint_A}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_original_variable_close_constraint_B}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:ms-variable-agreement, def:tensor-product-value}
+  Suppose $\eps\in\mathbb R$ and $\mathcal S$ has value at least
+  $1-\eps$. For every constraint $i$ and position $k$, put $j=c(i,k)$.
+  Then the completed effects satisfy
+  \begin{align*}
+    \sum_b\|(C^A_{i,k,b}\ot I-I\ot\hat B_{j,b})\psi\|^2&\le72\eps,\\
+    \sum_b\|(\hat A_{j,b}\ot I-I\ot C^B_{i,k,b})\psi\|^2&\le72\eps.
+  \end{align*}
+  Here $\hat A_{j,b}=\hat A^{\mathsf{Variable}_j}_b$ and similarly for Bob.
+  If also $\eps\ge0$, write $V^A_j=\hat A_{j,0}-\hat A_{j,1}$ and
+  $H^A_{i,k}=C^A_{i,k,0}-C^A_{i,k,1}$, and define $V^B,H^B$ similarly.
+  The corresponding observable estimates are
+  \begin{align*}
+    \|(V^A_j\ot I-I\ot H^B_{i,k})\psi\|&\le12\sqrt\eps,\\
+    \|(I\ot V^B_j-H^A_{i,k}\ot I)\psi\|&\le12\sqrt\eps.
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:ms-game, def:tensor-product-value, thm:ms-squared-vector-estimates}
+  A mismatch of the completed bits is rejected on the corresponding
+  incidence, so its mass is at most $36\eps$ in either orientation.
+  The squared distance between two measurements placed on opposite factors
+  is at most twice their mismatch mass. The binary-difference estimate
+  of Theorem~\ref{thm:ms-squared-vector-estimates} then gives squared
+  observable error at most $144\eps$.
+\end{proof}
+
+\begin{definition}[The one-way swap isometries]
+  \label{def:ms-one-way-swap}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msAliceOneWaySwapIsometry}
+  \leanok
+  \uses{thm:naimark, def:ms-prescribed-distances, lem:ms-rigidity-support-two-qubit-swap}
+  On the questionwise Naimark dilation of $\mathcal S$, write $\psi'$ for
+  the state and $H'^A_{i,k},V'^B_j$ for the completed constraint and variable
+  reflections. Alice's one-way isometry $U_A$ is the two-qubit controlled
+  swap built from the ordered pairs
+  $(H'^A_{1,1},H'^A_{2,2})$ and $(H'^A_{1,2},H'^A_{2,1})$.
+  Bob's isometry $U_B$ is the already defined controlled swap from
+  $(V'^B_1,V'^B_5)$ and $(V'^B_2,V'^B_4)$.
+  Explicitly, for either player's ordered list $(X_1,Z_1,X_2,Z_2)$,
+  the component of the image of $v$ at register label
+  $e\in\F_2^{\{0,1\}}$ is
+  $X_2^{e(1)}P^{Z_2}_{e(1)}X_1^{e(0)}P^{Z_1}_{e(0)}v$,
+  where $P^Z_b=(I+(-1)^bZ)/2$.
+  Each auxiliary space here is that player's dilated local space.
+\end{definition}
+
+\begin{theorem}[Formalization support: Alice's constraint reflections]
+  \label{thm:ms-one-way-constraint-relations}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msCellObsA_first_pair_anticommute}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.msCellObsA_comm_of_shared_constraint}
+  \leanok
+  \uses{def:ms-one-way-swap, def:tensor-product-value}
+  Let $\eps\in\mathbb R$ and suppose $\mathcal S$ has value at least
+  $1-\eps$. Alice's dilated constraint reflections obey
+  \[
+    \|((H'^A_{1,1}H'^A_{2,2}+H'^A_{2,2}H'^A_{1,1})\ot I)\psi'\|
+      \le672\sqrt\eps.
+  \]
+  More generally, for any constraints $I,J,i$ and positions $k,l,p,q$
+  with $c(I,k)=c(i,p)$ and $c(J,l)=c(i,q)$,
+  \[
+    \|((H'^A_{I,k}H'^A_{J,l}-H'^A_{J,l}H'^A_{I,k})\ot I)\psi'\|
+      \le144\sqrt\eps.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:ms-game, lem:ms-rigidity-support-second-pair,
+    lem:ms-rigidity-support-marginals}
+  Tested incidence agreement transfers each ordered product to the reversed
+  product of Bob's variables at cost $24\sqrt\eps$. Transfer Bob's
+  $624\sqrt\eps$ first-pair anticommutator in both directions. For the
+  second assertion use his $96\sqrt\eps$ commutator for cells sharing
+  constraint $i$, again with two product transfers.
+\end{proof}
+
+\begin{theorem}[Formalization support: the specified dilated state extraction]
+  \label{thm:ms-one-way-dilated-state}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_one_way_dilated_state_estimate}
+  \leanok
+  \uses{def:ms-one-way-swap, def:tensor-product-value, def:EPR}
+  For every $\eps\in\mathbb R$ and strategy of value at least $1-\eps$,
+  there is a unit vector $r$ in the tensor product of the two dilated local
+  spaces such that the specified isometries satisfy
+  \[
+    \|(U_A\ot U_B)\psi'-\Theta(r)\|\le155904\sqrt\eps.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-one-way-constraint-relations, lem:ms-rigidity-support-second-pair,
+    lem:ms-rigidity-support-joint-state, def:ms-game}
+  Every cross-player comparison is a tested incidence. The preceding
+  relations and the second-pair estimates bound all hypotheses of the
+  joint state estimate by $672\sqrt\eps$. That estimate gives a residual
+  at distance $116\cdot672\sqrt\eps$; normalizing it doubles the bound.
+\end{proof}
+
+\begin{theorem}[Formalization support: Bob's one-way effect transport]
+  \label{thm:ms-one-way-effect-transport}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_ms_one_way_effect_defect_B}
+  \leanok
+  \uses{def:ms-one-way-swap, def:ms-prescribed-distances}
+  For every strategy, Pauli kind $W$, and $b\in\F_2$, let
+  $F^B_{W,b}=(I+(-1)^b V'^B_{j_W})/2$. With $U=U_A\ot U_B$,
+  \[
+    \|P^{W,B}_b U\psi'-U(I\ot F^B_{W,b})\psi'\|
+      \le\|(I\ot(V'^B_1V'^B_5+V'^B_5V'^B_1))\psi'\|.
+  \]
+  No value bound is assumed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{lem:ms-rigidity-support-marginals, lem:ms-rigidity-support-intertwine}
+  The phase transport is exact. The shift transport has squared Gram
+  operator equal to half that of the first-pair anticommutator, and passing
+  to a spectral effect gives a further factor $1/4$. Tensoring with
+  Alice's specified isometry preserves the squared norm.
+\end{proof}
+
+\begin{theorem}[Formalization support: Bob's dilated effect distance]
+  \label{thm:ms-one-way-dilated-effects}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_one_way_dilated_operator_distance_B}
+  \leanok
+  \uses{def:ms-one-way-swap, def:ms-prescribed-distances, def:tensor-product-value}
+  Let $\eps\in\mathbb R$, let $\mathcal S$ have value at least
+  $1-\eps$, and let $r$ be any vector in the tensor product of the dilated
+  local spaces. Assume
+  $\|(U_A\ot U_B)\psi'-\Theta(r)\|\le155904\sqrt\eps$.
+  For each $W\in\{X,Z\}$, the completed effects
+  $F^B_{W,b}$ of the dilated variable measurement satisfy
+  \[
+    \sum_b\|((I\ot U_B F^B_{W,b}U_B^\dagger)-P^{W,B}_b)\Theta(r)\|^2
+      \le2(312432\sqrt\eps)^2.
+  \]
+  Normalization of $r$ is not required.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-one-way-effect-transport, lem:ms-rigidity-support-marginals,
+    lem:ms-rigidity-support-transfer}
+  The anticommutator norm is at most $624\sqrt\eps$. Moving two
+  contractions to the ideal vector costs $2\cdot155904\sqrt\eps$.
+  Square the resulting $312432\sqrt\eps$ bound and sum over both bits.
+\end{proof}
+
+\begin{theorem}[Formalization support: state and Bob variable extraction]
+  \label{thm:ms-one-way-variable-extraction}
+  \lean{MIPStarRE.QPBT.exists_ms_one_way_rigidity}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:tensor-product-value}
+  For every $\eps\ge0$ and strategy of value at least $1-\eps$, there
+  is an extraction witness $w$ such that
+  \[
+    s_w\le155904\sqrt\eps,\qquad
+    d_{B,j_W}(W)\le2\cdot10^{12}\eps\quad(W\in\{X,Z\}).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-one-way-dilated-state, thm:ms-one-way-dilated-effects,
+    thm:naimark, lem:ms-variable-agreement-support}
+  Compose $U_A,U_B$ with the Naimark embeddings and use the unit vector
+  from Theorem~\ref{thm:ms-one-way-dilated-state}. The state norm is
+  unchanged. Compression and leakage bound the completed effect distance
+  by $3\cdot2(312432\sqrt\eps)^2+216\eps+24(155904\sqrt\eps)^2$,
+  which is at most $2\cdot10^{12}\eps$.
+\end{proof}
+
+\begin{theorem}[Formalization support: ideal effects and cross-player transfer]
+  \label{thm:ms-ideal-measurement-transfer}
+  \lean{MIPStarRE.QPBT.idealMsState_pauli_actions_eq}
+  \lean{MIPStarRE.QPBT.ms_ideal_measurement_transfer}
+  \leanok
+  \uses{def:ms-prescribed-distances}
+  For any finite-dimensional auxiliary spaces, any auxiliary vector $r$
+  (not necessarily unit), any $W\in\{X,Z\}$, and any $b\in\F_2$,
+  $P^{W,A}_b\Theta(r)=P^{W,B}_b\Theta(r)$.
+  Now fix a strategy, an extraction witness $w$, binary POVMs $E_b,F_b$
+  on its respective local spaces, a Pauli kind $W$, and $s\in\mathbb R$
+  with $s_w\le s$. Then
+  \begin{align*}
+    \sum_b\|((\widetilde E_b\ot I)-P^{W,A}_b)\Theta(r)\|^2
+      &\le24s^2+3\sum_b\|(E_b\ot I-I\ot F_b)\psi\|^2\\
+      &\quad+3\sum_b\|((I\ot\widetilde F_b)-P^{W,B}_b)\Theta(r)\|^2.
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:EPR, def:ms-prescribed-distances}
+  Both Pauli effects are real symmetric, so their actions on opposite
+  halves of the EPR state agree. Insert the transported original state
+  between the two transported effects. Contractivity bounds the
+  state-change term by $2s$ for each bit, isometric transport preserves
+  the original comparison, and the squared three-term triangle inequality
+  gives the asserted sum.
+\end{proof}
+
+\begin{theorem}[Formalization support: completed variable agreement transfer]
+  \label{thm:ms-variable-distance-transfer}
+  \lean{MIPStarRE.QPBT.ms_variable_distance_le_agreement}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:ms-variable-agreement}
+  For every strategy, extraction witness $w$, cell $j$, Pauli kind $W$,
+  and real $s$ with $s_w\le s$,
+  \[
+    d_{A,j}(W)\le24s^2+3\Delta_j+3d_{B,j}(W).
+  \]
+  No value or agreement bound is assumed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-ideal-measurement-transfer}
+  Apply the transfer to the two completed variable measurements at $j$.
+\end{proof}
+
+\begin{theorem}[Formalization support: completed constraint transfer]
+  \label{thm:ms-constraint-distance-transfer}
+  \lean{MIPStarRE.QPBT.ms_constraint_distance_A_le}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:tensor-product-value}
+  Suppose $\eps,s\in\mathbb R$, the strategy has value at least
+  $1-\eps$, and an extraction witness satisfies $s_w\le s$.
+  For every constraint $i$, position $k$, and Pauli kind $W$,
+  \[
+    d^c_{A,i,k}(W)\le216\eps+24s^2+3d_{B,c(i,k)}(W).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-ideal-measurement-transfer, thm:ms-original-incidence-estimates}
+  Apply the ideal measurement transfer to Alice's completed constraint read
+  and Bob's completed variable at the tested cell. Their original squared
+  distance is at most $72\eps$.
+\end{proof}
+
+\begin{theorem}[Formalization support: completed extraction with agreement error]
+  \label{thm:ms-completed-extraction-agreement}
+  \lean{MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_agreement}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:ms-variable-agreement, def:tensor-product-value}
+  For every $\eps\ge0$ and strategy of value at least $1-\eps$, there
+  is one extraction witness satisfying
+  \[
+    s_w\le155904\sqrt\eps,\qquad
+    d_{B,j}\le2\cdot10^{12}\eps,\qquad
+    d_{A,j}\le7\cdot10^{12}\eps+3\Delta_j\quad(j=1,5).
+  \]
+  Both variable families are completed. The agreement distances are not
+  assumed bounded by any further parameter.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-one-way-variable-extraction, thm:ms-variable-distance-transfer}
+  Use the state and Bob witness, and apply variable agreement transfer.
+  The value coefficient for Alice is bounded by
+  $24\cdot155904^2+3\cdot2\cdot10^{12}\le7\cdot10^{12}$.
+\end{proof}
+
+\begin{theorem}[Formalization support: removing completion from effects]
+  \label{thm:ms-prescribed-effect-transfer}
+  \lean{MIPStarRE.QPBT.ms_prescribed_operator_distance_A_le}
+  \lean{MIPStarRE.QPBT.ms_prescribed_operator_distance_B_le}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:tensor-product-value}
+  Let $\eps,s\in\mathbb R$, let the strategy have value at least
+  $1-\eps$, and let $w$ be any extraction witness with $s_w\le s$.
+  For every cell $j$ and Pauli kind $W$,
+  \begin{align*}
+    d^{\mathrm{pre}}_{A,j}(W)&\le2d_{A,j}(W)+144\eps+4s^2,\\
+    d^{\mathrm{pre}}_{B,j}(W)&\le2d_{B,j}(W)+144\eps+4s^2.
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-completion-identities, thm:ms-wrong-form-bounds,
+    thm:ms-squared-vector-estimates}
+  Transport the wrong-form effect by the local isometry. Its squared action
+  on the ideal state is at most $72\eps+2s^2$ by the close-vector estimate.
+  Subtract that error only at outcome zero and apply the binary vector-sum
+  bound, which doubles the completed distance and this squared error.
+\end{proof}
+
+\begin{theorem}[Formalization support: prescribed measurement extraction]
+  \label{thm:ms-prescribed-measurement-extraction}
+  \lean{MIPStarRE.QPBT.exists_ms_prescribed_measurements_with_agreement}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:ms-variable-agreement, def:tensor-product-value}
+  For every $\eps\ge0$ and strategy of value at least $1-\eps$, there
+  is one extraction witness satisfying
+  \[
+    s_w\le155904\sqrt\eps,\qquad
+    d^{\mathrm{pre}}_{B,j}\le5\cdot10^{12}\eps,\qquad
+    d^{\mathrm{pre}}_{A,j}\le15\cdot10^{12}\eps+6\Delta_j\quad(j=1,5).
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-completed-extraction-agreement, thm:ms-prescribed-effect-transfer}
+  Remove completion from the four effect comparisons on the completed
+  extraction witness. The added coefficient $144+4\cdot155904^2$ is
+  at most $10^{12}$, giving the stated bounds after doubling.
+\end{proof}
+
+\begin{theorem}[Formalization support: products through a commuting contraction]
+  \label{thm:ms-product-opposite-transfer}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_product_via_opposite_le}
+  \leanok
+  Let $R,Z,D$ be operators on a finite-dimensional complex Hilbert space,
+  $\psi$ any vector, and $a,r\in\mathbb R$. Suppose
+  $R^\dagger R,D^\dagger D\le I$, $RD=DR$,
+  $\|(Z-D)\psi\|\le a$, and $\|R\psi\|\le r$. Then
+  $\|RZ\psi\|\le a+r$. No contractivity assumption on $Z$ is needed.
+\end{theorem}
+\begin{proof}
+  \leanok
+  Write $RZ=R(Z-D)+DR$ and use contractivity in the triangle inequality.
+\end{proof}
+
+\begin{theorem}[Formalization support: subtracting errors from an anticommutator]
+  \label{thm:ms-anticommutator-subtraction}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_anticommutator_sub_errors_le}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.norm_anticommutator_sub_apply_le}
+  \leanok
+  Let $X,Z,R,T,C,D$ be contractions on a finite-dimensional complex
+  Hilbert space, let $\psi$ be any vector, and let $a,r\in\mathbb R$.
+  Assume $RD=DR$, $TC=CT$, and
+  \[
+    \|(X-C)\psi\|,\|(Z-D)\psi\|\le a,\qquad
+    \|R\psi\|,\|T\psi\|\le r.
+  \]
+  Then
+  \[
+    \|((X-R)(Z-T)+(Z-T)(X-R))\psi\|
+      \le\|(XZ+ZX)\psi\|+2a+6r.
+  \]
+  Independently, for any four contractions $X,Z,R,T$ and any vector $v$,
+  \[
+    \|((X-R)(Z-T)+(Z-T)(X-R))v\|\le8\|v\|.
+  \]
+  The latter bound requires none of the comparison or commutation hypotheses.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-product-opposite-transfer}
+  The difference from $XZ+ZX$ is the negative of
+  $RZ+(X-R)T+TX+(Z-T)R$. The product-transfer estimate bounds the first
+  and third terms by $a+r$ each; the other two are bounded by $2r$ each.
+  For the independent estimate, each difference of contractions has norm
+  at most two, so each product has norm at most four.
+\end{proof}
+
+\begin{theorem}[Formalization support: prescribed anticommutators on the original state]
+  \label{thm:ms-prescribed-original-anticommutators}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_prescribed_anticommutator_norm_A}
+  \lean{MIPStarRE.QPBT.MagicSquareRigidity.ms_prescribed_anticommutator_norm_B}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:tensor-product-value}
+  Let $\eps\ge0$ and let the strategy have value at least $1-\eps$.
+  Its original prescribed observables satisfy
+  \begin{align*}
+    \|((O_{A,1}O_{A,5}+O_{A,5}O_{A,1})\ot I)\psi\|&\le1148\sqrt\eps,\\
+    \|(I\ot(O_{B,1}O_{B,5}+O_{B,5}O_{B,1}))\psi\|&\le1148\sqrt\eps.
+  \end{align*}
+  Neither assertion requires an extraction witness or variable agreement.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-completion-identities, thm:ms-wrong-form-bounds,
+    thm:ms-original-incidence-estimates, thm:ms-anticommutator-subtraction,
+    lem:qld-ms-anticommutator-original-state}
+  Use the completed variable observables as $X,Z$ and their wrong-form
+  effects as $R,T$. Opposite-player constraint observables at $(1,1)$
+  and $(2,2)$ supply $C,D$ with error $a=12\sqrt\eps$ and commute
+  with the local wrong-form effects. The wrong-form effects have action
+  bounded by $r=6\sqrt\eps$. Subtraction therefore costs $60\sqrt\eps$.
+  The completed anticommutator has squared norm at most $1183680\eps$,
+  hence norm at most $1088\sqrt\eps$, on either player's factor.
+\end{proof}
+
+\begin{theorem}[Formalization support: prescribed anticommutators on the ideal state]
+  \label{thm:ms-prescribed-ideal-anticommutators}
+  \lean{MIPStarRE.QPBT.ms_prescribed_anticommutator_distance_A_le}
+  \lean{MIPStarRE.QPBT.ms_prescribed_anticommutator_distance_B_le}
+  \leanok
+  \uses{def:ms-prescribed-distances, def:tensor-product-value}
+  Let $\eps\ge0$, let the strategy have value at least $1-\eps$, and
+  let any extraction witness $w$ and real $s$ satisfy $s_w\le s$. Then
+  \[
+    a^{\mathrm{pre}}_A\le(1148\sqrt\eps+8s)^2,\qquad
+    a^{\mathrm{pre}}_B\le(1148\sqrt\eps+8s)^2.
+  \]
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{thm:ms-prescribed-original-anticommutators, thm:ms-anticommutator-subtraction,
+    thm:ms-completion-identities}
+  Conjugation by an isometry preserves products and the norm on the
+  embedded original state. The transported prescribed anticommutator is
+  an anticommutator of two differences of contractions, so its action
+  on the state difference has norm at most $8s$. Add the original
+  $1148\sqrt\eps$ bound and square.
 \end{proof}
 
 % Formalization-support and specialization nodes for Theorem~\ref{thm:ms-rigidity}. None of
