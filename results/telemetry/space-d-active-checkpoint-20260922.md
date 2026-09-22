@@ -1212,3 +1212,62 @@ The completion report is public in d79e0d0f. The first follow-up snapshot push
 refused because CI appended builds.jsonl concurrently; the subsequent normal
 records invocation preserved it and published be1d0ab8 with a clean primary.
 Overall turn classification is progress, not an impasse. No gate was bypassed.
+
+## 2026-09-22T11:45Z author results, source-function decision, and696 repair
+
+694 completed0 after2552s at f78987a8cd22bdb6ba46ac7e7d9b51ed5f2c52a4,
+clean. Seven files+803/-13: both literal/conventional printed claims retained
+and refuted in Lean, corrected theorem for all natural index lengths and real
+errors, full consumer audit, and a mathematical sharp-factor2 proof. Sharpness
+is not falsely advertised as a Lean theorem. Existing operator/measurement/
+common-ancilla proofs stay unchanged; normalization stays pending review/Main
+adoption and padding stays open. Receipt
+/tmp/main-fullspeed-linearity-normalization-20260922-result.md; PR body
+/tmp/main-linearity-normalization-pr-body-20260922.md explicitly asks review
+of correctness, all-consumer sufficiency, minimality and Lean convergence.
+
+695 completed0 after1853s at23207298a8dfecd1026038c1a0d4a6a3362d5828,
+clean, six milestone commits. Five new declarations in LinePolynomial.lean
+derive affine parameters/compatibility from projection inclusion, construct
+the coefficient formula and prove the singleton evaluation obstruction. All
+five closures are standard-only;1881 declaration links and focused consumers
+pass. Arbitrary coefficient T on a singleton has no geometric value; this
+does not refute the source identity for actual functions. C4 stays open.
+Receipt /tmp/main-fullspeed-combine-map-20260922-result.md and audit
+audits/2026-09-22_combining-map-source-domain.md preserve full costs/proposal.
+
+Both detached /tmp/main-publish-source-evidence-20260922.sh instances are live,
+runtime /tmp/main-source-publish694-20260922 and ...publish695.... They verify
+exact clean completed heads, refresh normally, export private imports and
+checked-publish immediately. Full CI remains serial: the already queued690
+publication CI precedes694, then695 follows694's CI; reviews do not block the
+next CI. Each runs required marked axioms and FIRST independent review. CI
+receipts are /tmp/main-source-ci694-20260922 and ...ci695.... Unexpected merge,
+publication or dependency failure stops with evidence. Never blindly retry.
+
+Main separately opened698 under695 and authorized the concrete source-function
+representation proposal,3600s, base23207298 in isolated
+issue-698-geometric-line-functions-20260922. Packet
+/tmp/main-geometric-lines-packet-20260922.md; runtime
+/tmp/main-fullspeed-geometric-lines-20260922. The task adds faithful polynomial
+functions on geometric lines, combines them on the full source domain, proves
+choice/representative independence and supplies a separate descending-coefficient
+adapter. It changes no existing game, strategy, sampling law, answer carrier
+or probability; measurement transport remains open. Full statement/consumer
+audit and independent review are mandatory. All predecessor costs remain.
+
+PR696 first review5277695906 is CHANGES_REQUESTED. Code F1 and prose F1 name
+the SAME sentence in the subline note near304, falsely claiming no new marks
+despite five marked auxiliary entries. Both reviewers confirm the mathematics
+and stated restrictions. Whole2700s note repair now runs via
+/tmp/main-fullspeed-fix696-marks-20260922 from e632decf, packet
+/tmp/main-fix696-marks-packet-20260922.md; preserve all marks/proofs and open
+source claims. Main must publish new-head CI/marked audit and SECOND full review.
+
+691's earlier apparently quiet publication was a live checked-push marker
+audit, not a stopped process. It is now published at
+3ab2724f989ba4b04f51a7c5faad862050699872 with complete CI running through the
+existing repair691 pipeline. 692 and690 continue to wait on their explicit
+dependencies. 697 remains active; its intermediate output reports a checked
+fixed-space padding obstruction, but no completed receipt has yet been adopted.
+Prior stage5775834887 and telemetrye8e87554 were published cleanly.

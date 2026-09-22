@@ -9563,3 +9563,18 @@ historical entry above is rewritten.
   The completion report was published at d79e0d0f; a concurrent builds.jsonl
   append made the following snapshot push refuse, and the normal records retry
   preserved that record and published clean be1d0ab8. Overall cycle: progress.
+
+- The11:45Z cycle harvested694 at f78987a8 (2552s, clean) and695 at23207298
+  (1853s, clean), preserving their whole-task receipts and prior budgets.
+  New detached checked-publication pipelines start now; their full CI follows
+  the existing692/690 queue, then694 followed by695, with marked audits and
+  first independent reviews. 694's pending adoption requires explicit review
+  of all four conditions. 695 proves the source projection step but leaves
+  C4 open because arbitrary coefficient answers need not descend to functions.
+  Main admits the separate698 source-function construction, with no game change.
+- PR696 review5277695906 has two ledger entries for the same note-status
+  defect; both reviewers report no mathematical mismatch. A2700s whole repair
+  is assigned under main-fix696. 691 is republished at3ab2724f and full CI is
+  running. Source694/695 publications and all captures remain independently
+  guarded. Previous cycle progressed through696 CI/axioms and clean telemetry
+  e8e87554; current cycle progresses through author receipts and new admissions.

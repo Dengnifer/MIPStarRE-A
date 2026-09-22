@@ -109,6 +109,9 @@ CI/review. The main checkpoint records live assignments.
    existing explicit compatibility assumptions do not discharge this target.
    Active whole-task construction owner: issue695, admitted3600s; any needed
    source definition/game correction returns to main before implementation.
+   695 completed the projection construction and certified the singleton
+   coefficient obstruction. Main separately admitted698 for the faithful
+   source-function carrier and algebraic comparison, with no game change.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
