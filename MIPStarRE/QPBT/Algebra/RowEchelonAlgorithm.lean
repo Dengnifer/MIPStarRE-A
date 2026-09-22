@@ -486,4 +486,33 @@ theorem gaussianElimination_correct (A : StoredMatrix K m n) :
   · rintro hj ⟨i, hi⟩
     exact hj ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩ i.isLt (congrArg Fin.val hi)
 
+/-- For the independent rows of paper `def:canonical-complement`, all `m` output
+rows are pivot rows. The full stored output is RREF with the input row span,
+and its computed nonpivot indices are precisely the source complement. The only
+effectivity data beyond the paper's field are executable operations and equality. -/
+theorem gaussianElimination_of_linearIndependent (A : StoredMatrix K m n)
+    (hA : LinearIndependent K (toMatrix A).row) :
+    (gaussianElimination A).rank = m ∧
+      ∃ pivot : Fin m ↪o Fin n,
+        IsReducedRowEchelon (toMatrix (gaussianElimination A).entries) pivot ∧
+          Submodule.span K (Set.range (toMatrix (gaussianElimination A).entries).row) =
+            Submodule.span K (Set.range (toMatrix A).row) ∧
+          canonicalComplement (Submodule.span K (Set.range (toMatrix A).row)) =
+            (gaussianElimination A).nonpivotIndices := by
+  have hc := gaussianElimination_correct A
+  have h := runColumns_invariant A n (Nat.le_refl n)
+  have hin := finrank_span_eq_card hA
+  have hout := finrank_span_eq_card hc.1.linearIndependent_rows
+  rw [hc.2.1] at hout
+  simp only [Fintype.card_fin] at hin hout
+  have hrank : (gaussianElimination A).rank = m := hout.symm.trans hin
+  let e := (Fin.castOrderIso hrank.symm).toOrderEmbedding
+  refine ⟨hrank, e.trans (gaussianEliminationPivots A), ?_, h.span_eq, hc.2.2.2⟩
+  constructor
+  · intro i j
+    have he := hc.1.pivot_entry (e i) (e j)
+    simpa [gaussianEliminationRows, e, Fin.ext_iff] using he
+  · intro i j hj
+    exact hc.1.zero_before (e i) j hj
+
 end MIPStarRE.QPBT
