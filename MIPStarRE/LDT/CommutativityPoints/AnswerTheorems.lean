@@ -329,7 +329,8 @@ private lemma answerSampledDiagonalLineApproximation_ignore_second
 /-- **Lean-only:** A local tensor-placement comparison in the answer-valued
 point-commutativity chain.
 
-Paper origin: `references/ldt-paper/commutativity_points.tex`; this is one of
+Paper origin: proof of `thm:commutativity-points`,
+`references/ldt-paper/commutativity-points.tex:35-36`; this is one of
 the formal transport steps used to realize the mixed point/diagonal comparison
 appearing in the paper.  It is internal to the answer-valued implementation
 tracked in upstream issue 1507 (historical) and is not a source theorem.
@@ -449,7 +450,8 @@ private lemma answerOrderedLiftToMixedLine
 /-- **Lean-only:** A local tensor-placement comparison from the mixed product to
 the ordered diagonal-line product.
 
-Paper origin: `references/ldt-paper/commutativity_points.tex`; this is an
+Paper origin: proof of `thm:commutativity-points`,
+`references/ldt-paper/commutativity-points.tex:36-37`; this is an
 internal reindexing and tensor-ordering step in the answer-valued
 point-commutativity route tracked in upstream issue 1507 (historical).  Discharge: proved here by
 transporting the point-to-line comparison through the explicit ordered product
@@ -579,7 +581,8 @@ private lemma answerOrderedLiftToLineProduct
 /-- **Lean-only:** A local tensor-placement comparison from the ordered
 diagonal-line product to the reversed mixed product.
 
-Paper origin: `references/ldt-paper/commutativity_points.tex`; this is an
+Paper origin: proof of `thm:commutativity-points`,
+`references/ldt-paper/commutativity-points.tex:37-39`; this is an
 internal answer-valued implementation step for the point-commutativity argument
 tracked in upstream issue 1507 (historical).  Discharge: proved here from the
 reversed
@@ -735,7 +738,8 @@ private lemma answerOrderedDropFromLineComparison
 /-- **Lean-only:** A local tensor-placement comparison from the reversed mixed
 product back to the reversed point product.
 
-Paper origin: `references/ldt-paper/commutativity_points.tex`; this is the last
+Paper origin: proof of `thm:commutativity-points`,
+`references/ldt-paper/commutativity-points.tex:39-40`; this is the last
 internal answer-valued transport step in the point-commutativity chain tracked
 in upstream issue 1507 (historical).  Discharge: proved here from the
 line-to-point comparison and

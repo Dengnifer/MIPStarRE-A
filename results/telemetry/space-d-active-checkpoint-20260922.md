@@ -367,3 +367,206 @@ hash is identical to reviewed d9350aed. Complete CI is running. The script
 can only prepare a canonical carry with review.sh --dry-run; main must verify
 and publish that generated artifact and then bind the adjudication to the new
 head. It cannot dispatch a fifth full model review or manufacture approval.
+
+## Truthfulness and Index Integrated
+
+Canonical carry5275291496 preserves the fourth adverse669 review at
+`958a5bfdf887e5eb04b3b1cd91ac559f59eebc1d`. Main verified the generated dry-run
+body against the original review, its whitespace-sensitive patch hash, every
+CI context and the complete manifest, then published only that canonical
+artifact through gh_common. Refreshed adjudication5772883432 binds the same
+sole F1 deferral to the new head. The service merged669 as
+`d5b3cbc8cb83bbe874743059ecdf6aed01ed67c3`; stage comment5773017194 records it.
+No fifth full review occurred and the adverse review status was never changed
+to an invented approval.
+
+The separate index correction became PR683 at
+`6589ac5d1e2f8233a26398765e1b75eb4470efdb`, passed full applicable CI and
+independent Astra review5275385625, and the service merged it as
+`ef6f105d1a97333de45fdef34031626501452f57`. Main closed issue682 through
+gh_common after verifying the actual merge. This discharges669's tracked F1.
+
+## Current Full-Speed Work
+
+PR681's preserved four-file repair was committed by main's model-free normal
+hook retry as `d104ada23f38b6b5c80ad3184f06e0e86685c76f`. All868 tests passed,
+with9 expected skips;22 focused packaging tests had already passed. Complete
+CI at `4c99de0ead169584938a91672966a5b46406ede3` passed, and the second
+independent Astra review5275399130 approved it. Because669/683 advanced main,
+`/tmp/main-fullspeed-refresh681-20260922.sh` is running: guarded refresh,
+verified unchanged patch at `593645c27e95f689011a4b114af35f47ac61e804`, checked
+publication, full CI, canonical dry-run carry and verified model-free
+publication of that carry. It admits no third model review. The helper
+`/tmp/main-publish-canonical-carry-20260922.py` verifies exact source review,
+unchanged body/patch, public head and complete CI before preserving its verdict.
+Successful completion gates the fresh PR for a standalone service merge.
+
+The RREF author `prover-676-20260922-01` completed within its1800-second bound
+at `aa3d3cf1c26781baeddfb3dd9c097de76e3f297d`. Six lemmas provide conventional
+RREF conditions, row independence, prefix-rank pivot counts, the nonpivot
+complement equality, existence with row-span preservation, invertible
+`A = U * B`, and pivot-set independence. Focused checks and the six-lemma
+standard-axiom audit pass. Its receipt is
+`/tmp/main-fullspeed-rref676-20260922-result.md`. No algorithmic complexity or
+source-adoption marks are claimed. Publication is PR685 at
+`f5300f2094d545415fa09e738203c61832279998`; complete CI is running after a
+successful full build. The first independent900-second Astra review is
+conditionally scheduled by `/tmp/main-fullspeed-review-when-ci-20260922.sh`
+on the exact successful publication/CI wrapper. It cannot start before that
+wrapper exits0 and the canonical review wrapper rechecks public-head statuses.
+
+PR680's second independent review5275261981 confirmed the mathematics and
+found three remaining documentation/duplication issues. Bounded600-second
+author `orc-673-20260922-04` committed all three repairs as
+`3db6f7ced1d7b1f3470f424c7b928eec8182d003` and wrote a complete receipt before
+the dispatcher timed out124. Preserve the timeout and unknown usage; the
+commit is clean and all actual focused checks are retained. Both redundant
+private addChar_sum proofs are removed in favor of Mathlib, chapter03 links
+the finite-index Fourier helpers, and the stale summary is fixed. Canonical
+regeneration changes one further source locator only, with no registered
+statement-closure or verification-pin change. Publication refreshed to
+`a6a8161d6477d3cf9efb6038a02f8ca292e24cbe`; full build passed and remaining CI
+is running. Its THIRD independent Astra review,900 seconds per code/prose
+phase, is conditionally scheduled on successful complete CI. It uses suffix
+`round3` to preserve the second review's wrapper logs. No fourth or fifth
+review is preauthorized by that waiter.
+
+Issue684, a child of679, tracks shipped references after a duplicate search
+found no open issue for the broken paper paths. Author `orc-684-20260922-01`
+completed its600-second assignment at
+`0c8d3f3cdc0d43470d8de19ea3b71392cf82c45e`: six LDT docstring citations and six
+gap-register links corrected, with exact noncomment Lean and21-cell status
+comparisons unchanged. Both real no-PDF archive variants have0 dead internal
+links of196 checked; the baseline had6 of202. Receipts and all manifests are
+at `/tmp/main-fullspeed-links684-20260922-result.md` and
+`/tmp/issue684-artifacts-20260922/`. The remaining two distinct missing-path
+strings occur in the guide's historical report and one additional actual
+LocalityPreservingRepair docstring. Main separately admitted a300-second
+source-checked correction of that neighboring docstring in the SAME worktree,
+preserving the first600-second assignment and its actual charges. Packet:
+`/tmp/main-fullspeed-links684-followup-20260922.md`; receipt prefix
+`/tmp/main-fullspeed-links684follow-20260922`. PR681's guide remains exclusively
+owned by its refresh; historical measurements and packaging rules are intact.
+
+All model work now uses fresh explicit Astra/ultra admissions with the owner's
+hard/hard_review reason. The extra wrappers waiting for CI and the681 carry
+are model-free. Space-d, space-3 and relay-1 remain enabled at the last census;
+relay-3 and cpa are out. The service remains live, builds stay on ghz, and the
+parked infrastructure PRs are unchanged. No completion certificate or final
+artifact acceptance is claimed. After the685 mathematical review, main must
+separately decide source alignment and any justified blueprint marks; neither
+its existence proof nor the compiler alone constitutes that adoption.
+
+## Artifact Guide Integrated; Mathematical Reviews Live
+
+The service merged681 as `1482a2020db6045ea32c2c1467d33a6d9e3845d9` after
+complete refreshed-head CI and canonical approval carry5275554543 from the
+second independent review5275399130. Its completed worktree was removed by
+the service. A concurrent main telemetry snapshot caused checked-push to
+refuse because main moved during preflight; the merge service subsequently
+published the preserved snapshot and aligned local/remote main at ea66d146.
+No force push, reset, hook skip or historical capture rewrite occurred.
+
+Both680 at `a6a8161d6477d3cf9efb6038a02f8ca292e24cbe` and685 at
+`f5300f2094d545415fa09e738203c61832279998` completed all CI. The conditional
+waiters admitted their frozen-head reviews as planned:680's THIRD full round,
+code/prose workers `reviewer-pr680-20260922-05` and `-06`, and685's FIRST
+review `reviewer-pr685-20260922-01`. All are Astra/ultra, independent and
+read-only. Read their actual final ledgers before dispositioning anything;
+exit0 by itself is not approval. Logs are
+`/tmp/main-fullspeed-review680-round3-20260922.log` and
+`/tmp/main-fullspeed-review685-20260922.log`. Both heads are now stale after
+683/681: if approved, use an eligible reviewed train or unchanged refresh
+and canonical carry, with the primary clean and local branch tips equal to
+the published heads. Never include a fresh ancestor head in a train.
+
+The300-second684 follow-up author timed out124 after completing a clean,
+normally hooked commit `9d28f1bca56db535ef7646d81c21befbbd34363d` and writing
+its complete receipt. Preserve that timeout and unknown final usage. The
+remaining actual Lean citation is corrected and accurately described as a
+Lean-only consequence after swapping tensor factors. All three Lean files'
+noncomment content is unchanged. The authored no-PDF snapshot at9d28f1bc has
+0 dead links of196 checked; its2 absent path diagnostics now originate only
+in the guide's historical quotations and generated manifest report. The
+first receipt and all old archive hashes remain unchanged.
+
+Main started `/tmp/main-fullspeed-publish-doc-20260922.sh` for issue684,
+branch `issue-684-artifact-references-20260922`, expected author head9d28f1bc,
+body `/tmp/main-fullspeed-pr684-body-20260922.md`. Runtime prefix:
+`/tmp/main-fullspeed-publish684-20260922`. Publication and complete CI must
+finish successfully before the prepared first independent Astra review can
+start. `/tmp/main-fullspeed-review684-when-published-20260922.sh` reads the
+actual published PR number, freezes the final local head, and delegates to
+the canonical exact-head review wrapper only after exit0 and key checks.
+It cannot turn a failed publication or partial CI into review admission.
+
+Next main actions: disposition the680/685 reviews; inspect the684 publication
+and first-review results; integrate only with real current-head gates; decide
+the RREF source-alignment/blueprint update from independent evidence; then
+continue the source-gap and final artifact work. The original unadopted
+polynomial/pasting corrections, remaining source-law obligations and final
+completion gate are still unresolved. Do not infer completion from the new
+algebra proof, the merged guide, or zero direct proof holes.
+
+## Latest Review Disposition
+
+PR680's THIRD review5275631270 at a6a8161d completed: code APPROVED; prose
+requests one final direct dependency link in chapter11's Fourier-expansion
+proof. Both phases confirm source-faithful mathematics and all prior findings
+resolved. Main admitted one300-second Astra repair, packet
+`/tmp/main-fullspeed-fix680-final-20260922.md`, runtime prefix
+`/tmp/main-fullspeed-fix680final-20260922`. It owns only the chapter11 uses
+entry and matching citation, referring to `lem:fourier-fact-finite-index`
+whose proof already records `prop:fourier-fact-vector`. Exactly ONE full
+independent review remains after complete new-head CI. Do not dispatch a fifth,
+fabricate carry across this repair, or reset any previous cost or finding.
+
+Issue684's reference repair is now PR686 at
+`114047649c158363407640da436b33bcc74ed0f2`, with complete CI running and its
+first independent review conditionally scheduled on success. The current
+685 first mathematical review remains live. PR681's service merge stage
+comment is5773319982; the683 merge stage comment is5773233630.
+
+The checkpoint/records publication after the681 race succeeded and aligned
+local/remote main at3e4b75ca with a clean checkout. Space-d was enabled at that
+census. New author/reviewer telemetry may subsequently add passive rows.
+
+## Current Direct Goal and Review Recovery
+
+The direct /goal received at08:23:53 UTC specifies four workers using only
+space-d and space-3, two each, caps4/0/4. Main registered that goal and ran
+the required status snapshot. Its historical failed markers are outside the
+current open-PR set;552/554/556/561 remain parked. No approved current open
+head was eligible for a train. The meta-gate scan retained680's adverse result
+and correctly posted no invented reviews for685/686.
+
+Main applied the direct key restriction over the older relay addenda: relay-1
+limit0 and an authorization-withdrawal marker, caps4/0/4, and SIGINT only to
+the identified track-A relay worker3191796. Its final680 repair was already
+committed as9734c54c37593bf2e22f51fc7459d17498d365c0 with normal hooks; the
+worktree is clean and body/test logs are preserved. Both processes exited,
+wrapper1. The old rotation directory is preserved at
+keyrot-off/relay-1-owner-goal-20260922. Active rotation contains only space-d
+and space-3 at limit2; both homes retain ultra/fast. No quota failure, model
+shim rewrite, credential change, proxy or fallback is inferred or used.
+
+`/tmp/main-four-lane-final680-20260922.sh` now handles guarded refresh,
+publication, full CI and the FOURTH/LAST independent review. Its new head is
+3ac291177420fd70d11e7dedfccae57fc039037a. No fifth review is authorized.
+The first685 reviewer timed out900s/124 without a verdict. Its runtime tree
+is archived at ~/.cache/mipstarre-dev/reviews/pr685/failed-attempt1-f5300f20-20260922,
+and raw records/unknown usage remain unchanged. Main released the failed
+claim and admitted a1200-second independent retry at the same green f5300f20,
+`reviewer-pr685-20260922-02`, through
+`/tmp/main-four-lane-review685-retry-20260922.sh`. This does not reset costs
+or invent a completed first review. PR686 passed complete CI and its first
+review started as reviewer-pr686-20260922-01 after the key restriction.
+The two Pauli phases follow their required CI, filling the remaining slots.
+
+A new ASAP appendix appeared in the external handoff during this cycle. Its
+backlog decomposition and longer-work guidance are useful for the next
+planning cycle; it also repeats six lanes. The current direct user goal's
+four-lane/no-other-key restriction remains the applied authorization. Main
+has not overwritten that concurrently maintained handoff or re-enabled a key
+on the basis of the conflicting resource text. No pause condition or DONE
+condition occurred; the goal remains active.
