@@ -254,3 +254,116 @@ pass, and the worktree is clean. Main started
 publication and full CI. A second independent review is still required. The
 RREF correspondence remains open. Actual model work now is 680's repair and
 the admitted 669 review phases; 681 review and 678 re-review wait for capacity.
+
+## Prime Repair Committed
+
+The 680 author completed all six finding dispositions and committed
+`b3ec0041ebb7d27e569883bb86ea464ff02b2c88`, with a clean worktree. The receipt
+is `/tmp/main-space-d-fix680-20260922-result.md`. Shared finite-index character
+orthogonality now lives in `LDT/Preliminaries/FiniteFields.lean`; both prime and
+binary consumers use it. Focused type checks/builds, blueprint render, 2,124
+declaration resolutions, the scope-note PDF, both comparator drift checks and
+normal hooks passed. The source-facing signatures are unchanged.
+
+Canonical regeneration changed only four source-line comments in the QPBT
+Pauli fixture. The author reports no registered statement-closure change, no
+headline target change, no LDT-fixture change and no verification-pin change.
+Complete new-head CI and independent review must still verify the final patch.
+Main started `/tmp/main-space-d-publish680-repair-20260922.sh`: guarded refresh,
+locked full build, checked publication and full CI. It does not admit the second
+review automatically. Both available model slots are now allocated to 669's
+fourth-review phases; independent 681 review and 678/680 re-reviews are the next
+bounded jobs after real vacancies and exact-head green CI.
+
+## Artifact Review Admission
+
+At 07:01 UTC one 669 review phase had finished, leaving one live worker
+reservation and space-d enabled. Main admitted the prepared first independent
+681 review at `646eb9e27ffc56e4e9b9dd579a61809d22d401c8` through the canonical
+review wrapper, with900 seconds and the normal two-worker cap. The remaining
+669 phase keeps its slot. The 678 and 680 publication/build/CI jobs continue
+without models; their new-head re-reviews still require complete green CI.
+
+## Full Speed Owner Instruction and Successors
+
+At07:06 UTC main received the owner's full-speed instruction: every new
+subagent uses gpt-6-astra/ultra through the explicit hard/hard_review escalation
+with reason `owner 2026-09-22 full speed mode: all subagents on astra`.
+Existing Sol assignments finished with their original identity and costs.
+The owner-relayed handoff subsequently records six lanes, adjusted at07:09:46
+to space-d2, space-3 2, relay-1 2, with relay-3 out. The live rotation agrees;
+main did not alter keys, model defaults or caps. The shim selects a home.
+Builds remain on ghz under the machine-wide lock; no parked infra PR is needed.
+
+PR669's fourth and final ordinary review5275002951 at
+`d9350aed3cd1c6355067db49d3ac188dad7171c8` approves prose and confirms all prior
+findings resolved, but finds one theorem-index error. Main verified this exact
+head and its complete green CI, accepted F1, and created issue682 to correct
+the deltaQld_mono description and add deltaQld_mono_epsilon. Terminal
+adjudication defers only this documentation finding to682; no fifth full review,
+invented approval or current-head mutation is admitted. The artifact remains
+incomplete until the separately reviewed index correction lands. The frozen
+adjudication template is `/tmp/adjudication-669-template-20260922.md`.
+
+PR681's first independent review5275058228 found a missing Python dependency
+closure in the packaged blueprint audit and an incorrect physical-core count.
+Main admitted a600-second Astra repair in its existing worktree, retaining the
+900-second initial timeout,600-second finisher and first review. Ownership
+extends narrowly to the artifact allow-list/export rules and an extracted
+snapshot regression, alongside the guide. Packet:
+`/tmp/main-fullspeed-fix681-20260922.md`.
+
+Main also admitted the prepared1800-second canonical-complement proof successor
+in `.worktrees/issue-676-rref-correspondence-20260922`, based on PR678 head
+`bff84964581fd85bfa7d52d6a5fc97b1406d0df3`, warmed through worktree-setup.
+It proves the conventional RREF correspondence, including existence, without
+changing source semantics or adding completion marks. Publication waits for678.
+Prior900+385+480+300-second bounds and all actual charges remain attached;
+this is not a budget reset. Packet: `/tmp/main-fullspeed-rref676-20260922.md`.
+
+The issue682 index-only successor has its own worktree based on669's frozen
+head and a300-second bound; publication waits for669. The second independent
+678 and680 reviews are ready for admission as their complete new-head CI
+finishes. Review wrappers use Astra/hard_review and preserve their first rounds.
+No read-only reviewer may become a second author in either worktree.
+
+## Prefix-Rank Integration and Preserved Timeouts
+
+The second independent678 review5275160534 approved
+`bff84964581fd85bfa7d52d6a5fc97b1406d0df3` with zero findings. The service
+merged it at07:25 UTC as `9a99cdab26c61bdbf87f5f0fae11b444f552eec3` and removed
+the completed parent worktree. The separate RREF proof worktree remains live.
+Progress Log27 stage comment5772751267 records this boundary and the current
+full-speed layout. The source correspondence and its blueprint marks are not
+claimed complete by the prefix-rank integration.
+
+PR680 repaired head `09c29b28ac1ea774899e18423351e498eb86e18c` passed complete
+CI. Main admitted its second independent Astra code/prose review through
+`/tmp/main-fullspeed-review-20260922.sh`, retaining review5274718665 and all
+original author/repair costs. Both phases are read-only.
+
+Issue682's300-second author `orc-682-20260922-01` timed out after committing
+`34e354d793b7ecf58ac4b189c94d5229a5164e87`; its worktree is clean. The actual
+source-level axiom probe and normal commit hook succeeded, and its prepared
+PR body is preserved. A final result file was not written; main does not
+invent one or treat unknown timeout usage as zero. No new author is needed
+to publish this completed one-file correction after669 integrates.
+
+PR681's600-second repair `orc-679-20260922-03` also timed out. Its four staged
+files and checkpoint receipt are preserved. All22 packaging tests passed,
+including reproduction and repair of missing audit imports in both authored
+and anonymized snapshots. The normal commit hook ran868 tests and failed one
+model-policy fixture because MIPSTARRE_HARDNESS_REASON leaked from the worker
+environment. The same focused fixture passed with that variable unset.
+After the author stopped, main started a model-free normal commit retry with
+only model-selection environment variables cleared. No hook is skipped and
+no test or workflow policy is edited. Log:
+`/tmp/main-fullspeed-fix681-clean-commit-20260922.log`.
+
+The678 integration makes669 stale. Main claimed it and started
+`/tmp/main-fullspeed-refresh669-20260922.sh`. Guarded refresh produced
+`958a5bfdf887e5eb04b3b1cd91ac559f59eebc1d`; its whitespace-sensitive PR patch
+hash is identical to reviewed d9350aed. Complete CI is running. The script
+can only prepare a canonical carry with review.sh --dry-run; main must verify
+and publish that generated artifact and then bind the adjudication to the new
+head. It cannot dispatch a fifth full model review or manufacture approval.

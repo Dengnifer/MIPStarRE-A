@@ -1,223 +1,235 @@
-# MIPStarRE — the quantum Pauli basis test, formalized in Lean 4
+# MIPStarRE - the quantum Pauli basis test, formalized in Lean 4
 
-This repository contains a machine-checked formalization of the **quantum
-Pauli basis test** of *MIP\* = RE* ([arXiv:2001.04383](https://arxiv.org/abs/2001.04383)),
-together with the classical **low individual degree test** it is built on
-(*Quantum soundness of the classical low individual degree test*,
-[arXiv:2009.12982](https://arxiv.org/abs/2009.12982)). The source sections are
-mirrored in-repo under `references/`; the Pauli basis test is developed in
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex`.
+This repository formalizes the **quantum Pauli basis test** from *MIP\* = RE*
+([arXiv:2001.04383](https://arxiv.org/abs/2001.04383)) in Lean 4, together with
+the classical low individual degree test on which it depends. The paper sources
+are mirrored under `references/`; the Pauli basis test is stated in
+`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex` and proved
+in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`.
+
+The counts, locators, and status claims on this page were audited against source
+commit `abb98018ec07d6ba5896907f5675f716c6e07a05` (September 21, 2026).
 
 | | |
 |---|---|
-| Headline theorem | `MIPStarRE.QPBT.pauli_soundness`, `MIPStarRE/QPBT/Test/Soundness.lean:52` |
-| Proof debt | none — **0 `sorry`**, 0 `admit`, 0 project `axiom` declarations |
-| Axioms used | `propext`, `Classical.choice`, `Quot.sound` only |
-| Toolchain | Lean `v4.32.0`, Mathlib `v4.32.0` (rev `81a5d257c8e4`), pinned in `lean-toolchain` and `lake-manifest.json` |
-| Size | Pauli development 330 Lean files / 105,319 lines; `MIPStarRE/LDT/` 326 files; `MIPStarRE/Quantum/` 11 files |
+| Headline theorem | `MIPStarRE.QPBT.pauli_soundness` |
+| Registered headline targets | 4, listed below |
+| QPBT axiom assertions | 13 compile-time checks |
+| Proof debt in `MIPStarRE/QPBT/` | no active `sorry`, `admit`, or project `axiom` declaration |
+| Toolchain | Lean `v4.32.0`, Mathlib `v4.32.0`, pinned by the repository |
+| Source size at the audited commit | QPBT: 332 Lean files / 106,458 lines; LDT: 326 files; Quantum: 11 files |
 
 ## What is formalized
 
-The Pauli basis test is a two-player nonlocal game whose soundness is one of the
-rigidity ingredients of *MIP\* = RE*. The headline results:
+The four registered QPBT headline targets are:
 
-| Result | Lean declaration | File |
+| Result | Lean declaration | Source and blueprint label |
 |---|---|---|
-| Soundness of the Pauli basis test (blueprint `thm:pauli`) | `pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:52` |
-| Qubit form of soundness (`cor:pauli-binary`) | `pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` |
-| Completeness: a value-one strategy exists (`lem:pauli-completeness`) | `exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` |
-| Quantum soundness of the low-degree game (`lem:ld-soundness`) | `exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` |
+| Soundness of the Pauli basis test | `MIPStarRE.QPBT.pauli_soundness` | `thm:pauli` |
+| Qubit form of soundness | `MIPStarRE.QPBT.pauli_soundness_qubit` | `cor:pauli-binary` |
+| Completeness at value one | `MIPStarRE.QPBT.exists_spcc_value_one` | `lem:pauli-completeness` |
+| Quantum soundness of the low-degree game | `MIPStarRE.QPBT.exists_ld_soundness` | `lem:ld-soundness` |
 
-`pauli_soundness` states: there are constants `a ≥ 1` and `0 < b < 1` such that
-for every admissible parameter tuple `P` and every `ε ≥ 0`, every strategy for
-the Pauli basis test with value at least `1 - ε` admits local isometries and an
-auxiliary state under which the strategy's state is within
-`deltaQld a b ε P.m P.d P.q` of the ideal state, and both players' operator
-families are within the same bound of the ideal Pauli observables. The error
-scale carries the admissible sizes as explicit arguments —
-`deltaQld (a b ε : ℝ) (m d q : ℕ)`, `MIPStarRE/QPBT/Test/SoundnessDefs.lean:35` —
-because it is `a · (m·d)^a · (ε^b + q^(-b) + 2^(-b·m·d))`: the bound depends on
-the admissible sizes `m`, `d` and `q` as well as on `ε`, which is what the
-`q^(-b)` and `2^(-b·m·d)` terms express. As in the source, the constants are
-existentially quantified and no regime in which `deltaQld < 1` is exhibited;
-see [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
+`pauli_soundness` states that universal constants `a >= 1` and `0 < b < 1`
+exist such that every admissible parameter tuple `P`, every `epsilon >= 0`, and
+every strategy winning the Pauli basis test with probability at least
+`1 - epsilon` admit local isometries and an auxiliary state. The state distance
+and both players' distances for the **raw prescribed-answer Pauli effects** are
+bounded by
 
-Every headline declaration carries a docstring naming both its blueprint node
-and the exact source line range it formalizes, for example
-`references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:1426-1447`
-for `pauli_soundness`.
+```text
+deltaQld a b epsilon P.m P.d P.q
+  = a * (P.m * P.d)^a
+      * (epsilon^b + P.q^(-b) + 2^(-b * P.m * P.d)).
+```
 
-The classical low individual degree test underneath is
-`MIPStarRE.LDT.Test.mainFormal`; the Pauli development imports it and does not
-re-derive it.
+The theorem's public statement matches `thm:pauli`. Its Lean proof uses a
+directly indexed replacement for the source's unsatisfiable seed-indexed
+divisibility route and proves the transfer from completed internal Pauli effects
+to the raw effects in the theorem. The unresolved obligations in the printed
+route remain documented; they are not hypotheses of the Lean theorem. See
+[`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) and the theorem index below.
 
-## Status
+### Non-vacuity and a small-error regime
 
-- **No proof debt.** There is no `sorry`, `admit`, `native_decide`, `unsafe`
-  declaration or project-introduced `axiom` anywhere in the Lean sources under
-  `MIPStarRE/`. In the `.lean` files of the whole tree the word `sorry` occurs
-  exactly four times: twice in prose inside docstrings
-  (`MIPStarRE/LDT/Test/AxiomAudit.lean:81`,
-  `MIPStarRE/QPBT/Combining/Apply.lean:57`), once in prose in
-  `scripts/comparator/challenge_header.lean:14`, and once as real syntax in
-  `scripts/comparator/challenge_footer.lean:44` — the footer of a
-  statement-only challenge template that is supposed to be unproved (see
-  "Independent checking" below). One further file is Lean-shaped without
-  carrying the `.lean` extension: `scripts/comparator/expected/Challenge.lean.expected`,
-  the checked-in expected assembly of that same template, repeats the prose
-  mention (line 14) and the template's `sorry` (line 802);
-  `scripts/comparator/README.md:14` mentions it in prose as well. These counts
-  are about source files: the string also
-  occurs throughout the development records under `results/telemetry/` and in
-  the documentation, so a bare `git grep sorry` over the whole tree returns
-  thousands of lines.
-- **Standard axioms only.** The headline theorems depend on `propext`,
-  `Classical.choice` and `Quot.sound` and on nothing else. There is no
-  dedicated Pauli-test axiom-audit module yet — the existing
-  [`MIPStarRE/LDT/Test/AxiomAudit.lean`](MIPStarRE/LDT/Test/AxiomAudit.lean)
-  covers the classical low-degree track only — so the check is made by asking
-  Lean directly; the command is under "Build and check" below. Repository-wide,
-  the pre-push gate (`.githooks/pre-push`) runs
-  [`scripts/blueprint_leanok_axioms.py`](scripts/blueprint_leanok_axioms.py)
-  `--ci`, which runs `#print axioms` on every blueprint declaration marked
-  `\leanok` and fails if any of them depends on `sorryAx`.
-- **Statement corrections are documented, not hidden.** Where the source
-  paper's printed statement is wrong, or where its printed proof does not
-  establish the printed claim, the deviation is recorded rather than papered
-  over. There are 20 Pauli-test gap notes (45 notes in total; the directory
-  also holds `command.tex`, `template.tex`, `policy.tex` and
-  `proof-gap-protocol.tex`, which are not notes) under
-  `docs/paper-gaps/`, summarized in the register linked below. Two printed
-  claims that are not established are carried as `Prop`-valued definitions
-  which state the source sentence without asserting it, so the printed form
-  stays visible and stays unproved.
-- **Independent checking.** There is no comparator challenge for
-  `pauli_soundness` yet. What can be re-checked outside this repository today
-  is the classical low individual degree test underneath: the statement
-  `MIPStarRE.LDT.Test.mainFormal` has a challenge repository at
-  [LionSR/LDT-comparator](https://github.com/LionSR/LDT-comparator), which
-  re-declares the statement against Mathlib alone and runs the Lean comparator
-  against this library; the setup is described in
-  [`docs/comparator.md`](docs/comparator.md), and the template it is assembled
-  from lives under `scripts/comparator/`. The analogous challenge for the
-  Pauli statement has not been built: `Dengnifer/QPBT-comparator` is so far a
-  placeholder holding only a licence and a toolchain pin.
+`MIPStarRE/QPBT/Test/NonVacuity.lean` proves both that the hypotheses can be met
+and that the conclusion is quantitatively non-trivial. For
+
+```text
+q = 2^(2*n + 1),  m = 1,  d = n + 1,  epsilon = 0,
+```
+
+`nonVacuousParams n` is admissible, and every admissible Pauli test has a
+value-one strategy. For any constants `a >= 1`, `b > 0`, and any `eta > 0`, the
+quantity `deltaQld a b 0 1 (n + 1) (2^(2*n + 1))` tends to zero as `n` tends to
+infinity. Consequently `pauli_soundness_nontrivial` supplies admissible
+parameters and a value-one strategy for which the state distance and both raw
+operator distances are all less than `eta`.
+
+This is an existential regime along a growing parameter family at
+`epsilon = 0`. The formalization does not provide a numeric value of `a` or `b`,
+nor an explicit or uniform positive-`epsilon` threshold at a fixed parameter
+tuple. `tendsto_deltaQld_eps_zero` separately records right-continuity at zero.
+
+## Status and evidence
+
+### Proof integrity
+
+For the QPBT track, criterion C1 of the repository's authoritative completion
+gate scans for `sorry` and `admit` sites with the shared comment-aware rule,
+project `axiom` and `constant` declarations, and prohibited native evaluation:
+
+```bash
+python3 scripts/completion_gate.py check --track qpbt
+```
+
+The C1 line is the proof-integrity result. The command can still exit nonzero
+while independent completion criteria remain pending. Comments and strings are
+removed before this scan, and the generated comparator challenge lies outside
+the QPBT Lean root.
+
+The QPBT source-size figures above are reproduced from the audited snapshot
+with:
+
+```bash
+snapshot=abb98018ec07d6ba5896907f5675f716c6e07a05
+git ls-tree -r --name-only "$snapshot" -- MIPStarRE/QPBT \
+  | awk '/[.]lean$/ { count++ } END { print count + 0 }'
+git ls-tree -r --name-only "$snapshot" -- MIPStarRE/QPBT \
+  | awk '/[.]lean$/ { print }' \
+  | while IFS= read -r path; do git show "$snapshot:$path"; done \
+  | wc -l
+```
+
+### Axiom audit
+
+`MIPStarRE/QPBT/Test/AxiomAudit.lean` checks 13 declarations during
+elaboration. Each check prints the axiom closure and fails unless it is exactly
+`propext`, `Classical.choice`, and `Quot.sound`; `sorryAx` is rejected.
+
+The four registered targets are the four declarations in the first table. The
+nine additional supporting assertions are:
+
+- `MIPStarRE.QPBT.honestStrategy_isSPCC`
+- `MIPStarRE.QPBT.exists_combinedLinesWitness`
+- `MIPStarRE.QPBT.exists_extendedLinesWitness_established`
+- `MIPStarRE.QPBT.exists_globalPairWitness`
+- `MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound`
+- `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds`
+- `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds`
+- `MIPStarRE.QPBT.pauli_soundness_deltaQld_ofExtractionWitness`
+- `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx`
+
+The audit module is an explicit CI target and is intentionally not imported by
+the ordinary `MIPStarRE.QPBT` umbrella.
+
+### Preserved printed claims
+
+Two problematic printed claims are retained as `Prop`-valued definitions. A
+`Prop` declaration records a proposition; it does not prove it.
+
+- `PrintedExtendedLinesWitnessClaim` preserves the printed error expression of
+  `lem:qld-4-13`, but it is **not** a verbatim encoding of the paper statement.
+  It uses directly indexed questions, an `Option`-completed answer alphabet,
+  and the corrected sum-form `IsPolyErr₂` contract. The proved result used by
+  soundness is `exists_extendedLinesWitness_established`.
+- `PrintedSymmetricProjectiveAttainmentClaim` records the printed attainment
+  form of `lem:symmetric-strat`. It is used by
+  `not_forall_printedSymmetricProjectiveAttainmentClaim`, which refutes the
+  universal claim on the current Lean domain using an empty-answer game. The
+  proved nonempty-answer replacement is
+  `exists_symmetric_projective_strategy_approx`.
+
+Neither printed claim is consumed as a premise by `pauli_soundness`. The exact
+carrier differences, counterexample scope, and corrected alternatives are in
+[`docs/QPBT-theorem-index.md`](docs/QPBT-theorem-index.md) and
+[`docs/DEVIATIONS.md`](docs/DEVIATIONS.md).
+
+### Independent comparator status
+
+The canonical [comparator verification record](docs/comparator.md#current-verification-status)
+documents successful independent four-target acceptance. Official run
+`35638601720` completed on September 21, 2026 UTC using the service-merged-main
+library commit `ecb97d1f66eec1e6fad964f144f78b91ce1fab36`, with real landrun, nanoda,
+and Lean's kernel enabled. As that record explains, the result verifies closure
+equality at the pinned commit; it is not a source-faithfulness certificate or a
+claim that the QPBT track is complete.
 
 ## Build and check
 
-Install [elan](https://github.com/leanprover/elan); it reads `lean-toolchain`
-and fetches Lean `v4.32.0` automatically. From the repository root:
+Install [elan](https://github.com/leanprover/elan), then run from the repository
+root:
 
 ```bash
-lake exe cache get              # fetch the pinned Mathlib build cache (required)
-lake build MIPStarRE.QPBT       # build the Pauli basis test development
-lake build MIPStarRE            # build everything (QPBT, LDT, Quantum)
+lake exe cache get
+lake build MIPStarRE.QPBT
+lake build MIPStarRE.QPBT.Test.AxiomAudit
+lake build MIPStarRE
+(cd blueprint && leanblueprint web)
+lake exe checkdecls blueprint/lean_decls
+python3 scripts/blueprint_leanok_axioms.py --ci
 ```
 
-To reproduce the axiom claim, ask Lean for the axiom closure of a headline
-declaration:
+The QPBT target builds the development; the audit target runs the 13 checks.
+The root `MIPStarRE` target is needed before the full blueprint axiom check,
+because blueprint declarations also import LDT modules. Building only QPBT left
+two required LDT artifacts absent in the recorded clean-project experiment.
+
+Lake 5 in this toolchain has no `-j` or `--jobs` option. `LEAN_NUM_THREADS`
+controls Lean's internal worker threads; it is not a cap on the number of Lean
+processes scheduled by Lake.
+
+### Recorded clean-project timing
+
+`results/telemetry/clean-clone-build-20260921.md` records a measurement at
+source commit `05df4b74fea7d291050909102c737e6b03d85ba6` on a 128-core Intel Xeon
+Platinum 8358P host with 503 GiB RAM. With the project `.lake/build` directory
+absent, but Mathlib oleans reused from a read-only prebuilt package store, this
+command took 803 seconds:
 
 ```bash
-lake build MIPStarRE.QPBT.Test.Soundness
-printf 'import MIPStarRE.QPBT.Test.Soundness\n#print axioms MIPStarRE.QPBT.pauli_soundness\n' > AxiomCheck.lean
-lake env lean AxiomCheck.lean
+nice -n 10 env LEAN_NUM_THREADS=16 \
+  lake build MIPStarRE.QPBT MIPStarRE.QPBT.Test.AxiomAudit \
+    MIPStarRE.QPBT.Test.NonVacuity
 ```
 
-`propext`, `Classical.choice` and `Quot.sound` are the only axioms that should
-appear; in particular `sorryAx` must not. The same recipe applies to the other
-three headline declarations, with their own modules imported.
+It compiled 602 project modules (9,313 jobs); the largest observed process used
+5.10 GB, and the sampled aggregate peak across 21 concurrent processes was
+84.3 GB. A subsequent `lake build MIPStarRE` compiled 12 additional modules in
+26 seconds and enabled the full blueprint axiom check.
 
-To type-check a single file, which is the fastest iteration loop:
-
-```bash
-lake env lean MIPStarRE/QPBT/Test/Soundness.lean
-```
-
-### Build time and machine requirements
-
-Timings below are the recorded ones from `results/telemetry/builds.jsonl`
-(1,608 rows), all measured on one machine: a 128-core Intel Xeon Platinum 8358P
-at 2.60 GHz with 503 GiB of RAM.
-
-| Kind of build | Rows | Median | Range |
-|---|---|---|---|
-| Incremental build of touched modules | 1,248 | 37 s | 17 s – 4,428 s |
-| Fresh worktree seeded from a warm local cache | 172 | 75 s | 5 s – 25,052 s |
-
-Recent fresh-worktree builds of the full tree took 219 s, 227 s, 229 s and
-502 s. The 25,052 s (≈ 7 h) outlier is a single from-scratch run of
-2026-08-30 that also compiled 20 Mathlib files the cache failed to deliver;
-it predates most of the Pauli development and is not a measurement of the
-current tree.
-
-**A clean-clone build of `MIPStarRE.QPBT` has not yet been timed and recorded.**
-All rows above were produced with a warm local build cache, so they are lower
-bounds on what a fresh clone costs. Budget accordingly, and expect the
-`lake exe cache get` download of Mathlib to dominate the first build. 23 files
-raise `maxHeartbeats` and 17 raise `synthInstance.maxSize`; these are
-elaboration-budget options, not soundness escapes.
-
-The blueprint is built with [`leanblueprint`](https://github.com/PatrickMassot/leanblueprint):
-
-```bash
-leanblueprint pdf     # PDF output
-leanblueprint web     # HTML output
-```
-
-`leanblueprint` also generates `blueprint/lean_decls`, the list of declarations
-the blueprint cross-references; `lake exe checkdecls blueprint/lean_decls`
-verifies that each one exists.
+This was a clean **project** rebuild, not a fully cold clone-to-build timing:
+dependency download and Mathlib compilation were excluded. The figures are tied
+to that host, source revision, and cache state and should not be extrapolated as
+a general hardware requirement or current end-to-end build time.
 
 ## Repository layout
 
-```
+```text
 MIPStarRE/
-├── QPBT/          # Quantum Pauli basis test — the contribution
-│   ├── Algebra/        # finite fields, low-degree codes, lines, Pauli matrices
-│   ├── Games/          # nonlocal games, strategies, operator distances
-│   ├── Observables/    # observable algebra for the test
-│   ├── Combining/      # combining lines and points into global objects
-│   ├── Extraction/     # extracting Pauli observables from a strategy
-│   ├── Test/           # the test, completeness, soundness, qubit form
-│   └── State.lean
-├── LDT/           # Classical low individual degree test (12 submodules)
-└── Quantum/       # Reusable finite-dimensional Hilbert space and POVM layer
+|-- QPBT/       quantum Pauli basis test
+|-- LDT/        classical low individual degree test
+`-- Quantum/    reusable matrix, Hilbert-space, and measurement infrastructure
 ```
 
-`MIPStarRE.lean` re-exports `MIPStarRE.Quantum`, `MIPStarRE.LDT` and
-`MIPStarRE.QPBT`.
+`blueprint/src/` contains the mathematical blueprint, `references/` the paper
+mirrors, `docs/` reviewer and contributor documentation, and
+`scripts/comparator/` the independent-checking tooling. `local/` and
+`results/telemetry/` describe the local development workflow and are not proof
+dependencies.
 
-Top-level directories:
+## Further reading
 
-| Path | Contents |
+| Document | Purpose |
 |---|---|
-| `MIPStarRE/` | Lean sources (above) |
-| `blueprint/src/` | LaTeX blueprint, 16 chapters; `ch11`–`ch16` cover the Pauli basis test |
-| `references/` | In-repo TeX mirrors of the source papers (`qpbt-paper`, `ldt-paper`, `neexp-paper`, `nv-paper`, `cs-paper`), used as line-precise citation targets |
-| `docs/` | Artifact documentation, gap notes, contributor guides, style rules |
-| `audits/` | Dated dependency-scouting reports written during development |
-| `scripts/` | Reference-paper splitter, declaration checker, comparator tooling |
-| `local/` | The AI-assisted development workflow (issue, PR, CI and review drivers) |
-| `results/telemetry/` | Session, build and stage records produced by that workflow |
+| [`docs/ARTIFACT.md`](docs/ARTIFACT.md) | Artifact evaluation sequence |
+| [`docs/QPBT-theorem-index.md`](docs/QPBT-theorem-index.md) | Paper, Lean, blueprint, and axiom map |
+| [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) | Reviewer-facing source deviations |
+| [`docs/paper-gaps/qpbt-gap-register.md`](docs/paper-gaps/qpbt-gap-register.md) | Detailed QPBT gap register |
+| [`docs/comparator.md`](docs/comparator.md) | Comparator protocol and historical records |
+| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Contribution and review rules |
+| [`docs/PROOF_INTEGRITY.md`](docs/PROOF_INTEGRITY.md) | Proof-integrity policy |
 
-`local/` and `results/telemetry/` document **how** the formalization was
-produced. They are research data about an AI-assisted development process and
-are not part of the mathematical artifact; nothing in `MIPStarRE/` depends on
-them, and they can be ignored when evaluating the proofs.
+## License
 
-## Where to read more
-
-| Document | What it covers |
-|---|---|
-| [`docs/ARTIFACT.md`](docs/ARTIFACT.md) | How to evaluate this repository as an artifact: what to check and in what order |
-| [`docs/QPBT-theorem-index.md`](docs/QPBT-theorem-index.md) | Every headline result: paper statement → Lean name → file:line → blueprint node → axioms |
-| [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) | Where the formalization departs from the printed source, and why |
-| [`docs/paper-gaps/qpbt-gap-register.md`](docs/paper-gaps/qpbt-gap-register.md) | The gap register: 18 of the 20 Pauli-test notes, each linking a source statement, its blueprint label, the correction and the Lean status. `qpbt_combined-points-field-valued.tex` and `qpbt_subline-claims-line-marginal.tex` have no row yet |
-| [`docs/comparator.md`](docs/comparator.md) | Independent re-checking with the official Lean comparator |
-| [`blueprint/src/`](blueprint/src/) | The LaTeX blueprint: the informal argument, node by node, cross-referenced to Lean |
-| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | PR and issue conventions, review checklist |
-| [`docs/PROOF_INTEGRITY.md`](docs/PROOF_INTEGRITY.md) | The rules the development holds itself to about faithful statements |
-
-## Licence
-
-Licence: to be added by the repository owner before submission.
+Licensed under the Apache License 2.0; see [`LICENSE`](LICENSE).
