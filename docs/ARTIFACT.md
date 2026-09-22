@@ -13,11 +13,11 @@ commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 | path | what it is |
 |---|---|
 | `MIPStarRE/`, `MIPStarRE.lean` | the Lean 4 development — the contribution |
-| `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | the pinned build: Lean 4 and all ten dependencies by exact revision |
+| `lakefile.toml`, `lake-manifest.json`, `lean-toolchain` | the pinned Lean toolchain and nine Lake package revisions |
 | `blueprint/src/` | the LaTeX blueprint, cross-referenced to the Lean names with `\lean{}` / `\leanok` |
-| `docs/` | the mathematical documentation, including `docs/QPBT-theorem-index.md` (every headline and supporting statement with its Lean name, blueprint label and paper locator) and `docs/paper-gaps/` (the register of gaps found in the source papers) |
+| `docs/` | the mathematical documentation, including `docs/QPBT-theorem-index.md`, `docs/DEVIATIONS.md`, and the source-gap register under `docs/paper-gaps/` |
 | `references/` | the TeX sources of the five source papers — third-party material, see below — so that the paper locators can be checked inside the snapshot; the report below records two existing exceptions |
-| `scripts/comparator/` | the generator for the self-contained `Challenge.lean` statement file used by the independent challenge repository |
+| `scripts/comparator/` | the generator and checked-in Mathlib-only challenge tree used by the independent comparator repository |
 | `scripts/blueprint_leanok_axioms.py` | the blueprint/axiom consistency check |
 | `scripts/make_artifact.sh` | the script that produced this snapshot, so the packaging is itself auditable |
 | `MANIFEST.txt` | source commit, file count, Lean code-line total, toolchain, Mathlib revision, leak-scan and self-containment results |
@@ -29,9 +29,9 @@ agent-orchestration layer: `local/`, `results/telemetry/`, `.github/` prompts
 and workflows, `.githooks/`, `audits/`, `home_page/`, `docbuild/`, and the
 scripts and docs that only serve that layer. It stays in the source repository
 because it is research material in its own right, but it is not part of the
-mathematics and it dominates the repository's size (the telemetry session logs
-alone are roughly 200 MB). Excluding it also removes, without any history
-rewrite, the ~2,456 tracked files that mention the build host's home path.
+mathematics and contains host-specific operational records. Evidence needed by
+a tarball reviewer is therefore stated in this page or in another shipped file;
+an excluded telemetry, audit, or `local/` path is not an artifact locator.
 
 ## Third-party material: the paper sources, `references/`
 
@@ -48,13 +48,11 @@ public repository):
 | `references/nv-paper/` | Natarajan–Vidick | arXiv:1610.03574 |
 | `references/cs-paper/` | see `references/cs-paper/SOURCE.md` | — |
 
-**Why they ship.** Lean docstrings and `docs/QPBT-theorem-index.md` cite their
-source as `references/<paper>/<file>.tex:<lines>`, and so will
-`docs/DEVIATIONS.md` when it lands (it is pending in another packet, and the
-two `README.md` links to it are the two dead internal-link occurrences that
-`MANIFEST.txt` still reports). With the sources in the snapshot all but the two
-locators listed below resolve inside the tarball, and a reviewer can read the
-paper statement next to the Lean statement without reconstructing the
+**Why they ship.** Lean docstrings, `docs/QPBT-theorem-index.md`, and
+`docs/DEVIATIONS.md` cite their source as
+`references/<paper>/<file>.tex:<lines>`. With the sources in the snapshot all
+but the two locators listed below resolve inside the tarball, and a reviewer can
+read the paper statement next to the Lean statement without reconstructing the
 per-section split from arXiv. The directories are plain per-section splits of
 the papers' arXiv sources.
 
@@ -78,6 +76,14 @@ than a citation). At the commit named in the MANIFEST two do not resolve —
 predate this packaging work and are tracked separately; the surrounding
 docstrings also name their blueprint labels, which do resolve.
 
+**Internal-link report.** The packaging script also reports relative Markdown
+links whose targets do not ship. In the historical preflight pinned below it
+found two dead links among 198 checked, both in
+`docs/paper-gaps/qpbt-gap-register.md`: one to
+`local/protocols/completion.md` and one to `local/protocols/issues-prs.md`.
+Those workflow documents are excluded intentionally. They are the two known
+internal-link limitations; they are not missing `docs/DEVIATIONS.md` links.
+
 **Leak scan.** The scan that gates packaging (below) treats these files like
 any other: a home path or a key-shaped string inside `references/` still fails
 the run. The one forgiveness is scoped to `references/` by path and to
@@ -98,33 +104,50 @@ cd <unpacked snapshot>
 cat lean-toolchain     # leanprover/lean4:v4.32.0 — elan installs this on first use
 ```
 
-### 2. Fetch the Mathlib build cache and build
+### 2. Fetch the Mathlib build cache, build, and run the audits
 
 ```sh
 lake exe cache get
-lake build MIPStarRE.QPBT
+lake build MIPStarRE
+lake build MIPStarRE.QPBT.Test.AxiomAudit
+lake build MIPStarRE.LDT.Test.AxiomAudit
+python3 scripts/blueprint_leanok_axioms.py --ci
 ```
 
-**Expected cost.** `lake exe cache get` downloads several GB. Plan on **16 GB
-of RAM** and tens of GB of disk. At this source commit, these commands count
-occurrences and files, respectively:
+The full `MIPStarRE` target must precede the blueprint audit. A QPBT-only build
+does not produce two LDT oleans needed by that audit, and its on-demand fallback
+does not recursively build missing dependencies. The two compile-time axiom
+modules are not imported by the umbrella targets, so they must also be named
+explicitly.
+
+**Measured project-build cost, with exact scope.** At library commit
+`05df4b74fea7d291050909102c737e6b03d85ba6`, a fresh `--no-local` clone with an
+empty `.lake/build` ran
 
 ```sh
-rg -n -o 'maxHeartbeats' MIPStarRE | wc -l
-rg -l 'maxHeartbeats' MIPStarRE | wc -l
-rg -n -o 'synthInstance\.maxSize' MIPStarRE | wc -l
-rg -l 'synthInstance\.maxSize' MIPStarRE | wc -l
+nice -n 10 env LEAN_NUM_THREADS=16 \
+  lake build MIPStarRE.QPBT MIPStarRE.QPBT.Test.AxiomAudit \
+    MIPStarRE.QPBT.Test.NonVacuity
 ```
 
-They report 38 occurrences across 23 files for `maxHeartbeats`, and 66 across
-17 files for `synthInstance.maxSize`, so this is not a laptop build. Honest
-statement of the evidence we have: the maintainers' build telemetry records
-1,608 builds of this development, but every one is an
-*incremental, warm-cache* build (the two most recent took 79 s and 556 s); the
-only full-rebuild record, 25,052 s (7 h), is from 2026-08-30 and predates most
-of the QPBT development. **A cold clean-clone build of `MIPStarRE.QPBT` has not
-yet been recorded**; when one is, its wall-clock time and machine replace this
-paragraph. Budget several hours.
+in 803 seconds (13 minutes 23 seconds), compiling 602 project modules with zero
+errors. The pinned dependencies were supplied as prebuilt oleans from a
+read-only store; `lake exe cache get`, dependency download, and dependency
+compilation were not part of the 803 seconds. From that built state,
+`lake build MIPStarRE` compiled 12 additional modules in 26 seconds, after
+which `python3 scripts/blueprint_leanok_axioms.py --ci` passed 1,837
+declarations. This historical run did not include the separately named LDT
+axiom-audit target.
+
+The host was a 128-core Intel Xeon Platinum 8358P at 2.60 GHz with 503 GiB of
+RAM. Lake scheduled up to 21 Lean processes despite `LEAN_NUM_THREADS=16`; the
+largest single-process RSS was 5.10 GB and the sampled sum across Lean and Lake
+processes peaked at 84.3 GB. These are measurements, not minimum hardware
+requirements. A reviewer starting without cached dependencies must additionally
+pay the download and unpack cost of `lake exe cache get`; no end-to-end timing
+including that step has been recorded. The 803-second run is historical evidence
+at its named commit, not a timing for the manifest commit in an arbitrary
+tarball and not a final artifact build.
 
 ### 3. Check that nothing is assumed
 
@@ -132,24 +155,25 @@ The development claims to depend on no axioms beyond Lean's three standard
 ones — `propext`, `Classical.choice`, `Quot.sound` — and on no `sorry`,
 `admit`, `native_decide`, `unsafe` or `@[extern]` escape hatch.
 
-The check that settles the first half is Lean's own `#print axioms`: it reports
-the complete axiom closure of a declaration, and unlike a text search it cannot
-be misled by prose. The snapshot ships two modules that run it at build time and
-**fail the build** when a declaration's closure is not exactly
-`{Classical.choice, Quot.sound, propext}` — one for the Pauli test, one for the
-classical low-individual-degree layer underneath it:
+The check that settles the first half is Lean's own axiom collector, the same
+mechanism used by `#print axioms`: it reports the complete axiom closure of a
+declaration and, unlike a text search, cannot be misled by prose. The snapshot
+ships two compile-time audit modules. The QPBT module fails unless each of
+thirteen named declarations has exactly
+`{Classical.choice, Quot.sound, propext}`. The LDT module applies the same exact
+standard-axiom check to its theorem route and a no-`sorryAx` check to selected
+definition and interface declarations:
 
 ```sh
 lake build MIPStarRE.QPBT.Test.AxiomAudit
 lake build MIPStarRE.LDT.Test.AxiomAudit
 ```
 
-`MIPStarRE.QPBT.Test.AxiomAudit` covers the four headline theorems of section 4
-and nine further load-bearing statements; the printed axiom lines stay in the
-build log as the positive record. Neither module is imported from the
-`MIPStarRE.QPBT` umbrella — that keeps the audits out of ordinary downstream
-imports — so a plain `lake build MIPStarRE.QPBT` does not run them and they have
-to be named, as above.
+`MIPStarRE.QPBT.Test.AxiomAudit` covers the four headline theorems and nine
+further load-bearing statements; the printed axiom lines stay in the build log
+as the positive record. Neither audit module is imported from the umbrella
+targets. This keeps the metaprogram checks out of ordinary downstream imports,
+but also means a plain `lake build MIPStarRE` does not run them.
 
 To read the closures directly instead, put this in a scratch file at the root of
 the unpacked snapshot and elaborate it with `lake env lean scratch.lean`:
@@ -175,17 +199,14 @@ the check for those, and for `axiom` declarations:
 grep -rn --include='*.lean' -E '^[[:space:]]*axiom |\b(sorry|admit|native_decide|unsafe)\b|@\[extern' MIPStarRE/
 ```
 
-**Expected output: a handful of matches, every one of them inside a comment or
-a docstring that discusses an escape hatch rather than using one.** At the
-commit named in `MANIFEST.txt` there are four: three are the word `sorry` in
-backticks — `MIPStarRE/QPBT/Combining/Apply.lean`, describing a source proof
-that was open in the paper, and the two audit modules named above, whose prose
-says what they exist to catch — and one is a docstring line in
-`MIPStarRE/QPBT/Test/QubitForm.lean` that happens to begin with the word
-"axiom". A match in code position — a bare `sorry` in
-tactic position, or a line that really begins a declaration with `axiom` —
-would be a genuine escape hatch. `grep` cannot tell prose from code, which is
-why the `#print axioms` run above is the check that counts.
+Inspect every match: each must be inside a comment or docstring discussing an
+escape hatch rather than using one. At frozen package commit
+`73c493c8638a098043733205fe6f155dc6d733d1` the command returned four prose
+matches: `sorry` in the QPBT combining docstring and both axiom-audit docstrings,
+plus a QPBT qubit-form docstring line beginning with "axiom". A bare `sorry` in
+tactic position or an actual `axiom` declaration would be a genuine escape
+hatch. `grep` cannot distinguish prose from code, which is why the compile-time
+axiom audits above are decisive for their registered declarations.
 
 ### 4. Headline statements
 
@@ -202,13 +223,22 @@ ships, so it can be opened directly in the unpacked snapshot.
 
 ### 5. Independent statement check (optional)
 
-The statement of the main theorem is also reproduced, with its whole kernel
-closure and with the theorem itself left as `sorry`, in a separate challenge
-repository — <https://github.com/Dengnifer/QPBT-comparator> — so that the
-official [`leanprover/comparator`](https://github.com/leanprover/comparator) can
-confirm that *this* library proves *that* statement, with no shared definitions
-to hide behind. `scripts/comparator/` in this snapshot is the generator, and
-`docs/comparator.md` explains the trust model.
+The four headline statements are reproduced, with their union of kernel
+closures and with the targets themselves left as `sorry`, in a separate
+challenge repository — <https://github.com/Dengnifer/QPBT-comparator> — so that
+the official [`leanprover/comparator`](https://github.com/leanprover/comparator)
+can confirm that this library proves those statements with no shared project
+definitions to hide behind. `scripts/comparator/` is the generator, and
+`docs/comparator.md` is the canonical verification record and trust-model
+description.
+
+Official run 35638601720 accepted all four targets at challenge commit
+`360402fdf4a39399f94331452d6e5d0a35c144be`. Both Lake pins selected library
+commit `ecb97d1f66eec1e6fad964f144f78b91ce1fab36`. The run used real landrun,
+enabled nanoda, and recorded acceptance by nanoda and Lean's default kernel.
+Those exact pins establish closure equality for that run; they do not establish
+source faithfulness, completion criteria, or a final artifact build. The exact
+commands, pins, and residual trust are recorded in `docs/comparator.md`.
 
 ### 6. Blueprint
 
@@ -235,16 +265,41 @@ if the leak scan finds a home path, a key-shaped string or an e-mail address
 that is not allow-listed with a reason in the script.
 
 Then verify the snapshot the way a reviewer would, in a scratch directory and
-from the tarball alone — never in the working tree, whose Mathlib cache would
-mask a missing dependency:
+from the tarball alone. The Mathlib cache supplies dependency oleans, but the
+project build directory must belong to the unpacked snapshot:
 
 ```sh
 cd $(mktemp -d) && tar xzf /tmp/artifact/mipstarre-qpbt-artifact-*.tar.gz
-cd mipstarre-qpbt-artifact-* && lake exe cache get && lake build MIPStarRE.QPBT
+cd mipstarre-qpbt-artifact-*
+lake exe cache get
+lake build MIPStarRE
+lake build MIPStarRE.QPBT.Test.AxiomAudit
+lake build MIPStarRE.LDT.Test.AxiomAudit
+python3 scripts/blueprint_leanok_axioms.py --ci
 ```
 
 Attach the tarball and its sha256 to the release, and record the clean-clone
 build's wall-clock time and machine in section 2 above.
+
+### Historical packaging preflight, not a final artifact build
+
+The model-free packaging preflight completed at 2026-09-21T20:06:21Z against
+the frozen source commit `73c493c8638a098043733205fe6f155dc6d733d1`. The
+authored package contained 956 files including its manifest and 673 project Lean
+files (`MIPStarRE/` plus `MIPStarRE.lean`). It built 49 gap-note PDFs, pruned 339
+LaTeX intermediates, extracted and leak-scanned all 49 PDFs, found every
+`MIPStarRE` import path inside the snapshot, and passed the package leak scan.
+Its tarball SHA256 was
+`abe7dec8f285dae88b9661aff7e7f2d80f6304d05e74d4a46451982eee003852`.
+
+The same preflight exercised the anonymization rewrite with `--no-pdf`; its
+907-file package was self-contained and passed the leak scan, with SHA256
+`d94aaf0e8a024e4851c86f6f8dae85782077fb604030e21858d0a35030a07936`.
+Both manifests reported the two excluded-workflow Markdown links and the two
+historical LDT paper locators documented above. The preflight predates merged
+PR #672. It did not build Lean from the packaged tree, run the final
+source-faithfulness gates, or certify completion, and neither tarball is the
+final artifact.
 
 ### Double-blind venues
 
@@ -282,26 +337,23 @@ What ships is decided twice, on purpose:
 A path excluded in one should be excluded in the other, and the second guard is
 the weaker of the two: it is a deny-list, so a new workflow-only file has to be
 added to it by hand, whereas the allow-list drops anything it has not been told
-about. `scripts/` is the one mixed directory — three entries ship, the roughly
-thirty workflow-only ones do not — and `git archive` does not descend into a
-directory it has been told to ignore, so a child of an ignored directory cannot
-be re-admitted. The deny-list therefore excludes the workflow-only scripts by
-glob (`scripts/*.py`, `scripts/*.sh`, `scripts/*.lean`, `scripts/tests/`) and
-re-admits the two shipped top-level files with `-export-ignore`;
-`scripts/comparator/` is never matched and ships under both guards.
-`references/` is named in `.gitattributes` too, as a comment rather than an
-`export-ignore` line, so that the decision to ship it is visible where somebody
-would otherwise add the line back. Checked again on 2026-09-21 at the final PR
-head: a plain `git archive` of the repository produces 872 files, while normal
-and anonymized `scripts/make_artifact.sh --no-pdf` snapshots each contain 873,
-the snapshot adding only its `MANIFEST.txt`. The retained full-PDF run used
-input-equivalent head `0e710bce16de`: `docs/paper-gaps/` is unchanged through
-the final head, and later included edits change only the contents of existing
-exported paths. That run built 49 gap-note PDFs and produced 922 files after
-pruning 339 `latexmk` intermediates. The PDFs are not tracked in git and so
-cannot appear in a plain `git archive`; the intermediates are pruned both
-because they are not part of the artifact and because `.fls` and
-`.fdb_latexmk` record the absolute path of the directory the build ran in.
+about. `scripts/` is the one mixed directory: the comparator directory and two
+top-level scripts ship, while workflow-only entries do not. `git archive` does
+not descend into a directory it has been told to ignore, so a child of an
+ignored directory cannot be re-admitted. The deny-list therefore excludes the
+workflow-only scripts by glob (`scripts/*.py`, `scripts/*.sh`,
+`scripts/*.lean`, `scripts/tests/`) and re-admits the two shipped top-level
+files with `-export-ignore`; `scripts/comparator/` is never matched and ships
+under both guards. `references/` is named in `.gitattributes` too, as a comment
+rather than an `export-ignore` line, so that the decision to ship it is visible
+where somebody would otherwise add the line back.
+
+The exact retained full-PDF evidence is the frozen preflight above; moving file
+counts are read from each package's `MANIFEST.txt`, not inferred from an older
+repository-wide count. Generated PDFs are not tracked in git and therefore
+cannot appear in a plain `git archive`. LaTeX intermediates are pruned because
+they are not part of the artifact and because `.fls` and `.fdb_latexmk` record
+the absolute build directory.
 
 The leak scan is the backstop: it is what caught an upstream developer's home
 path in `docs/reports/` and got that directory excluded. It is fail-closed —
