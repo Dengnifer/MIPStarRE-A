@@ -2682,3 +2682,22 @@ and admitted publication/full CI under
 /tmp/main-fullspeed-publish710-integrated716-20260922. SECOND review remains.
 The Sol slot automatically moved to preserved713's integration;723's repair
 and the green-row review queue remain behind it.720/721 are still unstarted.
+
+## 2026-09-22T19:31Z: dimension review waits for publication and full CI
+
+The required snapshot completed with no new QPBT blocker. Primary was clean at
+da60d017, and space-d remains enabled. The only model worker is still the
+preserved issue713 integration. Its web, sync, style and static marker checks
+passed; it is refreshing private aggregate build artifacts before checkdecls.
+The earlier direct Lean invocation did not emit an object file, so its wrapper
+exit zero is not declaration-check evidence. Targeted Lake builds are now active.
+
+Dimension publication PID968656 is live in the normal checked-push blueprint
+hook, not stalled or complete. The new model-free watcher
+/tmp/main-sol-review716-after-ci-v1-20260922.sh waits for its successful receipt,
+verifies the original integration remains an ancestor and the worktree is clean,
+then queues the SECOND review through the existing pause-aware one-Sol wrapper.
+It cannot admit review before all exact-head CI contexts pass. The already
+queued723 repair and five green row reviews remain unchanged. No additional
+model slot, proof task, or review continuation was started. No new pause notice
+has arrived; the final artifact and final comparator pin remain unfinished.
