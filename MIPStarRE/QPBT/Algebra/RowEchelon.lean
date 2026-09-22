@@ -46,4 +46,49 @@ lemma IsReducedRowEchelon.linearIndependent_rows
   have hi := congrFun hc (pivot i)
   simpa [Matrix.row, Finset.sum_apply, hB.pivot_entry] using hi
 
+/-- The rank of the first `k` columns is the number of pivots in those columns.
+Rows whose pivots lie beyond the prefix restrict to zero, and the remaining
+rows are independent on their pivot columns. -/
+lemma IsReducedRowEchelon.prefixRank_eq_card
+    {B : Matrix (Fin m) (Fin n) K} {pivot : Fin m ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) {k : ℕ} (hk : k ≤ n) :
+    prefixRank (Submodule.span K (Set.range B.row)) k hk =
+      (Finset.univ.filter fun i => (pivot i).val < k).card := by
+  classical
+  let s := Finset.univ.filter fun i => (pivot i).val < k
+  let b : s → Fin k → K := fun i => prefixMap k n hk (B.row i.val)
+  have hb : LinearIndependent K b := by
+    apply Fintype.linearIndependent_iff.mpr
+    intro c hc i
+    have hi := congrFun hc
+      ⟨(pivot i.val).val, (Finset.mem_filter.mp i.property).2⟩
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at hi
+    change (∑ j : s, c j * B j.val (pivot i.val)) = 0 at hi
+    simpa [hB.pivot_entry, ← Subtype.ext_iff] using hi
+  have hspan :
+      Submodule.span K (Set.range (fun i => prefixMap k n hk (B.row i))) =
+        Submodule.span K (Set.range b) := by
+    apply le_antisymm
+    · apply Submodule.span_le.mpr
+      rintro _ ⟨i, rfl⟩
+      by_cases hi : (pivot i).val < k
+      · exact Submodule.subset_span ⟨⟨i, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hi⟩⟩,
+          rfl⟩
+      · have hz : prefixMap k n hk (B.row i) = 0 := by
+          funext j
+          apply hB.zero_before
+          change j.val < (pivot i).val
+          exact lt_of_lt_of_le j.isLt (Nat.le_of_not_lt hi)
+        change prefixMap k n hk (B.row i) ∈ _
+        rw [hz]
+        exact Submodule.zero_mem _
+    · apply Submodule.span_mono
+      rintro _ ⟨i, rfl⟩
+      exact ⟨i.val, rfl⟩
+  rw [prefixRank, Submodule.map_span, ← Set.range_comp]
+  change Module.finrank K
+    (Submodule.span K (Set.range (fun i => prefixMap k n hk (B.row i)))) = s.card
+  rw [hspan, finrank_span_eq_card hb]
+  exact Fintype.card_coe s
+
 end MIPStarRE.QPBT
