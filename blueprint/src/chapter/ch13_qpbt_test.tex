@@ -11,7 +11,7 @@ quantum soundness of the classical game (Theorem~\ref{lem:ld-soundness},
 imported, with the facts required by the identification, which remain to be
 proved, recorded in \cite{gap:qpbt_ld-dimension-divisibility}; see
 Remark~\ref{rem:ld-soundness-provider}), the rigidity of the Magic Square game
-(Theorem~\ref{thm:ms-rigidity}, imported, and stated with the consistency
+(Theorem~\ref{thm:ms-rigidity}, proved with the consistency
 hypothesis on the two distinguished variable measurements that the source
 omits --- the source's unrestricted statement is false; the counterexamples
 and the correction are recorded in
@@ -1111,7 +1111,8 @@ $4$, respectively.
 	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652, quantifies over
 	% every strategy of value 1 - eps and carries no consistency hypothesis; that statement is
 	% false (see the proof, Remark~\ref{rem:ms-rigidity-strategy-class}, and the cited note). The
-	% source's display is the case delta = 0 below.
+	% case delta = 0 below recovers the source's error scale for completed binary effects;
+	% comparison with the prescribed-answer effects remains a separate construction.
 	Let $\eps, \delta \ge 0$, and let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$, and whose $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements are consistent between the two players up to $\delta$ on $\ket{\psi}$, in the binary effects $\hat A$, $\hat B$ of Definition~\ref{def:ms-variable-agreement}:
 	\begin{equation}\label{eq:ms-rigidity-consistency}
 		\Delta_j(\mathcal S) = \sum_{b \in \F_2} \bigl\| \bigl( \hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} - I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b \bigr) \ket{\psi} \bigr\|^2 \le \delta \qquad \text{for } j \in \{1, 5\}\,.
@@ -1133,7 +1134,11 @@ $4$, respectively.
 		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\eta} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
 		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\eta} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
 	\end{align*}
-	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\zeta N$ means $\bra{\Theta} (M-N)^\dagger (M-N) \ket{\Theta} \le O(\zeta)$, evaluated on the extracted ideal state $\ket{\Theta}$ of item~2 --- the state on which the transported operators act --- and not on $\ket{\psi}$. For $\delta = 0$, in particular for every symmetric consistent strategy, the conclusion is the source's display, with $\eta = \sqrt\eps$.
+	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\zeta N$ means $\bra{\Theta} (M-N)^\dagger (M-N) \ket{\Theta} \le O(\zeta)$, evaluated on the extracted ideal state $\ket{\Theta}$ of item~2 --- the state on which the transported operators act --- and not on $\ket{\psi}$. For $\delta = 0$, in particular for every symmetric consistent strategy, $\eta = \sqrt\eps$.
+	This recovers the source's error scale for the completed binary effects of
+	Definition~\ref{def:ms-variable-agreement}; comparison with the
+	prescribed-answer effects remains a separate construction. Zero agreement
+	does not eliminate answers of the wrong form.
 \end{theorem}
 \begin{proof}
 	\leanok
@@ -1156,6 +1161,27 @@ $4$, respectively.
 \begin{remark}[The strategy class in Theorem~\ref{thm:ms-rigidity}]\label{rem:ms-rigidity-strategy-class}
 	Fix the canonical Mermin--Peres operator solution on $\C^2 \ot \C^2$ --- the nine $\pm 1$ observables $\sigma^X \ot I$, $I \ot \sigma^X$, $\sigma^X \ot \sigma^X$ in the first row, $I \ot \sigma^Z$, $\sigma^Z \ot I$, $\sigma^Z \ot \sigma^Z$ in the second, and $\sigma^X \ot \sigma^Z$, $\sigma^Z \ot \sigma^X$, $\sigma^Y \ot \sigma^Y$ in the third --- and let $\ket{\Omega}$ be the maximally entangled state of two copies of $\C^2 \ot \C^2$. Measuring the three commuting observables of a row or column on a $\mathsf{Constraint}$ question, and the single observable of a cell on a $\mathsf{Variable}$ question, is a symmetric, projective, consistent strategy of value $1$ (Theorem~\ref{thm:ms-from-ac}). Now give each player two copies of $\C^2 \ot \C^2$ paired into two copies of $\ket{\Omega}$, and split the two roles across them: on a constraint question the first player measures copy~$1$ and the second copy~$2$, and on a variable question the first player measures copy~$2$ and the second copy~$1$. Every sampled question pair consists of one constraint and one variable, so the two measurements actually performed are the canonical perfect pair acting on a single copy of $\ket{\Omega}$, and the value is $1$. The two players' $\mathsf{Variable}_1$ observables, however, act on halves of different copies, whose joint reduced state is a product of maximally mixed states, so their correlation is $0$, while the second item of Theorem~\ref{thm:ms-rigidity} forces it to be $1$ at $\eps = \delta = 0$; the same computation applies to $\mathsf{Variable}_5$. Giving each player a flag qubit, putting the two flags in the state $(\ket{01}+\ket{10})/\sqrt2$, and letting each player's flag select which of the two roles it plays turns this into a \emph{symmetric} strategy with the same value and the same vanishing correlations, so a restriction to symmetric strategies (Definition~\ref{def:symmetric-game}) would not repair the source's statement. Agreement of the two players' $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements on the state, that is, the hypothesis~\eqref{eq:ms-rigidity-consistency} --- exact consistency in the sense of Definition~\ref{def:consistent-measurement} when the strategy is symmetric and $\delta = 0$ --- does force the correlation to be $1$ up to $O(\delta)$, and both strategies above have agreement distance $\Delta_1 = \Delta_5 = 1$ (Definition~\ref{def:ms-variable-agreement}). It is also what the analysis of the Pauli basis test has available when it applies Theorem~\ref{thm:ms-rigidity}: the Magic Square strategy induced at an anticommuting tuple has, on average over the tuple, agreement distances of order $\eps$ by items~1 and~7 of Lemma~\ref{lem:qld-win-implications} (the point measurements are consistent between the players, and each player's point measurement agrees with the other player's variable measurement), once item~1 is conditioned on the anticommutation event and both are passed through the binary relabeling of Definition~\ref{def:ms-variable-agreement}; that analysis uses only the anticommutation consequence for one player. The theorem is therefore stated with that agreement as its hypothesis, for arbitrary and not necessarily symmetric strategies; the class of symmetric consistent strategies named in the owner decision is the case $\delta = 0$. The details are in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
 \end{remark}
+
+\begin{definition}[The unasserted printed rigidity claim]
+  \label{def:ms-rigidity-printed-claim}
+  \lean{MIPStarRE.QPBT.PrintedMagicSquareRigidityClaim}
+  \leanok
+  \uses{def:ms-game, def:tensor-product-value, def:povm-distance}
+  Define $\mathrm{PrintedMS}$ to be the following proposition. There is a
+  universal constant $C\geq1$ such that, for every $\eps\geq0$ and every
+  strategy of the Magic Square game of value exactly $1-\eps$, there are
+  local isometries and a unit auxiliary state satisfying all seven bounds
+  in the conclusion of Theorem~\ref{thm:ms-rigidity} at scale $C\sqrt\eps$.
+  Here the bit effects are the prescribed single-bit answers themselves,
+  without assigning wrong-form answers to zero, and the observables are
+  the differences of those same effects. Both anticommutator distances
+  are read on the ideal extracted state, as are the four measurement
+  distances. No agreement or symmetry hypothesis is included.
+  This defines a proposition and does not assert it. The independent-copy
+  examples in Remark~\ref{rem:ms-rigidity-strategy-class} refute the
+  unrestricted assertion. The Lean declaration does not assert its
+  refutation either; see \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+\end{definition}
 
 % Formalization-support and specialization nodes for Theorem~\ref{thm:ms-rigidity}. None of
 % the four statements below is a named result of the source article: the first two isolate
@@ -1206,7 +1232,10 @@ $4$, respectively.
 	\lean{MIPStarRE.QPBT.exists_ms_rigidity_of_symmetric_consistent}
 	\leanok
 	\uses{thm:ms-rigidity, def:ms-variable-agreement, lem:ms-variable-agreement-zero, def:consistent-strategy, def:spcc, def:symmetric-game}
-	Let $\eps \ge 0$ and let $\mathcal S = (\ket{\psi}, M)$ be a symmetric consistent strategy for $\mathfrak{G}^{\mathrm{MS}}$ in the sense of Definition~\ref{def:consistent-strategy}, so that $\mathcal S$ is projective and every measurement $\{M^x_a\}$ is consistent on $\ket{\psi}$; every SPCC strategy (Definition~\ref{def:spcc}) is of this form. Suppose that $\mathcal S$ succeeds in $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$. Then the conclusion of Theorem~\ref{thm:ms-rigidity} holds with $\eta = \sqrt\eps$, that is, in the form printed in the source.
+	Let $\eps \ge 0$ and let $\mathcal S = (\ket{\psi}, M)$ be a symmetric consistent strategy for $\mathfrak{G}^{\mathrm{MS}}$ in the sense of Definition~\ref{def:consistent-strategy}, so that $\mathcal S$ is projective and every measurement $\{M^x_a\}$ is consistent on $\ket{\psi}$; every SPCC strategy (Definition~\ref{def:spcc}) is of this form. Suppose that $\mathcal S$ succeeds in $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$. Then the conclusion of Theorem~\ref{thm:ms-rigidity} holds with $\eta = \sqrt\eps$.
+	This recovers the source's error scale for the completed binary effects of
+	Definition~\ref{def:ms-variable-agreement}; comparison with the
+	prescribed-answer effects remains a separate construction.
 \end{corollary}
 \begin{proof}
 	\leanok
@@ -1641,9 +1670,12 @@ indexed low-degree soundness and transfers the resulting completed Pauli
 measurements to the prescribed-answer effects. The seed-indexed derivation
 printed in the source remains subject to the divisibility and identification
 obligations documented in \cite{gap:qpbt_ld-dimension-divisibility} and is
-recorded separately in Remark~\ref{rem:pauli-printed-seed-argument}. The
-argument also uses the corrected rigidity statement of
-Theorem~\ref{thm:ms-rigidity}.
+recorded separately in Remark~\ref{rem:pauli-printed-seed-argument}.
+For the Magic Square step, the soundness argument uses the original-state
+anticommutation bounds of
+Lemma~\ref{lem:qld-ms-anticommutator-original-state}, obtained from winning
+probability alone. The additional variable-agreement hypotheses of
+Theorem~\ref{thm:ms-rigidity} are not inputs to that argument.
 
 The strategies appearing in Lemma~\ref{lem:pauli-completeness} and in the conclusion of Theorem~\ref{thm:pauli} are phrased in terms of qudit Pauli measurements and maximally entangled states of $q$-dimensional qudits. For the intended application it is more convenient to work with qubits: since the field sizes $q$ used here are powers of $2$, the conclusions can be restated in terms of qubit EPR pairs and qubit Pauli measurements.
 
