@@ -176,8 +176,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -197,7 +197,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -213,7 +213,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -311,8 +311,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -332,7 +332,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -348,7 +348,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -422,7 +422,7 @@
   "updated_at": "2026-09-22T13:15:36Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "d709f7f83ccba8edd65c9833be9ad8346792ec14",
+  "merge_commit_sha": null,
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -561,8 +561,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -582,7 +582,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -598,7 +598,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -696,8 +696,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -717,7 +717,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -733,7 +733,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -802,12 +802,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n\nNatarajan--Vidick Theorem 10 (`thm:qblr`, `references/nv-paper/fullpaper.tex:1074-1113`)\nprints an averaged squared operator-distance bound of delta. Its binary\nmeasurement calculation at lines 900-912 instead gives operator bound\n2 delta. The four-point scalar example refutes the printed bound even with\narbitrary ancillary extensions. Issue #694 completes the normalization evidence\ncarried from #124, #129, and #173 for blueprint `thm:linearity`.\n\n### Description\n\n- Retain both the conventional and literal duplicated-density readings as\n  unasserted universal propositions, with every finite input and ancillary\n  space quantified. Prove their negations in Lean using the four-point family:\n  correlation 1/4, error parameter 3/4, and optimal operator error 1.\n- Add the corrected existence theorem for every natural index length and real\n  error parameter. Preserve the existing operator, binary-measurement, and\n  common-ancilla statements and proofs.\n- Prove mathematically that 2 is the least universal multiplicative constant\n  using Boolean quadratic families, and distinguish this from the exact\n  normalization identity and the error of the Fourier-square construction.\n  The asymptotic sharpness argument is not claimed as a Lean theorem.\n- Record all source applications, blueprint references and dependencies, Lean\n  callers, adversarial checks, and historical budget provenance in the note and\n  focused audit. Keep the normalization register pending independent review and\n  main adoption. The separate padding/absorption question remains open.\n\n### Testing\n\n- Focused Lean checks passed for `Combining/Linearity.lean`,\n  `Combining/Linearity/PrintedClaims.lean`, `Combining/Points.lean`,\n  `MIPStarRE/QPBT.lean`, and `MIPStarRE.lean`.\n- Seven targeted axiom-closure checks contain only `propext`,\n  `Classical.choice`, and `Quot.sound`; the changed Lean modules contain no\n  proof holes, axioms, bypass tactics, or debug commands.\n- Blueprint web rendering, synchronization, LaTeX conventions, and all 1886\n  generated declaration resolutions passed. The final web render has no\n  unresolved-label errors or missing bibliography entries. Existing sync\n  warnings outside this change remain.\n- The gap note builds to PDF with resolved references and no overfull boxes;\n  note style and paper-gap reference checks passed. Normal commit hooks passed.\n- Exact enumeration of all scalar Boolean families for index lengths 0 through\n  4 found no violation of the corrected bound. The unbounded sharpness argument\n  is given separately as a proof.\n- Full build, canonical CI, and independent review are reserved for main and\n  have not been run by this author session.\n\n---\nAddresses #694\n",
+  "body": "### Motivation\n\nNatarajan--Vidick Theorem 10 (`thm:qblr`, `references/nv-paper/fullpaper.tex:1074-1113`)\nprints an averaged squared operator-distance bound of delta. Its binary\nmeasurement calculation at lines 900-912 instead gives operator bound\n2 delta. The four-point scalar example refutes the printed bound even with\narbitrary ancillary extensions. Issue #694 completes the normalization evidence\ncarried from #124, #129, and #173 for blueprint `thm:linearity`.\n\n### Description\n\n- Retain both the conventional and literal duplicated-density readings as\n  unasserted universal propositions, with every finite input and ancillary\n  space quantified. Prove their negations in Lean using the four-point family:\n  correlation 1/4, error parameter 3/4, and optimal operator error 1.\n- Add the corrected existence theorem for every natural index length and real\n  error parameter. Preserve the existing operator, binary-measurement, and\n  common-ancilla statements and proofs.\n- Prove mathematically that 2 is the least universal multiplicative constant\n  using Boolean quadratic families, and distinguish this from the exact\n  normalization identity and the error of the Fourier-square construction.\n  The asymptotic sharpness argument is not claimed as a Lean theorem.\n- Record all source applications, blueprint references and dependencies, Lean\n  callers, adversarial checks, and historical budget provenance in the note and\n  focused audit. Keep the normalization register pending independent review and\n  main adoption. The separate padding/absorption question remains open.\n\nThe adoption evidence to assess independently is correctness on the full\nprinted domain, sufficiency for every source and blueprint consumer, minimality\nof the factor two, and Lean convergence. Approval of a retained counterexample\nalone does not certify all four conditions or make the pending row terminal.\n\n### Testing\n\n- Focused Lean checks passed for `Combining/Linearity.lean`,\n  `Combining/Linearity/PrintedClaims.lean`, `Combining/Points.lean`,\n  `MIPStarRE/QPBT.lean`, and `MIPStarRE.lean`.\n- Seven targeted axiom-closure checks contain only `propext`,\n  `Classical.choice`, and `Quot.sound`; the changed Lean modules contain no\n  proof holes, axioms, bypass tactics, or debug commands.\n- Blueprint web rendering, synchronization, LaTeX conventions, and all 1886\n  generated declaration resolutions passed. The final web render has no\n  unresolved-label errors or missing bibliography entries. Existing sync\n  warnings outside this change remain.\n- The gap note builds to PDF with resolved references and no overfull boxes;\n  note style and paper-gap reference checks passed. Normal commit hooks passed.\n- Exact enumeration of all scalar Boolean families for index lengths 0 through\n  4 found no violation of the corrected bound. The unbounded sharpness argument\n  is given separately as a proof.\n- Full build, canonical CI, and independent review are reserved for main and\n  have not been run by this author session.\n\n---\nAddresses #694\n",
   "created_at": "2026-09-22T12:07:57Z",
-  "updated_at": "2026-09-22T13:11:24Z",
+  "updated_at": "2026-09-22T13:34:29Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "dd780af59478491372f3512e2f63de9d120005f6",
+  "merge_commit_sha": "bebf0b5b3577f6acd4d7f21efb30b5fe3abc04ff",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -852,11 +852,11 @@
   "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/699/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/comments{/number}",
   "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/699/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/463feff47f96c89ebbf238e60eac6d8af74bb9a2",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/d3089cbea6cfabe4c0ea97c7b8276be341ed33fb",
   "head": {
    "label": "Dengnifer:issue-694-linearity-normalization-20260922",
    "ref": "issue-694-linearity-normalization-20260922",
-   "sha": "463feff47f96c89ebbf238e60eac6d8af74bb9a2",
+   "sha": "d3089cbea6cfabe4c0ea97c7b8276be341ed33fb",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -946,8 +946,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -967,7 +967,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -983,7 +983,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -991,7 +991,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "7905fd79a1b3c6d495d616a024fafd7ef24f2fc2",
+   "sha": "ff6ac05994082608ff0fcd44a74e2da4044155a6",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1081,8 +1081,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1102,7 +1102,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1118,7 +1118,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1146,7 +1146,7 @@
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/pulls/699/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/463feff47f96c89ebbf238e60eac6d8af74bb9a2"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/statuses/d3089cbea6cfabe4c0ea97c7b8276be341ed33fb"
    }
   },
   "author_association": "OWNER",
@@ -1189,7 +1189,7 @@
   },
   "body": "### Motivation\n- Claims 17-1 and 17-3 in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1239` require complex scalar estimates. The existing direct-law proofs only supplied real-part bounds for these two claims. Claim 17-1's ordered product can be non-Hermitian, so its squared-norm calculation needs `W` adjoint times `W`.\n\n### Description\n- Prove the complex Claim 17-1 bound for the actual X-Z-X measurement, with constant `2 * sqrt(deltaQ)`, using the existing complex weighted Cauchy-Schwarz and same-placement distance APIs.\n- Prove that the Z overlap is real for any line POVM by positivity on opposite registers. Obtain the complex Z bound with the real estimate's unchanged constant, whose proof permits `2`. For the concrete X-Z-X measurement, derive the polynomial line error and line-consistency data from the existing pasting theorem.\n- Link all five new public declarations through separate auxiliary blueprint entries. State the constructed measurement, completed evaluations, directly indexed law, quantitative hypotheses and constants explicitly; distinguish the general Z estimate's assumed line consistency from the concrete theorem's internal construction. Preserve the real-part entries and all source-claim completion markers.\n- Update the subline gap note, source and consumer audit, and the subline register row. Its status remains `open`: source-law transport, zero-direction evaluation semantics, and the printed extended-line error are not resolved. No Lean hypothesis, game definition, source-law identification or completion criterion is changed.\n\n### Testing\n- `leanblueprint web` passes after bibliography regeneration. Normal declaration-index generation produces 1,871 entries, and `lake exe checkdecls blueprint/lean_decls` resolves all of them. The generated index remains ignored under the repository's existing rules.\n- Source synchronization passes with `--ci --warn-missing-blueprint --fail-on-missing-blueprint`, comparing both changed Lean modules against `ccba9a6756c58c0efa5cda04747e6a97935d71fb`. All five new public declarations have blueprint coverage. Four existing orphan marks in chapter 16 and two existing missing proof marks in chapters 13 and 14 remain advisory warnings.\n- Focused Lean checks pass for `SubLineComplex.lean` and `Claims.lean`. The axiom audit of all five new declarations, five retained scalar declarations, and the line-consistency construction reports only `propext`, `Classical.choice`, and `Quot.sound`.\n- The mathematical author's recorded checks also passed for both re-export files, `ExtendedLines/Estimates.lean`, `Apply.lean`, and the three supplied-witness consumer modules named in the audit. That session validated the gap-note PDF, duplicate names, source headers, file length and proof integrity, plus 100 seeded X-Z-X diagnostics and a commuting zero-distance case.\n- Hook installation, normal pre-commit checks, blueprint LaTeX conventions and whitespace checks pass without skips. No Lean source changes were needed during blueprint integration. Full locked CI, publication and independent review remain with main.\n\n---\nAddresses #689\nAddresses #118\n",
   "created_at": "2026-09-22T11:22:44Z",
-  "updated_at": "2026-09-22T13:28:51Z",
+  "updated_at": "2026-09-22T13:38:17Z",
   "closed_at": null,
   "merged_at": null,
   "merge_commit_sha": "dd34833617483ba1c888bee3cb632ba096962629",
@@ -1331,8 +1331,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1352,7 +1352,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1368,7 +1368,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1466,8 +1466,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1487,7 +1487,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1503,7 +1503,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1705,8 +1705,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1726,7 +1726,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1742,7 +1742,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1840,8 +1840,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -1861,7 +1861,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1877,7 +1877,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2079,8 +2079,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2100,7 +2100,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2116,7 +2116,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2214,8 +2214,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2235,7 +2235,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2251,7 +2251,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2453,8 +2453,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2474,7 +2474,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2490,7 +2490,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2588,8 +2588,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2609,7 +2609,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2625,7 +2625,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2827,8 +2827,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2848,7 +2848,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2864,7 +2864,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2962,8 +2962,8 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T13:30:42Z",
-    "pushed_at": "2026-09-22T13:30:36Z",
+    "updated_at": "2026-09-22T13:31:55Z",
+    "pushed_at": "2026-09-22T13:34:20Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-A.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-A.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-A.git",
@@ -2983,7 +2983,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 72,
+    "open_issues_count": 74,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2999,7 +2999,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 72,
+    "open_issues": 74,
     "watchers": 1,
     "default_branch": "main"
    }
