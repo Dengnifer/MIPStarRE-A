@@ -12,15 +12,6 @@ of a formalization mark must keep C4 failing. Construction targets and the
 row-by-row adoption evidence are in the
 [gap register](../paper-gaps/qpbt-gap-register.md#source-adoption-audit-2026-09-22).
 
-1. `def:canonical-complement`: `canonicalComplement` uses prefix ranks;
-   the source uses the nonpivot columns of reduced row echelon form
-   (`04_preliminaries.tex:303-340`). Their equality, basis independence,
-   cardinality, independence of the selected vectors, and the register-subspace
-   case are proved. The remaining obligation is a deterministic executable
-   Gaussian-elimination construction, with correctness and a polynomial bound
-   on field operations and zero tests. Abstract RREF existence and an executable
-   decomposition given an RREF matrix do not establish that claim. See the
-   [canonical-complement audit](../../audits/2026-09-22_issue-676-canonical-completion.md).
 3. `def:generalized-pauli`: general-prime matrices exist, but the linked
    eigenvectors and projectors require characteristic two. See
    [the scope note](../paper-gaps/qpbt_characteristic-two-pauli-scope.tex).
@@ -46,8 +37,21 @@ row-by-row adoption evidence are in the
 correspondence with the intrinsic complement from the independent input rows,
 then proves the source complement conclusion using the pivot-coordinate
 decomposition. No RREF, correspondence, or complement hypothesis is assumed.
-This resolves the former canonical-complement lemma row without exempting the
-definition's remaining algorithmic assertion.
+This resolves the former canonical-complement lemma row.
+
+`def:canonical-complement` is now marked as well. The deterministic stored-matrix
+program `gaussianElimination` supplies the construction in
+`04_preliminaries.tex:303-333`. Its independent-row correctness theorem derives
+RREF, row-span preservation, and equality of the computed nonpivot indices
+with `canonicalComplement`. Its counter is bounded by `n*(m+n+2*m*n)` under
+unit-cost field division, multiplication, subtraction, and equality tests.
+The arbitrary-field result requires executable operations and decidable
+equality; it is an arithmetic-operation bound for materialized input, not a
+machine-instruction, allocation, or bit-complexity claim. The predecessor
+cardinality, independence, basis-independence, and register-subspace results
+remain linked. This discharges the former algorithmic obligation without an
+exemption; see the [integration audit](../../audits/2026-09-22_issue-690-canonical-integration.md).
+Full CI and independent review of this adoption remain with main.
 
 The four CL definition nodes audited in chapter 12 now carry marks for their
 faithful recursive predicates and shared-seed sampling laws. No theorem or
