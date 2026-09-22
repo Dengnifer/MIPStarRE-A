@@ -2444,3 +2444,49 @@ repair and THIRD independent review, not proof work or another gate rewrite.
 using packet /tmp/main-fix707-prose-round2-20260922.md and one3600s Sol task.
 The queued721/720 author driver will refuse its prerequisite because707's
 combined review failed, preserving priority for707; no row author has started.
+
+## 2026-09-22T18:04Z: refresh709, repair707 committed, combine-map documentation admitted
+
+Previous goal turn classified as progress: issues720/721 were created,709's
+second review5281698617 approved0 findings and gated, and707's two prose
+findings were assigned to a default Sol worker. The row-author driver ended
+at its explicit707-approval prerequisite; neither720 nor721 has started.
+
+709 is objectively nonfresh on current main, and the model-free service was
+waiting for a partner/update. The owner-supplied precheck confirms a clean
+merge. New /tmp/main-refresh709-approved-sol-v2-20260922.sh claims709 and
+integrates main ascb22a7e962ec373d83f5270e7bfd7237982b42fa, then performs
+normal locked private build, publication and full exact-head CI. It attempts
+only strict identical-patch carry from the genuine SECOND review5281698617;
+if comparison refuses, it publishes no fabricated approval and leaves a
+READY_FOR_THIRD_DEFAULT_SOL_REVIEW receipt. No train is staged by main.
+
+707's prose worker orc-703-20260923-03 ended0 in393s at
+10a5c675058adb3218e124c73558583786cfdd80. Only chapter12 changed,4 additions
+and11 deletions; both wording findings were addressed. Web, sync, LaTeX lint,
+whitespace and normal hooks passed. The mathematical endpoint distinction,
+external-versus-formal refutation and unresolved rank claims remain explicit.
+Main inspected the diff and exact receipt. No theorem, mark, gate or row changed.
+
+/tmp/main-after-fix707-prose-v1-20260922.sh verifies terminal author success,
+the clean descendant commit, sole changed chapter12 file and unchanged Lean
+links/marks/labels/dependencies before integration. It has merged current main
+cleanly and entered the normal locked private build. Publication/full CI and
+THIRD independent default Sol review follow. Seven dependent row tails still
+wait for actual707 merge. All earlier failed checks and review evidence remain.
+
+The model slot became free during these builds. Created documentation issue722
+under173 for def:combine-map and admitted one3600s default Sol ultra task in a
+fresh issue-722-combine-map-documentation-20260922 worktree. Runtime prefix is
+/tmp/main-sol-document-combine722-20260922, using the node mode of
+/tmp/main-sol-document-row-v2-20260922.sh. The old node brief is the authority:
+preserve merged700 facts, document the source-function discrepancy, add its
+reasoned exemption, preserve all row statuses, no new proofs or698 continuation.
+The same operator lock and cap1 keep future707 review and this worker serialized.
+
+Issue722's actual Sol thread started as01a0ca49-ebbe-7032-b7e8-f00f56f53327.
+Both meta-records attempts returned3 because a live /tmp/tmpyygqm2h4/repo/
+local/bin/pr_train.py unit-test fixture matched the helper's conservative
+train guard. No guard was bypassed. Primary dirt consists only of the pending
+telemetry and the completed707 worker's preserved transcript/usage. The next
+quiet normal records cycle should publish it; no clean-main claim is made here.
