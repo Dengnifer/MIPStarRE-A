@@ -381,6 +381,33 @@ theorem Invariant.step {A : StoredMatrix K m n} {S : State K m n} (c : Fin n)
       rw [Nat.add_mul, Nat.one_mul]
       omega
 
+/-- Induction over the bounded column loop derives the invariant from the input
+matrix alone. In particular, correctness certificates are not program inputs. -/
+theorem runColumns_invariant (A : StoredMatrix K m n) (k : ℕ) (hk : k ≤ n) :
+    Invariant A k (runColumns A k) := by
+  induction k with
+  | zero => exact initialState_invariant A
+  | succ k ih =>
+    have hkn : k < n := by omega
+    rw [runColumns, dif_pos hkn]
+    exact (ih (by omega)).step ⟨k, hkn⟩
+
+/-- The computed nonpivot indices. Only assigned pivot entries are inspected;
+the finite scan uses integer comparisons and no field operations. -/
+def State.nonpivotIndices (S : State K m n) : Finset (Fin n) :=
+  Finset.univ.filter fun j => ∀ i : Fin m, i.val < S.rank → S.pivots[i.val] ≠ j.val
+
 end GaussianElimination
+
+open GaussianElimination
+
+variable {K : Type*} [Field K] [DecidableEq K] {m n : ℕ}
+
+/-- Deterministic, materialized Gauss-Jordan elimination. The input is stored
+matrix data, with field operations and decidable equality supplied by the caller.
+Exactly `n` bounded column iterations are executed. This constructs the reduced
+matrix and nonpivot indices used in paper `def:canonical-complement`. -/
+def gaussianElimination (A : StoredMatrix K m n) : State K m n :=
+  runColumns A n
 
 end MIPStarRE.QPBT
