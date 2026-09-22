@@ -231,3 +231,26 @@ two-space line ending. Before first publication, main removed those two spaces
 only from the presentation file. Its original cache copy and canonical raw
 JSONL remain unchanged. Normal whitespace hooks remain enabled; no published
 capture or historical session data was rewritten. The incident is in events.md.
+
+## Green Documentation Heads and Last Review Admission
+
+The 669 publication job finished with complete green CI at
+`d9350aed3cd1c6355067db49d3ac188dad7171c8`. Main admitted its fourth and last
+ordinary full review through `/tmp/main-space-d-review669-final-20260922.sh`,
+with900 seconds per phase. Canonical code/prose phases obey the shared cap;
+one can queue behind the still-running 680 repair. Account queue wait is not
+an extra model slot. No fifth full review is authorized.
+
+The artifact guide is published as PR 681 at
+`646eb9e27ffc56e4e9b9dd579a61809d22d401c8`, with complete green CI and no first
+review yet. The prepared independent-review wrapper now accepts 681 as well;
+admit it only after a real vacancy and frozen-head verification.
+
+The 678 audit repair completed as
+`87729390d048422ae6f720876f871b2f7a43e0e8`, changing only the audit. Both
+findings are addressed by the author, YAML/whitespace checks and normal hooks
+pass, and the worktree is clean. Main started
+`/tmp/main-space-d-publish678-auditfix-20260922.sh` for guarded refresh, build,
+publication and full CI. A second independent review is still required. The
+RREF correspondence remains open. Actual model work now is 680's repair and
+the admitted 669 review phases; 681 review and 678 re-review wait for capacity.
