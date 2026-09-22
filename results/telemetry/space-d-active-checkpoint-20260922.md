@@ -274,3 +274,12 @@ locked full build, checked publication and full CI. It does not admit the second
 review automatically. Both available model slots are now allocated to 669's
 fourth-review phases; independent 681 review and 678/680 re-reviews are the next
 bounded jobs after real vacancies and exact-head green CI.
+
+## Artifact Review Admission
+
+At 07:01 UTC one 669 review phase had finished, leaving one live worker
+reservation and space-d enabled. Main admitted the prepared first independent
+681 review at `646eb9e27ffc56e4e9b9dd579a61809d22d401c8` through the canonical
+review wrapper, with900 seconds and the normal two-worker cap. The remaining
+669 phase keeps its slot. The 678 and 680 publication/build/CI jobs continue
+without models; their new-head re-reviews still require complete green CI.
