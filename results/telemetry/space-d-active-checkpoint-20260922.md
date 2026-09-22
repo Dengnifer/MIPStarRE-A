@@ -927,3 +927,166 @@ the first independent whole review. No further author continuation is admitted.
 The accounting repair published aligned and clean atcf20c7a4. Any later
 passive rows are new, not a failed repair. Current production waits and
 worker ownership remain live and bounded; mathematical completion is unproven.
+
+## 680 Merged; Completed Construction Integration
+
+The interrupted cycles made progress; no planned PR draft hold or resource
+change was applied. The10:43Z snapshot confirms space-d only3/0/3, three live
+workers, no retired-key marker, and a live daemon PID1928886. Main did not
+restart live workers or interpret observation delays as failures.
+
+Independent reviewer-680-20260922-01 completed its limited check in767s:
+all edits/imports/contexts, full CI, the four prior reviews and F1 continuity
+verified, no new integration regression. Main published its actual body as
+review5276885422 at66796a9a, retained CHANGES_REQUESTED and posted failure
+summary, then exact-head ADJUDICATION5774986476 deferring only F1 to687.
+The frozen template /tmp/adjudication-680-template-current-20260922.md and
+daemon adj-list entry680 enabled service-only merge. The service merged680
+at10:39:38Z as0ea50f00414df9aeb9b5117c6fa6033187a3f7c7. No fake carry or fifth
+full review occurred; all earlier costs and failed helper logs remain.
+
+691 first review5276705143: code APPROVED, prose one F1 about paper/Lean row,
+column, pivot, prefix and sum indexing. blueprint-676-20260922-01 fixed it in
+582s at3249d6443e3e288730b682cd589c2779208c05e3, only chapter11(+29/-14).
+All markers/links/dependencies and Lean statements are unchanged; web, lint,
+sync,2133 declaration checks and normal hooks pass. Detached
+/tmp/main-publish691-index-fix-20260922.sh now performs guarded main refresh,
+private import exports, complete new-head CI and its SECOND independent whole
+review. It retains main-fix691 on failure; no approval carries across this edit.
+
+690's prover finished0 after2429s at8f55fc058512f43f69c8c869de349613bbf2de59:
+537-line algorithm and202-line audit,12 retained milestone commits. All28
+authored declarations have standard-only axiom closures; executable tests over
+ZMod2/3/5 and rationals, zero dimensions and normal hooks pass. The actual
+materialized algorithm proves RREF, preserved span, canonical nonpivot output
+and cost bound n*(m+n+2*m*n) for charged field operations/zero tests. This is
+author evidence pending independent review, not a bit-complexity certificate.
+Its ONE3600-second blueprint/source integration is now live as
+blueprint-690-20260922-01, runtime /tmp/main-fullspeed-integrate690-v2-20260922,
+packet /tmp/main-integrate690-algorithm-20260922.md. The first bootstrap never
+produced its PID/log/session or a surviving handle; the untouched worktree was
+verified before retry with a startup handshake. Preserve its empty launch log.
+
+689 blueprint continuation completed0 after1071s at
+2560ce2c3adfc953a6150cf84c8622874852c502. All five new declarations have
+explicit direct-law auxiliary coverage; old real results/marks remain intact,
+and source claims and row remain open. Both1684s proof and1071s integration
+costs stay charged to118's existing history. Detached
+/tmp/main-publish689-integrated-20260922.sh waited for692's completed CI,
+then admitted guarded publication/import hydration/full CI/first whole review.
+Publication sublog: /tmp/main-fullspeed-publish689-20260922; inspect before
+any retry, because a write may have completed after this note.
+
+688 is now PR692 at a41b8eeabb177fa99a97b5dcfd81747e6c11944c. Full CI passed
+(build699s, render140s, sync407s); its code/prose reviews are live through
+/tmp/main-whole-review692-ms688-20260922. These two phases plus690 integration
+fill the three actual lanes. Parked infrastructure remains untouched.
+
+687's watcher observed680 merge, refreshed to
+90eba77ae53d6ce7f1c88a1819076d6a26f1a99d, then checked push refused: the leaf
+PrimePauliBasis build succeeded, but the stale umbrella import product made
+checkdecls miss12 correct prime-Pauli names. Do not delete those names. Original
+watcher/publisher exited2, with logs retained. Detached
+/tmp/main-recover687-imports-20260922.sh now exports incoming modules plus both
+QPBT/MIPStarRE umbrellas privately, checks the genuine declaration list, and
+retries normal publication/CI using /tmp/main-fullspeed-publish-tagged-20260922.sh
+with tag imports-retry. It then schedules the successor's first whole review.
+The original live publication helper was copied, not edited in place. The
+same bounded import-export helper serves691's incoming680 dependency graph.
+
+## 2026-09-22T11:04Z cycle: two repairs, normalization packet, publication recovery
+
+The interrupted preceding turn was progress: two new whole-task repair workers
+started, and harmless telemetry whitespace was normalized and published. The
+current allocation is still main plus3 space-d workers only; the machine-wide
+status snapshot includes unrelated QKD workers on its own assigned keys.
+
+PR691's publication refresh stopped at an actual single-file conflict in
+docs/completion/qpbt-leanok-exemptions.md: HEAD3249d644, MERGE_HEAD0ea50f00.
+Main preserved all staged incoming source/telemetry and assigned the exact
+union to blueprint-676-20260922-02 for2700s. Runtime
+/tmp/main-fullspeed-fix691-merge-20260922; packet
+/tmp/main-repair691-merge-20260922.md. Keep merged Pauli obligations closed,
+close only the canonical lemma in this PR, retain the algorithmic definition
+obligation until690. The first wrapper stopped on the retained main-fix691
+claim with no model request; its .claim-held logs remain. Main verified the
+prior author finished, released/reclaimed ownership, and the new process is live.
+
+PR692 first review5276971441: code approved, prose F1 requires distinguishing
+completed binary effects from prescribed-answer effects in the zero-agreement
+specializations. Blueprint repair runs2700s from a41b8eea under main-fix692;
+runtime /tmp/main-fullspeed-fix692-effects-20260922, packet
+/tmp/main-repair692-effects-20260922.md. Preserve proofs and pending adoption,
+correct both blueprint entries and matching docstrings, then new-head full CI
+and SECOND independent review. The marked-declaration axiom audit remains due.
+
+690's single integration continuation finished at
+bb607c6f82a9afe8b898c157e96269996ea53f2b, clean. The receipt records806 seconds
+at verification; use dispatcher actual duration for accounting. It adds the
+root import, explicit arithmetic cost-model entries/marks, canonical-definition
+coverage and an audit. Author checks passed1889 declaration links and28
+standard-axiom closures. Publication waits for actual691 parent merge and
+retains691's localized index repair; no further automatic author continuation.
+
+687 is PR693 at90eba77ae53d6ce7f1c88a1819076d6a26f1a99d, full CI live through
+/tmp/main-fullspeed-publish687-imports-retry-20260922. Its recovery wrapper
+will request the first ordinary independent review after full green CI.
+689's checked push likewise found12 valid Pauli declarations absent from a
+stale umbrella product, after refresh to bda0d3bb7dffcab0adee34b7d6aa36c2f8ea1449.
+No PR was published by that failed path. New detached
+/tmp/main-recover689-imports-20260922.sh exports private imports, verifies the
+real declaration list and waits for693's complete CI before tagged publication,
+full CI and first review. Inspect live process and import log before retrying.
+
+Main opened694 with one3600-second mathfix tranche for the pending normalization
+row, continuing124/129/173 and related costs. Packet
+/tmp/main-linearity-normalization-packet-20260922.md; runtime
+/tmp/main-fullspeed-linearity-normalization-20260922. Expected isolated base
+99d4036e62e7dd4a21637d8f3e313c907afe39dc; branch
+issue-694-linearity-normalization-20260922. No automatic continuation, source
+semantics change or terminal adoption is admitted. The sharp normalization
+identity, this construction's factor2 bound and the optimal existence bound
+must remain distinguished. Full source consumers, exact printed claim and
+unchanged four-condition adoption evidence are the exit, not a passing weaker
+theorem. Partial historical measured counts and unknown/overlapping records
+are listed in the packet and decision ledger without fabricated totals.
+
+## 2026-09-22T11:15Z repair results and source-domain construction
+
+Both repair workers completed0 with clean worktrees. PR691 merge head is
+a65426c7f804e84b83f8d7629ab2783c408e5da3 with parents3249d644 and0ea50f00.
+Only the authorized conflict was resolved; all Pauli marks and the canonical
+lemma are retained, the algorithmic definition and remaining three obligations
+stay open. PR692 head is0f7e969c7cebb666076fae8fc77515c53f86f123. Its two
+source-equivalence claims and matching docstrings now distinguish completed
+effects from prescribed answers. Lean code stripped of comments, source
+headers and chapter13 dependency/mark sequences are unchanged; all1867 links,
+focused Lean, web, sync and normal hooks pass. Use actual dispatcher wall_s
+rather than author verification timestamps for both costs.
+
+Detached /tmp/main-publish-repairs691692-20260922.sh is launched once for each
+PR. Runtime /tmp/main-publish-repair691-20260922 and ...repair692.... They
+verify successful author exit/receipt, clean tree and original ancestry; wait
+for preceding complete CI (689 then691); refresh, export private imports and
+checked-publish. Each runs full CI, required marked-declaration axiom audit,
+then SECOND ordinary2700s-per-phase review via main-whole-review. Unexpected
+merge/conflict/check failure stops with evidence; no blind retry or review carry.
+
+693's build passed846s; its blueprint-sync unittest process611425 was verified
+live at11:15Z and the log was still advancing. It has not been restarted.
+The author-cleanup first review is already chained after complete CI. 689's
+1881 genuine declaration links passed after import repair; its publication
+still waits for693's full CI to avoid the known cold-build fixture contention.
+
+Main opened695 and admitted one3600-second source combining-map packet;
+branch issue-695-source-combine-map-20260922, base
+023a0c59539cc22be4c23298d7ebed73eee9cc39. Runtime
+/tmp/main-fullspeed-combine-map-20260922; packet
+/tmp/main-combine-map-packet-20260922.md. It owns only source projection-to-affine
+compatibility, full degenerate evaluation and directly corresponding entries.
+No automatic continuation or definition/game change is admitted; all previous
+117/118/119/geometry costs remain charged. 694 remains independently live on
+normalization. Third capacity is assigned to693's already queued first review
+as soon as its exact-head CI succeeds. All model dispatches remain space-d only.
+
+Prior stage publication: issue27 comment5775386048; telemetry023a0c59 clean.
