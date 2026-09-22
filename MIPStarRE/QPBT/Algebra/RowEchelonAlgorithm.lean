@@ -264,6 +264,123 @@ theorem initialState_invariant (A : StoredMatrix K m n) :
   · intro i hi c hc
     exact (Nat.not_lt_zero _ hc).elim
 
+/-- One column iteration preserves the partial RREF conditions and row span,
+and adds at most `m + n + 2*m*n` charged field operations and zero tests. -/
+theorem Invariant.step {A : StoredMatrix K m n} {S : State K m n} (c : Fin n)
+    (h : Invariant A c.val S) : Invariant A (c.val + 1) (step S c) := by
+  by_cases hr : S.rank < m
+  · have hsearch := findPivot_spec S.entries S.rank c (List.finRange m)
+    have hsearch_cost : (findPivot S.entries S.rank c (List.finRange m)).2 ≤ m := by
+      simpa using hsearch.2
+    cases hf : (findPivot S.entries S.rank c (List.finRange m)).1 with
+    | none =>
+      have hz (i : Fin m) (hi : S.rank ≤ i.val) : toMatrix S.entries i c = 0 := by
+        have hh := List.find?_eq_none.mp (hsearch.1.symm.trans hf) i (List.mem_finRange i)
+        simpa [hi] using hh
+      simp only [GaussianElimination.step, dif_pos hr, hf]
+      refine ⟨h.rank_le, ?_, h.pivot_strict, h.pivot_entry, h.zero_before, ?_,
+        h.span_eq, ?_⟩
+      · intro i hi
+        exact Nat.lt_succ_of_lt (h.pivot_lt i hi)
+      · intro i hi j hj
+        by_cases hjc : j.val < c.val
+        · exact h.remaining_zero i hi j hjc
+        · have heq : j = c := Fin.ext (by omega)
+          subst j
+          exact hz i hi
+      · have hc := h.cost_le
+        dsimp only
+        rw [Nat.add_mul, Nat.one_mul]
+        omega
+    | some s =>
+      have hs : S.rank ≤ s.val ∧ toMatrix S.entries s c ≠ 0 := by
+        simpa using List.find?_some (hsearch.1.symm.trans hf)
+      let r : Fin m := ⟨S.rank, hr⟩
+      have hcol := eliminateColumn_entries S.entries r s c hs.2
+      have hpres (j : Fin n) (hj : j.val < c.val) (i : Fin m) :
+          toMatrix (eliminateColumn S.entries r s c) i j = toMatrix S.entries i j :=
+        hcol.2 j (h.remaining_zero r (Nat.le_refl _) j hj)
+          (h.remaining_zero s hs.1 j hj) i
+      have hcost := eliminateColumnCounted_cost S.entries r s c
+      simp only [GaussianElimination.step, dif_pos hr, hf]
+      change Invariant A (c.val + 1)
+        ⟨eliminateColumn S.entries r s c, S.rank + 1,
+          S.pivots.set S.rank c.val hr,
+          S.operations + (findPivot S.entries S.rank c (List.finRange m)).2 +
+            (eliminateColumnCounted S.entries r s c).2⟩
+      refine ⟨by dsimp only; omega, ?_, ?_, ?_, ?_, ?_,
+        (eliminateColumn_span S.entries r s c hs.2).trans h.span_eq, ?_⟩
+      · intro i hi
+        dsimp only at hi ⊢
+        rw [Vector.getElem_set]
+        split_ifs with hir
+        · omega
+        · exact Nat.lt_succ_of_lt (h.pivot_lt i (by omega))
+      · intro i j hij hj
+        dsimp only at hj ⊢
+        have hij' : i.val < j.val := hij
+        have hir : S.rank ≠ i.val := by omega
+        simp only [Vector.getElem_set, if_neg hir]
+        split_ifs with hjr
+        · exact h.pivot_lt i (by omega)
+        · exact h.pivot_strict i j hij (by omega)
+      · intro t ht j hj i
+        dsimp only at ht hj ⊢
+        by_cases htr : S.rank = t.val
+        · have hteq : t = r := Fin.ext htr.symm
+          have hjeq : j = c := by
+            apply Fin.ext
+            simpa [Vector.getElem_set, htr] using hj.symm
+          subst t
+          subst j
+          exact hcol.1 i
+        · have ht' : t.val < S.rank := by omega
+          have hj' : S.pivots[t.val] = j.val := by
+            simpa [Vector.getElem_set, htr] using hj
+          rw [hpres j (by rw [← hj']; exact h.pivot_lt t ht') i]
+          exact h.pivot_entry t ht' j hj' i
+      · intro i hi j hj
+        dsimp only at hi hj ⊢
+        by_cases hir : S.rank = i.val
+        · have hieq : i = r := Fin.ext hir.symm
+          have hjc : j.val < c.val := by
+            simpa [Vector.getElem_set, hir] using hj
+          subst i
+          rw [eliminateColumn_apply, if_pos rfl, h.remaining_zero s hs.1 j hjc,
+            zero_div]
+        · have hi' : i.val < S.rank := by omega
+          have hj' : j.val < S.pivots[i.val] := by
+            simpa [Vector.getElem_set, hir] using hj
+          rw [hpres j (lt_trans hj' (h.pivot_lt i hi')) i]
+          exact h.zero_before i hi' j hj'
+      · intro i hi j hj
+        dsimp only at hi hj ⊢
+        by_cases hjc : j.val < c.val
+        · rw [hpres j hjc i]
+          exact h.remaining_zero i (by omega) j hjc
+        · have hjeq : j = c := Fin.ext (by omega)
+          subst j
+          rw [hcol.1, if_neg]
+          intro hir
+          have := congrArg Fin.val hir
+          dsimp [r] at this
+          omega
+      · dsimp only
+        have hc := h.cost_le
+        rw [Nat.add_mul, Nat.one_mul]
+        omega
+  · simp only [GaussianElimination.step, dif_neg hr]
+    refine ⟨h.rank_le, ?_, h.pivot_strict, h.pivot_entry, h.zero_before, ?_,
+      h.span_eq, ?_⟩
+    · intro i hi
+      exact Nat.lt_succ_of_lt (h.pivot_lt i hi)
+    · intro i hi j hj
+      have := i.isLt
+      omega
+    · have hc := h.cost_le
+      rw [Nat.add_mul, Nat.one_mul]
+      omega
+
 end GaussianElimination
 
 end MIPStarRE.QPBT
