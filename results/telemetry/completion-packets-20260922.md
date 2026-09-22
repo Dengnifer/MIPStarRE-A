@@ -167,3 +167,11 @@ above is historical. Main owns verified promotion and the subsequent record,
 and the author must not race that operation. The final completion audit must
 bind the actual artifact commit, external pin, official run and comparator
 main explicitly; C5's delegated result is not proof of these equalities.
+
+705's author is now complete at664f5006 after2303s; publication/CI/review are
+pending. Its authored and anonymous exports built/scanned49 PDFs each with
+zero remaining leak findings, but one excluded-audit link and two LDT source
+locators still fail. /tmp/main-final-artifact-links-20260922.md is the prepared,
+unadmitted whole-task packet for those exact three findings. The final artifact
+must rerun the full export from the actual final commit; this earlier package
+is supporting evidence, not the final submission artifact.

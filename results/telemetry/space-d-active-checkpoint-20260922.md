@@ -2000,3 +2000,53 @@ and completed only699's verified cleanup, without fabricating approval.
 Merge daemon1980476 and model-free meta-auto3313963 were verified live despite
 a temporarily quiet daemon log. Space-d has no retired marker; no capacity,
 key, native-agent or infrastructure-PR expansion occurred.
+
+## 2026-09-22T15:17Z approved refresh,706 repair and completed rename
+
+The preceding turn made progress through690's completed integration and699's
+verified approval/gate. Stage5778825249 and telemetry252adc8b are published.
+The daemon is live and cycling;699 did not merge because its reviewedd3089cbe
+base lacks691's four source-file changes. This is not a passive-telemetry-only
+advance. PAR0 leaves approved refreshes to Main and the auto loop's lone stale
+candidate waits. New /tmp/main-refresh699-approved-20260922.sh claims the clean
+tree, waits active708 CI, then refreshes, runs full CI/marked audit and attempts
+only strict canonical carry of5279778199. If refused, THIRD independent full
+review is queued within the existing cap. It must merge alone, never in a train.
+
+706 first review5279885789 at491c1d85 approves code and reports four prose
+findings: existential versus displayed fixed constant, mismatched supporting
+links,33 of46 new declarations missing proper entries, and a support dependency.
+The older operator wrapper exited2 AFTER publishing that valid adverse review,
+as anticipated from the live-script edit incident. Main transferred only its
+completed review claim to fix706. /tmp/main-fix706-firstreview-20260922.sh queues
+one2700s whole repair, all approved proofs/counterexamples/pending adoption
+preserved, followed by refreshed CI and SECOND review. No extra proof tranche.
+
+700 second review5279963222 approves both phases with0 findings at e9397043;
+its claim was released and meta-gate confirmed success. Service merge is pending,
+not manually performed.690 is published as PR708 at
+fea7f2bacd1f2bf01b330a6ecdaeab1064cc6f16; its full CI is active with build51s,
+render68s and paper-gap0s passed. The first algorithm review remains required.
+
+705 author completed0 after2303s, clean
+664f5006e7739e9ee33205945dbb13639a84613e,40 files+186/-91. Current URLs and
+anonymization are updated; the minimal offline fixture isolation handles
+inherited hardness reasons without changing production dispatch/policy. Normal
+hooks passed869 tests/9 skips;90 focused packaging/sync tests and19 fixture
+tests passed. Both exact-commit full authored/anonymous exports passed49 PDF
+builds/scans,962 files/import closure and zero remaining leaks. They still
+report one link to an excluded audit and two absent LDT locators, so this is
+not final artifact acceptance. Prepared, unadmitted follow-up packet:
+/tmp/main-final-artifact-links-20260922.md, with exact three-reference exits.
+
+The comparator URL-only commit0f02b0b9 remains on the diagnostic branch with
+all dependency fields/pins preserved. Original dirty comparator files and all
+ten untracked checksums match their initial snapshot. Both new official runs
+were still in progress at this turn's API check; do not promote or claim success.
+New /tmp/main-publish705-source-20260922.sh is live: it verified the completed
+head, refreshed with a passing loss guard and prepares one ordinary PR, complete
+CI after699 and FIRST independent review. Its exact .pr/.head receipts govern.
+
+Actual model lanes at the latest census are704's ONE continuation and the702
+and706 repairs, all on space-d.696's replacement and707's first review retain
+their queued processes; no live job was restarted merely for being quiet.
