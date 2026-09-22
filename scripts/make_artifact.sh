@@ -113,7 +113,8 @@ LEAK_ALLOW_IN=(
 # --------------------------------------------------------------------------
 
 # `<literal text> :: <replacement>`, applied to every text file in the snapshot.
-# The repository owner's GitHub name inside URLs is the main one; the rest are
+# The repository owner's GitHub name covers both current and historical URLs;
+# the Pages host has a separate lowercase spelling. The remaining rules cover
 # the identifying strings the 2026-09-19 readiness audit found outside the
 # excluded workflow layer.
 #
@@ -125,13 +126,14 @@ LEAK_ALLOW_IN=(
 # use, and step 4b fails the run if any of these strings survives.
 ANON_RULES=(
   'Dengnifer :: ANONYMIZED'
+  'dengnifer.github.io :: anonymized.example.invalid'
   'LionSR :: ANONYMIZED-UPSTREAM'
   'Ruixuan Deng :: Anonymous Author'
   'ruixuan.deng@icloud.com :: anonymous@example.invalid'
   'sirui-lu.com :: anonymized-upstream.example.invalid'
 )
 
-SOURCE_REPO='Dengnifer/MIPStarRE-A'
+SOURCE_REPO='Dengnifer/MIPStarRE-QPBT'
 
 # --------------------------------------------------------------------------
 
@@ -339,8 +341,8 @@ fi
 # the pass left them, and the extracted text of every shipped PDF, which `sed`
 # cannot reach at all.  Checking the escaped spelling is load-bearing: that was
 # how the address survived in an earlier shipped allow-list entry.  The leak
-# patterns above would not catch these on their own — three of the five are
-# names, not address- or key-shaped.  A survivor stops the run, like a leak.
+# patterns above would not catch names or hosts on their own: they are not
+# address- or key-shaped. A survivor stops the run, like a leak.
 if [ "$ANONYMIZE" -eq 1 ]; then
   ANON_LEFT="$WORK/anon-left.txt"
   : > "$ANON_LEFT"
