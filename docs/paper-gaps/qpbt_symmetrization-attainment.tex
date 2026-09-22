@@ -18,7 +18,7 @@
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
-\date{2026-09-22; earlier formalization history retained below}
+\date{2026-09-23; earlier formalization history retained below}
 
 \begin{document}
 \maketitle
@@ -31,7 +31,9 @@
   finite-dimensional strategy. Its mathematical proof uses
   \cite[Theorem~1.1]{Slofstra2017Nonclosure}, with an explicit probability
   law, decision predicate, and symmetry conversion. It is not a Lean
-  refutation, and the register row remains open.
+  refutation. The intermediate discrepancy is terminal as a
+  \emph{documented deviation}; this does not certify the printed assertion or
+  the affected entanglement bounds.
   \item \textbf{Difficulty and estimated weight:} the value-preserving and
   positive-slack forms are already proved. The new finite bookkeeping is
   short; a kernel proof of nonattainment would require substantial independent
@@ -81,8 +83,8 @@ strategy supplied by the definition of the supremum; this yields the second
 form. The first form asserts strictly more than the second, and the passage
 from the second to the first is the gap discussed in this note. Both direct
 source uses need only the second or third form for their value conclusions.
-The entanglement conclusion of answer reduction requires additional care,
-as discussed under ``Uses of the lemma''.
+The entanglement conclusion of answer reduction and its use in compression
+remain unresolved, as discussed under ``Uses of the lemma''.
 
 \section{The source assertion}
 
@@ -108,8 +110,9 @@ same measurements.
 The symmetrization lemma of \cite[Section~5]{Ji2020MIPStar} asserts:%
 \footnote{The statement is at
 \path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--99,
-and its proof at lines~101--132.  The blueprint statement kept in this form
-is \path{lem:symmetric-strat} in
+and its proof at lines~101--132. The printed statement is retained in
+\path{rem:symmetric-strat-limit}; \path{lem:symmetric-strat} states the proved
+approximate form in
 \path{blueprint/src/chapter/ch12_qpbt_games.tex}.}
 if $\game$ is a symmetric game with $\val^*(\game) = 1-\eps$ for some
 $\eps \ge 0$, then
@@ -316,10 +319,11 @@ source semantics. Neither is an admissible repair here. A fixed positive
 slack is less precise than arbitrary positive slack, and can always be halved.
 Thus the exact preservation of attainable values and the all-positive-slack
 consequence describe what the cited construction proves without unnecessary
-loss. They remain logically weaker than universal attainment and are not a
-terminal correction under the unchanged completion criterion C3. In
-particular, usefulness in later value estimates does not discharge that
-criterion or the independent rank issue below.
+loss. They remain logically weaker than universal attainment. The terminal
+classification \emph{documented deviation} records that difference without
+adopting the approximate assertion as the printed theorem. In particular,
+usefulness in later value estimates does not prove the endpoint or resolve
+the independent rank issue below.
 
 \section{An additional obstruction in the formal domain}
 
@@ -420,6 +424,25 @@ attainment correction. This note does not claim that the entanglement
 inequality is false. It withdraws the earlier blanket assertion of sufficiency
 for every conclusion of the source transformations.
 
+The compression argument is an affected entanglement consumer. With the
+source's successive verifiers $V_n^{(1)},V_n^{(2)}$ and errors
+$\eps_1,\eps_2$, it explicitly concludes
+\[
+ \operatorname{Ent}(V_n^{(2)},1-\eps_2)
+ \geq \operatorname{Ent}(V_n^{(1)},1-\eps_1),
+\]
+where $\operatorname{Ent}(V,p)$ is the minimum Schmidt rank needed to pass
+$V$ with probability at least $p$, or infinity if no such strategy exists.
+This is a rank guarantee, not merely a comparison of game values. It depends
+on the unresolved entanglement part of
+answer reduction, so the compression passage cannot be certified by the
+positive-slack argument. Its separate value estimates use no attained
+supremum, and its completeness starts from an actual perfect PCC strategy;
+neither observation establishes the displayed rank inequality.%
+\footnote{\path{references/qpbt-paper/13_gap_preserving_compression.tex},
+lines~287--326, specifically the entanglement comparison at line~322.
+This corrects finding F1 of the first review of \ghpr{707}.}
+
 One cannot simply require symmetrization itself to preserve rank. Consider
 the symmetric one-question game that accepts different binary answers.
 The deterministic answers zero and one give a perfect product-state strategy.
@@ -430,22 +453,24 @@ rank-preserving version of the symmetrization construction is false; the
 additional argument must concern the specific downstream transformation.
 
 In this project, the soundness statements of the Pauli basis test track
-quantify over strategies assumed to succeed with probability at least
-$1-\eps$, so any symmetrization step starts from a given strategy and consumes
-the given-strategy form. The blueprint records both forms as part of the games
-vocabulary. Its only proof-dependency edge from a symmetrization node is from
-the given-strategy node to the approximate node; there are no further
+quantify over given strategies assumed to succeed with probability at least
+$1-\eps$. The caller inventory finds no invocation of this symmetrization
+family in the headline proofs. The blueprint records both proved forms as part
+of the games vocabulary. Its only proof-dependency edge from a symmetrization
+node is from the given-strategy node to the approximate node; there are no further
 descendants. Its other actual references occur in the surrounding Naimark
-remark and the four symmetrization nodes themselves. The two source
-transformations are not formalized in the active blueprint or Lean subtree.
+remark and the four symmetrization nodes themselves. The oracularization,
+answer-reduction and compression transformations are not formalized in the
+active blueprint or Lean subtree.
 The exact caller inventory and focused compilation evidence are in the
 accompanying audit. Neither direct source invocation requires attainment, but
 this does not certify the separate entanglement conclusion just discussed.
 
 \section{Comparison with the blueprint}
 
-The two subsections that follow describe the arrangement in force before
-2026-09-19; the statement-correction section below supersedes them.
+This section and the next two retain the formalization history through 2026-09-19.
+Their completion assessments are historical; the current documented-deviation
+disposition is stated at the end of this note.
 
 The blueprint \cite{MIPStarREBlueprint} states the lemma in the source shape,
 as the proof-gap protocol requires when the printed statement is not known to
@@ -563,32 +588,39 @@ source's nonempty-answer domain. That distinction remains relevant to the
 adoption conditions of \path{local/protocols/completion.md}; the change alone
 does not give this row a terminal status.
 
-\section{Formal obligations and current verdict}
+\section{Limits of the formal evidence}
 
 The nonempty counterexample is a mathematical consequence of the cited
-external results, not a theorem imported into Lean. A kernel verification must
-prove for the displayed solution group that $J$ is trivial in every finite
+external results, not a theorem imported into Lean. A future kernel verification
+would prove for the displayed solution group that $J$ is trivial in every finite
 unitary representation and nontrivial in approximate representations, connect
 those facts to exact and approximate perfect play, and verify the fixed-answer
 and symmetric-game transfers above. These are conclusions to prove, not new
-axioms, generic statement inputs, or hypotheses on a paper theorem. No Lean
-declaration is added or changed by this audit. In particular, the existing
-empty-answer theorem is not being relabelled as a nonempty refutation.
+axioms, generic statement inputs, or hypotheses on a paper theorem. They
+describe what is absent from the formal evidence, not required completion work
+for this documented deviation. No Lean declaration is added or changed here.
+In particular, the existing empty-answer theorem is not being relabelled as a
+nonempty refutation.
 
 \section{Conclusion}
 
 The printed attainment assertion is false on the nonempty finite source
 domain, by the explicit game and the external theorem above. Lean still
-proves only the previously established given-strategy and approximate forms
-and the separate empty-answer refutation. Those valid forms and the exact
-unasserted printed proposition are preserved. The register remains open:
-the nonempty refutation lacks a kernel proof, arbitrary positive slack is
-strictly weaker than the printed endpoint under C3, and the answer-reduction
-rank conclusion needs its own sufficiency argument. The task returns these
-specific obligations to main for disposition and independent review, without
-changing any source definition, theorem hypothesis, or completion criterion.%
+proves the previously established given-strategy and approximate forms and
+the separate empty-answer refutation. Those forms and the exact unasserted
+printed proposition are preserved. The intermediate discrepancy is terminal
+as \texttt{documented-deviation} under completion criterion C3, with this note,
+the matching blueprint remark, the register row and the deviations disclosure.
+This status certifies neither the printed endpoint nor a Lean proof of the
+nonempty counterexample. Answer reduction's entanglement conclusion and the
+compression inequality that consumes it remain unresolved. No source game,
+theorem statement or proof is changed, and the headline Pauli soundness theorem
+retains its printed statement.%
 \footnote{\ghissue{703}; the audit retains the earlier attempts and distinguishes
-their recorded costs from unknown or shared costs.}
+their recorded costs from unknown or shared costs. The owner's instruction of
+2026-09-22, ``document, don't prove'', authorizes the terminal documentation
+status in \path{local/protocols/completion.md}; it does not assert a mathematical
+claim. The disclosure is section a2 of \path{docs/DEVIATIONS.md}.}
 
 \bibliographystyle{alpha}
 \bibliography{references}

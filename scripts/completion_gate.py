@@ -352,7 +352,7 @@ def _table_rows(text: str) -> tuple[int, list[str], list[tuple[int, list[str]]]]
 
 
 def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
-    """C3: every register row carries a terminal status."""
+    """C3: every row is terminal; documented deviations are intermediate only."""
 
     crit = Criterion("C3", "paper gaps terminal", PASS)
     path = root / track.gap_register
@@ -380,15 +380,35 @@ def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
         )
         return crit
 
+    source_column = next(
+        (i for i, cell in enumerate(header) if cell.lower() == "source statement"), None
+    )
+    headline_identifiers = {identifier for pair in track.headline for identifier in pair}
     bad: list[str] = []
     for number, cells in rows:
         value = cells[column].strip("` ").lower() if column < len(cells) else ""
-        if value not in {"corrected", "no-difference"}:
+        if value not in {"corrected", "no-difference", "documented-deviation"}:
             note = cells[0][:60] if cells else ""
             bad.append(
                 f"{track.gap_register}:{number}: terminal status "
                 f"{value or '(empty)'!r} for {note}"
             )
+        elif value == "documented-deviation":
+            source = (
+                cells[source_column].strip("` ")
+                if source_column is not None and source_column < len(cells) else ""
+            )
+            identifiers = set(re.findall(r"[\w.:-]+", source))
+            if not source or identifiers & headline_identifiers:
+                bad.append(
+                    f"{track.gap_register}:{number}: documented-deviation requires "
+                    "an intermediate Source statement, not a headline or blank cell"
+                )
+    crit.notes.append(
+        "terminal statuses do not prove printed claims; independent review checks "
+        "correction adoption or the justification, intermediate scope, gap note, "
+        "blueprint remark and deviations disclosure of a documented difference"
+    )
     if bad:
         crit.status = FAIL
         crit.summary = f"{len(bad)} of {len(rows)} rows not terminal"

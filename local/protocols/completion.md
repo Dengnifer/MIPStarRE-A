@@ -46,8 +46,8 @@ exists and covers the table; the axiom values themselves come from the build
 and are reported as delegated.
 
 **C3 — Paper gaps terminal.** Every data row of the track's paper-gap register
-carries a `Terminal status` cell reading exactly `corrected` or
-`no-difference`:
+carries a `Terminal status` cell reading exactly `corrected`,
+`no-difference` or `documented-deviation`:
 
 - `corrected` — a documented statement correction that **meets the four
   adoption conditions of `local/protocols/issues-prs.md`** — correctness,
@@ -58,13 +58,38 @@ carries a `Terminal status` cell reading exactly `corrected` or
   is not proved, the printed claim preserved as a non-asserted `Prop` (the
   `lem:symmetric-strat` and `lem:qld-4-13` pattern of 2026-09-19). The
   artifacts are evidence that a correction was adopted; they are not a route
-  around those conditions, and a row whose correction weakens a conclusion is
-  not terminal however complete its artifacts are.
+  around those conditions, and a row whose correction weakens a conclusion
+  cannot receive `corrected` however complete its artifacts are.
 - `no-difference` — the formalization and the source statement agree; nothing
   to correct.
+- `documented-deviation` — a justified **intermediate** difference is closed
+  by honest mathematical documentation, under the owner's 2026-09-22 15:10Z
+  instruction, "document, don't prove". Its mathematical gap note, matching
+  blueprint remark and `docs/DEVIATIONS.md` disclosure must state the printed
+  assertion, the established result, their difference, affected consumers and
+  remaining limitations. External mathematical evidence must be distinguished
+  from Lean-certified results. Preserve an existing unasserted printed `Prop`
+  and any necessary blueprint exemption; never mark the unsupported printed
+  claim proved. This status means a documented difference, **not** proof of
+  that claim or adoption of the weaker result as `corrected`. Proving the
+  printed intermediate assertion, formalizing its external refutation or
+  satisfying the stronger correction-adoption conditions is not required to
+  close this documentation task.
 
-No row may read `open`, `pending` or `sorry`. No headline theorem statement may
-be weaker than the source paper except through a `corrected` row.
+No row may have an unknown or blank status, or read `open`, `pending` or `sorry`.
+No headline theorem statement may be weaker than the source paper except
+through a `corrected` row. `documented-deviation` cannot authorize a headline
+statement change or an unproved dependency of a headline theorem: in particular,
+`pauli_soundness` remains proved at its printed statement. All requirements of
+C1, C2, C4, C5, C6 and C7 remain in force.
+
+The gate checks the status vocabulary and rejects `documented-deviation` when
+the row's `Source statement` names a registered headline theorem or its blueprint
+label; a missing or blank source cell also fails for that status. Independent
+review establishes the mathematical justification, intermediate scope and
+adequacy of the three documentation artifacts, just as it establishes the four
+adoption conditions for `corrected`. A passing status check does not certify
+those mathematical judgments.
 
 **C4 — Blueprint marked.** Every blueprint node of the track that carries
 `\lean{...}` also carries `\leanok`, or appears in the track's exemption table

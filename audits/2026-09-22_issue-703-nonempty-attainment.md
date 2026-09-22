@@ -2,13 +2,79 @@
 title: "Nonempty games refute universal attainment"
 date: 2026-09-22
 purpose: >
-  Specify a source-domain counterexample using a verified external theorem,
-  distinguish that mathematical argument from the existing Lean evidence,
-  and return the remaining C3 and consumer obligations to main.
+  Preserve the source-domain counterexample and prior costs, distinguish
+  external mathematics from Lean evidence, correct the entanglement consumer
+  inventory, and record the terminal documentation disposition.
 issue: "#703"
 ---
 
 # Nonempty Attainment Audit
+
+## Documentation Disposition, 2026-09-23
+
+The owner instruction of 2026-09-22 15:10Z, "document, don't prove", supersedes
+the strict-adoption completion demand of the original investigation below.
+The symmetrization row is now terminal as `documented-deviation`, supported by
+the [mathematical note](../docs/paper-gaps/qpbt_symmetrization-attainment.tex),
+blueprint `rem:symmetric-strat-limit`, the
+[register row](../docs/paper-gaps/qpbt-gap-register.md), and
+[DEVIATIONS section a2](../docs/DEVIATIONS.md#a2-attainment-in-the-symmetrization-lemma).
+This closes documentation of an intermediate difference. It proves neither
+the printed attainment assertion nor its nonempty refutation in Lean, and
+does not adopt a weaker assertion as the printed theorem.
+
+The first independent review, PR #707 review 5280263427 at
+`a4782a5acc1627ec7ab76cf67592fdd53bea535c`, accepted the explicit construction
+and independently checked the ranks 180/181. Its sole finding F1 is corrected
+in the consumer inventory below: compression at
+`references/qpbt-paper/13_gap_preserving_compression.tex:322` explicitly needs
+the unresolved entanglement inequality. The answer-reduction and compression
+rank guarantees remain unestablished by this argument. No counterexample to
+either rank guarantee is claimed. Their proofs are not completion work for
+this documentation task, and the QPBT headline statements remain unchanged.
+
+The current admission is one 3600-second documentation task starting
+`2026-09-23T00:46:11+09:00`, not an extension of the proof campaign. The
+original author session finished with dispatcher-measured `wall_s = 2165`
+(`results/telemetry/sessions.jsonl`, `mathfix-703-20260922-01`); the first
+reviewer finished with `wall_s = 2371` (`reviewer-pr707-20260922-02`, its
+dispatcher receipt). Both remain charged in addition to the historical
+families below. These are session durations, not an exclusive cumulative
+attainment total. This session does not rewrite either ledger.
+
+Focused validation of this documentation change passed: all 63 completion-gate
+tests; the preserved finite-system enumeration; note style and blueprint LaTeX
+checks; the 14-page note PDF with resolved references and no overfull boxes;
+and blueprint web rendering. The first sync check reported 254 stale generated
+declaration entries after rendering; the normal `--update-lean-decls --ci`
+refresh passed with 1890 entries. Four orphan marks and two missing proof marks
+in unchanged chapters remain advisory warnings. Paper-gap source-key checking
+passed for all 43 referenced slugs, with the existing verdict-marker warnings.
+The completion gate still fails on nine other register rows and four unrelated
+unmarked blueprint nodes. No full build, Lean proof check, independent review,
+publication or GitHub status mutation is claimed for this continuation; main
+owns full CI and independent review of its commit.
+
+The first normal commit hook failed one of 873 script tests (306.184 seconds,
+nine skipped): a routing fixture inherited `MIPSTARRE_HARDNESS_REASON` while
+testing a routine request. That isolated dry-run test passes with the variable
+absent. The normal commit is retried with only that variable removed from its
+process environment; no hook or persistent configuration changes. The failed
+run remains recorded in `results/telemetry/events.md`.
+That partial cleanup failed four routing fixtures in the second full hook run
+(873 tests, 325.605 seconds, nine skipped), because `MIPSTARRE_JOB_CLASS`
+still supplied a hard classification. All 31 routing tests pass when both
+inherited routing variables are absent. The subsequent normal commit uses
+that process-local isolation, with all hooks enabled and no routing-code or
+test-assertion changes. Both failed runs remain part of this session's cost.
+
+The remainder records the original investigation and its then-current
+strict-adoption decision, with only the consumer classification corrected for
+F1. Its mathematical evidence, validation history, failed paths and budget
+reconciliation are preserved. Original references to an `open` row or required
+kernel work are historical and do not describe the current C3 disposition.
+
+## Original Investigation, 2026-09-22 (Historical)
 
 The printed `lem:symmetric-strat` is false even for nonempty finite
 alphabets. An explicit symmetric game below has 419 questions, 16 answers,
@@ -183,9 +249,14 @@ besides the declaration itself.
    `claim:ar-1` through `claim:ar-5`, `lem:ar-ar`, and `lem:ar-ora`, then
    `thm:oracle-soundness` at 2951-2953. Their error estimates use an upper
    bound on the strategy's failure probability, so no constants or error
-   parameter changes are needed. The downstream value uses of `thm:ar` in
-   `13_gap_preserving_compression.tex:287-326` retain the same soundness
-   statement, and completeness starts from an actual perfect PCC strategy.
+   parameter changes are needed for the value conclusion. Completeness starts
+   from an actual perfect PCC strategy.
+3. `13_gap_preserving_compression.tex:287-326` is a transitive **entanglement
+   consumer**, not merely a downstream value use. At line 322 it concludes
+   `Ent(V_n^(2), 1-eps_2) >= Ent(V_n^(1), 1-eps_1)` using answer reduction.
+   This rank guarantee is unresolved for the reason below; the separate value
+   estimates do not justify reporting the passage's full soundness guarantee
+   as retained. This is the correction requested by review 5280263427, F1.
 
 The second theorem also prints an **entanglement** conclusion at
 `11_answer_reduction.tex:2110-2115`. Its closing justification at 2995-2999
@@ -197,8 +268,8 @@ This audit identifies a missing derivation, not a counterexample to the
 entanglement theorem. A proof for the original two measurement families or
 another rank-preserving transfer remains necessary. Consequently the earlier
 note's blanket assertion that every source conclusion is covered is withdrawn.
-No claim is made that transitive consumers of that entanglement assertion are
-settled. No theorem or game in those chapters has been edited.
+In particular, the displayed compression inequality in item 3 is not settled.
+No theorem or game in those chapters has been edited.
 
 A general rank-preserving symmetric-strategy replacement cannot resolve this:
 in the symmetric one-question game accepting unequal binary answers, distinct

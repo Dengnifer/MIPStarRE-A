@@ -9745,3 +9745,50 @@ historical entry above is rewritten.
   of700/690's repair workers.699 marked audit passed1874 declarations and its
   new code review approved0 findings; prose remains pending. All3 space-d
   slots were verified occupied, with no traffic moved to another key.
+
+## 2026-09-23 - Intermediate documentation disposition for symmetrization
+
+- Session `orc-703-20260923-01`, admitted at
+  `a4782a5acc1627ec7ab76cf67592fdd53bea535c` by
+  `/tmp/main-document-symmetrization-20260922.md`, implements the owner's
+  2026-09-22 15:10Z instruction, "document, don't prove". The former C3
+  vocabulary could not record a terminal documented intermediate difference
+  without claiming correction adoption. Main expressly assigned this packet
+  the minimal protocol/checker alignment: add `documented-deviation`, preserve
+  `corrected` and `no-difference`, reject unknown/open/pending/blank states,
+  and retain headline requirements and C1/C2/C4/C5/C6/C7. The gate remains
+  outside blocking PR CI; mathematical justification and the documentation
+  artifacts still require independent review.
+- First review 5280263427 (PR #707, `reviewer-pr707-20260922-02`) accepted the
+  source-domain counterexample and independently checked the finite ranks,
+  but F1 found a misleading compression-consumer classification. The audit,
+  mathematical note, blueprint remark and deviations disclosure now explicitly
+  identify chapter 13 line 322 as an unresolved entanglement consumer of answer
+  reduction. The symmetrization row alone receives the documentation status.
+  The nonempty refutation remains external mathematics, the rank guarantees
+  remain unresolved, and no Lean proof or statement changes. Historical
+  strict-adoption evidence and all earlier costs remain recorded; this one
+  3600-second documentation admission neither resets nor extends any budget.
+- Documentation validation initially found 254 stale generated declaration
+  entries after web rendering, matching the earlier author audit's recorded
+  behavior. The normal blueprint sync refresh resolves these entries without
+  changing any tracked Lean link. The 63 focused completion tests, finite
+  enumeration, note PDF/style and blueprint checks pass; the full completion
+  gate correctly retains nine other nonterminal rows and four unrelated
+  unmarked nodes. No full CI or independent review is claimed by this session.
+- The first normal commit hook ran 873 script tests in 306.184 seconds and
+  failed one model-policy fixture (nine tests skipped). The fixture inherited
+  `MIPSTARRE_HARDNESS_REASON` from this hard-classified session while testing
+  a routine Sol request, so dispatch's dry-run correctly rejected the mismatch.
+  The isolated failing test passes with only that variable absent. The commit
+  is retried with `env -u MIPSTARRE_HARDNESS_REASON`, retaining all normal
+  hooks; no persistent environment, routing policy, account, cache or test
+  implementation is changed. No live worker is dispatched by the fixture.
+- That partial environment cleanup ran 873 tests in 325.605 seconds and
+  failed four `DispatchCommandTests` (nine skipped): the inherited
+  `MIPSTARRE_JOB_CLASS` still selected hard work without a reason. Clearing
+  both routing-context variables for the test process passes all 31 model-policy
+  and dispatch-command tests in 20.057 seconds. The next normal commit uses
+  `env -u MIPSTARRE_JOB_CLASS -u MIPSTARRE_HARDNESS_REASON`; no hook is skipped,
+  no routing code or test assertion is edited, and both failed runs remain
+  charged to this documentation session.

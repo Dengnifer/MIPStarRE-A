@@ -373,6 +373,82 @@ class PaperGapTests(GateFixture):
         self.assertEqual(crit.status, gate.FAIL)
         self.assertTrue(crit.evidence[0].startswith("docs/paper-gaps/fixture-register.md:6"))
 
+    def test_documented_intermediate_can_join_existing_terminal_rows(self) -> None:
+        write(
+            self.root,
+            "docs/paper-gaps/fixture-register.md",
+            GOOD_REGISTER + "| `c.tex` | `lem:c` | documented-deviation | unasserted |\n",
+        )
+        crit = gate.criterion_paper_gaps(self.root, self.track)
+        self.assertEqual(crit.status, gate.PASS, crit.evidence)
+        self.assertIn("3 rows terminal", crit.summary)
+        self.assertIn("do not prove printed claims", " ".join(crit.notes))
+
+    def test_documented_deviation_cannot_dispose_of_a_headline(self) -> None:
+        for source in ("`Fixture.good`", "`thm:fixture`, chapter 1", ""):
+            with self.subTest(source=source):
+                write(
+                    self.root,
+                    "docs/paper-gaps/fixture-register.md",
+                    GOOD_REGISTER + f"| `c.tex` | {source} | documented-deviation | unasserted |\n",
+                )
+                crit = gate.criterion_paper_gaps(self.root, self.track)
+                self.assertEqual(crit.status, gate.FAIL)
+                self.assertIn("intermediate Source statement", crit.evidence[0])
+
+    def test_documented_deviation_requires_a_source_column(self) -> None:
+        write(
+            self.root,
+            "docs/paper-gaps/fixture-register.md",
+            "| Note | Terminal status |\n|---|---|\n"
+            "| `c.tex` | documented-deviation |\n",
+        )
+        crit = gate.criterion_paper_gaps(self.root, self.track)
+        self.assertEqual(crit.status, gate.FAIL)
+
+    def test_unknown_open_pending_and_empty_statuses_still_fail(self) -> None:
+        for status in ("unknown", "open", "pending", "sorry", "", "documented", "proved"):
+            with self.subTest(status=status):
+                write(
+                    self.root,
+                    "docs/paper-gaps/fixture-register.md",
+                    GOOD_REGISTER.replace("| no-difference |", f"| {status} |"),
+                )
+                crit = gate.criterion_paper_gaps(self.root, self.track)
+                self.assertEqual(crit.status, gate.FAIL)
+                self.assertTrue(
+                    crit.evidence[0].startswith("docs/paper-gaps/fixture-register.md:6")
+                )
+
+    def test_documented_deviation_does_not_change_other_criteria(self) -> None:
+        # Exercise each gate with a failing input, so a new terminal row cannot
+        # turn a proof hole, missing headline audit or other failure green.
+        write(self.root, "MIPStarRE/Fixture/Good.lean", BAD_LEAN)
+        write(self.root, self.track.axiom_audit, "import Fixture\n")
+        write(self.root, self.track.blueprint_chapters[0], UNMARKED_CHAPTER)
+        write(self.root, self.track.comparator_doc, "# Missing comparator record\n")
+        write(self.root, "README.md", "Fixture track: 3 open sites.\n")
+        (self.root / "LICENSE").unlink()
+        before = gate.run_check(self.root, self.track, self.head)
+        write(
+            self.root,
+            self.track.gap_register,
+            GOOD_REGISTER + "| `c.tex` | `lem:c` | documented-deviation | unasserted |\n",
+        )
+        after = gate.run_check(self.root, self.track, self.head)
+        self.assertEqual(after[2].status, gate.PASS)
+        self.assertEqual(
+            [c for c in before if c.ident != "C3"],
+            [c for c in after if c.ident != "C3"],
+        )
+        for ident in ("C1", "C2", "C4", "C5", "C7"):
+            self.assertEqual(next(c for c in after if c.ident == ident).status, gate.FAIL)
+        # C6 is deferred while C1 fails; once the proof hole is removed its
+        # stale-doc check must still fail with the documented deviation present.
+        write(self.root, "MIPStarRE/Fixture/Good.lean", GOOD_LEAN)
+        criteria = gate.run_check(self.root, self.track, self.head)
+        self.assertEqual(next(c for c in criteria if c.ident == "C6").status, gate.FAIL)
+
 
 class BlueprintTests(GateFixture):
     def test_marked_nodes_are_delegated(self) -> None:

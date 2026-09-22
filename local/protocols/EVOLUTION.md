@@ -1717,3 +1717,30 @@ generated tree rather than accepting a hand-written coverage list.
 challenge. A completion claim still requires the official comparator evidence,
 only the three permitted standard axioms, an ancestor-or-equal verified library
 revision and a passing drift check on the exact completion commit.
+
+## 2026-09-23 - Permit terminal documentation of intermediate differences
+
+**Trigger:** the owner's 2026-09-22 15:10Z instruction, "document, don't prove",
+and main's explicit assignment in `/tmp/main-document-symmetrization-20260922.md`
+at `a4782a5acc1627ec7ab76cf67592fdd53bea535c`, recorded in
+`results/telemetry/events.md`, "Intermediate documentation disposition for
+symmetrization". This supersedes the demand that every intermediate difference
+converge to an adopted stronger correction before its documentation can close.
+
+**Change:** `local/protocols/completion.md` admits `documented-deviation` under
+C3 for justified intermediate differences with a mathematical gap note, matching
+blueprint remark and `docs/DEVIATIONS.md` disclosure. The status does not prove
+the printed claim or certify an external result in Lean. The checker accepts
+the new status, rejects its use for a named registered headline or absent source
+cell, and retains rejection of unknown/open/pending/blank states. Focused tests
+cover the mixed terminal statuses, headline restriction, invalid statuses and
+the unchanged behavior of C1/C2/C4/C5/C6/C7. Independent review still judges the
+mathematical justification and supporting artifacts. Existing `corrected` and
+`no-difference` meanings and all headline requirements are retained.
+
+**Expected effect:** the symmetrization documentation can close honestly while
+its nonempty counterexample remains external mathematics and the affected
+answer-reduction and compression rank guarantees remain unresolved. The gate
+is not added to blocking PR CI. Only the assigned register row changes status;
+historical audits and cumulative cost evidence are preserved. No Lean theorem
+or proof changes, and no new proof campaign follows from this disposition.
