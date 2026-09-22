@@ -355,6 +355,28 @@ assembled by Fourier averaging.
 	reservation must be established separately.
 \end{proof}
 
+\begin{lemma}[Full-support obstruction to a pure ancillary factor]
+	\label{lem:linearity-ancilla-full-support-obstruction}
+	\lean{MIPStarRE.QPBT.posDef_ne_linearity_ancilla_conjugate}
+	\leanok
+	This formalization-only auxiliary concerns the same padding obligation.
+	Let $t\geq0$, let $\hilb$ be a nonzero finite-dimensional complex Hilbert
+	space, and let $K_t$ have orthonormal basis indexed by
+	$\F_2^t\sqcup\{\bot\}$. If $\rho$ is positive definite on
+	$\hilb\ot K_t$, $U$ is invertible on that space, and $\sigma$ is any
+	operator on $\hilb$, then
+	\[
+		U\rho U^\dagger\neq\sigma\ot\ket{\bot}\bra{\bot}.
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	Invertible conjugation preserves positive definiteness. The right-hand
+	side annihilates every vector whose ancillary coordinate is a Boolean
+	word, so it is not positive definite. Thus a dimension bound alone
+	cannot supply the pure ancillary factor.
+\end{proof}
+
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
 	As printed in \cite{Natarajan2017Linearity}, the conclusion of the quantum

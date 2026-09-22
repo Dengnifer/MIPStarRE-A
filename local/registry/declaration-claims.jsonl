@@ -1,3 +1,4 @@
 {"action": "claim", "by": "opus", "issue": 612, "names": ["MIPStarRE.QPBT.three_add_six_sq_deltaQld_le"], "ts": "2026-09-18T17:53:17Z"}
 {"action": "claim", "by": "opus", "issue": 612, "names": ["MIPStarRE.QPBT.deltaQld_nonneg"], "ts": "2026-09-18T17:53:28Z"}
 {"action": "claim", "by": "prover-697-20260922-01", "issue": 697, "names": ["MIPStarRE.QPBT.not_nonempty_linearity_ancilla_isometry"], "note": "Finite-dimensional obstruction to identifying the full common-ancilla extension with the fixed local space; source absorption remains open.", "ts": "2026-09-22T11:32:18Z"}
+{"action": "claim", "by": "prover-697-20260922-01", "issue": 697, "names": ["MIPStarRE.QPBT.posDef_ne_linearity_ancilla_conjugate"], "note": "Full-support state obstruction: an invertible local change cannot expose the pure common ancilla.", "ts": "2026-09-22T11:34:28Z"}
