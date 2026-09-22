@@ -8,7 +8,7 @@ pivot columns, an identity matrix in those columns, and zeros before each pivot.
 This module compares its nonpivot indices with the intrinsic prefix-rank
 definition of `canonicalComplement`.
 
-Independent input rows admit such a matrix with the same row span and an
+Independent input rows have such a matrix with the same row span and an
 invertible change of row basis. The pivot index set depends only on that span.
 
 The arbitrary-field and zero-dimensional cases are extensions of the paper's
@@ -128,7 +128,7 @@ theorem IsReducedRowEchelon.canonicalComplement_eq_nonpivot_indices
       exact hpivot ⟨i, Fin.ext h⟩
     omega
 
-/-- Independent input rows admit an RREF matrix with exactly the same row span.
+/-- Independent input rows have an RREF matrix with exactly the same row span.
 The proof constructs its rows by projection along the intrinsic coordinate
 complement, then verifies the conventional entrywise conditions. This is an
 abstract existence theorem supporting paper `def:canonical-complement`, not a
