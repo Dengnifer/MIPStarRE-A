@@ -32,7 +32,7 @@ Review remains independent and exact-head CI remains required.
 | Node | Separate brief | Exit |
 |---|---|---|
 | def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | PR708 merged7b9dd8f2 at17:30:29Z after green exact-head CI and canonical independent-review carry5281456386. |
-| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Issue722 admitted to the free single Sol slot while707/709 model-free builds run. One3600s documentation task, preserving merged700 facts and all register statuses. Do not resume698. |
+| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Issue722 completed13d3f5a5 in1521s: three documentation files, no register or mark changes, focused checks passed. Model-free publication/full CI is admitted under tagcombine722; independent review remains required. |
 | lem:qld-xz-lines | /tmp/main-document-node-qld-xz-lines-20260922.md | Supported mark or reasoned completed-evaluation/source-law exemption; coordinate with subline row. |
 | lem:qld-4-13 | /tmp/main-document-node-qld-4-13-20260922.md | Explicit exemption for unasserted printed rate/carrier; coordinate with error row. |
 

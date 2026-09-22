@@ -2540,3 +2540,43 @@ Bash helper or silently discard a conflict. Issue722 remains the sole model
 worker and has reached web/sync/declaration checks on its three documentation
 files. Prepared720/721 are unstarted; final artifact/reference and truthfulness
 work remains as recorded above.
+
+## 2026-09-22T18:32Z: guarded row integration tested; combine-map author complete
+
+Previous turn classified as progress:709 merge was recorded on27,707's exact
+URL-only conflict resolution was admitted, and the final evidence packet was
+prepared. Pending telemetry subsequently published normally ascf80e52c.
+
+707 is now published at6c5343c66432f9bfc0a589015428e983cfcde539, including the
+rename integration. Its full CI passed; the THIRD default Sol review pipeline
+is active after722's terminal process. The cancelled199f94a1 review never
+started a model and did not consume a review round.
+
+Issue722's worker ended0 in1521s at13d3f5a599495f6d7d8fc931c02c07979487feff.
+Only chapter15, DEVIATIONS and the exemption file changed. The source global
+map and projection-to-parameter results remain distinguished from unproved
+representative independence on geometric line functions. Focused web/sync,
+declaration checks and hooks passed; all register statuses/marks are unchanged.
+Its model-free publication/full CI runs under
+/tmp/main-fullspeed-publish722-combine722-20260922; read its .pr file for the
+new PR number. No independent review is yet claimed.
+
+The seven old waiting v2 publication process groups were checked to contain no
+model/build/git worker and stopped before any integration. New immutable
+/tmp/main-after707-publish-only-v3-20260922.sh tails are live with tags
+urls715,urls716,urls717,urls713,urls714,urls718,urls719. They still require ACTUAL
+707 merge and do not dispatch reviewers. The helper
+/tmp/main-merge-reviewed-urls-v2-20260922.py first normalizes the approved repo
+URL in native Git's three inputs; only the register gets a narrow fallback for
+adjacent whole rows whose identities/order agree and for which at least one
+side is unchanged from the base. It refuses same-row disagreements or prose
+conflicts, and writes no partial resolution when any path fails.
+
+A real isolated preflight merged715's authored head with prospective707.
+The URL-only v1 helper correctly refused the adjacent square-root/symmetrization
+rows. The v2 helper passed; both whole mathematical rows were then compared
+byte-for-byte to their respective original sides, apart from approved URLs.
+Staged whitespace passed. Evidence is
+/tmp/qpbt-reviewed-url-check.vyq92h/verification.md and merge.log; the disposable
+worktree is removed after the successful test. No actual source branch changed
+in this preflight, and normal hooks/loss guard/full CI/review remain mandatory.
