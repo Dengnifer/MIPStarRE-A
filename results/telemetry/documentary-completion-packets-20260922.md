@@ -16,10 +16,10 @@ Review remains independent and exact-head CI remains required.
 
 | Register row | Brief | Current disposition after the 17:27Z allocation change |
 |---|---|---|
-| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | SECOND review5281669767 approved code with0 findings. Both wording findings repaired in10a5c675 (393s), chapter12 only. A guarded model-free refresh/publication/full-CI/THIRD-default-Sol-review pipeline is live. |
-| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 completes F2 and adds the source-node exemption. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
+| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 MERGED0771440b at18:58:17Z after complete CI and THIRD approval5282383545 with0 findings. Common documented-deviation support is now on main. |
+| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 preserved; integration of merged707 has two retained conflicts. Sol integration under tagpreserved716 is active, preserving staged incoming work and the authored exemption. Publication/CI/SECOND review follow. |
 | Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | PR715 at4ac910df has green CI; first review's sole finding is common707 support. Refresh/CI waits for merged707, then SECOND review. |
-| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af in1494s with one reasoned C4 exemption; publication/FIRST review waits for merged707. |
+| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af with one reasoned C4 exemption. Two integration conflicts are retained; tagpreserved713 queues a Sol task after716. No original work or budget is discarded. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Issue718 completedc1bf9623 in785s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
 | Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Issue720 prepared; no author admitted because the queue correctly stopped on707's adverse combined review. Admit after the priority707 repair/review. PR702 remains closed unmerged; read actual main. |
 | Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Issue719 completed76312c5f in1378s, four documentation artifacts and clean worktree. Publication/CI waits for merged707, then FIRST review. PR706 remains closed unmerged. No continuation. |
@@ -32,7 +32,7 @@ Review remains independent and exact-head CI remains required.
 | Node | Separate brief | Exit |
 |---|---|---|
 | def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | PR708 merged7b9dd8f2 at17:30:29Z after green exact-head CI and canonical independent-review carry5281456386. |
-| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Issue722 completed13d3f5a5 in1521s: three documentation files, no register or mark changes, focused checks passed. Model-free publication/full CI is admitted under tagcombine722; independent review remains required. |
+| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | PR723 at94a4bafe has green CI. Review5282487123 requires corrected inventory and a dedicated TeX gap note/register row. One Sol repair is queued after the integrations, preserving the accepted mathematical comparison and every other row. |
 | lem:qld-xz-lines | /tmp/main-document-node-qld-xz-lines-20260922.md | Supported mark or reasoned completed-evaluation/source-law exemption; coordinate with subline row. |
 | lem:qld-4-13 | /tmp/main-document-node-qld-4-13-20260922.md | Explicit exemption for unasserted printed rate/carrier; coordinate with error row. |
 

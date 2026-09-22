@@ -2613,3 +2613,45 @@ review on exactly94a4bafe. The shared operator lock keeps it behind707's
 current review; it cannot bypass green CI or create a second model slot.
 Issues720/721 remain prepared but unstarted, and the final packaging/truthfulness
 and immutable comparator evidence sequence remains outstanding.
+
+## 2026-09-22T19:16Z: merged707, live row pipelines and review-directed723 repair
+
+The preceding interrupted turn made progress.707 merged at18:58:17Z as
+0771440bb2dd9f7cc7f702300839a44051277dd0 after full CI at6c5343c6 and THIRD
+review5282383545 (code/prose approved,0 findings). The stage-boundary27 report
+is5782349102. The renewed model-free supervisor remains live; no manual merge.
+
+Real isolated preflights under /tmp/qpbt-doc-integration-preflight-pcyq90tp
+confirmed five of seven integrations, including the earlier715 preflight.
+710/716 and713 additionally conflict in the exemption document's policy prose
+and obligation list. Their actual publication tails reached the same guarded
+failure just as main was preparing replacements; the attempted stop found
+those tails already terminal and killed nothing. Both actual worktrees retain
+their authored HEADs and full staged incoming merge, with exactly the two
+known unmerged documentation files. The original v1 integration wrappers were
+stopped before model admission, and immutable v2 wrappers explicitly validate
+and continue that MERGE_HEAD without reset/abort/discard. Runtime prefixes:
+/tmp/main-sol-c4-integration-preserved716-20260922 (active Sol) and
+/tmp/main-sol-c4-integration-preserved713-20260922 (queued behind it).
+
+The other five rows are published/on detached full CI:
+715=b5a68dcc9e4ac40978ee269af202acfba2f12c6b;
+717=da1201c55461eefb3c166a638e231754686372a9;
+714 is now PR724 atd2e98314c187ae8fb9a8f0a0c8eb29ba6655b126;
+718 is now PR725 at7f59d0e3b9008054226cebf7f43d04e9dacdf4af;
+719 is now PR726 at456b0d160ec81c459aa166e058a6a8e05ca74b9f.
+Their corresponding URLs/publication receipts remain under the existing tags.
+715/717 need SECOND reviews;724/725/726 need FIRST reviews after green CI.
+
+723's first review5282487123 has3 ledger findings but2 distinct defects:
+the19-of21 inventory is false, and c10 lacks a dedicated TeX note/register row.
+Both reviewers accept the mathematical singleton comparison and marks.
+/tmp/main-fix723-documentary-record-20260922.md now authorizes one dedicated
+combining-map note and its terminal documented-deviation row, superseding the
+old no-register-edit restriction only for this already-assigned discrepancy.
+Every other row/status remains protected, including the separately assigned
+subline note. Correct counts must be recomputed after adding the note.
+/tmp/main-sol-fix723-record-v1-20260922.sh is queued under the same one-Sol lock,
+with one3600s task, exact initial94a4bafe and pause/key-retirement guards.
+No new proof work or budget reset is authorized. Full CI and SECOND review
+remain required after the repair.720/721 remain prepared and unstarted.
