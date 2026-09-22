@@ -60,4 +60,41 @@ theorem exists_isCombineLineCompatible_of_projection_mem {K : Type*} [Field K] {
   exact ⟨aX, bX, aZ, bZ,
     isCombineLineCompatible_of_blocks u v uX vX uZ vZ aX bX aZ bZ haX hbX haZ hbZ⟩
 
+/-- Projection inclusion gives a combining polynomial of degree at most
+`c + 1` with the affine-weighted coefficient evaluation formula, simultaneously
+for every pair of degree-`c` coefficient lists. This is the parameter version
+of `eq:combine-lines`; its parameters are constructed, not assumed.
+
+**Scope restriction:** coefficient evaluation at a parameter is not evaluation
+of an arbitrary answer at a geometric point of a singleton line. The latter
+requires the answer to induce a constant function, as recorded in issue #695
+and `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. Consequently this
+auxiliary alone does not certify blueprint `def:combine-map`. -/
+theorem exists_combineLinePoly_of_projection_mem {K : Type*} [Field K] {m c : ℕ}
+    (u v : Fin (2 * m + 2) → K) (uX vX uZ vZ : Fin m → K)
+    (hproj : ∀ p ∈ linePoints u v,
+      projX p ∈ linePoints uX vX ∧ projZ p ∈ linePoints uZ vZ) :
+    ∃ aX bX aZ bZ : K,
+      IsCombineLineCompatible u v uX vX uZ vZ aX bX aZ bZ
+        (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m)) ∧
+      ∀ f g : Fin (c + 1) → K,
+        (combineLinePolynomial aX bX aZ bZ
+          (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m))
+          f g).natDegree ≤ c + 1 ∧
+        ∀ t : K,
+          evalCoefficient (combineLinePoly aX bX aZ bZ
+            (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m))
+            f g) t =
+          (u + t • v) (alphaVar m) * evalCoefficient f (aX + bX * t) +
+            (u + t • v) (betaVar m) * evalCoefficient g (aZ + bZ * t) := by
+  obtain ⟨aX, bX, aZ, bZ, hcompat⟩ :=
+    exists_isCombineLineCompatible_of_projection_mem u v uX vX uZ vZ hproj
+  refine ⟨aX, bX, aZ, bZ, hcompat, fun f g => ⟨?_, ?_⟩⟩
+  · exact combineLinePolynomial_natDegree_le _ _ _ _ _ _ _ _ f g
+  · intro t
+    simpa only [Pi.add_apply, Pi.smul_apply, smul_eq_mul] using
+      (combineLinePoly_spec u v uX vX uZ vZ aX bX aZ bZ
+        (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m))
+        f g hcompat t).2.2
+
 end MIPStarRE.QPBT
