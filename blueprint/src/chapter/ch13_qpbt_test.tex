@@ -1111,7 +1111,8 @@ $4$, respectively.
 	% references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:612-652, quantifies over
 	% every strategy of value 1 - eps and carries no consistency hypothesis; that statement is
 	% false (see the proof, Remark~\ref{rem:ms-rigidity-strategy-class}, and the cited note). The
-	% source's display is the case delta = 0 below.
+	% case delta = 0 below recovers the source's error scale for completed binary effects;
+	% comparison with the prescribed-answer effects remains a separate construction.
 	Let $\eps, \delta \ge 0$, and let $\mathcal S = (\ket{\psi}, A, B)$ be a strategy that succeeds in the Magic Square game $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$, where $\ket{\psi} \in \hilb_{\mathrm A} \ot \hilb_{\mathrm B}$, and whose $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements are consistent between the two players up to $\delta$ on $\ket{\psi}$, in the binary effects $\hat A$, $\hat B$ of Definition~\ref{def:ms-variable-agreement}:
 	\begin{equation}\label{eq:ms-rigidity-consistency}
 		\Delta_j(\mathcal S) = \sum_{b \in \F_2} \bigl\| \bigl( \hat A^{\mathsf{Variable}_j}_b \ot I_{\mathrm B} - I_{\mathrm A} \ot \hat B^{\mathsf{Variable}_j}_b \bigr) \ket{\psi} \bigr\|^2 \le \delta \qquad \text{for } j \in \{1, 5\}\,.
@@ -1133,7 +1134,11 @@ $4$, respectively.
 		\tilde A^{\mathsf{Variable}_1} \tilde A^{\mathsf{Variable}_5} \ot I_{\mathrm{B'B''}} &\approx_{\eta} -\, \tilde A^{\mathsf{Variable}_5} \tilde A^{\mathsf{Variable}_1} \ot I_{\mathrm{B'B''}}\;,\\
 		I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_1} \tilde B^{\mathsf{Variable}_5} &\approx_{\eta} -\, I_{\mathrm{A'A''}} \ot \tilde B^{\mathsf{Variable}_5} \tilde B^{\mathsf{Variable}_1}\;,
 	\end{align*}
-	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\zeta N$ means $\bra{\Theta} (M-N)^\dagger (M-N) \ket{\Theta} \le O(\zeta)$, evaluated on the extracted ideal state $\ket{\Theta}$ of item~2 --- the state on which the transported operators act --- and not on $\ket{\psi}$. For $\delta = 0$, in particular for every symmetric consistent strategy, the conclusion is the source's display, with $\eta = \sqrt\eps$.
+	where, for operators $M$, $N$ that are not POVM elements, the notation $M \approx_\zeta N$ means $\bra{\Theta} (M-N)^\dagger (M-N) \ket{\Theta} \le O(\zeta)$, evaluated on the extracted ideal state $\ket{\Theta}$ of item~2 --- the state on which the transported operators act --- and not on $\ket{\psi}$. For $\delta = 0$, in particular for every symmetric consistent strategy, $\eta = \sqrt\eps$.
+	This recovers the source's error scale for the completed binary effects of
+	Definition~\ref{def:ms-variable-agreement}; comparison with the
+	prescribed-answer effects remains a separate construction. Zero agreement
+	does not eliminate answers of the wrong form.
 \end{theorem}
 \begin{proof}
 	\leanok
@@ -1227,7 +1232,10 @@ $4$, respectively.
 	\lean{MIPStarRE.QPBT.exists_ms_rigidity_of_symmetric_consistent}
 	\leanok
 	\uses{thm:ms-rigidity, def:ms-variable-agreement, lem:ms-variable-agreement-zero, def:consistent-strategy, def:spcc, def:symmetric-game}
-	Let $\eps \ge 0$ and let $\mathcal S = (\ket{\psi}, M)$ be a symmetric consistent strategy for $\mathfrak{G}^{\mathrm{MS}}$ in the sense of Definition~\ref{def:consistent-strategy}, so that $\mathcal S$ is projective and every measurement $\{M^x_a\}$ is consistent on $\ket{\psi}$; every SPCC strategy (Definition~\ref{def:spcc}) is of this form. Suppose that $\mathcal S$ succeeds in $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$. Then the conclusion of Theorem~\ref{thm:ms-rigidity} holds with $\eta = \sqrt\eps$, that is, in the form printed in the source.
+	Let $\eps \ge 0$ and let $\mathcal S = (\ket{\psi}, M)$ be a symmetric consistent strategy for $\mathfrak{G}^{\mathrm{MS}}$ in the sense of Definition~\ref{def:consistent-strategy}, so that $\mathcal S$ is projective and every measurement $\{M^x_a\}$ is consistent on $\ket{\psi}$; every SPCC strategy (Definition~\ref{def:spcc}) is of this form. Suppose that $\mathcal S$ succeeds in $\mathfrak{G}^{\mathrm{MS}}$ with probability at least $1-\eps$. Then the conclusion of Theorem~\ref{thm:ms-rigidity} holds with $\eta = \sqrt\eps$.
+	This recovers the source's error scale for the completed binary effects of
+	Definition~\ref{def:ms-variable-agreement}; comparison with the
+	prescribed-answer effects remains a separate construction.
 \end{corollary}
 \begin{proof}
 	\leanok
