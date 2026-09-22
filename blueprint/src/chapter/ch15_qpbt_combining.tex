@@ -6237,24 +6237,42 @@ POVMs with $n=2m+2$ and $k=1$.
 	and~\ref{lem:qld-4-7}. The condition that $2m+2$ divide $q$ does not
 	follow from admissibility of $(q,m,d)$
 	(Definition~\ref{def:admissible}), which supplies only that $m$
-	divides $q$; indeed the two are jointly satisfiable only in a
-	degenerate range. An admissible field size
+	divides $q$. An admissible field size
 	(Definition~\ref{def:admissible-size}) is a power of two, so $m$
 	dividing $q$ forces $m$ to be a power of two; for $m \ge 2$ the
 	integer $m+1$ is odd and exceeds $1$, so $2m+2 = 2(m+1)$ divides no
 	power of two, while for $m = 1$ the condition $4 \mid q$ holds for
-	every admissible $q$ except $q = 2$. The source proof in
-	\cite{Ji2020MIPStar} performs the instantiation at dimension $2m+2$
-	without addressing the divisibility. The statements above are
-	therefore retained in their source form, and for admissible
-	parameters with $m \ge 2$ their proofs, like the source's, are
-	blocked at the marked steps, so the conclusions are not established
-	for such parameters, here or in the source. A proof covering every
-	admissible parameter tuple requires a formulation of the game, of its
-	question distribution, and of Theorem~\ref{lem:ld-soundness} that
-	applies to dimensions not dividing $q$; the missing step and the
-	candidate repairs are analyzed in
-	\cite{gap:qpbt_ld-dimension-divisibility}.
+	every admissible $q$ except $q = 2$. Thus the extended seed-indexed
+	construction is defined exactly in the exceptional range $m=1$,
+	$q\ge8$. The source proof in \cite{Ji2020MIPStar} performs this
+	instantiation without addressing its parameter domain.
+
+	The formalized proof of Lemma~\ref{lem:qld-4-7} instead uses the
+	directly indexed auxiliary game: its axis and diagonal prefix indices
+	are sampled uniformly from $\{1,\ldots,2m+2\}$, and line descriptions
+	carry those indices rather than field seeds. Its soundness follows from
+	Theorem~\ref{thm:main-formal} and the simultaneous combining reduction
+	of Proposition~\ref{prop:ld-simultaneous-general-k}. The direct subline
+	distribution of Lemma~\ref{lem:qld-sublines-direct} and the extended
+	line measurements of Lemma~\ref{lem:qld-4-13-established} supply the
+	proved polynomial-pair conclusion for every admissible tuple. No
+	additional divisibility hypothesis is imposed on that conclusion.
+
+	This is a documented deviation of the intermediate construction, as
+	explained in \cite{gap:qpbt_ld-dimension-divisibility}. The direct law
+	is not identified with the source law: where the seed law is defined,
+	the source subline comparison still requires the appropriate line and
+	separate projected-point marginals and evaluation transports. The
+	source-shaped Lemmas~\ref{lem:qld-sublines} and~\ref{lem:qld-4-13}
+	are retained without certifying those comparisons. Separately,
+	Theorem~\ref{lem:ld-soundness-formalized} proves seed-indexed soundness
+	for completed point POVMs on its original divisible-dimension domain
+	by correlated seed dilation, compression, and polynomial agreement.
+	The prescribed-effect comparison is distinguished in
+	Remark~\ref{rem:ld-soundness-provider}. Neither this theorem nor the
+	direct proof establishes the printed tensor-code game correspondence
+	or the parameter substitution discussed in
+	Remark~\ref{rem:ld-soundness-provider}.
 \end{remark}
 
 \begin{lemma}[Formalization support for the supplied scalar point measurement]

@@ -269,7 +269,8 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 % We keep both the environment and the label verbatim for cross-reference fidelity.
 \begin{theorem}[Quantum soundness of the simultaneous classical low individual degree test]\label{lem:ld-soundness}
 	\lean{MIPStarRE.QPBT.deltaLd, MIPStarRE.QPBT.exists_ld_soundness}
-	\leanok
+	% The linked theorem uses completed point POVMs. The prescribed-effect
+	% statement stays unmarked; see the C4 exemption and the provider remark.
 	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
 	There exists a function
 	\[
@@ -295,21 +296,20 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 \end{theorem}
 \begin{proof}
 	\uses{def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:povm-distance}
-	The route transcribed below is the one the paper prints, and it is not the
-	route of the formalization. The Lean proof of this statement follows instead
-	the seed-indexed direct reduction and seed compression of
-	Remark~\ref{rem:ld-soundness-provider}, recorded as
-	Theorem~\ref{lem:ld-soundness-formalized}; it establishes all three
-	conclusions for every $k$ and uses neither step of the printed route. Those
-	two steps --- the identification of $\mathfrak{G}^{\mathrm{ld}}$ with the
+	The route transcribed below is the one the paper prints. The linked
+	formal theorem instead establishes the three bounds for completed point
+	POVMs, as stated in Theorem~\ref{lem:ld-soundness-formalized}; it does not
+	state the conclusion for the prescribed-answer effects displayed above.
+	The positivity comparison in Remark~\ref{rem:ld-soundness-provider}
+	explains their relation, but is not a formalized implication here.
+	The source-labelled statement and this printed proof therefore remain
+	unmarked. The completed theorem uses neither of the two steps of the
+	printed route --- the identification of $\mathfrak{G}^{\mathrm{ld}}$ with the
 	two-prover tensor-code test, and the admissibility of the printed parameter
 	choice $m^3 d$ against the bound $12m(d+1)$ required by Theorem~4.7
-	of~\cite{Ji2021Quantum} --- remain open source gaps, tracked as issue 527 of
-	this repository and enumerated below. This node accordingly carries a
-	statement-level formalization mark and no proof-level one, since a
-	proof-level mark here would certify the printed route, which nothing in the
-	formalization discharges. The following account records that printed route
-	and its separate verification obligations.
+	of~\cite{Ji2021Quantum}. These remain open source gaps, tracked as issue
+	527 of this repository and enumerated below. The following account records
+	that printed route and its separate verification obligations.
 	Let $\Sigma = \F_q$ and let $\code \subseteq \Sigma^q$ be the Reed--Solomon code of degree $d$: the set of all $(p(x_1),\ldots,p(x_q))$ where $p\colon \F_q \to \F_q$ is a univariate polynomial of degree at most $d$ and $x_1,\ldots,x_q$ enumerate $\F_q$. We may assume $d < q$. In the opposite regime the statement is immediate: for $d \ge q$ the prefactor gives $\delta_{\mathrm{ld}} \ge a\,(dmk)^a\, q^{-b} \ge q^{a-b} \ge 1$, using $m, k \ge 1$, while the quantity bounded in Definition~\ref{def:consistency} never exceeds $4$ for families of POVM elements: $\sum_a \lVert (A_a \ot I - I \ot B_a)\ket{\psi}\rVert^2 \le 2\sum_a \bigl(\bra{\psi} A_a^2 \ot I \ket{\psi} + \bra{\psi} I \ot B_a^2 \ket{\psi}\bigr) \le 4$, using $0 \le M_a^2 \le M_a$ and $\sum_a M_a = \Id$ for POVM elements, so the three relations hold for an arbitrary choice of $G^w \in \mathrm{PolyMeas}(m,q,d,k)$. For $d < q$, evaluation is injective on polynomials of degree at most $d$ and a nonzero polynomial of degree at most $d$ vanishes at no more than $d$ of the $q$ points, so $\code$ is a linear $[q,\, d+1,\, q-d]_\Sigma$ code.
 	% The paper prints the parameters as [q, d+1, n-d+1] with an undefined n. With the
 	% intended value n = q the printed distance q-d+1 exceeds the true minimum distance
@@ -340,10 +340,10 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 	Quantum soundness of the low individual degree test itself is the result of~\cite{Ji2020LowIndividualDegree}; Remark~\ref{rem:ld-soundness-provider} relates the present statement to Theorem~\ref{thm:main-formal}, which proves that result.
 \end{proof}
 
-% This node is not a statement from the paper: it records the route by which
-% Theorem lem:ld-soundness is formalized, so that a proof-level formalization
-% mark certifies the formalized route and not the printed tensor-code one.
-\begin{theorem}[Formalization support for Theorem~\ref{lem:ld-soundness}: the seed-indexed route]
+% This node states the completed point-POVM variant and its formalized route.
+% Its marks do not certify the prescribed-effect statement or printed proof.
+\begin{theorem}[Formalization support for Theorem~\ref{lem:ld-soundness}:
+	completed point measurements in the seed-indexed game]
 	\label{lem:ld-soundness-formalized}
 	\lean{MIPStarRE.QPBT.exists_ld_soundness}
 	\lean{MIPStarRE.QPBT.polyTupleAgreement_avg_le_mdq}
@@ -351,18 +351,59 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 	\lean{MIPStarRE.QPBT.error_and_collision_le_deltaLd}
 	\leanok
 	\uses{def:ld-game, def:ld-question-distribution, def:ld-win-predicate, def:ld-meas, def:projective-strategy-general, def:tensor-product-value, def:consistency, def:bracket}
-	This formalization-only node is not a named statement of the paper; it carries the conclusion of Theorem~\ref{lem:ld-soundness} verbatim, and exists so that the route the formalization actually takes is the route a proof-level formalization mark certifies. There exists a function
+	This formalization-only statement uses completed point measurements.
+	For a point question $u$, write $A^u_{\mathbf a}$ for the strategy's
+	effect at the prescribed answer $\mathbf a\in\F_q^k$, and put
+	\[
+		R_A^u=I_{\mathrm A}-\sum_{\mathbf a\in\F_q^k}A^u_{\mathbf a},
+		\qquad
+		\widetilde A^u_{\mathbf a}
+		=A^u_{\mathbf a}+\mathbf 1_{\mathbf a=\mathbf 0}R_A^u.
+	\]
+	Here $R_A^u$ is the sum of the effects of all answers of the wrong
+	form. Define $R_B^u$ and $\widetilde B^u$ in the same way. Thus
+	$\widetilde A^u$ and $\widetilde B^u$ are POVMs obtained by sending
+	wrong-form answers to the zero tuple; the hypotheses do not require
+	$R_A^u$ or $R_B^u$ to vanish.
+
+	There exists a function
 	\[
 		\delta_{\mathrm{ld}}(\eps, q, m, d, k) = a\,(dmk)^a \bigl(\eps^b + q^{-b} + 2^{-bmd}\bigr)
 	\]
-	for universal constants $a \ge 1$ and $0 < b \le 1$ such that all three consistency relations displayed in Theorem~\ref{lem:ld-soundness} hold with that bound, with the same question laws and the same bracket convention, for every parameter tuple $\mathsf{ldparams} = (q,m,d,k)$ as in Definition~\ref{def:ld-game}, every $\eps > 0$, and every projective strategy $(\psi, A, B)$ succeeding with probability at least $1-\eps$ in $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$. The statement is that of Theorem~\ref{lem:ld-soundness}; only the proof recorded below differs from the one printed there. The auxiliary declarations tagged on this node are the tuple collision bound and the two scalar absorption estimates that proof uses.
+	for universal constants $a\ge1$ and $0<b\le1$ such that, for every
+	parameter tuple $(q,m,d,k)$ as in Definition~\ref{def:ld-game}, every
+	$\eps>0$, and every projective strategy $(\psi,A,B)$ of value at least
+	$1-\eps$ in $\mathfrak{G}^{\mathrm{ld}}_{\mathsf{ldparams}}$, there are
+	polynomial-tuple POVMs $G^{\mathrm A}$ and $G^{\mathrm B}$ on the original
+	players' spaces satisfying
+	\begin{align*}
+		\widetilde A^u_{\mathbf a}\ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A}\ot G^{\mathrm B}_{[\mathbf g(u)=\mathbf a]},\\
+		G^{\mathrm A}_{[\mathbf g(u)=\mathbf a]}\ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A}\ot\widetilde B^u_{\mathbf a},\\
+		G^{\mathrm A}_{\mathbf g}\ot I_{\mathrm B}
+		&\simeq_{\delta_{\mathrm{ld}}}
+		I_{\mathrm A}\ot G^{\mathrm B}_{\mathbf g}.
+	\end{align*}
+	Here $\mathbf g=(g_1,\ldots,g_k)$ is a tuple of polynomial
+	representatives of individual degree at most $d$, and
+	$\mathbf g(u)=(g_1(u),\ldots,g_k(u))$. All three relations use
+	$\ket\psi$; the first two average over uniform $u\in\F_q^m$, and the
+	third has no question distribution. More precisely, each off-diagonal
+	consistency defect is at most $\delta_{\mathrm{ld}}$.
+	The auxiliary declarations linked here are the tuple collision bound
+	and the two scalar absorption estimates used in the proof.
 \end{theorem}
 \begin{proof}
 	\leanok
 	\uses{prop:ld-simultaneous-general-k, lem:direct-ld-residue-compression, lem:ld-point-agreement, lem:direct-ld-polynomial-agreement, fact:triangle-for-simeq, lem:ld-soundness-k-one}
 	Neither obligation enumerated in the proof of Theorem~\ref{lem:ld-soundness} is used or assumed here: the two-prover tensor-code test does not occur in this argument at all.
 
-	Dilate the given seed-indexed strategy by a maximally correlated register indexed by the seed fibre, so that each player answers the reconstructed directly indexed question in the block selected by their copy. The dilation preserves projectivity and preserves the value exactly, because the residue is uniform and shared. Proposition~\ref{prop:ld-simultaneous-general-k}, applied to the dilated strategy, supplies polynomial-tuple measurements for every $k$ on the extended Hilbert spaces. Compress both of them back to the original Hilbert spaces by the normalized diagonal-block average over the correlated register. The two mixed point-versus-polynomial relations transfer through that compression exactly, by the two compression-transfer lemmas of Lemma~\ref{lem:direct-ld-residue-compression}: in each of them the opposite player's operator is the block-diagonal amplification of the original point measurement and therefore leaves the correlated register untouched.
+	Throughout this proof, point measurements mean the completed families
+	$\widetilde A^u$ and $\widetilde B^u$ just defined.
+	Dilate the given seed-indexed strategy by a maximally correlated register indexed by the seed fibre, so that each player answers the reconstructed directly indexed question in the block selected by their copy. The dilation preserves projectivity and preserves the value exactly, because the residue is uniform and shared. Proposition~\ref{prop:ld-simultaneous-general-k}, applied to the dilated strategy, supplies polynomial-tuple measurements for every $k$ on the extended Hilbert spaces. Compress both of them back to the original Hilbert spaces by the normalized diagonal-block average over the correlated register. The two mixed point-versus-polynomial relations transfer through that compression exactly, by the two compression-transfer lemmas of Lemma~\ref{lem:direct-ld-residue-compression}: in each of them the opposite player's operator is the block-diagonal amplification of the completed point measurement and therefore leaves the correlated register untouched.
 
 	The third relation, in which both operators act on the correlated register, is not preserved by compression and is reproved on the original spaces. The point-versus-point branch of Definition~\ref{def:ld-win-predicate} accepts only on equal answers and carries one ninth of the question law, so the two point measurements are consistent up to $9\eps$ (Lemma~\ref{lem:ld-point-agreement}), and the triangle inequality of Lemma~\ref{fact:triangle-for-simeq} chains the two compressed relations through that agreement. The defect this leaves is the probability that two \emph{distinct} polynomial tuples take the same value at a uniform point, which is at most $md/q$: distinct tuples differ in some coordinate, and the Schwartz--Zippel estimate of Lemma~\ref{lem:direct-ld-polynomial-agreement} is applied at that one coordinate, so no union bound over the $k$ coordinates is taken and the estimate does not degrade in $k$. This bounds collisions between tuples that have already been constructed; it does not construct simultaneous measurements coordinatewise, and so it does not touch the coordinatewise route refuted in Remark~\ref{rem:ld-soundness-simultaneity}.
 
@@ -370,7 +411,50 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 \end{proof}
 
 \begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
-	The printed proof of Theorem~\ref{lem:ld-soundness} uses an import: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Proposition~\ref{prop:ld-simultaneous-general-k} establishes the directly indexed combining reduction for every $k$. Its correlated seed dilation preserves projectivity and value, and the two point/polynomial relations compress exactly. Point agreement and the Schwartz--Zippel bound for distinct polynomial tuples recover the global relation on the original spaces. The error is absorbed by replacing the direct constants $(a,b)$ by $(10a,b/2)$, proving Theorem~\ref{lem:ld-soundness} for every $k$ without invoking either open tensor-code assertion; the case $k=1$ is recorded separately in Theorem~\ref{lem:ld-soundness-k-one}. The printed tensor-code route above does not invoke Theorem~\ref{thm:main-formal}.
+	Theorem~\ref{lem:ld-soundness-formalized} proves the three consistency
+	bounds for completed point POVMs for every positive simultaneity
+	parameter $k$ on the original seed-indexed domain $m\mid q$. Its proof
+	uses the low individual degree theorem of~\cite{Ji2020LowIndividualDegree},
+	formalized as Theorem~\ref{thm:main-formal}, together with the directly
+	indexed strategy reduction and the combining construction of
+	Proposition~\ref{prop:ld-simultaneous-general-k}. At combined dimension
+	$M=m+k$ it uses the auxiliary integer $N=2560000M^3d$ and verifies the
+	condition $400Md\le N$. Correlated seed dilation preserves projectivity
+	and game value; the two point/polynomial relations compress exactly,
+	and point agreement and Schwartz--Zippel recover global consistency on
+	the original spaces. Replacing the direct constants $(a,b)$ by
+	$(10a,b/2)$ absorbs the resulting error.
+
+	The prescribed-answer effects in Theorem~\ref{lem:ld-soundness}
+	differ from these completed effects at the zero tuple by the positive
+	remainders $R_A^u$ and $R_B^u$. For opposite tensor placements, each
+	off-diagonal summand contributed by a remainder is nonnegative.
+	Consequently the completed bounds imply the corresponding bounds for
+	the prescribed effects, with the same error; the polynomial/polynomial
+	relation is unchanged. This is a mathematical comparison, not an
+	implication stated by the linked formal theorem. The source-labelled
+	entry remains unmarked, with the documentary exemption recorded in
+	\cite{gap:qpbt_ld-dimension-divisibility}; only the separate completed
+	statement and its proof carry formalization marks.
+
+	The printed proof in~\cite{Ji2020MIPStar} takes a different route through
+	Theorem~4.7 of~\cite{Ji2021Quantum}. Its claimed game identification
+	requires a reduction from diagonal-line questions to hidden-subcube
+	pair questions, with the seed information and branch probabilities
+	accounted for. Its choice $K=m^3d$ must also meet that theorem's distinct
+	condition $K\ge12m(d+1)$, which fails at the small dimensions enumerated
+	in the proof above. Neither assertion is a hypothesis or a proved step
+	of the formalized soundness theorem.
+
+	The documented deviation in~\cite{gap:qpbt_ld-dimension-divisibility}
+	therefore distinguishes the established completed-POVM soundness statement
+	from the prescribed-effect statement and the unverified source derivation.
+	It also distinguishes these from the
+	use of a directly indexed auxiliary game at dimension $2m+2$, where
+	the original seed-indexed game is generally undefined
+	(Remark~\ref{rem:qld-4-7-divisibility}). Documentary closure of that
+	comparison supplies no proof of the printed import or of the
+	intermediate source-law assertions.
 \end{remark}
 
 % This remark records the formal status of the extension to general k;

@@ -10,7 +10,7 @@
 \title{Dimension Divisibility in the Classical Test Instantiation of the
 	Pauli Basis Analysis}
 \author{}
-\date{2026-09-05}
+\date{2026-09-23}
 
 \begin{document}
 \maketitle
@@ -18,57 +18,110 @@
 \section{At a glance}
 
 \begin{itemize}
-  \item \textbf{Difficulty: medium.}  Two related matters are recorded.
-  First, the soundness analysis of the Pauli basis test invokes the
-  classical low individual degree game at dimension $2m+2$, and the game's
-  question distribution is undefined at that dimension for the admissible
-  parameters: it requires $2m+2$ to divide $q$, while admissibility supplies
-  only $m \mid q$.  A separate directly indexed auxiliary game avoids this
-  obstruction without strengthening the source statement.  Second, the
-  import of the classical
-  game's quantum soundness from the tensor-code paper carries two open
-  verification obligations at every dimension: the asserted identity with
-  the cited tensor-code test is not an identity and must be replaced by a
-  reduction with a value bound, and the source's instantiation of the
-  theorem's auxiliary parameter violates its lower bound at small
-  dimensions (Section~\ref{sec:import-obligations}).  Soundness of a directly
-  indexed game is now established by an independent application of the low
-  individual degree theorem.  That proof avoids the tensor-code import; it
-  does not discharge either of these two source-import obligations.
-  Separately from both matters, the scalar sub-line claims are formalized
-  over that auxiliary directly indexed law rather than over the source law;
-  that scope record is Section~\ref{sec:auxiliary-subline-scalars}.
-  \item \textbf{Estimated weight:} the directly indexed game, its soundness
-  theorem, the reduction from general simultaneity to one, the correlated
-  residue lift from the seed-indexed game, and the compression of the two
-  mixed consistency conclusions are formalized. For every $k$, the global
-  relation is recovered from point agreement and Schwartz--Zippel, completing
-  seed-indexed soundness. The downstream use at dimension $2m+2$ remains
-  separate from this transport. Independently, discharging
-  the original import obligations of
-  Section~\ref{sec:import-obligations} adds the pair-measurement
-  construction with its distributional matching, the branch-weight value
-  bound, and the parameter-bound case split; this remains several hundred
-  lines of project-local formal proof.  The padding fallback is heavier,
-  roughly 6--10 reworked lemmas.
-  \item \textbf{Mathlib/project split:} approximately \textbf{15\% Mathlib}
-  and \textbf{85\% project-local}.  Mathlib supplies uniform distributions on
-  finite types and pushforward identities; the remaining substance is the
-  recovery of global polynomial agreement and the reduction to the tensor-code test.
-  \item \textbf{Key Mathlib inputs:} uniform distributions on finite types
-  and their maps, and elementary divisibility arithmetic on powers of two.
-  The main inputs are project-local: the two classical games, the
-  conditionally linear question distribution, and their strategy transports.
-  Tracked in \localissue{0002}.
+  \item \textbf{Difficulty: medium for the source comparison.} The printed
+  analysis invokes a seed-indexed game at dimension $2m+2$, requiring
+  $2m+2\mid q$. This fails for every admissible $m\ge2$ and for
+  $(q,m)=(2,1)$; the exception is $m=1$, $q\ge8$. The formalization uses a
+  directly indexed auxiliary game at that dimension. Its soundness, the
+  seed-indexed soundness theorem for completed point POVMs on its original
+  domain, and the final
+  polynomial-pair conclusion are proved by the low individual degree route.
+  The printed tensor-code reduction and the intermediate source-law
+  comparisons are not thereby proved. The prescribed-effect statement is
+  also distinguished from the completed-POVM statement linked in Lean.
+  \item \textbf{Estimated weight: documentation only.} This revision
+  compares existing definitions and results; it adds no proof or theorem
+  hypothesis. The verdict is a \emph{documented deviation}: the auxiliary
+  replacement is justified for the proved conclusions, while the precise
+  limits of its correspondence with the source remain explicit. This is
+  the documentary closure authorized for \ghissue{710}, not a claim that
+  the unresolved intermediate assertions are proved or false.
+  \item \textbf{Mathlib/project split:} the existing argument is principally
+  project-local. Mathlib supplies finite-field, matrix, and finite-sum
+  infrastructure; the game transports, combining reduction, and polynomial
+  agreement estimates are established in the repository.
+  \item \textbf{Key mathematical inputs:} balanced finite sampling, the low
+  individual degree theorem, correlated seed registers, and
+  Schwartz--Zippel. The two separate tensor-code import obligations are
+  retained in Section~\ref{sec:import-obligations} (\ghissue{527}); the
+  original investigation is \localissue{0002}.
 \end{itemize}
 
 \section{Key theorem forms}
 
-Throughout, $q = 2^r$ with $r$ odd is an admissible field size, the tuple
-$(q,m,d)$ is admissible when moreover $d \ge 1$ and $m \mid q$, and
+Throughout, $q = 2^r$ with $r$ positive and odd is an admissible field size.
+The source's definition of an admissible tuple adds $m\mid q$; the
+formal parameter records make positivity of the dimension, degree, and
+simultaneity explicit. We work with these positive parameters, and
 $\mathrm{ideg}_{d,m}(\F_q)$ denotes the $m$-variate polynomial representatives
-over $\F_q$ of individual degree at most $d$.  The comparison involves four
-theorem forms.
+over $\F_q$ of individual degree at most $d$.
+
+The classical soundness theorem asserts that, for $m'\mid q$, $\eps>0$,
+and a projective strategy of value at least $1-\eps$ for the seed-indexed
+game at $(q,m',d,k)$, there are polynomial-tuple POVMs $G^{\mathrm A}$ and
+$G^{\mathrm B}$ on the original players' spaces such that
+\[
+ A^u\simeq_{\delta_{\rm ld}}G^{\mathrm B}(u),\qquad
+ G^{\mathrm A}(u)\simeq_{\delta_{\rm ld}}B^u,\qquad
+ G^{\mathrm A}\simeq_{\delta_{\rm ld}}G^{\mathrm B},
+ \tag{\path{lem:ld-soundness}}
+\]
+where the first two relations average over uniform $u\in\F_q^{m'}$, all
+relations use the strategy state and opposite tensor placements, and
+$\delta_{\rm ld}=a(dm'k)^a(\eps^b+q^{-b}+2^{-bm'd})$ for universal
+$a\ge1$, $0<b\le1$. Here $G(u)$ means evaluation of every polynomial in
+the outcome tuple. In this source display, $A^u_{\mathbf a}$ and
+$B^u_{\mathbf a}$ are the strategy's effects for the prescribed point
+answer $\mathbf a\in\F_q^k$.
+
+The Lean theorem instead compares completed point POVMs. The strategy's
+answer alphabet also contains axis-line and diagonal-line polynomial
+answers. At a point question their effects have positive sums
+\[
+ R_A^u=I_{\mathrm A}-\sum_{\mathbf a\in\F_q^k}A^u_{\mathbf a},
+ \qquad
+ R_B^u=I_{\mathrm B}-\sum_{\mathbf a\in\F_q^k}B^u_{\mathbf a}.
+\]
+The point readout sends all these wrong-form answers to the zero tuple, so
+the complete families are
+\[
+ \widetilde A^u_{\mathbf a}
+   =A^u_{\mathbf a}+\mathbf1_{\mathbf a=\mathbf0}R_A^u,
+ \qquad
+ \widetilde B^u_{\mathbf a}
+   =B^u_{\mathbf a}+\mathbf1_{\mathbf a=\mathbf0}R_B^u.
+\]
+The established statement has the same hypotheses, error function,
+question laws, and original players' spaces, but its first two relations are
+\[
+ \widetilde A^u\simeq_{\delta_{\rm ld}}G^{\mathrm B}(u),
+ \qquad
+ G^{\mathrm A}(u)\simeq_{\delta_{\rm ld}}\widetilde B^u.
+\]
+It also proves the unchanged global relation
+$G^{\mathrm A}\simeq_{\delta_{\rm ld}}G^{\mathrm B}$, for every positive
+$k$, with no tensor-code correspondence or parameter-bound
+hypothesis.\footnote{\leanid{exists\_ld\_soundness},
+\doclink{MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean}, lines~82--112;
+\leanid{LdParams}, \doclink{MIPStarRE/QPBT/Test/LowDegreeGame.lean},
+lines~40--50; \leanid{ldPointValuesOrZero},
+\doclink{MIPStarRE/QPBT/Test/LowDegreeGameMeasurements.lean}, line~370.}
+No hypothesis forces $R_A^u$ or $R_B^u$ to vanish. The two theorem displays
+therefore do not agree verbatim. Their mathematical relation follows from
+positivity: the consistency defect is an average of
+$\sum_{\mathbf a\ne\mathbf b}
+\langle\psi|A^u_{\mathbf a}\ot C^u_{\mathbf b}|\psi\rangle$,
+where $C^u$ is the other player's positive measurement family.
+Replacing $A^u$ by $\widetilde A^u$ adds only nonnegative summands,
+and the same applies to $B^u$. Hence the completed bounds imply the
+prescribed-effect bounds with the same error. This paragraph explains the
+comparison in ordinary mathematics; the linked Lean signature does not
+state that implication, and no new kernel proof is supplied here. The
+source-labelled blueprint entry remains unmarked with a reasoned C4
+exemption; the separately labelled completed statement retains its marks.
+
+The original domain $m'\mid q$ must also be distinguished from the
+extended-dimension application, whose comparison has four forms.
 \begin{enumerate}
   \item \textbf{Source theorem form} (the polynomial-pair measurement).  There
   is a function $\delta_S(\eps,m,d,q) = a(md)^a(\eps^b + q^{-b} + 2^{-bmd})$,
@@ -113,8 +166,9 @@ theorem forms.
   Theorem~4.7 of \cite{Ji2021Quantum} or verify that theorem's distinct
   condition $K \ge 12m'(d+1)$.  Thus it avoids rather than discharges the
   two source-import obligations of Section~\ref{sec:import-obligations}.
-  For every $k$, transport to the seed-indexed game is established: the two
-  mixed relations compress exactly and the global relation is recovered
+  Its point families likewise use the completed readout above.
+  When $m'\mid q$, for every $k$, transport to the seed-indexed game is
+  established: the two mixed relations compress exactly and the global relation is recovered
   from point agreement on the original Hilbert spaces and the
   Schwartz--Zippel bound for polynomial tuples.
 \end{enumerate}
@@ -124,7 +178,7 @@ theorem forms.
 We examine the final step of the subsection ``Applying the classical
 low-degree test'' in the analysis of the Pauli basis test in the compression
 paper of Ji, Natarajan, Vidick, Wright, and Yuen (MIP$^{*}$=RE,
-arXiv:2001.04383), whose quantum soundness component builds on the low
+arXiv:2001.04383) \cite{Ji2020MIPStar}, whose quantum soundness component builds on the low
 individual degree test of \cite{Ji2020LowIndividualDegree}.%
 \footnote{Tracked in \localissue{0002}.  In the mirror of the source
 consulted here, the polynomial-pair lemma and its proof are at
@@ -160,8 +214,11 @@ $\chi(s)$ with
   \tag{\path{eq:chi-func}}
 \]
 so that the $m'$ classes $\chi^{-1}(i)$ partition $\F_q$ into sets of equal
-size $q/m'$ and the index is uniform.  For $m' \nmid q$ neither the index
-function nor the line-point distribution built from it is defined.
+size $q/m'$ and the index is uniform. Indeed, each index has probability
+$|\chi^{-1}(i)|/q$, which equals $1/m'$ only if every class has the integer
+size $q/m'$. Thus for $m'\nmid q$ this balanced construction is unavailable,
+and the source has not defined its game or its line-point law there. An
+arbitrary map with unequal fibres would specify a different sampling law.
 
 Admissibility of $(q,m,d)$ supplies only $m \mid q$.  Since an admissible $q$
 is a power of two, $m \mid q$ forces $m = 2^j$.  For $j \ge 1$ the integer
@@ -218,7 +275,7 @@ pair, with probability $1/3$ each --- to both provers and accept iff their
 answers agree.  Theorem~4.7 supposes a two-prover strategy passing this
 test with probability $1-\eps$ together with an integer parameter
 $K \ge 12 m' t$, where $t$ is the interpolation parameter of the base code
---- for the degree-$d$ Reed--Solomon code, of blocklength $n = q$ and
+--- for the degree-$d$ Reed--Solomon code with $d<q$, of blocklength $n = q$ and
 distance $q-d$, one has $t = d+1$ --- and produces projective measurements
 $\{G_c\}$ and $\{\tilde G_c\}$ with outcomes in $\mathcal C^{\ot m'}$,
 consistent with one prover's points measurements, with the other prover's
@@ -242,8 +299,9 @@ the pair $(u,v)$, so the constructed measurement must average over the
 compatible indices and seeds; and the game's diagonal lines fix the
 \emph{first} $i-1$ coordinates where the test's subcubes fix the
 \emph{last} $j-1$, so the coordinate conventions must be aligned.  The
-construction must preserve projectivity and must match the law of the
-hidden-subcube pair with the law induced by the game's diagonal sampling.
+construction must justify the measurement class used in the import and must
+match the law of the hidden-subcube pair with the law induced by the game's
+diagonal sampling.
 (ii)~The game's line questions carry the seed $s \in \F_q$; the test's carry
 only the line.  A strategy may depend on the seed beyond its class
 $\chi^{-1}(i)$.  For the comparison with the directly indexed game, this
@@ -306,7 +364,7 @@ $2m+2$ never appears in a verifier; it is an internal analysis device in the
 proof of the polynomial-pair lemma, so nothing there requires its question
 distribution to be conditionally linear.
 
-\section{Repairs and current status}
+\section{Established formalization and alternatives}
 
 \paragraph{Direct index sampling (soundness established).}
 For arbitrary $m' \ge 1$, the formalization defines the line-point
@@ -318,7 +376,17 @@ of the seed $s \in \F_q$.  Soundness form~4 is established for this game
 through the low individual degree theorem and the general-simultaneity
 combining reduction analysed in \cite{gap:qpbt_ld-simultaneous-sandwich}.
 This removes the divisibility obstruction for the
-auxiliary directly indexed game.  Because the proof does not use the
+auxiliary directly indexed game. The constants supplied by the general
+simultaneous proof are $a=10^{23}$ and $b=1/80000$.\footnote{
+\leanid{exists\_direct\_ld\_soundness},
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Soundness.lean}, line~65;
+\leanid{exists\_directCombinedTransportConstants},
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Combining/Error.lean}.
+The carrier and sampling definitions are \leanid{DirectLdParams},
+\leanid{DirectLineDesc}, and \leanid{directLinePointDist} in
+\doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Geometry.lean},
+lines~36, 136, and 263.}
+Because the proof does not use the
 tensor-code import, it leaves both original import obligations open rather
 than establishing them.
 
@@ -342,8 +410,10 @@ preserves normalization and projectivity and preserves the game value exactly,
 branch by branch.  In particular, seed-dependent relabellings cause no loss;
 the earlier obstruction arose only from independently averaging the local
 measurements, which is not the construction used here.%
-\footnote{The exact distribution comparison is formalized in
-\path{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Correspondence.lean}.
+\footnote{The exact distribution comparison is
+\leanid{ldQuestionDistribution\_map\_parse} in
+\path{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/Correspondence.lean},
+line~389; it requires an \leanid{LdParams} record, including $m'\mid q$.
 The lift, projectivity theorem, and value identity are
 \leanid{ldStrategyToDirect},
 \leanid{ldStrategyToDirect\_isProjective}, and
@@ -354,7 +424,7 @@ The lift, projectivity theorem, and value identity are
 Applying form~4 to the lifted strategy produces polynomial-tuple POVMs
 $G^{\mathrm A}$ and $G^{\mathrm B}$ on the enlarged carriers.  Compress one
 such POVM by taking the normalized average of its diagonal residue blocks.
-When the other family is a point measurement, it is constant on the opposite
+When the other family is a completed point measurement, it is constant on the opposite
 residue register, and this compression preserves the associated defect
 exactly.  Consequently the point/polynomial and polynomial/point conclusions
 of the directly indexed theorem transport back to the original seed-indexed
@@ -391,7 +461,9 @@ Replacing the direct constants $(a,b)$ by $(10a,b/2)$ absorbs this bound:
 the square root of a sum is at most the sum of its square roots, and the
 prefactor $a(dm'k)^a$ is at least one. When $E>1$ or $\eps>1$, the unit
 bound on bipartite consistency defects suffices. This proves seed-indexed
-soundness for every $k$.%
+soundness for completed point POVMs for every $k$ on its original domain
+$m'\mid q$, with possible
+universal constants $a=10^{24}$ and $b=1/160000$.%
 \footnote{The point-agreement estimates are proved in
 \doclink{MIPStarRE/QPBT/Combining/DirectLowDegree/Transport/PointAgreement.lean}.
 The resulting theorem is \leanid{exists\_ld\_soundness} in
@@ -404,8 +476,9 @@ and the directly indexed game, so it is well defined at dimension
 $m'+\kappa$ for
 all positive parameters.  Its proof uses the sampled geometric data and then
 applies the low individual degree theorem at the combined dimension.  This
-establishes soundness of the directly indexed game and, by the compression
-and recovery argument above, of the seed-indexed game. The directly indexed
+establishes soundness with completed point POVMs for the directly indexed
+game and, by the compression and recovery argument above, for the
+seed-indexed game. The directly indexed
 application at dimension $2m+2$ now also constructs the global polynomial-pair
 measurement, as \leanid{exists\_globalPairWitness} in
 \path{MIPStarRE/QPBT/Combining/Apply.lean}. This proves the polynomial-pair
@@ -418,7 +491,9 @@ there draws the axis index and the subcube data uniformly and directly,
 with no index encoding into $\F_q$.
 
 \paragraph{Padding the dimension.}
-Alternatively, embed the combined polynomial into
+The following two alternatives record the earlier mathematical comparison;
+neither is used by the established proof or adopted as a new game definition.
+One could embed the combined polynomial into
 $\mathrm{ideg}_{d,\bar m}(\F_q)$ for $\bar m = 4m$, the least power of two
 with $\bar m \ge 2m+2$, ignoring the $2m-2$ dummy variables.  Then
 $\bar m \mid q$ holds whenever $q \ge 4m$, and the existing game applies at
@@ -443,8 +518,9 @@ soundness theorem for a perturbed game and is not recommended.
 \label{sec:auxiliary-subline-scalars}
 
 The source sub-line lemma \path{lem:qld-sublines} samples the extended line
-over $\F_q^{2m+2}$, so its distribution $D$ is exactly the seed-indexed
-object at which the divisibility condition of this note fails.  The scalar
+over $\F_q^{2m+2}$, so its distribution $D$ uses the seed-indexed
+construction whose divisibility condition fails outside the exceptional
+range $m=1$, $q\ge8$. The scalar
 claims \path{claim:17-1} and \path{claim:17-3}, at lines 1140--1166 and
 1204--1239 of
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex} --- the
@@ -480,12 +556,12 @@ source assertions are
 The established statements instead bound real parts over $D_{\rm dir}$: for
 projective joint point measurements and complete paired-line measurements
 satisfying the witness hypotheses, and any auxiliary subline witness,
-\[
+\begin{align*}
  |\operatorname{Re}A_Q(D_{\rm dir})-
-     \operatorname{Re}A_{ZX}(D_{\rm dir})|\le C\,\delta_Q^{1/2},\qquad
- |\operatorname{Re}A_Z(D_{\rm dir})-1|\le
+     \operatorname{Re}A_{ZX}(D_{\rm dir})|&\le C\,\delta_Q^{1/2},\\
+ |\operatorname{Re}A_Z(D_{\rm dir})-1|&\le
  C\sqrt m\,(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}).
-\]
+\end{align*}
 The constant is existentially quantified in both formal statements; the
 recorded proofs supply the witness $C=2$, at lines 117 and 686 of
 \doclink{MIPStarRE/QPBT/Combining/Claims.lean}.  The evaluations use the
@@ -544,16 +620,18 @@ and \path{docs/paper-gaps/qpbt_symmetrization-attainment.tex}
 
 The blueprint \cite{MIPStarREBlueprint} keeps the sub-line lemma, the
 combined line lemma, and the polynomial-pair lemma in their source-shaped
-statements, with no divisibility hypothesis.  Their proofs retain the source
-constructions and mark the unresolved obligation at the exact steps: the
-first sampling step of the sub-line construction, where $\chi_{2m+2}$ and
-the line-point distribution over $\F_q^{2m+2}$ are invoked, and the
-instantiation step of the polynomial-pair proof, where $(q,2m+2,d,1)$ is
-used as a game parameter tuple.  A chapter remark records the divisibility
-arithmetic and cites this note. The global polynomial-pair conclusion and
-the final Pauli soundness theorem now have complete proofs through the
-directly indexed construction; the source-law assertions described here
-remain distinct obligations. The blueprint's proof node
+statements, with no added divisibility hypothesis. It records the failed
+source instantiation at $(q,2m+2,d,1)$ and leaves the source sub-line and
+combined-line assertions unmarked. In contrast, the polynomial-pair lemma
+has a complete proof through the directly indexed construction, which also
+supports the final Pauli soundness theorem. The dimension-divisibility
+remark distinguishes this proved conclusion from the source-law assertions
+and records the exceptional defined range $m=1$, $q\ge8$. The soundness
+provider remark likewise distinguishes the proved completed-POVM
+seed-indexed theorem from the prescribed-effect statement and the printed
+import. These remarks record a documented deviation;
+their documentary status supplies no formalization mark.
+The blueprint's proof node
 for the classical soundness import itself states the source's route --- the
 identification with the two-prover tensor-code test and the application of
 Theorem~4.7 --- and enumerates the two obligations of
@@ -561,12 +639,16 @@ Section~\ref{sec:import-obligations} as open, citing this note for the
 detailed comparison and the case arithmetic.  The separate support node for
 general simultaneity records the established directly indexed theorem and its
 proof through the low individual degree theorem. The seed-indexed theorem
-is now proved by compression and global recovery for arbitrary $k$.
-A further support node, placed directly after the paper-labelled soundness
-theorem, records that formalized route, so that the proof-level formalization
-mark sits on the route the Lean proof takes rather than on the printed one;
-the two obligations of Section~\ref{sec:import-obligations} stay open on the
-paper-labelled node.
+for completed point POVMs is proved by compression and global recovery for
+arbitrary $k$. The separate node \path{lem:ld-soundness-formalized}
+states these completed measurements explicitly and carries both statement
+and proof marks. The source-labelled \path{lem:ld-soundness} retains its
+prescribed-effect statement and its link to the completed result, but has
+neither mark: no linked declaration states the prescribed-effect implication
+discussed in Section~2. Its reasoned exemption is recorded in
+\doclink{docs/completion/qpbt-leanok-exemptions.md}, under the documentary
+authorization for \ghissue{710}. This exemption does not certify that
+implication or either printed import obligation.
 An earlier revision had
 instead added the hypothesis $2m+2 \mid q$ to the three lemmas; that was
 statement drift in the sense of the proof-gap protocol, since the hypothesis
@@ -574,31 +656,24 @@ excludes all admissible $m \ge 2$ and does not appear in the source.
 
 \section{Conclusion}
 
-There remains a theorem-level gap in the source proof route.  The classical
-low individual degree game invoked at dimension $2m+2$ is undefined for every
-admissible tuple with $m \ge 2$ (and for $(q,m)=(2,1)$), because its question
-distribution requires $2m+2 \mid q$ while admissibility supplies only
-$m \mid q$.  Independently, the source import still requires a reduction to
-the two-prover tensor-code test with a value bound and a valid choice of
-$K \ge 12m'(d+1)$; the printed choice $K=(m')^3d$ fails at the small
-dimensions listed in Section~\ref{sec:import-obligations}.
+The verdict is a \emph{documented deviation}. Direct index sampling is a
+justified auxiliary construction: its soundness is proved at every positive
+dimension, and it supplies the proved global polynomial-pair conclusion
+without $2m+2\mid q$. Seed-indexed soundness for completed point POVMs is
+also proved, for every positive simultaneity parameter, on its unchanged
+domain $m'\mid q$. Positivity relates this result to the prescribed-effect
+conclusion, but the linked Lean theorem does not state that implication.
+These proofs use the low individual degree theorem, not the printed
+tensor-code import.
 
-Soundness of the directly indexed game is now established at arbitrary
-dimension by a different proof through the low individual degree theorem and
-the general-simultaneity combining reduction.  That proof checks the separate
-condition $400Md \le N$ for $M=m'+\kappa$ and $N=2560000M^3d$.  It neither
-applies the tensor-code theorem nor verifies its bound on $K$, so it bypasses
-rather than discharges both source-import obligations.  The correlated-residue
-lift now transports projectivity, game value, and the two mixed consistency
-conclusions from this direct proof. For every $k$, point agreement and
-Schwartz--Zippel recover the global relation on the original Hilbert spaces,
-completing the seed-indexed soundness theorem without asserting a false
-double-compression identity.
-The global polynomial-pair conclusion is also proved by the directly indexed
-construction. What remains is the source-law correspondence of the intermediate
-subline assertions, not another proof of that conclusion. Repairing the
-original tensor-code import would provide another route to soundness, subject
-to the source instantiation obstruction above.
+The source's balanced seed construction at $2m+2$ remains unavailable when
+$m\ge2$ or $(q,m)=(2,1)$. The tensor-code game correspondence and its
+parameter substitution remain unverified, and the direct subline law is not
+identified with the source law even in the exceptional defined range.
+Documentary closure of this register row under \ghissue{710} certifies this
+comparison only. It proves no unresolved source-law assertion, refutes no
+unknown conclusion, and does not close the separate scalar or error-form
+comparisons recorded in Section~\ref{sec:auxiliary-subline-scalars}.
 
 \bibliographystyle{alpha}
 \bibliography{references}
