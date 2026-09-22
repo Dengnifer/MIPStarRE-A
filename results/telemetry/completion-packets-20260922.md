@@ -47,12 +47,18 @@ CI/review. The main checkpoint records live assignments.
    proved common-ancilla theorem and avoid duplicating it.
    Active whole-task construction owner: issue697, admitted3600s with preserved
    costs and a separate decision required before any source-space correction.
+   Its one continuation constructed the initial reserve and local transports;
+   full source binary-family and four-placement absorption remain unproved.
+   Both tranches are complete, with no automatic further proof continuation.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean
    convergence under the four unchanged adoption conditions. Source symmetry
    alone is refuted. A bounded dedicated evidence task continues105/172; no
    change of source semantics is preauthorized.
+   688's evidence is published as692. Main admitted701 for the remaining
+   prescribed-effect/one-way extraction and quantitative agreement construction,
+   3600s with inherited costs and pending adoption preserved.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -109,6 +115,11 @@ CI/review. The main checkpoint records live assignments.
    existing explicit compatibility assumptions do not discharge this target.
    Active whole-task construction owner: issue695, admitted3600s; any needed
    source definition/game correction returns to main before implementation.
+   695 completed the projection construction and certified the singleton
+   coefficient obstruction. Main separately admitted698 for the faithful
+   source-function carrier and algebraic comparison, with no game change.
+   698 completed that source-function construction atff024214; its scoped
+   source mark awaits parent700 merge, full CI and independent review.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
