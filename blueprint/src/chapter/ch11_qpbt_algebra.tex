@@ -775,11 +775,11 @@ representation is obtained as follows.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:generalized-pauli, prop:fourier-fact-vector}
+	\uses{def:generalized-pauli, lem:fourier-fact-finite-index}
 	For $W=Z$, the entrywise expansion follows directly from the computational
 	basis projectors. For $W=X$, multiplying the explicit rank-one projector
 	entries by the character coefficient reduces each matrix entry to the
-	full-space character sum of Proposition~\ref{prop:fourier-fact-vector}, which
+	full-space character sum of Lemma~\ref{lem:fourier-fact-finite-index}, which
 	vanishes off the required shift and equals one on it. For the inversion,
 	substitute the forward expansion and exchange the finite sums. The same
 	full-space Fourier orthogonality makes the inner expectation vanish unless
