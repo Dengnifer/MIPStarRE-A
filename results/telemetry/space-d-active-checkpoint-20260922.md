@@ -2319,3 +2319,30 @@ Quotation and subline documentation, combine-map exemption, the three artifact
 reference fixes and final truthfulness/verification remain prepared work.
 The latest merge-boundary27 report is5780432134 for696. No later completion
 or new stage boundary is asserted.
+
+## 2026-09-22T17:38Z: owner reduces to one Sol worker; canonical documentation merged
+
+The 17:27Z owner instruction supersedes all earlier lane/model allocations:
+space-d only, one main plus one Sol ultra worker, default dispatch/review routing.
+Existing authors finish normally with no continuation. Pending Astra reviews
+707/709 and four after707 launchers were cancelled before model admission;
+their process groups were checked for actual model descendants before TERM.
+All six groups are terminal, no active author or other-project process was killed,
+and prior CI, review artifacts and usage remain intact. New versioned runtime
+scripts leave the old live-script contents unchanged.
+
+708 merged at17:30:29Z as7b9dd8f2e77eb20d59e8fac878d89fe0c9854fa9;
+its exact head8378d489 had green CI and strict independent-review carry5281456386.
+718 finished successfully in785s atc1bf962331cc1e5af13b04ac00b354f7cd3f9838:
+four documentation artifacts, no Lean or mark edits, focused checks/hooks passed.
+Its full CI/publication/review are still pending; common C3 support still needs707.
+714 and719 remain grandfathered live authors; neither receives a continuation.
+
+The default Sol review queue is /tmp/main-sol-review-queue-v1-20260922.sh,
+with exact heads707=c9c6240c0de3f7919641589cc9385f0eb88ff604 and
+709=6977a88685574d03a8abddd1ee377437332217a6. It waits for all QPBT worktree
+model processes to drain before starting; account caps serialize review phases.
+No model overrides, hard classes or hardness reasons are passed. Each phase
+keeps its2700s allowance; no already-green CI is repeated without a changed head.
+The stopped dependent publication tails need model-free replacements or direct
+admission after707 actually merges. Prepared row work and claims remain intact.
