@@ -880,3 +880,50 @@ five findings and601-second duration. All812 nonblank JSONL records now parse;
 comparison against the prior Git blob verifies no other line changed. This
 repairs the accounting parser, not any review verdict or historical charge.
 Original bytes remain in Git history and the incident is logged in events.md.
+
+## Complete CI And Context-Sensitive Review Recovery
+
+At the09:57Z cycle, CI680 completed successfully at66796a9a, including all868
+workflow tests (blueprint-sync256s). CI691 completed successfully ated5ee0b0
+and its ordinary2700s-per-phase independent review started through
+/tmp/main-whole-review691-canonical676-20260922. Code reviewer
+reviewer-pr691-20260922-01 obtained the freed688 lane; prose admission waits
+under the same space-d cap. No extra key or slot is used.
+
+The680 dry-run canonical carry refused because full normalized patch hashes
+differ: old548901f2..., new776cb841.... Main recomputed both against their
+actual merge bases and found every added/removed line and file header exactly
+identical (SHA25624a699c0d7258e5fc9348c522c7bc9b5a05c1578ac884289a8f9aad0555fe055).
+Only surrounding gap-register prose from merged686 differs: excluded telemetry
+links became accurate nonlinks. No carried review file was generated, and the
+publisher stopped with FileNotFoundError. No review/status was fabricated.
+Claim main-review680 remains held; four full rounds and their adverse evidence
+are unchanged.
+
+Main explicitly authorized one1800-second independent integration verification
+at66796a9a as the fifth LIMITED observation, using the retained September9
+project-review authority (the same documented basis as650/659). It is not a
+fifth full mathematical review, a carried review, or permission to alter the
+canonical hash. Packet /tmp/main-pr680-context-verification-20260922.md and
+queued wrapper /tmp/main-verify680-context-20260922.sh. The wrapper waits for
+an actually free space-d slot before dispatch, rechecks exact-head complete CI,
+then uses canonical dispatch in read-only mode. Main must inspect and publish
+its actual final body and only then adjudicate remaining findings at this
+exact head. It preserves F1/687 unless the independent evidence warrants
+another disposition. No automatic further observation or manual merge.
+
+orc-688-20260922-02 finished0 after915s at
+3f2f8c0515e7a64abbf2272f4f88ec5ce298d038. All five integration steps are
+complete; combined diff is six files796+/40-. Root import, separate unasserted
+definition node, summaries and Magic Square register prose are synchronized;
+pending status and all other rows are unchanged. The generated declaration list
+is ignored by repository design and was regenerated, not force-added.
+Focused Lean/export/axiom, blueprint web/sync/1867 declaration checks and
+normal hooks pass. All2067+915s and historical105/172 costs remain charged.
+Detached /tmp/main-publish688-integrated-20260922.sh now refreshes/publishes,
+exports the incoming RowEchelon module privately, runs complete CI and schedules
+the first independent whole review. No further author continuation is admitted.
+
+The accounting repair published aligned and clean atcf20c7a4. Any later
+passive rows are new, not a failed repair. Current production waits and
+worker ownership remain live and bounded; mathematical completion is unproven.
