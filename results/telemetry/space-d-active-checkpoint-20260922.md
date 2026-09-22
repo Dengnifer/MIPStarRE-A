@@ -190,3 +190,44 @@ and 679 completion. The 680 six-finding repair is fully prepared at
 `/tmp/main-space-d-fix680-prepared-20260922.md` but not admitted. This packet
 preserves the verified source-facing signatures and requires honest comparator
 drift reporting if the shared Fourier cleanup changes the registered closure.
+
+## Latest Review and Repair Ownership
+
+PR 678's first review completed adversely as 5274778156, with two audit-document
+findings: missing YAML metadata and an incorrect description of the paper's
+finite-field, positive-dimensional domain. It explicitly verifies the Lean
+prefix-rank lemma and provenance-only fixture changes. Main read the full review
+and prepared `/tmp/main-space-d-fix678-prepared-20260922.md`, a proposed
+300-second single-file repair with no new mathematics; it is not admitted.
+The RREF successor packet now also states the correct source-domain boundary.
+
+After that actual reviewer completion, main admitted the prepared six-finding
+680 repair through `/tmp/main-space-d-fix680-20260922.sh`, with900 seconds and
+checkpoint450, preserving the original source-facing statements and all earlier
+issue673 costs. Its worktree refreshed cleanly through normal guards. Current
+worker ownership is the 680 repair and the 679 completion. Both slots are in
+use; the next critical jobs are 669's fourth review after its new-head CI,
+the narrowly scoped 678 audit repair, and validation/publication of the two
+current authors' outputs. No final completion claim has been made.
+
+## Artifact Guide Checkpoint
+
+The 679 finisher completed successfully with the single-file guide commit
+`f3a5535337e7de2dcff3fec760e99dbf9adb52e0`. Its receipt and PR body are
+`/tmp/main-space-d-guide679-20260922-result.md` and
+`/tmp/main-space-d-guide679-pr.md`. Normal hooks and focused path, historical-pin
+and Markdown-link checks passed. This is not a new package or final-tree build.
+Main started `/tmp/main-space-d-publish679-20260922.sh` for guarded refresh,
+publication and complete CI; first independent review follows actual green CI.
+
+Main admitted `/tmp/main-space-d-fix678-audit-20260922.sh` in the released slot:
+300 seconds for the two audit-document findings only. Current worker ownership
+is 680's six-finding repair and 678's audit repair. The 669 final repair is
+published at `d9350aed3cd1c6355067db49d3ac188dad7171c8`; complete CI is running,
+with the fourth independent review still reserved for after it succeeds.
+
+The first commit of 679's generated last-message Markdown was refused for one
+two-space line ending. Before first publication, main removed those two spaces
+only from the presentation file. Its original cache copy and canonical raw
+JSONL remain unchanged. Normal whitespace hooks remain enabled; no published
+capture or historical session data was rewritten. The incident is in events.md.
