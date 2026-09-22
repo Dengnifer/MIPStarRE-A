@@ -530,3 +530,43 @@ comment is5773319982; the683 merge stage comment is5773233630.
 The checkpoint/records publication after the681 race succeeded and aligned
 local/remote main at3e4b75ca with a clean checkout. Space-d was enabled at that
 census. New author/reviewer telemetry may subsequently add passive rows.
+
+## Current Direct Goal and Review Recovery
+
+The direct /goal received at08:23:53 UTC specifies four workers using only
+space-d and space-3, two each, caps4/0/4. Main registered that goal and ran
+the required status snapshot. Its historical failed markers are outside the
+current open-PR set;552/554/556/561 remain parked. No approved current open
+head was eligible for a train. The meta-gate scan retained680's adverse result
+and correctly posted no invented reviews for685/686.
+
+Main applied the direct key restriction over the older relay addenda: relay-1
+limit0 and an authorization-withdrawal marker, caps4/0/4, and SIGINT only to
+the identified track-A relay worker3191796. Its final680 repair was already
+committed as9734c54c37593bf2e22f51fc7459d17498d365c0 with normal hooks; the
+worktree is clean and body/test logs are preserved. Both processes exited,
+wrapper1. The old rotation directory is preserved at
+keyrot-off/relay-1-owner-goal-20260922. Active rotation contains only space-d
+and space-3 at limit2; both homes retain ultra/fast. No quota failure, model
+shim rewrite, credential change, proxy or fallback is inferred or used.
+
+`/tmp/main-four-lane-final680-20260922.sh` now handles guarded refresh,
+publication, full CI and the FOURTH/LAST independent review. Its new head is
+3ac291177420fd70d11e7dedfccae57fc039037a. No fifth review is authorized.
+The first685 reviewer timed out900s/124 without a verdict. Its runtime tree
+is archived at ~/.cache/mipstarre-dev/reviews/pr685/failed-attempt1-f5300f20-20260922,
+and raw records/unknown usage remain unchanged. Main released the failed
+claim and admitted a1200-second independent retry at the same green f5300f20,
+`reviewer-pr685-20260922-02`, through
+`/tmp/main-four-lane-review685-retry-20260922.sh`. This does not reset costs
+or invent a completed first review. PR686 passed complete CI and its first
+review started as reviewer-pr686-20260922-01 after the key restriction.
+The two Pauli phases follow their required CI, filling the remaining slots.
+
+A new ASAP appendix appeared in the external handoff during this cycle. Its
+backlog decomposition and longer-work guidance are useful for the next
+planning cycle; it also repeats six lanes. The current direct user goal's
+four-lane/no-other-key restriction remains the applied authorization. Main
+has not overwritten that concurrently maintained handoff or re-enabled a key
+on the basis of the conflicting resource text. No pause condition or DONE
+condition occurred; the goal remains active.
