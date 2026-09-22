@@ -2580,3 +2580,15 @@ Staged whitespace passed. Evidence is
 /tmp/qpbt-reviewed-url-check.vyq92h/verification.md and merge.log; the disposable
 worktree is removed after the successful test. No actual source branch changed
 in this preflight, and normal hooks/loss guard/full CI/review remain mandatory.
+
+722 published as PR723 at94a4bafeb598688427a95e460e01cbe956c279d8 and has
+detached full CI.707's THIRD independent Sol review is actually running on
+6c5343c6 after that head's green full CI. No additional model was admitted.
+
+The meta merge supervisor PID3313963 reached its configured10h lifetime at
+about18:40Z and is completing its current sleep/iteration. The model-free
+/tmp/main-renew-merge-supervisor-v1-20260922.sh watches that actual PID and
+starts the unchanged /tmp/meta-auto-merge-v3.py only after it exits and no
+other supervisor exists. It refuses deliberate stop, paused/pause-now, daemon
+stop or retired-space-d markers; it clears none. This preserves continuous
+gating/staging without a duplicate supervisor, manual train or model request.
