@@ -17,7 +17,7 @@ Review remains independent and exact-head CI remains required.
 | Register row | Brief | Current disposition after the 17:27Z allocation change |
 |---|---|---|
 | Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 MERGED0771440b at18:58:17Z after complete CI and THIRD approval5282383545 with0 findings. Common documented-deviation support is now on main. |
-| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 preserved; integration of merged707 has two retained conflicts. Sol integration under tagpreserved716 is active, preserving staged incoming work and the authored exemption. Publication/CI/SECOND review follow. |
+| Dimension divisibility | /tmp/main-document-dimension-20260922.md | Integration completedf04d1980 in944s with both conflicts resolved in place and authored row/exemption preserved. Model-free publication/full CI is admitted under tagintegrated716; SECOND review remains required. |
 | Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | PR715 at4ac910df has green CI; first review's sole finding is common707 support. Refresh/CI waits for merged707, then SECOND review. |
 | Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af with one reasoned C4 exemption. Two integration conflicts are retained; tagpreserved713 queues a Sol task after716. No original work or budget is discarded. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Issue718 completedc1bf9623 in785s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |

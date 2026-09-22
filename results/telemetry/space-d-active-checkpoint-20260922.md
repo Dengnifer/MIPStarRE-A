@@ -2655,3 +2655,30 @@ subline note. Correct counts must be recomputed after adding the note.
 with one3600s task, exact initial94a4bafe and pause/key-retirement guards.
 No new proof work or budget reset is authorized. Full CI and SECOND review
 remain required after the repair.720/721 remain prepared and unstarted.
+
+## 2026-09-22T19:23Z: five green row PRs and completed dimension integration
+
+Previous turn classified as progress:723's review-directed documentary repair
+was concretely queued and the707/integration state recorded. Those pending
+records have now published normally to clean mainc7013a7e. This turn's snapshot
+reconfirmed one space-d worker and no retirement marker; no task was restarted.
+
+Full CI passed on all five previously published row heads715/717/724/725/726.
+/tmp/main-sol-row-review-queue-v1-20260922.sh queues their required independent
+reviews (SECOND715/717, FIRST725/724/726) on the exact recorded heads, using
+new immutable /tmp/main-sol-review-v2-20260922.sh. It retains default Sol ultra
+routing and the single shared lock, revalidates complete green CI before each
+review, and checks paused/pause-now/retired-space-d after admission. No live
+review helper was edited and no extra model slot was used.
+
+Dimension integration orc-710-20260923-03 ended0 in944s at
+f04d1980729eea2ac577d11cd76b965aa9fab0b8. The existing merge was committed in
+place; exact row/exemption preservation, both merge-loss guards, web/sync,
+1920 declaration references and all normal hooks passed (876 tests,9 existing
+skips). The initial stale aggregate-cache failure is documented in the receipt;
+targeted private module builds and aggregate refresh resolved it. No proof was
+changed or imported from a deferred branch. Main has read the exact receipt
+and admitted publication/full CI under
+/tmp/main-fullspeed-publish710-integrated716-20260922. SECOND review remains.
+The Sol slot automatically moved to preserved713's integration;723's repair
+and the green-row review queue remain behind it.720/721 are still unstarted.
