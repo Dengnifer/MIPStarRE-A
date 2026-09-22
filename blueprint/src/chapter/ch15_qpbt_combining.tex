@@ -336,6 +336,25 @@ assembled by Fourier averaging.
 	averaged BLR estimate.
 \end{proof}
 
+\begin{lemma}[Dimension obstruction for the full ancillary extension]
+	\label{lem:linearity-ancilla-dimension-obstruction}
+	\lean{MIPStarRE.QPBT.not_nonempty_linearity_ancilla_isometry}
+	\leanok
+	This formalization-only auxiliary concerns the padding obligation in
+	Remark~\ref{rem:linearity-import}. Let $t\geq0$, let $\hilb$ be a nonzero
+	finite-dimensional complex Hilbert space, and let $K_t$ have orthonormal
+	basis indexed by $\F_2^t\sqcup\{\bot\}$. There is no linear isometry
+	$\hilb\ot K_t\longrightarrow\hilb$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	An injective linear map cannot decrease dimension, whereas
+	$\dim(\hilb\ot K_t)=(2^t+1)\dim\hilb>\dim\hilb$.
+	This does not exclude applying linearity on a smaller space and placing
+	its extension in a previously reserved register. It shows why that
+	reservation must be established separately.
+\end{proof}
+
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
 	As printed in \cite{Natarajan2017Linearity}, the conclusion of the quantum
