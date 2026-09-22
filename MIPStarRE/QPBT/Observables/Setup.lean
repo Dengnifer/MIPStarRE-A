@@ -137,12 +137,18 @@ private noncomputable def optionSumComplEquiv (α : Type*)
 
 /-- Distribute the local Hilbert-space index over the encoded Boolean-cube
 coordinates and their complement. -/
-private noncomputable def paddedLocalEquiv (I α : Type*)
+noncomputable def paddedLocalEquiv (I α : Type*)
     [Fintype α] [DecidableEq α] :
     (I × Option α) ⊕ (I × BoolAncillaCompl α) ≃
       I × (Fin (Fintype.card α + 1) → Bool) :=
   (Equiv.prodSumDistrib I (Option α) (BoolAncillaCompl α)).symm.trans
     (Equiv.prodCongr (Equiv.refl I) (optionSumComplEquiv α))
+
+/-- Every active Naimark coordinate retains the existing one-hot encoding. -/
+theorem paddedLocalEquiv_inl (I α : Type*)
+    [Fintype α] [DecidableEq α] (p : I × Option α) :
+    paddedLocalEquiv I α (Sum.inl p) = (p.1, optionBoolEmbedding α p.2) := by
+  simp [paddedLocalEquiv, optionSumComplEquiv]
 
 /-- The distinguished Naimark coordinate is carried to the zero Boolean
 ancilla by `paddedLocalEquiv`. -/
@@ -153,7 +159,7 @@ private theorem paddedLocalEquiv_inl_none (I α : Type*)
 
 /-- Tensoring the two local zero-padding isometries gives the coordinate-wise
 Boolean-padded state. -/
-private theorem isometryTensor_padWithZeros_refl
+theorem isometryTensor_padWithZeros_refl
     {I J : Type*} [Fintype I] [DecidableEq I]
     [Fintype J] [DecidableEq J] {nA nB : ℕ}
     (ψ : EuclideanSpace ℂ (I × J)) :
@@ -212,7 +218,7 @@ private theorem trivialProjectiveMeasurement_isProjective
 
 /-- Extend a Naimark POVM to the requested Boolean cube by a projective
 measurement on the complementary coordinates. -/
-private def paddedMeasurement
+def paddedMeasurement
     {α I : Type} [Fintype α] [DecidableEq α]
     [Fintype I] [DecidableEq I]
     (a0 : α) (M : MIPStarRE.Quantum.Measurement α I) :
@@ -257,7 +263,7 @@ private theorem paddedMeasurement_compression
 
 /-- Dilate each local POVM family into the Boolean-cube ancilla space and pad
 the shared state at the zero ancilla coordinates. -/
-private def paddedProjectiveStrategy {G : Game} (S : Strategy G)
+def paddedProjectiveStrategy {G : Game} (S : Strategy G)
     (a0 : G.AnswerA) (b0 : G.AnswerB) : Strategy G :=
   paddedStrategy S
     (0 : Fin (Fintype.card G.AnswerA + 1) → Bool)

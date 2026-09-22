@@ -6,3 +6,4 @@
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_capacity"], "ts": "2026-09-22T12:18:28Z"}
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_ground_embedding"], "ts": "2026-09-22T12:21:17Z"}
 {"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_state_transport"], "ts": "2026-09-22T12:24:41Z"}
+{"action": "claim", "issue": 697, "names": ["MIPStarRE.QPBT.linearity_padding_naimark_comparison"], "ts": "2026-09-22T12:29:57Z"}
