@@ -993,3 +993,60 @@ retries normal publication/CI using /tmp/main-fullspeed-publish-tagged-20260922.
 with tag imports-retry. It then schedules the successor's first whole review.
 The original live publication helper was copied, not edited in place. The
 same bounded import-export helper serves691's incoming680 dependency graph.
+
+## 2026-09-22T11:04Z cycle: two repairs, normalization packet, publication recovery
+
+The interrupted preceding turn was progress: two new whole-task repair workers
+started, and harmless telemetry whitespace was normalized and published. The
+current allocation is still main plus3 space-d workers only; the machine-wide
+status snapshot includes unrelated QKD workers on its own assigned keys.
+
+PR691's publication refresh stopped at an actual single-file conflict in
+docs/completion/qpbt-leanok-exemptions.md: HEAD3249d644, MERGE_HEAD0ea50f00.
+Main preserved all staged incoming source/telemetry and assigned the exact
+union to blueprint-676-20260922-02 for2700s. Runtime
+/tmp/main-fullspeed-fix691-merge-20260922; packet
+/tmp/main-repair691-merge-20260922.md. Keep merged Pauli obligations closed,
+close only the canonical lemma in this PR, retain the algorithmic definition
+obligation until690. The first wrapper stopped on the retained main-fix691
+claim with no model request; its .claim-held logs remain. Main verified the
+prior author finished, released/reclaimed ownership, and the new process is live.
+
+PR692 first review5276971441: code approved, prose F1 requires distinguishing
+completed binary effects from prescribed-answer effects in the zero-agreement
+specializations. Blueprint repair runs2700s from a41b8eea under main-fix692;
+runtime /tmp/main-fullspeed-fix692-effects-20260922, packet
+/tmp/main-repair692-effects-20260922.md. Preserve proofs and pending adoption,
+correct both blueprint entries and matching docstrings, then new-head full CI
+and SECOND independent review. The marked-declaration axiom audit remains due.
+
+690's single integration continuation finished at
+bb607c6f82a9afe8b898c157e96269996ea53f2b, clean. The receipt records806 seconds
+at verification; use dispatcher actual duration for accounting. It adds the
+root import, explicit arithmetic cost-model entries/marks, canonical-definition
+coverage and an audit. Author checks passed1889 declaration links and28
+standard-axiom closures. Publication waits for actual691 parent merge and
+retains691's localized index repair; no further automatic author continuation.
+
+687 is PR693 at90eba77ae53d6ce7f1c88a1819076d6a26f1a99d, full CI live through
+/tmp/main-fullspeed-publish687-imports-retry-20260922. Its recovery wrapper
+will request the first ordinary independent review after full green CI.
+689's checked push likewise found12 valid Pauli declarations absent from a
+stale umbrella product, after refresh to bda0d3bb7dffcab0adee34b7d6aa36c2f8ea1449.
+No PR was published by that failed path. New detached
+/tmp/main-recover689-imports-20260922.sh exports private imports, verifies the
+real declaration list and waits for693's complete CI before tagged publication,
+full CI and first review. Inspect live process and import log before retrying.
+
+Main opened694 with one3600-second mathfix tranche for the pending normalization
+row, continuing124/129/173 and related costs. Packet
+/tmp/main-linearity-normalization-packet-20260922.md; runtime
+/tmp/main-fullspeed-linearity-normalization-20260922. Expected isolated base
+99d4036e62e7dd4a21637d8f3e313c907afe39dc; branch
+issue-694-linearity-normalization-20260922. No automatic continuation, source
+semantics change or terminal adoption is admitted. The sharp normalization
+identity, this construction's factor2 bound and the optimal existence bound
+must remain distinguished. Full source consumers, exact printed claim and
+unchanged four-condition adoption evidence are the exit, not a passing weaker
+theorem. Partial historical measured counts and unknown/overlapping records
+are listed in the packet and decision ledger without fabricated totals.

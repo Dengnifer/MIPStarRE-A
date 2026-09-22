@@ -9484,3 +9484,22 @@ historical entry above is rewritten.
   and branch, restored that empty checkout to its original snapshot, and
   launched replacements using setsid; all three real sessions registered.
   No lost author edits or invented worker usage. Stage report5773885415.
+
+- The10:58Z cycle made progress before interruption: dispatched the PR691
+  completion-record merge repair and PR692's first-review effects correction.
+  The691 wrapper initially stopped on main's retained claim before any model
+  request; after verifying the old worker finished, main explicitly released
+  and reclaimed it. Both launch outcomes remain recorded. Three slots on
+  space-d remain the sole QPBT allocation; the snapshot's other-key workers
+  belong to the separate QKD project and are not QPBT capacity.
+- Normalized two trailing Markdown hard-break spaces in the tracked copy of
+  reviewer-680-20260922-01.last.md so normal telemetry hooks can pass. The
+  canonical runtime receipt, raw capture and published review are unchanged.
+  Automated records subsequently published clean main99d4036e.
+- The11:04Z cycle reverified both repair processes alive. Issue694 admits one
+  finite3600-second linearity normalization evidence task with all historical
+  charges and pending status preserved. PR693 is published and in complete
+  CI;689's prior checked push failed on stale root import products, with its
+  logs retained. A separate model-free recovery rebuilds private imports and
+  declaration links, then waits for693's current full CI before normal
+  publication/CI/review. No source declaration is deleted to mask stale imports.
