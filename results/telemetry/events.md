@@ -9745,3 +9745,16 @@ historical entry above is rewritten.
   of700/690's repair workers.699 marked audit passed1874 declarations and its
   new code review approved0 findings; prose remains pending. All3 space-d
   slots were verified occupied, with no traffic moved to another key.
+
+- The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
+  normal hooks/loss guards and all unrelated indexed/staged content preserved.
+  A new guarded pipeline queues publication/full CI/marked audit and strict
+  canonical carry or SECOND independent review.706 full CI and1884-declaration
+  audit passed;703 publication resumed. Direct PID arguments corrected the
+  earlier stale reviewer-assignment description; the physical3-slot count was
+  always accurate.
+- 705's warmed clean tree lost its free slot to a queued reviewer during setup.
+  Canonical account routing exited4 without a reservation or model session.
+  Keep the original logs and setup cost; retry the same initial2700s assignment
+  from exact04e7a7d6 through the normal3600s account wait. No extra worker slot,
+  key, author continuation, model budget reset or hook bypass is involved.

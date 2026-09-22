@@ -1834,3 +1834,50 @@ free. It records a fresh exact library base, creates an isolated warm worktree,
 claims705 and dispatches through the canonical tool with the owner's reason.
 This is one library PR and the explicitly requested comparator URL commit;
 no extra key, slot, model configuration or infrastructure PR is activated.
+
+## 2026-09-22T14:30Z repaired700, full706 checks and capacity admission retry
+
+The previous turn made concrete progress through the isolated completion
+check, authoritative comparator-branch verification and queued705 assignment;
+it was not an impasse. Its #27 comment5778240641 and telemetryef55d21c are
+published. Clarification to its lane description: that paragraph reused the
+earlier reviewer census. Direct process arguments now identify704's author,
+690's merge repair and702's prose review.700's repair ran in a vacated slot
+and completed; at no time was capacity increased beyond three space-d workers.
+
+blueprint-695-20260922-01 completed0 after533s at clean
+a66c9e14b6ca3797dfb19fa31d0d816696f23860. It resolved only the completion-list
+union; all5704 other indexed entries,53 staged incoming paths and both parents
+were preserved, with normal hooks and loss guards passing. The approved source
+content is intact. Receipt:
+/tmp/main-fullspeed-fix700-completion-merge-20260922-result.md. The old failed
+refresh remains terminal; no proof attempt, author continuation or review
+budget was reset.
+
+New /tmp/main-publish700-repaired-20260922.sh verifies this exact completed
+head, waits703's already active publication/CI, and then refreshes, checks
+publication, runs complete CI/marked audit and requests only the strict
+canonical carry from5278574076. If canonical evidence refuses the carry, it
+starts the SECOND independent full review. A703 publication failure does not
+strand this independent pipeline: terminal failure is retained and700 proceeds.
+No fresh approved PR is staged in a train. The runtime canonical carry helper's
+new status URLs now resolve through gh_common.repo_slug; its equality checks
+and immutable review bodies are unchanged.
+
+706 complete CI passed at491c1d85 (build67s, render104s, sync321s, debt15s,
+evasion50s), then marked audit1884 declarations/378 modules passed0 failures,
+evidence5778262538. FIRST review is queued in
+/tmp/main-whole-review706-initial701-20260922.703 publication is now live after
+that CI, with normal refresh/loss guard and all1877 declaration links resolved.
+690 and704 remain active; no completion or new continuation is presumed.
+
+705's first queue created and warmed its exact clean worktree at
+04e7a7d64354df6e2a4a8d03bc6e978284372ebe, then canonical account routing
+exited4: capacity exhausted, no reservation made. A queued702 reviewer had
+taken the physical slot during warming. No705 model worker or token session
+started. Preserve both original exit4/logs and setup cost. Main verified the
+terminal receipts and clean head and prepared
+/tmp/main-retry705-capacity-20260922.sh, retaining the same initial2700s box
+but using the normal3600s account wait. It transfers only the stale retained
+main-fix705 claim, reuses the already warm tree and dispatches with the exact
+owner Astra reason. This is a capacity retry, not a second author attempt.
