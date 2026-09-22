@@ -846,3 +846,17 @@ links and Magic Square register prose, with unchanged pending status. All
 2067s and historical105/172 work remain charged; no further automatic extension.
 This fills the freed space-d lane beside689 and690. Publication/full CI/review
 of the final combined688 change remain main's next action after its receipt.
+
+mathfix-689-20260922-01 then completed0 in1684s at
+1c1fa96b8a49578bde1e3de1d126296d74d60fea. Its five declarations prove the
+complex first direct estimate, general Z-overlap reality, same-constant Z modulus
+bound and a concrete wrapper deriving the line data. Focused checks of all
+listed consumers and standard-only axiom audits pass; no unfinished proof.
+Receipt /tmp/main-fullspeed-subline689-20260922-result.md discloses an unchanged
+generated-registry mismatch and preserves source-law/zero-direction/error-rate
+obligations. Main admits its ONE3600-second blueprint continuation, with exact
+ownership extension and unchanged open status in design-decisions. Packet
+/tmp/main-subline689-integration-packet-20260922.md, runtime
+/tmp/main-fullspeed-subline689-integration-20260922, same worktree/head. This
+fills the just-freed slot beside688 integration and690. No more automatic
+continuations are granted for688 or689; future results need main evaluation.
