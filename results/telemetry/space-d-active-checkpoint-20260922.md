@@ -2063,3 +2063,45 @@ source statement or gate and does not restart the old publisher blindly.
 The records helper briefly exited3 for its train guard; the subsequent census
 found no train process and a normal retry published26b360ee cleanly. No guarded
 operation was bypassed or process killed. Stage5779111666 is published.
+
+## 2026-09-22T15:57Z: Owner documentary completion stage
+
+The owner's "document, don't prove" instruction supersedes remaining proof
+exits above. The full ten-row/four-node map is now in
+documentary-completion-packets-20260922.md. Three space-d Astra/ultra workers
+are confirmed live, each with3600s and a separate worktree:707/703 repairs
+review5280263427 F1, closes attainment and implements minimal owner-authorized
+C3 status support;710 documents dimension divisibility;711 documents the
+square-root convention.707 remains the first closure priority. No new proofs,
+native agents or other QPBT keys. Earlier costs and unknowns remain preserved.
+
+699 merged317aa9f4 after exact CI and canonical carry5280352533 from5279778199;
+700 merged87837aff.696 approved5280333594 at5b4e80f9;708 approved5280276523
+atfea7f2ba. The live model-free service owns gates/integration, not main.
+Infra552/554/556/561 remain parked.
+
+702's review repair completed af2bde5948516f4ea00633742aa3044f9932b5c0
+(2611s, seven findings addressed by author). Refresh then conflicted in ch15
+and declaration-claims.702 is CLOSED unmerged, comment5779646553, under the
+owner cutoff. The local repair, unfinished merge, remote branch and evidence
+are preserved.698's ff024214 and unfinished exemption-file merge remain;
+704's interrupted sole continuation leaves clean9f9e62ea. Both proof efforts
+are deferred with no open PR observed. Their main-fix claims and702's were
+released after terminal verification.710 is a separate documentation branch.
+
+706's review repair e2f5e1996b05e1682795a752230144e098b253cf completed1789s
+with all four findings and46 declaration matches. Its refresh/private imports
+succeeded; /tmp/main-publish-near-706-20260922.sh owns complete CI, marked audit
+and SECOND independent review.702's corresponding publisher exited1.
+
+Repository rename705 is now709 at207b5cf8cdeb00449f0034a9680a4187dca4da70.
+Detached CI passed build425s, blueprint76s and paper-gap checks at observation;
+FIRST review follows complete green CI. Three artifact-reference defects
+remain prepared separately. Comparator runs35741427654 and35742141249 both
+completed/success, still checking libraryecb97d1f at challenge360402fd and
+URL-only0f02b0b9. Neither is final-artifact evidence. Exact final gate, artifact,
+comparator pin and main promotion remain required; no completion claim.
+
+Previous turn classification: progress (issues710/711 and three actual model
+dispatches). Current turn also progresses: prepares remaining packets, closes
+702, starts706's detached CI/review tail and records this owner-directed stage.

@@ -15,11 +15,11 @@
 
 \title{Distance Normalization in the Quantum Linearity Theorem}
 \author{}
-\date{2026-09-04}
+\date{2026-09-22}
 
 \begin{document}
 \maketitle
-\gapnote{false-source}{resolved}
+\gapnote{false-source}{wip}
 
 \section{At a glance}
 
@@ -27,10 +27,11 @@
   \item \textbf{Difficulty.} Medium.  The factor-of-two calculation is
   elementary, but the counterexample must remain valid after the ancillary
   extension allowed by the theorem.
-  \item \textbf{Estimated weight.} The formal adapter consists of one binary
-  effect definition and two distance identities, requiring roughly 70--100
-  lines of matrix algebra.  The source-facing theorem is stated with the
-  corrected bound.
+  \item \textbf{Estimated weight.} The normalization identities and the
+  Fourier--Naimark theorem were already proved. The additional verification
+  uses roughly 250 lines for the printed propositions and the four-point
+  obstruction, including arbitrary ancillary dimensions, and 35 lines for
+  the corrected theorem without numerical domain restrictions.
   \item \textbf{Mathlib/project split.} About 60\% is direct finite-matrix and
   finite-sum algebra; the remaining 40\% is the project-local Boolean Fourier
   and state-dependent distance interface.
@@ -38,6 +39,13 @@
   matrices and conjugate transpose, cyclicity of trace, and simultaneous
   spectral decomposition for commuting Hermitian matrices.
 \end{itemize}
+The squared operator bound $2\delta$ is valid, and $2$ is the least universal
+multiplicative constant, even for positive index length and $0<\delta<1$.
+The sharpness argument below uses a family of Boolean quadratic functions;
+the four-point example alone only forces $4/3$. This is not a claim that the
+Fourier--Naimark construction minimizes the error for each input. The
+normalization row remains pending independent review and main adoption; the
+separate state-preserving padding question remains open.
 
 \section{Key theorem forms}
 
@@ -83,6 +91,26 @@ state-dependent operator distance.%
 \leanid{binaryObservableDistSq\_eq\_one\_sub\_correlation} in
 \doclink{MIPStarRE/QPBT/Combining/Linearity/BooleanFourier.lean}.}
 
+More precisely, fix a nonnegative integer $t$, a real number $\delta$, a
+finite-dimensional complex Hilbert space $\mathcal H$, a density operator
+$\rho$ on it, and Hermitian involutions $A(a)$ for $a\in\mathbb F_2^t$.
+Write
+\[
+ C=\mathbb E_{a,b}\Re\tr(A(a)A(b)A(a+b)\rho).
+\]
+The printed theorem asserts that $C\geq1-\delta$ implies the existence of
+a finite-dimensional space $\mathcal H'$, a unit vector $\mathrm{anc}$ in it,
+and Hermitian involutions $\mathcal A(a)$ on $\mathcal H\otimes\mathcal H'$
+such that $\mathcal A(a)\mathcal A(b)=\mathcal A(a+b)$ for every pair and
+$\mathbb E_a d_{\rho'}(\mathcal A(a),A(a)\otimes\Id)^2\leq\delta$.
+Here $\rho'=\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|$; the
+extension is chosen after the input family. The correction changes only
+the final bound to $2\delta$. No commutation, upper error bound, or prescribed
+ancilla is assumed. Taking real parts makes explicit a real quantity:
+conjugation reverses the triple product, and exchanging $a$ with $a+b$
+preserves the uniform average. The source's ambient spaces are finite
+dimensional by its Section~3.1, line~732.
+
 \section{The source calculation}
 
 Natarajan and Vidick define the distance between two POVMs by summing the
@@ -112,6 +140,17 @@ definition of $d$ above.  Under that reading the squared state-dependent
 operator distance is $\tr_\rho((S-T)^2)$ rather than one half of that
 quantity.  Thus the calculation through line~910 is correct and the equality
 on line~911 loses a factor of two.
+
+The correction is also sufficient if the duplicated density is retained
+literally. A density operator has eigenvalues in $[0,1]$, so
+$0\leq\rho'^2\leq\rho'$. For the positive operator
+$K=(S-T)^\dagger(S-T)$, positivity of the trace pairing gives
+$\Re\tr(K\rho'^2)\leq\Re\tr(K\rho')$. Thus the proved standard-distance
+bound implies the literal-distance bound with the same coefficient $2$,
+without changing either definition. The pure-state counterexamples below
+also show that this coefficient cannot be decreased under the literal
+reading. This comparison is a mathematical consequence of the proved
+standard-distance theorem, not a separate claimed Lean declaration.
 
 The Fourier--Naimark proof is consistent with the measurement normalization.
 It proves
@@ -168,6 +207,73 @@ cannot be at most $\delta=3/4$.  By~\eqref{eq:normalization}, the corresponding
 mean squared binary-measurement distance has lower bound $1/2$, which is
 compatible with the provider's conclusion.
 
+There is also a direct positivity proof, independent of simultaneous
+diagonalization. Choose $r=(1,1)$ and put $X=\mathcal A(1,0)$,
+$Y=\mathcal A(0,1)$. Exact linearity gives $\mathcal A(0)=\Id$,
+$\mathcal A(1,1)=XY=YX$, and
+\[
+ ((\Id-X)(\Id-Y))^\dagger((\Id-X)(\Id-Y))
+   =4(\Id-X-Y+XY)\geq0.
+\]
+Thus the averaged correlation with $A$ is at most $1/2$ in every density
+operator, giving operator error at least $1$. The constant identity
+representation attains $1$, whereas the Fourier--Naimark construction has
+error $2(1-C)=3/2$. The example therefore establishes an existence lower
+bound of $4\delta/3$, not $2\delta$. These facts, and the negations of both
+printed readings, are proved in \Lean{}.%
+\footnote{See \leanid{blrCorrelation\_fourPointObservable},
+\leanid{one\_le\_avg\_fourPointObservable\_distance},
+\leanid{avg\_fourPointObservable\_distance\_one},
+\leanid{not\_printedLinearityClaim}, and
+\leanid{not\_printedLinearityLiteralDistanceClaim} in
+\doclink{MIPStarRE/QPBT/Combining/Linearity/PrintedClaims.lean}.}
+
+\section{Optimal universal constant}
+
+For $k\geq1$, let $x,y\in\mathbb F_2^k$ and set
+$f_k(x,y)=(-1)^{x\cdot y}$, acting as scalar observables on $\mathbb C$.
+For $u,v\in\mathbb F_2^k$, character orthogonality gives
+\[
+ \widehat f_k(u,v)
+ =\mathbb E_x(-1)^{u\cdot x}
+       \mathbb E_y(-1)^{(x+v)\cdot y}
+ =2^{-k}(-1)^{u\cdot v}.
+\]
+Every coefficient has magnitude $2^{-k}$, and their sum is $f_k(0,0)=1$.
+The cubic identity in the provider proof therefore yields
+$C_k=\sum_{u,v}\widehat f_k(u,v)^3=4^{-k}$.
+Any exactly linear binary family on any finite ancillary space decomposes
+into characters: equivalently, its Fourier coefficients are mutually
+orthogonal projections summing to the identity. Their expectations in the
+ancillary density operator are nonnegative weights summing to one. Its
+correlation with $f_k$ is consequently at most
+$\max_{u,v}\widehat f_k(u,v)=2^{-k}$. A character attaining this maximum
+achieves equality, so the best existence error, even allowing all ancillas, is
+\[
+ E_{\mathrm{opt}}(f_k)=2(1-2^{-k}),\qquad
+ \delta_k=1-4^{-k},\qquad
+ \frac{E_{\mathrm{opt}}(f_k)}{\delta_k}
+   =\frac{2}{1+2^{-k}}\longrightarrow2.
+\]
+Hence no constant $c<2$ can replace $2$ in a universal conclusion
+$E_{\mathrm{opt}}\leq c\delta$ with the printed hypotheses. This proof
+establishes minimality among constant-multiple repairs of the printed bound.
+It does not determine the best bound as a function of each fixed $t$ and
+$\delta$, or assert optimality of the particular Fourier-square construction.
+The sharp normalization identity, that construction's exact error $2(1-C)$,
+and the optimal existence error are three different assertions.
+
+The argument covers an unbounded sequence of dimensions and is mathematical
+evidence, not a claim of a formalized sharpness theorem. As additional finite
+checks, exact rational enumeration of every scalar Boolean family for
+$0\leq t\leq4$ found no violation of $E_{\mathrm{opt}}\leq2(1-C)$;
+the quadratic examples for $1\leq k\leq5$ have respectively the ratios
+$4/3,8/5,16/9,32/17,64/33$. The proof also covers mixed states and
+noncommuting input observables through the Fourier--Naimark construction.
+At zero deficit it gives zero error; for $t=0$ the same construction and
+identities still apply. A negative $\delta$ cannot satisfy the hypothesis,
+since the defect identity and positivity imply $C\leq1$.
+
 \section{Comparison with the blueprint and formalization}
 
 The QPBT paper quotes the quantum linearity theorem at lines~711--725 of its
@@ -185,13 +291,13 @@ bounds the average of \leanid{binaryObservableDistSq} by $\delta$; the
 printed bound $\delta$ for the mean squared state-dependent operator
 distance is not reproduced.%
 \footnote{See
-\path{blueprint/src/chapter/ch15_qpbt_combining.tex}, lines~104--150, and
+\path{blueprint/src/chapter/ch15_qpbt_combining.tex},
+\texttt{thm:linearity}, and
 the two declarations in
 \doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.}
 
 The mathematical content of the theorem is nevertheless available in the
-correct normalization.  The stability theorem
-\leanid{exists\_exact\_boolean\_representation} assumes the mean squared
+correct normalization. The stability theorem assumes the mean squared
 state-dependent multiplicative defect
 \[
   \mathbb E_{a,b}\, d_\rho\big(A(a)A(b), A(a+b)\big)^2 \le \eta
@@ -205,7 +311,8 @@ Its bound rests on an identity rather than an inequality:
 proves that the two averages above coincide, both being $2-2C$ for the
 two-query correlation
 $C = \mathbb E_{a,b}\Re\tr(A(a)A(b)A(a+b)\rho)$ of the linearity test.%
-\footnote{Both declarations are in
+\footnote{The stability theorem is
+\leanid{exists\_exact\_boolean\_representation}. Both declarations are in
 \doclink{MIPStarRE/QPBT/Combining/Linearity/Stability.lean}; the blueprint
 records them as \texttt{lem:boolean-representation-stability}.}
 The source hypothesis $C \ge 1-\delta$ is therefore exactly the hypothesis of
@@ -217,6 +324,19 @@ content of the repair, and the corrected source-facing statement
 \leanid{exists\_exactly\_linear\_observables} is obtained from
 \leanid{exists\_exact\_boolean\_representation} by substituting
 $\eta = 2\delta$.
+
+The additional theorem
+\leanid{exists\_exactly\_linear\_observables\_of\_correlation} proves this
+same corrected conclusion for every $t\in\mathbb N$ and every real
+$\delta$, without the unused numerical restrictions in the earlier API.
+The universal propositions \leanid{PrintedLinearityClaim} and
+\leanid{PrintedLinearityLiteralDistanceClaim} retain, respectively, the
+single-density reading and the literal duplicated-density reading of the
+printed theorem. Neither is asserted or supplied as a theorem hypothesis.
+The second uses $d_{\rho'^2}$ in the standard notation; for the pure-state
+four-point obstruction, $\rho'^2=\rho'$ on every allowed extension, so both
+readings are refuted. This retention neither fixes a common ancilla in
+advance nor restricts the printed existential domain.
 
 The Boolean Fourier foundation keeps the state-dependent operator distance
 unchanged and adds the separately named binary-measurement distance together
@@ -231,6 +351,39 @@ stability theorem under the reparameterization just described.%
 \ghissue{124}; the source-facing statement repair was carried out in
 \ghissue{129}.}
 
+\section{Uses of the corrected estimate}
+
+The provider applies Theorem~10 to the family $C(a,b)$ in its proof of
+\texttt{thm:isotwoplayer}, lines~1537--1541. The resulting squared error is
+$O(\varepsilon^{1/8})$; multiplying its constant by two preserves that
+statement and all subsequent substitutions. The exact representation
+relations are unchanged. The introduction to \texttt{thm:qblr\_game} at
+lines~1115--1117 only promises the correlation hypothesis and does not use
+the erroneous conclusion. The later EPR and energy applications consume
+the same exact relations and unspecified robustness constants.
+
+In QPBT, the sole invocation is chapter~14, line~832. For each fixed $(x,z)$
+let $\eta_{x,z}$ be the conditional mean squared multiplicative defect.
+The defect identity gives $C_{x,z}=1-\eta_{x,z}/2$, so applying the corrected
+theorem with $\delta_{x,z}=\eta_{x,z}/2$ gives output error at most
+$\eta_{x,z}$. Averaging again preserves the incoming bound. Exact linearity
+and the value at zero give the projectors and completeness at lines~834--849;
+Parseval and the averaged comparisons give self-consistency and both product
+orders at lines~851--875 with the same polynomial error form.
+These observations establish sufficiency of the normalization correction at
+each use. They do not justify the separate assumption at line~832 that the
+optional ancilla has already been absorbed into the fixed strategy.
+
+The active blueprint's combined-point theorem has a direct field-valued
+proof. No \verb|\uses{}| edge leaves the linearity theorem, import remark,
+normalization remark, or common-ancilla lemma. The remaining references to
+these nodes explain their proof or distinguish the direct point construction;
+they are enumerated, together with the source applications and exact Lean
+caller set, in the accompanying audit.%
+\footnote{\path{audits/2026-09-22_linearity-normalization.md}, issue \#694.
+The separate quotation and padding note is
+\path{docs/paper-gaps/qpbt_linearity-theorem-quotation.tex}.}
+
 \section{Conclusion}
 
 The provider's binary-measurement calculation is correct through the factor
@@ -241,7 +394,11 @@ $\delta$, equivalently mean squared state-dependent operator error at most
 $2\delta$.  The four-point example rules out the printed bound $\delta$ for
 the mean squared state-dependent operator distance even when arbitrary
 ancillary extensions are allowed.  The blueprint theorem and the formal
-declarations carry the corrected bounds.
+declarations carry the corrected bounds, including the unrestricted numerical
+domain. The quadratic family proves optimality of the universal coefficient
+$2$, but does not make the construction optimal for each input. This is a
+proved correction proposed for independent review and main adoption; the
+register remains pending, and state-preserving padding remains open.
 
 \bibliographystyle{alpha}
 \bibliography{references}

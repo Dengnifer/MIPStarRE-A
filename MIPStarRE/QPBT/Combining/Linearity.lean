@@ -53,6 +53,39 @@ open MIPStarRE.Quantum
 
 noncomputable section
 
+/-- The corrected provider theorem on its full numerical domain, including the
+zero-dimensional Boolean cube and arbitrary real `δ`. Neither `0 < t` nor
+`0 ≤ δ` is needed by the Fourier--Naimark construction. The latter follows
+already from the correlation hypothesis; there is no upper bound on `δ`.
+
+**Local fix:** In `thm:qblr`,
+`references/nv-paper/fullpaper.tex:1074-1088`, replace the printed squared
+operator bound `δ` by `2 * δ`, keeping all hypotheses and the arbitrary finite
+pure ancillary extension. The normalization and optimality of the universal
+multiplicative constant are proved in
+`docs/paper-gaps/qpbt_linearity-distance-normalization.tex`, issue #694.
+The printed assertions are retained, unasserted, in `Linearity/PrintedClaims.lean`.
+Blueprint `lem:linearity-unrestricted-parameters` records this full-domain form. -/
+theorem exists_exactly_linear_observables_of_correlation {ι : Type}
+    [Fintype ι] [DecidableEq ι] (t : ℕ) (δ : ℝ)
+    (ρ : Op ι) (hρ : ρ.PosSemidef) (htrace : ρ.trace = 1)
+    (O : (Fin t → ZMod 2) → Op ι)
+    (hO : ∀ u, IsBinaryObservable (O u))
+    (hcorrelation : 1 - δ ≤ blrCorrelation O ρ) :
+    ∃ (ι' : Type) (_ : Fintype ι') (_ : DecidableEq ι')
+        (anc : EuclideanSpace ℂ ι'),
+      ‖anc‖ = 1 ∧ ∃ L : (Fin t → ZMod 2) → Op (ι × ι'),
+        (∀ u, IsBinaryObservable (L u)) ∧
+        (∀ u v, L u * L v = L (u + v)) ∧
+        avgOver (uniformDistribution (Fin t → ZMod 2))
+          (fun u => stateDepDistSq (L u) (heteroKron (O u) (1 : Op ι'))
+            (heteroKron ρ (ancProj anc))) ≤ 2 * δ := by
+  refine ⟨Option (Fin t → ZMod 2), inferInstance, inferInstance,
+    naimarkAncilla t, norm_naimarkAncilla t, roundedObservable O hO,
+    roundedObservable_isBinaryObservable O hO, roundedObservable_mul O hO, ?_⟩
+  rw [avg_stateDepDistSq_roundedObservable_eq_avg_multiplicativeDefect O hO ρ hρ htrace]
+  exact avg_multiplicativeDefect_le_two_mul_error O hO ρ hρ htrace δ hcorrelation
+
 /-- The quantum linearity theorem of Natarajan--Vidick.  Let `t` be positive,
 `δ ≥ 0`, `ρ` a positive semidefinite trace-one operator on a finite-dimensional
 Hilbert space, and `O^u`, for `u ∈ F_2^t`, binary observables whose two-query

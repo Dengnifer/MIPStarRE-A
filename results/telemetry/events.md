@@ -9845,3 +9845,7 @@ historical entry above is rewritten.
   repair is needed. Preserve the original failure and clean merge. A temporary
   records train-guard exit3 cleared before the process census; a normal retry
   published26b360ee without bypassing the guard or killing a process.
+
+## 2026-09-23
+
+- Owner 2026-09-22 document-dont-prove supersedes remaining intermediate proof goals: three3600s documentation workers707/710/711 are live on space-d, with all ten row/four node briefs prepared. PR702 refresh conflicted after its completed repair and is closed unmerged by comment5779646553; repaired commit, unfinished merge, branches and costs retained. Issues698/704 proof work is deferred and preserved. PR706 repair is on detached CI/review; no new proofs or unsupported leanok marks are admitted. PR707 owns the explicitly authorized minimal terminal-status protocol/checker update; headline faithfulness and other completion criteria remain binding.
