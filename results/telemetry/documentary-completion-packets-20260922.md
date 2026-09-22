@@ -16,23 +16,23 @@ Review remains independent and exact-head CI remains required.
 
 | Register row | Brief | Current disposition after the 17:27Z allocation change |
 |---|---|---|
-| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 atc9c6240c has green full CI. SECOND review5281669767 approves code with0 findings but requests two chapter12 wording repairs. One Sol prose repair is queued after709, then full CI and THIRD review. |
+| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | SECOND review5281669767 approved code with0 findings. Both wording findings repaired in10a5c675 (393s), chapter12 only. A guarded model-free refresh/publication/full-CI/THIRD-default-Sol-review pipeline is live. |
 | Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 completes F2 and adds the source-node exemption. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
 | Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | PR715 at4ac910df has green CI; first review's sole finding is common707 support. Refresh/CI waits for merged707, then SECOND review. |
 | Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af in1494s with one reasoned C4 exemption; publication/FIRST review waits for merged707. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Issue718 completedc1bf9623 in785s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
-| Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Issue720 created; one default Sol3600s author queued after current707/709 reviews and subline721, requiring707 combined approval. PR702 remains closed unmerged; read actual main. |
+| Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Issue720 prepared; no author admitted because the queue correctly stopped on707's adverse combined review. Admit after the priority707 repair/review. PR702 remains closed unmerged; read actual main. |
 | Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Issue719 completed76312c5f in1378s, four documentation artifacts and clean worktree. Publication/CI waits for merged707, then FIRST review. PR706 remains closed unmerged. No continuation. |
 | Pasting product error | /tmp/main-document-pasting-product-20260922.md | PR717 repair3671fec9 resolves the wording finding in535s. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
 | Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 completed6bb626c0 in1187s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
-| Subline claims | /tmp/main-document-subline-20260922.md | Issue721 created; one default Sol3600s author queued after current707/709 reviews, requiring707 combined approval. Includes its coordinated qld-xz-lines exemption. PR696 is merged045a657d; no further proof. |
+| Subline claims | /tmp/main-document-subline-20260922.md | Issue721 prepared; no author admitted because the queue correctly stopped on707's adverse combined review. Includes its coordinated qld-xz-lines exemption. PR696 is merged045a657d; no further proof. |
 
 ## Blueprint nodes
 
 | Node | Separate brief | Exit |
 |---|---|---|
 | def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | PR708 merged7b9dd8f2 at17:30:29Z after green exact-head CI and canonical independent-review carry5281456386. |
-| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Preserve merged700 facts; explain source-function mismatch and exempt if unsupported. Do not resume698. |
+| def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Issue722 admitted to the free single Sol slot while707/709 model-free builds run. One3600s documentation task, preserving merged700 facts and all register statuses. Do not resume698. |
 | lem:qld-xz-lines | /tmp/main-document-node-qld-xz-lines-20260922.md | Supported mark or reasoned completed-evaluation/source-law exemption; coordinate with subline row. |
 | lem:qld-4-13 | /tmp/main-document-node-qld-4-13-20260922.md | Explicit exemption for unasserted printed rate/carrier; coordinate with error row. |
 

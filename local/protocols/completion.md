@@ -155,8 +155,8 @@ into a completion statement.
 
 ## 3. Where the comparator challenge lives
 
-The challenge repository lives **outside** this repository and outside the
-umbrella repository: a separate repository of its own, as `LDT-comparator`
+The challenge repository lives **outside** this library repository
+(`Dengnifer/MIPStarRE-QPBT`): a separate repository of its own, as `LDT-comparator`
 already is for `MIPStarRE.LDT.Test.mainFormal` (`docs/comparator.md`). Three
 reasons, in order of weight:
 
@@ -166,8 +166,9 @@ reasons, in order of weight:
 2. The challenge must depend on this library **pinned by commit**. A repository
    cannot meaningfully pin a commit of itself, and the pin is the evidence C5
    rests on.
-3. `Dengnifer/MIPStarRE-qpbt` is the umbrella repository and is not the main
-   session's to modify (`local/personas/main.md`).
+3. A separate repository keeps the challenge outside the main session's
+   ordinary write scope; modifying it requires explicit owner authorization
+   (`local/personas/main.md`).
 
 What stays here: the generator (`scripts/comparator/`), the expected copy, the
 drift check, and the comparator record. Creating the challenge repository is an

@@ -104,7 +104,7 @@ class MakeArtifactTests(unittest.TestCase):
         write(self.repo / "lakefile.toml", 'name = "MIPStarRE"\n')
         write(self.repo / "lake-manifest.json", json.dumps(
             {"packages": [{"name": "mathlib", "rev": "deadbeefcafe"}]}))
-        write(self.repo / "README.md", "See https://github.com/Dengnifer/MIPStarRE-A\n")
+        write(self.repo / "README.md", "See https://github.com/Dengnifer/MIPStarRE-QPBT\n")
         write(self.repo / "docs" / "comparator.md", "trust model\n")
         # Third-party paper sources: they ship (owner decision, 2026-09-19).
         write(self.repo / "references" / "qpbt-paper" / "frontmatter.tex",
@@ -206,6 +206,7 @@ class MakeArtifactTests(unittest.TestCase):
         manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
         self.assertIn("leanprover/lean4:v4.32.0", manifest)
         self.assertIn("deadbeefcafe", manifest)
+        self.assertIn("source repository : Dengnifer/MIPStarRE-QPBT", manifest)
         self.assertIn("Lean files        : 3", manifest)
         # Foo.lean: import + theorem are code, the two doc-comment lines and the
         # blank lines are not; Bar.lean and MIPStarRE.lean are one line each.
@@ -392,6 +393,13 @@ class MakeArtifactTests(unittest.TestCase):
     # -- anonymization ------------------------------------------------------
 
     def test_anonymize_rewrites_the_owner_name_and_tags_the_tarball(self) -> None:
+        # Historical links remain in evidence; both aliases must anonymize.
+        write(self.repo / "README.md", "\n".join(
+            f"https://{host}/{slug}/issues/705"
+            for host in ("github.com/Dengnifer", "dengnifer.github.io")
+            for slug in ("MIPStarRE-A", "MIPStarRE-QPBT")
+        ) + "\n")
+        self.commit("exercise current and historical repository aliases")
         result = self.run_script("--anonymize")
         self.assertEqual(result.returncode, 0, result.stderr)
         tarball = next(self.out.glob("*.tar.gz"))
@@ -400,7 +408,12 @@ class MakeArtifactTests(unittest.TestCase):
             member = next(m for m in archive.getnames() if m.endswith("README.md"))
             text = archive.extractfile(member).read().decode("utf-8")
         self.assertNotIn("Dengnifer", text)
+        self.assertNotIn("dengnifer.github.io", text)
         self.assertIn("ANONYMIZED", text)
+        self.assertIn("anonymized.example.invalid", text)
+        manifest = next(self.out.glob("*.MANIFEST.txt")).read_text(encoding="utf-8")
+        self.assertIn("source repository : ANONYMIZED/MIPStarRE-QPBT", manifest)
+        self.assertNotIn("Dengnifer", manifest)
 
     def test_anonymize_rewrites_the_rules_inside_the_shipped_script(self) -> None:
         """The script ships, so the pass runs over its own rules block.
@@ -422,7 +435,7 @@ class MakeArtifactTests(unittest.TestCase):
             member = next(m for m in archive.getnames()
                           if m.endswith("scripts/make_artifact.sh"))
             text = archive.extractfile(member).read().decode("utf-8")
-        for rule_text in ("Dengnifer", "LionSR", "Ruixuan Deng",
+        for rule_text in ("Dengnifer", "dengnifer.github.io", "LionSR", "Ruixuan Deng",
                           "ruixuan.deng@icloud.com", "sirui-lu.com"):
             self.assertNotIn(rule_text, text, f"{rule_text!r} survived in the shipped script")
             escaped = rule_text.replace(".", r"\.")
@@ -456,16 +469,19 @@ class MakeArtifactTests(unittest.TestCase):
             self.skipTest("pdftotext (poppler-utils) is not installed")
         pdf = self.repo / "docs" / "paper-gaps" / "note.pdf"
         pdf.parent.mkdir(parents=True, exist_ok=True)
-        pdf.write_bytes(minimal_pdf("Ruixuan Deng"))
-        self.commit("a name baked into a binary")
-        self.assertEqual(self.run_script().returncode, 0,
-                         "without --anonymize the name is not a leak")
-        result = self.run_script("--anonymize")
-        self.assertEqual(result.returncode, 2, result.stdout)
-        self.assertIn("ANONYMIZATION INCOMPLETE", result.stderr)
-        self.assertIn("docs/paper-gaps/note.pdf", result.stderr)
-        self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
-                         "an incompletely anonymized snapshot must not be packaged")
+        for identity in ("Ruixuan Deng", "Dengnifer/MIPStarRE-A",
+                         "Dengnifer/MIPStarRE-QPBT", "dengnifer.github.io"):
+            with self.subTest(identity=identity):
+                pdf.write_bytes(minimal_pdf(identity))
+                self.commit("an identity baked into a binary")
+                self.assertEqual(self.run_script().returncode, 0,
+                                 "without --anonymize the identity is not a leak")
+                result = self.run_script("--anonymize")
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertIn("ANONYMIZATION INCOMPLETE", result.stderr)
+                self.assertIn("docs/paper-gaps/note.pdf", result.stderr)
+                self.assertEqual(sorted(self.out.glob("*.tar.gz")), [],
+                                 "an incompletely anonymized snapshot must not be packaged")
 
     def test_an_unresolvable_ref_is_a_usage_error(self) -> None:
         result = subprocess.run(

@@ -9830,6 +9830,39 @@ historical entry above is rewritten.
   are static author checks, not full CI, independent review or a completion
   claim. Main retains publication, full CI and SECOND independent review.
 
+- 2026-09-22T14:39Z - Repository rename alignment (#705,
+  `orc-705-20260922-01`): the admitted packet and owner instruction require
+  current references to `Dengnifer/MIPStarRE-QPBT`. The primary `gh_common.py`
+  layer and GitHub repository API agree on that identity; both the former
+  `Dengnifer/MIPStarRE-A` alias and the former umbrella spelling
+  `Dengnifer/MIPStarRE-qpbt` resolve to it. Active instructions still described
+  the latter as a separate forbidden repository. Update the current URLs and
+  that obsolete distinction, retaining owner authorization for every external
+  repository. Historical records and accepted comparator evidence remain
+  untouched. The comparator change uses the separately authorized isolated
+  worktree at accepted commit `360402fdf4a39399f94331452d6e5d0a35c144be`;
+  its URL-only diff must preserve library pin
+  `ecb97d1f66eec1e6fad964f144f78b91ce1fab36` and the dirty original checkout.
+
+- 2026-09-22T14:49Z - The #705 export commit's normal pre-commit hook ran
+  869 tests in 301.441 seconds, with one error and nine skips. The unchanged
+  `test_model_policy` bounded-job dry-run inherited the worker session's
+  `MIPSTARRE_HARDNESS_REASON` and failed with "an escalation reason requires a
+  hard job classification". An isolated reproduction confirmed that cause.
+  Retry the normal hook with only that inherited variable absent from the
+  commit process; do not change routing policy, credentials, live admission,
+  or hook enforcement. This is test-environment isolation, not a new worker
+  request. The 90 focused rename tests had already passed.
+
+- 2026-09-22T14:53Z - Follow-up to the #705 hook incident: removing the reason
+  from the entire commit process made four older hard-job fixtures fail
+  instead (869 tests, 271.321 seconds, four failures, nine skips). Restore the
+  ordinary session environment and isolate only the dry-run command fixture:
+  it now discards the inherited reason before applying its explicit test
+  arguments. All 19 command/model-policy regression tests passed in 18.447
+  seconds with that two-line fixture fix. No live dispatcher, model policy,
+  credential, admission rule or hook was changed; rerun the normal hook.
+
 - The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
   normal hooks/loss guards and all unrelated indexed/staged content preserved.
   A new guarded pipeline queues publication/full CI/marked audit and strict
