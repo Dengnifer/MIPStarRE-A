@@ -1327,3 +1327,56 @@ local integrity reference and completed the task without a workaround. Prose
 phase and combined published verdict remain pending. Do not gate a code-phase
 result as a completed approval. The freed lane was consumed by the queued
 review; total actual space-d workers remains at most3.
+
+## 2026-09-22T12:28Z third691 repair and independent CI queue
+
+Second full691 review5278009056 is CHANGES_REQUESTED: code APPROVED; prose F1
+asks only that the reindexing paragraph remove the trailing Lean Fin m jargon,
+leaving its explicit mathematical index set. Prior mathematical index F1 is
+resolved, and no equivalence/status discrepancy was found. New2700s author
+blueprint-676-20260922-03 works from3ab2724f; packet
+/tmp/main-fix691-style-packet-20260922.md, runtime
+/tmp/main-fullspeed-fix691-style-20260922. Keep both earlier rounds/costs.
+After repair, full new-head CI/axioms and THIRD review are required.
+
+The completed-source CI queue no longer waits on an unrelated parent review.
+Main confirmed both699/700 exact published heads and the untouched clean690/696
+trees, checked no source-ci694/695 or algorithm/696 pending publication CI had
+started, and matched each old PID to its exact waiting shell command. Only then
+SIGTERM stopped waiting wrappers1035436,1035459,747212,1258553. All four were
+verified gone. Keep their original logs/.pr/.exit records; this was an intentional
+model-free scheduling replacement, not a worker/key failure or lost publication.
+Claims main-ci699/700 and main-fix690/696 are retained. No source or review changed.
+
+ACTIVE replacement order:
+692 complete CI ->699 complete CI ->700 complete CI ->691 repair complete CI
+->696 repair complete CI ->690 complete CI, with690 ALSO requiring actual691
+merge. Reviews start after their own complete CI and marked audit and need not
+finish before the next independent CI. This avoids the known concurrent-build
+fixture timeout while allowing699/700 review before691's further repair cycle.
+
+- /tmp/main-source-ci-v2-20260922.sh694 and695 are already running, under runtime
+  /tmp/main-source-ci694-v2-20260922 and ...ci695-v2.... They preserve the public
+  heads463feff4/8089cc88, do not republish, retain existing CI claims, and create
+  the original source-ci694/695 .pid/.exit receipts only for actual CI execution.
+  The first waits existing692 publication CI; the second waits real source-ci694.
+- /tmp/main-publish-repairs-v3-20260922.sh691 and696 are running under
+  /tmp/main-publish-repair691-v3-20260922 and ...repair696-v3.... The first waits
+  its style worker and700 CI, then publishes via tagstyle691 and third691 review.
+  The second waits style691 CI, then tagrepair696v2 and second696 review. Both
+  require clean ancestry, normal refresh/loss guard, CI and marked audit.
+- /tmp/main-publish690-after691-v2-20260922.sh is running and replaces the old
+  after691 wrapper. It waits actual691 merge and repair696v2 CI before any
+  mutation to bb607c6f, then normal publication, CI, audit and first review.
+- /tmp/main-export-merged-imports-v2-20260922.sh is a separate helper, leaving
+  the old live helper unchanged. It includes known optional algorithm, linearity
+  claims/padding, line-polynomial and complex-subline modules before root exports;
+  it writes only private worktree objects, never shared caches.
+
+All new shell files passed bash-n; parent PID startup handshakes succeeded.
+Do NOT restart the old waiting wrappers: their publication results remain valid
+but their dependency order is retired. If a new dependency fails, inspect its
+actual process/result and preserve branch work. The previous cycle progressed
+through697's continuation, published699/700 and queued696 repair; retained
+telemetry is now published at6d16297c. This cycle changes real scheduling and
+starts the concrete691 repair; the artifact goal is still unachieved.

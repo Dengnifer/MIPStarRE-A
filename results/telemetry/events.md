@@ -9602,3 +9602,18 @@ historical entry above is rewritten.
   automatic review rejected the network action, and it completed the review
   using checked-in rules/local integrity references instead. No bypass or
   permission request was needed. The repaired/source claims remain distinct.
+
+- The12:28Z cycle found691's second combined review5278009056 adverse on one
+  prose-only jargon clause; code approved and the prior index defect is fixed.
+  Main dispatched a2700s whole repair, blueprint-676-20260922-03, from3ab2724f,
+  preserving both rounds and planning the THIRD full review. The free space-d
+  slot was refilled;697 continuation and698 remained live.
+- The adverse parent review exposed an unnecessary CI dependency: independent
+  published699/700 were waiting for690, which waited for691 merge. Main verified
+  exact published heads/clean worktrees and absence of all four pending CI-start
+  receipts, then replaced only four live, waiting model-free scripts. Their
+  original logs and terminated receipts remain; no author/reviewer was stopped,
+  no PR republished, no status invented and no claim discarded. New serial CI
+  order is692,699,700,691 repair,696 repair,690 (which still also needs actual691
+  merge). Source CI runners retain the existing main-ci699/700 claims and run
+  all normal gates. Private import helperv2 covers the known new source modules.
