@@ -2105,3 +2105,40 @@ comparator pin and main promotion remain required; no completion claim.
 Previous turn classification: progress (issues710/711 and three actual model
 dispatches). Current turn also progresses: prepares remaining packets, closes
 702, starts706's detached CI/review tail and records this owner-directed stage.
+
+## 2026-09-22: First documentary author receipt and integration follow-up
+
+Progress:711 author completed2dd2d894358389094b31b48600a6812041f41cf8,
+952s, four documentation artifacts, clean tree and focused PDF/web/sync/hooks
+passed. It introduces no Lean or formalization-mark change. Its detached
+publisher /tmp/main-publish-square-root-doc-20260922.sh has merged current
+main cleanly and owns checked publication/full CI/FIRST review. The common
+protocol support remains707's responsibility; this is not a main-row closure yet.
+
+New prepared issues:712 pasting,713 combined-line error,714 winning implications.
+712 is admitted at53d12daa1ea79aa6c62ef93c3b621a331e1368b0 and waits in the
+canonical dispatcher for capacity. The first wrapper supplied an abbreviated
+SHA, so its exact-head guard exited1 before claim/model admission; that failed
+log and warmed worktree remain. The separate pasting712 tag uses the full SHA.
+
+The read-only train precheck found696 clean and708 conflicting only in
+docs/completion/qpbt-leanok-exemptions.md.696 now has a claimed model-free
+refresh/publication/CI/marked-audit tail, with strict canonical carry from
+5280333594 or THIRD review if the context-sensitive equality check refuses.
+It will merge alone after fresh approval.708 has a documentation-only C4
+integration packet, preserving its code-approved algorithm and all earlier
+costs; a guarded successor waits for710's verified terminal process before
+dispatch. No new proof continuation is admitted. The meta service remains the
+only train/staging owner.
+
+709 complete CI is green at207b5cf8cdeb00449f0034a9680a4187dca4da70 and FIRST
+review is live.706 is published at5edfe0e2 with complete CI now waiting on the
+machine-wide build lock.707 and710 authors remain live at observation;710 has
+committed719815e9 and is finishing its receipt.707's commit hook met the known
+inherited-hardness-reason test contamination; its author retries only the commit
+process with that variable removed, preserving the failed test and all hooks.
+
+Stage5779697630 is the one27 comment for this documentary stage. The previous
+records attempt publishedb74a2641 but its snapshot push refused a concurrent
+main move; the model-free loop subsequently published53d12daa cleanly. No
+preflight guard was bypassed. This turn is progress, with no new stage boundary.
