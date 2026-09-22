@@ -46,8 +46,8 @@ exists and covers the table; the axiom values themselves come from the build
 and are reported as delegated.
 
 **C3 — Paper gaps terminal.** Every data row of the track's paper-gap register
-carries a `Terminal status` cell reading exactly `corrected` or
-`no-difference`:
+carries a `Terminal status` cell reading exactly `corrected`,
+`no-difference` or `documented-deviation`:
 
 - `corrected` — a documented statement correction that **meets the four
   adoption conditions of `local/protocols/issues-prs.md`** — correctness,
@@ -58,13 +58,46 @@ carries a `Terminal status` cell reading exactly `corrected` or
   is not proved, the printed claim preserved as a non-asserted `Prop` (the
   `lem:symmetric-strat` and `lem:qld-4-13` pattern of 2026-09-19). The
   artifacts are evidence that a correction was adopted; they are not a route
-  around those conditions, and a row whose correction weakens a conclusion is
-  not terminal however complete its artifacts are.
+  around those conditions, and a row whose correction weakens a conclusion
+  cannot receive `corrected` however complete its artifacts are.
 - `no-difference` — the formalization and the source statement agree; nothing
   to correct.
+- `documented-deviation` — a justified **intermediate** difference is closed
+  by honest mathematical documentation, under the owner's 2026-09-22 15:10Z
+  instruction, "document, don't prove". Its mathematical gap note, matching
+  blueprint remark and `docs/DEVIATIONS.md` disclosure must state the printed
+  assertion, the established result, their difference, affected consumers and
+  remaining limitations. External mathematical evidence must be distinguished
+  from Lean-certified results. Preserve an existing unasserted printed `Prop`
+  and any necessary blueprint exemption; never mark the unsupported printed
+  claim proved. This status means a documented difference, **not** proof of
+  that claim or adoption of the weaker result as `corrected`. Proving the
+  printed intermediate assertion, formalizing its external refutation or
+  satisfying the stronger correction-adoption conditions is not required to
+  close this documentation task.
 
-No row may read `open`, `pending` or `sorry`. No headline theorem statement may
-be weaker than the source paper except through a `corrected` row.
+No row may have an unknown or blank status, or read `open`, `pending` or `sorry`.
+No headline theorem statement may be weaker than the source paper except
+through a `corrected` row. `documented-deviation` cannot authorize a headline
+statement change or an unproved dependency of a headline theorem: in particular,
+`pauli_soundness` remains proved at its printed statement. All requirements of
+C1, C2, C4, C5, C6 and C7 remain in force.
+
+The gate checks the status vocabulary and requires a nonempty `Source statement`
+cell for `documented-deviation`. A citation of a registered headline theorem or
+its blueprint label does not by itself identify a change to that assertion: an
+intermediate difference may concern its import, application or proof route. For
+example, the dimension-divisibility row cites the `lem:ld-soundness` import while
+documenting the intermediate seed and dimension obstruction; the registered
+headline statement is unchanged. The gate does not infer mathematical scope
+from identifier occurrence. Independent review establishes the intermediate
+scope, mathematical justification and adequacy of all three documentation
+artifacts, just as it establishes the four adoption conditions for `corrected`.
+That review must distinguish an intermediate import or proof-route difference
+from a changed headline assertion or an unproved headline dependency; the latter
+two remain inadmissible under `documented-deviation`. Headline statement
+faithfulness and the comparator requirements of C5 remain binding. A passing
+status check does not certify those mathematical judgments.
 
 **C4 — Blueprint marked.** Every blueprint node of the track that carries
 `\lean{...}` also carries `\leanok`, or appears in the track's exemption table
@@ -122,8 +155,8 @@ into a completion statement.
 
 ## 3. Where the comparator challenge lives
 
-The challenge repository lives **outside** this repository and outside the
-umbrella repository: a separate repository of its own, as `LDT-comparator`
+The challenge repository lives **outside** this library repository
+(`Dengnifer/MIPStarRE-QPBT`): a separate repository of its own, as `LDT-comparator`
 already is for `MIPStarRE.LDT.Test.mainFormal` (`docs/comparator.md`). Three
 reasons, in order of weight:
 
@@ -133,8 +166,9 @@ reasons, in order of weight:
 2. The challenge must depend on this library **pinned by commit**. A repository
    cannot meaningfully pin a commit of itself, and the pin is the evidence C5
    rests on.
-3. `Dengnifer/MIPStarRE-qpbt` is the umbrella repository and is not the main
-   session's to modify (`local/personas/main.md`).
+3. A separate repository keeps the challenge outside the main session's
+   ordinary write scope; modifying it requires explicit owner authorization
+   (`local/personas/main.md`).
 
 What stays here: the generator (`scripts/comparator/`), the expected copy, the
 drift check, and the comparator record. Creating the challenge repository is an
