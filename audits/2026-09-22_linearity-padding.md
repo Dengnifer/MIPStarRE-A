@@ -61,7 +61,7 @@ formalization mark was weakened or replaced. No proof hole was introduced.
 The verdict for the requested source absorption is **unproved**, not a changed
 source statement with extra hypotheses.
 
-## Closest Sufficient Construction
+## Initial Proposal (First Session)
 
 Keep the existing general `ProjectiveSetting` domain. A reservation should be
 constructed in the conclusion of the initial strategy reduction, before the
@@ -123,3 +123,99 @@ and `Test/QubitForm.lean`. The new declarations and the common-ancilla, point,
 global-pair, extraction, and headline soundness declarations have transitive
 axiom sets contained in `propext`, `Classical.choice`, and `Quot.sound`.
 Full CI and independent review remain Main's responsibility.
+
+## Admitted Continuation
+
+The continuation began from `45039ea9bf8058b2b40fc8eb2aafbf57e3b3ce5c`.
+Main authorized constructing the reserve in the initial padded strategy. The
+four predecessor commits, all three obstructions, the predecessor's 2094
+dispatcher seconds, and every historical/shared charge remain retained. The
+continuation has one 3600-second admission, starting 2026-09-22T21:14:10+09:00;
+it does not authorize a further session or change any earlier budget.
+
+The proposed capacity estimate is correct. `linearity_padding_capacity`
+derives it from `PauliAnswer.pauliOutcome`, `P.one_le_m`, and the actual field
+cardinality. `linearity_padding_ground_embedding` uses Mathlib's extension of
+a finite partial bijection to construct an injection whose entire ground
+slice agrees with `optionBoolEmbedding`. Its choice precedes the player,
+state, density, errors, and observable families.
+
+The continuation proves the following additional construction results:
+
+| Declaration | Exact content | Remaining limitation |
+| --- | --- | --- |
+| `linearity_padding_state_transport` | Reservation of an appended pure ancilla equals the active Boolean embedding for every bipartite vector | Six-register identity not asserted |
+| `linearity_padding_naimark_comparison` | The actual Option strategy state maps to the Boolean state; both original question/answer families intertwine | The consumer is compared, not replaced |
+| `linearity_padding_measurement_transport` | Extend any PVM across an isometry, assigning the complement to its distinguished outcome; prove projectivity and intertwining | Instantiation with the earlier source binary rounding remains |
+| `linearity_padding_error_transport` | Exact pointwise squared vector errors | Operators are the stated isometric extensions |
+| `LinearityPadding.extendObservable_stateDepDistSq` | Exact pointwise density-weighted squared errors | Density is explicitly conjugated by the isometry |
+| `linearity_padding_average_error_transport` | Both finite averages retain the exact identity | No replacement of the state or comparator is implicit |
+| `linearity_padding_ground_error_transport` | Compare an operator on an extension to the original operator on its ground slice | Six-register placement not asserted |
+| `linearity_padding_rounding_transport` | One actual expanded reservation serves every fiber; exact linearity, identity at zero, and the corrected averaged bound are preserved | Transported density and comparator still need source identification |
+
+All extensions use `J L J* + (I - J J*)`; PVM completion assigns the
+complement to a specified outcome, with zero intended for linearity. The
+expanded reservation leaves every `PauliRegister P` coordinate unchanged.
+It changes neither `M = 2^m` nor any game, answer, error, or unrestricted
+`ProjectiveSetting` definition. Setup changes expose the existing embedding
+and construction functions and prove their active-coordinate formula; their
+definitions and source-facing setup theorem are unchanged.
+
+### Statement Integrity of the Continuation
+
+Paper assumptions: an admissible parameter tuple, an initial projective
+strategy chosen with zero padding, and the density/binary-observable averaged
+linearity premises at the later application. Lean assumptions: the capacity
+and embedding theorems take only the admissible tuple; the initial comparison
+takes only the input strategy; the general extension lemmas take finite
+isometries and actual operators/PVMs, and prove rather than assume transport.
+The rounding auxiliary uses the same density and correlation premises as the
+provider, on the explicitly displayed active expanded space.
+
+Paper conclusion: exactly linear observables and their PVM on the prescribed
+expanded spaces, compared with the actual source binary families. Lean
+conclusion: the constructed reservation, exact initial and algebraic
+transports, and rounding with an explicitly transported comparator and
+density. Verdict: exact for these separately stated auxiliaries; the full
+paper application is still unproved. No source theorem gains an assumption
+or loses a conclusion, and no auxiliary is advertised as full absorption.
+
+### Remaining Construction
+
+1. Extend the bipartite state comparison to `psiHat` and prove operator
+   intertwining for `AA'`, `BA''`, `BB'`, and `AB''` with the same reservation.
+2. Choose the binary sandwich orthonormalizations on the active expanded
+   spaces, and prove that their extensions satisfy the comparisons required
+   by paper lines 731--824. The construction must derive its estimates from
+   the actual projective setting, not take a transport or rounding package.
+3. Identify the density and comparator of `linearity_padding_rounding_transport`
+   with that construction and assemble `linearity_padding_absorption` for all
+   point pairs and placements. This declaration has not been introduced.
+
+The quotation gap remains open. There are no new or retained `sorry` sites
+in these modules. The source pipeline and independent field-valued point
+proof listed above are unchanged; none is counted as the missing absorption.
+
+### Continuation Validation
+
+Focused Lean checks pass without diagnostics for all four new modules,
+`Observables/Setup.lean`, the root `QPBT.lean`, `Points.lean`, `Apply.lean`,
+`Extraction/SourceUnitary.lean`, `Test/Soundness.lean`, and `Test/QubitForm.lean`.
+The worktree-private root compilation also succeeds. The axiom audit of the
+ten new principal/support results, three predecessor obstructions, the common
+ancilla theorem, and five downstream declarations reports exactly `propext`,
+`Classical.choice`, and `Quot.sound` for all nineteen declarations.
+
+The forbidden-token and debug-command scans have no matches in the four new
+modules. All their lines satisfy the 100-character limit. The branch duplicate
+check finds no duplicate among 36 new or newly public declarations on
+`github/main`. Normal hooks ran at each proof checkpoint.
+
+The final `leanblueprint web` succeeds without warnings or errors in its log.
+After that render, synchronization and the declaration checker pass for all
+1888 entries. The four existing orphan marks in chapter 16 and two existing
+statement-only marks in chapters 13/14 remain. An intermediate synchronization
+found multiline Lean links unrecognized by the parser; putting each link on
+its own line removed all six newly reported orphan marks. Paper-gap style and
+reference checks pass, with the pre-existing note-verdict-marker warnings.
+No full build or full CI was run; Main retains those gates and independent review.

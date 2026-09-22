@@ -63,6 +63,10 @@ import MIPStarRE.QPBT.Combining.Linearity.BLR
 import MIPStarRE.QPBT.Combining.Linearity.NaimarkRounding
 import MIPStarRE.QPBT.Combining.Linearity.Stability
 import MIPStarRE.QPBT.Combining.Linearity.Padding
+import MIPStarRE.QPBT.Combining.Linearity.Reservation
+import MIPStarRE.QPBT.Combining.Linearity.SetupComparison
+import MIPStarRE.QPBT.Combining.Linearity.Extension
+import MIPStarRE.QPBT.Combining.Linearity.ReservedRounding
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Combining.Points
 import MIPStarRE.QPBT.Combining.OrderedPolynomialEstimates

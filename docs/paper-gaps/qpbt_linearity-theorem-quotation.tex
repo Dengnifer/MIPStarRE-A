@@ -29,9 +29,10 @@
   \item \textbf{Estimated weight.} The corrected single-family theorem and its
   two distance formulations are proved. A fixed optional Naimark ancilla now
   serves all families of the same index length. Absorption of this ancilla
-  into the strategy's original zero-state padding is not proved. Three
-  auxiliary obstruction lemmas show that the required reserve cannot be
-  inferred for every fixed projective setting.
+  into the strategy's original zero-state padding is not proved. The initial
+  Boolean allocation now has a constructed reservation, with exact bipartite
+  state and initial-measurement transport. Three auxiliary obstruction lemmas
+  show why a reserve cannot be inferred for every fixed projective setting.
   \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
   operators, and squared norms are standard linear algebra.  The proved
   Fourier--Naimark stability theorem and the two state-dependent distance
@@ -242,10 +243,21 @@ the Pauli-outcome constructor gives $N\geq q^{2^m}\geq q^2\geq4$, so
 \[
  (N+1)(q^2+1)\leq(N+1)^2\leq2^{N+1}.
 \]
-Hence the existing Boolean cube has enough dimension to embed the active
-summand times the common ancilla. The required embedding must agree on the
-ground slice with the existing one-hot embedding; the inequality alone
-does not construct that agreement or the measurement transport.
+The declarations \path{linearity_padding_capacity} and
+\path{linearity_padding_ground_embedding} now prove the bound and construct
+an injection agreeing with the existing one-hot encoding on the entire ground
+slice. They use the actual Pauli-answer alphabet and admissibility, without a
+capacity certificate. The injection is chosen from the parameter tuple before
+the local state and observable families. Tensoring with the unchanged Pauli
+register gives \path{linearityExpandedReservationIsometry}.
+
+The declaration \path{linearity_padding_state_transport} proves the exact
+bipartite state identity for every active vector. Moreover,
+\path{linearity_padding_naimark_comparison} proves that the inclusion of the
+Option-indexed strategy used by \path{pauliNaimarkSetting} maps its state to
+the initial Boolean-padded state and intertwines both complete measurement
+families for every question and answer. This comparison preserves the
+existing arbitrary-strategy consumer; it does not replace that consumer.
 
 After such an embedding is constructed, a rounded observable $L^u$ extends
 to $H^+$ as $JL^uJ^\dagger+(I-JJ^\dagger)$. Orthogonality of the two
@@ -253,9 +265,30 @@ summands preserves exact linearity and binary observability. Intertwining
 of the original operators on the ground slice preserves each squared
 state-dependent error, and hence both the Boolean-index and $(x,z)$ averages.
 For the corresponding projective measurement the complementary projection
-is assigned to the zero outcome. This is a proposed sufficient construction,
-not a proved absorption theorem. Its state identity, all-family transport,
-and use in the binary construction remain open under \ghissue{697}.
+is assigned to the zero outcome. These extension properties, their exact
+pointwise vector and density-weighted squared-error identities, and both
+finite averages are now proved in
+\path{MIPStarRE/QPBT/Combining/Linearity/Extension.lean}.
+The ground-space comparison also retains the original operator: for a ground
+embedding $E$ it proves
+\[
+ \|(F_J(L)-F_{JE}(O))JE\psi\|^2=\|LE\psi-EO\psi\|^2,
+ \qquad F_J(A)=JAJ^\dagger+(I-JJ^\dagger).
+\]
+The declaration \path{linearity_padding_rounding_transport} applies the
+concrete Fourier--Naimark rounding to all fibers in the allocated expanded
+space with this single reservation. It preserves exact linearity, the identity
+at zero, and the averaged bound $2\mathbb E_x\delta_x$, with the explicitly
+transported density and comparator.
+
+This remains short of source absorption. The six-register state identity and
+all four placement comparisons have not been proved. The earlier binary
+orthonormalization must be chosen on the active subspace and its comparisons
+transported to the actual padded measurements. Finally the transported
+density and comparator in the rounding theorem must be identified with those
+of that construction. These are the remaining parts of
+\path{linearity_padding_absorption} under \ghissue{697}; no such theorem is
+assumed or marked as proved.
 
 \section{Direct construction of the combined points}
 \label{sec:direct-combined-points}

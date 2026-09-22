@@ -342,6 +342,136 @@ assembled by Fourier averaging.
 	averaged BLR estimate.
 \end{proof}
 
+\begin{lemma}[Reservation in the initial Boolean padding]
+	\label{lem:linearity-padding-reservation}
+	\lean{MIPStarRE.QPBT.linearity_padding_capacity}
+	\lean{MIPStarRE.QPBT.linearity_padding_ground_embedding}
+	\leanok
+	This formalization-only auxiliary concerns the initial construction of
+	Remark~\ref{rem:linearity-import}. For admissible parameters, put
+	$N=|\mathrm{PauliAnswer}|$, $q=2^t$, and
+	$K=\F_2^{2t}\sqcup\{\bot\}$. There is an injection
+	\[
+	 e:\operatorname{Option}(\mathrm{PauliAnswer})\times K
+	   \longrightarrow\{0,1\}^{N+1}
+	\]
+	whose restriction to the $\bot$ slice is the existing one-hot encoding
+	of the active Naimark coordinates. The injection depends only on the
+	parameters, before the state or the observable families are chosen.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The Pauli-outcome constructor and admissibility give
+	$N\geq q^{2^m}\geq q^2\geq4$. Hence
+	$(N+1)(q^2+1)\leq(N+1)^2\leq2^{N+1}$.
+	Choose an injection by this cardinality bound and compose it with a
+	permutation of the Boolean cube mapping its ground slice to the existing
+	one-hot encoding. Mathlib's extension of a bijection between finite
+	subsets supplies this permutation.
+\end{proof}
+
+\begin{lemma}[Bipartite state and initial measurement transport]
+	\label{lem:linearity-padding-initial-transport}
+	\lean{MIPStarRE.QPBT.linearity_padding_state_transport}
+	\lean{MIPStarRE.QPBT.linearity_padding_naimark_comparison}
+	\leanok
+	Let $G_A,G_B$ include the active Naimark spaces in the Boolean-padded
+	spaces and let $J_A,J_B$ be the reservations from
+	Lemma~\ref{lem:linearity-padding-reservation}. For every active bipartite
+	vector $\psi$,
+	\[
+	 (J_A\ot J_B)(\psi\ot\ket{\bot}\ot\ket{\bot})
+	   =(G_A\ot G_B)\psi,
+	\]
+	with the ancillary factors placed next to their respective players.
+	For the actual Option-indexed projective dilation, $G_A\ot G_B$ maps
+	its state to the initial Boolean-padded state, and each local effect
+	satisfies $M_{\rm pad}G=GM_{\rm Naimark}$ for every question and answer.
+	These are bipartite identities. They do not assert the six-register
+	transport or completion of the source's binary-rounding construction.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The two isometries agree on every ground coordinate. The initial
+	Boolean measurements are the active Naimark measurements in direct sum
+	with a fixed-outcome measurement, so they preserve the active summand.
+\end{proof}
+
+\begin{lemma}[Extending a projective measurement across a subspace]
+	\label{lem:linearity-padding-measurement-extension}
+	\lean{MIPStarRE.QPBT.linearity_padding_measurement_transport}
+	\leanok
+	For any finite-dimensional isometry $J:H\longrightarrow K$, projective
+	measurement $\{P_a\}$ on $H$, and distinguished outcome $a_0$, the effects
+	\[
+	 \widetilde P_a=JP_aJ^\dagger+mathbf{1}_{a=a_0}(I-JJ^\dagger)
+	\]
+	form a projective measurement on $K$ and satisfy
+	$\widetilde P_aJ=JP_a$. This auxiliary applies to the constructed
+	reservation with $a_0=0$; it assumes no transport identities.
+\end{lemma}
+\begin{proof}
+	\leanok
+	The range and complementary projections are orthogonal. Their sum is
+	the identity, and the complementary projection annihilates $J$.
+\end{proof}
+
+\begin{lemma}[Exact errors under isometric extension]
+	\label{lem:linearity-padding-error-transport}
+	\lean{MIPStarRE.QPBT.linearity_padding_error_transport}
+	\lean{MIPStarRE.QPBT.linearity_padding_average_error_transport}
+	\lean{MIPStarRE.QPBT.linearity_padding_ground_error_transport}
+	\leanok
+	For an isometry $J$, write
+	$F_J(A)=JAJ^\dagger+(I-JJ^\dagger)$. For arbitrary operators $A,B$ and
+	a vector $\psi$ in the source space,
+	\[
+	 \|(F_J(A)-F_J(B))J\psi\|^2=\|(A-B)\psi\|^2.
+	\]
+	This identity also holds after any two finite averages. More generally,
+	if $E:H_0\longrightarrow H$ is an isometry, $L$ acts on $H$, and $O$
+	acts on $H_0$, then
+	\[
+	 \|(F_J(L)-F_{JE}(O))JE\psi\|^2
+	   =\|LE\psi-EO\psi\|^2.
+	\]
+	This compares the original ground-space operator with the rounded
+	operator, including both complementary subspaces.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Use $F_J(A)J=JA$ and preservation of the norm by $J$, pointwise before
+	taking either average.
+\end{proof}
+
+\begin{lemma}[Rounding on the reserved expanded subspace]
+	\label{lem:linearity-padding-reserved-rounding}
+	\lean{MIPStarRE.QPBT.linearity_padding_rounding_transport}
+	\leanok
+	Fix admissible parameters and the reservation $J$ from the active
+	expanded space tensored with the common ancilla into the allocated
+	expanded space. The Pauli register is unchanged. For any density $\rho$
+	on the active expanded space and any fibers $O_x^u$ satisfying the
+	correlation premise of Theorem~\ref{thm:linearity} with error $\delta_x$,
+	there are binary observables $\widetilde L_x^u$ on the allocated space
+	with exact linearity, $\widetilde L_x^0=I$, and
+	\[
+	 \E_x\E_u d_{J(\rho\ot\ket{\bot}\bra{\bot})J^\dagger}
+	   (\widetilde L_x^u,F_J(O_x^u\ot I))^2
+	   \leq 2\E_x\delta_x.
+	\]
+	This auxiliary uses the explicitly transported density and comparator.
+	Their identification with the source binary construction on the four
+	placements remains an obligation of Remark~\ref{rem:linearity-import}.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Extend the concrete Fourier--Naimark rounded observables by the identity
+	on the complement. Multiplication and the identity are preserved.
+	The density-weighted squared errors are exactly preserved under
+	isometric conjugation, so the per-fiber estimate can be averaged.
+\end{proof}
+
 \begin{lemma}[Dimension obstruction for the full ancillary extension]
 	\label{lem:linearity-ancilla-dimension-obstruction}
 	\lean{MIPStarRE.QPBT.not_nonempty_linearity_ancilla_isometry}
