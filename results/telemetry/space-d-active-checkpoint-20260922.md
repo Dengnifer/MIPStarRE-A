@@ -190,3 +190,139 @@ and 679 completion. The 680 six-finding repair is fully prepared at
 `/tmp/main-space-d-fix680-prepared-20260922.md` but not admitted. This packet
 preserves the verified source-facing signatures and requires honest comparator
 drift reporting if the shared Fourier cleanup changes the registered closure.
+
+## Latest Review and Repair Ownership
+
+PR 678's first review completed adversely as 5274778156, with two audit-document
+findings: missing YAML metadata and an incorrect description of the paper's
+finite-field, positive-dimensional domain. It explicitly verifies the Lean
+prefix-rank lemma and provenance-only fixture changes. Main read the full review
+and prepared `/tmp/main-space-d-fix678-prepared-20260922.md`, a proposed
+300-second single-file repair with no new mathematics; it is not admitted.
+The RREF successor packet now also states the correct source-domain boundary.
+
+After that actual reviewer completion, main admitted the prepared six-finding
+680 repair through `/tmp/main-space-d-fix680-20260922.sh`, with900 seconds and
+checkpoint450, preserving the original source-facing statements and all earlier
+issue673 costs. Its worktree refreshed cleanly through normal guards. Current
+worker ownership is the 680 repair and the 679 completion. Both slots are in
+use; the next critical jobs are 669's fourth review after its new-head CI,
+the narrowly scoped 678 audit repair, and validation/publication of the two
+current authors' outputs. No final completion claim has been made.
+
+## Artifact Guide Checkpoint
+
+The 679 finisher completed successfully with the single-file guide commit
+`f3a5535337e7de2dcff3fec760e99dbf9adb52e0`. Its receipt and PR body are
+`/tmp/main-space-d-guide679-20260922-result.md` and
+`/tmp/main-space-d-guide679-pr.md`. Normal hooks and focused path, historical-pin
+and Markdown-link checks passed. This is not a new package or final-tree build.
+Main started `/tmp/main-space-d-publish679-20260922.sh` for guarded refresh,
+publication and complete CI; first independent review follows actual green CI.
+
+Main admitted `/tmp/main-space-d-fix678-audit-20260922.sh` in the released slot:
+300 seconds for the two audit-document findings only. Current worker ownership
+is 680's six-finding repair and 678's audit repair. The 669 final repair is
+published at `d9350aed3cd1c6355067db49d3ac188dad7171c8`; complete CI is running,
+with the fourth independent review still reserved for after it succeeds.
+
+The first commit of 679's generated last-message Markdown was refused for one
+two-space line ending. Before first publication, main removed those two spaces
+only from the presentation file. Its original cache copy and canonical raw
+JSONL remain unchanged. Normal whitespace hooks remain enabled; no published
+capture or historical session data was rewritten. The incident is in events.md.
+
+## Green Documentation Heads and Last Review Admission
+
+The 669 publication job finished with complete green CI at
+`d9350aed3cd1c6355067db49d3ac188dad7171c8`. Main admitted its fourth and last
+ordinary full review through `/tmp/main-space-d-review669-final-20260922.sh`,
+with900 seconds per phase. Canonical code/prose phases obey the shared cap;
+one can queue behind the still-running 680 repair. Account queue wait is not
+an extra model slot. No fifth full review is authorized.
+
+The artifact guide is published as PR 681 at
+`646eb9e27ffc56e4e9b9dd579a61809d22d401c8`, with complete green CI and no first
+review yet. The prepared independent-review wrapper now accepts 681 as well;
+admit it only after a real vacancy and frozen-head verification.
+
+The 678 audit repair completed as
+`87729390d048422ae6f720876f871b2f7a43e0e8`, changing only the audit. Both
+findings are addressed by the author, YAML/whitespace checks and normal hooks
+pass, and the worktree is clean. Main started
+`/tmp/main-space-d-publish678-auditfix-20260922.sh` for guarded refresh, build,
+publication and full CI. A second independent review is still required. The
+RREF correspondence remains open. Actual model work now is 680's repair and
+the admitted 669 review phases; 681 review and 678 re-review wait for capacity.
+
+## Prime Repair Committed
+
+The 680 author completed all six finding dispositions and committed
+`b3ec0041ebb7d27e569883bb86ea464ff02b2c88`, with a clean worktree. The receipt
+is `/tmp/main-space-d-fix680-20260922-result.md`. Shared finite-index character
+orthogonality now lives in `LDT/Preliminaries/FiniteFields.lean`; both prime and
+binary consumers use it. Focused type checks/builds, blueprint render, 2,124
+declaration resolutions, the scope-note PDF, both comparator drift checks and
+normal hooks passed. The source-facing signatures are unchanged.
+
+Canonical regeneration changed only four source-line comments in the QPBT
+Pauli fixture. The author reports no registered statement-closure change, no
+headline target change, no LDT-fixture change and no verification-pin change.
+Complete new-head CI and independent review must still verify the final patch.
+Main started `/tmp/main-space-d-publish680-repair-20260922.sh`: guarded refresh,
+locked full build, checked publication and full CI. It does not admit the second
+review automatically. Both available model slots are now allocated to 669's
+fourth-review phases; independent 681 review and 678/680 re-reviews are the next
+bounded jobs after real vacancies and exact-head green CI.
+
+## Artifact Review Admission
+
+At 07:01 UTC one 669 review phase had finished, leaving one live worker
+reservation and space-d enabled. Main admitted the prepared first independent
+681 review at `646eb9e27ffc56e4e9b9dd579a61809d22d401c8` through the canonical
+review wrapper, with900 seconds and the normal two-worker cap. The remaining
+669 phase keeps its slot. The 678 and 680 publication/build/CI jobs continue
+without models; their new-head re-reviews still require complete green CI.
+
+## Full Speed Owner Instruction and Successors
+
+At07:06 UTC main received the owner's full-speed instruction: every new
+subagent uses gpt-6-astra/ultra through the explicit hard/hard_review escalation
+with reason `owner 2026-09-22 full speed mode: all subagents on astra`.
+Existing Sol assignments finished with their original identity and costs.
+The owner-relayed handoff subsequently records six lanes, adjusted at07:09:46
+to space-d2, space-3 2, relay-1 2, with relay-3 out. The live rotation agrees;
+main did not alter keys, model defaults or caps. The shim selects a home.
+Builds remain on ghz under the machine-wide lock; no parked infra PR is needed.
+
+PR669's fourth and final ordinary review5275002951 at
+`d9350aed3cd1c6355067db49d3ac188dad7171c8` approves prose and confirms all prior
+findings resolved, but finds one theorem-index error. Main verified this exact
+head and its complete green CI, accepted F1, and created issue682 to correct
+the deltaQld_mono description and add deltaQld_mono_epsilon. Terminal
+adjudication defers only this documentation finding to682; no fifth full review,
+invented approval or current-head mutation is admitted. The artifact remains
+incomplete until the separately reviewed index correction lands. The frozen
+adjudication template is `/tmp/adjudication-669-template-20260922.md`.
+
+PR681's first independent review5275058228 found a missing Python dependency
+closure in the packaged blueprint audit and an incorrect physical-core count.
+Main admitted a600-second Astra repair in its existing worktree, retaining the
+900-second initial timeout,600-second finisher and first review. Ownership
+extends narrowly to the artifact allow-list/export rules and an extracted
+snapshot regression, alongside the guide. Packet:
+`/tmp/main-fullspeed-fix681-20260922.md`.
+
+Main also admitted the prepared1800-second canonical-complement proof successor
+in `.worktrees/issue-676-rref-correspondence-20260922`, based on PR678 head
+`bff84964581fd85bfa7d52d6a5fc97b1406d0df3`, warmed through worktree-setup.
+It proves the conventional RREF correspondence, including existence, without
+changing source semantics or adding completion marks. Publication waits for678.
+Prior900+385+480+300-second bounds and all actual charges remain attached;
+this is not a budget reset. Packet: `/tmp/main-fullspeed-rref676-20260922.md`.
+
+The issue682 index-only successor has its own worktree based on669's frozen
+head and a300-second bound; publication waits for669. The second independent
+678 and680 reviews are ready for admission as their complete new-head CI
+finishes. Review wrappers use Astra/hard_review and preserve their first rounds.
+No read-only reviewer may become a second author in either worktree.
