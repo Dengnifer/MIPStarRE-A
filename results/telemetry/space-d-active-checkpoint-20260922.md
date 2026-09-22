@@ -2432,3 +2432,15 @@ explicit ultra, one shared operator lock and the cap1 router, removes inherited
 effort/model/class overrides, creates an isolated worktree from actual main at
 admission, and retains all prior budgets. No models launch while the current
 review uses the slot. Main still owns publication, full CI and independent review.
+
+707's second combined review5281669767 then finished CHANGES_REQUESTED:
+code APPROVED0, prose two wording findings in chapter12 (software-consumer
+language and C3/formalization-status reporting inside the mathematical remark).
+The reviewer confirms the prior compression finding is fixed and reports0 new
+equivalence mismatches or stale marks. Required next step is a bounded prose
+repair and THIRD independent review, not proof work or another gate rewrite.
+709's second Sol review is now live, vendor PID4063193. Main has queued
+/tmp/main-sol-fix707-prose-round2-20260922.sh behind that actual review queue,
+using packet /tmp/main-fix707-prose-round2-20260922.md and one3600s Sol task.
+The queued721/720 author driver will refuse its prerequisite because707's
+combined review failed, preserving priority for707; no row author has started.
