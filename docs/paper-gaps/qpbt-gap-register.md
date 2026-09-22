@@ -124,7 +124,6 @@ an absent proof is not discharged by giving it a new name.
 
 | Target | Required mathematical content and affected entries |
 |---|---|
-| `canonicalComplement_eq_nonpivot_indices` | Identify the prefix-rank complement with the nonpivot standard-basis indices of the source reduced-row-echelon construction. The complementary-subspace theorem is already proved for the former. No executable Gaussian-elimination or complexity claim is certified by that theorem. |
 | `combineLine_reparameterization_of_projection` | Derive the affine compatibility parameters from the source projection-inclusion hypotheses, with a well-defined evaluation comparison for degenerate lines. `combineLinePoly_spec` currently takes those parameters and their compatibility as inputs. The global individual-degree bound is already proved, using the source condition `d>=1`. |
 | `combinedLines_field_consistency` | Relate the completed evaluated family in `CombinedLinesWitness` to the source field-valued comparison, including zero directions and its POVM/evaluation convention. The concrete unconditioned line measurement and its completed consistency are already proved. |
 | `subline_source_distribution_transport` | Relate carriers, evaluations, line laws, and the separate point marginals where the source law is defined. At unrestricted dimension `2m+2`, first resolve the undefined seed-index construction by separately authorized semantic work; do not add divisibility to the source theorem. |
@@ -133,6 +132,23 @@ an absent proof is not discharged by giving it a new name.
 | `tensor_code_strategy_of_ld_strategy`, `tensor_code_soundness_parameter_bound` | Construct the tensor-code pair measurements and exact sampled laws, bound rejection with the actual branch weights and zero directions, and absorb a valid choice such as `max(m^3 d,12m(d+1))`. These are source-import targets, not missing premises of the proved `exists_ld_soundness`. |
 | `linearity_padding_absorption` | Justify the source's use of a common ancillary register on a padded strategy, with state/measurement transport back to the prescribed spaces. Uniformity of the optional ancilla alone supplies no such transport. |
 | Nonempty-answer attainment adjudication | Settle the actual source-domain attainment assertion or provide a source-domain refutation and a correction meeting the unchanged adoption conditions. The existing empty-answer refutation settles only the larger Lean domain. |
+
+The former canonical-complement target is discharged by the RREF correspondence
+of issue #676 and the executable construction of issue #690.
+`gaussianElimination_of_linearIndependent` derives the reduced matrix, unchanged
+row span, and nonpivot correspondence from independent stored input rows.
+`gaussianElimination_cost_le_poly` bounds the program's charged field operations
+and equality tests by `n*(m+n+2*m*n)`. The model gives unit cost to field
+division, multiplication, subtraction, and equality; the construction uses
+bounded searches and materialized intermediate matrices. It applies over any
+field supplied with executable operations and decidable equality, without a
+bit-complexity or machine-instruction claim. The
+[integration audit](../../audits/2026-09-22_issue-690-canonical-integration.md)
+records the source comparison and focused evidence supporting the canonical
+definition's mark. Full CI, independent review, and merge of this adoption
+remain with main. The general-prime Pauli construction is also discharged,
+as recorded in its row above. All other construction targets and paper-gap
+statuses remain unchanged.
 
 For the five `pending` rows the remaining work is adoption/retention evidence,
 not a request to prove the refuted statement. In particular, any necessary
@@ -153,18 +169,21 @@ uniform seed, with the typed version first sampling the graph law. Defining
 the same sampling formula on arbitrary maps does not add a hypothesis or alter
 its restriction to CL maps.
 
-Accordingly, statement-level marks were added only to `def:cl-func`,
-`def:cl-dist`, `def:typed-cl-functions`, and `def:typed-cl-distributions`.
+At the issue #667 audit snapshot, statement-level marks were added only to
+`def:cl-func`, `def:cl-dist`, `def:typed-cl-functions`, and `def:typed-cl-distributions`.
 Their domains, quantifiers, output laws, and shared-seed dependence agree with
 the source; finite/decidable coordinate encodings and a nonempty graph edge set
 are faithful boundary conditions. No `uses` edge or proof-level mark changed.
-The linked nodes `def:canonical-complement`, `lem:canonical-complement`,
-`lem:qld-xz-lines`, `def:combine-map`, and `lem:qld-4-13` remain unmarked, with
-their precise discrepancies listed in the
+The other seven linked nodes were unmarked at that snapshot. Four now carry
+marks: `def:canonical-complement`, `lem:canonical-complement`,
+`def:generalized-pauli`, and `lem:pauli-observable-expansion`, as recorded above.
+The three remaining nodes `lem:qld-xz-lines`, `def:combine-map`, and
+`lem:qld-4-13` remain unmarked, with their precise discrepancies listed in the
 [exemption record](../completion/qpbt-leanok-exemptions.md).
 
-`texra-blueprint bbl` and `leanblueprint web` succeeded. `lake exe checkdecls
-blueprint/lean_decls` resolved all 2,116 names. The initial guarded invocation
+At that audit snapshot, `texra-blueprint bbl` and `leanblueprint web` succeeded.
+`lake exe checkdecls blueprint/lean_decls` resolved all 2,116 names.
+The initial guarded invocation
 with `--no-build` found the checker executable stale; the ordinary invocation
 rebuilt only that executable and succeeded. `lake env lean` succeeded for
 `Games/CondLinear.lean` and `Games/TypedCondLinear.lean`; neither file has a

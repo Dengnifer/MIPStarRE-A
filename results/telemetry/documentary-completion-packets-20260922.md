@@ -9,27 +9,29 @@ does not assert the printed intermediate is proved or alter the headline
 pauli_soundness statement.
 
 Each row is one independent 3600-second documentation packet and isolated
-worktree. Main admits at most three workers, all space-d/Astra/ultra, through
-dispatch.sh. Review remains independent and exact-head CI remains required.
+worktree. The owner's 17:27Z instruction now permits one Sol ultra worker on
+space-d through default dispatch/review routing. Previously admitted authors
+finish normally, with no continuation or new dispatch while any remain alive.
+Review remains independent and exact-head CI remains required.
 
-| Register row | Brief | Admission at 15:52Z |
+| Register row | Brief | Current disposition after the 17:27Z allocation change |
 |---|---|---|
-| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707, issue703; live continuation at a4782a5a. Also owns minimal common C3 protocol/checker support and review5280263427 F1. |
-| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 at4e2e7617 has green CI and first review5280897802. One documentation repair follows707's common gate correction; F2 makes completed point effects explicit. |
-| Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | Issue711; author completed2dd2d894 in952s, all four artifacts; publication/full CI/FIRST review tail admitted. |
-| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 admitted at0eb04963 after a real lane freed; canonical dispatch controls actual capacity. |
-| Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Prepared; PR699 merged as317aa9f4, no further proof. |
-| Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Prepared; PR702 refresh conflicts, deferred. |
-| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Prepared; PR706 closed unmerged after second review and the allowed continuation, branch preserved. Use only actual main. |
-| Pasting product error | /tmp/main-document-pasting-product-20260922.md | Issue712 completed099f4326 in1316s; now PR717 atba841d42 with detached CI/FIRST review pipeline. |
-| Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 prepared, not admitted. |
-| Subline claims | /tmp/main-document-subline-20260922.md | Prepared; PR696 merged045a657d with complete fresh CI and canonical approval carry. Use its actual merged direct-law statements; no further proof. |
+| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 atc9c6240c has green full CI. SECOND review5281669767 approves code with0 findings but requests two chapter12 wording repairs. One Sol prose repair is queued after709, then full CI and THIRD review. |
+| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 completes F2 and adds the source-node exemption. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
+| Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | PR715 at4ac910df has green CI; first review's sole finding is common707 support. Refresh/CI waits for merged707, then SECOND review. |
+| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af in1494s with one reasoned C4 exemption; publication/FIRST review waits for merged707. |
+| Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Issue718 completedc1bf9623 in785s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
+| Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Issue720 created; one default Sol3600s author queued after current707/709 reviews and subline721, requiring707 combined approval. PR702 remains closed unmerged; read actual main. |
+| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Issue719 completed76312c5f in1378s, four documentation artifacts and clean worktree. Publication/CI waits for merged707, then FIRST review. PR706 remains closed unmerged. No continuation. |
+| Pasting product error | /tmp/main-document-pasting-product-20260922.md | PR717 repair3671fec9 resolves the wording finding in535s. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
+| Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 completed6bb626c0 in1187s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
+| Subline claims | /tmp/main-document-subline-20260922.md | Issue721 created; one default Sol3600s author queued after current707/709 reviews, requiring707 combined approval. Includes its coordinated qld-xz-lines exemption. PR696 is merged045a657d; no further proof. |
 
 ## Blueprint nodes
 
 | Node | Separate brief | Exit |
 |---|---|---|
-| def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | Approved708 has one exemption-document refresh conflict. Documentation-only packet /tmp/main-document-canonical708-refresh-20260922.md follows710's terminal process; no algorithm proof continuation. |
+| def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | PR708 merged7b9dd8f2 at17:30:29Z after green exact-head CI and canonical independent-review carry5281456386. |
 | def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Preserve merged700 facts; explain source-function mismatch and exempt if unsupported. Do not resume698. |
 | lem:qld-xz-lines | /tmp/main-document-node-qld-xz-lines-20260922.md | Supported mark or reasoned completed-evaluation/source-law exemption; coordinate with subline row. |
 | lem:qld-4-13 | /tmp/main-document-node-qld-4-13-20260922.md | Explicit exemption for unasserted printed rate/carrier; coordinate with error row. |
