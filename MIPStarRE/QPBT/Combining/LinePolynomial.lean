@@ -97,4 +97,14 @@ theorem exists_combineLinePoly_of_projection_mem {K : Type*} [Field K] {m c : �
         (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m))
         f g hcompat t).2.2
 
+/-- A coefficient answer on a singleton line has value `a` precisely when
+its polynomial function on the parameter field is constantly `a`. Formalization
+support for the evaluation distinction in `def:combine-map`; see issue #695
+and `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. Constancy of the
+function does not assert that its formal polynomial has degree zero. -/
+theorem evaluatesTo_zero_direction_iff {L : LdParams} {c : ℕ}
+    (line : LineDesc L) (hdir : line.direction = 0) (f : DegPoly L c) (a : ScalarQ L) :
+    EvaluatesTo line f line.base a ↔ ∀ t : ScalarQ L, evalCoefficient f t = a := by
+  simp [EvaluatesTo, hdir]
+
 end MIPStarRE.QPBT
