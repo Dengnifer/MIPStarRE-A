@@ -507,3 +507,26 @@ continue the source-gap and final artifact work. The original unadopted
 polynomial/pasting corrections, remaining source-law obligations and final
 completion gate are still unresolved. Do not infer completion from the new
 algebra proof, the merged guide, or zero direct proof holes.
+
+## Latest Review Disposition
+
+PR680's THIRD review5275631270 at a6a8161d completed: code APPROVED; prose
+requests one final direct dependency link in chapter11's Fourier-expansion
+proof. Both phases confirm source-faithful mathematics and all prior findings
+resolved. Main admitted one300-second Astra repair, packet
+`/tmp/main-fullspeed-fix680-final-20260922.md`, runtime prefix
+`/tmp/main-fullspeed-fix680final-20260922`. It owns only the chapter11 uses
+entry and matching citation, referring to `lem:fourier-fact-finite-index`
+whose proof already records `prop:fourier-fact-vector`. Exactly ONE full
+independent review remains after complete new-head CI. Do not dispatch a fifth,
+fabricate carry across this repair, or reset any previous cost or finding.
+
+Issue684's reference repair is now PR686 at
+`114047649c158363407640da436b33bcc74ed0f2`, with complete CI running and its
+first independent review conditionally scheduled on success. The current
+685 first mathematical review remains live. PR681's service merge stage
+comment is5773319982; the683 merge stage comment is5773233630.
+
+The checkpoint/records publication after the681 race succeeded and aligned
+local/remote main at3e4b75ca with a clean checkout. Space-d was enabled at that
+census. New author/reviewer telemetry may subsequently add passive rows.
