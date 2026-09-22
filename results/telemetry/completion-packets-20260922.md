@@ -33,6 +33,8 @@ CI/review. The main checkpoint records live assignments.
    proposal to main for separate decision and review; do not add divisibility
    as a paper theorem premise. Subtasks: tensor-code strategy construction and
    actual weighted rejection/parameter bound.
+   Active owner for the source-import construction: issue704,3600s, preserving
+   the independent direct proof and the separate undefined2m+2 obstruction.
 4. **Linearity distance normalization.** NV eq(3)/Theorem10 and source14:711-725,
    thm:linearity. Exit: prove the exact normalized source comparison and all
    consumers, or document the necessary factor2 with minimality, printed-claim
@@ -75,6 +77,8 @@ CI/review. The main checkpoint records live assignments.
    source-domain refutation with a sufficient minimal correction meeting C3.
    Existing empty-answer counterexample and positive-slack theorem must remain
    distinguished from nonempty attainment. Verify both source consumers.
+   Active owner: issue703,3600s; all historical173/524/601 costs remain charged,
+   with no new axiom, source-domain weakening or preapproved terminal status.
 10. **Winning implications.** Source14:197-362, lem:qld-win-implications.
     Exit: source evaluation/acceptance correspondence including zero directions,
     corrected phase/index formulas and exact probabilities, complete consumer
@@ -100,6 +104,8 @@ CI/review. The main checkpoint records live assignments.
    no assumed bridge. Reuse approved685, not another RREF proof. Can close
    separately if the definition's algorithmic claim remains explicitly open.
    PR691's completed repair awaits new-head CI and second independent review.
+   Completed through third review5278739717 and service merge968b0cc3. The
+   separate algorithmic definition still awaits690's first independent review.
 3. **def:generalized-pauli.** Exit: all linked eigenvectors/projectors cover
    arbitrary prime characteristic and match source phases/domain. Completed
    by merged680; the current completion check confirms the node is marked.
