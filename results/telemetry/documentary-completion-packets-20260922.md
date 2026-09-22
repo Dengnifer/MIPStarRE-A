@@ -15,21 +15,21 @@ dispatch.sh. Review remains independent and exact-head CI remains required.
 | Register row | Brief | Admission at 15:52Z |
 |---|---|---|
 | Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707, issue703; live continuation at a4782a5a. Also owns minimal common C3 protocol/checker support and review5280263427 F1. |
-| Dimension divisibility | /tmp/main-document-dimension-20260922.md | Issue710; fresh branch issue-710-dimension-deviation-20260922 at ad44b372; live. |
-| Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | Issue711; fresh branch issue-711-square-root-deviation-20260922 at ad44b372; live. |
-| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Prepared, not admitted. |
+| Dimension divisibility | /tmp/main-document-dimension-20260922.md | Issue710 completed719815e9 in1323s with all four artifacts; publication/full CI/FIRST review detached. |
+| Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | Issue711; author completed2dd2d894 in952s, all four artifacts; publication/full CI/FIRST review tail admitted. |
+| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 prepared, not admitted. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Prepared; PR699 merged as317aa9f4, no further proof. |
 | Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Prepared; PR702 refresh conflicts, deferred. |
 | Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Prepared; PR706's completed prose repair goes through CI and one clean review if feasible. |
-| Pasting product error | /tmp/main-document-pasting-product-20260922.md | Prepared, not admitted. |
-| Winning implications | /tmp/main-document-winning-implications-20260922.md | Prepared, not admitted. |
+| Pasting product error | /tmp/main-document-pasting-product-20260922.md | Issue712 admitted from53d12daa; orc-712-20260923-01 now live after capacity became available. |
+| Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 prepared, not admitted. |
 | Subline claims | /tmp/main-document-subline-20260922.md | Prepared; PR696 approved at5b4e80f9, no further proof. |
 
 ## Blueprint nodes
 
 | Node | Separate brief | Exit |
 |---|---|---|
-| def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | Actual merged PR708 supports an honest unit-cost mark; otherwise reasoned exemption. |
+| def:canonical-complement | /tmp/main-document-node-canonical-20260922.md | Approved708 has one exemption-document refresh conflict. Documentation-only packet /tmp/main-document-canonical708-refresh-20260922.md follows710's terminal process; no algorithm proof continuation. |
 | def:combine-map | /tmp/main-document-node-combine-map-20260922.md | Preserve merged700 facts; explain source-function mismatch and exempt if unsupported. Do not resume698. |
 | lem:qld-xz-lines | /tmp/main-document-node-qld-xz-lines-20260922.md | Supported mark or reasoned completed-evaluation/source-law exemption; coordinate with subline row. |
 | lem:qld-4-13 | /tmp/main-document-node-qld-4-13-20260922.md | Explicit exemption for unasserted printed rate/carrier; coordinate with error row. |
