@@ -37,7 +37,7 @@ character in their statement types. -/
 noncomputable def phaseSign (t : ZMod 2) : ℂ :=
   if t = 0 then 1 else -1
 
--- source: MIPStarRE/QPBT/Algebra/Pauli.lean:353-359  (MIPStarRE.QPBT.singlePauliVec)
+-- source: MIPStarRE/QPBT/Algebra/Pauli.lean:313-319  (MIPStarRE.QPBT.singlePauliVec)
 /-- The single-qudit eigenvector coordinate used in the tensor-product basis;
 see `references/qpbt-paper/04_preliminaries.tex:1126-1161`. -/
 noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
@@ -46,7 +46,7 @@ noncomputable def singlePauliVec (W : PauliKind) (e x : K) : ℂ :=
   | .X =>
       (Real.sqrt (Fintype.card K : ℝ) : ℂ)⁻¹ * phaseSign (binTrace K (e * x))
 
--- source: MIPStarRE/QPBT/Algebra/Pauli.lean:361-370  (MIPStarRE.QPBT.pauliVec)
+-- source: MIPStarRE/QPBT/Algebra/Pauli.lean:321-330  (MIPStarRE.QPBT.pauliVec)
 /--
 The normalized single/multi-qudit eigenvector for a Pauli basis label.  For an
 index type `ι`, the input `e : ι → K` labels the tensor-product basis vector.
@@ -58,7 +58,7 @@ noncomputable def pauliVec {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (e : ι → K) (x : ι → K) : ℂ :=
   ∏ i : ι, singlePauliVec W (e i) (x i)
 
--- source: MIPStarRE/QPBT/Algebra/Pauli.lean:372-379  (MIPStarRE.QPBT.pauliProj)
+-- source: MIPStarRE/QPBT/Algebra/Pauli.lean:332-339  (MIPStarRE.QPBT.pauliProj)
 /--
 The rank-one projector onto `pauliVec W e`.  This is the projective measurement
 element `τ^W_e` in blueprint `def:generalized-pauli`; paper
@@ -68,7 +68,7 @@ noncomputable def pauliProj {ι : Type*} [Fintype ι] [DecidableEq ι]
     (W : PauliKind) (e : ι → K) : Op (ι → K) :=
   Matrix.vecMulVec (pauliVec W e) (fun x => star (pauliVec W e x))
 
--- source: MIPStarRE/QPBT/Algebra/Pauli.lean:506-514  (MIPStarRE.QPBT.eprState)
+-- source: MIPStarRE/QPBT/Algebra/Pauli.lean:466-474  (MIPStarRE.QPBT.eprState)
 /--
 The EPR vector on a finite label space.  Blueprint `def:EPR`; paper origin
 `references/qpbt-paper/04_preliminaries.tex:946-955`.

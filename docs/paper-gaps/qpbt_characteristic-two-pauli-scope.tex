@@ -15,10 +15,11 @@
   \item \textbf{Difficulty.} Medium.  The source-facing statements must retain
   arbitrary prime characteristic while the later Pauli basis test uses a
   separately named characteristic-two specialization.
-  \item \textbf{Estimated weight.} The binary specialization comprises
-  \textbf{10--15 private adapters} and roughly \textbf{250--400 lines} of formal
-  proof in one algebra file; the source-general identities remain a separate
-  formalization task.
+  \item \textbf{Estimated weight.} The completed extension is implemented in
+  \path{MIPStarRE/QPBT/Algebra/PrimePauliBasis.lean}.  It formalizes the
+  source-general eigenvectors, rank-one projectors, eigenvalue calculation,
+  projective-measurement facts, and both Fourier identities; the separately
+  named binary consumer layer is unchanged.
   \item \textbf{Mathlib/project split.} Mathlib supplies finite matrix algebra
   and finite-field facts; the generalized Pauli definitions and their
   characteristic-two specialization are project-local.
@@ -70,16 +71,28 @@ The formal definitions \path{primeTauShift}, \path{primeTauPhase}, and
 \path{primeTauObservable} use the canonical character \path{ffChar} in
 characteristic $p$.  Their theorem statements cover the product, power,
 unitarity, spectral, commutation, and cancellation identities for arbitrary
-$p$.  The source-general forward expansion and inversion do not yet have
-corresponding Lean declarations.  Neither do the common eigenbases
-$\{\ket{b_W}\}$ and the rank-one projectors $P^W_b$ of the same source
-definition: these are formalized only in the characteristic-two form, by
-\path{pauliVec} and \path{pauliProj}, whose phases are given by
-\path{phaseSign}.  The general definition is therefore covered in Lean by its
-shift, phase, and observable matrices alone.  The declarations whose names begin with
-\path{tauObservable} or use \path{phaseSign} instead specialize to $p=2$, where
-$\chi(x)=(-1)^{\operatorname{Tr}(x)}$.  This specialization is appropriate only
-for the subsequent test, whose admissible sizes satisfy $q=2^k$; it is not
+$p$.  The declarations \path{primePauliVec}, \path{primePauliFourier}, and
+\path{primePauliProj} give the common eigenvectors, the Fourier matrix, and the
+rank-one projectors of the same source definition.  In particular, the $X$
+vector uses the negative phase $\chi(-e\cdot x)$, while
+\path{primeTauObservable_mulVec_primePauliVec} proves the positive-phase
+eigenvalue $\chi(a\cdot e)$.  Orthonormality, projectivity, positivity, and
+completeness are proved by the accompanying declarations in
+\path{MIPStarRE/QPBT/Algebra/PrimePauliBasis.lean}.
+
+The source assumptions are that $p$ is prime, $K=\F_q$ is a finite extension
+of $\F_p$, and the many-qudit carrier has positive finite dimension.  Lean
+encodes these by \path{Fact p.Prime}, a finite field $K$ with an algebra from
+\path{ZMod p}, and a finite decidable coordinate type $\iota$; the two
+source-labelled Fourier identities additionally assume \path{Nonempty}, which
+is exactly the condition $n\geq 1$.  The Boolean basis parameter uses
+\path{true} for $X$ and \path{false} for $Z$.  These are boundary encodings of
+the source domain, not additional mathematical hypotheses.
+
+The declarations whose names begin with \path{tauObservable} or use
+\path{phaseSign} remain the separately named specialization to $p=2$, where
+$\chi(x)=(-1)^{\operatorname{Tr}(x)}$.  This specialization is appropriate for
+the subsequent test, whose admissible sizes satisfy $q=2^k$; it is not
 substituted for the general statements.
 
 In characteristic two, $-x=x$, so the negative phase in the inverse expansion
@@ -105,9 +118,13 @@ The source-general definitions and results are recorded in
 \path{def:generalized-pauli}, \path{lem:twisted-commutation}, and
 \path{lem:pauli-observable-expansion}. Their Lean declarations are \leanid{primeTauShift},
 \leanid{primeTauPhase}, \leanid{primeTauObservable}, and the accompanying
-product, power, unitarity, spectral, commutation, and cancellation theorems.
-They quantify an arbitrary prime characteristic and use the corresponding
-additive character.
+product, power, unitarity, spectral, commutation, and cancellation theorems,
+together with \leanid{primePauliVec}, \leanid{primePauliFourier},
+\leanid{primePauliProj}, and their orthonormality, eigenvalue, and projective
+measurement theorems.  The source-general forward expansion and inverse are
+\leanid{primeTauObservable\_eq\_sum\_primePauliProj} and
+\leanid{primePauliProj\_eq\_avg\_primeTauObservable}.  They quantify an
+arbitrary prime characteristic and use the corresponding additive character.
 
 The separately named binary declarations are used by the later QPBT chapters.
 In particular, \leanid{tauObservable\_eq\_sum\_pauliProj} is the forward
@@ -119,16 +136,17 @@ agree; the binary layer is a consumer specialization rather than a restriction
 of the source statement.
 
 \section{Conclusion}
-There is no mathematical restriction in the source-facing formal statements
-that exist: the shift, phase, and observable matrices retain arbitrary prime
-characteristic and the corresponding canonical character.  The eigenvectors and
-rank-one projectors of the same definition, however, exist only in the
-characteristic-two form, so the general definition is not yet covered in full.
-The characteristic-two declarations are separate corollaries for the QPBT
-parameter regime; the binary forward expansion and inversion are proved from
-the explicit matrices and character orthogonality.  The remaining work is to
-formalize and link the source-general eigenvectors, projectors, expansion, and
-inversion, and it does not require changing the binary operator definitions.
+The source-facing shift, phase, observable, eigenvector, Fourier-transform, and
+projector definitions all retain arbitrary prime characteristic and the
+corresponding canonical character.  Their orthonormality, projective
+measurement properties, eigenvalue identities, forward expansion, and Fourier
+inverse are proved from the explicit matrices and additive-character
+orthogonality.  The characteristic-two declarations remain separate
+specializations for the QPBT parameter regime, and no binary definition or
+consumer is changed by the source-general completion.  The corresponding
+register row therefore has terminal disposition \path{no-difference}: there is
+no mathematical discrepancy in the domains, phases, hypotheses, or conclusions
+of the source-facing statements.
 \bibliographystyle{alpha}
 \bibliography{references}
 \end{document}

@@ -71,6 +71,37 @@ Fix a prime power $q=p^t$. Write $\omega=e^{2\pi i/p}$, and let $\tr:\F_q\to\F_p
 	Proposition~\ref{prop:fourier-fact-scalar} shows that the $i$-th factor is $1$ when $v_i=0$ and $0$ otherwise, so the product is $1$ exactly when $v=0$.
 \end{proof}
 
+\begin{lemma}[Fourier orthogonality for a finite index set]
+\label{lem:fourier-fact-finite-index}
+	\lean{MIPStarRE.LDT.Preliminaries.expect_ffChar_sum_mul}
+	\lean{MIPStarRE.LDT.Preliminaries.sum_ffChar_sum_mul}
+	\leanok
+	\uses{def:ff-trace}
+	This auxiliary lemma is a finite reindexing of
+	Lemma~\ref{prop:fourier-fact-vector}, not a separate statement of the paper.
+	Let $F$ be a finite field of prime characteristic $p$, with its canonical
+	$\F_p$-algebra structure, and put $q=|F|$. Let $I$ be a finite index set,
+	possibly empty, and let $v\in F^I$. Write
+	$\chi(x)=\omega^{\tr[x]}$, where $\tr:F\to\F_p$ is the field trace.
+	Then the uniform expectation and the unnormalized sum satisfy
+	\[
+		\E_{u\in F^I}\chi\Bigl(\sum_{i\in I}u_i v_i\Bigr)
+		=\begin{cases}1&v=0,\\0&v\ne0,\end{cases}
+		\qquad
+		\sum_{u\in F^I}\chi\Bigl(\sum_{i\in I}u_i v_i\Bigr)
+		=\begin{cases}q^{|I|}&v=0,\\0&v\ne0.\end{cases}
+	\]
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{prop:fourier-fact-vector}
+	Choose a bijection from $I$ to $\{0,\ldots,|I|-1\}$, interpreted as
+	the empty set when $I$ is empty. Reindexing both vectors preserves their
+	dot product, the uniform expectation, and the condition $v=0$.
+	Lemma~\ref{prop:fourier-fact-vector} therefore gives the first identity.
+	Multiplying by $|F^I|=q^{|I|}$ gives the second.
+\end{proof}
+
 \begin{definition}[Low individual degree polynomials]\label{def:polyfunc}
 	\lean{MIPStarRE.LDT.Preliminaries.polyFunc, MIPStarRE.LDT.Polynomial}
 	\leanok
