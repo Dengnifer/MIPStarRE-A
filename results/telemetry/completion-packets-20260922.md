@@ -33,6 +33,8 @@ CI/review. The main checkpoint records live assignments.
    proposal to main for separate decision and review; do not add divisibility
    as a paper theorem premise. Subtasks: tensor-code strategy construction and
    actual weighted rejection/parameter bound.
+   Active owner for the source-import construction: issue704,3600s, preserving
+   the independent direct proof and the separate undefined2m+2 obstruction.
 4. **Linearity distance normalization.** NV eq(3)/Theorem10 and source14:711-725,
    thm:linearity. Exit: prove the exact normalized source comparison and all
    consumers, or document the necessary factor2 with minimality, printed-claim
@@ -59,6 +61,8 @@ CI/review. The main checkpoint records live assignments.
    688's evidence is published as692. Main admitted701 for the remaining
    prescribed-effect/one-way extraction and quantitative agreement construction,
    3600s with inherited costs and pending adoption preserved.
+   701 completed both constructions and necessity evidence at e0c8f4ce;
+   publication, complete CI, independent review and Main adoption remain.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -75,6 +79,8 @@ CI/review. The main checkpoint records live assignments.
    source-domain refutation with a sufficient minimal correction meeting C3.
    Existing empty-answer counterexample and positive-slack theorem must remain
    distinguished from nonempty attainment. Verify both source consumers.
+   Active owner: issue703,3600s; all historical173/524/601 costs remain charged,
+   with no new axiom, source-domain weakening or preapproved terminal status.
 10. **Winning implications.** Source14:197-362, lem:qld-win-implications.
     Exit: source evaluation/acceptance correspondence including zero directions,
     corrected phase/index formulas and exact probabilities, complete consumer
@@ -100,6 +106,8 @@ CI/review. The main checkpoint records live assignments.
    no assumed bridge. Reuse approved685, not another RREF proof. Can close
    separately if the definition's algorithmic claim remains explicitly open.
    PR691's completed repair awaits new-head CI and second independent review.
+   Completed through third review5278739717 and service merge968b0cc3. The
+   separate algorithmic definition still awaits690's first independent review.
 3. **def:generalized-pauli.** Exit: all linked eigenvectors/projectors cover
    arbitrary prime characteristic and match source phases/domain. Completed
    by merged680; the current completion check confirms the node is marked.
@@ -134,3 +142,36 @@ scripts/completion_gate.py check --track qpbt on the exact published commit.
 Retain the official comparator acceptance35638601720 and record677; any required
 pin update follows comparator rules, not an unrecorded local substitute. Only
 all passing completion criteria justify the final27 comment and goal pause.
+
+Issue705 is prepared after the repository rename to MIPStarRE-QPBT: update
+active artifact/workflow references and check anonymization of both aliases,
+while retaining historical evidence and accepted comparator pins. It has no
+worker admission yet and does not activate parked infrastructure PRs.
+
+## 2026-09-22 comparator-main and final-pin requirement
+
+The owner's new standing requirement supersedes the earlier final-comparator
+assumption. Comparator main must hold the latest officially verified challenge.
+After any new pin's official run passes, fast-forward comparator main to that
+challenge commit and update docs/comparator.md as the same operational step.
+At completion, independently verify that its library pin is the FINAL library
+artifact commit on main and comparator main is the exact challenge commit
+accepted by the official run. The historical ecb97d1f acceptance alone no
+longer satisfies that final condition. Preserve it as historical evidence.
+
+Current observed state: main360402fd, accepted by35638601720; its new main run
+35741427654 is in progress.705's URL-only comparator commit0f02b0b9 is on the
+diagnostic branch; run35742141249 is in progress. No promotion or new acceptance
+is claimed yet.705 is now an active worker; its earlier unadmitted description
+above is historical. Main owns verified promotion and the subsequent record,
+and the author must not race that operation. The final completion audit must
+bind the actual artifact commit, external pin, official run and comparator
+main explicitly; C5's delegated result is not proof of these equalities.
+
+705's author is now complete at664f5006 after2303s; publication/CI/review are
+pending. Its authored and anonymous exports built/scanned49 PDFs each with
+zero remaining leak findings, but one excluded-audit link and two LDT source
+locators still fail. /tmp/main-final-artifact-links-20260922.md is the prepared,
+unadmitted whole-task packet for those exact three findings. The final artifact
+must rerun the full export from the actual final commit; this earlier package
+is supporting evidence, not the final submission artifact.

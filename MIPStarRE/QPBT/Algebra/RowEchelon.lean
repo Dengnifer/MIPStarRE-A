@@ -10,11 +10,14 @@ definition of `canonicalComplement`.
 
 Independent input rows have such a matrix with the same row span and an
 invertible change of row basis. The pivot index set depends only on that span.
+An explicit row combination gives the complementary-subspace decomposition.
+The canonical complement has the asserted cardinality and independence, and
+for register subspaces it consists of the remaining standard basis vectors.
 
 The arbitrary-field and zero-dimensional cases are extensions of the paper's
 ambient convention of a finite field and positive ambient dimension. The results
-concern abstract existence and equality, not an executable elimination algorithm
-or its complexity.
+include an executable decomposition once an RREF matrix is supplied, but do not
+provide an executable elimination algorithm or a complexity theorem for finding it.
 
 ## References
 
@@ -256,5 +259,158 @@ theorem IsReducedRowEchelon.pivot_indices_eq_of_span_eq
   rw [hB.canonicalComplement_eq_nonpivot_indices,
     hD.canonicalComplement_eq_nonpivot_indices] at h
   exact compl_injective h
+
+/-- The row-span component used in the proof of paper `lem:canonical-complement`,
+`references/qpbt-paper/04_preliminaries.tex:357-371`. Given an RREF matrix and its
+pivots, its value at `x` is the row combination with coefficients `x (pivot i)`.
+This finite matrix product is executable; finding the RREF matrix is separate. -/
+def rowEchelonComponent (B : Matrix (Fin m) (Fin n) K) (pivot : Fin m ↪o Fin n)
+    (x : Fin n → K) : Fin n → K :=
+  Matrix.vecMul (x ∘ pivot) B
+
+/-- The explicit row combination belongs to the row span, without any RREF
+assumption. This supports the decomposition in paper `lem:canonical-complement`. -/
+lemma rowEchelonComponent_mem_span (B : Matrix (Fin m) (Fin n) K)
+    (pivot : Fin m ↪o Fin n) (x : Fin n → K) :
+    rowEchelonComponent B pivot x ∈ Submodule.span K (Set.range B.row) := by
+  rw [← range_vecMulLinear]
+  exact ⟨x ∘ pivot, rfl⟩
+
+/-- The explicit row component agrees with the input on every pivot coordinate,
+as required in paper `lem:canonical-complement`. -/
+lemma IsReducedRowEchelon.rowEchelonComponent_pivot
+    {B : Matrix (Fin m) (Fin n) K} {pivot : Fin m ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) (x : Fin n → K) (i : Fin m) :
+    rowEchelonComponent B pivot x (pivot i) = x (pivot i) := by
+  simp [rowEchelonComponent, Matrix.vecMul_apply_eq_sum, hB.pivot_entry]
+
+/-- Subtracting the explicit row component leaves a vector supported on the
+nonpivot coordinates. This is the constructive step of paper
+`lem:canonical-complement`, `references/qpbt-paper/04_preliminaries.tex:363-371`. -/
+lemma IsReducedRowEchelon.sub_rowEchelonComponent_mem
+    {B : Matrix (Fin m) (Fin n) K} {pivot : Fin m ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) (x : Fin n → K) :
+    x - rowEchelonComponent B pivot x ∈
+      registerSubmodule K (Finset.univ.image pivot)ᶜ := by
+  rw [registerSubmodule_eq_spanSubset]
+  apply Pi.mem_spanSubset_iff.mpr
+  intro j hj
+  have hj' : j ∈ Finset.univ.image pivot := by simpa using hj
+  obtain ⟨i, _, rfl⟩ := Finset.mem_image.mp hj'
+  simp [hB.rowEchelonComponent_pivot]
+
+/-- An RREF row span is complementary to the span of its nonpivot standard
+basis vectors. This auxiliary proves the decomposition and trivial intersection
+directly from the entrywise conditions, following paper `lem:canonical-complement`.
+The paper-facing theorem below derives these conditions from the input rows. -/
+theorem IsReducedRowEchelon.isCompl_span_nonpivot
+    {B : Matrix (Fin m) (Fin n) K} {pivot : Fin m ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) :
+    IsCompl (Submodule.span K (Set.range B.row))
+      (registerSubmodule K (Finset.univ.image pivot)ᶜ) := by
+  classical
+  constructor
+  · apply Submodule.disjoint_def.mpr
+    intro x hx hxC
+    rw [registerSubmodule_eq_spanSubset] at hxC
+    obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun K).mp hx
+    have hc0 (i : Fin m) : c i = 0 := by
+      have hx0 := Pi.mem_spanSubset_iff.mp hxC (pivot i) (by simp)
+      have hi := congrFun hc (pivot i)
+      simpa [Finset.sum_apply, Matrix.row, hB.pivot_entry, hx0] using hi
+    rw [← hc]
+    simp [hc0]
+  · apply Submodule.codisjoint_iff_exists_add_eq.mpr
+    intro x
+    exact ⟨rowEchelonComponent B pivot x, x - rowEchelonComponent B pivot x,
+      rowEchelonComponent_mem_span B pivot x, hB.sub_rowEchelonComponent_mem x,
+      add_sub_cancel _ _⟩
+
+/-- Paper `lem:canonical-complement`,
+`references/qpbt-paper/04_preliminaries.tex:342-373`: the span of independent
+input rows and the span of their canonical nonpivot standard basis vectors are
+complementary. RREF existence and correspondence with `canonicalComplement` are
+derived from row independence, not assumed. Arbitrary fields and zero ambient
+dimension extend the paper's domain. -/
+theorem isCompl_span_rows_canonicalComplement
+    (A : Matrix (Fin m) (Fin n) K) (hA : LinearIndependent K A.row) :
+    IsCompl (Submodule.span K (Set.range A.row))
+      (registerSubmodule K (canonicalComplement (Submodule.span K (Set.range A.row)))) := by
+  obtain ⟨B, pivot, _, _, _, hB, hspan, hC⟩ := exists_isReducedRowEchelon A hA
+  rw [hC, ← hspan]
+  exact hB.isCompl_span_nonpivot
+
+/-- The canonical complement of `m` independent rows has `n - m` coordinate
+indices, as asserted in paper `def:canonical-complement`. Distinct indices give
+distinct standard basis vectors. -/
+theorem card_canonicalComplement_span_rows
+    (A : Matrix (Fin m) (Fin n) K) (hA : LinearIndependent K A.row) :
+    (canonicalComplement (Submodule.span K (Set.range A.row))).card = n - m := by
+  obtain ⟨_, pivot, _, _, _, _, _, hC⟩ := exists_isReducedRowEchelon A hA
+  rw [hC, Finset.card_compl, Finset.card_image_of_injective _ pivot.injective]
+  simp
+
+/-- The standard basis vectors selected by the canonical complement are linearly
+independent, as asserted in paper `def:canonical-complement`. This is the
+restriction of Mathlib's standard basis independence theorem. -/
+theorem linearIndependent_canonicalComplement (W : Submodule K (Fin n → K)) :
+    LinearIndependent K
+      (fun j : (canonicalComplement W) => (Pi.single j.val (1 : K) : Fin n → K)) := by
+  exact (Pi.linearIndependent_single_one (Fin n) K).comp _ Subtype.val_injective
+
+/-- For a register subspace, the canonical complement consists of the remaining
+standard basis indices. This is the remark following paper
+`def:canonical-complement`, `references/qpbt-paper/04_preliminaries.tex:333-340`. -/
+theorem canonicalComplement_registerSubmodule (S : Finset (Fin n)) :
+    canonicalComplement (registerSubmodule K S) = Sᶜ := by
+  let pivot : Fin S.card ↪o Fin n := S.orderEmbOfFin rfl
+  let B : Matrix (Fin S.card) (Fin n) K := fun i => Pi.single (pivot i) 1
+  have hB : IsReducedRowEchelon B pivot := by
+    constructor
+    · intro i j
+      simp [B, Pi.single_apply, pivot.injective.eq_iff, eq_comm]
+    · intro i j hj
+      exact Pi.single_eq_of_ne (ne_of_lt hj) _
+  have hspan : Submodule.span K (Set.range B.row) = registerSubmodule K S := by
+    unfold registerSubmodule
+    congr 1
+    ext v
+    constructor
+    · rintro ⟨i, rfl⟩
+      exact ⟨pivot i, S.orderEmbOfFin_mem rfl i, rfl⟩
+    · rintro ⟨j, hj, rfl⟩
+      have hj' : j ∈ Set.range pivot := by
+        rw [Finset.range_orderEmbOfFin]
+        exact hj
+      obtain ⟨i, rfl⟩ := hj'
+      exact ⟨i, rfl⟩
+  rw [← hspan, hB.canonicalComplement_eq_nonpivot_indices]
+  rw [Finset.image_orderEmbOfFin_univ]
+
+/-- For a register subspace, its canonical complement spans its dot-product
+orthogonal. This is the second assertion of the remark following paper
+`def:canonical-complement`, `references/qpbt-paper/04_preliminaries.tex:333-340`. -/
+theorem registerSubmodule_canonicalComplement_eq_dotOrthogonal (S : Finset (Fin n)) :
+    registerSubmodule K (canonicalComplement (registerSubmodule K S)) =
+      dotOrthogonal (registerSubmodule K S) := by
+  rw [canonicalComplement_registerSubmodule, registerSubmodule_eq_spanSubset]
+  ext x
+  rw [Pi.mem_spanSubset_iff]
+  change (∀ j, j ∉ (Sᶜ : Finset (Fin n)) → x j = 0) ↔
+    ∀ v, v ∈ registerSubmodule K S → dotProduct x v = 0
+  constructor
+  · intro hx v hv
+    rw [registerSubmodule_eq_spanSubset] at hv
+    apply Finset.sum_eq_zero
+    intro j _
+    by_cases hj : j ∈ S
+    · rw [hx j (by simpa using hj), zero_mul]
+    · have hvj := Pi.mem_spanSubset_iff.mp hv j hj
+      rw [hvj, mul_zero]
+  · intro hx j hj
+    have hj' : j ∈ S := by simpa using hj
+    have hv : Pi.single j (1 : K) ∈ registerSubmodule K S :=
+      Submodule.subset_span ⟨j, hj', rfl⟩
+    simpa using hx _ hv
 
 end MIPStarRE.QPBT
