@@ -24,8 +24,10 @@ record. The policy that governs when a note must be written is
 the 21 current `qpbt_*.tex` notes one-to-one. This page is a summary of those
 notes, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `f976bec2`.
-Line numbers are from that commit.
+Except for the dated updates identified below, rows were checked against
+`github/main` at commit `f976bec2`, and Lean line numbers are from that commit.
+Section a2 was updated on 2026-09-23 against the unchanged Lean tree at
+`a4782a5acc1627ec7ab76cf67592fdd53bea535c`.
 
 ## How to read the table
 
@@ -75,17 +77,27 @@ proof debt.
 |---|---|
 | **Paper statement** | `lem:symmetric-strat`: the supremum defining `val*(G)` is *attained* by a symmetric projective strategy |
 | **Locator** | `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex`, chapter 6 lines 94–132 |
-| **What differs** | The source's argument establishes only the *approximate* form — for every slack there is a symmetric projective strategy within it. The printed attainment statement is additionally **false** on the Lean domain, which admits a game with an empty answer alphabet: at `ε = 1` no strategy exists at all. |
-| **Why** | A limit of symmetric projective strategies need not be a strategy, so the source's compactness step does not close; and the empty-answer game refutes the printed sentence outright. |
+| **What differs** | The source construction preserves the value of a given strategy exactly and proves a symmetric projective strategy exists within every positive slack of the supremum. It does not attain that supremum. The printed assertion is false even for nonempty finite alphabets by the external mathematical counterexample below; the separate Lean refutation uses empty answers. |
+| **Why** | The finite local dimension may grow without bound as slack tends to zero. The explicit symmetric game in the note has 419 questions, 16 answers, value one and no optimal finite-dimensional strategy. It is derived from Slofstra's particular binary linear-system game, with a specified normalized question law, Boolean predicate and symmetry conversion; non-closure alone is not used to infer a game counterexample. |
+| **External evidence** | [Slofstra, *The set of quantum correlations is not closed*, arXiv:1703.08618v2](https://arxiv.org/pdf/1703.08618v2), Theorem 1.1, Theorem 3.2, Proposition 3.4 and Proposition 5.1. This is mathematical source evidence, **not a Lean-certified nonempty refutation**. The preserved enumeration checks a 184-by-235 binary system with ranks 180 and 181 for the matrix and augmented matrix; those ranks exclude a classical solution, not a perfect quantum strategy. |
 | **Lean (printed form)** | `PrintedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:901` — a `Prop`, not a theorem |
-| **Lean (refutation)** | `not_forall_printedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:952`, from `SymmetrizationObstruction.emptyAnswerGame` |
+| **Lean (refutation)** | `not_forall_printedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:952`, from `SymmetrizationObstruction.emptyAnswerGame`. This certifies only the empty-answer obstruction, at `ε = 1`. |
 | **Lean (what is proved)** | `exists_symmetric_projective_strategy_approx`, `MIPStarRE/QPBT/Games/Symmetrization.lean:139`; slack form `exists_symmetric_projective_strategy_of_lt_value`, `Symmetrization.lean:110`; support node carrier `exists_symmetric_projective_strategy_of_strategy`, `StrategyClasses.lean:967` |
 | **Blueprint** | `lem:symmetric-strat` (corrected approximate form), `rem:symmetric-strat-limit`, `lem:symmetric-strat-printed-claim`, `lem:symmetric-strat-given-strategy`, in `blueprint/src/chapter/ch12_qpbt_games.tex` |
 | **Gap note** | [`qpbt_symmetrization-attainment.tex`](paper-gaps/qpbt_symmetrization-attainment.tex) |
-| **Printed-claim status** | **refuted** — the repository proves the printed sentence false. Tracked as issue #524. |
+| **Affected consumers** | Oracularization (`10_oracularization.tex:317-321`) needs only correlation- and rank-preserving Naimark dilation. Answer reduction's strict value input (`11_answer_reduction.tex:2322-2332`) uses positive slack, but its entanglement guarantee at lines 2110-2115 and 2995-2999 is unresolved: the role-register symmetrization doubles Schmidt rank. Compression (`13_gap_preserving_compression.tex:322`) explicitly consumes that guarantee as `Ent(V_n^(2),1-eps_2) >= Ent(V_n^(1),1-eps_1)` and is an affected **entanglement consumer**. Its full rank guarantee is not established by the separate value argument. No counterexample to either rank guarantee is claimed. |
+| **Printed-claim status** | **refuted mathematically on the nonempty source domain**, using the cited external theorem; **refuted in Lean only on the larger domain admitting empty answers**. The printed `Prop` remains unasserted. Tracked as issues #524 and #703. |
+| **Terminal status** | **documented-deviation**: the mathematical note, blueprint `rem:symmetric-strat-limit`, register row and this disclosure close documentation of the intermediate difference under the owner's 2026-09-22 instruction, "document, don't prove". This is neither proof of the printed claim nor adoption of the weaker result as `corrected`. |
 
 The earlier `sorry`-bearing theorem `exists_symmetric_projective_strategy` is
-**gone**.
+**gone**. The nonempty counterexample and its external group-representation
+theorem remain outside the Lean evidence. Answer reduction and compression
+are not formalized in this track, and their rank guarantees are unresolved by
+the documented argument. These limitations remain visible without requiring
+new proof work to close this intermediate documentation task. No headline
+theorem statement, proof or dependency changes; in particular,
+`pauli_soundness` remains proved at its printed statement. See the
+[audit and F1 correction](../audits/2026-09-22_issue-703-nonempty-attainment.md).
 
 ---
 
