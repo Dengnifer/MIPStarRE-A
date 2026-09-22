@@ -135,7 +135,7 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	\]
 	Equivalently, for every slack $\delta > 0$ there is a symmetric projective strategy of value at least $\operatorname{val}^*(\mathfrak G) - \delta$; that slack form is the Lean declaration \texttt{exists\_symmetric\_projective\_strategy\_of\_lt\_value}.
 
-	The source prints the conclusion at $\eps' = \eps$, that is, with the supremum attained. That form is not established by the argument below. The mathematical counterexample in \cite{gap:qpbt_symmetrization-attainment} also refutes it on the nonempty source domain; that counterexample uses an external theorem not yet formalized here. The separate empty-answer refutation is proved in Lean. Remark~\ref{rem:symmetric-strat-limit} distinguishes this evidence. The nonemptiness of $\mathcal A$ is displayed because the formal domain does not impose it. The formalization marks certify the approximate statement only; the intermediate discrepancy is recorded as a terminal documented deviation, not as proof of the printed endpoint.
+	The source prints the conclusion at $\eps' = \eps$, that is, with the supremum attained. That form is not established by the argument below. The mathematical counterexample in \cite{gap:qpbt_symmetrization-attainment} also refutes it on the nonempty source domain; that counterexample uses an external theorem not yet formalized here. The separate empty-answer refutation is proved in Lean. Remark~\ref{rem:symmetric-strat-limit} distinguishes this evidence. The nonemptiness of $\mathcal A$ is displayed because the formal domain does not impose it.
 \end{lemma}
 \begin{proof}
 	\leanok
@@ -173,8 +173,8 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	the state after that step does not by itself prove the printed bound for an
 	arbitrary original strategy.
 
-	Compression is an affected entanglement consumer: its argument explicitly
-	concludes
+	The compression argument also uses the answer-reduction entanglement
+	inequality. It concludes
 	\[
 		\operatorname{Ent}(V_n^{(2)},1-\eps_2)
 		\geq \operatorname{Ent}(V_n^{(1)},1-\eps_1)
@@ -188,14 +188,7 @@ We often specify symmetric games $\mathfrak G$ and symmetric strategies $\mathca
 	claim is at \path{references/qpbt-paper/11_answer_reduction.tex},
 	lines~2110--2115 and 2995--2999. No refutation of those rank claims is asserted.
 
-	The note, this remark, the register row and section a2 of
-	\path{docs/DEVIATIONS.md} record a terminal documented deviation under C3.
-	This classifies the intermediate difference without proving the printed
-	assertion, formalizing the external counterexample or adopting the weaker
-	approximate form as the endpoint theorem. The existing formalization marks
-	certify only their displayed proved forms. The source transformations just
-	discussed have no Lean consumers here; the headline Pauli soundness statement
-	and proof are unchanged.
+	Answer reduction and compression are not formalized here.
 \end{remark}
 
 % This node is not a statement of the paper: it is the Lean record of the printed
