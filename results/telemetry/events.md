@@ -9825,3 +9825,23 @@ historical entry above is rewritten.
   Keep the existing successful35638601720 evidence and do not promote until
   the corresponding new run actually passes. The final checklist now binds
   library artifact commit, pin, official run and comparator main explicitly.
+
+- 699's approved ancestor lacks691's actual source changes, so the live PAR0
+  daemon correctly leaves it unmerged. Main queued normal refresh/full CI and
+  strict canonical carry or THIRD review, with standalone merge only.706's
+  first review published four blueprint findings before the known operator
+  wrapper EOF; both reviewer outputs remain intact and one2700s repair owns
+  all findings.700's second review now approves0 findings;708 CI is active.
+- 705 completed2303s at664f5006. Both full artifact exports passed49 PDF/leak
+  checks but retain three real reference defects. Its40-file rename/fixture
+  diff passed869 hook tests and preserves mathematical/historical content and
+  comparator pins. Checked publication/full CI/first review are queued, and a
+  separate prepared packet addresses the exact remaining artifact references.
+
+- 705's normal refresh merged cleanly at126bde72, but its publication preflight
+  stopped because ignored blueprint/lean_decls did not exist. The new guarded
+  resume regenerates that list through the normal sync command before imports,
+  checked publication and complete CI. No source edit, hook bypass or model
+  repair is needed. Preserve the original failure and clean merge. A temporary
+  records train-guard exit3 cleared before the process census; a normal retry
+  published26b360ee without bypassing the guard or killing a process.
