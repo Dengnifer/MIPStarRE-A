@@ -9578,3 +9578,18 @@ historical entry above is rewritten.
   running. Source694/695 publications and all captures remain independently
   guarded. Previous cycle progressed through696 CI/axioms and clean telemetry
   e8e87554; current cycle progresses through author receipts and new admissions.
+
+- After the interruption, the12:09Z cycle verified the actual source publication
+  results:694 is PR699 at463feff4;695 is PR700 at8089cc88. Both have queued CI
+  under their existing main-ci claims. First697 task finished0 after2094s at
+  45039ea9 with three checked fixed-setting obstructions and a concrete initial
+  padding proposal. Main read the explicit prior-padding source passages and
+  admitted its single3600s continuation, prover-697-20260922-02. The stale retained
+  main-fix697 ownership was released/reclaimed only after successful completion
+  and a clean exact head were verified. 696 repair and698 construction remain
+  live. The interrupted turn was progress; no live job was restarted.
+- The delayed stage comment from the interrupted turn is5776169299. Normal
+  records published all retained source decisions and the continuation at
+  94f86baa with a clean primary. PR691's new-head CI steps have completed
+  successfully; required marked audit and second review are next in its existing
+  continuation. No manual merge, extra slot, alternate key or completion claim.

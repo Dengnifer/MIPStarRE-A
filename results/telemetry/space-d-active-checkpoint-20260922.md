@@ -1271,3 +1271,41 @@ existing repair691 pipeline. 692 and690 continue to wait on their explicit
 dependencies. 697 remains active; its intermediate output reports a checked
 fixed-space padding obstruction, but no completed receipt has yet been adopted.
 Prior stage5775834887 and telemetrye8e87554 were published cleanly.
+
+## 2026-09-22T12:09Z resumed pipelines and single697 continuation
+
+The interrupted turn was progress, with no killed/restarted model task. Its
+stage comment completed as5776169299. Verified publications: issue694 is PR699
+at463feff47f96c89ebbf238e60eac6d8af74bb9a2; issue695 is PR700 at
+8089cc881cbc495759018f097e4e8ca3545de421. Main-ci claims cover their queued full
+CI; existing runtime prefixes main-source-publish694/695 apply. Both ordinary
+checked pushes succeeded after private imports. Neither has independent review
+or source-gap adoption yet.
+
+First697 session finished0 after2094s at
+45039ea9bf8058b2b40fc8eb2aafbf57e3b3ce5c, clean. It proves dimension,
+full-support density and actual ProjectiveSetting obstructions to an automatic
+reserved zero factor, without refuting the source's INITIAL padding permission.
+Its concrete proposal preserves the active Naimark summand and embeds the
+common ancilla into the already allocated Boolean padding. The full absorption
+was not proved. Three auxiliaries have distinct scoped blueprint entries;
+the quotation row remains open. Receipt
+/tmp/main-fullspeed-linearity-padding-20260922-result.md contains the proposal,
+cardinality estimates, five named remaining targets and full historical costs.
+
+Main verified source14:166,371,832,1864 and admits the ONE3600-second continuation
+at45039ea9 to construct that reservation and its state/measurement/error
+transport. Actual prover-697-20260922-02, runtime
+/tmp/main-fullspeed-padding697-continue-20260922, packet
+/tmp/main-padding697-continuation-20260922.md. Keep unrestricted ProjectiveSetting,
+M, games and source quantifiers unchanged; no assumed capacity or transport
+certificate. No automatic further continuation. Existing main-fix697 ownership
+was replaced after verifying the original process was terminal and its tree clean.
+
+The other active assignments are blueprint-689-20260922-02 (696's single note
+defect) and prover-698-20260922-01 (source geometric functions). These are the
+only other space-d workers. PR691 all CI steps now report success at3ab2724f;
+the same repair691 pipeline posts the complete status, runs marked axioms and
+requests the second review. 692/690/source699/700 queues remain intact.
+All retained source decisions were published at94f86baa, clean, before this
+additional receipt. Artifact completion remains open under the unchanged gate.
