@@ -2677,18 +2677,29 @@ analyzed, together with candidate repairs, in
 
 \begin{remark}[The function domain of the combining map]
 	\label{rem:combine-map-function-domain}
-	Equation~\eqref{eq:combine-lines} is well defined for polynomial
-	functions on the geometric lines. The coefficient interpretation in
-	Remark~\ref{rem:deg-line-representatives} also admits answers that do
-	not define such functions, as the preceding lemma shows. Choosing an
-	affine parameter for a singleton does not resolve this discrepancy:
-	for $f(T)=T$, two constant parameter choices give different values.
+	The projection-inclusion hypothesis gives affine changes of parameter and
+	hence a coefficient polynomial of degree at most $md+1$ satisfying
+	Equation~\eqref{eq:combine-lines} in the line parameter. This does not yet
+	define the source operation on functions on the geometric lines. Indeed,
+	let $\ell_X=\ell_Z=\{0\}$, let the extended line have base
+	$u=(0,0,1,0)$ and zero direction, and, since $md\geq1$, take
+	$f(T)=T$ and $g(T)=0$.
+	Every affine parameter choice is compatible with the two projected
+	singletons. The choices $(a_X,b_X)=(0,0)$, $(1,0)$, and $(0,1)$ give,
+	respectively, the combined parameter polynomials $0$, $1$, and $T$.
+	The last polynomial has no value at the singleton extended point under the
+	evaluation relation of Definition~\ref{def:ideg-deg-polynomials}. Thus the
+	coefficient construction depends on choices on this enlarged domain and
+	need not descend to a function on the geometric line. This is not a
+	counterexample to Equation~\eqref{eq:combine-lines} for genuine functions:
+	$f(T)=T$ does not define a function on the singleton $\ell_X$.
+
 	There is also a distinction between formal representatives and their
 	functions even on a nondegenerate line: over $\F_q$, the distinct
-	polynomials $0$ and $T^q-T$ induce the same function. Thus the condition
-	in the preceding lemma is constancy as a function, rather than formal
-	degree zero. The geometric parameter construction does not by itself
-	establish the identification of these carriers; see
+	polynomials $0$ and $T^q-T$ induce the same function. Consequently a
+	function-valued construction must be independent both of affine parameter
+	choices and of polynomial representatives. The coefficient construction
+	does not by itself establish this descent; see
 	\cite{gap:qpbt_subline-claims-line-marginal}.
 \end{remark}
 
