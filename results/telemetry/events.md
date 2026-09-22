@@ -9695,3 +9695,14 @@ historical entry above is rewritten.
   cleanbb607c6f with its parent already merged; its old v3 waiter is terminal
   and needs a fresh publication admission, not a blind restart. All three
   model slots remain701/703/704; the700 repair waits actual space-d capacity.
+
+- The13:46Z cycle re-admitted690 publication independently after verifying
+  its cleanbb607c6f and actual merged691 parent. Normal refresh stopped on
+  three documentation conflicts, with HEADbb607c6f and MERGE_HEADc394da91.
+  Every proof and staged incoming file is preserved. A2700s integration-only
+  worker is queued to combine the algorithm/cost entries, reviewed parent
+  indices, merged Pauli coverage and accurate completion lists. It changes no
+  proof or source semantics and receives no new mathematical tranche. The
+  previous turn made progress through691 merge and702 CI; current progress
+  makes690's actual integration obstacle concrete and assigned. 702's live
+  build57s/render111s passed; independent CI and three source workers continue.

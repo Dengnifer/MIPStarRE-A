@@ -1661,3 +1661,37 @@ first702/second699 reviews remain in the tails. No conflict-delayed algorithm
 or review is in their build dependency chain. Active PIDs1915287/1915425 were
 verified, along with queued700 repair1915450 and model handles701/703/704.
 Space-d is enabled and no fourth worker was started.
+
+## 2026-09-22T13:46Z algorithm parent integration made concrete
+
+Verified cleanbb607c6f, retained main-fix690 and the actual merged691 parent;
+new /tmp/main-publish690-source-20260922.sh attempted normal publication
+independently of700. It STOPPED exit1 in a real merge before publication/CI.
+HEADbb607c6f82a9afe8b898c157e96269996ea53f2b; MERGE_HEAD
+c394da91813f1156c65b964e47f233042599119f. Exactly three UU paths:
+blueprint/src/chapter/ch11_qpbt_algebra.tex,
+docs/completion/qpbt-leanok-exemptions.md, docs/paper-gaps/qpbt-gap-register.md.
+All algorithm proofs and incoming staged files are untouched. Do not restart
+the clean-original-head publisher or any retired after691 waiter blindly.
+
+Queued2700s integration-only repair:
+/tmp/main-start690-merge-repair-20260922.sh, outer prefix
+/tmp/main-queued-fix690-parent-merge-20260922; packet
+/tmp/main-fix690-parent-merge-packet-20260922.md; worker prefix will be
+/tmp/main-fullspeed-fix690-parent-merge-20260922. On actual space-d capacity
+it checks exact parents and the complete UU list, then transfers retained
+main-fix690 to the repair. Preserve algorithm definitions/correctness/cost and
+marks, incoming691's reviewed row/column/pivot/prefix prose without Fin jargon,
+and merged Pauli evidence. Only three source obligations should remain listed
+in this algorithm branch: qld-xz-lines, combine-map and qld-4-13. Historical
+audit counts remain historical. No Lean proof edit, source/game change, new
+proof tranche, bit-complexity claim or exempted obligation is authorized.
+
+After a successful repair receipt, Main must use a NEW guarded exact-head
+publication tail, full CI/marked audit and FIRST independent algorithm review.
+The stopped source publisher's planned CI-after699 body has not run and is
+not a live queue entry. Keep its log/exit1.702/699-v2 CI remains independent
+and live;702 build57s and render111s passed.701/703/704 are the3 actual model
+slots; both700 and690 integration repairs and696's second review await space.
+Previous stage5777653085 and telemetryc394da91 are published cleanly. This
+cycle is progress, not a repeated impasse or a key failure.
