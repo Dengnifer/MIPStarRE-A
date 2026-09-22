@@ -370,7 +370,37 @@ Quantum soundness of a version of the classical low-degree test for polynomials 
 \end{proof}
 
 \begin{remark}[Relation to the low individual degree test of Chapter~\ref{chap:test}]\label{rem:ld-soundness-provider}
-	The printed proof of Theorem~\ref{lem:ld-soundness} uses an import: the proof above records the source's reduction to Theorem~4.7 of~\cite{Ji2021Quantum}, instantiated with that theorem's auxiliary parameter chosen as $m^3 d$ and followed by the extension to simultaneous $k$-tuples of~\cite{Natarajan2018NEEXP}, together with the two open facts required by the identification, which remain to be proved, --- the game correspondence and the parameter bound, detailed in~\cite{gap:qpbt_ld-dimension-divisibility}. The result of~\cite{Ji2020LowIndividualDegree} that underlies it is proved here as Theorem~\ref{thm:main-formal}: for every projective strategy passing the $(m,q,d)$ low individual degree test of Definition~\ref{def:low-individual-degree-test} with probability at least $1-\eps$, that theorem produces measurements in $\polymeas{m}{q}{d}$ satisfying consistency relations of the same shape as the three approximations of Theorem~\ref{lem:ld-soundness}. Theorem~\ref{lem:ld-soundness} is not a consequence of Theorem~\ref{thm:main-formal} alone: a derivation from it would require, in addition, an equivalence between the typed game $\mathfrak{G}^{\mathrm{ld}}_{(q,m,d,1)}$ and the $(m,q,d)$ test of Chapter~\ref{chap:test} --- matching the two question distributions, the two win conditions, and the two error functions --- together with the extension from $k = 1$ to general $k$ by the reduction of~\cite{Natarajan2018NEEXP} cited above. Proposition~\ref{prop:ld-simultaneous-general-k} establishes the directly indexed combining reduction for every $k$. Its correlated seed dilation preserves projectivity and value, and the two point/polynomial relations compress exactly. Point agreement and the Schwartz--Zippel bound for distinct polynomial tuples recover the global relation on the original spaces. The error is absorbed by replacing the direct constants $(a,b)$ by $(10a,b/2)$, proving Theorem~\ref{lem:ld-soundness} for every $k$ without invoking either open tensor-code assertion; the case $k=1$ is recorded separately in Theorem~\ref{lem:ld-soundness-k-one}. The printed tensor-code route above does not invoke Theorem~\ref{thm:main-formal}.
+	Theorem~\ref{lem:ld-soundness} is proved for every positive simultaneity
+	parameter $k$ on the original seed-indexed domain $m\mid q$. Its
+	formalized proof, recorded in Theorem~\ref{lem:ld-soundness-formalized},
+	uses the low individual degree theorem of~\cite{Ji2020LowIndividualDegree},
+	formalized as Theorem~\ref{thm:main-formal}, together with the directly
+	indexed strategy reduction and the combining construction of
+	Proposition~\ref{prop:ld-simultaneous-general-k}. At combined dimension
+	$M=m+k$ it uses the auxiliary integer $N=2560000M^3d$ and verifies the
+	condition $400Md\le N$. Correlated seed dilation preserves projectivity
+	and game value; the two point/polynomial relations compress exactly,
+	and point agreement and Schwartz--Zippel recover global consistency on
+	the original spaces. Replacing the direct constants $(a,b)$ by
+	$(10a,b/2)$ absorbs the resulting error.
+
+	The printed proof in~\cite{Ji2020MIPStar} takes a different route through
+	Theorem~4.7 of~\cite{Ji2021Quantum}. Its claimed game identification
+	requires a reduction from diagonal-line questions to hidden-subcube
+	pair questions, with the seed information and branch probabilities
+	accounted for. Its choice $K=m^3d$ must also meet that theorem's distinct
+	condition $K\ge12m(d+1)$, which fails at the small dimensions enumerated
+	in the proof above. Neither assertion is a hypothesis or a proved step
+	of the formalized soundness theorem.
+
+	The documented deviation in~\cite{gap:qpbt_ld-dimension-divisibility}
+	therefore distinguishes the established soundness statement from this
+	unverified source derivation. It also distinguishes both from the
+	use of a directly indexed auxiliary game at dimension $2m+2$, where
+	the original seed-indexed game is generally undefined
+	(Remark~\ref{rem:qld-4-7-divisibility}). Documentary closure of that
+	comparison supplies no proof of the printed import or of the
+	intermediate source-law assertions.
 \end{remark}
 
 % This remark records the formal status of the extension to general k;
