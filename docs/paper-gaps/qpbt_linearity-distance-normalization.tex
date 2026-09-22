@@ -15,11 +15,13 @@
 
 \title{Distance Normalization in the Quantum Linearity Theorem}
 \author{}
-\date{2026-09-22}
+\date{2026-09-23}
 
 \begin{document}
 \maketitle
-\gapnote{false-source}{wip}
+\gapnote{false-source}{resolved}
+\noindent Resolved by documentation; register status
+\texttt{documented-deviation}. The printed operator bound remains refuted.
 
 \section{At a glance}
 
@@ -43,9 +45,22 @@ The squared operator bound $2\delta$ is valid, and $2$ is the least universal
 multiplicative constant, even for positive index length and $0<\delta<1$.
 The sharpness argument below uses a family of Boolean quadratic functions;
 the four-point example alone only forces $4/3$. This is not a claim that the
-Fourier--Naimark construction minimizes the error for each input. The
-normalization row remains pending independent review and main adoption; the
-separate state-preserving padding question remains open.
+Fourier--Naimark construction minimizes the error for each input. This note
+closes the normalization discrepancy as a documented constant/convention
+deviation; it does not certify the refuted printed operator bound. The
+separate state-preserving padding question remains open. The corrected
+existence theorem, exact distance/defect identity, and four-point optimum
+are already formalized; the asymptotic sharpness argument is mathematical
+and is not claimed as a \Lean{} theorem.%
+\footnote{The normalization evidence of issue \#694 was merged in
+\href{https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699}{PR~\#699},
+commit \texttt{317aa9f4eb625f502043f57398e43f8e80201bf6}, before this
+documentation update. Under the owner's 2026-09-22 instruction, issue
+\href{https://github.com/Dengnifer/MIPStarRE-QPBT/issues/718}{\#718}
+closes only this row by documentation, superseding its earlier strict-adoption
+completion requirement without changing any theorem or asserting the printed
+claim. The earlier audit and budget evidence remain in
+\path{audits/2026-09-22_linearity-normalization.md}.}
 
 \section{Key theorem forms}
 
@@ -315,11 +330,11 @@ $C = \mathbb E_{a,b}\Re\tr(A(a)A(b)A(a+b)\rho)$ of the linearity test.%
 \leanid{exists\_exact\_boolean\_representation}. Both declarations are in
 \doclink{MIPStarRE/QPBT/Combining/Linearity/Stability.lean}; the blueprint
 records them as \texttt{lem:boolean-representation-stability}.}
-The source hypothesis $C \ge 1-\delta$ is therefore exactly the hypothesis of
-the stability theorem with $\eta = 2\delta$, and the theorem then yields the
-mean squared state-dependent operator distance bound $2\delta$: the corrected
-conclusion identified above, with no restriction on $\delta$ and no commutation
-assumption on the $A(a)$.  This reparameterization is the entire
+The source hypothesis $C \ge 1-\delta$ is therefore equivalent to the defect
+bound with $\eta = 2\delta$. For positive $t$ and nonnegative $\delta$, the
+stability theorem then yields the mean squared state-dependent operator
+distance bound $2\delta$, without an upper bound on $\delta$ or a commutation
+assumption on the $A(a)$. This reparameterization is the entire
 content of the repair, and the corrected source-facing statement
 \leanid{exists\_exactly\_linear\_observables} is obtained from
 \leanid{exists\_exact\_boolean\_representation} by substituting
@@ -378,9 +393,20 @@ The active blueprint's combined-point theorem has a direct field-valued
 proof. No \verb|\uses{}| edge leaves the linearity theorem, import remark,
 normalization remark, or common-ancilla lemma. The remaining references to
 these nodes explain their proof or distinguish the direct point construction;
-they are enumerated, together with the source applications and exact Lean
-caller set, in the accompanying audit.%
+they are enumerated, together with the source applications, in the earlier
+audit. In the current \Lean{} development, the operator-bound theorem is
+called only by its binary-measurement companion. The unrestricted and
+common-ancilla forms use the rounding identity directly and have no external
+callers. The combined-point and extended-point constructions instead use the
+independent field-valued measurement construction.%
 \footnote{\path{audits/2026-09-22_linearity-normalization.md}, issue \#694.
+The sole call to \leanid{exists\_exactly\_linear\_observables} is in
+\leanid{exists\_exactly\_linear\_observables\_binaryObservableDistSq};
+the unrestricted and common-ancilla forms are in the same
+\doclink{MIPStarRE/QPBT/Combining/Linearity.lean}.
+The independent declarations are \leanid{exists\_combinedPointsWitness} and
+\leanid{exists\_extendedQ} in
+\doclink{MIPStarRE/QPBT/Combining/Points.lean}.
 The separate quotation and padding note is
 \path{docs/paper-gaps/qpbt_linearity-theorem-quotation.tex}.}
 
@@ -396,9 +422,11 @@ the mean squared state-dependent operator distance even when arbitrary
 ancillary extensions are allowed.  The blueprint theorem and the formal
 declarations carry the corrected bounds, including the unrestricted numerical
 domain. The quadratic family proves optimality of the universal coefficient
-$2$, but does not make the construction optimal for each input. This is a
-proved correction proposed for independent review and main adoption; the
-register remains pending, and state-preserving padding remains open.
+$2$, but does not make the construction optimal for each input. The
+normalization row is terminal as \texttt{documented-deviation}: the corrected
+bounds are proved, while the printed operator bound remains refuted and its
+two propositions remain unasserted. This documentary closure does not settle
+state-preserving padding or certify other source-to-formalization comparisons.
 
 \bibliographystyle{alpha}
 \bibliography{references}
