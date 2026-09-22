@@ -51,6 +51,7 @@ import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
 import MIPStarRE.QPBT.Test.NonVacuity
 import MIPStarRE.QPBT.Combining.Defs
+import MIPStarRE.QPBT.Combining.LinePolynomial
 import MIPStarRE.QPBT.Combining.CombinedPolynomialImage
 import MIPStarRE.QPBT.Combining.ErrorBounds
 import MIPStarRE.QPBT.Combining.PassingError
