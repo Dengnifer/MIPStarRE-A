@@ -2592,3 +2592,24 @@ starts the unchanged /tmp/meta-auto-merge-v3.py only after it exits and no
 other supervisor exists. It refuses deliberate stop, paused/pause-now, daemon
 stop or retired-space-d markers; it clears none. This preserves continuous
 gating/staging without a duplicate supervisor, manual train or model request.
+
+## 2026-09-22T18:46Z: interrupted turn reconciled and next review queued
+
+The preceding interrupted turn made progress: the completed722 change was
+published as723, guarded documentary integrations were installed and tested,
+and supervisor renewal was admitted. Revalidated actual process handles after
+the interruption; no running CI or reviewer was restarted. Records completed
+normally to clean mainb7d9737b.
+
+The original supervisor ended normally; its unchanged replacement is actually
+live as PID394115. The renewal watcher reports that handoff and launched no
+model.707's third review remains live at6c5343c6 in the single space-d slot;
+723's full CI remains live at94a4bafe. Seven v3 publication-only tails remain
+live and still require actual707 merge. No key retirement marker is present.
+
+/tmp/main-review723-after-ci-v1-20260922.sh now waits for the actual723 CI
+parent355156 and a successful terminal receipt, then invokes default Sol
+review on exactly94a4bafe. The shared operator lock keeps it behind707's
+current review; it cannot bypass green CI or create a second model slot.
+Issues720/721 remain prepared but unstarted, and the final packaging/truthfulness
+and immutable comparator evidence sequence remains outstanding.
