@@ -2444,3 +2444,99 @@ repair and THIRD independent review, not proof work or another gate rewrite.
 using packet /tmp/main-fix707-prose-round2-20260922.md and one3600s Sol task.
 The queued721/720 author driver will refuse its prerequisite because707's
 combined review failed, preserving priority for707; no row author has started.
+
+## 2026-09-22T18:04Z: refresh709, repair707 committed, combine-map documentation admitted
+
+Previous goal turn classified as progress: issues720/721 were created,709's
+second review5281698617 approved0 findings and gated, and707's two prose
+findings were assigned to a default Sol worker. The row-author driver ended
+at its explicit707-approval prerequisite; neither720 nor721 has started.
+
+709 is objectively nonfresh on current main, and the model-free service was
+waiting for a partner/update. The owner-supplied precheck confirms a clean
+merge. New /tmp/main-refresh709-approved-sol-v2-20260922.sh claims709 and
+integrates main ascb22a7e962ec373d83f5270e7bfd7237982b42fa, then performs
+normal locked private build, publication and full exact-head CI. It attempts
+only strict identical-patch carry from the genuine SECOND review5281698617;
+if comparison refuses, it publishes no fabricated approval and leaves a
+READY_FOR_THIRD_DEFAULT_SOL_REVIEW receipt. No train is staged by main.
+
+707's prose worker orc-703-20260923-03 ended0 in393s at
+10a5c675058adb3218e124c73558583786cfdd80. Only chapter12 changed,4 additions
+and11 deletions; both wording findings were addressed. Web, sync, LaTeX lint,
+whitespace and normal hooks passed. The mathematical endpoint distinction,
+external-versus-formal refutation and unresolved rank claims remain explicit.
+Main inspected the diff and exact receipt. No theorem, mark, gate or row changed.
+
+/tmp/main-after-fix707-prose-v1-20260922.sh verifies terminal author success,
+the clean descendant commit, sole changed chapter12 file and unchanged Lean
+links/marks/labels/dependencies before integration. It has merged current main
+cleanly and entered the normal locked private build. Publication/full CI and
+THIRD independent default Sol review follow. Seven dependent row tails still
+wait for actual707 merge. All earlier failed checks and review evidence remain.
+
+The model slot became free during these builds. Created documentation issue722
+under173 for def:combine-map and admitted one3600s default Sol ultra task in a
+fresh issue-722-combine-map-documentation-20260922 worktree. Runtime prefix is
+/tmp/main-sol-document-combine722-20260922, using the node mode of
+/tmp/main-sol-document-row-v2-20260922.sh. The old node brief is the authority:
+preserve merged700 facts, document the source-function discrepancy, add its
+reasoned exemption, preserve all row statuses, no new proofs or698 continuation.
+The same operator lock and cap1 keep future707 review and this worker serialized.
+
+Issue722's actual Sol thread started as01a0ca49-ebbe-7032-b7e8-f00f56f53327.
+Both meta-records attempts returned3 because a live /tmp/tmpyygqm2h4/repo/
+local/bin/pr_train.py unit-test fixture matched the helper's conservative
+train guard. No guard was bypassed. Primary dirt consists only of the pending
+telemetry and the completed707 worker's preserved transcript/usage. The next
+quiet normal records cycle should publish it; no clean-main claim is made here.
+
+## 2026-09-22T18:11Z: fresh709 CI passes; final evidence contract made explicit
+
+Previous goal turn classified as progress:707's prose repair was committed and
+published at199f94a1a3941c0059184068265963920d58afa2 with full CI admitted;
+approved709 was refreshed and published atcb22a7e962ec373d83f5270e7bfd7237982b42fa;
+issue722 was created and its sole Sol documentation worker started.
+The pending telemetry has now been normally published asad537e33, clean.
+
+709's full CI manifest atcb22a7e9 is success, all eight steps complete. Its live
+model-free tail now performs the strict carry check; no carry result is yet
+asserted.707's full CI is still active. Issue722 remains the only model worker;
+its actual parent PID9308 and both CI-tail PIDs were rechecked live. No extra
+key, slot, proof work, train or unsupported approval was introduced.
+
+Reading the actual C5 protocol/checker and docs/comparator.md confirmed that
+the static record may name a verified ancestor, but the owner's final-pin
+requirement is stronger and still applies. Prepared
+/tmp/main-final-truthfulness-and-evidence-20260922.md for the already-required
+final truthfulness pass: preserve historical verification as history, explain
+immutable artifact evidence, update documentation before freezing the final
+library commit, and do not move that commit with a later metadata-only record.
+All actual final gates, delegated checks, snapshots and official comparator
+verification must identify that exact commit; no success or exception is assumed.
+
+709 subsequently passed strict carry5281874215 from its genuine second
+review5281698617 and merged at18:12:41Z as
+6bf80a37ffcd9eeea1891d8c333fd2e3b645dee0. The stage-boundary27 report is
+5781625794. No library PR was manually merged.707's complete CI at199f94a1
+also passed, and its THIRD review was queued behind the still-live722 author.
+
+Precheck against actual main after709 found exactly one707 merge conflict,
+docs/paper-gaps/qpbt-gap-register.md. Before any third reviewer started,
+main verified the pending review process group4119922 contained no model and
+stopped only that model-free queue; its green CI/evidence are retained.
+The replacement /tmp/main-refresh707-after-rename-v2-20260922.sh verifies
+the sole conflict and proves incoming register == merge-base register with
+only the already-approved repository URL substitution. It applies precisely
+that substitution to707's authored register, preserving its mathematics,
+then runs normal merge hooks/loss guard, new-head full CI and THIRD Sol review.
+At this checkpoint the guarded resolution passed and normal commit hooks run;
+no new review round has been consumed by the cancelled queue.
+
+The seven after707 publication-only tails still wait on actual707 merge.
+Their older authored registers can encounter the same rename overlap; inspect
+and preserve their mathematical changes when they integrate. Never edit a live
+Bash helper or silently discard a conflict. Issue722 remains the sole model
+worker and has reached web/sync/declaration checks on its three documentation
+files. Prepared720/721 are unstarted; final artifact/reference and truthfulness
+work remains as recorded above.

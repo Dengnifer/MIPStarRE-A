@@ -2,7 +2,7 @@
 
 Normative for the GitHub-backed issue and PR lifecycle and the automation in
 `local/bin/`; read `local/protocols/meta.md` first. The repository is
-`Dengnifer/MIPStarRE-A`, and GitHub is the **single source of truth** for
+`Dengnifer/MIPStarRE-QPBT`, and GitHub is the **single source of truth** for
 issues, PRs, CI and review evidence, and merges; CI and reviews still *execute*
 here and publish their results there. No active `issues/` or `prs/` tree, no
 shadow record, no write-through cache, no offline mutation mode: a GitHub error

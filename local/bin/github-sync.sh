@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # github-sync.sh — push the named refs to this repository's GitHub home,
-# git@github.com:Dengnifer/MIPStarRE-A.git (standalone repo since the
+# git@github.com:Dengnifer/MIPStarRE-QPBT.git (standalone repo since the
 # 2026-08-31 restructure; the old subtree-into-monorepo flow is retired, see
 # EVOLUTION.md), then refresh the read-only record snapshot.
 #
@@ -30,7 +30,7 @@ REFS=("$@")
 [ "${#REFS[@]}" -gt 0 ] || REFS=(main)
 
 git remote get-url github >/dev/null 2>&1 ||
-  git remote add github git@github.com:Dengnifer/MIPStarRE-A.git
+  git remote add github git@github.com:Dengnifer/MIPStarRE-QPBT.git
 
 RC=0
 MAIN_PUSHED=0

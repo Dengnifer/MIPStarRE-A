@@ -90,6 +90,15 @@ class GithubSyncTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.git("rev-parse", "main"), self.remote_ref("main"))
 
+    def test_missing_remote_uses_current_repository(self):
+        canonical = "git@github.com:Dengnifer/MIPStarRE-QPBT.git"
+        self.git("config", f"url.{self.remote}.insteadOf", canonical)
+        self.git("remote", "remove", "github")
+        result = self.sync("main")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.git("config", "--get", "remote.github.url"), canonical)
+        self.assertEqual(self.git("rev-parse", "main"), self.remote_ref("main"))
+
     def test_branch_only_never_publishes_main(self):
         result = self.sync("issue-1-example")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
