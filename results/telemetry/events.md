@@ -9431,6 +9431,17 @@ historical entry above is rewritten.
 - PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
 # 2026-09-22 Main Whole-Task Admission
 
+- CI680's complete cea8800e run failed only the cold axiom-audit fixture among
+  868 tests: outcome `error` instead of the expected `failure`. The fixture has
+  a300-second shared-build-lock wait; concurrent685's build took992s. An
+  isolated unchanged run passed in4.395s. Preserve full failed logs/manifest;
+  queue one complete refreshed retry after685 integration. No partial success
+  status, bypass or source repair is inferred from a passing isolated test.
+- Refreshed685 CI passed, but the operator's canonical dry-carry helper stopped
+  on its missing explicit ultra effort. No model review ran. A separate detached
+  continuation supplies the required effort, performs the marked-declaration
+  axiom audit and the same unchanged-patch carry. Preserve both helper results.
+
 - The09:14Z cycle harvested687's successful462-second author task at908df81c
   and started its model-free parent-merge/publication/CI/review watcher.
   Refilled the free lane with mathfix689, one3600-second tranche for the
