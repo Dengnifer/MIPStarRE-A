@@ -46,6 +46,7 @@ import MIPStarRE.QPBT.Observables.WinImplications
 import MIPStarRE.QPBT.Test.LowDegreeGameMeasurements
 import MIPStarRE.QPBT.Test.LowDegreeGameTheorems
 import MIPStarRE.QPBT.Test.MagicSquareTheorems
+import MIPStarRE.QPBT.Test.MagicSquareTheorems.PrintedClaim
 import MIPStarRE.QPBT.Test.Completeness
 import MIPStarRE.QPBT.Test.QubitForm
 import MIPStarRE.QPBT.Test.CanonicalParams
