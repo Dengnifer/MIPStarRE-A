@@ -2246,3 +2246,26 @@ and it is gated for a standalone service merge; no model review was fabricated.
 707's focused correction and709's single-conflict continuation are confirmed
 dispatched, alongside the remaining documentation review work. The main key
 is not retired. Stage27 remains5779697630 until the next actual stage boundary.
+
+696 is now confirmed service-merged at2026-09-22T16:35:32Z as
+045a657d696380b7e58d68427650465638bb9247. The new merge-boundary27 report uses
+marker main-696-merged-documentary-stage-20260922 and includes the row pipeline,
+706 deferral and outstanding final-artifact checks.713 was admitted at clean
+0eb04963283b74964a2f718813e879e742217010, which contains that merge, when709's
+documentation worker ended and the census showed a free model slot.
+
+709's ONE continuation completed0 in1081s at
+ef1667004b514b055f64104380a0b809532c122a. Its receipt proves the register equals
+the incoming blob with only the approved repository-URL replacement; all21
+statuses and mathematical prose are preserved. New source merges can recreate
+that same mechanical URL conflict. The detached
+/tmp/main-publish709-url-preserving-20260922.sh therefore verifies the sole
+conflict path and byte-for-byte branch=base+URL-only transformation before
+applying that exact transformation to the new incoming blob. Any other change
+fails closed. Normal hooks, merge-loss guard, complete CI and SECOND review
+still apply; no model continuation, mathematical edit or manual PR merge.
+
+The active source/documentation models and queued reviews remain capped at
+three through the space-d shim.707's focused gate repair and709's continuation
+were genuinely dispatched; the latter is now completed. Do not count waiting
+wrappers as active models or treat a quiet live process as stopped.
