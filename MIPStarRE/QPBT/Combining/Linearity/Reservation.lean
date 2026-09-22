@@ -1,5 +1,6 @@
 import MIPStarRE.QPBT.Observables.Setup
 import MIPStarRE.QPBT.Test.PauliBasisTest
+import MIPStarRE.QPBT.Test.Soundness.NaimarkReduction
 import Mathlib.Logic.Equiv.Fintype
 
 /-!
@@ -20,6 +21,8 @@ These are construction lemmas for blueprint `rem:linearity-import`, tracked in
 namespace MIPStarRE.QPBT
 
 open MIPStarRE.LDT
+open MagicSquareRigidity
+open scoped BigOperators
 
 /-- The existing Boolean allocation contains the active Naimark summand times
 the common ancilla for the group of field pairs. The estimate follows from the
@@ -83,5 +86,95 @@ theorem linearity_padding_ground_embedding (P : AdmissibleParams) :
     (fun _ _ h => congrArg Prod.fst (f.injective h))
     (optionBoolEmbedding (PauliAnswer P)).injective
   exact ⟨f.trans σ.toEmbedding, hσ⟩
+
+/-- The common ancillary index, chosen independently of the strategy and all
+families, inside the original Boolean allocation. -/
+noncomputable def linearityPaddingEmbedding (P : AdmissibleParams) :
+    (Option (PauliAnswer P) × Option (Fin (2 * P.model.basisDim) → ZMod 2)) ↪
+      (Fin (Fintype.card (PauliAnswer P) + 1) → Bool) :=
+  Classical.choose (linearity_padding_ground_embedding P)
+
+/-- The chosen reservation restricts to the existing Naimark encoding. -/
+@[simp] theorem linearityPaddingEmbedding_none (P : AdmissibleParams)
+    (a : Option (PauliAnswer P)) :
+    linearityPaddingEmbedding P (a, none) = optionBoolEmbedding (PauliAnswer P) a :=
+  Classical.choose_spec (linearity_padding_ground_embedding P) a
+
+/-- The Euclidean isometry induced by an injection of computational bases.
+Mathlib's orthonormal-basis construction supplies the norm preservation. -/
+noncomputable def indexEmbeddingIsometry {ι κ : Type}
+    [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
+    (e : ι ↪ κ) : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ κ := by
+  let b : OrthonormalBasis ι ℂ (EuclideanSpace ℂ ι) := EuclideanSpace.basisFun ι ℂ
+  let L : EuclideanSpace ℂ ι →ₗ[ℂ] EuclideanSpace ℂ κ :=
+    b.toBasis.constr ℂ (fun i => EuclideanSpace.single (e i) (1 : ℂ))
+  refine L.isometryOfOrthonormal (v := b.toBasis) b.orthonormal ?_
+  simpa [L, Function.comp_def] using
+    (EuclideanSpace.orthonormal_single (𝕜 := ℂ) (ι := κ)).comp e e.injective
+
+/-- The matrix of an index embedding has the corresponding coordinate columns. -/
+@[simp] theorem isometryMatrix_indexEmbeddingIsometry {ι κ : Type}
+    [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
+    (e : ι ↪ κ) (j : κ) (i : ι) :
+    isometryMatrix (indexEmbeddingIsometry e) j i = if j = e i then 1 else 0 := by
+  rw [isometryMatrix_apply]
+  change (indexEmbeddingIsometry e (EuclideanSpace.single i 1)) j = _
+  rw [← EuclideanSpace.basisFun_apply]
+  simp [indexEmbeddingIsometry]
+
+/-- The active Naimark coordinates in the initial padded local space. -/
+noncomputable def linearityActiveIsometry (P : AdmissibleParams) (ι : Type)
+    [Fintype ι] [DecidableEq ι] :
+    EuclideanSpace ℂ (ι × Option (PauliAnswer P)) →ₗᵢ[ℂ]
+      EuclideanSpace ℂ (ι × (Fin (Fintype.card (PauliAnswer P) + 1) → Bool)) :=
+  indexEmbeddingIsometry
+    ((Function.Embedding.refl ι).prodMap (optionBoolEmbedding (PauliAnswer P)))
+
+/-- The common reservation on a player's original space; no Pauli register is
+enlarged. Tensoring this isometry with its identity leaves `M = 2 ^ m` fixed. -/
+noncomputable def linearityReservationIsometry (P : AdmissibleParams) (ι : Type)
+    [Fintype ι] [DecidableEq ι] :
+    EuclideanSpace ℂ ((ι × Option (PauliAnswer P)) ×
+      Option (Fin (2 * P.model.basisDim) → ZMod 2)) →ₗᵢ[ℂ]
+      EuclideanSpace ℂ (ι × (Fin (Fintype.card (PauliAnswer P) + 1) → Bool)) :=
+  indexEmbeddingIsometry
+    ((Equiv.prodAssoc ι _ _).toEmbedding.trans
+      ((Function.Embedding.refl ι).prodMap (linearityPaddingEmbedding P)))
+
+private theorem linearityReservationIsometry_ground (P : AdmissibleParams) (ι : Type)
+    [Fintype ι] [DecidableEq ι] :
+    (linearityReservationIsometry P ι).comp
+        (naimarkEmbedding (ι × Option (PauliAnswer P))
+          (Fin (2 * P.model.basisDim) → ZMod 2)) =
+      linearityActiveIsometry P ι := by
+  apply LinearIsometry.toLinearMap_injective
+  apply Matrix.toEuclideanLin.symm.injective
+  change isometryMatrix ((linearityReservationIsometry P ι).comp _) = _
+  rw [isometryMatrix_comp]
+  change isometryMatrix (linearityReservationIsometry P ι) *
+    isometryMatrix (naimarkEmbedding _ _) = isometryMatrix (linearityActiveIsometry P ι)
+  ext j i
+  simp only [Matrix.mul_apply, linearityReservationIsometry, linearityActiveIsometry,
+    isometryMatrix_indexEmbeddingIsometry]
+  rw [Fintype.sum_prod_type]
+  simp [isometryMatrix_apply, naimarkEmbedding_apply]
+  rfl
+
+/-- Appending the common pure ancilla to the active bipartite state and then
+applying the reservation gives exactly its original Boolean embedding. This
+identity is valid for every active state, so in particular for the actual
+Option-indexed `pauliNaimarkStrategy`. It is the bipartite state-transport step
+of the construction in paper `14_analysis_of_the_pauli_basis_test.tex:825-832`.
+The six-register placements are separate transport assertions. -/
+theorem linearity_padding_state_transport (P : AdmissibleParams) (ιA ιB : Type)
+    [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]
+    (ψ : EuclideanSpace ℂ
+      ((ιA × Option (PauliAnswer P)) × (ιB × Option (PauliAnswer P)))) :
+    isometryTensor (linearityReservationIsometry P ιA)
+        (linearityReservationIsometry P ιB)
+        (naimarkDilatedState (Fin (2 * P.model.basisDim) → ZMod 2) ψ) =
+      isometryTensor (linearityActiveIsometry P ιA) (linearityActiveIsometry P ιB) ψ := by
+  rw [naimarkDilatedState, ← isometryTensor_comp,
+    linearityReservationIsometry_ground, linearityReservationIsometry_ground]
 
 end MIPStarRE.QPBT
