@@ -256,7 +256,7 @@ scaffolding work is a COST, not an achievement.  Binding rules:
 
 ## GitHub (the workflow authority as of 2026-09-01)
 
-The repository lives standalone at `Dengnifer/MIPStarRE-A` and holds every
+The repository lives standalone at `Dengnifer/MIPStarRE-QPBT` and holds every
 issue, PR and piece of evidence; the tooling adaptation is DONE — all traffic
 goes through `local/bin/gh_common.py`, and there is no local registry to keep.
 CI and reviews still EXECUTE locally on this server and publish exact-head
@@ -264,9 +264,9 @@ commit statuses: `local-ci/<step>` for the eight CI steps, `local-ci/summary`,
 and `local-review/summary` (see `local/protocols/issues-prs.md`).
 `local/bin/github-sync.sh` pushes after merges and writes the read-only
 snapshot under `results/telemetry/github-snapshot/` — forensics, never
-lifecycle input. The umbrella repo `Dengnifer/MIPStarRE-qpbt` and track B
-(`Dengnifer/MIPStarRE-B`, `/home/drx/MIPStarRE-auto`, a different agent)
-are not yours to modify.
+lifecycle input. Track B (`Dengnifer/MIPStarRE-B`, `/home/drx/MIPStarRE-auto`,
+a different agent) and other repositories are not yours to modify without
+explicit owner authorization.
 
 ## Where the project stands and what is next
 

@@ -453,7 +453,7 @@ Before writing a new lemma, spend one minute on:
 If Mathlib has it, use it. If it doesn't, consider whether the missing
 lemma should be upstreamed (file an issue against Mathlib, or at least a
 TODO pointing at the gap). The project already has this mandate — see the
-"Mathlib Integration" section of [`AGENTS.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/AGENTS.md):
+"Mathlib Integration" section of [`AGENTS.md`](https://github.com/Dengnifer/MIPStarRE-QPBT/blob/main/AGENTS.md):
 
 > Scout Mathlib first (`exact?`, `apply?`, `#find?`, grep Mathlib source)
 
@@ -519,7 +519,7 @@ If any answer is "no", the structure is an unacceptable smuggle.
 ### Current status (audited 2026-05-08)
 
 The May 2026 re-audit
-([`audits/2026-05-08_statement-smuggle-reaudit.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/audits/2026-05-08_statement-smuggle-reaudit.md))
+([`audits/2026-05-08_statement-smuggle-reaudit.md`](https://github.com/Dengnifer/MIPStarRE-QPBT/blob/main/audits/2026-05-08_statement-smuggle-reaudit.md))
 classified 39 `*Statement` structures (102 declarations total across the
 extended suffix sweep of `*Witness`/`*Conclusion`/`*Input`/etc.).
 

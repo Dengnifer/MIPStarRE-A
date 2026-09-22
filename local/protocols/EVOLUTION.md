@@ -1717,3 +1717,25 @@ generated tree rather than accepting a hand-written coverage list.
 challenge. A completion claim still requires the official comparator evidence,
 only the three permitted standard axioms, an ancestor-or-equal verified library
 revision and a passing drift check on the exact completion commit.
+
+## 2026-09-22 - Align active repository identity after rename (#705)
+
+**Trigger:** the owner's rename instruction, admitted issue #705 packet, and
+the 2026-09-22T14:39Z entry in `results/telemetry/events.md`. GitHub, queried
+through the primary `gh_common.py`, resolves both the old library alias and
+the former umbrella spelling to `Dengnifer/MIPStarRE-QPBT`.
+
+**Change:** update the current repository identity in `AGENTS.md`,
+`local/DESIGN.md`, `local/protocols/issues-prs.md`, and `local/personas/main.md`.
+The main persona and `local/protocols/completion.md` no longer describe this
+same repository as a separate umbrella outside the main session's scope;
+external repositories still require explicit owner authorization. Align the
+sync fallback, artifact metadata, site configuration, current documentation
+links, and test fixtures. Preserve owner-name anonymization for both aliases
+and cover the lowercase Pages host. Append this record without rewriting old
+protocol history, telemetry, paper mirrors, or accepted comparator evidence.
+
+**Expected effect:** new exports and workflow defaults use the canonical
+repository, historical and current identifying URLs remain anonymized, and
+the scope instructions distinguish the library from actual external
+repositories. No CI, review, merge, completion, or dependency-pin gate changes.

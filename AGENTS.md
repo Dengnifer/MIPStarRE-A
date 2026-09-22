@@ -14,7 +14,7 @@ track is the **quantum Pauli basis test (QPBT)** from *MIP\*=RE*
 (arXiv:2001.04383, primary) and *NEEXP in MIP\** (arXiv:1904.05870, secondary).
 
 CI, review, and auto-fix **execute locally**; issues, PRs, their evidence and
-merges live on GitHub (`Dengnifer/MIPStarRE-A`), reached only through
+merges live on GitHub (`Dengnifer/MIPStarRE-QPBT`), reached only through
 `local/bin/gh_common.py`. Read `local/README.md` and `local/DESIGN.md` before
 doing workflow actions; the `## Local Operations` section below summarizes the
 rules.
