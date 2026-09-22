@@ -528,9 +528,11 @@ this repository.
   indexed estimates, including the complex second claim, are proved.
 
 Row [c4](#c4-prime-characteristic-and-binary-pauli-scope) separately records
-source-general eigenvector and projector declarations that are absent rather
-than claimed or used. None of these remaining items is an assumption of the
-four headline results above. The raw-effect discrepancy of
+the general-prime eigenvectors and projectors defined by `primePauliVec` and
+`primePauliProj`, together with their proved Fourier identities; its verdict
+is `no-difference`. The binary declarations remain characteristic-two
+specializations. None of the remaining open items above is an assumption of
+the four headline results. The raw-effect discrepancy of
 [d3](#d3-raw-prescribed-answer-effects-in-the-soundness-conclusion) is not on
 this list because its transfer is proved.
 

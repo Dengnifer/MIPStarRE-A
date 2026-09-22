@@ -51,16 +51,6 @@ noncomputable def primePauliProj {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
   Matrix.vecMulVec (primePauliVec (p := p) W e)
     (fun x => star (primePauliVec (p := p) W e x))
 
-/-- An additive character sends a finite sum to the product of its values. -/
-private theorem addChar_sum {A M ι : Type*} [AddCommMonoid A] [CommMonoid M]
-    [Fintype ι] (ψ : AddChar A M) (f : ι → A) :
-    ψ (∑ i, f i) = ∏ i, ψ (f i) := by
-  classical
-  induction (Finset.univ : Finset ι) using Finset.induction_on with
-  | empty => simp
-  | @insert i s hi ih =>
-      rw [Finset.sum_insert hi, Finset.prod_insert hi, AddChar.map_add_eq_mul, ih]
-
 /-- Sum form of Fourier orthogonality on an arbitrarily indexed finite power. -/
 private theorem sum_ffChar_dotProduct {p : ℕ} {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
@@ -223,7 +213,10 @@ private theorem primeTauObservable_Z_apply {p : ℕ} {K ι : Type*} [Field K]
       if x = y then ffChar (p := p) (F := K) (dotProduct a y) else 0 := by
   change (∏ i : ι,
     if x i = y i then ffChar (p := p) (F := K) (a i * y i) else 0) = _
-  rw [Fintype.prod_ite_zero, ← addChar_sum]
+  have hchar := map_prod (ffChar (p := p) (F := K)).toMonoidHom
+    (fun i => Multiplicative.ofAdd (a i * y i)) Finset.univ
+  simp only [AddChar.toMonoidHom_apply, toAdd_prod, toAdd_ofAdd] at hchar
+  rw [Fintype.prod_ite_zero, ← hchar]
   have hsupport : (∀ i, x i = y i) ↔ x = y :=
     (funext_iff (f := x) (g := y)).symm
   simp only [dotProduct, hsupport]
