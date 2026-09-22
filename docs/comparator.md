@@ -94,20 +94,50 @@ with `--challenge qpbt`.
 
 ### Current verification status
 
-At library commit `a534c7f97ba34fd561ae03134f90b81ee4e395c1`, generation and
-elaboration of this four-target tree passed, as did the canonical local CI
-contexts.  Those checks establish that the generated challenge and library
-compile.  They do **not** establish equality of every declaration in the union
-of the four statement closures.  In particular, equality of the generated
-private auxiliaries reached through the completeness target remains
-unestablished.
+On September 21, 2026 UTC (September 22, 2026 JST), official comparator
+[run 35638601720](https://github.com/Dengnifer/QPBT-comparator/actions/runs/35638601720)
+([job 106462118372](https://github.com/Dengnifer/QPBT-comparator/actions/runs/35638601720/job/106462118372))
+completed successfully at QPBT-comparator commit
+`360402fdf4a39399f94331452d6e5d0a35c144be`.  Both `lakefile.toml` and the
+manifest's `rev` and `inputRev` pinned library commit
+`ecb97d1f66eec1e6fad964f144f78b91ce1fab36`, the merged-main result of PR 671.
+The run's configuration named all four targets above, enabled nanoda, and
+permitted exactly `propext`, `Quot.sound`, and `Classical.choice`.
+Preliminary run 35621468975 at unmerged library commit
+`a3683e9b75da4aeb52174af2cccacfde606361ce` is not evidence for this record.
 
-The following checks are still pending for the four-target configuration:
+The workflow used Lean `v4.32.0` and the official comparator tag at
+`07bc4ea40f2266dcb861820a2ec1fa3244ed307f`, with landrun pinned at
+`c91b41ac6cb180e2fdcb989408dcde34449bd8b0` and nanoda pinned at
+`f58f2f6d535e189a40fcb02ede8eb95f97a92d37`.  It invoked `./verify.sh` without
+`--fake-landrun`, required the real `landrun` executable, and ran
+`lake env comparator comparator.json`.  The retained log exports all four
+theorem names from both `Challenge` and `Solution`, then records that the nanoda
+kernel and Lean's default kernel each accept the solution.  This establishes
+equality of the complete union of the four statement closures at the verified
+library commit.  Before that run, PR 671 either eliminated the earlier private
+and compiler-generated blockers from the closure or made the affected closure
+declarations public.  The successful comparison verifies the resulting current
+closure; it did not compare those former blockers under their old names.
 
-- an official comparator run establishing all-four closure equality;
-- equality of the private and compiler-generated completeness auxiliaries;
-- real-landrun verification with nanoda enabled; and
-- a challenge-repository pin to the verified commit after it reaches `main`.
+The completion gate reads the following record.  For an exact-head QPBT
+completion claim, C5's delegated evidence must include a passing drift check
+from CI on that same commit; carrying this documentation record alone does not
+select the comparator build step.
+
+<!-- completion-gate: track=qpbt -->
+- challenge-repository: https://github.com/Dengnifer/QPBT-comparator
+- verified-library-commit: ecb97d1f66eec1e6fad964f144f78b91ce1fab36
+- expected-challenge: scripts/comparator/expected/qpbt
+- drift-check: scripts/comparator/check_challenge_drift.py
+- covered-theorems: MIPStarRE.QPBT.pauli_soundness, MIPStarRE.QPBT.pauli_soundness_qubit, MIPStarRE.QPBT.exists_spcc_value_one, MIPStarRE.QPBT.exists_ld_soundness
+
+Comparator acceptance is a closure-equality result, not a source-faithfulness
+certificate.  It does not prove that the trusted challenge faithfully states
+the QPBT paper, settle completion criteria C3 or C4, perform the final artifact
+build, or establish that the QPBT track is complete.  Any later change to the
+statement closure requires regeneration, a passing drift check, and a new
+official comparator run before this verification claim can be advanced.
 
 There is a narrower historical result.  At commit
 `4aec9ebedf6ca401e3f2d7b4bd90bd565d38f90d`, the split challenge configured
@@ -152,7 +182,8 @@ are protected independently by the baseline regression described in
 `scripts/comparator/README.md`.
 
 No public statement of any of the four targets changed as part of this
-comparator alignment.  Comparator equality remains pending as described above.
+comparator alignment.  The official run above established comparator equality
+for the verified merged-main library commit.
 
 The "do not narrow this import" notes on the shared base modules
 (`MIPStarRE/LDT/Basic/ParametersBase.lean`,
@@ -180,7 +211,9 @@ the Pauli basis test it defines — `pauliQuestionDistribution`,
 `QubitSoundnessWitness` package isometries and an auxiliary state without
 smuggling in a hypothesis; and that `Strategy.value` and the operator
 distances mean what their names claim.  Agreement of the remaining declarations
-is exactly what the pending four-target comparator run must establish.
+was established by the four-target comparator run above; their intended
+mathematical meaning and agreement with the cited paper remain matters for
+source comparison and review.
 
 ## Benchmark use
 

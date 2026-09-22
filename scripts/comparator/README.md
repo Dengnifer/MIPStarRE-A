@@ -143,14 +143,10 @@ tree, into the matching comparator repository. Bump the `rev` pin in its
 `lakefile.toml` and `lake-manifest.json` to the library commit from which it was
 generated, and run its `./verify.sh` (its CI also runs on every push).
 
-The four-target tree checked in at
-`a534c7f97ba34fd561ae03134f90b81ee4e395c1` generated and elaborated, and the
-canonical local CI contexts passed.  This is not yet comparator acceptance:
-all-four closure equality, equality of the private completeness auxiliaries, a
-real-landrun run with nanoda, and a verified merged-`main` pin remain pending.
-The only comparator acceptance recorded so far is the narrower historical run
-at `4aec9ebedf6ca401e3f2d7b4bd90bd565d38f90d`, whose configuration contained
-only `pauli_soundness` and `pauli_soundness_qubit` and used fake landrun.
+Comparator verification status is maintained in `docs/comparator.md`, including
+the exact four-target run, merged-main library pin, real-landrun and nanoda
+evidence, and trust qualifications.  This operational README documents
+generation and deliberately does not duplicate mutable acceptance status.
 
 ## Maintenance notes
 
