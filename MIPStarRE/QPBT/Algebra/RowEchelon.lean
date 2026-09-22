@@ -91,4 +91,38 @@ lemma IsReducedRowEchelon.prefixRank_eq_card
   rw [hspan, finrank_span_eq_card hb]
   exact Fintype.card_coe s
 
+/-- The intrinsic canonical complement of the row span of an RREF matrix is
+exactly its nonpivot index set. This identifies the index sets underlying paper
+`def:canonical-complement`, independently of an elimination algorithm. -/
+theorem IsReducedRowEchelon.canonicalComplement_eq_nonpivot_indices
+    {B : Matrix (Fin m) (Fin n) K} {pivot : Fin m ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) :
+    canonicalComplement (Submodule.span K (Set.range B.row)) =
+      (Finset.univ.image pivot)ᶜ := by
+  classical
+  ext j
+  simp only [canonicalComplement, Finset.mem_filter, Finset.mem_univ, true_and,
+    hB.prefixRank_eq_card, Finset.mem_compl, Finset.mem_image]
+  constructor
+  · intro hcard hpivot
+    obtain ⟨i, hi⟩ := hpivot
+    have hsub : (Finset.univ.filter fun a => (pivot a).val < j.val) ⊆
+        (Finset.univ.filter fun a => (pivot a).val < j.val + 1) := by
+      intro a ha
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ha ⊢
+      omega
+    have heq := Finset.eq_of_subset_of_card_le hsub hcard.le
+    have hi' : i ∈ Finset.univ.filter fun a => (pivot a).val < j.val + 1 := by
+      simp [hi]
+    rw [← heq] at hi'
+    simp [hi] at hi'
+  · intro hpivot
+    congr 1
+    ext i
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    have hne : (pivot i).val ≠ j.val := by
+      intro h
+      exact hpivot ⟨i, Fin.ext h⟩
+    omega
+
 end MIPStarRE.QPBT
