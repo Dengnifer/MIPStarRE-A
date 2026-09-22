@@ -9681,3 +9681,17 @@ historical entry above is rewritten.
   weaker theorem, external axiom, game change or automatic continuation was
   authorized. The previous turn progressed through two completed repairs,
   published tails and the diagnosed700 freshness refresh.
+
+- Later in that cycle, the700 refresh exposed a genuine one-file completion-
+  record conflict after691 merged: HEAD8089cc88, MERGE_HEAD5e6e5d0a. The refresh
+  stopped before publication, and dependent690/702/699 waiters correctly exited1
+  without running CI. Main verified terminal handles and untouched published
+  heads, retained every failed log and staged file, and queued a2700s merge-only
+  repair. It preserves incoming691's closed lemma and numbered list plus700's
+  approved combining-map obstruction paragraph. No source proof is changed.
+- Independent702/699 CI no longer waits on that conflict. New v2 tails run
+  after the completed696 CI:702 has actually posted pending statuses and begun,
+  repaired699 follows it. Original failed tail logs are retained.690 remains
+  cleanbb607c6f with its parent already merged; its old v3 waiter is terminal
+  and needs a fresh publication admission, not a blind restart. All three
+  model slots remain701/703/704; the700 repair waits actual space-d capacity.

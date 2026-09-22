@@ -1621,3 +1621,43 @@ registered; together with701 they use all3 space-d slots. No automatic next
 tranche, source/game change, proof-budget reset or terminal-status edit was
 authorized. The previous turn was progress; this one completes a source merge,
 admits actual remaining-row work and schedules the published heads' full checks.
+
+IMPORTANT later outcome in the same cycle: the original scheduled CI tails
+did NOT remain live. /tmp/main-refresh700-approved-20260922.sh exited1 in a
+real merge conflict BEFORE creating its publisher/CI receipt.700 HEAD is still
+8089cc881cbc495759018f097e4e8ca3545de421, MERGE_HEAD is
+5e6e5d0a639271e688a64601635bc5d560d80d6c. Sole UU path:
+docs/completion/qpbt-leanok-exemptions.md. Incoming691 numbers the four remaining
+obligations and closes its lemma; approved700 adds the derived affine and
+singleton-obstruction paragraph. The exact union is required, retaining open
+combine-map until child698 is reviewed/merged. All other staged incoming source
+and telemetry are preserved. Original refresh log/exit1 are authoritative.
+
+The700 conflict caused /tmp/main-publish690-after691-v3-20260922.sh and both
+original /tmp/main-published-ci702/699-20260922 waiters to exit1 as their guards
+require. Their PIDs were absent and receipts terminal; no observation timeout
+was mistaken for failure and no CI had started. KEEP all their logs and do not
+reuse those prefixes as live pipelines.690 remains untouched cleanbb607c6f,
+actual parent691 merged. Next main action for690: a new guarded publication
+admission independent of the700 conflict, stopping on any real child conflict.
+
+New2700s integration-only700 repair is queued through
+/tmp/main-start700-merge-repair-20260922.sh, runtime
+/tmp/main-queued-fix700-completion-merge-20260922, packet
+/tmp/main-fix700-completion-merge-packet-20260922.md. When a space-d slot frees,
+it verifies exact conflict parents/path and transfers retained main-fix700 to
+the repair. Worker runtime will be
+/tmp/main-fullspeed-fix700-completion-merge-20260922. After its receipt, main
+must prepare a NEW exact-head publisher/CI/strict carry-or-second-review tail;
+the original refresh guard expecting clean8089cc88 must not be restarted.
+
+Independent published702/699 are already rescheduled via
+/tmp/main-published-ci-tail-v2-20260922.sh. Active prefixes:
+/tmp/main-published-ci702-v2-20260922 and ...ci699-v2....702 now follows the
+completed696 repair CI directly, and699 follows702's real .ci.pid/.ci.exit.
+Publication receipts/heads and claims are unchanged.702 actually started full
+CI and posted pending statuses atb167f8e1. Their required marked audits and
+first702/second699 reviews remain in the tails. No conflict-delayed algorithm
+or review is in their build dependency chain. Active PIDs1915287/1915425 were
+verified, along with queued700 repair1915450 and model handles701/703/704.
+Space-d is enabled and no fourth worker was started.
