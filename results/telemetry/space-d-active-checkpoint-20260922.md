@@ -1794,3 +1794,43 @@ was corrected to include that exact separate-checkout scope, without rewriting
 accepted evidence or renaming the comparator repository.705 remains unadmitted
 behind current mathematical integration and reviews; inspect its clean head
 and ownership before admission. No runtime configuration was changed.
+
+## 2026-09-22T14:23Z exact completion check and queued rename assignment
+
+The previous turn made progress through703's completed evidence,706 checked
+publication and recorded full699 CI. Stage5778109328 and telemetryb819704e
+are published. This turn confirmed all3 actual space-d handles:704 author,
+702 first reviewer and699 second code reviewer.699's required marked audit
+passed1874 declarations/373 modules,0 failures, evidence5777988067; its code
+phase now approves0 findings, with prose still pending.696's completed code
+phase also approves0; the other phase remains queued. Both700 and690 conflict
+repair waiters are live. No stopped worker was inferred from quiet logs.
+
+706 is published at491c1d85bc3e460d97be85ff2d7de994ec271f9a; full CI is live,
+with build67s/render104s/paper-gap1s passed.703's verified live publisher
+waits that actual CI completion before refresh/publication/checks. There is
+no source adoption or completion claim for either PR.
+
+Fresh isolated completion evidence at exactb819704e is recorded in
+results/telemetry/completion-check-b819704e-20260922.md:336 Lean files/no holes,
+10/21 nonterminal source rows and4/533 remaining blueprint nodes. C2/C5/C7
+remain delegated; C6 is only the narrow registered-document check. The691
+merge removed one blueprint obligation. The final artifact goal is unmet.
+
+Owner's explicit rename message confirms705's scope. Comparator inspection
+found the local draft-challenge checkout dirty with older generated files;
+preserve them. The actual official accepted branch is
+issue-662-closure-20260921-diagnostic at360402fdf4a39399f94331452d6e5d0a35c144be,
+confirmed by gh_common's run35638601720 and git ls-remote. origin/main has no
+lakefile.toml; using that skeleton or the stale local a942ecb5 pin would be
+wrong. The packet now requires a separate comparator worktree on the accepted
+branch, asserts ecb97d1f in both dependency files and permits only the owner's
+URL-only commit/push without force or pin changes. Historical accepted evidence
+and the dirty local challenge files stay intact.
+
+/tmp/main-start705-rename-20260922.sh queues one2700s Astra/ultra task after
+both700/690 repair workers have been admitted and a space-d slot is actually
+free. It records a fresh exact library base, creates an isolated warm worktree,
+claims705 and dispatches through the canonical tool with the owner's reason.
+This is one library PR and the explicitly requested comparator URL commit;
+no extra key, slot, model configuration or infrastructure PR is activated.
