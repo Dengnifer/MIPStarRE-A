@@ -13,119 +13,279 @@
 
 \title{Corrections to the Pauli-Test Winning Implications}
 \author{}
-\date{2026-09-04}
+\date{2026-09-23}
 
 \begin{document}
 \maketitle
 
 \section{At a glance}
 
-\begin{itemize}
-  \item \textbf{Difficulty.} Low to medium.  The subtest implications are
-  direct after conditioning, but the printed proof uses an invalid parameter
-  reduction and two displayed formulas contain wrong indices.
-  \item \textbf{Estimated weight.} The formal work is the family of exact and
-  approximate winning implications, roughly 300--500 lines after the sampling
-  probability results are available.
-  \item \textbf{Mathlib/project split.} About 20\% finite-probability
-  bookkeeping and 80\% project-local game predicates, post-processing, and
-  state-dependent distance transfer.
-  \item \textbf{Key mathematical inputs.} Constant lower bounds for the
-  commuting and anticommuting events, data processing, and the one-way Magic
-  Square rigidity theorem.  The proof packets are \ghissue{112} and
-  \ghissue{113}.
-\end{itemize}
+\textbf{Difficulty.} The phase and index corrections are algebraic; the
+conditioning argument uses an exact finite probability. The substantive
+difference is the evaluation and acceptance convention on zero-direction
+lines. The existing winning implications are proved for that convention;
+their identification with the printed source convention is not established.
+
+\textbf{Estimated weight.} This revision documents existing results and their
+scope; it adds no formal proof. \textbf{Mathlib/project split.} Finite sums,
+post-processing of measurements, and state-dependent norm estimates provide
+the general infrastructure. The question distribution, completed evaluation,
+and downstream constructions are project-specific.
+\textbf{Key mathematical inputs.} Exact commuting and anticommuting probabilities, rejection bounds,
+and a value-only Magic Square anticommutator estimate on the original state.
+The verdict is a \emph{documented deviation}, not a proof or a refutation of
+the unrestricted printed line-evaluation claim.%
+\footnote{The original implication results are tracked in \ghissue{112} and
+\ghissue{113}; this documentary disposition is \ghissue{714}.}
 
 \section{Key theorem forms}
 
-For an admissible tuple $(q,m,d)$ and a strategy that wins the Pauli basis test
-with probability at least $1-\eps$, each subtest has conditional failure
-$O(\eps)$.  In particular, the Magic Square average is conditioned on
+Let $q=2^k$ with $k$ odd, let $m,d\geq1$ with $m\mid q$, and let a projective
+strategy on a unit bipartite state $\ket\psi$ succeed with probability at least
+$1-\eps$, where $\eps\geq0$, in the formal Pauli basis game. Here that game
+uses the coefficient-answer and universal-evaluation convention described
+below. The trace $\tr$ takes values in $\F_2$, and the interpolation vector
+$\ind_m(u)$ has coordinates
+$\prod_{i:b_i=0}(1-u_i)\prod_{i:b_i=1}u_i$ indexed by
+$b\in\{0,1\}^m$. For a uniform tuple
+$\omega=(u_X,u_Z,r_X,r_Z)\in(\F_q^m)^2\times\F_q^2$, put
 \[
   \gamma(\omega)
-  =\tr\big((r_X\ind_m(u_X))\cdot(r_Z\ind_m(u_Z))\big)\ne0,
+  =\tr\big((r_X\ind_m(u_X))\cdot(r_Z\ind_m(u_Z))\big).
 \]
-and the low-degree line-evaluation family is completed on zero-direction lines
-by an additional outcome.  The observable consequence is
+The corrected probabilities are
 \[
-  X^{r_X}(u_X)Z^{r_Z}(u_Z)
-  \approx_{\sqrt\eps}
-  (-1)^{\gamma(\omega)}Z^{r_Z}(u_Z)X^{r_X}(u_X)
+  \Pr[\gamma\ne0]=\frac12(1-q^{-1})^{m+1}\geq\frac1{16},
+  \qquad \Pr[\gamma=0]\geq\frac12.
 \]
-on average over all tuples.  These statements hold for every admissible
-parameter tuple; no assumption $6md\leq q$ is needed.
+Thus the subtest consistency defects are $O(\eps)$, including those
+conditioned on $\gamma=0$ or $\gamma\ne0$. The induced Magic Square strategy
+has conditional average value $1-O(\eps)$ on $\gamma\ne0$.
+
+For a sampled line--point pair $(\ell,u)$, let $L_a^{\ell,u}$ denote the
+completed line-evaluation effect and let $B_a^u$ denote the point effect,
+extended by $B_\bot^u=0$. The low-degree implication has the form
+\[
+  \E_{(\ell,u)}\sum_{\substack{a,b\in\F_q\cup\{\bot\}\\a\ne b}}
+    \bra\psi L_a^{\ell,u}\ot B_b^u\ket\psi\leq C\eps
+\]
+for a universal $C$. The squared-distance companion compares the same
+completed families on $\ket\psi$ and also has error $O(\eps)$.
+For the observables
+$W^r(u)=\sum_{a\in\F_q}(-1)^{\tr(ar)}M^{(\mathrm{Point},W),u}_a$
+of the complete typed point measurements, one has self-consistency with
+squared-distance error $O(\eps)$ and
+\[
+  X^{r_X}(u_X)Z^{r_Z}(u_Z)\ot I
+  \approx_{\sqrt\eps}
+  (-1)^{\gamma(\omega)}Z^{r_Z}(u_Z)X^{r_X}(u_X)\ot I
+\]
+on average over all tuples, with both player orientations. Here
+$A\approx_\eta B$ means $\E\|(A-B)\ket\psi\|^2=O(\eta)$.
+None of these established estimates assumes $6md\leq q$.
 
 \section{The source assertions and discrepancies}
 
-The source states the measurement implications at lines~197--265 and the
-observable implications at lines~267--362 of the Pauli analysis
-\cite[lines~197--362]{Ji2020MIPStar}.%
+The source states the seven measurement implications in
+\path{lem:qld-win-implications} and the observable implications in
+\path{len:qld-win-implications-obs} of the Pauli analysis
+\cite[Appendix~A, Strategies]{Ji2020MIPStar}.%
 \footnote{See
-\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.}
-Four corrections are required.
+\path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex},
+lines~197--265 and 267--362.}
+The hypotheses are success in the Pauli basis game for admissible parameters;
+projectivity has already been obtained by dilation. The conclusions concern
+question self-consistency, low-degree and Pauli-basis consistency, the two
+commutation checks, and Magic Square value and consistency. The source's
+low-degree item sums only over $\F_q$, without a missing outcome.
 
 First, the displayed conditioning event for the Magic Square average omits
-$\ind_m$ and writes the scalar expression
-$\tr((r_Xu_X)\cdot(r_Zu_Z))$, even though $u_X,u_Z\in\F_q^m$ and the phase
-used by the game is defined through vectors in $\F_q^{2^m}$.
+$\ind_m$ and writes $\tr((r_Xu_X)\cdot(r_Zu_Z))$. This expression uses the
+dot product in $\F_q^m$, whereas the game's phase uses the indicator vectors
+in $\F_q^{2^m}$. These events need not agree: at the admissible tuple
+$(q,m,d)=(2,1,1)$, take $u_X=u_Z=0$ and $r_X=r_Z=1$. The printed expression
+is zero, but $\ind_1(0)=(1,0)$ and $\gamma=1$. This refutes the equality of
+the conditioning events within the source domain; it does not refute all
+seven winning implications.
 
 Second, the proof assumes $6md\leq q$ and disposes of the complementary range
-by appealing to the final Pauli soundness theorem, whose proof uses the lemma
-under discussion.  That appeal cannot prove the lemma as an unrestricted
-standalone result.  The corrected exact probability calculation gives
-universal lower bounds for both conditioning events whenever the parameters
-are admissible, and removes this circular reduction.%
+by noting that the final Pauli soundness error can then be made trivial.
+Such a reduction can restrict the part of a final theorem's proof requiring
+this lemma, but cannot prove the lemma as an unrestricted standalone result.
+The replacement uses
+\[
+  \ind_m(u_X)\cdot\ind_m(u_Z)
+  =\prod_{i=1}^m(1+u_{X,i}+u_{Z,i}).
+\]
+Each factor is independently nonzero with probability $1-q^{-1}$ as $u_Z$
+varies. Independently $r_X\ne0$ with that probability, and then the trace is
+balanced as $r_Z$ varies. This is the established exact probability calculation,
+which gives the bounds above since $m\mid q$ implies $m\leq q$.%
 \footnote{The probability correction is documented separately in
-\path{docs/paper-gaps/qpbt_anticommuting-probability.tex}.}
+\path{docs/paper-gaps/qpbt_anticommuting-probability.tex}; the declarations
+are \leanid{anticommProb\_eq}, \leanid{commProb\_ge\_half}, and
+\leanid{anticommProb\_ge\_of\_m\_le\_q} in
+\path{MIPStarRE/QPBT/Observables/Anticommuting.lean}.}
+The degree-zero example $(q,m,d)=(2,1,0)$, where the printed probability
+bound fails, is outside the source domain: the paper uses positive natural
+numbers. It is not a counterexample to the lemma on admissible parameters.
 
-Third, the source treats evaluation classes of a line measurement as a POVM
-indexed by $\F_q$.  A zero-direction line admits nonconstant polynomial
-representatives with no well-defined value on its singleton image, so these
-classes form only a sub-measurement.  Adding an outcome $\bot$ for the missing
-mass makes the consistency relation well typed; the point family is completed
-by a zero effect at the same outcome.
-
-Finally, the observable proof writes
+Finally, a display in the observable proof writes
 $Z^{r_X}(u_X)X^{r_Z}(u_Z)$ where the intended reversed product is
-$Z^{r_Z}(u_Z)X^{r_X}(u_X)$.  The source label prefix
+$Z^{r_Z}(u_Z)X^{r_X}(u_X)$. The latter agrees with the statement of the
+observable lemma and the variable indices in the same display. The source label prefix
 \path{len:qld-win-implications-obs} is likewise a typographical error for
 \path{lem:qld-win-implications-obs}.
 
-\section{The corrected argument}
+\section{Evaluation and the actual game convention}
 
-Every question type and every relevant subtest has a universal positive
-sampling weight.  For admissible parameters, $1\leq m\leq q$, and the exact
-calculation of the anticommuting probability gives probability at least
-$2^{-4}$ for the anticommuting event and at least $1/2$ for its complement.
-Conditioning therefore enlarges rejection probabilities only by a universal
-factor.  The measurement implications follow directly from their rejection
-events, including the completed zero-direction outcome.  Data processing and
-the agreement identities yield the observable relations; the corrected Magic
-Square phase and reversed product then give the displayed signed commutation
-law.
+The source explicitly permits a line $\ell(u_0,v)=\{u_0+tv:t\in\F_q\}$
+with $v=0$. It specifies coefficient lists as answers, but its low-degree
+decider checks $f(t)=a$ for ``the'' parameter with $u=u_0+tv$. At $v=0$
+and $u=u_0$, every parameter satisfies this equality. A nonconstant function
+$t\mapsto f(t)$ therefore has no value determined by the point alone.%
+\footnote{See \path{references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex},
+\path{def:line}, lines~107--121, and \path{fig:ld-decider}, lines~337--386.
+The Pauli low-degree check invokes that decider at lines~1148--1159.}
+Such questions have positive probability. Conditional on a diagonal question,
+their probability is $m^{-1}\sum_{j=1}^m q^{-j}$; the equal line--point mixture
+has half that mass. Choosing a parameter, discarding these questions, and
+requiring equality at every parameter are different conventions.
+
+The formal game chooses the last convention. For $u\in\ell$, an answer
+evaluates to $a$ precisely when
+\[
+  f(t)=a\quad\hbox{for every }t\in\F_q\hbox{ such that }u=u_0+tv.
+\]
+For nonzero direction there is a unique such $t$. At zero direction this
+condition says that the induced function on $\F_q$ is constant, not that its
+coefficient representative is a constant polynomial. These distinctions matter
+when the degree bound is at least $q$. On pairs outside the sampled support,
+the win predicate is vacuous if no parameter exists, whereas partial evaluation
+is undefined there; every sampled point lies on its line.%
+\footnote{The exact definitions are \leanid{dlinePointCondition} and
+\leanid{ldWinPredicate} in \path{MIPStarRE/QPBT/Test/LowDegreeGame.lean},
+and \leanid{DegPoly}, \leanid{EvaluatesTo}, and \leanid{evalOpt} in
+\path{MIPStarRE/QPBT/Observables/LineDefs.lean}.}
+
+For a complete line measurement $\{L_f\}$, partition the answers that evaluate
+by their values, and put the remaining effects into $L_\bot$:
+\[
+  L_a=\sum_{f\text{ evaluating to }a}L_f,\qquad
+  L_\bot=\sum_{f\text{ without an evaluation}}L_f.
+\]
+Then $\sum_{a\in\F_q}L_a+L_\bot=I$. This is a complete measurement indexed
+by $\F_q\cup\{\bot\}$, whereas
+the field-valued classes alone can have total effect strictly below $I$.
+For example, at $(q,m,d)=(2,1,1)$, place effect $I$ on the allowed answer
+$f(T)=T$ at a zero-direction diagonal question. It has no evaluation at the
+sampled point, so $L_\bot=I$ and every $L_a=0$. The universal check rejects
+against either field answer, while selecting $t=0$ would accept answer zero.
+This is a local answer/measurement example on admissible parameters, not a
+high-success strategy refuting the source lemma.
+
+The point measurement is extended by $B_\bot=0$. Completion adds exactly
+$\bra\psi L_\bot\ot I\ket\psi$ to the field-only off-diagonal consistency
+defect, and adds $\|(L_\bot\ot I)\ket\psi\|^2$ to the corresponding
+squared-distance sum. Thus completion does not merely rename an alphabet.
+Every mismatch of completed labels is rejected by the universal check, so its
+Born mass is controlled by the game's rejection probability. The extra symbol
+is an internal measurement label, not a new permitted answer to the verifier.
+
+There is a separate completion in the formal representation of answers. A
+strategy measures one common sum-type alphabet, and malformed answers are
+rejected. The typed point and line families are obtained by sending malformed
+answers to the zero value or zero coefficient list; axis lists are padded to
+degree $md$. Their measurements are complete, and their malformed-answer mass
+is bounded by rejection, not assumed zero. Only after this post-processing is
+the line evaluation completed by $\bot$; the point's $\bot$ effect is zero.%
+\footnote{See the \leanid{ProjectiveSetting} methods \leanid{pointMeas},
+\leanid{lineMeas}, and \leanid{lineEvalMeas} in
+\path{MIPStarRE/QPBT/Observables/Defs.lean}, and
+\leanid{pointMeasOption} in
+\path{MIPStarRE/QPBT/Observables/WinImplications/Setup.lean}.}
+
+Under this convention, conditioning a nonnegative rejection cost on the
+commuting or anticommuting event costs at most $2$ or $16$, respectively.
+The finite type graph contributes another universal factor. This gives the
+seven established implications and their distance companions. For observables,
+the formal proof uses the value-only Magic Square anticommutator bound on the
+original state, for both players, and transfers it using point--variable
+consistency. It does not require the unrestricted extraction claim of the
+printed Magic Square rigidity theorem. That theorem has its own deviation
+note. The resulting observable error is $O(\sqrt\eps)$ for all $\eps\geq0$.
 
 \section{Blueprint and formalization status}
 
-The blueprint uses the full phase $\gamma$, completes the line-evaluation
-families, proves the conditioning step with the universal probability bounds,
-and corrects the reversed product and label.  Its proof and correction remark
-cite this note.  The linked formal declarations use the same conditional
-distributions and completed line outcomes, so their statements agree with the
-corrected blueprint. Their proofs are complete in the audited source snapshot.%
-\footnote{The relevant declarations are \leanid{win\_cons},
-\leanid{win\_low\_degree}, \leanid{win\_pauli\_basis\_cons},
-\leanid{win\_comm}, \leanid{win\_comm\_cons},
-\leanid{win\_magic\_square}, \leanid{win\_ms\_cons}, and their
-\path{\_approx} companions in
-\doclink{MIPStarRE/QPBT/Observables/WinImplications.lean}.}
+The blueprint's winning-implication nodes state the corrected phase and products
+and the completed line comparison. Its remarks on coefficient representatives
+and zero directions specify the game convention. The statement and proof
+marks there concern those explicitly stated objects; they do not certify
+equality with an unspecified source acceptance rule on zero directions.
+The Lean hypotheses retain admissibility, projectivity, and success, with
+$\eps\geq0$ explicit. No intermediate estimate is supplied as an extra premise.
+The comparison differs in its evaluation alphabet and game convention, not in
+an additional hypothesis such as $6md\leq q$.%
+\footnote{The blueprint labels are \path{lem:qld-win-implications},
+\path{lem:qld-win-implications-obs}, and
+\path{rem:qld-win-implications-typos}. The seven \path{win_*} declarations,
+their distance companions, \leanid{pointObs\_self\_consistent}, and both
+\leanid{pointObs\_twisted\_commutation} orientations are proved in
+\path{MIPStarRE/QPBT/Observables/WinImplications.lean} and its imported
+leaves. The value-only estimates are
+\leanid{msVarObs\_anticommutator\_le} and
+\leanid{msVarObsA\_anticommutator\_le} in the
+\path{WinImplications/AnticommutingObs.lean} leaf.}
+
+In the source, these implications are used to expand the Hilbert spaces,
+combine measurements, and extract the Pauli registers. The implemented route
+uses the winning estimates with the following explicit
+conventions. Tensoring with ancillary Pauli operators cancels the signed phase
+and gives approximately commuting expanded point observables. The completed
+line estimate gives consistency of the expanded line measurement, with every
+opposite register placement proved directly. Field-valued point measurements
+are then combined and rounded on the existing expanded spaces, without the
+source's unproved ancillary-padding identification. The combined and extended
+line constructions retain completed evaluations; at extended dimension $2m+2$
+they use the directly indexed line law. The established extended-line error is
+$C m\,\operatorname{poly}(\eps,md/q)$, not the printed
+$\operatorname{poly}(m^2\eps,md/q)$ claim.%
+\footnote{See \path{MIPStarRE/QPBT/Observables/ExpandedCommutation.lean},
+\path{MIPStarRE/QPBT/Observables/LineMeasurement.lean},
+\leanid{exists\_combinedPointsWitness} in
+\path{MIPStarRE/QPBT/Combining/Points.lean},
+\leanid{exists\_combinedLinesWitness} in
+\path{MIPStarRE/QPBT/Combining/Lines.lean}, and
+\leanid{exists\_extendedLinesWitness\_established} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean}. The separate differences are
+documented in the combined-points, dimension-divisibility, combined-lines,
+and subline-claims notes in \path{docs/paper-gaps/}.}
+
+That established construction supplies a global polynomial-pair measurement
+and hence the extraction witness. Point--Pauli consistency also enters the
+nonencoding-mass and evaluated-Pauli comparisons. The final isometry and
+completed-to-prescribed-answer transfers give the public soundness conclusions.
+None of this proves a transport to the source's extended seed-indexed law, a
+field-only POVM identification, or the printed extended-line error bound.%
+\footnote{See \leanid{exists\_globalPairWitness} in
+\path{MIPStarRE/QPBT/Combining/Apply.lean},
+\path{MIPStarRE/QPBT/Extraction/EvaluatedPauliConsistency.lean},
+\leanid{exists\_extractionWitness} in
+\path{MIPStarRE/QPBT/Extraction/SourceUnitary.lean}, and
+\path{MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean}.
+The public theorems are \leanid{pauli\_soundness} and
+\leanid{pauli\_soundness\_qubit}; their statements are unchanged.}
 
 \section{Conclusion}
 
-The winning implications remain valid for all admissible parameters, but the
-printed proof does not establish that scope and several formulas need local
-correction.  Exact conditioning probabilities, the explicit missing outcome,
-and the corrected phase and operator indices give the form used by the Pauli
-basis analysis.
+The algebraic and probability repairs are established on the admissible domain.
+The completed winning implications and their observable consequences are also
+proved for the actual formal game. The coefficient, evaluation, and
+zero-direction acceptance conventions are substantive differences whose full
+identification with the printed source remains unresolved. The verdict
+\emph{documented deviation} closes this intermediate documentation item only:
+it neither asserts the unsupported source claim nor adopts a new game, changes
+a theorem statement, or settles the separate downstream source-law questions.
 
 \bibliographystyle{alpha}
 \bibliography{references}
