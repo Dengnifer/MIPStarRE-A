@@ -2212,3 +2212,37 @@ space-d shim; pending dispatch wrappers are not counted as live models.
 The records helper most recently refused its train guard again; the earlier
 identified guard matches were real temporary unit-test fixture processes.
 Preserve this telemetry and retry normally when quiet, never bypass the guard.
+
+## 2026-09-22: Pasting publication and first dimension review
+
+Progress:712 completed099f4326ddf4aef328047e000a9a3825bc683c32 in1316s,
+with the four mathematical documentation artifacts and normal focused checks.
+Its17-page PDF and blueprint render were inspected; no Lean/mark changes.
+The publication tail is live, now PR717 atba841d42d14633e539a4786c925ca8ed81a8c710,
+with rendering/paper-gap CI steps passed. No additional row worker was admitted
+while all three space-d slots were occupied by necessary reviews/repairs.
+
+706's SECOND review5280855481 approves code, confirms F1-F4 repaired, but asks
+for three missing existing blueprint dependencies in two prose findings. The
+author continuation was already spent. Under the owner cutoff706 is CLOSED
+unmerged, comment5780224671, with published5edfe0e2, original proofs, repaired
+docs, green CI, both reviews, branches and all costs preserved. This is not a
+claim of a proof defect. The separate Magic Square documentation packet uses
+actual main and receives no additional proof assignment.
+
+716's FIRST review5280897802 has two findings at4e2e7617: F1 is the shared707
+C3 dependency; F2 is a real blueprint mismatch between original prescribed
+point effects and the linked ldPointValuesOrZero completed POVMs. The sole
+documentation continuation is /tmp/main-fix716-firstreview-20260922.md;
+/tmp/main-fix716-after707-20260922.sh waits for the C3 correction's successful
+terminal process, then admits that repair. It must make the Lean-only support
+statement accurate and remove/exempt any unsupported source mark. No new
+proof or theorem weakening; no duplicate common checker implementation.
+Main must integrate reviewed707 before publishing/reviewing repaired716.
+
+696's refresh now has complete CI and strict canonical approval carry5280888430
+from5280333594 atb5348baaadead1548c51a339bc610ce4cfd98d33. Its claim is released
+and it is gated for a standalone service merge; no model review was fabricated.
+707's focused correction and709's single-conflict continuation are confirmed
+dispatched, alongside the remaining documentation review work. The main key
+is not retired. Stage27 remains5779697630 until the next actual stage boundary.
