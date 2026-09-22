@@ -37,6 +37,8 @@ CI/review. The main checkpoint records live assignments.
    consumers, or document the necessary factor2 with minimality, printed-claim
    retention and independently reviewed adoption. The existing O(delta) use
    does not by itself certify literal equality with delta. Keep counterexamples.
+   Active whole-task evidence owner: issue694, admitted3600s with all historical
+   costs retained; a partial or weaker theorem does not close the row.
 5. **Linearity theorem quotation.** Same source, lem:linearity-common-ancilla.
    Exit: derive state/measurement-preserving padding absorption into the
    prescribed expanded strategy spaces, including every family/ancilla
@@ -99,6 +101,8 @@ CI/review. The main checkpoint records live assignments.
    and compatibility from source projection inclusion, then prove evaluation
    on degenerate lines. Reuse global polynomial and individual-degree bounds;
    existing explicit compatibility assumptions do not discharge this target.
+   Active whole-task construction owner: issue695, admitted3600s; any needed
+   source definition/game correction returns to main before implementation.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.

@@ -1050,3 +1050,43 @@ must remain distinguished. Full source consumers, exact printed claim and
 unchanged four-condition adoption evidence are the exit, not a passing weaker
 theorem. Partial historical measured counts and unknown/overlapping records
 are listed in the packet and decision ledger without fabricated totals.
+
+## 2026-09-22T11:15Z repair results and source-domain construction
+
+Both repair workers completed0 with clean worktrees. PR691 merge head is
+a65426c7f804e84b83f8d7629ab2783c408e5da3 with parents3249d644 and0ea50f00.
+Only the authorized conflict was resolved; all Pauli marks and the canonical
+lemma are retained, the algorithmic definition and remaining three obligations
+stay open. PR692 head is0f7e969c7cebb666076fae8fc77515c53f86f123. Its two
+source-equivalence claims and matching docstrings now distinguish completed
+effects from prescribed answers. Lean code stripped of comments, source
+headers and chapter13 dependency/mark sequences are unchanged; all1867 links,
+focused Lean, web, sync and normal hooks pass. Use actual dispatcher wall_s
+rather than author verification timestamps for both costs.
+
+Detached /tmp/main-publish-repairs691692-20260922.sh is launched once for each
+PR. Runtime /tmp/main-publish-repair691-20260922 and ...repair692.... They
+verify successful author exit/receipt, clean tree and original ancestry; wait
+for preceding complete CI (689 then691); refresh, export private imports and
+checked-publish. Each runs full CI, required marked-declaration axiom audit,
+then SECOND ordinary2700s-per-phase review via main-whole-review. Unexpected
+merge/conflict/check failure stops with evidence; no blind retry or review carry.
+
+693's build passed846s; its blueprint-sync unittest process611425 was verified
+live at11:15Z and the log was still advancing. It has not been restarted.
+The author-cleanup first review is already chained after complete CI. 689's
+1881 genuine declaration links passed after import repair; its publication
+still waits for693's full CI to avoid the known cold-build fixture contention.
+
+Main opened695 and admitted one3600-second source combining-map packet;
+branch issue-695-source-combine-map-20260922, base
+023a0c59539cc22be4c23298d7ebed73eee9cc39. Runtime
+/tmp/main-fullspeed-combine-map-20260922; packet
+/tmp/main-combine-map-packet-20260922.md. It owns only source projection-to-affine
+compatibility, full degenerate evaluation and directly corresponding entries.
+No automatic continuation or definition/game change is admitted; all previous
+117/118/119/geometry costs remain charged. 694 remains independently live on
+normalization. Third capacity is assigned to693's already queued first review
+as soon as its exact-head CI succeeds. All model dispatches remain space-d only.
+
+Prior stage publication: issue27 comment5775386048; telemetry023a0c59 clean.
