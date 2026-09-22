@@ -2269,3 +2269,53 @@ The active source/documentation models and queued reviews remain capped at
 three through the space-d shim.707's focused gate repair and709's continuation
 were genuinely dispatched; the latter is now completed. Do not count waiting
 wrappers as active models or treat a quiet live process as stopped.
+
+## 2026-09-22T17:20Z: Common policy publication and completed row repairs
+
+Progress:707's final integration correction completedb3d3a0dc in1279s.
+Corrected gate blob5f10852b205c4bb5035a5d08d39022cae076fe09 accepts the real
+dimension import citation and preserves every other C3 finding and all six
+other criterion records.65 focused tests and875 normal-hook tests passed
+(nine existing skips). The integrated head is
+c9c6240c0de3f7919641589cc9385f0eb88ff604, now published with complete CI and
+SECOND-review tail in /tmp/main-resume-private-build707-20260922.sh.
+
+Both707 and709 publication preflights had reported the same five missing
+new696 declarations. The ad-hoc v2 exporter compiled a fixed list including
+SubLineComplex but omitted the changed Claims dependency; its cached products
+did not expose the new declarations. Neither source nor declaration list was
+deleted or weakened. Guarded new model-free tails use the existing primary
+warm-worktree.sh --build --skip-packages, under the machine-wide full-build
+lock, then actual declaration checking, checked publication, full CI and
+independent review.707 proceeds first;709 is published at6977a886 with its
+own complete CI tail. The old failed preflight logs and clean source merges
+are retained. No live script was edited and no hot cache was written by main.
+
+708 SECOND review5281111695 approvesd3a89eb6, but the actual freshness check
+against current main returned false after696. Its claimed model-free refresh
+/tmp/main-refresh708-approved-20260922.sh now uses the normal private build,
+complete CI/marked audit, strict carry or THIRD review if equality refuses,
+then standalone service merge. No new proof continuation and no manual train.
+
+All three documentation authors ended0:713 completed6cda45af97dfb87745105afb5b6a8067b8300aa7
+in1494s, adding its mathematical note/remark/row/disclosure and a reasoned
+lem:qld-4-13 exemption;716's repair completed0ebadf50dd938fb626fd290b6e110e3f9ba2c702
+in1367s, making completed POVMs explicit and adding a truthful source
+lem:ld-soundness exemption;717's wording repair completed3671fec916589e5874c397039d66b6f756cb3169
+in535s. Their common C3 dependency is honestly still pending merge.
+
+Four model-free publication/review tails are now waiting for ACTUAL707 merge:
+/tmp/main-after707-ready715-20260922.sh (runtime prefix, generic script),
+ready716, ready717 and ready713. The invoked script is
+/tmp/main-after707-documentary-v1-20260922.sh; each prefix has its own pid/log/exit.
+They verify expected clean heads and ownership, integrate actual main,
+perform normal builds/checks and full CI, then the required independent review.
+715 has only the common-policy first-review finding; no author rewrite is needed.
+
+The three freed model lanes were replenished:714 winning implications,718
+linearity normalization and719 Magic Square, each from clean9a08996f and with
+a3600s whole documentation task. New issues718/719 hold their exact row briefs.
+Quotation and subline documentation, combine-map exemption, the three artifact
+reference fixes and final truthfulness/verification remain prepared work.
+The latest merge-boundary27 report is5780432134 for696. No later completion
+or new stage boundary is asserted.
