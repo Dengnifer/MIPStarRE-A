@@ -84,6 +84,26 @@ noncomputable def prefixRank {n : ℕ} (W : Submodule K (Fin n → K))
     (k : ℕ) (hk : k ≤ n) : ℕ :=
   Module.finrank K (W.map (prefixMap k n hk))
 
+/-- For a row matrix, prefix rank is the matrix rank after retaining the first
+`k` columns. This is Lean-only infrastructure for comparing
+`canonicalComplement` with the reduced-row-echelon construction in blueprint
+`def:canonical-complement`, paper
+`references/qpbt-paper/04_preliminaries.tex:303-320`. -/
+lemma prefixRank_span_rows_eq_rank_submatrix {m n k : ℕ}
+    (A : Matrix (Fin m) (Fin n) K) (hk : k ≤ n) :
+    prefixRank (Submodule.span K (Set.range A.row)) k hk =
+      (A.submatrix id (Fin.castLE hk)).rank := by
+  have himage :
+      (prefixMap (K := K) k n hk) '' Set.range A.row =
+        Set.range (A.submatrix id (Fin.castLE hk)).row := by
+    ext x
+    constructor
+    · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
+      exact ⟨i, rfl⟩
+    · rintro ⟨i, rfl⟩
+      exact ⟨A.row i, ⟨i, rfl⟩, rfl⟩
+  rw [prefixRank, Matrix.rank_eq_finrank_span_row, Submodule.map_span, himage]
+
 /--
 The non-pivot coordinate set of `W`, defined by the rank-increase
 characterization of pivots.  This is the basis-free encoding approved for
