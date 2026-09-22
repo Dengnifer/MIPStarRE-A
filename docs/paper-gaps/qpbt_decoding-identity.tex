@@ -11,7 +11,7 @@
 
 \title{The Decoding Identity in the Pauli Extraction Argument}
 \author{}
-\date{2026-09-15}
+\date{2026-09-22}
 
 \begin{document}
 \maketitle
@@ -85,6 +85,12 @@ Thus the equality asserted for every $g$ at lines~1483--1492 of the chapter-14
 source mirror is false \cite[lines~1483--1492]{Ji2020MIPStar}.  If degrees at
 least $q$ are allowed, equality as a function would not by itself prove encoding
 membership either, since $x^q$ and $x$ induce the same function on $\mathbb F_q$.
+In particular, $(q,m,d)=(8,1,2)$ is an admissible tuple exhibiting the
+failure: $1$ divides $8$, the extension degree is odd, and $d\geq1$.
+The polynomial reindexing used at lines~1805--1822 also fails here.  Set
+$h=0$ and $h'=h+\operatorname{Dec}(g)$.  Then $g_{h'}=x$, whereas the
+printed assertion $g_{h'}=g_h+g$ gives $x^2$.  These are unequal polynomial
+representatives, independently of the choice of evaluation point.
 
 \section{Required repair}
 
@@ -165,8 +171,81 @@ zero error. This does not remove the witness premise from the auxiliary
 theorem. Issue~\#19 owns the Stage~4.2 statements and this discrepancy
 record; \ghissue{47} tracks the non-encoding support theorem, completed for a
 supplied witness by issue~\#517.
-No unrestricted decoder identity, residual assumption, or additional witness
-field was introduced.
+No unrestricted decoder identity was asserted, and no residual assumption or
+additional witness field was introduced.
+
+\section{Retention and sufficiency of the correction}
+
+The two printed identities are retained separately as unasserted propositions.
+One quantifies over every bounded polynomial $g$ and every field point $u$ and
+states $\operatorname{Dec}(g)\cdot\operatorname{ind}_m(u)=g(u)$.
+The other quantifies over every bounded polynomial $g$ and every word $h$ and
+states $g_{h+\operatorname{Dec}(g)}=g_h+g$ as an equality of polynomial
+representatives.  Neither includes an encoding hypothesis.  They must not be
+identified: the example $g(x)=x^q$ satisfies the first identity at every point
+but violates the second at $h=0$.\footnote{The definitions are
+\leanid{MIPStarRE.QPBT.PrintedDecoderEvaluationClaim} and
+\leanid{MIPStarRE.QPBT.PrintedDecoderReindexingClaim} in
+\path{MIPStarRE/QPBT/Extraction/PrintedClaims.lean}, tracked in
+\ghissue{667}.  They have no proofs and are not inputs to any consumer.}
+
+The consumer comparison distinguishes three calculations in the source.
+For point consistency at lines~1483--1492, both player orientations separate
+encoding outcomes from their complement.  The restricted evaluation identity
+applies only in the first sum, and the proved non-encoding estimate bounds the
+second.  The source-facing construction supplies one global measurement and
+applies both comparisons to it.  The separately stated uniform support estimate
+still takes a global measurement as a premise; its proof is not an
+unconditional construction and is not used by that composition.
+
+For observable self-consistency at lines~1495--1605, the difference polynomial
+$g-g_h$ has decoder $\operatorname{Dec}(g)-h$.  Consequently equality of two
+such polynomials gives equality of their decoded labels.  This uses only
+linearity and the left-inverse law $\operatorname{Dec}(g_h)=h$, both valid for
+the full-field decoder, and requires no encoding condition on $g$.
+The corresponding difference-polynomial and observable estimates are proved
+separately from the non-encoding estimate.\footnote{The algebraic identity and
+its use are \path{decodeFq_pullingPoly},
+\path{pulling_label_eq_of_poly_eq}, and
+\path{tildeObs_selfConsistent_ofGlobalPairWitness}.  The inverse law is also
+used by the encoding-supported reference and by the overlap transfer; these
+uses apply it only to an encoded word.}
+
+Finally, the swap-conjugation calculation at lines~1805--1822 uses the exact
+cancellation already described, not either retained false proposition.
+The ensuing unitary extraction and both final soundness conclusions therefore
+receive the same operator identities.  This covers the uses in the blueprint
+consistency, swap-conjugation, unitary-extraction, and soundness nodes as well
+as the two direct substitutions in the paper.
+
+The repair does not change the decoder specified at lines~1419--1420 or discard
+any polynomial outcomes.  The encoding restriction is a hypothesis of the
+local identity only, not of the extraction theorem.  No condition $d<q$ is
+added: when the collision estimate $md/q$ is large the support bound may be
+uninformative, but it remains valid.  Nor is encoding membership claimed to be
+necessary for pointwise equality at high degree.
+
+The additional consistency terms do not weaken the source error family.  Write
+$\delta_G=a(md)^a(\eps^b+q^{-b}+2^{-bmd})$ for the global-measurement error.
+For $0\leq\eps\leq1$, $md\geq1$, and $0<b\leq1/2$, one has
+$\sqrt\eps\leq\eps^b$ and $md/q\leq(md)^a q^{-b}$.
+Thus $C(\delta_G+\sqrt\eps+md/q)$ is absorbed by choosing the universal
+constants before the parameters and strategy, exactly as the source absorbs
+these terms after its pulling calculation.  The fourth-root extraction rate
+and the final soundness error family are unchanged, including at zero
+error.\footnote{The existing declarations \path{deltaExtract_le_deltaQld} and
+\path{exists_extractionWitness_fourth_root_rate} perform the downstream
+absorption; \path{exists_globalPairWitness} constructs the measurement.
+The source-law and tensor-code questions remain separate in
+\path{docs/paper-gaps/qpbt_ld-dimension-divisibility.tex}.}
+This is a restriction of an invalid intermediate substitution, with its omitted
+contribution estimated, not a restriction of the source conclusion.  Independent
+hard review
+\href{https://github.com/Dengnifer/MIPStarRE-A/pull/672#pullrequestreview-5270109079}%
+{5270109079} verified all four adoption conditions, and main adopted this
+correction in
+\path{results/telemetry/source-adoptions-672-20260922.md}.  The retained
+propositions themselves remain unasserted and supply no proof evidence.
 
 \section{Conclusion}
 
