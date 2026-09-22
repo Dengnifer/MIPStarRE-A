@@ -798,3 +798,13 @@ The original680 wrapper exited1 and is no longer live; its failure is preserved.
 The prior pending telemetry batch published cleanly at305abb88. New diagnostic
 records follow in the next normal records batch. All three mathematical workers
 remain live; no key failure, extra key, new slot or chsh use occurred.
+
+Recovery685 succeeded:1846 marked declarations passed with no sorryAx,
+canonical approval carry5276394586 published at2b5aefac, claim released and
+gate passed. The service merged685 as
+b495c5da9b80462f0741e3a5c40d6385c8b1c03c. Both the680 recovery and canonical
+lemma publication watcher observed the actual merge and advanced. A records
+attempt collided with the service's live primary index.lock; no lock was
+removed or force operation used. Inspect normal publication/primary state
+after the service finishes. The CI incident stage comment is updated to include
+this merge and the passed audit rather than duplicating the same stage report.
