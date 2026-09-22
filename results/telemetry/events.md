@@ -9745,3 +9745,17 @@ historical entry above is rewritten.
   of700/690's repair workers.699 marked audit passed1874 declarations and its
   new code review approved0 findings; prose remains pending. All3 space-d
   slots were verified occupied, with no traffic moved to another key.
+
+- 2026-09-22T14:39Z - Repository rename alignment (#705,
+  `orc-705-20260922-01`): the admitted packet and owner instruction require
+  current references to `Dengnifer/MIPStarRE-QPBT`. The primary `gh_common.py`
+  layer and GitHub repository API agree on that identity; both the former
+  `Dengnifer/MIPStarRE-A` alias and the former umbrella spelling
+  `Dengnifer/MIPStarRE-qpbt` resolve to it. Active instructions still described
+  the latter as a separate forbidden repository. Update the current URLs and
+  that obsolete distinction, retaining owner authorization for every external
+  repository. Historical records and accepted comparator evidence remain
+  untouched. The comparator change uses the separately authorized isolated
+  worktree at accepted commit `360402fdf4a39399f94331452d6e5d0a35c144be`;
+  its URL-only diff must preserve library pin
+  `ecb97d1f66eec1e6fad964f144f78b91ce1fab36` and the dirty original checkout.

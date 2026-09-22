@@ -8,6 +8,12 @@ The artifact is a **release snapshot of the mathematical development**, not the
 working repository. It is produced by `scripts/make_artifact.sh` from a tagged
 commit, and every copy carries a `MANIFEST.txt` naming the commit it came from.
 
+The source repository is
+[Dengnifer/MIPStarRE-QPBT](https://github.com/Dengnifer/MIPStarRE-QPBT).
+The former `Dengnifer/MIPStarRE-A` URL redirects there. Authored manifests use
+the current name; the rename changes no library pin or comparator acceptance
+record.
+
 ## What is in it
 
 | path | what it is |
@@ -313,8 +319,9 @@ scripts/make_artifact.sh --anonymize <tag> /tmp/artifact
 ```
 
 This additionally rewrites the author-identifying strings listed in
-`ANON_RULES` in the script (the GitHub owner name inside URLs, the upstream
-project name and host, the author name and address) and tags the tarball
+`ANON_RULES` in the script (the GitHub owner name inside both current and
+historical repository URLs, the GitHub Pages host, the upstream project name
+and host, the author name and address) and tags the tarball
 `-anon`. The rewrite is not taken on trust: the script itself ships, so the
 pass runs over its own rules list as well, and before packaging anything the
 run searches the whole snapshot -- including the text extracted from every

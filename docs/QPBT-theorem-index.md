@@ -33,7 +33,7 @@ attributed retroactively to the audited commit.
 declared at in this commit. Permalink base:
 
 ```
-https://github.com/Dengnifer/MIPStarRE-A/blob/abb98018ec07d6ba5896907f5675f716c6e07a05/<file>#L<line>
+https://github.com/Dengnifer/MIPStarRE-QPBT/blob/abb98018ec07d6ba5896907f5675f716c6e07a05/<file>#L<line>
 ```
 
 **Paper** — file and line range under `references/qpbt-paper/`, given as the
