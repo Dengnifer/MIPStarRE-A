@@ -3515,6 +3515,41 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	completeness bounds the squared norm of the left factor by one.
 \end{proof}
 
+\begin{theorem}[Formalization support: replacing one factor of a complex overlap]
+	\label{thm:complex-overlap-gap-distance}
+	\lean{MIPStarRE.QPBT.norm_overlap_gap_le_sqrt_of_opFamilyDistSq}
+	\leanok
+	\uses{def:povm-distance, def:povm-conventions}
+	This formalization-only auxiliary isolates the complex Cauchy--Schwarz
+	estimate used in Lemma~\ref{lem:claim-17-1} of \cite{Ji2020MIPStar}.
+	Let $\mu$ be a finitely supported probability distribution on $\mathcal X$,
+	let $\psi$ be a unit vector in a finite-dimensional complex Hilbert space,
+	and let $\{E^x_a\}_{a\in\mathcal O}$ be a complete POVM for each $x$,
+	with finite outcome set $\mathcal O$. Let $B^x_a,C^x_a$ be arbitrary
+	operators on the same space. If
+	\[
+		\E_{x\sim\mu}\sum_a\|(B^x_a-C^x_a)\psi\|^2\le\zeta,
+	\]
+	then
+	\[
+		\left|\E_{x\sim\mu}\sum_a\langle\psi,E^x_aB^x_a\psi\rangle
+		-\E_{x\sim\mu}\sum_a\langle\psi,E^x_aC^x_a\psi\rangle\right|
+		\le\sqrt\zeta.
+	\]
+	The absolute value is the complex modulus. Neither operator family is
+	assumed Hermitian or commuting with the POVM.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:povm-distance, def:povm-conventions}
+	Apply weighted complex Cauchy--Schwarz to $\sqrt{E^x_a}\psi$ and
+	$\sqrt{E^x_a}(B^x_a-C^x_a)\psi$. Completeness and normalization make
+	the first squared factor one. Since $0\le E^x_a\le I$, the second
+	is at most the displayed squared distance, hence at most $\zeta$.
+	In particular, the squared-norm operator is
+	$(B^x_a-C^x_a)^\dagger(B^x_a-C^x_a)$.
+\end{proof}
+
 \begin{lemma}[Formalization support: axis lines have nonzero direction]
 	\label{lem:axis-line-zero-direction-mass}
 	\lean{MIPStarRE.QPBT.aLinePointDist_zero_direction_mass}
@@ -3724,6 +3759,58 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	rewrite the point average, and take $C=2$.
 \end{proof}
 
+\begin{theorem}[Formalization support: complex replacement under the directly indexed law]
+	\label{thm:claim-17-1-direct}
+	\lean{MIPStarRE.QPBT.subline_replace_by_ordered_product_direct}
+	\leanok
+	\uses{lem:qld-4-10, def:concrete-paired-line-measurement,
+		def:direct-subline-law, def:expanded-point-measurement}
+	This is an auxiliary version of Lemma~\ref{lem:claim-17-1} for completed
+	evaluations and the directly indexed law. Fix admissible parameters and
+	a projective setting with error $\eps$. Let $Q$ be a projective joint
+	point family satisfying all three squared-distance bounds of
+	Lemma~\ref{lem:qld-4-10}, each with upper bound $\delta_Q$, for every
+	directed opposite placement. Use the concrete paired-line POVM
+	\[
+		T^{\ell_X,\ell_Z}_{f_X,f_Z}
+		=\hat M^{(\mathrm{Line},X),\ell_X}_{f_X}
+		 \hat M^{(\mathrm{Line},Z),\ell_Z}_{f_Z}
+		 \hat M^{(\mathrm{Line},X),\ell_X}_{f_X}.
+	\]
+	Sample $(\ell,\ell_X,\ell_Z)$ from any $D_{\mathrm{dir}}$ of
+	Definition~\ref{def:direct-subline-law}, then an independent uniform
+	affine parameter $t\in\F_q$, and write
+	$\ell(t)=(x,z,\alpha,\beta)$ using the fixed field identifications.
+	Denote this expectation by $\E_{\mathrm{dir}}$. For each pair of
+	polynomial representatives $f_X,f_Z$ of degree at most $md$, put
+	$a=\mathrm{eval}_x(f_X)$ and $b=\mathrm{eval}_z(f_Z)$ in
+	$\F_q\cup\{\bot\}$. Extend the joint and individual point measurements
+	by zero effects at every answer containing $\bot$. Set
+	\begin{align*}
+		J_{\mathrm{dir}}&=\E_{\mathrm{dir}}\sum_{f_X,f_Z}
+		\bra{\hat\psi}(T^{\ell_X,\ell_Z}_{f_X,f_Z})_{\mathsf{A}\mathsf{A}'}
+		(\hat Q^{x,z}_{a,b})_{\mathsf{B}\mathsf{A}''}\ket{\hat\psi},\\
+		A_{\mathrm{dir}}&=\E_{\mathrm{dir}}\sum_{f_X,f_Z}
+		\bra{\hat\psi}(T^{\ell_X,\ell_Z}_{f_X,f_Z})_{\mathsf{A}\mathsf{A}'}
+		(\hat M^{(\mathrm{Point},Z),z}_b
+		 \hat M^{(\mathrm{Point},X),x}_a)_{\mathsf{B}\mathsf{A}''}
+		\ket{\hat\psi}.
+	\end{align*}
+	Then $|J_{\mathrm{dir}}-A_{\mathrm{dir}}|\le2\sqrt{\delta_Q}$ in
+	complex modulus. No paired-line consistency hypothesis is required.
+	The source-law identification remains separate; see
+	\cite{gap:qpbt_subline-claims-line-marginal}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:complex-overlap-gap-distance, lem:qld-4-10-same-placement,
+		lem:qld-sublines-uniform-point}
+	Regroup the complete line POVM by its two completed evaluations and apply
+	Theorem~\ref{thm:complex-overlap-gap-distance}. Undefined point effects
+	vanish. The uniform-point identity and the same-placement estimate bound
+	the averaged squared distance by $4\delta_Q$, giving $2\sqrt{\delta_Q}$.
+\end{proof}
+
 \begin{lemma}[Formalization support: the concrete X marginal]
 	\label{lem:concrete-line-X-marginal}
 	\lean{MIPStarRE.QPBT.ProjectiveSetting.combinedLineMeasurement_sum_Z}
@@ -3812,6 +3899,127 @@ $(f_X, f_Z) \in \deg_{md}(\ell_X) \times \deg_{md}(\ell_Z)$.
 	The separate Z marginal and restricted consistency estimates bound the
 	nonnegative overlap deficit; taking a square root gives the displayed
 	bound with $C=2$.
+\end{proof}
+
+\begin{theorem}[Formalization support: reality of the directly indexed Z overlap]
+	\label{thm:subline-z-overlap-real-direct}
+	\lean{MIPStarRE.QPBT.subline_Z_overlap_eq_real_direct}
+	\leanok
+	\uses{def:direct-subline-law, def:expanded-point-measurement,
+		def:expanded-state, def:povm-conventions}
+	This formalization-only auxiliary supplies the reality identity for the
+	directly indexed analogue of Lemma~\ref{lem:claim-17-3}. Fix admissible
+	parameters, a projective setting with error $\eps$, and a law
+	$D_{\mathrm{dir}}$ as in Definition~\ref{def:direct-subline-law}.
+	Let $T^{\ell_X,\ell_Z}$ be any complete POVM on Alice's expanded local
+	space with outcomes $(f_X,f_Z)$ consisting of polynomial representatives
+	of degree at most $md$. Sample a subline triple and an independent uniform
+	affine parameter $t$, and let $z=\pi_Z(\ell(t))$, with the scalar fields
+	identified as above. Define
+	\[
+		B_{\mathrm{dir}}(T)=
+		\E_{(\ell,\ell_X,\ell_Z)\sim D_{\mathrm{dir}}}\E_{t\in\F_q}
+		\sum_{f_X,f_Z}\bra{\hat\psi}
+		(T^{\ell_X,\ell_Z}_{f_X,f_Z})_{\mathsf{A}\mathsf{A}'}
+		(\hat M^{(\mathrm{Point},Z),z}_{\mathrm{eval}_z(f_Z)})_{
+		\mathsf{B}\mathsf{A}''}\ket{\hat\psi},
+	\]
+	where the evaluation takes values in $\F_q\cup\{\bot\}$ and the point
+	effect at $\bot$ is zero. Then
+	$B_{\mathrm{dir}}(T)=\operatorname{Re}B_{\mathrm{dir}}(T)$, with the
+	real number on the right embedded in $\C$. No projectivity or consistency
+	of $T$ is assumed.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{def:expanded-state, def:expanded-point-measurement,
+		def:povm-conventions}
+	Each line effect and the corresponding completed point effect are positive
+	and act on opposite registers. Their product is positive semidefinite, so
+	its expectation is real. Finite sums and averages with real weights
+	preserve this identity.
+\end{proof}
+
+\begin{theorem}[Formalization support: the complex Z bound with line consistency]
+	\label{thm:claim-17-3-direct}
+	\lean{MIPStarRE.QPBT.subline_Z_term_near_one_direct}
+	\leanok
+	\uses{lem:qld-4-10, thm:subline-z-overlap-real-direct,
+		def:line-point-dist, def:consistency, def:symmetric-equivalents}
+	This auxiliary estimate assumes joint point and paired-line consistency
+	data explicitly. There is a universal $C>0$ with the following property.
+	Fix admissible parameters, a projective setting with error $\eps$, and
+	any law $D_{\mathrm{dir}}$ of Definition~\ref{def:direct-subline-law}.
+	Let $Q$ satisfy the projectivity and three squared-distance bounds of
+	Lemma~\ref{lem:qld-4-10}, each at most $\delta_Q$ on every directed
+	opposite placement. Let $T$ be a paired-line POVM on each player's
+	expanded local space, with polynomial representatives of degree at most
+	$md$ as outcomes. Assume that effects vanish when an axis-parallel
+	$\ell_W$ has an outcome of degree greater than $d$, and that its completed
+	evaluations have consistency defect at most $\delta_P$ with the completed joint point
+	family, averaged over two independent samples from the refined line-point
+	law of Definition~\ref{def:line-point-dist}, on every directed opposite
+	placement. Then, for Alice's member of this family,
+	\[
+		|B_{\mathrm{dir}}(T)-1|\le
+		C\sqrt m\bigl(\delta_P^{1/4}+\delta_Q^{1/4}+\eps^{1/4}\bigr).
+	\]
+	The overlap and its zero effects at undefined evaluations are those of
+	Theorem~\ref{thm:subline-z-overlap-real-direct}. This is a direct-law
+	auxiliary, not the source assertion of Lemma~\ref{lem:claim-17-3}.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{thm:subline-z-overlap-real-direct, lem:claim-17-3-re-direct}
+	The reality identity gives
+	$|B_{\mathrm{dir}}(T)-1|=|\operatorname{Re}B_{\mathrm{dir}}(T)-1|$.
+	Apply Lemma~\ref{lem:claim-17-3-re-direct} with its unchanged constant;
+	its proof permits $C=2$.
+\end{proof}
+
+\begin{theorem}[Formalization support: the complex Z bound for the constructed measurement]
+	\label{thm:claim-17-3-concrete-direct}
+	\lean{MIPStarRE.QPBT.subline_concrete_Z_term_near_one_direct}
+	\leanok
+	\uses{lem:qld-4-10, def:concrete-paired-line-measurement,
+		thm:subline-z-overlap-real-direct}
+	This auxiliary specializes the complex Z estimate to the constructed
+	X-Z-X measurement without assuming paired-line consistency data.
+	Fix $\delta_Q:\R\to\R$ such that, for some $K_Q\ge1$ and $r_Q>0$,
+	$0\le\delta_Q(u)\le K_Q u^{r_Q}$ for all $u\ge0$.
+	There exist a function $\delta_P:\R^2\to\R$, constants $C>0$ and
+	$K_P\ge1$, and exponents $r_P,s_P>0$ such that
+	\[
+		0\le\delta_P(u,v)\le K_P(u^{r_P}+v^{s_P})\qquad(u,v\ge0),
+	\]
+	and the following holds for every admissible parameter tuple, projective
+	setting with error $\eps$, projective joint point family satisfying the
+	three bounds of Lemma~\ref{lem:qld-4-10} with upper bound
+	$\delta_Q(\eps)$ on every directed opposite placement, and law
+	$D_{\mathrm{dir}}$ of Definition~\ref{def:direct-subline-law}.
+	The concrete X-Z-X POVM $T$ of
+	Definition~\ref{def:concrete-paired-line-measurement} satisfies
+	\[
+		|B_{\mathrm{dir}}(T)-1|\le C\sqrt m
+		\bigl(\delta_P(\eps,md/q)^{1/4}
+		+\delta_Q(\eps)^{1/4}+\eps^{1/4}\bigr).
+	\]
+	The expectation uses the completed evaluations and uniform affine
+	parameter of Theorem~\ref{thm:subline-z-overlap-real-direct}, including
+	zero diagonal directions. The two-variable error is in the corrected sum
+	sense of \cite{gap:qpbt_pasting-product-error}. Identification with the
+	source law and its evaluation convention remains open.
+\end{theorem}
+\begin{proof}
+	\leanok
+	\uses{lem:combined-line-measurement-consistency,
+		lem:concrete-paired-line-degree-support, thm:claim-17-3-direct}
+	After fixing $\delta_Q$ and its polynomial bound, apply
+	Lemma~\ref{lem:combined-line-measurement-consistency} to obtain
+	$\delta_P$ for the concrete measurement. Its degree support and this
+	consistency estimate supply all the line hypotheses of
+	Theorem~\ref{thm:claim-17-3-direct}. Apply that theorem without changing
+	its constant, so the same choice $C=2$ is available.
 \end{proof}
 
 \begin{definition}[Conditional extended-line construction]
@@ -4279,10 +4487,14 @@ enters this estimate: it uses only the concrete sandwich.
 \end{proof}
 
 The real-part estimates of Lemmas~\ref{lem:claim-17-1-re-direct},
-\ref{lem:claim-17-2-direct-real} and~\ref{lem:claim-17-3-re-direct} are proved
-on the auxiliary law, as is the complex second estimate in
-Lemma~\ref{lem:claim-17-2-direct}. The remaining source complex estimates and
-the carrier transport remain separate obligations recorded in
+\ref{lem:claim-17-2-direct-real} and~\ref{lem:claim-17-3-re-direct} remain
+available. On the directly indexed law, the complex estimates for the
+concrete X-Z-X measurement are Theorem~\ref{thm:claim-17-1-direct},
+Lemma~\ref{lem:claim-17-2-direct}, and
+Theorem~\ref{thm:claim-17-3-concrete-direct}. The last obtains its line
+consistency data internally from a polynomially controlled joint point family.
+The source-law transport, zero-direction evaluation convention, and
+extended-line error bound remain separate obligations recorded in
 \cite{gap:qpbt_subline-claims-line-marginal}. None of the three
 source-labelled claims is certified by these auxiliary entries.
 

@@ -7,6 +7,9 @@ are mirrored under `references/`; the Pauli basis test is stated in
 `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex` and proved
 in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`.
 
+The repository's current home is
+[Dengnifer/MIPStarRE-QPBT](https://github.com/Dengnifer/MIPStarRE-QPBT).
+
 The counts, locators, and status claims on this page were audited against source
 commit `abb98018ec07d6ba5896907f5675f716c6e07a05` (September 21, 2026).
 

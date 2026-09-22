@@ -8,7 +8,7 @@ track here is the **quantum Pauli basis test (QPBT)** from MIP\*=RE
 
 Every GitHub-hosted operation of the parent workflow is replaced by a local
 equivalent that *executes* here. Since 2026-09-01 the issue, PR, evidence and
-merge **records** live on GitHub again (`Dengnifer/MIPStarRE-A`,
+merge **records** live on GitHub again (`Dengnifer/MIPStarRE-QPBT`,
 `protocols/issues-prs.md`); what runs is still local. The `.github/` tree is
 kept **frozen as reference** — it documents the mechanisms being localized and
 is never executed here. The operative layer is this `local/` tree plus the

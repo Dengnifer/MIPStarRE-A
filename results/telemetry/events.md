@@ -9746,6 +9746,123 @@ historical entry above is rewritten.
   new code review approved0 findings; prose remains pending. All3 space-d
   slots were verified occupied, with no traffic moved to another key.
 
+## 2026-09-23 - Intermediate documentation disposition for symmetrization
+
+- Session `orc-703-20260923-01`, admitted at
+  `a4782a5acc1627ec7ab76cf67592fdd53bea535c` by
+  `/tmp/main-document-symmetrization-20260922.md`, implements the owner's
+  2026-09-22 15:10Z instruction, "document, don't prove". The former C3
+  vocabulary could not record a terminal documented intermediate difference
+  without claiming correction adoption. Main expressly assigned this packet
+  the minimal protocol/checker alignment: add `documented-deviation`, preserve
+  `corrected` and `no-difference`, reject unknown/open/pending/blank states,
+  and retain headline requirements and C1/C2/C4/C5/C6/C7. The gate remains
+  outside blocking PR CI; mathematical justification and the documentation
+  artifacts still require independent review.
+- First review 5280263427 (PR #707, `reviewer-pr707-20260922-02`) accepted the
+  source-domain counterexample and independently checked the finite ranks,
+  but F1 found a misleading compression-consumer classification. The audit,
+  mathematical note, blueprint remark and deviations disclosure now explicitly
+  identify chapter 13 line 322 as an unresolved entanglement consumer of answer
+  reduction. The symmetrization row alone receives the documentation status.
+  The nonempty refutation remains external mathematics, the rank guarantees
+  remain unresolved, and no Lean proof or statement changes. Historical
+  strict-adoption evidence and all earlier costs remain recorded; this one
+  3600-second documentation admission neither resets nor extends any budget.
+- Documentation validation initially found 254 stale generated declaration
+  entries after web rendering, matching the earlier author audit's recorded
+  behavior. The normal blueprint sync refresh resolves these entries without
+  changing any tracked Lean link. The 63 focused completion tests, finite
+  enumeration, note PDF/style and blueprint checks pass; the full completion
+  gate correctly retains nine other nonterminal rows and four unrelated
+  unmarked nodes. No full CI or independent review is claimed by this session.
+- The first normal commit hook ran 873 script tests in 306.184 seconds and
+  failed one model-policy fixture (nine tests skipped). The fixture inherited
+  `MIPSTARRE_HARDNESS_REASON` from this hard-classified session while testing
+  a routine Sol request, so dispatch's dry-run correctly rejected the mismatch.
+  The isolated failing test passes with only that variable absent. The commit
+  is retried with `env -u MIPSTARRE_HARDNESS_REASON`, retaining all normal
+  hooks; no persistent environment, routing policy, account, cache or test
+  implementation is changed. No live worker is dispatched by the fixture.
+- That partial environment cleanup ran 873 tests in 325.605 seconds and
+  failed four `DispatchCommandTests` (nine skipped): the inherited
+  `MIPSTARRE_JOB_CLASS` still selected hard work without a reason. Clearing
+  both routing-context variables for the test process passes all 31 model-policy
+  and dispatch-command tests in 20.057 seconds. The next normal commit uses
+  `env -u MIPSTARRE_JOB_CLASS -u MIPSTARRE_HARDNESS_REASON`; no hook is skipped,
+  no routing code or test assertion is edited, and both failed runs remain
+  charged to this documentation session.
+
+## 2026-09-23 - C3 dimension import citation false positive
+
+- Operator comment 5780049792 on PR #707 and
+  `/tmp/main-707-c3-cross-row-finding-20260922.md` identify a false positive in
+  gate blob `6fa6bee10681b313957c74d052188f85d99f3ee9`. At the clean dimension
+  candidate `4e2e76170356c6b4c98cb2046e2a2f1fc8701278`, register line 30 cites
+  `lem:qld-sublines`, `lem:qld-4-7`, and the `lem:ld-soundness` import. The
+  identifier-intersection check treated that truthful import citation as a
+  changed headline assertion. The documented difference concerns an
+  intermediate seed/dimension obstruction and proof route; the registered
+  headline statement is unchanged.
+- Main admitted session `orc-703-20260923-02` at
+  `3f63f6d663ddfcee394ac13ba04ec2915bc73f77` for one final 3600-second
+  documentation integration correction, in
+  `/tmp/main-fix707-c3-integration-20260922.md`. The gate now checks the terminal
+  vocabulary and nonempty source cell without inferring mathematical scope
+  from identifier occurrence. The protocol leaves that distinction to
+  independent review and retains every headline, comparator and other
+  completion requirement. No source citation, register status, Lean file or
+  blueprint marker changes. The repaired first-review F1 compression-consumer
+  classification and all prior #703 costs, including the preceding author's
+  2221 seconds and both failed fixture runs, remain preserved.
+- Author validation with gate blob `5f10852b205c4bb5035a5d08d39022cae076fe09`
+  reproduces the former failure and removes only the finding at line 30 of
+  the dimension candidate. Its head, clean status and register blob
+  `1f9e9ffb3d4ffb6b2b93939dbf9826aa53b855d7` remain unchanged; its other nine
+  nonterminal rows still fail C3. The 65 focused tests pass, including the
+  real source-cell shape and invalid/missing status checks. C1/C2/C4/C5/C6/C7
+  results are identical before and after the change on this worktree.
+- A read-only GitHub census at 2026-09-22T16:39Z checks published main
+  `0eb04963283b74964a2f718813e879e742217010` and all ten open PR heads. All
+  80 terminal-row occurrences parse, including the dimension, square-root and
+  pasting candidates (#716/#715/#717). Four older infrastructure PR registers
+  have no terminal-status column and receive no terminal certification. These
+  are static author checks, not full CI, independent review or a completion
+  claim. Main retains publication, full CI and SECOND independent review.
+
+- 2026-09-22T14:39Z - Repository rename alignment (#705,
+  `orc-705-20260922-01`): the admitted packet and owner instruction require
+  current references to `Dengnifer/MIPStarRE-QPBT`. The primary `gh_common.py`
+  layer and GitHub repository API agree on that identity; both the former
+  `Dengnifer/MIPStarRE-A` alias and the former umbrella spelling
+  `Dengnifer/MIPStarRE-qpbt` resolve to it. Active instructions still described
+  the latter as a separate forbidden repository. Update the current URLs and
+  that obsolete distinction, retaining owner authorization for every external
+  repository. Historical records and accepted comparator evidence remain
+  untouched. The comparator change uses the separately authorized isolated
+  worktree at accepted commit `360402fdf4a39399f94331452d6e5d0a35c144be`;
+  its URL-only diff must preserve library pin
+  `ecb97d1f66eec1e6fad964f144f78b91ce1fab36` and the dirty original checkout.
+
+- 2026-09-22T14:49Z - The #705 export commit's normal pre-commit hook ran
+  869 tests in 301.441 seconds, with one error and nine skips. The unchanged
+  `test_model_policy` bounded-job dry-run inherited the worker session's
+  `MIPSTARRE_HARDNESS_REASON` and failed with "an escalation reason requires a
+  hard job classification". An isolated reproduction confirmed that cause.
+  Retry the normal hook with only that inherited variable absent from the
+  commit process; do not change routing policy, credentials, live admission,
+  or hook enforcement. This is test-environment isolation, not a new worker
+  request. The 90 focused rename tests had already passed.
+
+- 2026-09-22T14:53Z - Follow-up to the #705 hook incident: removing the reason
+  from the entire commit process made four older hard-job fixtures fail
+  instead (869 tests, 271.321 seconds, four failures, nine skips). Restore the
+  ordinary session environment and isolate only the dry-run command fixture:
+  it now discards the inherited reason before applying its explicit test
+  arguments. All 19 command/model-policy regression tests passed in 18.447
+  seconds with that two-line fixture fix. No live dispatcher, model policy,
+  credential, admission rule or hook was changed; rerun the normal hook.
+
 - The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
   normal hooks/loss guards and all unrelated indexed/staged content preserved.
   A new guarded pipeline queues publication/full CI/marked audit and strict
@@ -9816,3 +9933,10 @@ historical entry above is rewritten.
 ## 2026-09-23
 
 - Owner 2026-09-22 document-dont-prove supersedes remaining intermediate proof goals: three3600s documentation workers707/710/711 are live on space-d, with all ten row/four node briefs prepared. PR702 refresh conflicted after its completed repair and is closed unmerged by comment5779646553; repaired commit, unfinished merge, branches and costs retained. Issues698/704 proof work is deferred and preserved. PR706 repair is on detached CI/review; no new proofs or unsupported leanok marks are admitted. PR707 owns the explicitly authorized minimal terminal-status protocol/checker update; headline faithfulness and other completion criteria remain binding.
+- Documentary follow-up:711 completed2dd2d894 in952s with all four artifacts and focused validation; checked publication/full CI/review is detached. A first712 wrapper used abbreviated53d12daa and correctly failed its exact-head guard before claim/model admission; retained that log/worktree and admitted full53d12daa1ea79aa6c62ef93c3b621a331e1368b0 under separate pasting712 tag. Train precheck found696 clean and708 with one exemption-document conflict:696 gets model-free fresh checks/canonical carry;708 gets a documentation-only C4 integration after710, with no algorithm proof continuation.709 complete CI passed and independent review started. The prior records snapshot push refused a concurrent main move; the normal meta loop then published53d12daa without bypass.
+- C3 integration check before707 publication found a real false positive: staged gate blob6fa6bee10681b313957c74d052188f85d99f3ee9 rejects dimension candidate4e2e76170356c6b4c98cb2046e2a2f1fc8701278 because its Source statement cites the lem:ld-soundness import. This is an intermediate proof-route discrepancy, not a changed headline statement. Operator evidence/comment require correction without dropping truthful citations, weakening other criteria or adding proofs; live707 author remains sole writer. Approved709 refresh meanwhile stopped on one register conflict; preserve207b5cf8/MERGE_HEAD53d12daa and queue its one documentation continuation after708. Normal records retry published1e84e767 cleanly.
+- 707 documentation author completed3f63f6d6 in2221s and708 documentary conflict repair completed26821c36 in692s. Preserve all costs, failed fixture checks and the repaired compression-consumer F1. Operator C3 finding5780049792 remains real on707: one focused3600s documentation-gate correction is admitted before publication, no proof work.708 has a detached full-CI/marked-audit/SECOND-review tail;709 single-register-conflict continuation was released after its verified terminal process. Pending wrappers do not count as model occupancy. Train-guard refusals remain preserved and no guard is bypassed.
+- Documentary progress:712 completed099f4326 in1316s and is published as717 atba841d42, detached CI underway.716 first review5280897802 identifies common707 C3 dependency plus a genuine completed-point-POVM blueprint mismatch; one complete documentation repair is queued after707 correction, no new proof or duplicate gate work.706 second review5280855481 approved Lean code but retained two dependency-link findings after the allowed continuation; closed unmerged under owner cutoff with comment5780224671 and all branches/evidence preserved.696 complete CI and strict canonical carry5280888430 atb5348baa are green and released for standalone service merge.
+- 696 service-merged045a657d at16:35:32Z after complete new-head CI and strict approval carry.709 one continuation completedef166700 in1081s; its exact receipt certifies incoming register content plus the approved URL-only transformation. Main admits a guarded model-free refresh applying only that certified transformation on a sole register conflict, with byte equality against the merge base, normal hooks/loss guard, full CI and SECOND review; any other conflict fails closed.713 starts from0eb04963 containing696 after a verified lane freed. No new proof work, extra keys, reset of costs or manual PR merge.
+- 707 common C3 correction completedb3d3a0dc (1279s;65 focused/875 hook tests) and actual dimension integration passes without changing other criteria.707/709 private export preflights then missed five merged696 declarations; retained failed logs and source, and resumed through normal warm-worktree --build --skip-packages, lock/telemetry included, before declaration checks/full CI.713 note and716/717 documentation repairs completed6cda45af/0ebadf50/3671fec9 (1494/1367/535s). Their review/publication tails wait for actual707 merge, avoiding another review against the old terminal-status rule.714/718/719 refill the three space-d lanes.708 is approved but objectively nonfresh, so model-free refresh/strict carry is active. No new proof work, fabricated approval, cache write or gate bypass.
+- Owner17:27Z changes allocation to one default Sol ultra worker on space-d. Queued Astra707/709 reviews and four pending launchers were stopped before model admission; grandfathered714/718/719 finished normally with no continuation. The first Sol queue correctly refused inherited non-ultra review effort locally before dispatch. After both processes ended, main cleared that inherited override and restarted with distinct logs, keeping all original evidence. The cap1 queue revalidated707's green exact head and entered review.sh; seven completed documentary rows have model-free publication/CI tails waiting for actual707 merge. No key switch, native delegation or manual library merge.

@@ -1717,3 +1717,77 @@ generated tree rather than accepting a hand-written coverage list.
 challenge. A completion claim still requires the official comparator evidence,
 only the three permitted standard axioms, an ancestor-or-equal verified library
 revision and a passing drift check on the exact completion commit.
+
+## 2026-09-23 - Permit terminal documentation of intermediate differences
+
+**Trigger:** the owner's 2026-09-22 15:10Z instruction, "document, don't prove",
+and main's explicit assignment in `/tmp/main-document-symmetrization-20260922.md`
+at `a4782a5acc1627ec7ab76cf67592fdd53bea535c`, recorded in
+`results/telemetry/events.md`, "Intermediate documentation disposition for
+symmetrization". This supersedes the demand that every intermediate difference
+converge to an adopted stronger correction before its documentation can close.
+
+**Change:** `local/protocols/completion.md` admits `documented-deviation` under
+C3 for justified intermediate differences with a mathematical gap note, matching
+blueprint remark and `docs/DEVIATIONS.md` disclosure. The status does not prove
+the printed claim or certify an external result in Lean. The checker accepts
+the new status, rejects its use for a named registered headline or absent source
+cell, and retains rejection of unknown/open/pending/blank states. Focused tests
+cover the mixed terminal statuses, headline restriction, invalid statuses and
+the unchanged behavior of C1/C2/C4/C5/C6/C7. Independent review still judges the
+mathematical justification and supporting artifacts. Existing `corrected` and
+`no-difference` meanings and all headline requirements are retained.
+
+**Expected effect:** the symmetrization documentation can close honestly while
+its nonempty counterexample remains external mathematics and the affected
+answer-reduction and compression rank guarantees remain unresolved. The gate
+is not added to blocking PR CI. Only the assigned register row changes status;
+historical audits and cumulative cost evidence are preserved. No Lean theorem
+or proof changes, and no new proof campaign follows from this disposition.
+
+## 2026-09-23 - Distinguish headline citations from statement changes
+
+**Trigger:** PR #707 operator comment 5780049792 and main's final integration
+assignment in `/tmp/main-fix707-c3-integration-20260922.md`, recorded in
+`results/telemetry/events.md`, "C3 dimension import citation false positive".
+The real dimension row names the `lem:ld-soundness` import while documenting
+an intermediate obstruction, so the new identifier check rejected one of the
+owner's assigned documentation closures without identifying a headline change.
+
+**Change:** `local/protocols/completion.md` and `scripts/completion_gate.py`
+distinguish a source citation from a mathematical assertion about that source.
+C3 retains its terminal vocabulary and nonempty source requirement, and stops
+inferring headline scope from identifier occurrence. Independent review must
+certify that `documented-deviation` concerns an intermediate difference, with
+the required justification and documentation; a changed headline statement or
+unproved headline dependency remains inadmissible under that status. All other
+completion requirements, including comparator evidence, remain unchanged.
+Regression tests use the real dimension source cell, preserve invalid-status
+checks and verify that the other six criteria still reject their failing inputs.
+
+**Expected effect:** a truthful import or proof-route citation does not prevent
+documentation closure. Static acceptance remains distinct from mathematical
+certification. No register row, Lean statement, blueprint marker or historical
+cost record changes in this correction.
+
+## 2026-09-22 - Align active repository identity after rename (#705)
+
+**Trigger:** the owner's rename instruction, admitted issue #705 packet, and
+the 2026-09-22T14:39Z entry in `results/telemetry/events.md`. GitHub, queried
+through the primary `gh_common.py`, resolves both the old library alias and
+the former umbrella spelling to `Dengnifer/MIPStarRE-QPBT`.
+
+**Change:** update the current repository identity in `AGENTS.md`,
+`local/DESIGN.md`, `local/protocols/issues-prs.md`, and `local/personas/main.md`.
+The main persona and `local/protocols/completion.md` no longer describe this
+same repository as a separate umbrella outside the main session's scope;
+external repositories still require explicit owner authorization. Align the
+sync fallback, artifact metadata, site configuration, current documentation
+links, and test fixtures. Preserve owner-name anonymization for both aliases
+and cover the lowercase Pages host. Append this record without rewriting old
+protocol history, telemetry, paper mirrors, or accepted comparator evidence.
+
+**Expected effect:** new exports and workflow defaults use the canonical
+repository, historical and current identifying URLs remain anonymized, and
+the scope instructions distinguish the library from actual external
+repositories. No CI, review, merge, completion, or dependency-pin gate changes.
