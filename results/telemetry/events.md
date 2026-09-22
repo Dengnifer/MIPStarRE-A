@@ -9746,6 +9746,90 @@ historical entry above is rewritten.
   new code review approved0 findings; prose remains pending. All3 space-d
   slots were verified occupied, with no traffic moved to another key.
 
+## 2026-09-23 - Intermediate documentation disposition for symmetrization
+
+- Session `orc-703-20260923-01`, admitted at
+  `a4782a5acc1627ec7ab76cf67592fdd53bea535c` by
+  `/tmp/main-document-symmetrization-20260922.md`, implements the owner's
+  2026-09-22 15:10Z instruction, "document, don't prove". The former C3
+  vocabulary could not record a terminal documented intermediate difference
+  without claiming correction adoption. Main expressly assigned this packet
+  the minimal protocol/checker alignment: add `documented-deviation`, preserve
+  `corrected` and `no-difference`, reject unknown/open/pending/blank states,
+  and retain headline requirements and C1/C2/C4/C5/C6/C7. The gate remains
+  outside blocking PR CI; mathematical justification and the documentation
+  artifacts still require independent review.
+- First review 5280263427 (PR #707, `reviewer-pr707-20260922-02`) accepted the
+  source-domain counterexample and independently checked the finite ranks,
+  but F1 found a misleading compression-consumer classification. The audit,
+  mathematical note, blueprint remark and deviations disclosure now explicitly
+  identify chapter 13 line 322 as an unresolved entanglement consumer of answer
+  reduction. The symmetrization row alone receives the documentation status.
+  The nonempty refutation remains external mathematics, the rank guarantees
+  remain unresolved, and no Lean proof or statement changes. Historical
+  strict-adoption evidence and all earlier costs remain recorded; this one
+  3600-second documentation admission neither resets nor extends any budget.
+- Documentation validation initially found 254 stale generated declaration
+  entries after web rendering, matching the earlier author audit's recorded
+  behavior. The normal blueprint sync refresh resolves these entries without
+  changing any tracked Lean link. The 63 focused completion tests, finite
+  enumeration, note PDF/style and blueprint checks pass; the full completion
+  gate correctly retains nine other nonterminal rows and four unrelated
+  unmarked nodes. No full CI or independent review is claimed by this session.
+- The first normal commit hook ran 873 script tests in 306.184 seconds and
+  failed one model-policy fixture (nine tests skipped). The fixture inherited
+  `MIPSTARRE_HARDNESS_REASON` from this hard-classified session while testing
+  a routine Sol request, so dispatch's dry-run correctly rejected the mismatch.
+  The isolated failing test passes with only that variable absent. The commit
+  is retried with `env -u MIPSTARRE_HARDNESS_REASON`, retaining all normal
+  hooks; no persistent environment, routing policy, account, cache or test
+  implementation is changed. No live worker is dispatched by the fixture.
+- That partial environment cleanup ran 873 tests in 325.605 seconds and
+  failed four `DispatchCommandTests` (nine skipped): the inherited
+  `MIPSTARRE_JOB_CLASS` still selected hard work without a reason. Clearing
+  both routing-context variables for the test process passes all 31 model-policy
+  and dispatch-command tests in 20.057 seconds. The next normal commit uses
+  `env -u MIPSTARRE_JOB_CLASS -u MIPSTARRE_HARDNESS_REASON`; no hook is skipped,
+  no routing code or test assertion is edited, and both failed runs remain
+  charged to this documentation session.
+
+## 2026-09-23 - C3 dimension import citation false positive
+
+- Operator comment 5780049792 on PR #707 and
+  `/tmp/main-707-c3-cross-row-finding-20260922.md` identify a false positive in
+  gate blob `6fa6bee10681b313957c74d052188f85d99f3ee9`. At the clean dimension
+  candidate `4e2e76170356c6b4c98cb2046e2a2f1fc8701278`, register line 30 cites
+  `lem:qld-sublines`, `lem:qld-4-7`, and the `lem:ld-soundness` import. The
+  identifier-intersection check treated that truthful import citation as a
+  changed headline assertion. The documented difference concerns an
+  intermediate seed/dimension obstruction and proof route; the registered
+  headline statement is unchanged.
+- Main admitted session `orc-703-20260923-02` at
+  `3f63f6d663ddfcee394ac13ba04ec2915bc73f77` for one final 3600-second
+  documentation integration correction, in
+  `/tmp/main-fix707-c3-integration-20260922.md`. The gate now checks the terminal
+  vocabulary and nonempty source cell without inferring mathematical scope
+  from identifier occurrence. The protocol leaves that distinction to
+  independent review and retains every headline, comparator and other
+  completion requirement. No source citation, register status, Lean file or
+  blueprint marker changes. The repaired first-review F1 compression-consumer
+  classification and all prior #703 costs, including the preceding author's
+  2221 seconds and both failed fixture runs, remain preserved.
+- Author validation with gate blob `5f10852b205c4bb5035a5d08d39022cae076fe09`
+  reproduces the former failure and removes only the finding at line 30 of
+  the dimension candidate. Its head, clean status and register blob
+  `1f9e9ffb3d4ffb6b2b93939dbf9826aa53b855d7` remain unchanged; its other nine
+  nonterminal rows still fail C3. The 65 focused tests pass, including the
+  real source-cell shape and invalid/missing status checks. C1/C2/C4/C5/C6/C7
+  results are identical before and after the change on this worktree.
+- A read-only GitHub census at 2026-09-22T16:39Z checks published main
+  `0eb04963283b74964a2f718813e879e742217010` and all ten open PR heads. All
+  80 terminal-row occurrences parse, including the dimension, square-root and
+  pasting candidates (#716/#715/#717). Four older infrastructure PR registers
+  have no terminal-status column and receive no terminal certification. These
+  are static author checks, not full CI, independent review or a completion
+  claim. Main retains publication, full CI and SECOND independent review.
+
 - 2026-09-22T14:39Z - Repository rename alignment (#705,
   `orc-705-20260922-01`): the admitted packet and owner instruction require
   current references to `Dengnifer/MIPStarRE-QPBT`. The primary `gh_common.py`

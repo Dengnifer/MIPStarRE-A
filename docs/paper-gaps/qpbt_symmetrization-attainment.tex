@@ -18,7 +18,7 @@
 
 \title{Attainment in the Symmetrization Lemma}
 \author{}
-\date{2026-09-12, realignment section added 2026-09-18}
+\date{2026-09-23; earlier formalization history retained below}
 
 \begin{document}
 \maketitle
@@ -26,19 +26,24 @@
 \section{At a glance}
 
 \begin{itemize}
-  \item \textbf{Difficulty: easy.}  The issue is a quantifier exchange between
-  a supremum and an attained maximum in a preliminary lemma on nonlocal games.
-  No analytic estimate is missing; the substance is deciding which statement
-  the symmetrization proof supports and which statement the later arguments
-  consume.
-  \item \textbf{Estimated weight:} about \textbf{1--2 lemma interfaces} and on
-  the order of \textbf{100--300 lines} of formal proof for the value-preserving
-  symmetrization construction.  The attainment step itself should not be
-  formalized as printed (see the Conclusion).
-  \item \textbf{Mathlib/project split:} approximately \textbf{20\% Mathlib}
-  (finite-dimensional inner product spaces, tensor products, block
-  decompositions of $\C^2 \ot \C^d$) and \textbf{80\% project-local} (games,
-  strategies, values, and the Naimark input).
+  \item \textbf{Verdict: false also on the nonempty source domain.}
+  The finite game constructed below has value one and no optimal
+  finite-dimensional strategy. Its mathematical proof uses
+  \cite[Theorem~1.1]{Slofstra2017Nonclosure}, with an explicit probability
+  law, decision predicate, and symmetry conversion. It is not a Lean
+  refutation. The intermediate discrepancy is terminal as a
+  \emph{documented deviation}; this does not certify the printed assertion or
+  the affected entanglement bounds.
+  \item \textbf{Difficulty and estimated weight:} the value-preserving and
+  positive-slack forms are already proved. The new finite bookkeeping is
+  short; a kernel proof of nonattainment would require substantial independent
+  work on group representations, followed by the game transfer. The earlier
+  estimate of 100--300 proof lines concerned only symmetrization and does not
+  estimate this missing work.
+  \item \textbf{Mathlib/project split:} existing inner-product, tensor,
+  finite-sum and supremum APIs support the elementary transfers. The missing
+  group-theoretic theorem and its connection with quantum strategies are
+  external mathematical inputs, not existing project or Mathlib lemmas.
   \item \textbf{Key mathematical inputs:} the completed projective form of
   Naimark dilation, \cite[Theorem~5.1]{Ji2020LowIndividualDegree}, and the
   definitions of symmetric games and tensor product values in the source
@@ -54,9 +59,9 @@
 
 \section{Key theorem forms}
 
-Three statements must be kept apart.  Throughout, $\game$ denotes a symmetric
-two-player one-round game and $\eps \ge 0$ a real parameter; the notation is
-introduced in the next section.
+Three statements must be kept apart. Except in the explicitly empty-answer
+example, $\game$ denotes a symmetric two-player one-round game with nonempty
+finite alphabets, and $\eps \ge 0$ is real. The notation is introduced below.
 
 \begin{enumerate}
   \item \textbf{Source form (attainment form).}  If
@@ -75,10 +80,11 @@ introduced in the next section.
 
 The source proof consists exactly of a proof of the third form, applied to a
 strategy supplied by the definition of the supremum; this yields the second
-form.  The first form asserts strictly more than the second, and the passage
-from the second to the first is the gap discussed in this note.  Every use of
-the lemma, in the source and in this project, consumes only the second or the
-third form.
+form. The first form asserts strictly more than the second, and the passage
+from the second to the first is the gap discussed in this note. Both direct
+source uses need only the second or third form for their value conclusions.
+The entanglement conclusion of answer reduction and its use in compression
+remain unresolved, as discussed under ``Uses of the lemma''.
 
 \section{The source assertion}
 
@@ -104,8 +110,9 @@ same measurements.
 The symmetrization lemma of \cite[Section~5]{Ji2020MIPStar} asserts:%
 \footnote{The statement is at
 \path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex}, lines~94--99,
-and its proof at lines~101--132.  The blueprint statement kept in this form
-is \path{lem:symmetric-strat} in
+and its proof at lines~101--132. The printed statement is retained in
+\path{rem:symmetric-strat-limit}; \path{lem:symmetric-strat} states the proved
+approximate form in
 \path{blueprint/src/chapter/ch12_qpbt_games.tex}.}
 if $\game$ is a symmetric game with $\val^*(\game) = 1-\eps$ for some
 $\eps \ge 0$, then
@@ -151,12 +158,172 @@ this: it is known, and recalled in the introduction of the source itself, that
 the set of finite-dimensional quantum correlations is not closed and differs
 from the set of infinite-dimensional spatial correlations, so limits of
 finite-dimensional strategies need not be realized by any finite-dimensional
-strategy.  Whether some symmetric game realizes the failure --- a game whose
-value is attained by no tensor product strategy, presented together with the
-exposing functional as a decision predicate --- is a separate question that
-this note does not need to settle.  The local verdict is about the proof: the
-cited argument proves the approximate form and does not prove the attainment
-form.
+strategy. Non-closure alone would not prove that a game predicate exposes an
+unattained value. The construction below supplies such a predicate and settles
+that additional question mathematically, using a verified external theorem.
+
+\section{A finite nonempty counterexample}
+
+We use the particular binary linear system constructed in
+\cite[Proposition~5.1]{Slofstra2017Nonclosure}, not the inference that an
+arbitrary non-closed correlation set has an exposed missing point. Here and
+below citations to that article refer to arXiv version~2. The following
+finite recipe specifies its matrix $A$ and right-hand side $b$ without an
+existential choice of a game.
+
+Start with the group
+\[
+\begin{split}
+ K=\langle x,y,a,b\mid &a^2=b^2=1,\ [a,b]=1,\\
+ &yay^{-1}=a,\ yby^{-1}=ab,\ xyx^{-1}=y^2\rangle.
+\end{split}
+\]
+Introduce $c=ab$, and apply the construction of Proposition~4.8 first to
+$y=zw$ and then to $x=z_2w_2$. After adjoining the two involutions $t,Z$
+as in Proposition~5.1, there are fourteen involutary generators
+\[
+ a,b,c,z,w,d,e,W,z_2,w_2,r,s,t,Z.
+\]
+Their linear relations are $abc=1$ and $aZ=J$, where $J$ is the distinguished
+central involution. Their ten conjugacy relations $uvu=w'$ are specified by
+the ordered triples
+\[
+\begin{split}
+ &(w,a,d),(z,d,a),(w,b,e),(z,e,c),(w,z,W),\\
+ &(w_2,w,r),(z_2,r,W),(w_2,z,s),(z_2,s,z),(t,a,Z).
+\end{split}
+\]
+For example, the first elimination replaces $xwx^{-1}=wzw$ by
+$wzw=W$ and $xwx^{-1}=W$, and also imposes $xzx^{-1}=z$.
+The second elimination gives the four triples involving $z_2,w_2,r,s$.
+
+Apply Lemma~4.4 to this presentation. For each old generator $u$ add
+$y_u,z_u,w_u$, and add one generator $f$. Retain the two linear relations,
+add $u y_u z_u=1$ and $u f w_u=1$, and for each old triple $(u,v,w')$
+add a fresh $g$ with $g y_v z_{w'}=1$. The new conjugacy triples are
+$(f,y_u,z_u)$ and $(w_u,y_v,z_{w'})$. This gives 67 generators,
+40 linear relations, and 24 conjugacy triples. For each of these last
+triples $(u,v,w')$, add seven fresh variables $h_1,\ldots,h_7$ and replace
+the conjugacy by the six binary equations
+\[
+\begin{aligned}
+ u+h_1+h_2&=0,&v+h_2+h_3&=0,&h_3+h_4+h_5&=0,\\
+ u+h_5+h_6&=0,&w'+h_6+h_7&=0,&h_1+h_4+h_7&=0.
+\end{aligned}
+\]
+These are equation~(4.1) of the cited article. The resulting system
+$Aq=b$ has 184 equations and 235 variables. Every row has three variables
+except $a+Z=1$, which has two. Column order is the displayed seed order,
+then the added variables in the order just specified; within a row use
+increasing column order. An executable enumeration of every entry is supplied
+with the audit. Its finite checks do not prove quantum nonattainment.%
+\footnote{\path{audits/2026-09-22_issue-703-slofstra-system.py};
+the \texttt{--json} option prints all column names, row supports and parity bits.
+The accompanying mathematical and validation record is
+\path{audits/2026-09-22_issue-703-nonempty-attainment.md}.}
+
+Let $V_i$ be row $i$'s ordered support, of size $k_i\in\{2,3\}$.
+Define a game $H$ with questions $i\in[184]$ and $j\in[235]$, answers
+$\alpha\in\{0,1\}^3$ and $\beta\in\{0,1\}$, and the uniform law
+$\mu(i,j)=1/(184\cdot235)$. Its Boolean predicate accepts precisely when
+\[
+ \sum_{\ell=1}^{k_i}\alpha_\ell=b_i\pmod 2,\qquad
+ \alpha_\ell=0\ (\ell>k_i),\qquad
+ j\notin V_i\ \text{or}\ \alpha_{\operatorname{pos}_{V_i}(j)}=\beta.
+\]
+Thus even questions about a variable outside the row enforce a valid Alice
+answer. Padding by zero identifies the question-dependent satisfying
+assignments in Slofstra's Section~3 with a subset of the fixed eight-answer
+alphabet. Each row has a satisfying assignment. A perfect strategy for $H$
+has zero marginal probability on every invalid answer, so mapping those
+answers to any fixed satisfying assignment recovers a perfect strategy for
+the original linear-system game. Conversely its strategies extend by zero
+effects on invalid answers.
+
+For this system, Proposition~5.1 proves that $J$ is trivial in every
+finite-dimensional representation but nontrivial in approximate
+representations. Theorem~3.2 rules out a perfect finite-dimensional strategy;
+Proposition~3.4 supplies finite-dimensional strategies approaching perfect
+play on every question pair. These imply $\val^*(H)=1$ without attainment:
+the acceptance functional
+\[
+ L(p)=\frac{1}{184\cdot235}\sum_{i,j,\alpha,\beta}
+       D_H(i,j,\alpha,\beta)p(\alpha,\beta\mid i,j)
+\]
+is continuous, is bounded by one, and equals one exactly for perfect play,
+because every question pair has positive weight. This specifies the required
+supporting functional; it need not expose a unique correlation. Slofstra
+uses projective measurements and pure states. His finite-dimensional
+strategies are permitted POVM strategies here; in the other direction,
+Naimark dilation converts a hypothetical perfect finite-dimensional POVM
+strategy to a projective one without changing its correlations. The exclusion
+therefore covers exactly the finite-dimensional meaning used in this project.
+
+Now set $Q=[184]\sqcup[235]$ and $R=\{0,1\}^3\times\{0,1\}$, and define
+a symmetric game $\widehat H$ by
+\[
+ \widehat\mu(\mathsf L i,\mathsf R j)
+ =\widehat\mu(\mathsf R j,\mathsf L i)=\frac{1}{86480},
+\]
+with weight zero on equal-role pairs. On answers $(\alpha,\beta)$ and
+$(\alpha',\beta')$, its predicate is $D_H(i,j,\alpha,\beta')$ on
+$(\mathsf L i,\mathsf R j)$ and $D_H(i,j,\alpha',\beta)$ on the reversed
+pair, and is false on equal-role pairs. There are 419 questions and 16
+answers, all nonempty. The law sums to one and both symmetry identities hold.
+
+For any strategy for $\widehat H$, taking answer marginals gives a strategy
+for $H$ in each orientation, with the parties interchanged in the second.
+Its value is the average of those two values. In particular, a perfect
+strategy would give a perfect strategy for $H$. Conversely, from a pure
+strategy $\psi=\sum_{i,j}\psi_{ij}\ket i\ket j$ for $H$, use two copies
+on the common local space $\mathcal H_A\otimes\mathcal H_B$, with state
+\[
+ \Phi=\sum_{i,j,k,l}\psi_{ij}\psi_{kl}
+                 \ket{i,l}\otimes\ket{k,j}.
+\]
+This is a unit vector invariant under exchange of the players. For a left
+question measure $A$ on the first factor and return a fixed unused bit;
+for a right question measure $B$ on the second factor and return a fixed
+unused triple. Each orientation has exactly the original correlations.
+Projectivity is preserved. Thus $\widehat H$ has symmetric projective
+strategies approaching value one, while no finite-dimensional strategy
+attains it. Taking $\eps=0$ refutes the printed lemma on its nonempty domain.
+This mathematical argument neither changes a source game nor changes the
+definition of a strategy.
+
+\section{Extent of a possible correction}
+
+The exact value-preserving assertion is stronger than a single approximation
+bound: for every symmetric game, the set of values of all finite-dimensional
+strategies equals the set of values of symmetric projective strategies.
+One inclusion forgets the extra properties; the other is the given-strategy
+construction. On the nonempty domain the suprema are consequently equal,
+and every strict lower bound on the value is exceeded by a symmetric
+projective strategy. Equivalently, the approximate form holds for all
+$\eps'>\eps$; using an intermediate threshold also gives a strict conclusion.
+No positive numerical loss is necessary in the given-strategy form.
+
+Nonemptiness alone cannot restore the endpoint, by $\widehat H$. Nor can
+requiring $\eps>0$: for any $0<c<1$, add a new question $*$, put mass $1-c$
+on $(*,*)$ with unconditional rejection, and give the old pairs $c$ times
+their old mass. This symmetric nonempty game has value $c$ and no strategy
+of value $c$, so its error is $1-c>0$. At value zero, in contrast, every
+strategy attains the value, since values are nonnegative and the strategy
+class is nonempty. A single answer also forces attainment. These boundary
+cases do not extend to the general finite-alphabet domain.
+
+An assumed optimal input strategy would restore the printed endpoint, but
+would assume precisely the missing attainment fact. Fixing a dimension would
+change the supremum's domain; allowing infinite dimensions would change the
+source semantics. Neither is an admissible repair here. A fixed positive
+slack is less precise than arbitrary positive slack, and can always be halved.
+Thus the exact preservation of attainable values and the all-positive-slack
+consequence describe what the cited construction proves without unnecessary
+loss. They remain logically weaker than universal attainment. The terminal
+classification \emph{documented deviation} records that difference without
+adopting the approximate assertion as the printed theorem. In particular,
+usefulness in later value estimates does not prove the endpoint or resolve
+the independent rank issue below.
 
 \section{An additional obstruction in the formal domain}
 
@@ -200,7 +367,7 @@ leave the source proof's attainment step unproved.  The statement-integrity
 review requested here was carried out on 2026-09-19 and is the statement
 correction recorded below; the printed Lean statement and its proof-gap marker
 were replaced there by an unasserted Lean proposition and this refutation,
-proved as \leanid{not\_forall\_printedSymmetricProjectiveAttainmentClaim}.
+proved as \leanid{not\_forall\_printed\-Symmetric\-Projective\-Attainment\-Claim}.
 
 \section{Uses of the lemma}
 
@@ -212,9 +379,18 @@ argument fixes a strategy $\strategy^{\mathrm{orac}}$ for the oracularized game
 generality that it is projective.%
 \footnote{\path{references/qpbt-paper/10_oracularization.tex},
 lines~317--321.}
-Here the input is a given strategy, not the value of the game; the
-given-strategy form applies verbatim and preserves the value exactly, so the
-use is justified by what the proof establishes.
+Here the input is a given strategy, not the value of the game. Only the
+Naimark part of the proof is needed: it preserves every correlation and the
+Schmidt rank, since it appends local product ancillas and applies local
+isometries. The subsequent argument still uses distinct families $A,B$.
+This distinction matters for the entanglement bound in the same theorem:
+there is no reason to add the entangled role registers used for symmetry.%
+\footnote{The source defines the entanglement requirement by minimum Schmidt
+rank at \path{references/qpbt-paper/06_nonlocal_games_and_mipstar.tex},
+lines~189--197, and invokes that rank at the end of
+\path{references/qpbt-paper/10_oracularization.tex}, lines~401--405.
+The product ancillas are part of \path{thm:naimark},
+\path{references/qpbt-paper/04_preliminaries.tex}, lines~1007--1033.}
 
 Second, in the soundness proof for answer reduction, the argument assumes the
 strict inequality $\val^*(\game) > 1-\eps$ and concludes that there is a
@@ -225,22 +401,76 @@ Writing $\val^*(\game) = 1-\eps_0$ with $\eps_0 < \eps$ and applying the
 approximate form with $\eps' = (\eps+\eps_0)/2$ produces a symmetric
 projective strategy of value at least $1-\eps' > 1-\eps$.  A strict lower
 bound on the supremum thus passes through the approximate form; attainment is
-not used.
+not used. This justifies the starting strategy for the five local claims,
+\path{claim:ar-1} through \path{claim:ar-5}, and the two subsequent lemmas
+\path{lem:ar-ar} and \path{lem:ar-ora}. Their value estimates and the
+soundness conclusion need no endpoint strategy.
+
+There is a separate limitation when tracing this argument to the entanglement
+conclusion of the answer-reduction theorem. If the original state has Schmidt
+rank $r$, the symmetrized state in the source proof has rank $2r$: its two
+orthogonal role blocks each have the $r$ original Schmidt coefficients, scaled
+by $1/\sqrt2$. The last paragraph of the answer-reduction proof says that its
+decoded strategy uses the same state as the symmetric strategy chosen at the
+start. That does not give a strategy of rank at most $r$ from an arbitrary
+input of rank $r$, as the printed entanglement inequality requires.%
+\footnote{\path{references/qpbt-paper/11_answer_reduction.tex},
+lines~2110--2115 and 2995--2999.}
+Even starting from a supplied strategy, the cited symmetrization alone permits
+only a factor-two comparison of ranks. A derivation avoiding that loss,
+for example by proving the decoding estimates for the original two
+measurement families, is a separate obligation; it is not supplied by the
+attainment correction. This note does not claim that the entanglement
+inequality is false. It withdraws the earlier blanket assertion of sufficiency
+for every conclusion of the source transformations.
+
+The compression argument is an affected entanglement consumer. With the
+source's successive verifiers $V_n^{(1)},V_n^{(2)}$ and errors
+$\eps_1,\eps_2$, it explicitly concludes
+\[
+ \operatorname{Ent}(V_n^{(2)},1-\eps_2)
+ \geq \operatorname{Ent}(V_n^{(1)},1-\eps_1),
+\]
+where $\operatorname{Ent}(V,p)$ is the minimum Schmidt rank needed to pass
+$V$ with probability at least $p$, or infinity if no such strategy exists.
+This is a rank guarantee, not merely a comparison of game values. It depends
+on the unresolved entanglement part of
+answer reduction, so the compression passage cannot be certified by the
+positive-slack argument. Its separate value estimates use no attained
+supremum, and its completeness starts from an actual perfect PCC strategy;
+neither observation establishes the displayed rank inequality.%
+\footnote{\path{references/qpbt-paper/13_gap_preserving_compression.tex},
+lines~287--326, specifically the entanglement comparison at line~322.
+This corrects finding F1 of the first review of \ghpr{707}.}
+
+One cannot simply require symmetrization itself to preserve rank. Consider
+the symmetric one-question game that accepts different binary answers.
+The deterministic answers zero and one give a perfect product-state strategy.
+In a symmetric pure strategy of Schmidt rank one, the local states are equal
+up to phase and the common measurement gives identical independent answer
+distributions. Its success probability is $2p(1-p)\leq1/2$. Thus a general
+rank-preserving version of the symmetrization construction is false; the
+additional argument must concern the specific downstream transformation.
 
 In this project, the soundness statements of the Pauli basis test track
-quantify over strategies assumed to succeed with probability at least
-$1-\eps$, so any symmetrization step starts from a given strategy and consumes
-the given-strategy form.  The blueprint records both forms as part of the
-games vocabulary and has no downstream dependency on either; the two source
-uses above belong to transformations outside the scope of the present
-development.
-Consequently, no consumer of the lemma --- in the source or here --- requires
-the attainment form.
+quantify over given strategies assumed to succeed with probability at least
+$1-\eps$. The caller inventory finds no invocation of this symmetrization
+family in the headline proofs. The blueprint records both proved forms as part
+of the games vocabulary. Its only proof-dependency edge from a symmetrization
+node is from the given-strategy node to the approximate node; there are no further
+descendants. Its other actual references occur in the surrounding Naimark
+remark and the four symmetrization nodes themselves. The oracularization,
+answer-reduction and compression transformations are not formalized in the
+active blueprint or Lean subtree.
+The exact caller inventory and focused compilation evidence are in the
+accompanying audit. Neither direct source invocation requires attainment, but
+this does not certify the separate entanglement conclusion just discussed.
 
 \section{Comparison with the blueprint}
 
-The two subsections that follow describe the arrangement in force before
-2026-09-19; the statement-correction section below supersedes them.
+This section and the next two retain the formalization history through 2026-09-19.
+Their completion assessments are historical; the current documented-deviation
+disposition is stated at the end of this note.
 
 The blueprint \cite{MIPStarREBlueprint} states the lemma in the source shape,
 as the proof-gap protocol requires when the printed statement is not known to
@@ -278,7 +508,7 @@ printed statement, and the weaker result is not renamed as it.
 Second, the approximate form listed under ``Key theorem forms'' above is now
 formalized and proved as
 \leanid{exists\_symmetric\_projective\_strategy\_approx}, with the equivalent
-slack form \leanid{exists\_symmetric\_projective\_strategy\_of\_lt\_value}
+slack form \leanid{exists\_symmetric\_projective\_strategy\_of\_\allowbreak lt\_value}
 beside it, against a new formalization-only blueprint node
 \path{lem:symmetric-strat-approx}.  The Lean proof is the source argument
 unchanged: the supremum property of $\val^*(\game)$ supplies a strategy above
@@ -325,7 +555,7 @@ discrepancy from view.
   this note.
   \item The refutation recorded in the formal-domain section above is now a
   proved Lean theorem rather than an audit artifact:
-  \leanid{not\_forall\_printedSymmetricProjectiveAttainmentClaim} proves that
+  \leanid{not\_forall\_printed\-Symmetric\-Projective\-Attainment\-Claim} proves that
   the printed claim does not hold for every symmetric game and every $\eps$,
   using the empty-answer game
   \leanid{SymmetrizationObstruction.emptyAnswerGame} together with
@@ -337,7 +567,7 @@ discrepancy from view.
   \item The blueprint node \path{lem:symmetric-strat} now carries the
   \emph{corrected} statement --- the approximate form, with the nonempty
   answer alphabet displayed --- with \leanid{exists\_symmetric\_projective\_strategy\_approx}
-  and \leanid{exists\_symmetric\_projective\_strategy\_of\_lt\_value} as its
+  and \leanid{exists\_symmetric\_projective\_strategy\_of\_\allowbreak lt\_value} as its
   formalization and with statement- and proof-level \texttt{leanok}.  The
   printed sentence is stated in full in \path{rem:symmetric-strat-limit}
   beside it, and the Lean record and its refutation are the node
@@ -358,30 +588,39 @@ source's nonempty-answer domain. That distinction remains relevant to the
 adoption conditions of \path{local/protocols/completion.md}; the change alone
 does not give this row a terminal status.
 
+\section{Limits of the formal evidence}
+
+The nonempty counterexample is a mathematical consequence of the cited
+external results, not a theorem imported into Lean. A future kernel verification
+would prove for the displayed solution group that $J$ is trivial in every finite
+unitary representation and nontrivial in approximate representations, connect
+those facts to exact and approximate perfect play, and verify the fixed-answer
+and symmetric-game transfers above. These are conclusions to prove, not new
+axioms, generic statement inputs, or hypotheses on a paper theorem. They
+describe what is absent from the formal evidence, not required completion work
+for this documented deviation. No Lean declaration is added or changed here.
+In particular, the existing empty-answer theorem is not being relabelled as a
+nonempty refutation.
+
 \section{Conclusion}
 
-For games with nonempty answer alphabets, the verdict remains a proof-level
-gap in the cited lemma: the symmetrization argument proves the given-strategy
-and approximate forms, while the printed
-conclusion additionally asserts that the supremum defining $\val^*(\game)$ is
-attained, which does not follow.  The gap is harmless for the results built
-on the lemma, since both uses in the source, and all planned uses in this
-project, proceed from a given strategy of value at least $1-\eps$ or from a
-strict lower bound on the value, for which the value-preserving construction
-suffices.  Stage~4 has carried out the recommendation of this note: the
-given-strategy symmetrization lemma is formalized and proved as the workhorse
-statement.  The 2026-09-18
-realignment added the approximate form as a proved Lean declaration under an
-explicit nonempty-answer hypothesis, and the 2026-09-19 statement correction
-above makes that approximate form the formalization of the source node, keeps
-the printed sentence visible as an unasserted Lean proposition, and proves its
-refutation on the formal domain.  The reclassification from an unproved step to
-a documented statement correction, anticipated here, is thereby carried out.
-
-The exact current Lean domain has the empty-answer counterexample
-above.  An unrestricted attainment theorem cannot discharge the printed
-statement.  Neither obstruction is discharged by the correction; both are made
-explicit by it.
+The printed attainment assertion is false on the nonempty finite source
+domain, by the explicit game and the external theorem above. Lean still
+proves the previously established given-strategy and approximate forms and
+the separate empty-answer refutation. Those forms and the exact unasserted
+printed proposition are preserved. The intermediate discrepancy is terminal
+as \texttt{documented-deviation} under completion criterion C3, with this note,
+the matching blueprint remark, the register row and the deviations disclosure.
+This status certifies neither the printed endpoint nor a Lean proof of the
+nonempty counterexample. Answer reduction's entanglement conclusion and the
+compression inequality that consumes it remain unresolved. No source game,
+theorem statement or proof is changed, and the headline Pauli soundness theorem
+retains its printed statement.%
+\footnote{\ghissue{703}; the audit retains the earlier attempts and distinguishes
+their recorded costs from unknown or shared costs. The owner's instruction of
+2026-09-22, ``document, don't prove'', authorizes the terminal documentation
+status in \path{local/protocols/completion.md}; it does not assert a mathematical
+claim. The disclosure is section a2 of \path{docs/DEVIATIONS.md}.}
 
 \bibliographystyle{alpha}
 \bibliography{references}
