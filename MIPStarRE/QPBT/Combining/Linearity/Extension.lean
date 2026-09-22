@@ -167,6 +167,31 @@ theorem linearity_padding_error_transport {ι κ : Type}
   congr 2
   simp [applyOperatorToState]
 
+/-- Compare a rounded operator on an extension with an original operator on
+its ground slice. Both operators are extended by the identity on their
+respective complementary subspaces. The equality retains the actual action
+of the original operator, rather than replacing it by a compression of the
+rounded measurement. In the reservation construction `E` is the canonical
+ground embedding and `J` is the already constructed reservation. -/
+theorem linearity_padding_ground_error_transport {ι κ ν : Type}
+    [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
+    [Fintype ν] [DecidableEq ν]
+    (J : EuclideanSpace ℂ κ →ₗᵢ[ℂ] EuclideanSpace ℂ ν)
+    (E : EuclideanSpace ℂ ι →ₗᵢ[ℂ] EuclideanSpace ℂ κ)
+    (L : Op κ) (O : Op ι) (ψ : EuclideanSpace ℂ ι) :
+    ‖applyOperatorToState
+      (LinearityPadding.extendObservable J L -
+        LinearityPadding.extendObservable (J.comp E) O) ((J.comp E) ψ)‖ ^ 2 =
+      ‖applyOperatorToState L (E ψ) - E (applyOperatorToState O ψ)‖ ^ 2 := by
+  have hsub (A B : Op ν) (v : EuclideanSpace ℂ ν) :
+      applyOperatorToState (A - B) v =
+        applyOperatorToState A v - applyOperatorToState B v := by
+    simp [applyOperatorToState]
+  rw [hsub, LinearityPadding.extendObservable_apply]
+  change ‖applyOperatorToState (LinearityPadding.extendObservable J L) (J (E ψ)) -
+    J (E (applyOperatorToState O ψ))‖ ^ 2 = _
+  rw [LinearityPadding.extendObservable_apply, ← map_sub, J.norm_map]
+
 /-- Both finite averages preserve the same exact squared-error identity. The
 embedding is quantified before the indices and all the operator families. -/
 theorem linearity_padding_average_error_transport {ι κ : Type}
