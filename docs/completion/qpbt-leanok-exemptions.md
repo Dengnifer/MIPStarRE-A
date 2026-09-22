@@ -19,23 +19,19 @@ row-by-row adoption evidence are in the
    case are proved. The remaining obligation is a deterministic executable
    Gaussian-elimination construction, with correctness and a polynomial bound
    on field operations and zero tests. Abstract RREF existence and an executable
-   decomposition given an RREF matrix do not establish that claim. See the
+   decomposition given an RREF matrix do not establish that claim. This
+   obligation remains open until issue #690 receives CI, independent review,
+   and merge. See the
    [canonical-complement audit](../../audits/2026-09-22_issue-676-canonical-completion.md).
-3. `def:generalized-pauli`: general-prime matrices exist, but the linked
-   eigenvectors and projectors require characteristic two. See
-   [the scope note](../paper-gaps/qpbt_characteristic-two-pauli-scope.tex).
-4. `lem:pauli-observable-expansion`: the two linked Fourier identities have
-   only the characteristic-two domain, whereas the source equations are
-   general-prime. The same scope note records the missing constructions.
-5. `lem:qld-xz-lines`: the complete unconditioned line construction is proved,
+2. `lem:qld-xz-lines`: the complete unconditioned line construction is proved,
    but its witness states consistency on completed evaluations. The source
    uses field-valued evaluations, including its unresolved zero-direction
    convention. See [the subline note](../paper-gaps/qpbt_subline-claims-line-marginal.tex).
-6. `def:combine-map`: global polynomial combination and the coefficient formula
+3. `def:combine-map`: global polynomial combination and the coefficient formula
    are proved; `combineLinePoly_spec` assumes explicit affine compatibility.
    Derive it from the source line-projection domain and justify evaluations on
    degenerate lines (`14_analysis_of_the_pauli_basis_test.tex:970-989`).
-7. `lem:qld-4-13`: `PrintedExtendedLinesWitnessClaim` is unasserted and uses
+4. `lem:qld-4-13`: `PrintedExtendedLinesWitnessClaim` is unasserted and uses
    the directly indexed carrier and completed evaluations. Its error form is
    not established by the proved `C m poly(epsilon,md/q)` auxiliary. See
    [the error note](../paper-gaps/qpbt_combined-lines-error-term.tex) and
@@ -48,6 +44,12 @@ then proves the source complement conclusion using the pivot-coordinate
 decomposition. No RREF, correspondence, or complement hypothesis is assumed.
 This resolves the former canonical-complement lemma row without exempting the
 definition's remaining algorithmic assertion.
+
+`def:generalized-pauli` is marked, and `lem:pauli-observable-expansion` is
+marked at both statement and proof level. The general-prime eigenvectors,
+projectors, and both Fourier identities are formalized, closing their former
+unresolved rows. See
+[the scope note](../paper-gaps/qpbt_characteristic-two-pauli-scope.tex).
 
 The four CL definition nodes audited in chapter 12 now carry marks for their
 faithful recursive predicates and shared-seed sampling laws. No theorem or

@@ -673,14 +673,17 @@ representation is obtained as follows.
 % Paper label sec:generalized-pauli kept for cross-reference fidelity.
 \label{sec:generalized-pauli}
 
-% The node is not marked \leanok: the Fourier transform F of eq:fourier-f has no Lean
-% counterpart, and pauliVec/pauliProj formalize the eigenbasis vectors and the rank-one
-% projective measurement only in the characteristic-two scope recorded by
-% gap:qpbt_characteristic-two-pauli-scope, not in general prime characteristic.
 \begin{definition}[Generalized Pauli observables]\label{def:generalized-pauli}
 	\lean{MIPStarRE.QPBT.primeTauShift, MIPStarRE.QPBT.primeTauPhase}
-	\lean{MIPStarRE.QPBT.primeTauObservable}
-	\lean{MIPStarRE.QPBT.pauliVec, MIPStarRE.QPBT.pauliProj}
+	\lean{MIPStarRE.QPBT.primeTauObservable, MIPStarRE.QPBT.primePauliFourier}
+	\lean{MIPStarRE.QPBT.primePauliVec, MIPStarRE.QPBT.primePauliProj}
+	\lean{MIPStarRE.QPBT.primePauliVec_orthonormal}
+	\lean{MIPStarRE.QPBT.primeTauObservable_mulVec_primePauliVec}
+	\lean{MIPStarRE.QPBT.primePauliProj_mul_primePauliProj}
+	\lean{MIPStarRE.QPBT.primePauliProj_conjTranspose}
+	\lean{MIPStarRE.QPBT.posSemidef_primePauliProj}
+	\lean{MIPStarRE.QPBT.primePauliProj_isProj, MIPStarRE.QPBT.sum_primePauliProj_eq_one}
+	\leanok
 	\uses{def:subfield-trace, def:lin-reg}
 	Let $p$ be a prime and $\omega = e^{2\pi i/p}$. The \emph{generalized Pauli
 	observables over $\F_p$} are the unitaries on $\C^{\F_p}$ given by
@@ -803,13 +806,10 @@ representation is obtained as follows.
 	forces $C = 0$.
 \end{proof}
 
-% Unmarked, tracked in issue #667; no permanent exemption. The two declarations are the
-% characteristic-two specializations of eq:pauli-obs-proj and eq:pauli-inversion-0; the
-% node states both identities in general prime characteristic. Marking it would present
-% a scope-restricted theorem as the unrestricted source statement. The scope difference
-% is recorded in gap:qpbt_characteristic-two-pauli-scope, as for def:generalized-pauli.
 \begin{lemma}[Fourier expansion of Pauli observables]\label{lem:pauli-observable-expansion}
-	\lean{MIPStarRE.QPBT.tauObservable_eq_sum_pauliProj, MIPStarRE.QPBT.pauliProj_eq_avg_tauObservable}
+	\lean{MIPStarRE.QPBT.primeTauObservable_eq_sum_primePauliProj}
+	\lean{MIPStarRE.QPBT.primePauliProj_eq_avg_primeTauObservable}
+	\leanok
 	\uses{def:generalized-pauli, def:subfield-trace}
 	For every integer $n \ge 1$, all $W \in \{X, Z\}$, and all $a \in \F_q^n$,
 	% Paper equation label kept on the display it names.
@@ -827,17 +827,16 @@ representation is obtained as follows.
 	recorded in \cite{gap:qpbt_characteristic-two-pauli-scope}.
 \end{lemma}
 \begin{proof}
-	\uses{def:generalized-pauli, lem:cancellation}
-	Each $\ket{b_W}$ is an eigenvector of $\tau^W(a)$ with eigenvalue
-	$\omega^{\tr(a \cdot b)}$: for $W = Z$ this is immediate from the
-	definition, and for $W = X$ it follows from the single-qudit computation
-	$\tau^X(a)\ket{e_X} = \omega^{\tr(ae)}\ket{e_X}$, applied factor by factor.
-	Expanding $\tau^W(a)$ in the orthonormal eigenbasis
-	$\{\ket{b_W}\}_{b \in \F_q^n}$ gives the first display. For the inversion,
-	substitute the first display and exchange the order of summation; by
-	Lemma~\ref{lem:cancellation} applied with $V = \F_q^n$ (so that
-	$V^\perp = \{0\}$), the inner expectation vanishes unless $b' = b$, where
-	it equals $1$.
+	\leanok
+	\uses{def:generalized-pauli, lem:fourier-fact-finite-index}
+	For $W=Z$, the entrywise expansion follows directly from the computational
+	basis projectors. For $W=X$, multiplying the explicit rank-one projector
+	entries by the character coefficient reduces each matrix entry to the
+	full-space character sum of Lemma~\ref{lem:fourier-fact-finite-index}, which
+	vanishes off the required shift and equals one on it. For the inversion,
+	substitute the forward expansion and exchange the finite sums. The same
+	full-space Fourier orthogonality makes the inner expectation vanish unless
+	$b'=b$, where it equals $1$.
 \end{proof}
 
 Since only admissible field sizes $q = 2^k$ arise in the Pauli basis test, the

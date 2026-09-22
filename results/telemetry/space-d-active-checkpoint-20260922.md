@@ -798,3 +798,132 @@ The original680 wrapper exited1 and is no longer live; its failure is preserved.
 The prior pending telemetry batch published cleanly at305abb88. New diagnostic
 records follow in the next normal records batch. All three mathematical workers
 remain live; no key failure, extra key, new slot or chsh use occurred.
+
+Recovery685 succeeded:1846 marked declarations passed with no sorryAx,
+canonical approval carry5276394586 published at2b5aefac, claim released and
+gate passed. The service merged685 as
+b495c5da9b80462f0741e3a5c40d6385c8b1c03c. Both the680 recovery and canonical
+lemma publication watcher observed the actual merge and advanced. A records
+attempt collided with the service's live primary index.lock; no lock was
+removed or force operation used. Inspect normal publication/primary state
+after the service finishes. The CI incident stage comment is updated to include
+this merge and the passed audit rather than duplicating the same stage report.
+
+## Post-Merge Recovery And Magic Square Integration
+
+Actual records synchronization finished aligned/clean at0a48d0d0 despite the
+concurrent checked-push refusal; the daemon published the adopted telemetry.
+Stage comment5774353518 now includes685's merge and both recovery outcomes.
+
+The first canonical successor watcher exited1 on a concurrent git-fetch CAS
+refusal before touching its author head. Its log/exit were moved to
+/tmp/main-publish-canonical676-after685-20260922.failed-fetch.log/.failed-fetch.exit,
+then the same guarded watcher was restarted; the author work is intact.
+
+The680 post685 refresh merged cleanly to477fb87691268eba9b2a2fea297700a218e2c230,
+but checked push refused because this private worktree lacked the newly merged
+Algebra/RowEchelon.olean. No source error was inferred. Original recovery
+exited2 with main-fix680 retained. Detached /tmp/main-resume680-export-20260922.sh
+now compiles just that module into the private worktree, then performs normal
+publication/full CI under /tmp/main-fullspeed-publish680-export-recovery-20260922
+and the existing canonical adverse-carry/adjudication sequence. It changes no
+source, skips no hooks and uses no live-worktree Lake dependency.
+
+orc-688-20260922-01 finished0 after2067s at5ea95b1c9ecf3dd6d5ca6d772c180df4fc4d2e2c,
+three files760+/31-. It retains the exact unasserted prescribed-answer Magic
+Square claim and traces all source/blueprint consumers; it does not certify
+minimality or prescribed-answer extraction. Keep the row pending. Receipt
+/tmp/main-fullspeed-ms688-20260922-result.md includes a precise five-part
+integration patch and all prior accounting, plus a pre-existing malformed
+owner-sessions.jsonl line751 report requiring later reconciliation without loss.
+
+Main released the completed688 author claim and admitted its ONE3600-second
+continuation at the same clean worktree/head. Packet
+/tmp/main-ms688-integration-packet-20260922.md, runtime
+/tmp/main-fullspeed-ms688-integration-20260922. It applies only the specified
+root import, chapter13 summaries and separate printed-claim node, generated
+links and Magic Square register prose, with unchanged pending status. All
+2067s and historical105/172 work remain charged; no further automatic extension.
+This fills the freed space-d lane beside689 and690. Publication/full CI/review
+of the final combined688 change remain main's next action after its receipt.
+
+mathfix-689-20260922-01 then completed0 in1684s at
+1c1fa96b8a49578bde1e3de1d126296d74d60fea. Its five declarations prove the
+complex first direct estimate, general Z-overlap reality, same-constant Z modulus
+bound and a concrete wrapper deriving the line data. Focused checks of all
+listed consumers and standard-only axiom audits pass; no unfinished proof.
+Receipt /tmp/main-fullspeed-subline689-20260922-result.md discloses an unchanged
+generated-registry mismatch and preserves source-law/zero-direction/error-rate
+obligations. Main admits its ONE3600-second blueprint continuation, with exact
+ownership extension and unchanged open status in design-decisions. Packet
+/tmp/main-subline689-integration-packet-20260922.md, runtime
+/tmp/main-fullspeed-subline689-integration-20260922, same worktree/head. This
+fills the just-freed slot beside688 integration and690. No more automatic
+continuations are granted for688 or689; future results need main evaluation.
+
+## 09:54Z Cycle And Telemetry Syntax Repair
+
+The preceding cycle progressed through685 merge, recovery and two completed
+authors. Current snapshot confirms three live space-d workers (688 integration,
+689 blueprint integration,690 elimination),3/0/3 caps and no retired-key marker.
+All latest direct owner resource instructions agree with this allocation.
+PR680 is now published at66796a9aaee42da1454ca3745b79758f1cbd1854; its retry
+build47s and render61s pass, remaining CI active. Canonical successor is PR691
+at ed5ee0b0f5fe3f0cda7ecf1be18db2514430f46b; build71s and render79s pass,
+remaining CI active before its scheduled independent review. Do not duplicate
+either run or infer a verdict from their intermediate logs.
+
+Main resolved688's reported malformed telemetry row: owner-sessions.jsonl751
+was missing only its closing brace. The exact one-character repair preserves
+all fields of historical review5255854599, including the adverse verdict,
+five findings and601-second duration. All812 nonblank JSONL records now parse;
+comparison against the prior Git blob verifies no other line changed. This
+repairs the accounting parser, not any review verdict or historical charge.
+Original bytes remain in Git history and the incident is logged in events.md.
+
+## Complete CI And Context-Sensitive Review Recovery
+
+At the09:57Z cycle, CI680 completed successfully at66796a9a, including all868
+workflow tests (blueprint-sync256s). CI691 completed successfully ated5ee0b0
+and its ordinary2700s-per-phase independent review started through
+/tmp/main-whole-review691-canonical676-20260922. Code reviewer
+reviewer-pr691-20260922-01 obtained the freed688 lane; prose admission waits
+under the same space-d cap. No extra key or slot is used.
+
+The680 dry-run canonical carry refused because full normalized patch hashes
+differ: old548901f2..., new776cb841.... Main recomputed both against their
+actual merge bases and found every added/removed line and file header exactly
+identical (SHA25624a699c0d7258e5fc9348c522c7bc9b5a05c1578ac884289a8f9aad0555fe055).
+Only surrounding gap-register prose from merged686 differs: excluded telemetry
+links became accurate nonlinks. No carried review file was generated, and the
+publisher stopped with FileNotFoundError. No review/status was fabricated.
+Claim main-review680 remains held; four full rounds and their adverse evidence
+are unchanged.
+
+Main explicitly authorized one1800-second independent integration verification
+at66796a9a as the fifth LIMITED observation, using the retained September9
+project-review authority (the same documented basis as650/659). It is not a
+fifth full mathematical review, a carried review, or permission to alter the
+canonical hash. Packet /tmp/main-pr680-context-verification-20260922.md and
+queued wrapper /tmp/main-verify680-context-20260922.sh. The wrapper waits for
+an actually free space-d slot before dispatch, rechecks exact-head complete CI,
+then uses canonical dispatch in read-only mode. Main must inspect and publish
+its actual final body and only then adjudicate remaining findings at this
+exact head. It preserves F1/687 unless the independent evidence warrants
+another disposition. No automatic further observation or manual merge.
+
+orc-688-20260922-02 finished0 after915s at
+3f2f8c0515e7a64abbf2272f4f88ec5ce298d038. All five integration steps are
+complete; combined diff is six files796+/40-. Root import, separate unasserted
+definition node, summaries and Magic Square register prose are synchronized;
+pending status and all other rows are unchanged. The generated declaration list
+is ignored by repository design and was regenerated, not force-added.
+Focused Lean/export/axiom, blueprint web/sync/1867 declaration checks and
+normal hooks pass. All2067+915s and historical105/172 costs remain charged.
+Detached /tmp/main-publish688-integrated-20260922.sh now refreshes/publishes,
+exports the incoming RowEchelon module privately, runs complete CI and schedules
+the first independent whole review. No further author continuation is admitted.
+
+The accounting repair published aligned and clean atcf20c7a4. Any later
+passive rows are new, not a failed repair. Current production waits and
+worker ownership remain live and bounded; mathematical completion is unproven.
