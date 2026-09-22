@@ -145,6 +145,27 @@ theorem eliminateColumnCounted_cost (A : StoredMatrix K m n)
       split_ifs <;> simp [Nat.mul_comm]
     _ = m * (2 * n) := by simp
 
+/-- The selected column becomes a unit column. Any column in which both swapped
+rows were zero remains unchanged, preserving previously completed pivot columns. -/
+theorem eliminateColumn_entries (A : StoredMatrix K m n) (r s : Fin m) (c : Fin n)
+    (hc : toMatrix A s c ≠ 0) :
+    (∀ i, toMatrix (eliminateColumn A r s c) i c = if i = r then 1 else 0) ∧
+      ∀ j, toMatrix A r j = 0 → toMatrix A s j = 0 →
+        ∀ i, toMatrix (eliminateColumn A r s c) i j = toMatrix A i j := by
+  constructor
+  · intro i
+    rw [eliminateColumn_apply, div_self hc]
+    split_ifs <;> simp
+  · intro j hr hs i
+    rw [eliminateColumn_apply, hs, zero_div]
+    by_cases hir : i = r
+    · subst i
+      simp [hr]
+    · by_cases his : i = s
+      · subst i
+        simp [hir, hr, hs]
+      · simp [hir, Equiv.swap_apply_of_ne_of_ne hir his]
+
 end GaussianElimination
 
 end MIPStarRE.QPBT
