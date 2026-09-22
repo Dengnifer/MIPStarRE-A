@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Algebra.Subspaces
+import MIPStarRE.QPBT.Algebra.RowEchelon
 import MIPStarRE.QPBT.Algebra.FieldBasis
 import MIPStarRE.QPBT.Algebra.LowDegreeCode
 import MIPStarRE.QPBT.Algebra.Lines

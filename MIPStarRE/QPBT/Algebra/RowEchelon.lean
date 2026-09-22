@@ -8,6 +8,9 @@ pivot columns, an identity matrix in those columns, and zeros before each pivot.
 This module compares its nonpivot indices with the intrinsic prefix-rank
 definition of `canonicalComplement`.
 
+Independent input rows admit such a matrix with the same row span and an
+invertible change of row basis. The pivot index set depends only on that span.
+
 The arbitrary-field and zero-dimensional cases are extensions of the paper's
 ambient convention of a finite field and positive ambient dimension. The results
 concern abstract existence and equality, not an executable elimination algorithm
@@ -238,5 +241,20 @@ theorem exists_isReducedRowEchelon
   refine ⟨B, pivot, U, hunit, hmul, hB, hspan, ?_⟩
   rw [← hspan]
   exact hB.canonicalComplement_eq_nonpivot_indices
+
+/-- The pivot index set is independent of the chosen row basis and its order:
+any two RREF matrices spanning the same subspace have the same pivots. This is
+the basis-independence assertion accompanying blueprint
+`def:canonical-complement`. -/
+theorem IsReducedRowEchelon.pivot_indices_eq_of_span_eq
+    {m' : ℕ} {B : Matrix (Fin m) (Fin n) K} {D : Matrix (Fin m') (Fin n) K}
+    {pivot : Fin m ↪o Fin n} {pivot' : Fin m' ↪o Fin n}
+    (hB : IsReducedRowEchelon B pivot) (hD : IsReducedRowEchelon D pivot')
+    (hspan : Submodule.span K (Set.range B.row) = Submodule.span K (Set.range D.row)) :
+    Finset.univ.image pivot = Finset.univ.image pivot' := by
+  have h := congrArg canonicalComplement hspan
+  rw [hB.canonicalComplement_eq_nonpivot_indices,
+    hD.canonicalComplement_eq_nonpivot_indices] at h
+  exact compl_injective h
 
 end MIPStarRE.QPBT
