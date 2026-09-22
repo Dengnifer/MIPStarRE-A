@@ -6,10 +6,14 @@ import MIPStarRE.QPBT.Combining.Lines.SubLineExtended
 Projection inclusion supplies the affine parameters used by the combining
 polynomial. The geometric argument includes constant projections and singleton
 lines; it does not assume an injective parameterization.
+These are formalization-only auxiliary results. The evaluation results also
+isolate why a coefficient answer need not define a function on a singleton
+line, even after compatible affine parameters have been constructed.
 
 ## References
 
-- Blueprint `def:combine-map`.
+- Blueprint `def:combine-map`, `lem:combine-map-affine-parameters`,
+  `lem:combine-map-parameter-polynomial`, and `lem:combine-map-singleton-evaluation`.
 - `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`,
   especially `eq:combine-lines`.
 - `references/qpbt-paper/08_classical_and_quantum_low_degree_tests.tex:106-124`,
