@@ -1881,3 +1881,59 @@ terminal receipts and clean head and prepared
 but using the normal3600s account wait. It transfers only the stale retained
 main-fix705 claim, reuses the already warm tree and dispatches with the exact
 owner Astra reason. This is a capacity retry, not a second author attempt.
+
+## 2026-09-22T14:43Z tensor continuation,702 repair and696 capacity retry
+
+The previous turn made progress through700's completed integration and706's
+full checks; stage5778369441 and telemetryef9dcc94 are published. This turn
+harvested terminal704 work, the first702 review and696's verified capacity
+failure. The source/artifact goal remains active and incomplete.
+
+704 completed0 after3264s, clean eedcde3c347b607ff5114ab194afa1b3181253c7,
+eleven checked commits and ten proved auxiliary lemmas for pair/register laws,
+projective pair measurements, correlated state/Born weights and scalar bounds.
+The ACTUAL tensor strategy/rejection, required soundness instance and joint
+same-measurement transport remain open. Main records in design-decisions the
+ONE3600s continuation and proposed K=max(m^3*d,12*m*(d+1)) as an auxiliary
+construction parameter, subject to independent review and actual error
+absorption. This changes no verifier, source hypothesis or C3 terminal status.
+Packet /tmp/main-tensor704-continuation-20260922.md preserves the full exit,
+all18/173/527 history/current3264s, and the distinct undefined2m+2 obstruction.
+Runtime /tmp/main-fullspeed-tensor-import-continuation-20260922 is admitted
+through canonical dispatch and has started; no publication races its writer.
+
+703 is PR707 at a4782a5acc1627ec7ab76cf67592fdd53bea535c. Complete documentation
+CI passed: render65s, paper-gap1s, sync261s, debt15s; Lean build/evasion correctly
+skipped for this documentation-only diff. Its marked audit and FIRST review
+follow in the existing tail.700 refresh/publication resumed, loss guard passed
+and all1881 declaration links resolved.705 capacity retry started
+orc-705-20260922-01. Direct PID arguments identify690/705/704 as the three
+actual space-d workers at the latest observation; no other project key is ours.
+
+702 first combined review5279555373 requests changes atb167f8e1: seven ledger
+findings, with F1/F3 duplicating one malformed indicator. Other findings require
+binary/averaging hypotheses, dependency edges, a general stateDepDistSq
+transport link, mathematical alphabet notation and two docstring edits. Code
+checks found no extra proof-debt premise or proof hole; full source absorption
+remains open. /tmp/main-fix702-firstreview-20260922.sh queues one2700s complete
+repair at the exact clean head, with main-fix702 claimed. Preserve2094s+3036s+
+449s and both review phases. Main must publish the repaired head, run full CI
+and marked audit, then request SECOND independent review.
+
+696's incomplete second invocation ended1. Its CODE capacity wait exited4
+without a reservation or model output; completed PROSE has rc0 and APPROVED.
+Earlier journal descriptions calling the completed phase code were incorrect;
+the actual phase files are authoritative. Preserve reviewer-pr696-20260922-03,
+its1722s, and all raw context. New /tmp/main-retry696-review-capacity-20260922.sh
+archives that run directory with -capacity-failure-20260922T1438Z, releases
+only the stale main-review claim, and requests a replacement canonical review
+at the SAME5b4e80f9. Its capacity wait is7200s; each actual model phase remains
+limited to2700s. No result is fabricated/carried and no previous round or cost
+is erased. The private runtime wrapper gained an optional capacity-wait
+override; its normal default stays3600s, caps stay3 and evidence gates remain.
+
+690's merge repair remains live and has diagnosed inherited model-policy
+environment contamination in mocked dispatch tests during normal commit hooks.
+It is retrying with local command-environment cleanup. No skipped hook or
+unrelated workflow patch is authorized; this is not a key failure. Preserve
+the complete merge and all failed-test receipts.

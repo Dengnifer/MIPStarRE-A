@@ -9758,3 +9758,16 @@ historical entry above is rewritten.
   Keep the original logs and setup cost; retry the same initial2700s assignment
   from exact04e7a7d6 through the normal3600s account wait. No extra worker slot,
   key, author continuation, model budget reset or hook bypass is involved.
+
+- 704 completed3264s of checked partial construction at eedcde3c. Main admitted
+  its ONE3600s continuation on the actual strategy/rejection/soundness targets
+  and recorded the auxiliary K proposal for continued construction only.
+  Ten proved lemmas and all earlier costs remain; the source row stays open.
+  PR707's complete documentation CI passed.702 first review5279555373 returned
+  seven findings, assigned together to one2700s repair and a later fresh review.
+- 696's code lane waited3600s for capacity and exited4 without a reservation;
+  its prose lane completed with APPROVED. Previous shorthand calling that
+  completed phase code is corrected by the actual phase files. Archive the
+  whole failed run, preserve all costs and re-run canonical review at the same
+  exact head with a7200s capacity wait, unchanged2700s model limits and caps3.
+  This is a model-free capacity failure, not a key retirement or new finding.
