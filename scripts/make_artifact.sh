@@ -54,6 +54,8 @@ INCLUDE=(
   LICENSE
   scripts/comparator
   scripts/blueprint_leanok_axioms.py
+  scripts/blueprint_lean_sync.py
+  scripts/tex_utils.py
   scripts/make_artifact.sh
 )
 
