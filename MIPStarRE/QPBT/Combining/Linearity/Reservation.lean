@@ -63,4 +63,25 @@ theorem linearity_padding_capacity (P : AdmissibleParams) :
         (Fintype.card (PauliAnswer P) + 1) ^ 2 := by nlinarith
     _ ≤ _ := hsquare _ (by omega)
 
+/-- Choose the common ancillary index inside the existing Boolean cube, fixing
+the complete active Naimark summand on the `none` slice. The choice depends only
+on `P`, and therefore serves both players and every point pair simultaneously.
+This constructs the index reservation required at paper
+`14_analysis_of_the_pauli_basis_test.tex:825-832`; operator and state transport
+are separate assertions. -/
+theorem linearity_padding_ground_embedding (P : AdmissibleParams) :
+    ∃ e : (Option (PauliAnswer P) ×
+        Option (Fin (2 * P.model.basisDim) → ZMod 2)) ↪
+        (Fin (Fintype.card (PauliAnswer P) + 1) → Bool),
+      ∀ a : Option (PauliAnswer P),
+        e (a, none) = optionBoolEmbedding (PauliAnswer P) a := by
+  classical
+  obtain ⟨f⟩ := Function.Embedding.nonempty_of_card_le (linearity_padding_capacity P)
+  obtain ⟨σ, hσ⟩ := Equiv.Perm.exists_extending_pair
+    (fun a : Option (PauliAnswer P) => f (a, none))
+    (optionBoolEmbedding (PauliAnswer P))
+    (fun _ _ h => congrArg Prod.fst (f.injective h))
+    (optionBoolEmbedding (PauliAnswer P)).injective
+  exact ⟨f.trans σ.toEmbedding, hσ⟩
+
 end MIPStarRE.QPBT

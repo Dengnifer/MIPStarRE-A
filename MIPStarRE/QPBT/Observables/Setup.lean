@@ -87,7 +87,7 @@ def paddedProdShuffle {ιA ιB κA κB : Type*} {nA nB : ℕ}
 
 /-- Embed `Option α` into a Boolean cube, sending `none` to the zero word and
 each `some a` to a one-hot word. -/
-private def optionBoolEmbedding (α : Type*) [Fintype α] [DecidableEq α] :
+def optionBoolEmbedding (α : Type*) [Fintype α] [DecidableEq α] :
     Option α ↪ (Fin (Fintype.card α + 1) → Bool) where
   toFun
     | none => 0
@@ -116,7 +116,7 @@ private def optionBoolEmbedding (α : Type*) [Fintype α] [DecidableEq α] :
               (Fin.castSucc_injective _ heq))
 
 /-- The distinguished `none` coordinate maps to the zero Boolean word. -/
-private theorem optionBoolEmbedding_none (α : Type*)
+theorem optionBoolEmbedding_none (α : Type*)
     [Fintype α] [DecidableEq α] :
     optionBoolEmbedding α none = 0 := rfl
 
