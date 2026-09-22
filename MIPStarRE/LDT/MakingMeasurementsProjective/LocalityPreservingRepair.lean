@@ -621,10 +621,13 @@ It uses the right marginal state and returns a local projective submeasurement
 on Bob's space whose right placement is close to the given right-lifted
 measurement.
 
-**Faithful encoding:** Paper origin:
-`references/ldt-paper/projectivization.tex`; this is the right-register
-two-space form of the projectivization repair used by the source proof of
-`thm:main-formal`. -/
+**Faithful encoding:** This Lean-only helper follows the proof of
+`lem:orthonormalization-main-lemma` in `references/ldt-paper/orthonormalization.tex`.
+The source isolates the `2ζ` defect estimate at `eq:A-looks-projective`
+(lines 404-408), then derives the projective approximation from that estimate.
+Here the construction is applied to the right marginal state and transported
+back to the right tensor factor, with the same `84 * ζ^(1/4)` bound as the
+source's final estimate (lines 1183-1192). -/
 theorem rightPlacedProjectivizationRepair_of_sourceAlmostProjective_two_mul
     {Outcome : Type*} {ιA ιB : Type*}
     [Fintype ιA] [DecidableEq ιA] [Fintype ιB] [DecidableEq ιB]

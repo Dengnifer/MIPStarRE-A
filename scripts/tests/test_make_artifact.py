@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -165,6 +166,40 @@ class MakeArtifactTests(unittest.TestCase):
         """They are what the docstring `file.tex:lines` locators point at."""
         self.assertEqual(self.run_script().returncode, 0)
         self.assertIn("references/qpbt-paper/frontmatter.tex", self.members())
+
+    def test_blueprint_audit_runs_from_extracted_snapshot(self) -> None:
+        """The shipped entry point must import its helpers through both export guards."""
+        shutil.copyfile(SCRIPT.parent.parent / ".gitattributes",
+                        self.repo / ".gitattributes")
+        for name in ("blueprint_leanok_axioms.py", "blueprint_lean_sync.py", "tex_utils.py"):
+            write(self.repo / "scripts" / name,
+                  (SCRIPT.parent / name).read_text(encoding="utf-8"))
+        write(self.repo / "blueprint" / "src" / "chapter" / "test.tex",
+              "\\begin{theorem}\\label{thm:foo}\n"
+              "\\lean{foo}\\leanok % \\lean{not_a_declaration}\n"
+              "\\end{theorem}\n")
+        self.commit("ship the blueprint audit and its Python helpers")
+
+        for args in ((), ("--anonymize",)):
+            with self.subTest(args=args):
+                result = self.run_script("--no-pdf", *args)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                unpacked = self.out / "unpacked"
+                unpacked.mkdir()
+                subprocess.run(
+                    ["tar", "-xzf", str(next(self.out.glob("*.tar.gz"))),
+                     "-C", str(unpacked)], check=True,
+                )
+                snapshot = next(unpacked.iterdir())
+                audit = subprocess.run(
+                    [sys.executable, "-E", "-s", "-B", "scripts/blueprint_leanok_axioms.py",
+                     "--ci", "--skip-axiom-check"],
+                    cwd=snapshot, capture_output=True, text=True, timeout=30,
+                )
+                self.assertEqual(audit.returncode, 0, audit.stdout + audit.stderr)
+                self.assertIn("Parsed 1 blueprint", audit.stdout)
+                self.assertIn("1 carry at least one \\leanok tag.", audit.stdout)
+                self.assertIn("Axiom check skipped (--skip-axiom-check).", audit.stdout)
 
     def test_manifest_records_toolchain_mathlib_and_lean_code_lines(self) -> None:
         self.assertEqual(self.run_script().returncode, 0)

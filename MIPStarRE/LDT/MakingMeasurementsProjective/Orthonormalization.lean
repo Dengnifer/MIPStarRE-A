@@ -226,7 +226,8 @@ permutation-invariance or same-space identification is used.
 
 **Faithful encoding:** Paper origin:
 `references/ldt-paper/test_definition.tex:180-202` and
-`references/ldt-paper/projectivization.tex`; the heterogeneous form is the
+`lem:orthonormalization-main-lemma` in
+`references/ldt-paper/orthonormalization.tex:275-293`; the heterogeneous form is the
 two-space tensor-factor version needed by the source proof. -/
 lemma orthonormalizationMeasurement_of_consistency_from_projectivizationRepair_heterogeneous
     {Outcome : Type*}
@@ -267,7 +268,8 @@ same-space identification or permutation-invariance hypothesis is used.
 
 **Faithful encoding:** Paper origin:
 `references/ldt-paper/test_definition.tex:180-202` and
-`references/ldt-paper/projectivization.tex`; the heterogeneous form is the
+`lem:orthonormalization-main-lemma` in
+`references/ldt-paper/orthonormalization.tex:275-293`; the heterogeneous form is the
 two-space tensor-factor version needed by the source proof. -/
 lemma orthonormalizationMeasurement_right_of_consistency_from_projectivizationRepair_heterogeneous
     {Outcome : Type*}
