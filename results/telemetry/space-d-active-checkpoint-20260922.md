@@ -2346,3 +2346,31 @@ No model overrides, hard classes or hardness reasons are passed. Each phase
 keeps its2700s allowance; no already-green CI is repeated without a changed head.
 The stopped dependent publication tails need model-free replacements or direct
 admission after707 actually merges. Prepared row work and claims remain intact.
+
+## 2026-09-22T17:41Z: completed rows queued for model-free publication
+
+Previous goal turn classified as progress:708 merge evidence and one-Sol
+allocation were recorded on27 as5781107728; forbidden queued Astra launches
+were stopped before admission. Records reached clean main49bbac8a.
+
+Winning implications714 is terminal-success at6bb626c01c807ee798f502ea382e9007bf097d97,
+1187s, four documentation files, normal hooks and focused PDF/web checks passed.
+Magic Square719 has committed76312c5f5aa650322502eb299e9870f1284d479e and is
+finishing its receipt; it is still treated as live until the dispatcher ends.
+No continuation is admitted. The single default Sol707 review remains behind
+the author-drain check, followed by709's already-green second review.
+
+Six live model-free tails now wait for actual707 merge under new immutable
+/tmp/main-after707-publish-only-v2-20260922.sh. Runtime prefixes are
+/tmp/main-after707-publishonly-sol{715,716,717,713,714,718}-20260922.
+Each exact completed head and clean worktree was checked before launch.
+The tails merge actual main, check merge-loss protection, build private outputs
+with the normal locked helper, publish and run full CI. They DO NOT dispatch
+reviewers; they leave exact-head READY_FOR_DEFAULT_SOL_REVIEW receipts.
+The old cancelled tails and review evidence remain preserved.
+
+The snapshot's daemon failures260,479,487,488,533,539 were checked through
+the current repository API: all are closed;260 and479 are merged. None is an
+active restart target. Infra552/554/556/561 remain parked. The live model-free
+merge service still owns gates/trains; main staged none. This is a continuation
+of the existing documentary stage, so no duplicate27 boundary comment is posted.
