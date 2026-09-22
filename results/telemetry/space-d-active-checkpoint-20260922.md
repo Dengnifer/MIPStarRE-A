@@ -2050,3 +2050,16 @@ CI after699 and FIRST independent review. Its exact .pr/.head receipts govern.
 Actual model lanes at the latest census are704's ONE continuation and the702
 and706 repairs, all on space-d.696's replacement and707's first review retain
 their queued processes; no live job was restarted merely for being quiet.
+
+Publication follow-up:705's first publisher ended1 after its successful clean
+merge at126bde72c53b60c87d381aad7102c4f928309073. Private imports succeeded,
+but Checkdecls reported File not found: blueprint/lean_decls; this ignored
+generated list had not been created in the documentation worktree. Preserve
+the failed log, merge and main-fix705 claim. New
+/tmp/main-resume705-publication-20260922.sh verifies that exact clean head,
+waits699's independent CI, regenerates the list with the normal blueprint sync
+command, and resumes checked publication/full CI/FIRST review. It changes no
+source statement or gate and does not restart the old publisher blindly.
+The records helper briefly exited3 for its train guard; the subsequent census
+found no train process and a normal retry published26b360ee cleanly. No guarded
+operation was bypassed or process killed. Stage5779111666 is published.

@@ -9804,3 +9804,11 @@ historical entry above is rewritten.
   diff passed869 hook tests and preserves mathematical/historical content and
   comparator pins. Checked publication/full CI/first review are queued, and a
   separate prepared packet addresses the exact remaining artifact references.
+
+- 705's normal refresh merged cleanly at126bde72, but its publication preflight
+  stopped because ignored blueprint/lean_decls did not exist. The new guarded
+  resume regenerates that list through the normal sync command before imports,
+  checked publication and complete CI. No source edit, hook bypass or model
+  repair is needed. Preserve the original failure and clean merge. A temporary
+  records train-guard exit3 cleared before the process census; a normal retry
+  published26b360ee without bypassing the guard or killing a process.
