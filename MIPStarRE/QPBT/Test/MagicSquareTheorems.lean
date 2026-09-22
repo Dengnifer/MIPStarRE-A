@@ -598,9 +598,12 @@ of each edge on independent copies of two EPR pairs, or its symmetric role-flag
 version, violates the conclusion at `ε = 0`.  The corrected statement assumes,
 in addition to the value, that the two players' bit measurements at the cells
 `0` and `4` agree on the state up to `δ` in the squared state-dependent
-distance of `def:povm-distance` (`msVariableConsistencyDefect`); the conclusion
-is the source's display with `sqrt ε` replaced by `sqrt ε + sqrt δ`, so that
-`δ = 0` is the source's display verbatim.  Symmetric projective strategies that
+distance of `def:povm-distance` (`msVariableConsistencyDefect`). The conclusion
+uses the completed binary effects obtained by assigning wrong-form answers to
+bit zero, with error scale `sqrt ε + sqrt δ`. For `δ = 0`, this recovers the
+source's error scale for completed binary effects; comparison with the
+prescribed-answer effects remains a separate construction. Zero agreement does
+not eliminate wrong-form answers. Symmetric projective strategies that
 are consistent on their state, the class named in the owner decision, satisfy
 the hypothesis with `δ = 0` (`exists_ms_rigidity_of_symmetric_consistent`);
 neither symmetry nor projectivity is needed or assumed here.  Both
@@ -762,8 +765,9 @@ consistent on their state (`def:consistent-strategy`, paper
 `06_nonlocal_games_and_mipstar.tex:162-174`, where a consistent strategy is
 projective by definition).  Every SPCC strategy (`def:spcc`) is one of these, so
 the corollary covers the SPCC class as well.  Their variable measurements have
-zero agreement distance, so this is the case `δ = 0` of `exists_ms_rigidity`,
-and its conclusion is the source's display verbatim.  Projectivity is assumed
+zero agreement distance, so this is the case `δ = 0` of `exists_ms_rigidity`.
+This recovers the source's error scale for completed binary effects; comparison
+with the prescribed-answer effects remains a separate construction. Projectivity is assumed
 so that the hypothesis is exactly the source's class; the derivation below uses
 only consistency.  The witness and the distances are those of the underlying
 `Strategy msGame`, which the symmetric presentation `msGameSymm` yields
