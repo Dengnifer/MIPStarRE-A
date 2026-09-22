@@ -377,6 +377,33 @@ assembled by Fourier averaging.
 	cannot supply the pure ancillary factor.
 \end{proof}
 
+\begin{lemma}[Projective settings need not contain an unused zero register]
+	\label{lem:linearity-padding-setting-obstruction}
+	\lean{MIPStarRE.QPBT.exists_projectiveSetting_no_proper_alice_support}
+	\leanok
+	\uses{def:expanded-state, lem:pauli-completeness}
+	For every admissible parameter tuple there exist $\eps\geq0$ and a
+	projective strategy succeeding with probability at least $1-\eps$ such
+	that, for every operator $R$ on its expanded Alice space,
+	\[
+		R_{\mathsf{A}\mathsf{A}'}\ket{\hat\psi}=\ket{\hat\psi}
+		\quad\Longrightarrow\quad R=\Id.
+	\]
+	This formalization-only auxiliary concerns the unrestricted projective
+	strategy domain; it does not assume the source's prior padding convention.
+\end{lemma}
+\begin{proof}
+	\leanok
+	Take the honest strategy, with EPR state of local dimension $D$, and put
+	$\eps=1-\operatorname{val}(\mathcal S)\geq0$. On adjoining the two EPR
+	pairs, the reduced state on $\mathsf A\mathsf A'$ is
+	$\Id/(Dq^M)$, with $M=2^m$. Comparing coordinates in
+	$(R-\Id)_{\mathsf A\mathsf A'}\ket{\hat\psi}=0$ gives $R=\Id$.
+	A proper projection onto a zero ancillary sector therefore cannot fix
+	this expanded state. The assertion does not exclude choosing a padded
+	strategy before constructing its measurements.
+\end{proof}
+
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
 	As printed in \cite{Natarajan2017Linearity}, the conclusion of the quantum

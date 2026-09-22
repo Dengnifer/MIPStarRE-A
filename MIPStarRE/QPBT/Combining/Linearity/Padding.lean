@@ -1,4 +1,6 @@
 import MIPStarRE.QPBT.Combining.Linearity
+import MIPStarRE.QPBT.Observables.ExpandedDefs
+import MIPStarRE.QPBT.Test.Completeness
 
 /-!
 # Obstructions to absorbing the linearity ancilla
@@ -19,7 +21,7 @@ See blueprint `rem:linearity-import` and
 namespace MIPStarRE.QPBT
 
 open MIPStarRE.Quantum
-open scoped Matrix ComplexOrder
+open scoped BigOperators Matrix ComplexOrder
 
 /-- Formalization-only obstruction to absorbing the entire common-ancilla
 extension into its original finite space. Such an absorption would multiply
@@ -60,5 +62,55 @@ theorem posDef_ne_linearity_ancilla_conjugate (t : ℕ) (ι : Type*)
   rw [heq] at hpos
   have hdiag := hpos.diag_pos (i := (Classical.arbitrary ι, some 0))
   simp [heteroKron, ancProj, naimarkAncilla, Matrix.vecMulVec_apply] at hdiag
+
+/-- Every admissible parameter tuple admits a projective setting whose expanded
+Alice state has full support: any local operator fixing the expanded state is
+the identity. In particular, no proper projection onto a reserved zero-state
+sector can fix this state. The witness uses the honest strategy's EPR state
+and its actual rejection probability as `ε`; only `ε ≥ 0` is asserted here.
+
+This formalization-only counterexample shows that `ProjectiveSetting` alone
+does not encode the padding convention of paper
+`14_analysis_of_the_pauli_basis_test.tex:160-172,367-372,825-832`. It does not
+refute that convention or the combined-point conclusion; see
+`docs/paper-gaps/qpbt_linearity-theorem-quotation.tex`, issue #697. -/
+theorem exists_projectiveSetting_no_proper_alice_support (P : AdmissibleParams) :
+    ∃ ε : ℝ, 0 ≤ ε ∧ ∃ S : ProjectiveSetting P ε,
+      ∀ R : Op (S.ExpandedLocalSpace .alice),
+        applyOperatorToState (S.place .AA' R) S.psiHat = S.psiHat → R = 1 := by
+  classical
+  let T : Strategy (pauliBasisTest P) := (honestStrategy P).toStrategy
+  let S : ProjectiveSetting P (1 - T.value) :=
+    ⟨T, ⟨honestStrategy_projective P, honestStrategy_projective P⟩, by linarith⟩
+  refine ⟨1 - T.value, sub_nonneg.mpr T.value_le_one, S, ?_⟩
+  change ∀ R : Op (HonestIndex P × PauliRegister P),
+    applyOperatorToState (S.place .AA' R) S.psiHat = S.psiHat →
+      R = (1 : Op (HonestIndex P × PauliRegister P))
+  intro R hR
+  let c : ℂ := (Real.sqrt (Fintype.card (HonestIndex P) : ℝ) : ℂ)⁻¹
+  let d : ℂ := (Real.sqrt (Fintype.card (PauliRegister P) : ℝ) : ℂ)⁻¹
+  have hψ (p : SixReg P T.ιA T.ιB) : S.psiHat p =
+      (if p.1.1 = p.2.1 then c else 0) *
+      (if p.1.2.1 = p.1.2.2 then d else 0) *
+      (if p.2.2.1 = p.2.2.2 then d else 0) := rfl
+  ext ⟨i, a⟩ ⟨j, b⟩
+  have h := congrArg (fun v => v ((i, (a, b)), (j, (0, 0)))) hR
+  change (S.place .AA' R).mulVec S.psiHat ((i, (a, b)), (j, (0, 0))) =
+    S.psiHat ((i, (a, b)), (j, (0, 0))) at h
+  change (∑ x : SixReg P T.ιA T.ιB,
+    S.place .AA' R ((i, (a, b)), (j, (0, 0))) x * S.psiHat x) = _ at h
+  simp only [hψ, ProjectiveSetting.place, SixReg, Fintype.sum_prod_type,
+    Matrix.one_apply, mul_ite, ite_mul, mul_one, mul_zero, zero_mul, if_true] at h
+  dsimp only [S, T, honestStrategy, SymmetricStrategy.toStrategy,
+    ProjectiveSetting.LocalSpace] at h
+  simp at h
+  have hc : c ≠ 0 := by dsimp [c]; positivity
+  have hd : d ≠ 0 := by dsimp [d]; positivity
+  apply mul_right_cancel₀ (mul_ne_zero (mul_ne_zero hc hd) hd)
+  by_cases hij : i = j <;> by_cases hab : a = b
+  all_goals
+    simp [Matrix.one_apply, hij, hab] at h ⊢
+    convert h using 1
+    rfl
 
 end MIPStarRE.QPBT
