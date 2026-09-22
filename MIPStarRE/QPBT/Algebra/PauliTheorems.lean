@@ -299,16 +299,6 @@ private theorem primeTauShift_mul_primeTauPhase {p : ℕ} {K : Type*} [Field K]
     ring_nf
   · simp [Matrix.mul_apply, primeTauShift, primeTauPhase, Matrix.smul_apply, hxy]
 
-/-- An additive character sends a finite sum to the product of its values. -/
-private theorem addChar_sum {A M ι : Type*} [AddCommMonoid A] [CommMonoid M]
-    [Fintype ι] (ψ : AddChar A M) (f : ι → A) :
-    ψ (∑ i, f i) = ∏ i, ψ (f i) := by
-  classical
-  induction (Finset.univ : Finset ι) using Finset.induction_on with
-  | empty => simp
-  | @insert i s hi ih =>
-      rw [Finset.sum_insert hi, Finset.prod_insert hi, AddChar.map_add_eq_mul, ih]
-
 /-- The source multi-qudit twisted relation blueprint
 `eq:twisted-fq`, paper `04_preliminaries.tex:1090-1095,1141-1151`. -/
 theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K]
@@ -323,7 +313,10 @@ theorem primeTauObservable_X_mul_Z {p : ℕ} {K ι : Type*} [Field K] [Fintype K
       ψ (-dotProduct a b) = ψ (∑ i, -(a i) * b i) := by
         congr 1
         simp [dotProduct]
-      _ = ∏ i, ψ (-(a i) * b i) := addChar_sum ψ _
+      _ = ∏ i, ψ (-(a i) * b i) := by
+        simpa only [AddChar.toMonoidHom_apply, toAdd_prod, toAdd_ofAdd] using
+          (map_prod ψ.toMonoidHom (fun i => Multiplicative.ofAdd (-(a i) * b i))
+            Finset.univ)
   change productMatrix (fun i => primeTauShift (p := p) (a i)) *
       productMatrix (fun i => primeTauPhase (p := p) (b i)) =
     ψ (-dotProduct a b) •

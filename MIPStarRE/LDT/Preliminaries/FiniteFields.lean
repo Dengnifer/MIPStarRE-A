@@ -15,6 +15,8 @@ from `references/ldt-paper/preliminaries.tex` (lines 15–83).
   `𝔼_{x ∈ 𝔽_q} ω^{tr[x·a]} = 1 if a = 0, 0 otherwise`
 * `fourier_fact_vector` (`prop:fourier-fact-vector`):
   Vector version over `𝔽_q^m`.
+* `expect_ffChar_sum_mul`, `sum_ffChar_sum_mul`:
+  The same vector orthogonality over an arbitrary finite coordinate type.
 
 ## References
 
@@ -209,6 +211,66 @@ theorem fourier_fact_vector (v : Fin m → F) :
         simp [hv, hvc]
 
 end Vector
+
+section FiniteIndex
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+/-- Fourier orthogonality for the canonical character over an arbitrary finite
+coordinate type. This is the finite-index reindexing of
+`prop:fourier-fact-vector`. -/
+theorem expect_ffChar_sum_mul (v : ι → F) :
+    𝔼 u : (ι → F), ffChar (p := p) (F := F) (∑ i, u i * v i) =
+      if v = 0 then (1 : ℂ) else 0 := by
+  let eι : ι ≃ Fin (Fintype.card ι) := Fintype.equivFin ι
+  let reindex : (ι → F) ≃ (Fin (Fintype.card ι) → F) :=
+    { toFun := fun u j => u (eι.symm j)
+      invFun := fun u i => u (eι i)
+      left_inv := fun u => by
+        funext i
+        simp
+      right_inv := fun u => by
+        funext j
+        simp }
+  let v' : Fin (Fintype.card ι) → F := reindex v
+  calc
+    𝔼 u : (ι → F), ffChar (p := p) (F := F) (∑ i, u i * v i) =
+        𝔼 u : (Fin (Fintype.card ι) → F),
+          ffVecChar (p := p) (F := F) v' u := by
+      refine Finset.expect_equiv reindex (by simp) ?_
+      intro u _
+      rw [ffVecChar_apply]
+      congr 2
+      exact Fintype.sum_equiv eι
+        (fun i => u i * v i)
+        (fun j => reindex u j * v' j)
+        (fun i => by simp [reindex, v'])
+    _ = if v' = 0 then (1 : ℂ) else 0 := fourier_fact_vector v'
+    _ = if v = 0 then (1 : ℂ) else 0 := by
+      have reindex_zero : reindex (0 : ι → F) = 0 := by
+        ext j
+        rfl
+      by_cases hv : v = 0
+      · subst v
+        rw [show v' = 0 by exact reindex_zero]
+        simp
+      · have hv' : v' ≠ 0 := by
+          intro hv'
+          apply hv
+          apply reindex.injective
+          rw [reindex_zero]
+          exact hv'
+        simp [hv, hv']
+
+/-- Sum form of canonical-character orthogonality over an arbitrary finite
+coordinate type. -/
+theorem sum_ffChar_sum_mul (v : ι → F) :
+    ∑ u : ι → F, ffChar (p := p) (F := F) (∑ i, u i * v i) =
+      if v = 0 then (Fintype.card (ι → F) : ℂ) else 0 := by
+  rw [← Fintype.card_smul_expect, expect_ffChar_sum_mul]
+  by_cases hv : v = 0 <;> simp [hv]
+
+end FiniteIndex
 end Fourier
 
 end MIPStarRE.LDT.Preliminaries
