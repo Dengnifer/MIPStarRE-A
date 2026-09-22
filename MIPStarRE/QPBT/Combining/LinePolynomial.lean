@@ -107,4 +107,25 @@ theorem evaluatesTo_zero_direction_iff {L : LdParams} {c : ℕ}
     EvaluatesTo line f line.base a ↔ ∀ t : ScalarQ L, evalCoefficient f t = a := by
   simp [EvaluatesTo, hdir]
 
+/-- The coefficient answer representing `T` has no value at the point of a
+zero-direction line, at any degree bound at least one. This certifies the
+obstruction to identifying all coefficient answers with the functions on
+lines in `eq:combine-lines`, documented in issue #695 and
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. It is not a
+counterexample to the combining identity for actual functions on lines. -/
+theorem not_evaluatesTo_parameter_on_zero_direction {L : LdParams} {c : ℕ}
+    (hc : 1 ≤ c) (line : LineDesc L) (hdir : line.direction = 0) :
+    ¬ ∃ a : ScalarQ L,
+      EvaluatesTo line (Pi.single (⟨1, Nat.lt_succ_of_le hc⟩ : Fin (c + 1)) 1)
+        line.base a := by
+  have heval (t : ScalarQ L) :
+      evalCoefficient (Pi.single (⟨1, Nat.lt_succ_of_le hc⟩ : Fin (c + 1)) 1) t = t := by
+    simp [evalCoefficient, Pi.single_apply, ite_mul]
+  rintro ⟨a, ha⟩
+  have h := (evaluatesTo_zero_direction_iff line hdir _ a).mp ha
+  have hzero := h 0
+  have hone := h 1
+  rw [heval] at hzero hone
+  exact zero_ne_one (hzero.trans hone.symm)
+
 end MIPStarRE.QPBT
