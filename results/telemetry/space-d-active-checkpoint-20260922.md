@@ -1523,3 +1523,49 @@ The previous cycle was progress through700/699 review results and concrete
 repair admissions; this cycle completes gating evidence and publication-tail
 admission. Earlier retained records are published at1844ad0b with clean primary.
 No owner confirmation or policy exception was needed.
+
+## 2026-09-22T13:20Z standalone700 refresh and completed repair publications
+
+700 was approved but NOT fresh after692 advanced source main. The daemon
+correctly skipped immediate merge; meta-auto's log says the single non-fresh
+candidate waits for a partner/update. Main must never train a fresh approved
+ancestor. Claimed main-fix700 and launched
+/tmp/main-refresh700-approved-20260922.sh. It retains clean8089cc88 until696's
+queued repair CI completes, then normal refresh/private imports/publication via
+tagapproved700, complete CI and marked audit. It asks canonical review.sh
+--dry-run to prepare a carry from review5278574076 and uses the strict publisher
+to verify exact review-body/patch-hash/manifest equality. If no canonical carry
+exists, it releases the temporary review claim and runs the actual SECOND full
+review. No fake carry or waived changed context is authorized.
+
+Insert700 refresh between696 and690 in the complete-CI order. Waiting690v2
+PID1341514 was matched to its exact shell, no algorithm publication had started,
+and cleanbb607c6f was verified before intentional SIGTERM. It is gone. New
+/tmp/main-publish690-after691-v3-20260922.sh is live; it still requires actual691
+merge, and now waits real /tmp/main-fullspeed-publish695-approved700-20260922
+CI completion before touching690. Both new shells passed bash-n and startup
+handshakes. All old logs/exit outcomes remain. Do not restart the retiredv2.
+
+697 integration-only repair completed0 after449s at
+6c909dbe47303a5635735d912fdc3819a6fdbab0, clean, preserving parents087e5bfb and
+e0dafa73 and every incoming staged file. It kept the HEAD Linearity quotation
+row and incoming merged692 Magic Square row, with statuses open/pending.
+The existing resume697-publication tail is active, has refreshed normally and
+resolved all1888 declaration links. It ends with .pr/.head and READY_FOR_CI;
+Main still owes complete CI, required audit and FIRST independent review.
+
+699 blueprint repair completed0 after573s at
+7cb1e79cf8ddb691f6b33ee09b4bbdd8e82ed2e6, one chapter15 file+3/-2, clean.
+Its definition-level marker and statement/proof dependencies fix the two first
+review entries without changing proofs, pending adoption or external thm:qblr
+citation. New /tmp/main-publish699-repair-20260922.sh performs exact-head guarded
+refresh/imports/checked publication, then transfers main-fix699 to main-ci699
+and emits .head/READY_FOR_CI. It does NOT claim CI/review completed. Schedule
+its full checks and SECOND review at the next available complete-CI position.
+
+691 full CI completed at e3f8ce2a and THIRD reviewers-pr691-20260922-05/06 are
+actually active. Together with701 they filled the three space-d slots at the
+last observation; no new model task was admitted. 698 remains untouched waiting
+actual700 merge. Retained telemetry is public at c535429c after the fixture
+guard cleared. This turn made progress through diagnosed scheduling, two repair
+receipts and publication tails; completion remains unachieved.

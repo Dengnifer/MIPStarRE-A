@@ -9651,3 +9651,19 @@ historical entry above is rewritten.
   Retained telemetry is now published cleanly at1844ad0b. The697 repair has a
   guarded publication continuation which checks both preserved merge parents
   before refresh/push; it emits a CI-ready receipt rather than inventing checks.
+
+- The13:20Z cycle diagnosed700's service wait: merged692 makes approved8089cc88
+  non-fresh; the auto loop was waiting for another candidate. Main claimed a
+  standalone700 refresh rather than placing a fresh approval in a train. It
+  waits696 CI, then normal refresh/full CI/marked audit and canonical dry carry
+  from5278574076. If strict carry refuses, the actual second full review runs;
+  no context hash, verdict or budget is fabricated. Only the waiting690v2
+  wrapper was replaced, after exact PID/head/no-CI-start checks, to insert700
+  refresh before690's CI. All predecessor logs/claims/source trees are preserved.
+- Both scoped repairs finished0:697 at6c909dbe after449s, preserving the two
+  register rows/parents, and699 at7cb1e79c after573s with one chapter15 edit.
+  Padding publication has resumed through normal imports;699's repaired head
+  now has a guarded publication-only tail. Both emit exact CI-ready receipts
+  for Main to schedule full CI/audit/review, and neither claims source completion.
+  691 complete CI passed at e3f8ce2a and its THIRD review is actually running.
+  Retained telemetry published at c535429c after fixture guard release.
