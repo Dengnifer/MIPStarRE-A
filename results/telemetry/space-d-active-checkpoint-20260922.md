@@ -700,3 +700,67 @@ full-build lock held by live PID3685345. These are verified live waits, not
 failed jobs; do not restart or duplicate them. Latest resource assignment is
 space-d only3/0/3; load was67/128, no chsh admission. The status snapshot's
 parked infrastructure and historical markers remain outside current work.
+
+## Canonical Lemma Finished; Elimination Algorithm Admitted
+
+The09:21Z cycle began as a verified live wait and produced a completed author
+result: orc-676-20260922-05 exited0 after1220s at
+7c9d311279d67ebf5fd51bcdc91ec0ecad037e3e. Exactly four files,411+/34-, clean
+worktree. The source-facing complementarity proof derives its RREF data from
+row independence, and adds the source pivot-coordinate component, cardinality,
+independence and register-subspace conclusions. Focused Lean/ten standard-only
+axiom closures, boundary examples, blueprint web/sync and1879 declarations
+passed. The lemma receives its supported marks; the efficient-algorithm part of
+def:canonical-complement remains unmarked. Author's completion gate still fails
+(six unmarked nodes on that branch); no whole-track completion is claimed.
+Receipt /tmp/main-fullspeed-canonical676-v2-20260922-result.md and body
+/tmp/main-canonical-completion-body-20260922.md are retained.
+
+Detached model-free /tmp/main-publish-canonical676-after685-20260922.sh owns
+its publication after actual685 merge, with a bounded3h wait and key/closure
+guards. It requires the clean exact7c9d3112 author head, then guarded merge,
+checked publication, complete CI and an independent2700s whole review. Prefix
+is its filename without.sh; canonical predecessor costs/reviews are retained.
+Claim676 remains main-fix until publication; this is a new successor PR, not
+another full review of the approved685 patch.
+
+Main immediately filled the freed slot with issue690, branch/worktree
+issue-690-canonical-elimination-20260922 based on immutable7c9d3112. The new
+3600-second prover task owns only RowEchelonAlgorithm.lean and its audit; it
+reuses the existing algebra and proves executable deterministic elimination,
+RREF/row-span correctness and a polynomial bound for its actual field/zero-test
+operations. Packet /tmp/main-canonical-algorithm-packet-20260922.md; runtime
+/tmp/main-fullspeed-algorithm690-20260922. All676 costs persist. No choice-based
+efficiency claim, source weakening, extra dependencies or premature mark.
+
+The other two worker processes remain live on space-d. CI680's build succeeded
+in568s, blueprint-render52s and paper-gaps1s; remaining steps continue. CI685
+waits for the still-live shared CI/full-build lock. The meta merge loop remains
+sole train stager; no duplicated model review, build or manual merge was run.
+
+Algorithm successor is live as prover-690-20260922-01 on space-d, PID3901474;
+the stage comment is5774178956. Records publication currently returns3 because
+the guard sees an actual pr_train.py subprocess of scripts/tests unittest
+inside /tmp/tmphei1uj03/repo (PID3927004, parent3858384), not a production train.
+No active production train marker exists. Preserve the guard and pending
+telemetry; retry after the tests finish rather than kill tests or bypass gates.
+
+## 09:32Z Verified Live Wait
+
+Previous cycle made progress by completing676 and admitting690. This cycle
+confirms live worker PIDs3603248/3786407/3901474, all on space-d with3/0/3
+caps; no free lane or key-retirement condition. The latest direct owner message
+now explicitly confirms that same three-lane allocation. No new dispatch,
+duplicate review or train staging is needed while all slots are occupied.
+
+CI680 remains live at PID3685345. Its blueprint-sync log has one unittest
+failure indicator but no final traceback/verdict yet; do not call it passed or
+restart the active suite. Inspect the final failure before deciding an
+environment repair or code task. CI685 still waits on the same lock. The
+records guard again sees the suite's temporary pr_train.py subprocess, so
+pending passive telemetry remains locally preserved for publication when quiet.
+Author689 reports both the complex first estimate and averaged Z-reality proof
+type-check; wrappers and final validation continue, and no result is yet
+published or independently reviewed. Author690 has a checked pivot-step
+checkpoint and is proving row-span preservation. Parent-merge watchers for687
+and the canonical lemma remain active; all source/CI/review gates stay intact.
