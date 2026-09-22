@@ -9431,6 +9431,15 @@ historical entry above is rewritten.
 - PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
 # 2026-09-22 Main Whole-Task Admission
 
+- The09:14Z cycle harvested687's successful462-second author task at908df81c
+  and started its model-free parent-merge/publication/CI/review watcher.
+  Refilled the free lane with mathfix689, one3600-second tranche for the
+  unresolved complex/reality subline steps, preserving118's complete historical
+  costs and semantics. Main's finite admission is recorded in design-decisions
+  and stage comment5774043766. Three actual workers again run on space-d;
+  two refreshed PRs progress through serialized full-build CI. Existing logs
+  and live handles establish waiting, not failed work.
+
 - At09:08Z, the newer owner handoff has space-d main plus3 lanes, other keys
   reassigned to QKD. Verified sole rotation space-d/3 and caps3/0/3; no alternate
   key restored. Whole-task Astra/ultra admissions676(3600s),687(2700s),688(3600s)

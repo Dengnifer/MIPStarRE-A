@@ -657,3 +657,46 @@ review is consumed. The publication sublog prefix is
 on failure for inspection. The actual merge remains exclusively the service's
 job; no fresh approved head is placed in a train. Parent680's detached pipeline
 continues independently. Current authors own different worktrees and files.
+
+## Pauli Cleanup Complete; Complex Subline Task Admitted
+
+The09:14Z cycle is progress. orc-687-20260922-01 completed successfully in462s
+at908df81cfdac13ee559a406ad2197e56a71ea763; clean branch
+issue-687-pauli-mathlib-reuse-v2-20260922. Exactly two proof bodies changed,
+4 insertions/32 deletions. Focused Lean, nine standard-only axiom closures,
+statement-header comparison and normal hooks pass. Initial stale private
+FiniteFields.olean was rebuilt locally, with no shared-cache mutation.
+The duplicate scan's inherited projector/observable signature match is recorded
+as a type-only false positive, not falsely reported as a clean scan. Receipt:
+/tmp/main-fullspeed-reuse687-v2-20260922-result.md.
+
+Detached model-free /tmp/main-publish687-after680-20260922.sh waits for actual
+PR680 merge (bounded3h, polls30s, stops on space-d retirement or unmerged closure),
+then runs guarded refresh/publication and complete CI for the narrow successor.
+On green CI it invokes /tmp/main-whole-review-20260922.sh: independent Astra
+ultra2700s per phase with owner hardness reason and account admission. It never
+reviews the parent a fifth time. Runtime prefix is the script path without.sh;
+later publication prefix /tmp/main-fullspeed-publish687-20260922. Claim687 stays
+with main until publication. No PR or review for687 is yet claimed complete.
+
+The freed lane now runs mathfix-689-20260922-01,3600s on space-d after warm
+setup/hook checks. Worktree/branch issue-689-subline-complex-20260922 at
+ccba9a6756c58c0efa5cda04747e6a97935d71fb; packet
+/tmp/main-subline-complex-packet-20260922.md; runtime
+/tmp/main-fullspeed-subline689-20260922. It owns complex Claim17-1 and reality
+for Claim17-3 in the direct-law Combining/Claims surface. Existing Claim17-2
+is reused. No source-law/game/zero-direction change or false completion mark.
+Main explicitly admitted one finite additional118 tranche in design-decisions
+and stage comment5774043766 before dispatch. The13 recorded mathfix118 rows
+total26509s; this is a subset, not an exhaustive cross-issue total. Original
+anchor,10/19931s historical baseline, later attempts and all related work remain
+charged. No automatic extension. Dispatch warned no declaration claim was yet
+registered; the packet requires duplicate checks before new proofs.
+
+At09:18Z the other two worker PIDs3597257/3603248 are live. PR680 has published
+cea8800e23b4c6d6a57ba195e143429de5aa35eb and is in complete CI. PR685 has
+published2b5aefaca6eb07022645bfdc4e55e20d2deb5e09 and is waiting on the shared
+full-build lock held by live PID3685345. These are verified live waits, not
+failed jobs; do not restart or duplicate them. Latest resource assignment is
+space-d only3/0/3; load was67/128, no chsh admission. The status snapshot's
+parked infrastructure and historical markers remain outside current work.
