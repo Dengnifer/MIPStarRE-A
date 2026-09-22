@@ -226,18 +226,18 @@ was adopted by owner decision B5 (archived owner inbox #26).
 |---|---|
 | **Paper statement** | `lem:qld-sublines`, `lem:qld-4-7`, and the `lem:ld-soundness` import |
 | **Locator** | chapter 8 lines 33-35, 214-219, 413-458, 958-961; chapter 14 lines 1063-1116 and 1267-1288 |
-| **What differs** | The balanced seed-indexed construction at dimension `2m+2` needs `2m+2 ∣ q`. This fails for every admissible `m >= 2` and for `(q,m)=(2,1)`, but holds for `m=1`, `q>=8`. The implemented auxiliary carriers and laws use **direct index sampling** at that dimension. They are defined for every admissible tuple, but are not identified with the source's seed-indexed intermediate objects. |
+| **What differs** | The balanced seed-indexed construction at dimension `2m+2` needs `2m+2 ∣ q`. This fails for every admissible `m >= 2` and for `(q,m)=(2,1)`, but holds for `m=1`, `q>=8`. The implemented auxiliary carriers and laws use **direct index sampling** at that dimension. They are defined for every admissible tuple, but are not identified with the source's seed-indexed intermediate objects. Separately, the classical soundness signature compares completed point POVMs: `ldPointValuesOrZero` adds all wrong-form answer effects to the zero tuple. The source display uses only the prescribed point-answer effects, which need not form complete POVMs in the Lean strategy alphabet. |
 | **Why** | Adding extended divisibility would exclude all admissible `m >= 2` and change the source theorem. The auxiliary game is used only in the analysis and needs no conditionally linear seed encoding. Its established soundness and the resulting polynomial-pair conclusion justify this replacement for those conclusions; they do not prove the source-law subline assertions. |
 | **Lean** | `DirectLdParams`, `DirectLineDesc`, `directLinePointDist`, and `AdmissibleParams.extendedDirectLd` in `MIPStarRE/QPBT/Combining/DirectLowDegree/Geometry.lean`; `SubLineWitness` in `Combining/Witnesses.lean:209`; `exists_direct_ld_soundness` in `DirectLowDegree/Soundness.lean:65`; `exists_ld_soundness` in `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82`; `exists_globalPairWitness` in `Combining/Apply.lean:280` |
 | **Blueprint** | `lem:ld-soundness`, `lem:ld-soundness-formalized`, `rem:ld-soundness-provider`, `lem:qld-sublines`, `lem:qld-4-7`, `rem:qld-4-7-divisibility` (`ch13_qpbt_test.tex`, `ch15_qpbt_combining.tex`) |
 | **Gap note** | [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex) |
-| **Printed-claim status** | The seed-indexed soundness statement is **proved at its unchanged Lean statement**, for every positive `k` on the original domain `m ∣ q`; the polynomial-pair conclusion is also proved by the direct construction. The printed extended-dimension construction, source-law transports, and tensor-code derivation remain **unverified**, not refuted conclusions. The separate tensor-code requirements are the game correspondence and error absorption for a valid `K >= 12m(d+1)`, since the printed `K=m^3d` fails at small dimensions (#527). |
+| **Printed-claim status** | Seed-indexed soundness **for completed point POVMs** is proved at its unchanged Lean statement for every positive `k` on the original domain `m ∣ q`; the polynomial-pair conclusion is also proved by the direct construction. Positivity gives the prescribed-effect bounds from the completed bounds with the same error, but no linked declaration states that implication. Accordingly `lem:ld-soundness` is unmarked with a [reasoned C4 exemption](completion/qpbt-leanok-exemptions.md); only the explicitly completed statement `lem:ld-soundness-formalized` retains its statement and proof marks. The printed extended-dimension construction, source-law transports, and tensor-code derivation remain **unverified**, not refuted conclusions. The separate tensor-code requirements are the game correspondence and error absorption for a valid `K >= 12m(d+1)`, since the printed `K=m^3d` fails at small dimensions (#527). |
 | **Documentary disposition** | **documented-deviation**, authorized by the owner on 2026-09-22 and recorded in #710. This terminal register status closes only this mathematical comparison; it grants no unsupported formalization mark and makes no other gap row terminal. |
 
 The direct proof uses `mainFormal` at combined dimension `M=m+k`, with
 `N=2560000 M^3 d` and its separate condition `400 M d <= N`. It supplies
 `a=10^23`, `b=1/80000`. The seed-indexed proof uses a correlated residue
-register, exact compression of the two point/polynomial relations, and
+register, exact compression of the two completed-point/polynomial relations, and
 point agreement plus Schwartz--Zippel for the global relation; the constants
 become `(10a,b/2)`. None of these steps invokes the tensor-code theorem.
 The direct subline witness records the two projected-point marginals
@@ -523,10 +523,12 @@ this repository.
   documentary comparison is terminal as `documented-deviation` (#710).
   The source construction at `2m+2` remains undefined outside `m=1`, `q>=8`;
   source-law transport and the printed tensor-code correspondence and
-  parameter argument remain unverified (#527). Both `exists_ld_soundness`
-  on its original domain and the global polynomial-pair conclusion are
-  proved by the different route described above. Documentary closure does
-  not assert those remaining source steps.
+  parameter argument remain unverified (#527). `exists_ld_soundness` is
+  proved on its original domain for completed point POVMs; the
+  prescribed-effect implication is explained by positivity but is not
+  stated by the linked theorem, so the source node has a reasoned C4
+  exemption. The global polynomial-pair conclusion is proved by the direct
+  route. Documentary closure asserts none of the remaining source steps.
 - [c7](#c7-quantum-linearity-quantifiers-a-spurious-hypothesis-and-the-ancilla):
   the source's claim that the uniform Naimark ancilla is already available as
   zero-state padding on the fixed expanded spaces is not proved. The direct

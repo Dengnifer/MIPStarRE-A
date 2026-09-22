@@ -1,11 +1,15 @@
 # QPBT blueprint exemptions
 
-No permanent exemption is granted by the source-adoption audit of issue #667
-at source snapshot `e947a49e14080b46642be21ce551d911032a05f4`.
-The table intentionally has no data rows.
+The source-adoption audit of issue #667 granted no permanent exemption at
+source snapshot `e947a49e14080b46642be21ce551d911032a05f4`.
+The entry below is separately authorized by the owner's 2026-09-22
+"document, don't prove" instruction for issue #710 and its PR #716
+documentation repair. It records an unmarked source comparison; it is not
+a proof certificate or a change to the registered Lean theorem.
 
 | Blueprint label | Reason |
 |---|---|
+| `lem:ld-soundness` | The source display uses the original prescribed point-answer effects. The linked `exists_ld_soundness` proves the three bounds with point POVMs completed by `ldPointValuesOrZero`, adding all wrong-form answer effects at the zero tuple. The hypotheses do not force that remainder to vanish. Positivity gives the prescribed-effect bounds from the completed bounds with the same error, but this implication is not stated by the linked Lean declaration. Only `lem:ld-soundness-formalized`, which explicitly states the completed POVMs, retains statement and proof marks. The source entry and its printed tensor-code proof remain unmarked; the game correspondence and valid-parameter error absorption also remain unverified (#527). The [dimension note](../paper-gaps/qpbt_ld-dimension-divisibility.tex), `rem:ld-soundness-provider`, and [DEVIATIONS c2](../DEVIATIONS.md#c2-dimension-divisibility-in-the-classical-test-instantiation) explain the comparison. This documentary exemption under #710 does not assert a kernel proof, alter the theorem, or exempt any other node. |
 
 The following are unresolved matches, not exemptions. Their continued absence
 of a formalization mark must keep C4 failing. Construction targets and the
