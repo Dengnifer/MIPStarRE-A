@@ -12,6 +12,11 @@ The computational data are field operations and decidable equality. Arithmetic
 operation counts use unit cost for field operations and equality tests, without
 asserting bit complexity for an arbitrary field representation.
 
+`gaussianElimination_correct` proves RREF and row-span correctness for arbitrary
+input rows. `gaussianElimination_of_linearIndependent` gives the source's
+independent-row case. `gaussianElimination_cost_le_poly` bounds the actual
+program's charged arithmetic and zero tests by `n * (m + n + 2*m*n)`.
+
 ## References
 
 * `references/qpbt-paper/04_preliminaries.tex:303-333`,
@@ -514,5 +519,19 @@ theorem gaussianElimination_of_linearIndependent (A : StoredMatrix K m n)
     simpa [gaussianEliminationRows, e, Fin.ext_iff] using he
   · intro i j hj
     exact hc.1.zero_before (e i) j hj
+
+/-- Polynomial arithmetic-operation bound for the executable program, including
+its pivot searches. Each of the `n` columns charges at most `m` zero tests, `n`
+divisions, and `2*m*n` multiplications/subtractions. Short-circuited zero tests
+may be overcharged. Counts come from the same materialized computations as the
+matrix output, not from a separate nominal loop counter.
+
+Array access and storage use no field operations. Tabulation, cost summation,
+row scanning, and pivot-array updates make bounded passes of sizes at most
+`m`, `n`, and `m*n` per column. The result is an arithmetic bound under unit-cost
+field operations/equality, not a bit-complexity claim about a field encoding. -/
+theorem gaussianElimination_cost_le_poly (A : StoredMatrix K m n) :
+    (gaussianElimination A).operations ≤ n * (m + n + m * (2 * n)) :=
+  (runColumns_invariant A n (Nat.le_refl n)).cost_le
 
 end MIPStarRE.QPBT
