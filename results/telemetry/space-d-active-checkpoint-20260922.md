@@ -2514,3 +2514,29 @@ immutable artifact evidence, update documentation before freezing the final
 library commit, and do not move that commit with a later metadata-only record.
 All actual final gates, delegated checks, snapshots and official comparator
 verification must identify that exact commit; no success or exception is assumed.
+
+709 subsequently passed strict carry5281874215 from its genuine second
+review5281698617 and merged at18:12:41Z as
+6bf80a37ffcd9eeea1891d8c333fd2e3b645dee0. The stage-boundary27 report is
+5781625794. No library PR was manually merged.707's complete CI at199f94a1
+also passed, and its THIRD review was queued behind the still-live722 author.
+
+Precheck against actual main after709 found exactly one707 merge conflict,
+docs/paper-gaps/qpbt-gap-register.md. Before any third reviewer started,
+main verified the pending review process group4119922 contained no model and
+stopped only that model-free queue; its green CI/evidence are retained.
+The replacement /tmp/main-refresh707-after-rename-v2-20260922.sh verifies
+the sole conflict and proves incoming register == merge-base register with
+only the already-approved repository URL substitution. It applies precisely
+that substitution to707's authored register, preserving its mathematics,
+then runs normal merge hooks/loss guard, new-head full CI and THIRD Sol review.
+At this checkpoint the guarded resolution passed and normal commit hooks run;
+no new review round has been consumed by the cancelled queue.
+
+The seven after707 publication-only tails still wait on actual707 merge.
+Their older authored registers can encounter the same rename overlap; inspect
+and preserve their mathematical changes when they integrate. Never edit a live
+Bash helper or silently discard a conflict. Issue722 remains the sole model
+worker and has reached web/sync/declaration checks on its three documentation
+files. Prepared720/721 are unstarted; final artifact/reference and truthfulness
+work remains as recorded above.
