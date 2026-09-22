@@ -626,6 +626,9 @@ representation is obtained as follows.
 	\lean{MIPStarRE.QPBT.primePauliVec, MIPStarRE.QPBT.primePauliProj}
 	\lean{MIPStarRE.QPBT.primePauliVec_orthonormal}
 	\lean{MIPStarRE.QPBT.primeTauObservable_mulVec_primePauliVec}
+	\lean{MIPStarRE.QPBT.primePauliProj_mul_primePauliProj}
+	\lean{MIPStarRE.QPBT.primePauliProj_conjTranspose}
+	\lean{MIPStarRE.QPBT.posSemidef_primePauliProj}
 	\lean{MIPStarRE.QPBT.primePauliProj_isProj, MIPStarRE.QPBT.sum_primePauliProj_eq_one}
 	\leanok
 	\uses{def:subfield-trace, def:lin-reg}
@@ -772,17 +775,15 @@ representation is obtained as follows.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{def:generalized-pauli, lem:cancellation}
-	Each $\ket{b_W}$ is an eigenvector of $\tau^W(a)$ with eigenvalue
-	$\omega^{\tr(a \cdot b)}$: for $W = Z$ this is immediate from the
-	definition, and for $W = X$ it follows from the single-qudit computation
-	$\tau^X(a)\ket{e_X} = \omega^{\tr(ae)}\ket{e_X}$, applied factor by factor.
-	Expanding $\tau^W(a)$ in the orthonormal eigenbasis
-	$\{\ket{b_W}\}_{b \in \F_q^n}$ gives the first display. For the inversion,
-	substitute the first display and exchange the order of summation; by
-	Lemma~\ref{lem:cancellation} applied with $V = \F_q^n$ (so that
-	$V^\perp = \{0\}$), the inner expectation vanishes unless $b' = b$, where
-	it equals $1$.
+	\uses{def:generalized-pauli, prop:fourier-fact-vector}
+	For $W=Z$, the entrywise expansion follows directly from the computational
+	basis projectors. For $W=X$, multiplying the explicit rank-one projector
+	entries by the character coefficient reduces each matrix entry to the
+	full-space character sum of Proposition~\ref{prop:fourier-fact-vector}, which
+	vanishes off the required shift and equals one on it. For the inversion,
+	substitute the forward expansion and exchange the finite sums. The same
+	full-space Fourier orthogonality makes the inner expectation vanish unless
+	$b'=b$, where it equals $1$.
 \end{proof}
 
 Since only admissible field sizes $q = 2^k$ arise in the Pauli basis test, the

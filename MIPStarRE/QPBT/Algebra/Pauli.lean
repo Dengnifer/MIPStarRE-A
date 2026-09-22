@@ -206,60 +206,20 @@ private theorem add_add_eq_zero_iff_eq_add {ι : Type*} (a x y : ι → K) :
       a i + (y i + a i + y i) = (a i + a i) + (y i + y i) := by abel
       _ = 0 := by rw [CharTwo.add_self_eq_zero, CharTwo.add_self_eq_zero, zero_add]
 
-private theorem expect_phaseSign_dotProduct {ι : Type*} [Fintype ι]
-    [DecidableEq ι] (v : ι → K) :
-    𝔼 u : (ι → K), phaseSign (binTrace K (dotProduct u v)) =
-      if v = 0 then (1 : ℂ) else 0 := by
-  let eι : ι ≃ Fin (Fintype.card ι) := Fintype.equivFin ι
-  let reindex : (ι → K) ≃ (Fin (Fintype.card ι) → K) :=
-    { toFun := fun u j => u (eι.symm j)
-      invFun := fun u i => u (eι i)
-      left_inv := fun u => by
-        funext i
-        simp
-      right_inv := fun u => by
-        funext j
-        simp }
-  let v' : Fin (Fintype.card ι) → K := reindex v
-  calc
-    𝔼 u : (ι → K), phaseSign (binTrace K (dotProduct u v)) =
-        𝔼 u : (Fin (Fintype.card ι) → K),
-          phaseSign (binTrace K (dotProduct u v')) := by
-      refine Finset.expect_equiv reindex (by simp) ?_
-      intro u _
-      congr 3
-      simpa [reindex, v', Function.comp_def] using
-        (comp_equiv_dotProduct_comp_equiv u v eι.symm).symm
-    _ = 𝔼 u : (Fin (Fintype.card ι) → K),
-        ffVecChar (p := 2) (F := K) v' u := by
-      apply Finset.expect_congr rfl
-      intro u _
-      simp only [ffVecChar_apply, ffChar_apply]
-      rw [phaseSign_eq_ffChar]
-      rfl
-    _ = if v' = 0 then (1 : ℂ) else 0 := fourier_fact_vector v'
-    _ = if v = 0 then (1 : ℂ) else 0 := by
-      have reindex_zero : reindex (0 : ι → K) = 0 := by
-        ext j
-        rfl
-      by_cases hv : v = 0
-      · subst v
-        rw [show v' = 0 by exact reindex_zero]
-        simp
-      · have hv' : v' ≠ 0 := by
-          intro hv'
-          apply hv
-          apply reindex.injective
-          rw [reindex_zero]
-          exact hv'
-        simp [hv, hv']
-
 private theorem sum_phaseSign_dotProduct {ι : Type*} [Fintype ι]
     [DecidableEq ι] (v : ι → K) :
     ∑ u : ι → K, phaseSign (binTrace K (dotProduct u v)) =
       if v = 0 then (Fintype.card (ι → K) : ℂ) else 0 := by
-  rw [← Fintype.card_smul_expect, expect_phaseSign_dotProduct]
-  by_cases hv : v = 0 <;> simp [hv]
+  calc
+    ∑ u : ι → K, phaseSign (binTrace K (dotProduct u v)) =
+        ∑ u : ι → K, ffChar (p := 2) (F := K) (dotProduct u v) := by
+      apply Finset.sum_congr rfl
+      intro u _
+      rw [phaseSign_eq_ffChar]
+      rfl
+    _ = if v = 0 then (Fintype.card (ι → K) : ℂ) else 0 := by
+      simpa only [dotProduct] using
+        (sum_ffChar_sum_mul (p := 2) (F := K) (ι := ι) v)
 
 /--
 The shift operator `τ^X(a)`.  Blueprint `def:generalized-pauli`; paper origin

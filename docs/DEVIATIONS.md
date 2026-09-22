@@ -260,11 +260,12 @@ below states each item explicitly.
 |---|---|
 | **Paper statement** | Generalized Pauli identities |
 | **Locator** | chapter 4 lines 1056–1161 |
-| **What differs** | The general shift, phase and observable matrices, and their product, power, unitarity, spectral, twisted-commutation and cancellation identities, are formalized for **arbitrary prime characteristic**. The common eigenvectors and rank-one projectors of the same definition are formalized **only in characteristic two** (`pauliVec`, `pauliProj`), with only the binary Fourier formulas proved. |
-| **Why** | The source's prime-characteristic scope is preserved where the identities are used generally; QPBT itself only ever needs characteristic two for the eigenvector and projector layer, so the general versions were not built. |
+| **What differs** | No mathematical content differs. The shift, phase, observable, Fourier matrix, common eigenvectors, rank-one projectors, and their expansion and inversion formulas are formalized for arbitrary prime characteristic. The separately named `pauliVec`, `pauliProj`, and binary Fourier formulas remain characteristic-two specializations for QPBT consumers. |
+| **Why** | The former reduced-scope gap is closed by the source-general declarations; retaining the binary layer avoids changing downstream QPBT interfaces. |
+| **Lean** | `primePauliVec`, `primePauliFourier`, `primePauliProj`, `primeTauObservable_eq_sum_primePauliProj`, and `primePauliProj_eq_avg_primeTauObservable`, with the accompanying orthonormality, eigenvalue, and projective-measurement theorems |
 | **Blueprint** | `def:generalized-pauli`, `lem:twisted-commutation`, `lem:pauli-observable-expansion` (`ch11_qpbt_algebra.tex`) |
 | **Gap note** | [`qpbt_characteristic-two-pauli-scope.tex`](paper-gaps/qpbt_characteristic-two-pauli-scope.tex) |
-| **Printed-claim status** | **restated**, at reduced scope. Source-general eigenvector, projector, expansion and inversion declarations are **absent** — not unproved, simply not formalized, and not needed downstream. |
+| **Printed-claim status** | **no-difference**. The source-general declarations are present and proved; the binary declarations are separate specializations rather than replacements for the source scope. |
 
 ### c5. The cross-basis phase in the extracted Pauli observables
 

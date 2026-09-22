@@ -4,10 +4,9 @@ import MIPStarRE.Quantum.FiniteMatrix.NormalizedTrace
 /-!
 # Prime-characteristic Pauli eigenbases
 
-This file completes the arbitrary-prime eigenbasis layer of the generalized
-Pauli observables.  The `X`-basis vectors use the negative canonical-character
-phase from the source, while the observable expansion and its Fourier inverse
-use positive and negative phases, respectively.
+Generalized Pauli observables in arbitrary prime characteristic have the common
+eigenvectors and rank-one projectors defined below. Their orthogonality,
+projective-measurement properties, and Fourier expansions are established here.
 
 ## References
 
@@ -62,63 +61,14 @@ private theorem addChar_sum {A M ι : Type*} [AddCommMonoid A] [CommMonoid M]
   | @insert i s hi ih =>
       rw [Finset.sum_insert hi, Finset.prod_insert hi, AddChar.map_add_eq_mul, ih]
 
-/-- Fourier orthogonality for the canonical character on an arbitrarily
-indexed finite power of the field. -/
-private theorem expect_ffChar_dotProduct {p : ℕ} {K ι : Type*} [Field K]
-    [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
-    [Fintype ι] [DecidableEq ι] (v : ι → K) :
-    𝔼 u : (ι → K), ffChar (p := p) (F := K) (dotProduct u v) =
-      if v = 0 then (1 : ℂ) else 0 := by
-  let eι : ι ≃ Fin (Fintype.card ι) := Fintype.equivFin ι
-  let reindex : (ι → K) ≃ (Fin (Fintype.card ι) → K) :=
-    { toFun := fun u j => u (eι.symm j)
-      invFun := fun u i => u (eι i)
-      left_inv := fun u => by
-        funext i
-        simp
-      right_inv := fun u => by
-        funext j
-        simp }
-  let v' : Fin (Fintype.card ι) → K := reindex v
-  calc
-    𝔼 u : (ι → K), ffChar (p := p) (F := K) (dotProduct u v) =
-        𝔼 u : (Fin (Fintype.card ι) → K),
-          ffChar (p := p) (F := K) (dotProduct u v') := by
-      refine Finset.expect_equiv reindex (by simp) ?_
-      intro u _
-      congr 2
-      simpa [reindex, v', Function.comp_def] using
-        (comp_equiv_dotProduct_comp_equiv u v eι.symm).symm
-    _ = 𝔼 u : (Fin (Fintype.card ι) → K),
-        ffVecChar (p := p) (F := K) v' u := by
-      apply Finset.expect_congr rfl
-      intro u _
-      rfl
-    _ = if v' = 0 then (1 : ℂ) else 0 := fourier_fact_vector v'
-    _ = if v = 0 then (1 : ℂ) else 0 := by
-      have reindex_zero : reindex (0 : ι → K) = 0 := by
-        ext j
-        rfl
-      by_cases hv : v = 0
-      · subst v
-        rw [show v' = 0 by exact reindex_zero]
-        simp
-      · have hv' : v' ≠ 0 := by
-          intro hv'
-          apply hv
-          apply reindex.injective
-          rw [reindex_zero]
-          exact hv'
-        simp [hv, hv']
-
 /-- Sum form of Fourier orthogonality on an arbitrarily indexed finite power. -/
 private theorem sum_ffChar_dotProduct {p : ℕ} {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     [Fintype ι] [DecidableEq ι] (v : ι → K) :
     ∑ u : ι → K, ffChar (p := p) (F := K) (dotProduct u v) =
       if v = 0 then (Fintype.card (ι → K) : ℂ) else 0 := by
-  rw [← Fintype.card_smul_expect, expect_ffChar_dotProduct]
-  by_cases hv : v = 0 <;> simp [hv]
+  simpa only [dotProduct] using
+    (sum_ffChar_sum_mul (p := p) (F := K) (ι := ι) v)
 
 /-- Entry formula for an `X`-basis rank-one projector. -/
 private theorem primePauliProj_X_apply {p : ℕ} {K ι : Type*} [Field K]

@@ -15,8 +15,8 @@
   \item \textbf{Difficulty.} Medium.  The source-facing statements must retain
   arbitrary prime characteristic while the later Pauli basis test uses a
   separately named characteristic-two specialization.
-  \item \textbf{Estimated weight.} The completed extension is the 513-line
-  \path{MIPStarRE/QPBT/Algebra/PrimePauliBasis.lean} module.  It formalizes the
+  \item \textbf{Estimated weight.} The completed extension is implemented in
+  \path{MIPStarRE/QPBT/Algebra/PrimePauliBasis.lean}.  It formalizes the
   source-general eigenvectors, rank-one projectors, eigenvalue calculation,
   projective-measurement facts, and both Fourier identities; the separately
   named binary consumer layer is unchanged.
@@ -144,9 +144,9 @@ inverse are proved from the explicit matrices and additive-character
 orthogonality.  The characteristic-two declarations remain separate
 specializations for the QPBT parameter regime, and no binary definition or
 consumer is changed by the source-general completion.  The corresponding
-register row therefore proposes the terminal disposition \path{no-difference};
-independent source-fidelity review of issue~\#673 and main's merge gate decide
-whether that proposal is adopted.
+register row therefore has terminal disposition \path{no-difference}: there is
+no mathematical discrepancy in the domains, phases, hypotheses, or conclusions
+of the source-facing statements.
 \bibliographystyle{alpha}
 \bibliography{references}
 \end{document}
