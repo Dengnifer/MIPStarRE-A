@@ -28,17 +28,19 @@ CLAUDE.md               export-ignore
 texra-blueprint.toml    export-ignore
 
 # --- workflow-only scripts --------------------------------------------------
-# `scripts/` is mixed: `scripts/comparator/`, `scripts/blueprint_leanok_axioms.py`
-# and this packaging script ship with the artifact, the rest only serve the
+# `scripts/` is mixed: `scripts/comparator/`, the blueprint axiom audit and its
+# Python helpers, and this packaging script ship with the artifact; the rest serve the
 # workflow layer.  `git archive` does not descend into an ignored directory, so
 # a child of `scripts/ export-ignore` could not be re-admitted; the workflow-only
-# scripts are excluded by glob instead and the two shipped top-level files are
+# scripts are excluded by glob instead and the four shipped top-level files are
 # re-admitted with `-export-ignore`.  `scripts/comparator/` is never matched.
 scripts/*.py            export-ignore
 scripts/*.sh            export-ignore
 scripts/*.lean          export-ignore
 scripts/tests/          export-ignore
 scripts/blueprint_leanok_axioms.py -export-ignore
+scripts/blueprint_lean_sync.py -export-ignore
+scripts/tex_utils.py     -export-ignore
 scripts/make_artifact.sh -export-ignore
 
 # --- repository plumbing ----------------------------------------------------
