@@ -410,4 +410,80 @@ matrix and nonpivot indices used in paper `def:canonical-complement`. -/
 def gaussianElimination (A : StoredMatrix K m n) : State K m n :=
   runColumns A n
 
+/-- The computed nonzero rows. The bound used to index storage is proved by the
+loop invariant, rather than supplied by the caller. No field arithmetic occurs
+when this view of the stored output is read. -/
+def gaussianEliminationRows (A : StoredMatrix K m n) :
+    Matrix (Fin (gaussianElimination A).rank) (Fin n) K :=
+  let S := gaussianElimination A
+  let h := runColumns_invariant A n (Nat.le_refl n)
+  fun i => toMatrix S.entries ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩
+
+/-- Increasing pivot embedding read from the computed pivot array. The bound and
+ordering proofs are consequences of the loop invariant and are erased at run time. -/
+def gaussianEliminationPivots (A : StoredMatrix K m n) :
+    Fin (gaussianElimination A).rank ↪o Fin n :=
+  let S := gaussianElimination A
+  let h := runColumns_invariant A n (Nat.le_refl n)
+  OrderEmbedding.ofStrictMono
+    (fun i => ⟨S.pivots[i.val]'(lt_of_lt_of_le i.isLt h.rank_le),
+      h.pivot_lt ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩ i.isLt⟩)
+    (by
+      intro i j hij
+      exact h.pivot_strict ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩
+        ⟨j.val, lt_of_lt_of_le j.isLt h.rank_le⟩ hij j.isLt)
+
+/-- Correctness of the executable elimination program for arbitrary input rows.
+Its nonzero rows satisfy conventional RREF, span exactly the input row space,
+and its computed nonpivot indices are the existing canonical complement. The
+other stored rows are zero. This supplies the construction in paper
+`def:canonical-complement`; the independent-row specialization follows below. -/
+theorem gaussianElimination_correct (A : StoredMatrix K m n) :
+    IsReducedRowEchelon (gaussianEliminationRows A) (gaussianEliminationPivots A) ∧
+      Submodule.span K (Set.range (gaussianEliminationRows A).row) =
+        Submodule.span K (Set.range (toMatrix A).row) ∧
+      (∀ i : Fin m, (gaussianElimination A).rank ≤ i.val →
+        (toMatrix (gaussianElimination A).entries).row i = 0) ∧
+      canonicalComplement (Submodule.span K (Set.range (toMatrix A).row)) =
+        (gaussianElimination A).nonpivotIndices := by
+  let S := gaussianElimination A
+  have h : Invariant A n S := runColumns_invariant A n (Nat.le_refl n)
+  have hB : IsReducedRowEchelon (gaussianEliminationRows A)
+      (gaussianEliminationPivots A) := by
+    constructor
+    · intro i j
+      have he := h.pivot_entry ⟨j.val, lt_of_lt_of_le j.isLt h.rank_le⟩ j.isLt
+        (gaussianEliminationPivots A j) rfl ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩
+      simpa only [gaussianEliminationRows, Fin.ext_iff] using he
+    · intro i j hj
+      exact h.zero_before ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩ i.isLt j hj
+  have hz (i : Fin m) (hi : S.rank ≤ i.val) : (toMatrix S.entries).row i = 0 := by
+    funext j
+    exact h.remaining_zero i hi j j.isLt
+  have hspan : Submodule.span K (Set.range (gaussianEliminationRows A).row) =
+      Submodule.span K (Set.range (toMatrix A).row) := by
+    rw [← h.span_eq]
+    apply le_antisymm
+    · apply Submodule.span_le.mpr
+      rintro _ ⟨i, rfl⟩
+      exact Submodule.subset_span ⟨⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩, rfl⟩
+    · apply Submodule.span_le.mpr
+      rintro _ ⟨i, rfl⟩
+      by_cases hi : i.val < S.rank
+      · exact Submodule.subset_span ⟨⟨i.val, hi⟩, rfl⟩
+      · rw [hz i (Nat.le_of_not_lt hi)]
+        exact Submodule.zero_mem _
+  refine ⟨hB, hspan, hz, ?_⟩
+  rw [← hspan, hB.canonicalComplement_eq_nonpivot_indices]
+  ext j
+  simp only [State.nonpivotIndices, Finset.mem_compl, Finset.mem_image,
+    Finset.mem_univ, true_and, Finset.mem_filter]
+  constructor
+  · intro hj i hi heq
+    apply hj
+    refine ⟨⟨i.val, hi⟩, ?_⟩
+    exact Fin.ext heq
+  · rintro hj ⟨i, hi⟩
+    exact hj ⟨i.val, lt_of_lt_of_le i.isLt h.rank_le⟩ i.isLt (congrArg Fin.val hi)
+
 end MIPStarRE.QPBT
