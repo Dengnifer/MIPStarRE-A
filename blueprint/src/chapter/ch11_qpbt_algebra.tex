@@ -91,21 +91,65 @@ $S = \mathrm{span}\{(1,1)\}$ has the distinct complements
 $\mathrm{span}\{(1,0)\}$ and $\mathrm{span}\{(0,1)\}$. Given a basis of $S$,
 one may nevertheless single out a \emph{canonical} complement.
 
-% Issue #676: the RREF/prefix-rank correspondence, cardinality, independence and
-% register-subspace assertions are proved. This definition remains unmarked:
-% executable Gaussian elimination and its polynomial arithmetic-operation bound
-% remain obligations. Abstract RREF existence does not certify that algorithm.
-% See audits/2026-09-22_issue-676-canonical-completion.md; no exemption is granted.
+\begin{definition}[Deterministic Gaussian elimination]\label{def:gaussian-elimination}
+  \lean{MIPStarRE.QPBT.gaussianElimination}
+  \lean{MIPStarRE.QPBT.GaussianElimination.eliminateColumnCounted}
+  \lean{MIPStarRE.QPBT.GaussianElimination.State.nonpivotIndices}
+  \leanok
+  This auxiliary construction specifies the Gaussian elimination used in
+  Definition~\ref{def:canonical-complement}; it is not a separate labelled
+  definition of \cite{Ji2020MIPStar}. Let $K$ be any field with executable
+  field operations and decidable equality, and let $A\in K^{m\times n}$ be
+  given by its stored entries, where $m,n\geq 0$.
+
+  In this construction, rows $a\in\{1,\ldots,m\}$ and columns
+  $b\in\{1,\ldots,n\}$ use the paper's numbering. They correspond to the
+  formal indices $i=a-1$ and $j=b-1$, respectively. A pivot in paper row
+  $a$ has column number
+  $p_{\mathrm{paper}}(a)=p_{\mathrm{Lean}}(a-1)+1$.
+  The same conversion applies to every row or column subscript below.
+  The number $r$ of completed pivots is a count in both conventions:
+  the next paper row is $r+1$, with formal index $r$.
+
+  Start with $B=A$ and $r=0$, and process columns $b=1,\ldots,n$ in order.
+  When $r<m$, inspect the rows in increasing order and choose the first
+  $s>r$ with $B_{s,b}\ne 0$. If there is no such row, leave $B$ unchanged.
+  Otherwise interchange rows $r+1$ and $s$, writing $D$ for the resulting
+  matrix, and form the stored row
+  \[
+    v_d=D_{r+1,d}/D_{r+1,b}\qquad(1\leq d\leq n).
+  \]
+  Replace $B$ by the stored matrix
+  \[
+    B'_{a,d}=\begin{cases}
+      v_d,&a=r+1,\\
+      D_{a,d}-D_{a,b}v_d,&a\ne r+1,
+    \end{cases}
+  \]
+  record $p_{\mathrm{paper}}(r+1)=b$, and increase $r$ by one.
+  Once $r=m$, subsequent columns leave the state unchanged. The output
+  consists of $B$, the count $r$, the recorded pivot columns, and their
+  complement in $\{1,\ldots,n\}$. Each normalized row is stored before
+  forming the other rows, so reading it does not repeat its divisions.
+\end{definition}
+
+% Issues #676 and #690: the intrinsic correspondence and executable construction
+% are both proved. The efficiency assertion uses unit-cost field arithmetic and
+% equality tests, as specified in thm:gaussian-elimination-cost.
+% See audits/2026-09-22_issue-690-canonical-integration.md; no exemption is granted.
 \begin{definition}[Canonical complement]\label{def:canonical-complement}
 	\lean{MIPStarRE.QPBT.canonicalComplement}
-  \lean{MIPStarRE.QPBT.exists_isReducedRowEchelon}
+  \lean{MIPStarRE.QPBT.gaussianElimination}
+  \lean{MIPStarRE.QPBT.gaussianElimination_of_linearIndependent}
+  \lean{MIPStarRE.QPBT.gaussianElimination_cost_le_poly}
   \lean{MIPStarRE.QPBT.IsReducedRowEchelon.canonicalComplement_eq_nonpivot_indices}
   \lean{MIPStarRE.QPBT.IsReducedRowEchelon.pivot_indices_eq_of_span_eq}
   \lean{MIPStarRE.QPBT.card_canonicalComplement_span_rows}
   \lean{MIPStarRE.QPBT.linearIndependent_canonicalComplement}
   \lean{MIPStarRE.QPBT.canonicalComplement_registerSubmodule}
   \lean{MIPStarRE.QPBT.registerSubmodule_canonicalComplement_eq_dotOrthogonal}
-	\uses{def:register-subspace}
+  \leanok
+	\uses{def:register-subspace, def:gaussian-elimination}
 	Let $\hat{E}$ be the standard basis of $V = \F^n$ and let
 	$F = \{v_1, \dots, v_m\} \subset V$ be a set of $m$ linearly independent
 	vectors. Write $v_a = \sum_{b=1}^n A_{a,b}\, \hat{e}_b$, and, using a
@@ -132,6 +176,15 @@ one may nevertheless single out a \emph{canonical} complement.
 	spanned by $\hat{E}_0 \subseteq \hat{E}$, then the canonical complement of
 	$\hat{E}_0$ is $\hat{E} \setminus \hat{E}_0$, and its span coincides with
 	$S^\perp$.
+
+  Definition~\ref{def:gaussian-elimination} gives a deterministic realization
+  of this construction. Theorem~\ref{thm:gaussian-elimination-correct}
+  identifies its computed nonpivot indices with the intrinsic complement.
+  For stored input, Theorem~\ref{thm:gaussian-elimination-cost} gives at most
+  $n(m+n+2mn)$ charged field operations and equality tests, with each such
+  operation assigned unit cost. This is the arithmetic interpretation of
+  efficient construction over an arbitrary field; it makes no assertion
+  about the bit complexity of a field representation.
 \end{definition}
 
 The row indices $a=1,\ldots,m$ and column indices $b=1,\ldots,n$ here and
@@ -148,6 +201,87 @@ length counts coordinates and is not itself a coordinate index. In particular,
 $\pi_0$ restricts to the empty prefix. Similarly, a row sum
 $\sum_{a=1}^m$ becomes the sum of the reindexed terms over
 $i\in\{0,\ldots,m-1\}$.
+
+\begin{theorem}[Correctness of Gaussian elimination]\label{thm:gaussian-elimination-correct}
+  \lean{MIPStarRE.QPBT.gaussianEliminationRows}
+  \lean{MIPStarRE.QPBT.gaussianEliminationPivots}
+  \lean{MIPStarRE.QPBT.gaussianElimination_correct}
+  \lean{MIPStarRE.QPBT.gaussianElimination_of_linearIndependent}
+  \leanok
+  \uses{def:gaussian-elimination, def:canonical-complement}
+  This auxiliary theorem verifies the construction in
+  Definition~\ref{def:canonical-complement}. For any stored matrix
+  $A\in K^{m\times n}$ over a field with the computational data of
+  Definition~\ref{def:gaussian-elimination}, let $B,r,p$ be the computed
+  matrix, number of pivots, and pivot columns, in the paper's numbering.
+  The first $r$ rows of $B$ are in reduced row echelon form:
+  $p(1)<\cdots<p(r)$, $B_{a,p(c)}=\delta_{ac}$ for $1\leq a,c\leq r$,
+  and $B_{a,b}=0$ for $b<p(a)$. Every remaining row is zero, and
+  \[
+    \mathrm{span}\{B_{a,*}:1\leq a\leq r\}
+      =\mathrm{span}\{A_{a,*}:1\leq a\leq m\}=:S.
+  \]
+  The computed nonpivot columns are exactly those $b$ for which
+  $\dim\pi_b(S)=\dim\pi_{b-1}(S)$, where $\pi_k$ restricts to the first
+  $k$ coordinates. Thus paper column $b$ corresponds to formal column
+  $j=b-1$, and the two prefix lengths are $j+1$ and $j$.
+  If the input rows are independent, then $r=m$, the full output matrix
+  is in reduced row echelon form, and its nonpivot standard basis vectors
+  are precisely $F^\perp$ for $F=\{A_{1,*},\ldots,A_{m,*}\}$.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:gaussian-elimination, def:canonical-complement}
+  After each inspected column, the completed pivots are ordered unit
+  columns, their rows vanish before their pivots, and the remaining rows
+  vanish in all inspected columns. A nonzero pivot step preserves the row
+  span: its normalization and row subtractions can be reversed. Induction
+  over the columns proves these assertions for the output. Removing the
+  zero rows preserves its span. The prefix-dimension characterization of
+  Definition~\ref{def:canonical-complement} then identifies the nonpivot
+  columns. For independent input rows, equality of row spans gives
+  $r=\dim S=m$.
+\end{proof}
+
+\begin{theorem}[Arithmetic cost of Gaussian elimination]\label{thm:gaussian-elimination-cost}
+  \lean{MIPStarRE.QPBT.GaussianElimination.tabulateCounted}
+  \lean{MIPStarRE.QPBT.GaussianElimination.findPivot_spec}
+  \lean{MIPStarRE.QPBT.GaussianElimination.eliminateColumnCounted_cost}
+  \lean{MIPStarRE.QPBT.gaussianElimination_cost_le_poly}
+  \leanok
+  \uses{def:gaussian-elimination}
+  This auxiliary theorem makes precise the arithmetic cost of the
+  construction accompanying Definition~\ref{def:canonical-complement}.
+  Give each field division, multiplication, subtraction, and equality test
+  unit cost. For every stored $m\times n$ matrix, the charged cost $C(A)$ of
+  Definition~\ref{def:gaussian-elimination} satisfies
+  \[
+    C(A)\leq n(m+n+2mn).
+  \]
+  The counter accompanies the actual stored computations: each tabulation
+  evaluates an entry once and then sums its stored charge. Each inspected
+  search row is charged one equality test, even if its index already
+  excludes it and the field test is omitted. This conservative convention
+  makes $C(A)$ an upper bound on the executed field operations and tests.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:gaussian-elimination}
+  In each column, the search inspects at most $m$ rows. A successful pivot
+  requires $n$ divisions for its normalized row and at most $mn$
+  multiplications and $mn$ subtractions for the other rows. Summing the
+  charges over the $n$ column iterations gives the bound, including the
+  columns without pivots and those after all rows have been processed.
+\end{proof}
+
+Array access introduces no field arithmetic. Per column, tabulation,
+summation of charges, row scanning, and pivot storage traverse arrays or
+lists of sizes bounded by $m$, $n$, and $mn$. Selecting the nonpivot columns
+uses at most $mn$ comparisons of stored pivot indices. These bounds explain
+the polynomial administrative work of the construction; the displayed
+theorem counts field operations and tests, not machine instructions,
+allocations, or bit operations. The input is already materialized: any
+computation used to produce its entries lies outside this count.
 
 \begin{lemma}[Explicit RREF decomposition]\label{lem:canonical-complement-rref}
   \lean{MIPStarRE.QPBT.IsReducedRowEchelon}

@@ -51,7 +51,7 @@ import pr_merge  # noqa: E402
 from wf_util import LayerError  # noqa: E402
 
 #: Fixed slug so no test depends on the machine's git remotes (gh_common.py:70-86).
-REPO = "Dengnifer/MIPStarRE-A"
+REPO = "Dengnifer/MIPStarRE-QPBT"
 HEAD = "a" * 40
 BASE_SHA = "b" * 40
 MERGE_SHA = "c" * 40
