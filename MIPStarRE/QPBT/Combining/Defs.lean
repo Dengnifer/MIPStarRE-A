@@ -240,9 +240,12 @@ noncomputable def combineLinePoly {K : Type*} [CommSemiring K] {c : ℕ}
   fun i => (combineLinePolynomial aX bX aZ bZ uα vα uβ vβ f g).coeff i.val
 
 /-- Compatibility of an extended line with two projected lines and their
-explicit affine parameters.  This is precisely the domain condition preceding
-Equation `eq:combine-lines`; it is data supplied by the future subline
-construction, not a fallback branch in `combineLinePoly`. -/
+explicit affine parameters. These data witness the projection-inclusion
+condition preceding Equation `eq:combine-lines`. The theorem
+`exists_isCombineLineCompatible_of_projection_mem` in `Combining/LinePolynomial.lean`
+constructs them from that condition, including zero directions. Compatibility
+alone does not make every coefficient answer a function on a singleton line;
+see issue #695. -/
 def IsCombineLineCompatible {K : Type*} [Field K] {m : ℕ}
     (u v : Fin (2 * m + 2) → K)
     (uX vX uZ vZ : Fin m → K)
