@@ -29,7 +29,9 @@
   \item \textbf{Estimated weight.} The corrected single-family theorem and its
   two distance formulations are proved. A fixed optional Naimark ancilla now
   serves all families of the same index length. Absorption of this ancilla
-  into the strategy's original zero-state padding is not proved.
+  into the strategy's original zero-state padding is not proved. Three
+  auxiliary obstruction lemmas show that the required reserve cannot be
+  inferred for every fixed projective setting.
   \item \textbf{Mathlib/project split.} Finite direct sums, extensions of
   operators, and squared norms are standard linear algebra.  The proved
   Fourier--Naimark stability theorem and the two state-dependent distance
@@ -170,6 +172,90 @@ absorption theorem. Simply compressing the Naimark projection-valued
 measurement along the ancillary vector gives the Fourier-square POVM, which
 need not be projective. The completed field-valued proof of the combined-point
 lemma avoids this step entirely.
+
+\section{Fixed spaces and reserved subspaces}
+
+The source permits a choice of padded strategy at lines~160--172, recalls
+that convention at lines~367--372, and uses it at line~832. This is an
+existential choice made before the subsequent measurement constructions.
+It is not the assertion that every projective strategy already contains an
+unused pure register. The Lean type \path{ProjectiveSetting} retains the
+strategy, projectivity, and winning inequality, without specifying a reserved
+subspace. The theorem \path{exists_projective_padded_strategy} supplies a
+particular zero-padded strategy, but its public conclusion records neither
+an unused register nor an invariant smaller space for later observables.
+
+Two elementary obstructions prevent inferring this information from the
+dimensions alone. Put $K_t=\mathbb C^{\mathbb F_2^t\sqcup\{\bot\}}$.
+For nonzero finite-dimensional $H$,
+\[
+ \dim(H\otimes K_t)=(2^t+1)\dim H>\dim H,
+\]
+so the full extension returned by linearity on $H$ cannot embed isometrically
+back into $H$. Moreover, a positive definite local state cannot become
+$\sigma\otimes|\bot\rangle\langle\bot|$ under an invertible coordinate
+change: positive definiteness is preserved, whereas that tensor product
+annihilates every Boolean-word ancillary coordinate. Thus even an adequate
+ambient dimension does not imply the required state identity.
+
+There is also a counterexample within the actual projective-setting domain.
+For any admissible parameters, take the honest projective strategy on its
+EPR state of local dimension $D$, and let $\varepsilon$ be its rejection
+probability. The winning premise holds and $\varepsilon\geq0$. Its expanded
+state has reduced density $I/(Dq^M)$ on $AA'$, where $M=2^m$. Consequently,
+\[
+ R_{AA'}\Psi=\Psi\quad\Longrightarrow\quad R=I.
+\]
+In particular, no proper projection onto a zero ancillary sector fixes
+this state, even after changing its local orthonormal basis. The Lean proof
+compares the coefficients of the three EPR factors directly, without
+introducing a partial-trace definition. It asserts a nonnegative rejection
+probability, not a separate value-one theorem for this witness.
+These facts are verified by
+\path{not_nonempty_linearity_ancilla_isometry},
+\path{posDef_ne_linearity_ancilla_conjugate}, and
+\path{exists_projectiveSetting_no_proper_alice_support} in
+\path{MIPStarRE/QPBT/Combining/Linearity/Padding.lean}. They refute automatic
+reservation for arbitrary fixed settings, not the source's advance choice
+of padding and not its combined-point conclusion.
+
+A sufficient construction must keep that advance choice explicit. For
+$q=2^t$ the common ancilla for the pairs $(r,s)$ has dimension $q^2+1$;
+$2t+1$ zero qubits suffice to contain it. This number is independent of
+$(x,z)$, the observables, the state, and the error. It does not change the
+Pauli-register parameter $M=2^m$. One must construct a projective strategy
+with an invariant smaller local space $H_0$, and an isometry
+$J:H_0\otimes K_{2t}\longrightarrow H^+$ into its already chosen expanded
+space, with the original state embedded by $v\mapsto J(v\otimes\bot)$.
+The original measurements must intertwine with this embedding. Every
+subsequent observable family must be constructed on $H_0$ and transported
+using this same embedding; this is stronger than assuming a transport
+certificate for a family chosen on all of $H^+$.
+
+There is a concrete candidate in the existing setup construction. If $N$ is
+the size of its answer alphabet, the active Naimark summand has local index
+$I\times\operatorname{Option}(\mathrm{Answer})$, of dimension
+$|I|(N+1)$, inside a Boolean-padded space of dimension $|I|2^{N+1}$.
+The measurements preserve this summand and the state lies in it; the
+complement carries a fixed-outcome measurement. For the Pauli answer alphabet,
+the Pauli-outcome constructor gives $N\geq q^{2^m}\geq q^2\geq4$, so
+\[
+ (N+1)(q^2+1)\leq(N+1)^2\leq2^{N+1}.
+\]
+Hence the existing Boolean cube has enough dimension to embed the active
+summand times the common ancilla. The required embedding must agree on the
+ground slice with the existing one-hot embedding; the inequality alone
+does not construct that agreement or the measurement transport.
+
+After such an embedding is constructed, a rounded observable $L^u$ extends
+to $H^+$ as $JL^uJ^\dagger+(I-JJ^\dagger)$. Orthogonality of the two
+summands preserves exact linearity and binary observability. Intertwining
+of the original operators on the ground slice preserves each squared
+state-dependent error, and hence both the Boolean-index and $(x,z)$ averages.
+For the corresponding projective measurement the complementary projection
+is assigned to the zero outcome. This is a proposed sufficient construction,
+not a proved absorption theorem. Its state identity, all-family transport,
+and use in the binary construction remain open under \ghissue{697}.
 
 \section{Direct construction of the combined points}
 \label{sec:direct-combined-points}
