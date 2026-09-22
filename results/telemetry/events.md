@@ -9778,3 +9778,50 @@ historical entry above is rewritten.
   arguments. All 19 command/model-policy regression tests passed in 18.447
   seconds with that two-line fixture fix. No live dispatcher, model policy,
   credential, admission rule or hook was changed; rerun the normal hook.
+
+- The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
+  normal hooks/loss guards and all unrelated indexed/staged content preserved.
+  A new guarded pipeline queues publication/full CI/marked audit and strict
+  canonical carry or SECOND independent review.706 full CI and1884-declaration
+  audit passed;703 publication resumed. Direct PID arguments corrected the
+  earlier stale reviewer-assignment description; the physical3-slot count was
+  always accurate.
+- 705's warmed clean tree lost its free slot to a queued reviewer during setup.
+  Canonical account routing exited4 without a reservation or model session.
+  Keep the original logs and setup cost; retry the same initial2700s assignment
+  from exact04e7a7d6 through the normal3600s account wait. No extra worker slot,
+  key, author continuation, model budget reset or hook bypass is involved.
+
+- 704 completed3264s of checked partial construction at eedcde3c. Main admitted
+  its ONE3600s continuation on the actual strategy/rejection/soundness targets
+  and recorded the auxiliary K proposal for continued construction only.
+  Ten proved lemmas and all earlier costs remain; the source row stays open.
+  PR707's complete documentation CI passed.702 first review5279555373 returned
+  seven findings, assigned together to one2700s repair and a later fresh review.
+- 696's code lane waited3600s for capacity and exited4 without a reservation;
+  its prose lane completed with APPROVED. Previous shorthand calling that
+  completed phase code is corrected by the actual phase files. Archive the
+  whole failed run, preserve all costs and re-run canonical review at the same
+  exact head with a7200s capacity wait, unchanged2700s model limits and caps3.
+  This is a model-free capacity failure, not a key retirement or new finding.
+
+- 690's merge repair completed1809s at337e7582 with all source/index content
+  preserved and868 normal hook tests passing. Two prior fixture failures came
+  from inherited job-class/hardness metadata; local test-process isolation
+  fixed them without altering model policy or skipping hooks. A new guarded
+  publication/full-CI/first-review pipeline is live.700's fresh CI and1876-name
+  audit passed, and its canonical carry correctly led to a SECOND full review.
+- 699's published second review5279778199 approves both phases atd3089cbe.
+  Its operator wrapper then exited2 because Main had edited that shared Bash
+  script while it was blocked. Actual review evidence and exact-head CI remain
+  valid; Main verified them, released the claim and confirmed meta-gate state.
+  Never edit a script that live processes may still read; use a new versioned
+  file for future changes. Monitor older706/707 wrappers for the same cleanup
+  need only after their actual termination; preserve all live review work.
+- The owner now requires comparator main to hold the latest verified challenge
+  and final acceptance to pin the final library artifact commit on main.
+  Main verified360402fd on comparator main and the two in-progress official
+  runs35741427654/35742141249. The latter checks705's URL-only0f02b0b9 branch.
+  Keep the existing successful35638601720 evidence and do not promote until
+  the corresponding new run actually passes. The final checklist now binds
+  library artifact commit, pin, official run and comparator main explicitly.

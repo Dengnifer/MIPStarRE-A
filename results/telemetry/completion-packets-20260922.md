@@ -147,3 +147,23 @@ Issue705 is prepared after the repository rename to MIPStarRE-QPBT: update
 active artifact/workflow references and check anonymization of both aliases,
 while retaining historical evidence and accepted comparator pins. It has no
 worker admission yet and does not activate parked infrastructure PRs.
+
+## 2026-09-22 comparator-main and final-pin requirement
+
+The owner's new standing requirement supersedes the earlier final-comparator
+assumption. Comparator main must hold the latest officially verified challenge.
+After any new pin's official run passes, fast-forward comparator main to that
+challenge commit and update docs/comparator.md as the same operational step.
+At completion, independently verify that its library pin is the FINAL library
+artifact commit on main and comparator main is the exact challenge commit
+accepted by the official run. The historical ecb97d1f acceptance alone no
+longer satisfies that final condition. Preserve it as historical evidence.
+
+Current observed state: main360402fd, accepted by35638601720; its new main run
+35741427654 is in progress.705's URL-only comparator commit0f02b0b9 is on the
+diagnostic branch; run35742141249 is in progress. No promotion or new acceptance
+is claimed yet.705 is now an active worker; its earlier unadmitted description
+above is historical. Main owns verified promotion and the subsequent record,
+and the author must not race that operation. The final completion audit must
+bind the actual artifact commit, external pin, official run and comparator
+main explicitly; C5's delegated result is not proof of these equalities.

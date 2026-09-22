@@ -1703,3 +1703,4 @@
 {"ts": "2026-09-22T22:54:33+0900", "kind": "ci-build", "trigger": "ci.sh pr=702", "seconds": 57, "outcome": "success", "sha": "b167f8e1368060201f5bb8fbf7dca961230d10da", "note": "branch issue-697-linearity-padding-20260922"}
 {"ts": "2026-09-22T23:05:25+0900", "kind": "ci-build", "trigger": "ci.sh pr=699", "seconds": 61, "outcome": "success", "sha": "d3089cbea6cfabe4c0ea97c7b8276be341ed33fb", "note": "branch issue-694-linearity-normalization-20260922"}
 {"ts": "2026-09-22T23:23:24+0900", "kind": "ci-build", "trigger": "ci.sh pr=706", "seconds": 67, "outcome": "success", "sha": "491c1d85bc3e460d97be85ff2d7de994ec271f9a", "note": "branch issue-701-ms-prescribed-extraction-20260922"}
+{"ts": "2026-09-22T23:49:48+0900", "kind": "ci-build", "trigger": "ci.sh pr=700", "seconds": 46, "outcome": "success", "sha": "e939704396b4ec074de05a879723996edd7c8c0f", "note": "branch issue-695-source-combine-map-20260922"}
