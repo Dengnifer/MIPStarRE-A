@@ -2305,7 +2305,7 @@ lem:ld-soundness exemption;717's wording repair completed3671fec916589e5874c3970
 in535s. Their common C3 dependency is honestly still pending merge.
 
 Four model-free publication/review tails are now waiting for ACTUAL707 merge:
-/tmp/main-after707-ready715-20260922.sh (runtime prefix, generic script),
+/tmp/main-after707-ready715-20260922 (runtime prefix, generic script),
 ready716, ready717 and ready713. The invoked script is
 /tmp/main-after707-documentary-v1-20260922.sh; each prefix has its own pid/log/exit.
 They verify expected clean heads and ownership, integrate actual main,
