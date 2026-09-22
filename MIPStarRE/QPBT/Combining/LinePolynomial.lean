@@ -36,4 +36,28 @@ theorem exists_affine_parameters_of_linePoints_subset {K : Type*} [Field K] {m :
     _ = (u' + s • v') - (u' + a • v') := by rw [hs, ha]
     _ = (s - a) • v' := by module
 
+/-- The projection-inclusion hypothesis preceding `eq:combine-lines` supplies
+all the affine compatibility data. In particular, no subline witness and no
+nonzero-direction hypothesis are needed. This proves the geometric part of
+blueprint `def:combine-map` on its full stated domain. -/
+theorem exists_isCombineLineCompatible_of_projection_mem {K : Type*} [Field K] {m : ℕ}
+    (u v : Fin (2 * m + 2) → K) (uX vX uZ vZ : Fin m → K)
+    (hproj : ∀ p ∈ linePoints u v,
+      projX p ∈ linePoints uX vX ∧ projZ p ∈ linePoints uZ vZ) :
+    ∃ aX bX aZ bZ : K,
+      IsCombineLineCompatible u v uX vX uZ vZ aX bX aZ bZ
+        (u (alphaVar m)) (v (alphaVar m)) (u (betaVar m)) (v (betaVar m)) := by
+  have hX : linePoints (projX u) (projX v) ⊆ linePoints uX vX := by
+    rintro p ⟨t, rfl⟩
+    simpa only [projX_add, projX_smul] using (hproj (u + t • v) ⟨t, rfl⟩).1
+  have hZ : linePoints (projZ u) (projZ v) ⊆ linePoints uZ vZ := by
+    rintro p ⟨t, rfl⟩
+    simpa only [projZ_add, projZ_smul] using (hproj (u + t • v) ⟨t, rfl⟩).2
+  obtain ⟨aX, bX, haX, hbX⟩ :=
+    exists_affine_parameters_of_linePoints_subset _ _ _ _ hX
+  obtain ⟨aZ, bZ, haZ, hbZ⟩ :=
+    exists_affine_parameters_of_linePoints_subset _ _ _ _ hZ
+  exact ⟨aX, bX, aZ, bZ,
+    isCombineLineCompatible_of_blocks u v uX vX uZ vZ aX bX aZ bZ haX hbX haZ hbZ⟩
+
 end MIPStarRE.QPBT
