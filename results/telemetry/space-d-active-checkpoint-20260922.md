@@ -1309,3 +1309,21 @@ the same repair691 pipeline posts the complete status, runs marked axioms and
 requests the second review. 692/690/source699/700 queues remain intact.
 All retained source decisions were published at94f86baa, clean, before this
 additional receipt. Artifact completion remains open under the unchanged gate.
+
+Later in this cycle696's repair completed0, clean, at
+7b901f08146b820bf5b4349db6d06ee30bdeb760. Its receipt
+/tmp/main-fullspeed-fix696-marks-20260922-result.md resolves both duplicate
+ledger entries with the single truthful note comparison. Detached
+/tmp/main-publish696-after700-20260922.sh waits for source-ci695 (PR700), then
+guardedly refreshes, exports imports, checked-publishes via tag repair696,
+runs full CI/marked audit and SECOND review. Preserve failures if later main
+imports require additional private export hydration; never discard the repair.
+
+691's marked audit passed1870 declarations,0 failures. Second code phase
+reviewer-pr691-20260922-03 APPROVED, with prior index F1 resolved and all ten
+new closures standard-only. Its attempted external lean-conventions fetch was
+automatically rejected; the reviewer used repository rules and the available
+local integrity reference and completed the task without a workaround. Prose
+phase and combined published verdict remain pending. Do not gate a code-phase
+result as a completed approval. The freed lane was consumed by the queued
+review; total actual space-d workers remains at most3.

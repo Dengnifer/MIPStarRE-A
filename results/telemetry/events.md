@@ -9593,3 +9593,12 @@ historical entry above is rewritten.
   94f86baa with a clean primary. PR691's new-head CI steps have completed
   successfully; required marked audit and second review are next in its existing
   continuation. No manual merge, extra slot, alternate key or completion claim.
+
+- PR696 note repair completed0 at7b901f08, clean; a detached guarded pipeline
+  is queued after700's complete CI for refresh, normal publication, full CI,
+  marked audit and SECOND review. PR691's required axiom audit passed1870
+  declarations with0 failures and its second code phase approved; prose is
+  pending. The code reviewer attempted an unavailable external skill fetch,
+  automatic review rejected the network action, and it completed the review
+  using checked-in rules/local integrity references instead. No bypass or
+  permission request was needed. The repaired/source claims remain distinct.
