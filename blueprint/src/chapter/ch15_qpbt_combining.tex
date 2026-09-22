@@ -406,6 +406,7 @@ assembled by Fourier averaging.
 	\label{def:linearity-printed-claim}
 	\lean{MIPStarRE.QPBT.PrintedLinearityClaim}
 	\lean{MIPStarRE.QPBT.PrintedLinearityLiteralDistanceClaim}
+	\leanok
 	Define the first proposition to be the printed universal assertion: for every
 	$t\in\mathbb N$, real $\delta$, finite-dimensional space, density operator
 	$\rho$, and binary family with correlation at least $1-\delta$, there
@@ -427,7 +428,7 @@ assembled by Fourier averaging.
 	\lean{MIPStarRE.QPBT.not_printedLinearityClaim}
 	\lean{MIPStarRE.QPBT.not_printedLinearityLiteralDistanceClaim}
 	\leanok
-	\uses{lem:binary-measurement-distance}
+	\uses{lem:binary-measurement-distance, def:linearity-printed-claim}
 	Let $A(1,1)=-\Id$ and $A(a)=\Id$ at the other three points of
 	$\mathbb F_2^2$. In every density operator its correlation is $1/4$.
 	Every exactly linear binary family $L$ on the same space satisfies
@@ -437,7 +438,7 @@ assembled by Fourier averaging.
 \end{lemma}
 \begin{proof}
 	\leanok
-	\uses{lem:binary-measurement-distance}
+	\uses{lem:binary-measurement-distance, lem:boolean-representation-stability}
 	Put $X=L(1,0)$ and $Y=L(0,1)$. Exact linearity gives commuting
 	involutions with $L(0)=\Id$ and $L(1,1)=XY$. The identity
 	$((\Id-X)(\Id-Y))^\dagger((\Id-X)(\Id-Y))=4(\Id-X-Y+XY)$
