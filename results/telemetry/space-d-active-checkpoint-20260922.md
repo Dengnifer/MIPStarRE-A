@@ -456,3 +456,54 @@ parked infrastructure PRs are unchanged. No completion certificate or final
 artifact acceptance is claimed. After the685 mathematical review, main must
 separately decide source alignment and any justified blueprint marks; neither
 its existence proof nor the compiler alone constitutes that adoption.
+
+## Artifact Guide Integrated; Mathematical Reviews Live
+
+The service merged681 as `1482a2020db6045ea32c2c1467d33a6d9e3845d9` after
+complete refreshed-head CI and canonical approval carry5275554543 from the
+second independent review5275399130. Its completed worktree was removed by
+the service. A concurrent main telemetry snapshot caused checked-push to
+refuse because main moved during preflight; the merge service subsequently
+published the preserved snapshot and aligned local/remote main at ea66d146.
+No force push, reset, hook skip or historical capture rewrite occurred.
+
+Both680 at `a6a8161d6477d3cf9efb6038a02f8ca292e24cbe` and685 at
+`f5300f2094d545415fa09e738203c61832279998` completed all CI. The conditional
+waiters admitted their frozen-head reviews as planned:680's THIRD full round,
+code/prose workers `reviewer-pr680-20260922-05` and `-06`, and685's FIRST
+review `reviewer-pr685-20260922-01`. All are Astra/ultra, independent and
+read-only. Read their actual final ledgers before dispositioning anything;
+exit0 by itself is not approval. Logs are
+`/tmp/main-fullspeed-review680-round3-20260922.log` and
+`/tmp/main-fullspeed-review685-20260922.log`. Both heads are now stale after
+683/681: if approved, use an eligible reviewed train or unchanged refresh
+and canonical carry, with the primary clean and local branch tips equal to
+the published heads. Never include a fresh ancestor head in a train.
+
+The300-second684 follow-up author timed out124 after completing a clean,
+normally hooked commit `9d28f1bca56db535ef7646d81c21befbbd34363d` and writing
+its complete receipt. Preserve that timeout and unknown final usage. The
+remaining actual Lean citation is corrected and accurately described as a
+Lean-only consequence after swapping tensor factors. All three Lean files'
+noncomment content is unchanged. The authored no-PDF snapshot at9d28f1bc has
+0 dead links of196 checked; its2 absent path diagnostics now originate only
+in the guide's historical quotations and generated manifest report. The
+first receipt and all old archive hashes remain unchanged.
+
+Main started `/tmp/main-fullspeed-publish-doc-20260922.sh` for issue684,
+branch `issue-684-artifact-references-20260922`, expected author head9d28f1bc,
+body `/tmp/main-fullspeed-pr684-body-20260922.md`. Runtime prefix:
+`/tmp/main-fullspeed-publish684-20260922`. Publication and complete CI must
+finish successfully before the prepared first independent Astra review can
+start. `/tmp/main-fullspeed-review684-when-published-20260922.sh` reads the
+actual published PR number, freezes the final local head, and delegates to
+the canonical exact-head review wrapper only after exit0 and key checks.
+It cannot turn a failed publication or partial CI into review admission.
+
+Next main actions: disposition the680/685 reviews; inspect the684 publication
+and first-review results; integrate only with real current-head gates; decide
+the RREF source-alignment/blueprint update from independent evidence; then
+continue the source-gap and final artifact work. The original unadopted
+polynomial/pasting corrections, remaining source-law obligations and final
+completion gate are still unresolved. Do not infer completion from the new
+algebra proof, the merged guide, or zero direct proof holes.
