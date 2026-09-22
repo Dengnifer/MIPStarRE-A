@@ -2105,3 +2105,110 @@ comparator pin and main promotion remain required; no completion claim.
 Previous turn classification: progress (issues710/711 and three actual model
 dispatches). Current turn also progresses: prepares remaining packets, closes
 702, starts706's detached CI/review tail and records this owner-directed stage.
+
+## 2026-09-22: First documentary author receipt and integration follow-up
+
+Progress:711 author completed2dd2d894358389094b31b48600a6812041f41cf8,
+952s, four documentation artifacts, clean tree and focused PDF/web/sync/hooks
+passed. It introduces no Lean or formalization-mark change. Its detached
+publisher /tmp/main-publish-square-root-doc-20260922.sh has merged current
+main cleanly and owns checked publication/full CI/FIRST review. The common
+protocol support remains707's responsibility; this is not a main-row closure yet.
+
+New prepared issues:712 pasting,713 combined-line error,714 winning implications.
+712 is admitted at53d12daa1ea79aa6c62ef93c3b621a331e1368b0 and waits in the
+canonical dispatcher for capacity. The first wrapper supplied an abbreviated
+SHA, so its exact-head guard exited1 before claim/model admission; that failed
+log and warmed worktree remain. The separate pasting712 tag uses the full SHA.
+
+The read-only train precheck found696 clean and708 conflicting only in
+docs/completion/qpbt-leanok-exemptions.md.696 now has a claimed model-free
+refresh/publication/CI/marked-audit tail, with strict canonical carry from
+5280333594 or THIRD review if the context-sensitive equality check refuses.
+It will merge alone after fresh approval.708 has a documentation-only C4
+integration packet, preserving its code-approved algorithm and all earlier
+costs; a guarded successor waits for710's verified terminal process before
+dispatch. No new proof continuation is admitted. The meta service remains the
+only train/staging owner.
+
+709 complete CI is green at207b5cf8cdeb00449f0034a9680a4187dca4da70 and FIRST
+review is live.706 is published at5edfe0e2 with complete CI now waiting on the
+machine-wide build lock.707 and710 authors remain live at observation;710 has
+committed719815e9 and is finishing its receipt.707's commit hook met the known
+inherited-hardness-reason test contamination; its author retries only the commit
+process with that variable removed, preserving the failed test and all hooks.
+
+Stage5779697630 is the one27 comment for this documentary stage. The previous
+records attempt publishedb74a2641 but its snapshot push refused a concurrent
+main move; the model-free loop subsequently published53d12daa cleanly. No
+preflight guard was bypassed. This turn is progress, with no new stage boundary.
+710 subsequently completed0 in1323s, clean719815e9cde5795b24c99b1c5ae04c0790ad6c2d.
+Its five-file receipt confirms the mathematical note, two matching remarks,
+single terminal row and DEVIATIONS disclosure; no theorem or mark changes.
+The guarded /tmp/main-publish-doc-dimension710-20260922.sh tail is now live.
+That terminal process admitted the assigned canonical708 documentation worker;
+orc-690-20260923-01 and orc-712-20260923-01 are both confirmed dispatched.
+Together with707 they occupy the three space-d lanes.709's first review is
+now APPROVED, zero findings, review5280634239 on207b5cf8; main must refresh
+that documentation PR for normal standalone merge if the daemon needs it.
+The latest records pass left local81db029d ahead of remote53d12daa as710's
+session telemetry arrived. Preserve the new records and use normal publication;
+do not bypass checked-push or discard the session files.
+
+## 2026-09-22T16:21Z: C3 cross-row finding and rename conflict
+
+Progress: the dimension and square-root publication tails remain live; the
+square-root row is now715 at4ac910dfb08185deedc13eb9ee27c5776687d3e3 and CI
+has passed blueprint rendering/paper gaps.706's new-head build and blueprint
+checks passed. Three models remain on707,712 and708 documentation. No free
+space-d lane was inferred from a queued wrapper. No key-retirement marker.
+
+Operator integration check found a real C3 false positive BEFORE publication
+of707's common gate change. Staged gate blob
+6fa6bee10681b313957c74d052188f85d99f3ee9 rejects the dimension candidate
+4e2e76170356c6b4c98cb2046e2a2f1fc8701278 at register line30 solely because
+its source cell mentions the lem:ld-soundness import. The row documents an
+intermediate dimension/seed/proof-route difference and changes no headline
+statement. Detailed reproducible evidence and required correction are in
+/tmp/main-707-c3-cross-row-finding-20260922.md and the operator comment on707.
+Do not publish the common C3 support as complete without resolving this
+finding. Preserve all headline/C1/C2/C4/C5/C6/C7 requirements and truthful
+citations; no Lean proof work or source weakening is authorized.707's author
+is still live and retains exclusive ownership. Its pending commit retried
+the known fixture contamination, first without the reason and then without
+both MIPSTARRE_HARDNESS_REASON and MIPSTARRE_JOB_CLASS in the commit process
+only; all failed runs and actual dispatch/model metadata remain preserved.
+
+709's approved-head refresh stopped with ONE unresolved file,
+docs/paper-gaps/qpbt-gap-register.md. HEAD207b5cf8 and MERGE_HEAD53d12daa are
+preserved. Main-fix709 remains held. Its ONE3600s documentation integration
+continuation is prepared in /tmp/main-repair709-documentation-20260922.md;
+the guarded /tmp/main-repair709-after708-20260922.sh waits for708's terminal
+process, then resolves only that conflict while preserving incoming mathematics
+and the current URLs. No further proof work or automatic continuation.
+
+The normal records retry published1e84e767a1ec2cd372bae224865dcbe55855f419
+with local=remote and dirty0 before this new observation. The live model-free
+service still owns gating/trains. This is continued documentary work, not a
+new stage boundary, so27 retains its single stage comment5779697630.
+
+Both authors subsequently ended0:707 completed clean
+3f63f6d663ddfcee394ac13ba04ec2915bc73f77 in2221s, retaining the operator's
+identified gate defect;708's documentation-only conflict repair completed
+26821c3663650619682380c0b3be3f5b5b3d7818 in692s, with no proof/statement edits.
+Operator C3 finding is posted as707 comment5780049792. The exact clean707 head
+now has one3600s focused documentation-gate correction admitted through
+/tmp/main-fix707-c3-integration-20260922.sh, with all prior costs and F1 repair
+preserved; it must resolve the real dimension-import example before common
+C3 publication/full CI/SECOND review. This is no new proof assignment.
+
+708's repaired head is on /tmp/main-publish-near-708-20260922.sh for checked
+publication, complete CI, marked audit and SECOND independent review; no carry
+is assumed for its changed C4 prose. The verified708 termination released the
+709 documentation successor, now in canonical dispatch with the existing
+main-fix709 claim.712 remains live. Actual model occupancy is bounded by the
+space-d shim; pending dispatch wrappers are not counted as live models.
+
+The records helper most recently refused its train guard again; the earlier
+identified guard matches were real temporary unit-test fixture processes.
+Preserve this telemetry and retry normally when quiet, never bypass the guard.
