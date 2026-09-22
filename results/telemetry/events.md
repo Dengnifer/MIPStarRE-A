@@ -9535,3 +9535,22 @@ historical entry above is rewritten.
   and source semantics. A model-free690 watcher waits for actual691 merge,
   then queued692 CI, before guarded refresh/publication/audit/first review.
   No manual merge, ancestor approval in a train, or additional model slot.
+
+- The11:30Z cycle verified all three proof handles and all publication/CI
+  watchers live. PR696 build332s and render136s passed; later CI continues.
+  The completion gate was rerun in a clean detached worktree at exact7b455187:
+  C1/C6 pass, C3 has10 nonterminal rows and C4 has5 unresolved linked nodes;
+  C2/C5/C7 remain delegated. The initial primary observation raced only a
+  passive telemetry snapshot; both reports are retained and the isolated
+  result is authoritative. No criterion or terminal row changed. Previous
+  cycle was progress:693 service merge verified,697 dispatched,690 watcher
+  launched, stage5775622635 and telemetry7b455187 published. No extra worker
+  was dispatched while all three slots were occupied.
+
+- The11:37Z cycle was a verified wait: live model handles610332/686458/739348
+  continued694/695/697, and696's live CI progressed through its train fixtures
+  and blueprint synchronization. No terminal worker was inferred from a quiet
+  log. The prior completion-check cycle was progress with exact isolated gate
+  evidence. Telemetry publication first respected the active fixture guard;
+  after the train processes cleared, main retried the normal records helper.
+  No extra27 stage comment, model lane, test restart or guard bypass was added.

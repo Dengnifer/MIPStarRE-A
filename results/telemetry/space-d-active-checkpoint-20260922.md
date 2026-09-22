@@ -1157,3 +1157,42 @@ the worktree; do not restart blindly. No live worktree dependency is used.
 
 Previous cycle was progress: required1863-declaration audit and public evidence
 5775523053 completed; stage5775537054 and telemetry0a5dc2d9 published cleanly.
+
+## 2026-09-22T11:30Z exact-commit completion checkpoint
+
+The prior turn made progress (693 merge,697 dispatch,690 guarded watcher);
+stage5775622635 and telemetry7b455187 are published. This turn verified all
+three space-d model handles alive and the696/691/692/690 model-free pipelines
+alive. PR696's build332s and render136s passed; remaining CI continues. No
+additional lane or key was admitted.
+
+Exact7b4551879b08ef035931414095f139a79b8be120 was checked in a clean detached
+worktree .worktrees/completion-7b455187-20260922. The diagnostic required no
+build/cache setup and creates no source change or PR. C1 passes335 Lean files;
+C3 fails10 of21 nonterminal source rows; C4 fails5 of531 linked nodes;
+C6's narrow registered-document check passes. C2/C5/C7 are delegated, not
+automatically passed. Raw result
+/tmp/main-completion-gate-7b455187-isolated-20260922.json and durable report
+completion-check-7b455187-20260922.md. The initial primary report is retained
+separately: automated records changed only three telemetry snapshot files
+during that observation; the isolated rerun supplies the exact-commit result.
+
+Completion packets now accurately mark the general-prime source row and both
+Pauli blueprint entries complete after680/693, while recording the pending
+691/690 implementations. Nothing is waived and the full artifact goal is not
+achieved. Remaining source-law, field-evaluation and printed-rate obligations
+still require actual mathematics; passing a scoped auxiliary is insufficient.
+
+## 2026-09-22T11:37Z verified wait and telemetry publication
+
+All three actual space-d proof handles694/695/697 remain live; recent outputs
+show694/695 performing their final blueprint checks and697 editing its proof.
+These are progress observations, not completed receipts. PR696's unittest
+process757119 was verified live through its fixture work, then its log advanced
+to successful blueprint synchronization. No CI or worker was restarted.
+
+The completion checkpoint is posted on27 as5775727939. Its four local telemetry
+files were retained when meta-records correctly refused active train fixtures;
+main retries publication only after observing those processes clear. No new
+stage boundary occurred, so there is no repeated27 comment. The previous turn
+was progress (isolated exact-commit evidence); this cycle is a verified wait.
