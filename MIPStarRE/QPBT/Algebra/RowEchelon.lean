@@ -203,4 +203,40 @@ theorem exists_isReducedRowEchelon_span_eq
   · rw [finrank_span_eq_card hB.linearIndependent_rows, Fintype.card_fin]
     exact hW.symm
 
+/-- Independent rows have a reduced row echelon presentation `A = U * B` with
+`U` invertible, the same row span, and precisely the intrinsic canonical
+complement as nonpivot indices. This establishes the abstract correspondence
+with paper `def:canonical-complement` and the change of basis used in
+`lem:canonical-complement`. Arbitrary fields and zero ambient dimension extend
+the paper's domain; no algorithmic complexity assertion is made. -/
+theorem exists_isReducedRowEchelon
+    (A : Matrix (Fin m) (Fin n) K) (hA : LinearIndependent K A.row) :
+    ∃ (B : Matrix (Fin m) (Fin n) K) (pivot : Fin m ↪o Fin n)
+      (U : Matrix (Fin m) (Fin m) K),
+      IsUnit U ∧ A = U * B ∧ IsReducedRowEchelon B pivot ∧
+        Submodule.span K (Set.range B.row) = Submodule.span K (Set.range A.row) ∧
+        canonicalComplement (Submodule.span K (Set.range A.row)) =
+          (Finset.univ.image pivot)ᶜ := by
+  classical
+  obtain ⟨B, pivot, hB, hspan⟩ := exists_isReducedRowEchelon_span_eq A hA
+  have hcoeff : ∀ i, ∃ c : Fin m → K, ∑ j, c j • B.row j = A.row i := by
+    intro i
+    apply (Submodule.mem_span_range_iff_exists_fun K).mp
+    rw [hspan]
+    exact Submodule.subset_span ⟨i, rfl⟩
+  choose c hc using hcoeff
+  let U : Matrix (Fin m) (Fin m) K := Matrix.of c
+  have hmul : A = U * B := by
+    ext i j
+    have hij := congrFun (hc i) j
+    simpa [U, Matrix.mul_apply, Matrix.row, Finset.sum_apply, smul_eq_mul] using hij.symm
+  have hunit : IsUnit U := by
+    apply Matrix.linearIndependent_rows_iff_isUnit.mp
+    apply LinearIndependent.of_comp B.vecMulLinear
+    change LinearIndependent K (U * B).row
+    rwa [← hmul]
+  refine ⟨B, pivot, U, hunit, hmul, hB, hspan, ?_⟩
+  rw [← hspan]
+  exact hB.canonicalComplement_eq_nonpivot_indices
+
 end MIPStarRE.QPBT
