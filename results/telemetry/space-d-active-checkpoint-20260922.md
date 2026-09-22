@@ -106,3 +106,31 @@ Two attempts to publish this telemetry batch through `meta-records.sh` refused
 because its live-train guard fired while CI was running. No train markers or
 train process remained in the subsequent read. The guard was not overridden;
 records remain on primary for the next quiet batch or the merge service.
+
+## Initial Integrations Complete
+
+The service merged PR 675 as `255d8446c734456af67a24df1349da04fecc1648`, from
+head `f2075ad79095879e5723b8a421d533d6e7148911`, after complete green CI and
+canonical carried review 5274663282. Its original hard approval and both prior
+carry records remain intact. The source corrections remain nonterminal, as
+recorded in the adoption disposition. The service published primary main and
+its snapshot at `1996b291`; the records helper subsequently reported matching
+local/remote heads and a clean checkout.
+
+The PR 669 author also reached 900 seconds, exit 124, with usage unknown. Its
+README/chapter16 draft is preserved at branch head
+`8f5e9519786e55600ac979eefd01d96bae207055`. Its capture includes successful LaTeX
+lint, resolution of all 1,866 declaration links and an axiom audit passing all
+1,846 marked declarations. It has no verified author commit or final receipt.
+`/tmp/main-space-d-finish669-20260922.sh` prepares a same-thread 600-second
+completion of that draft and normal commit, preserving all previous costs and
+the unchanged four-review ceiling. It is not yet admitted.
+
+Both available worker reservations now belong to PR 680's independent code and
+prose phases (`reviewer-pr680-20260922-01` and `-02`). The next actual vacancy
+can admit the prepared 669 completion, then the independent 678 review or 679
+completion according to current dependencies. No third worker is authorized.
+Recheck phase completion and actual account reservations before dispatch; do
+not infer capacity merely from the end of an author job, because a queued
+review phase can consume it. The space-d disabled marker remains the mandatory
+key-watch stop condition; there is no fallback key.
