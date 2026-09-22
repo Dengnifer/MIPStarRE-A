@@ -33,6 +33,8 @@ CI/review. The main checkpoint records live assignments.
    proposal to main for separate decision and review; do not add divisibility
    as a paper theorem premise. Subtasks: tensor-code strategy construction and
    actual weighted rejection/parameter bound.
+   Active owner for the source-import construction: issue704,3600s, preserving
+   the independent direct proof and the separate undefined2m+2 obstruction.
 4. **Linearity distance normalization.** NV eq(3)/Theorem10 and source14:711-725,
    thm:linearity. Exit: prove the exact normalized source comparison and all
    consumers, or document the necessary factor2 with minimality, printed-claim
@@ -47,12 +49,18 @@ CI/review. The main checkpoint records live assignments.
    proved common-ancilla theorem and avoid duplicating it.
    Active whole-task construction owner: issue697, admitted3600s with preserved
    costs and a separate decision required before any source-space correction.
+   Its one continuation constructed the initial reserve and local transports;
+   full source binary-family and four-placement absorption remain unproved.
+   Both tranches are complete, with no automatic further proof continuation.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean
    convergence under the four unchanged adoption conditions. Source symmetry
    alone is refuted. A bounded dedicated evidence task continues105/172; no
    change of source semantics is preauthorized.
+   688's evidence is published as692. Main admitted701 for the remaining
+   prescribed-effect/one-way extraction and quantitative agreement construction,
+   3600s with inherited costs and pending adoption preserved.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -69,6 +77,8 @@ CI/review. The main checkpoint records live assignments.
    source-domain refutation with a sufficient minimal correction meeting C3.
    Existing empty-answer counterexample and positive-slack theorem must remain
    distinguished from nonempty attainment. Verify both source consumers.
+   Active owner: issue703,3600s; all historical173/524/601 costs remain charged,
+   with no new axiom, source-domain weakening or preapproved terminal status.
 10. **Winning implications.** Source14:197-362, lem:qld-win-implications.
     Exit: source evaluation/acceptance correspondence including zero directions,
     corrected phase/index formulas and exact probabilities, complete consumer
@@ -94,6 +104,8 @@ CI/review. The main checkpoint records live assignments.
    no assumed bridge. Reuse approved685, not another RREF proof. Can close
    separately if the definition's algorithmic claim remains explicitly open.
    PR691's completed repair awaits new-head CI and second independent review.
+   Completed through third review5278739717 and service merge968b0cc3. The
+   separate algorithmic definition still awaits690's first independent review.
 3. **def:generalized-pauli.** Exit: all linked eigenvectors/projectors cover
    arbitrary prime characteristic and match source phases/domain. Completed
    by merged680; the current completion check confirms the node is marked.
@@ -112,6 +124,8 @@ CI/review. The main checkpoint records live assignments.
    695 completed the projection construction and certified the singleton
    coefficient obstruction. Main separately admitted698 for the faithful
    source-function carrier and algebraic comparison, with no game change.
+   698 completed that source-function construction atff024214; its scoped
+   source mark awaits parent700 merge, full CI and independent review.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
