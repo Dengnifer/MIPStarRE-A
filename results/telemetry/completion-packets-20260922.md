@@ -44,6 +44,8 @@ CI/review. The main checkpoint records live assignments.
    prescribed expanded strategy spaces, including every family/ancilla
    quantifier; uniform ancilla alone is insufficient. Preserve the already
    proved common-ancilla theorem and avoid duplicating it.
+   Active whole-task construction owner: issue697, admitted3600s with preserved
+   costs and a separate decision required before any source-space correction.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean

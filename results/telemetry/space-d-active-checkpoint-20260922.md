@@ -1120,3 +1120,40 @@ additional model task or train was admitted while all three slots are occupied.
 Last completed stage record: issue27 comment5775488245; telemetrya0dcf8c9.
 The new build receipt dirtied builds.jsonl normally and is included in this
 cycle's passive telemetry publication. Artifact completion remains unproven.
+
+## 2026-09-22T11:23Z reuse merged, subline published, padding admitted
+
+PR693 first independent review5277289834 APPROVED exact90eba77a with0 findings;
+the prose phase was correctly skipped because this proof-only diff touches no
+blueprint. The service merged693 at11:23:54Z as
+d3bbe111984eec1b970fae39c951e4d5420d9ac6. GitHub merged=true was read back.
+Main's simultaneous meta-gate observed an already closed PR; no hand merge or
+fresh-approval train was used. This discharges680's deferred Mathlib-reuse F1.
+
+689 is now PR696 at e632decffe7c83b820f52ff193794056e4f9b1f5. Normal checked
+publication succeeded and its complete CI is live (ci719970, lake721066 at
+the observation). Runtime /tmp/main-fullspeed-publish689-imports-retry-20260922.
+The required marked-declaration audit and first independent review are queued
+by the existing watchers. 691/692 completed repairs still await this complete
+CI before their own sequential publication/check/review pipelines.
+
+Main opened697 and admitted one3600-second padding construction continuing
+124/129/173, separate from694's normalization evidence. Actual session
+prover-697-20260922-01; worktree issue-697-linearity-padding-20260922 at base
+a159185acc52b82fd2ab377eb8dbdef03c0fc2da. Packet
+/tmp/main-linearity-padding-packet-20260922.md; runtime
+/tmp/main-fullspeed-linearity-padding-20260922. 694 and695 remain live, so all
+three actual QPBT workers again use space-d. No new source-space/game semantics
+or automatic continuation is admitted. Preserve historical shared costs.
+
+690 remains clean at bb607c6f82a9afe8b898c157e96269996ea53f2b, with its existing
+main-fix690 claim retained from the completed integration author. Detached
+/tmp/main-publish690-after691-20260922.sh waits for GitHub's actual691 merged
+commit and for queued692's complete CI. It then verifies ancestry/clean head,
+refreshes through the normal merge/loss guard, exports private imports and
+checked-publishes, runs full CI and marked axioms, and requests the FIRST
+independent algorithm review. Unexpected conflict/failure stops and preserves
+the worktree; do not restart blindly. No live worktree dependency is used.
+
+Previous cycle was progress: required1863-declaration audit and public evidence
+5775523053 completed; stage5775537054 and telemetry0a5dc2d9 published cleanly.
