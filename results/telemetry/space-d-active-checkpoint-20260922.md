@@ -2402,3 +2402,33 @@ is made that its already-started requests used fast. Future launches read fast.
 Official support was verified at
 https://learn.chatgpt.com/docs/config-file/config-reference and
 https://developers.openai.com/api/docs/guides/fast-mode .
+
+## 2026-09-22T17:50Z: final two row issues and single-lane author queue
+
+Previous goal turn classified as progress: three documentation authors ended
+successfully, seven publication/CI tails were started, default Sol707 review
+actually began, and the standing fast-tier configuration was restored.
+Records reached clean main730da3ff. This turn's status snapshot confirms one
+space-d worker; the other three visible workers belong to QKD. Space-d has no
+retired marker. Historic failed-PR markers remain closed as verified last turn;
+parked infra PRs are not reopened or resumed.
+
+707's default Sol code phase APPROVED with0 findings; its prose phase is live.
+No combined approval or merge is yet asserted.709's second review remains
+next in /tmp/main-sol-review-queue-v2-20260922.sh, live PID4028527.
+
+Created separate documentation issues721 (subline correspondence and its
+qld-xz-lines exemption) and720 (linearity quotation/padding scope), both under
+173 with idempotency keys. Their existing briefs now state actual disposition:
+696 merged045a657d;702 closed UNMERGED with all local/published work retained.
+No source semantics are inferred from the unmerged702 branch.
+
+The model-free /tmp/main-sol-remaining-rows-v1-20260922.sh waits for the actual
+current review-queue PID, then requires707 merged or successful combined
+exact-head review. If707 needs repair, it stops before admitting an author.
+Otherwise it runs721 then720, each one whole3600s task through the new
+/tmp/main-sol-document-row-v2-20260922.sh. That helper uses default Sol routing,
+explicit ultra, one shared operator lock and the cap1 router, removes inherited
+effort/model/class overrides, creates an isolated worktree from actual main at
+admission, and retains all prior budgets. No models launch while the current
+review uses the slot. Main still owns publication, full CI and independent review.
