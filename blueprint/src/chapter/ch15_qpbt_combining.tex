@@ -336,6 +336,31 @@ assembled by Fourier averaging.
 	averaged BLR estimate.
 \end{proof}
 
+\begin{lemma}[Linearity with unrestricted numerical parameters]
+	\label{lem:linearity-unrestricted-parameters}
+	\lean{MIPStarRE.QPBT.exists_exactly_linear_observables_of_correlation}
+	\leanok
+	\uses{lem:blr-defect-identity, lem:boolean-representation-stability}
+	The corrected conclusion of Theorem~\ref{thm:linearity} also holds for
+	every $t\in\mathbb N$ and every real $\delta$, assuming only that $\rho$
+	is a density operator, the $\mathcal O^u$ are binary observables, and
+	$\E_{u,v}\Re\Tr(\mathcal O^u\mathcal O^v\mathcal O^{u+v}\rho)
+	\geq1-\delta$. Thus there are a finite ancillary space, a unit vector
+	$\mathrm{anc}$ in it, and exactly linear binary observables $\mathcal L^u$
+	on the extension with
+	$\E_u d_{\rho\otimes|\mathrm{anc}\rangle\langle\mathrm{anc}|}
+	(\mathcal L^u,\mathcal O^u\otimes\Id)^2\leq2\delta$.
+	This records the full numerical domain of the provider theorem; no
+	positivity of $t$ or separate nonnegativity premise on $\delta$ is needed.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:naimark-rounding, lem:blr-defect-identity,
+		lem:boolean-representation-stability}
+	The rounded family and its distance/defect identity are defined also
+	when $t=0$. Apply that identity and the correlation bound directly.
+\end{proof}
+
 \begin{remark}[Normalization of the distance in the linearity conclusion]
 	\label{rem:linearity-distance-normalization}
 	As printed in \cite{Natarajan2017Linearity}, the conclusion of the quantum
@@ -366,8 +391,61 @@ assembled by Fourier averaging.
 	conclusion, carrying the mean multiplicative defect as its hypothesis
 	parameter, is recorded as
 	Lemma~\ref{lem:boolean-representation-stability}, from which the theorem
-	is obtained by the substitution $\eta = 2\delta$.
+	is obtained by the substitution $\eta = 2\delta$. The universal
+	coefficient $2$ is optimal: the scalar quadratic families
+	$f_k(x,y)=(-1)^{x\cdot y}$ on $\mathbb F_2^{2k}$ have correlation
+	$4^{-k}$ and best possible error $2(1-2^{-k})$, even with arbitrary
+	ancillas. The ratio to $1-4^{-k}$ tends to $2$. This sharpness proof is
+	mathematical, not a claim of a formalized asymptotic theorem. The
+	Fourier--Naimark construction need not attain the best error for an
+	individual family. The normalization register remains pending independent
+	review and adoption, separately from the open padding obligation.
 \end{remark}
+
+\begin{definition}[Unasserted printed linearity propositions]
+	\label{def:linearity-printed-claim}
+	\lean{MIPStarRE.QPBT.PrintedLinearityClaim}
+	\lean{MIPStarRE.QPBT.PrintedLinearityLiteralDistanceClaim}
+	Define the first proposition to be the printed universal assertion: for every
+	$t\in\mathbb N$, real $\delta$, finite-dimensional space, density operator
+	$\rho$, and binary family with correlation at least $1-\delta$, there
+	exist an arbitrary finite pure ancillary extension and exactly linear
+	binary observables whose average squared operator error is at most
+	$\delta$. Define the second proposition by retaining also the duplicated
+	density in the literal source definition of the distance, using
+	$d_{\rho'^2}$ in our notation. Neither proposition is asserted or supplied to
+	a construction. Both are false by the following example.
+\end{definition}
+
+\begin{lemma}[Four-point obstruction to the printed bound]
+	\label{lem:linearity-four-point-obstruction}
+	\lean{MIPStarRE.QPBT.fourPointObservable}
+	\lean{MIPStarRE.QPBT.fourPointObservable_isBinaryObservable}
+	\lean{MIPStarRE.QPBT.blrCorrelation_fourPointObservable}
+	\lean{MIPStarRE.QPBT.one_le_avg_fourPointObservable_distance}
+	\lean{MIPStarRE.QPBT.avg_fourPointObservable_distance_one}
+	\lean{MIPStarRE.QPBT.not_printedLinearityClaim}
+	\lean{MIPStarRE.QPBT.not_printedLinearityLiteralDistanceClaim}
+	\leanok
+	\uses{lem:binary-measurement-distance}
+	Let $A(1,1)=-\Id$ and $A(a)=\Id$ at the other three points of
+	$\mathbb F_2^2$. In every density operator its correlation is $1/4$.
+	Every exactly linear binary family $L$ on the same space satisfies
+	$\E_a d_\rho(L(a),A(a))^2\geq1$, with equality for $L(a)=\Id$.
+	For the scalar pure input, the same bound holds on every ancillary
+	extension, refuting both printed propositions at $\delta=3/4$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:binary-measurement-distance}
+	Put $X=L(1,0)$ and $Y=L(0,1)$. Exact linearity gives commuting
+	involutions with $L(0)=\Id$ and $L(1,1)=XY$. The identity
+	$((\Id-X)(\Id-Y))^\dagger((\Id-X)(\Id-Y))=4(\Id-X-Y+XY)$
+	shows that their correlation with $A$ is at most $1/2$ in every density
+	operator. The distance is therefore at least $1$. The scalar pure state
+	and every pure ancilla have idempotent density, so duplicating that
+	density does not change the obstruction.
+\end{proof}
 
 \begin{lemma}[Formalization support for the Boolean characters]
 	\label{lem:boolean-characters}
