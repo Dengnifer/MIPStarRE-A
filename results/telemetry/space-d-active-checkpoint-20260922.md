@@ -2391,3 +2391,14 @@ and requested effort as well as all model/class overrides. New queue
 707 revalidated its complete green exact-head CI and entered review.sh; the
 cap1 account router serializes the two review phases using default Sol ultra.
 709 follows it. No grandfathered task got a continuation.
+
+Actual vendor PID4029621 confirms707 uses gpt-5.6-sol, ultra, read-only,
+CODEX_HOME=/home/drx/.cache/mipstarre-dev/codex-home-space-d; only one QPBT
+model worker is active. A speed-setting check found that home's service_tier
+had drifted to default (file mtime13:29:48Z). Under the standing owner fast-mode
+instruction, main restored only that field to fast; no model, key, shim or other
+project configuration changed. The active reviewer continues normally; no claim
+is made that its already-started requests used fast. Future launches read fast.
+Official support was verified at
+https://learn.chatgpt.com/docs/config-file/config-reference and
+https://developers.openai.com/api/docs/guides/fast-mode .
