@@ -9425,3 +9425,273 @@ historical entry above is rewritten.
 - The first telemetry commit for completed guide session orc-679-20260922-02 was refused by normal whitespace hooks: its previously unpublished generated last-message Markdown had a two-space hard break. The original presentation was byte-identical to the retained cache copy; main removed only those trailing spaces from the unpublished presentation before retrying normal hooks. The canonical raw JSONL and original cache last-message bytes remain unchanged; no published capture/history was rewritten.
 - At07:20 UTC the service correctly refused PR669's adjudicated merge: main's comment used a colon after F1 and a period after the issue number, while the existing gate requires a dash-delimited disposition and `deferred to issue #682:` on one line. Main corrected only the comment/template syntax, verified it against HEAD_FIELD_RE and DISPOSITION_RE, and retained the adverse fourth review and same frozen head. The failed service marker is archived before a normal service retry; no review status or gate is overridden.
 - PR681's600-second Astra repair preserved four staged files and22 passing packaging tests but its normal commit hook failed one of868 tests: inherited MIPSTARRE_HARDNESS_REASON contaminated a routine-dispatch fixture. The focused fixture passes with that variable unset. After the worker timed out, main retained its raw log and unknown usage and ran a model-free normal commit retry with only model-selection variables cleared; no test, policy or hook bypass was introduced. Issue682's300-second author timeout separately preserved clean committed34e354d7 and actual probe/hook evidence; its missing final receipt is not reconstructed as an author claim.
+- Main's PR681 publication wrapper exited127 after successful CI because its shared shell source was extended while that invocation was live; Bash resumed at a shifted position and attempted to execute `681`. The exact4c99de0e CI manifest and statuses are complete success, and the worktree was unchanged. Main released only the completed CI claim and admitted the normal second independent review, which approved as5275399130. Preserve the wrapper log/exit. Runtime wrappers must remain unchanged while live; later review logging was extended only after verifying all prior invocations had exited.
+- Main's telemetry snapshot push raced the681 service merge and checked-push correctly refused a branch that moved during preflight. The snapshot commit stayed local; the merge service then published it and aligned both refs at ea66d146 with a clean checkout. No force push or discarded commit was used. The684 citation follow-up separately timed out124 after clean commit9d28f1bc and a complete receipt; main preserves the timeout/unknown usage and publishes the actual completed work without another author session.
+- The new direct /goal restricts workers to space-d/space-3, four total. Main withdrew relay-1 admission, preserved its rotation directory, set caps4/0/4 and stopped the verified old relay worker after normal-hook commit9734c54c. Wrapper1 and raw records remain; no quota failure or lost work is inferred. Both authorized homes retain ultra/fast. A later external handoff repeats six lanes; main retains the direct goal's resource restriction pending direct steering, without overwriting the handoff.
+- PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
+# 2026-09-22 Main Whole-Task Admission
+
+- Service merged680 as0ea50f00 after actual limited verification5276885422 and
+  exact-head adjudication5774986476, preserving F1 as687 and every earlier
+  full review. The automatic carry had correctly refused changed documentation
+  context; it was never forged or relabelled as approval.
+- The Pauli cleanup's post-parent checked push built its leaf successfully but
+  checkdecls missed12 valid prime-Pauli names through a stale umbrella olean.
+  Preserve the failed run and correct names; export the current private
+  dependency/umbrella products and repeat normal gates. No registry weakening
+  or source edit is the repair for this artifact-cache error.
+
+- Author688 reported owner-sessions.jsonl line751 could not be parsed. Main
+  verified it was the file's sole JSONL error: the historical PR650 review row
+  lacked its final closing brace. Added only that brace; every field, timestamp,
+  review id5255854599, adverse verdict, five findings and601-second charge is
+  unchanged. The original malformed bytes remain in Git history; no session or
+  unknown usage was removed or reclassified. Full JSONL validation now passes.
+
+- CI680's complete cea8800e run failed only the cold axiom-audit fixture among
+  868 tests: outcome `error` instead of the expected `failure`. The fixture has
+  a300-second shared-build-lock wait; concurrent685's build took992s. An
+  isolated unchanged run passed in4.395s. Preserve full failed logs/manifest;
+  queue one complete refreshed retry after685 integration. No partial success
+  status, bypass or source repair is inferred from a passing isolated test.
+- Refreshed685 CI passed, but the operator's canonical dry-carry helper stopped
+  on its missing explicit ultra effort. No model review ran. A separate detached
+  continuation supplies the required effort, performs the marked-declaration
+  axiom audit and the same unchanged-patch carry. Preserve both helper results.
+
+- The09:14Z cycle harvested687's successful462-second author task at908df81c
+  and started its model-free parent-merge/publication/CI/review watcher.
+  Refilled the free lane with mathfix689, one3600-second tranche for the
+  unresolved complex/reality subline steps, preserving118's complete historical
+  costs and semantics. Main's finite admission is recorded in design-decisions
+  and stage comment5774043766. Three actual workers again run on space-d;
+  two refreshed PRs progress through serialized full-build CI. Existing logs
+  and live handles establish waiting, not failed work.
+
+- At09:08Z, the newer owner handoff has space-d main plus3 lanes, other keys
+  reassigned to QKD. Verified sole rotation space-d/3 and caps3/0/3; no alternate
+  key restored. Whole-task Astra/ultra admissions676(3600s),687(2700s),688(3600s)
+  fill the three slots. Eleven C3 and seven C4 entries now have separate briefs
+  and exact exits in completion-packets-20260922.md. Source semantics and all
+  historical budgets remain binding.
+- PR686 merged c70f29df after independent5275842693. PR685 approved5275826301.
+  PR680 fourth review5275958164 confirms source-faithful mathematics and prior
+  repairs, but retains one Mathlib-reuse F1. Main tracks it as687, adjudication
+  5773888104; no fifth review. An isolated cleanup author and model-free
+  unchanged-parent refresh/CI/canonical-adverse-carry run separately.
+- Two nohup-only bootstrap processes disappeared before dispatch, leaving no
+  exit receipt and one incomplete newly created worktree HEAD. Retained logs
+  and branch, restored that empty checkout to its original snapshot, and
+  launched replacements using setsid; all three real sessions registered.
+  No lost author edits or invented worker usage. Stage report5773885415.
+
+- The10:58Z cycle made progress before interruption: dispatched the PR691
+  completion-record merge repair and PR692's first-review effects correction.
+  The691 wrapper initially stopped on main's retained claim before any model
+  request; after verifying the old worker finished, main explicitly released
+  and reclaimed it. Both launch outcomes remain recorded. Three slots on
+  space-d remain the sole QPBT allocation; the snapshot's other-key workers
+  belong to the separate QKD project and are not QPBT capacity.
+- Normalized two trailing Markdown hard-break spaces in the tracked copy of
+  reviewer-680-20260922-01.last.md so normal telemetry hooks can pass. The
+  canonical runtime receipt, raw capture and published review are unchanged.
+  Automated records subsequently published clean main99d4036e.
+- The11:04Z cycle reverified both repair processes alive. Issue694 admits one
+  finite3600-second linearity normalization evidence task with all historical
+  charges and pending status preserved. PR693 is published and in complete
+  CI;689's prior checked push failed on stale root import products, with its
+  logs retained. A separate model-free recovery rebuilds private imports and
+  declaration links, then waits for693's current full CI before normal
+  publication/CI/review. No source declaration is deleted to mask stale imports.
+
+- The11:10Z cycle harvested completed691 and692 repairs at a65426c7 and
+  0f7e969c, respectively, with clean trees and focused checks. Their detached
+  publication pipelines wait for689's queued full CI, then run serial complete
+  CI, marked-declaration axiom audits and SECOND ordinary independent reviews.
+  Preserved prior adverse reviews and all repair costs. No review is carried
+  across the changed prose. Main admitted one3600-second source-domain
+  combining-map task695 to refill capacity while693's live unittest process
+  completes its CI and first review can start. Prior turn was progress:694 was
+  actually dispatched,689 imports were repaired, and telemetry/comment5775386048
+  were published. No new key, train staging or infrastructure activation.
+
+- The11:18Z cycle verified all three actual space-d handles: normalization694,
+  combining-map695 and reviewer-pr693-20260922-01. PR693 complete CI succeeded
+  at90eba77a (build846s, blueprint-sync399s, proof-debt22s, proof-evasion96s).
+  Its additional required blueprint axiom audit passed1863 declarations across
+  371 modules with0 failures, evidence comment5775523053. The audit uses real
+  transitive closures without a skip flag. A detached audit watcher also covers
+  the upcoming689 publication;691/692 already have the audit before review
+  in their publication continuations. The auto-merge loop and daemon are live;
+  main stages no competing train. Previous turn was progress: two repairs
+  harvested, exact guarded publication jobs started,695 actually dispatched,
+  and telemetry a0dcf8c9/stage5775488245 published.
+
+- The11:23Z cycle verified PR693 APPROVED by5277289834 at90eba77a, no findings;
+  the service merged it as d3bbe111 at11:23:54Z. Main's concurrent gate found
+  it already closed and made no extra merge. PR696 is the published complex
+  subline construction at e632decf with complete CI live. The freed model slot
+  goes to697's one3600-second padding construction, preserving shared costs
+  and source semantics. A model-free690 watcher waits for actual691 merge,
+  then queued692 CI, before guarded refresh/publication/audit/first review.
+  No manual merge, ancestor approval in a train, or additional model slot.
+
+- The11:30Z cycle verified all three proof handles and all publication/CI
+  watchers live. PR696 build332s and render136s passed; later CI continues.
+  The completion gate was rerun in a clean detached worktree at exact7b455187:
+  C1/C6 pass, C3 has10 nonterminal rows and C4 has5 unresolved linked nodes;
+  C2/C5/C7 remain delegated. The initial primary observation raced only a
+  passive telemetry snapshot; both reports are retained and the isolated
+  result is authoritative. No criterion or terminal row changed. Previous
+  cycle was progress:693 service merge verified,697 dispatched,690 watcher
+  launched, stage5775622635 and telemetry7b455187 published. No extra worker
+  was dispatched while all three slots were occupied.
+
+- The initial11:37Z observation was a verified wait: live model handles610332/686458/739348
+  continued694/695/697, and696's live CI progressed through its train fixtures
+  and blueprint synchronization. No terminal worker was inferred from a quiet
+  log. The prior completion-check cycle was progress with exact isolated gate
+  evidence. Telemetry publication first respected the active fixture guard;
+  after the train processes cleared, main retried the normal records helper.
+  No extra27 stage comment, model lane, test restart or guard bypass was added.
+
+- The same cycle then completed the telemetry publication and harvested696's
+  full CI success at e632decf plus its required1868-declaration/372-module axiom
+  audit,0 failures (PR evidence5775800525). Its first independent code/prose
+  review is queued behind the three active space-d workers. The691 continuation
+  refreshed successfully with the loss guard and is exporting private imports.
+  The completion report was published at d79e0d0f; a concurrent builds.jsonl
+  append made the following snapshot push refuse, and the normal records retry
+  preserved that record and published clean be1d0ab8. Overall cycle: progress.
+
+- The11:45Z cycle harvested694 at f78987a8 (2552s, clean) and695 at23207298
+  (1853s, clean), preserving their whole-task receipts and prior budgets.
+  New detached checked-publication pipelines start now; their full CI follows
+  the existing692/690 queue, then694 followed by695, with marked audits and
+  first independent reviews. 694's pending adoption requires explicit review
+  of all four conditions. 695 proves the source projection step but leaves
+  C4 open because arbitrary coefficient answers need not descend to functions.
+  Main admits the separate698 source-function construction, with no game change.
+- PR696 review5277695906 has two ledger entries for the same note-status
+  defect; both reviewers report no mathematical mismatch. A2700s whole repair
+  is assigned under main-fix696. 691 is republished at3ab2724f and full CI is
+  running. Source694/695 publications and all captures remain independently
+  guarded. Previous cycle progressed through696 CI/axioms and clean telemetry
+  e8e87554; current cycle progresses through author receipts and new admissions.
+
+- After the interruption, the12:09Z cycle verified the actual source publication
+  results:694 is PR699 at463feff4;695 is PR700 at8089cc88. Both have queued CI
+  under their existing main-ci claims. First697 task finished0 after2094s at
+  45039ea9 with three checked fixed-setting obstructions and a concrete initial
+  padding proposal. Main read the explicit prior-padding source passages and
+  admitted its single3600s continuation, prover-697-20260922-02. The stale retained
+  main-fix697 ownership was released/reclaimed only after successful completion
+  and a clean exact head were verified. 696 repair and698 construction remain
+  live. The interrupted turn was progress; no live job was restarted.
+- The delayed stage comment from the interrupted turn is5776169299. Normal
+  records published all retained source decisions and the continuation at
+  94f86baa with a clean primary. PR691's new-head CI steps have completed
+  successfully; required marked audit and second review are next in its existing
+  continuation. No manual merge, extra slot, alternate key or completion claim.
+
+- PR696 note repair completed0 at7b901f08, clean; a detached guarded pipeline
+  is queued after700's complete CI for refresh, normal publication, full CI,
+  marked audit and SECOND review. PR691's required axiom audit passed1870
+  declarations with0 failures and its second code phase approved; prose is
+  pending. The code reviewer attempted an unavailable external skill fetch,
+  automatic review rejected the network action, and it completed the review
+  using checked-in rules/local integrity references instead. No bypass or
+  permission request was needed. The repaired/source claims remain distinct.
+
+- The12:28Z cycle found691's second combined review5278009056 adverse on one
+  prose-only jargon clause; code approved and the prior index defect is fixed.
+  Main dispatched a2700s whole repair, blueprint-676-20260922-03, from3ab2724f,
+  preserving both rounds and planning the THIRD full review. The free space-d
+  slot was refilled;697 continuation and698 remained live.
+- The adverse parent review exposed an unnecessary CI dependency: independent
+  published699/700 were waiting for690, which waited for691 merge. Main verified
+  exact published heads/clean worktrees and absence of all four pending CI-start
+  receipts, then replaced only four live, waiting model-free scripts. Their
+  original logs and terminated receipts remain; no author/reviewer was stopped,
+  no PR republished, no status invented and no claim discarded. New serial CI
+  order is692,699,700,691 repair,696 repair,690 (which still also needs actual691
+  merge). Source CI runners retain the existing main-ci699/700 claims and run
+  all normal gates. Private import helperv2 covers the known new source modules.
+
+- The12:45Z cycle harvested691's prose repair69e5d997,456s, clean. Its guarded
+  third-review pipeline was already queued. The692 CI was live posting statuses,
+  not stalled; it completed successfully, ran its required audit and dispatched
+  second reviewers. 699 then began CI and passed build61s/render99s. Main opened
+  finite construction701 for688's concrete remaining prescribed-effect and
+  agreement targets. The next actual free space-d slot triggers its warmed
+  bootstrap; current live reviewers are not displaced. The previous cycle was
+  progress through691 repair admission and the model-free queue replacement.
+
+- The interrupted cycle and13:09Z resume made progress:692 merged as74b84fc1
+  after review5278423449;699 and700 completed CI plus their required axiom
+  audits (1871 and1868 declarations respectively). 699 review5278517118 approves
+  the code but needs two chapter15 marker/dependency repairs, now queued as a
+  bounded2700s blueprint task. 700 first review and701 construction occupy the
+  other live lanes; the shim still limits actual space-d workers to3.
+- 698 completed0 after3008s atff024214: faithful geometric line functions,
+  finite carrier, combination/degree, representation and affine-choice
+  independence, restriction and descent adapter, with scoped source mark.
+  Its publication watcher waits for actual700 merge. 697's one continuation
+  completed0 after3036s at087e5bfb with reservation and local transports; full
+  source absorption stays unproved and no automatic proof continuation follows.
+  Its publication refresh stopped on one gap-register conflict. Main preserved
+  both parents and staged files, queued a separate2700s integration-only repair,
+  and retained the failed publication logs. Source proof budgets were not reset.
+
+- The13:16Z cycle verified700's first review5278574076 APPROVED with0 findings
+  and its exact8089cc88 gate already satisfied. It awaits service merge alone;
+  main staged no fresh-approved train. The698 watcher remains live and guarded
+  by actual700 merge. 691's new-head build passed46s while later CI continues.
+  The three actual space-d handles are701 construction plus699 and697 repairs.
+  Retained telemetry is now published cleanly at1844ad0b. The697 repair has a
+  guarded publication continuation which checks both preserved merge parents
+  before refresh/push; it emits a CI-ready receipt rather than inventing checks.
+
+- The13:20Z cycle diagnosed700's service wait: merged692 makes approved8089cc88
+  non-fresh; the auto loop was waiting for another candidate. Main claimed a
+  standalone700 refresh rather than placing a fresh approval in a train. It
+  waits696 CI, then normal refresh/full CI/marked audit and canonical dry carry
+  from5278574076. If strict carry refuses, the actual second full review runs;
+  no context hash, verdict or budget is fabricated. Only the waiting690v2
+  wrapper was replaced, after exact PID/head/no-CI-start checks, to insert700
+  refresh before690's CI. All predecessor logs/claims/source trees are preserved.
+- Both scoped repairs finished0:697 at6c909dbe after449s, preserving the two
+  register rows/parents, and699 at7cb1e79c after573s with one chapter15 edit.
+  Padding publication has resumed through normal imports;699's repaired head
+  now has a guarded publication-only tail. Both emit exact CI-ready receipts
+  for Main to schedule full CI/audit/review, and neither claims source completion.
+  691 complete CI passed at e3f8ce2a and its THIRD review is actually running.
+  Retained telemetry published at c535429c after fixture guard release.
+
+- The13:29Z cycle verified691's third review5278739717 APPROVED with0 findings,
+  then GitHub confirmed its service merge968b0cc3 at13:30:36Z. No hand merge
+  or fresh-approved train occurred. 697 is published as702 atb167f8e1; repaired
+  699 is published atd3089cbe. Both exact-head CI tails are now scheduled after
+  the algorithm's existing complete-CI slot,702 then699; their first/second
+  independent reviews and required marked audits remain mandatory.
+- The two actually free model lanes were filled with whole3600s tasks703
+  (source nonempty-game attainment) and704 (source tensor-code reduction and
+  parameter obligations), each with precise exits and all historical costs
+  preserved. They are independent of active701 and run only on space-d. No
+  weaker theorem, external axiom, game change or automatic continuation was
+  authorized. The previous turn progressed through two completed repairs,
+  published tails and the diagnosed700 freshness refresh.
+
+- Later in that cycle, the700 refresh exposed a genuine one-file completion-
+  record conflict after691 merged: HEAD8089cc88, MERGE_HEAD5e6e5d0a. The refresh
+  stopped before publication, and dependent690/702/699 waiters correctly exited1
+  without running CI. Main verified terminal handles and untouched published
+  heads, retained every failed log and staged file, and queued a2700s merge-only
+  repair. It preserves incoming691's closed lemma and numbered list plus700's
+  approved combining-map obstruction paragraph. No source proof is changed.
+- Independent702/699 CI no longer waits on that conflict. New v2 tails run
+  after the completed696 CI:702 has actually posted pending statuses and begun,
+  repaired699 follows it. Original failed tail logs are retained.690 remains
+  cleanbb607c6f with its parent already merged; its old v3 waiter is terminal
+  and needs a fresh publication admission, not a blind restart. All three
+  model slots remain701/703/704; the700 repair waits actual space-d capacity.
