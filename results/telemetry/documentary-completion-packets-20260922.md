@@ -22,7 +22,7 @@ Review remains independent and exact-head CI remains required.
 | Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af in1494s with one reasoned C4 exemption; publication/FIRST review waits for merged707. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Issue718 completedc1bf9623 in785s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
 | Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Prepared; PR702 refresh conflicts, deferred. |
-| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Issue719 committed76312c5f; the grandfathered author is finishing its receipt. PR706 remains closed unmerged. No continuation. |
+| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Issue719 completed76312c5f in1378s, four documentation artifacts and clean worktree. Publication/CI waits for merged707, then FIRST review. PR706 remains closed unmerged. No continuation. |
 | Pasting product error | /tmp/main-document-pasting-product-20260922.md | PR717 repair3671fec9 resolves the wording finding in535s. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
 | Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 completed6bb626c0 in1187s, four documentation artifacts, clean worktree. Publication/CI waits for merged707, then FIRST review. |
 | Subline claims | /tmp/main-document-subline-20260922.md | Prepared; PR696 merged045a657d with complete fresh CI and canonical approval carry. Use its actual merged direct-law statements; no further proof. |

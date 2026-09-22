@@ -2374,3 +2374,20 @@ the current repository API: all are closed;260 and479 are merged. None is an
 active restart target. Infra552/554/556/561 remain parked. The live model-free
 merge service still owns gates/trains; main staged none. This is a continuation
 of the existing documentary stage, so no duplicate27 boundary comment is posted.
+
+The final grandfathered author719 then ended0 in1378s with the exact receipt
+/tmp/main-document-magic719-20260922-result.md. Its18-page PDF, web/sync,
+note-style and normal hooks passed. Seven completed dependent rows now have
+publication-only tails, adding runtime prefix
+/tmp/main-after707-publishonly-sol719-20260922 at76312c5f.
+
+The first default-Sol queue ended locally with exit2 on both707 and709 BEFORE
+dispatch because it inherited a non-ultra MIPSTARRE_REVIEW_EFFORT. No new
+reviewer thread or review was produced. Both old logs/exit receipts remain;
+their claims were released after terminal-process verification. With no live
+reader of the helper, its environment cleanup was corrected to unset review
+and requested effort as well as all model/class overrides. New queue
+/tmp/main-sol-review-queue-v2-20260922.sh uses distinct default-effort logs.
+707 revalidated its complete green exact-head CI and entered review.sh; the
+cap1 account router serializes the two review phases using default Sol ultra.
+709 follows it. No grandfathered task got a continuation.
