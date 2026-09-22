@@ -19,6 +19,8 @@ asserting bit complexity for an arbitrary field representation.
 * Issue #690, continuing the algorithmic obligation of issue #676.
 -/
 
+open scoped BigOperators
+
 namespace MIPStarRE.QPBT
 
 namespace GaussianElimination
@@ -44,14 +46,29 @@ def ofMatrix (A : Matrix (Fin m) (Fin n) K) : StoredMatrix K m n :=
 
 variable [Field K]
 
+/-- Tabulate counted computations, evaluating each computation once. Reading the
+stored results and summing their natural-number costs perform no field operations. -/
+def tabulateCounted {α : Type*} {k : ℕ} (f : Fin k → α × ℕ) : Vector α k × ℕ :=
+  let samples := Vector.ofFn f
+  (samples.map Prod.fst, ∑ i : Fin k, samples[i.val].2)
+
+/-- Counted pivot elimination. A division costs one field operation; each
+nonpivot entry uses one multiplication and one subtraction. The normalized
+pivot row is stored before it is used by the other rows. -/
+def eliminateColumnCounted (A : StoredMatrix K m n) (r s : Fin m) (c : Fin n) :
+    StoredMatrix K m n × ℕ :=
+  let B := fun i j => toMatrix A (Equiv.swap r s i) j
+  let v := tabulateCounted fun j => (B r j / B r c, 1)
+  let result := tabulateCounted fun i =>
+    if i = r then (v.1, 0)
+    else tabulateCounted fun j => (B i j - B i c * v.1[j.val], 2)
+  (result.1, v.2 + result.2)
+
 /-- Swap the selected row into position `r`, normalize it, and clear its column
 in every other row. Both the normalized row and the result are materialized. -/
 def eliminateColumn (A : StoredMatrix K m n) (r s : Fin m) (c : Fin n) :
     StoredMatrix K m n :=
-  let B := fun i j => toMatrix A (Equiv.swap r s i) j
-  let v := Vector.ofFn fun j => B r j / B r c
-  Vector.ofFn fun i =>
-    if i = r then v else Vector.ofFn fun j => B i j - B i c * v[j.val]
+  (eliminateColumnCounted A r s c).1
 
 /-- Entrywise formula for the materialized pivot step. -/
 lemma eliminateColumn_apply (A : StoredMatrix K m n) (r s i : Fin m) (c j : Fin n) :
@@ -59,7 +76,8 @@ lemma eliminateColumn_apply (A : StoredMatrix K m n) (r s i : Fin m) (c j : Fin 
       if i = r then toMatrix A s j / toMatrix A s c
       else toMatrix A (Equiv.swap r s i) j -
         toMatrix A (Equiv.swap r s i) c * (toMatrix A s j / toMatrix A s c) := by
-  by_cases hi : i = r <;> simp [eliminateColumn, toMatrix, hi]
+  by_cases hi : i = r <;>
+    simp [eliminateColumn, eliminateColumnCounted, tabulateCounted, toMatrix, hi]
 
 /-- A pivot step with a nonzero pivot preserves the entire row span. The inverse
 row expressions recover the swapped input rows from the normalized pivot row. -/
@@ -109,6 +127,23 @@ theorem eliminateColumn_span (A : StoredMatrix K m n) (r s : Fin m) (c : Fin n)
         exact (sub_add_cancel _ _).symm
       rw [hback]
       exact Submodule.add_mem _ (hnew _) (Submodule.smul_mem _ _ (hnew r))
+
+/-- The arithmetic count of the actual materialized pivot step is bounded by
+`n + 2*m*n`. The estimate permits charging the pivot row as an additional
+eliminated row; no search or matrix evaluation is hidden in a field operation. -/
+theorem eliminateColumnCounted_cost (A : StoredMatrix K m n)
+    (r s : Fin m) (c : Fin n) :
+    (eliminateColumnCounted A r s c).2 ≤ n + m * (2 * n) := by
+  simp only [eliminateColumnCounted, tabulateCounted, Vector.getElem_ofFn]
+  simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul, mul_one]
+  apply Nat.add_le_add_left
+  calc
+    (∑ i : Fin m, (if i = r then (_, 0) else (_, n * 2)).2) ≤
+        ∑ _i : Fin m, 2 * n := by
+      apply Finset.sum_le_sum
+      intro i _
+      split_ifs <;> simp [Nat.mul_comm]
+    _ = m * (2 * n) := by simp
 
 end GaussianElimination
 
