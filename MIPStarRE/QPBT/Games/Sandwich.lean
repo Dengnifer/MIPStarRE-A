@@ -24,6 +24,61 @@ open MIPStarRE.LDT hiding Measurement
 open MIPStarRE.Quantum
 open DistanceCalculus
 
+/-- The finite-dimensional input/output assertion of printed `lem:pasting`,
+retained **without being asserted**, with its literal product error contract.
+Paper: `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-525` and
+`references/qpbt-paper/04_preliminaries.tex:26-29`.
+
+Codewords are actual functions in finite collections. The three comparisons
+are exactly `eq:pasting-1` (twice) and `eq:pasting-2`; there is no register-exchange
+or state-symmetry assumption. Conditioning is restricted to positive-mass fibers.
+The common finite matrix space permits the same `A` on both registers.
+
+The error function precedes all data. The source `def:consistency` at chapter 6,
+lines 233-250 hides big-O constants: `cIn` bounds the three input constants,
+and `cOut` is uniform in the data and errors but may depend on `cIn`. It is
+kept outside the error function, since absorbing it into a coupled prefactor
+and exponent is not justified. The scalar bound concerns positive inputs only;
+the comparisons also make sense at nonnegative errors, without imposing a
+new scalar bound on the axes.
+
+The product conclusion is refuted in
+`docs/paper-gaps/qpbt_pasting-product-error.tex`, issues #196, #201, and #674.
+`exists_pasting_error` proves the additive correction, not this proposition.
+No assertion about infinite-dimensional operator families is encoded here. -/
+def PrintedPastingClaim : Prop :=
+  ∃ δp : ℝ → ℝ → ℝ,
+    PrintedPolynomialBound (fun x : Fin 2 → ℝ => δp (x 0) (x 1)) ∧
+      ∀ cIn : ℝ, 0 < cIn → ∃ cOut : ℝ, 0 < cOut ∧
+        ∀ {X Y₁ Y₂ R₁ R₂ ι : Type*}
+          [Fintype X] [DecidableEq X] [Fintype Y₁] [DecidableEq Y₁]
+          [Fintype Y₂] [DecidableEq Y₂] [Fintype R₁] [DecidableEq R₁]
+          [Fintype R₂] [DecidableEq R₂] [Fintype ι] [DecidableEq ι]
+          (D : Distribution ((X × Y₁) × Y₂))
+          (Γ₁ : Finset (Y₁ → R₁)) (Γ₂ : Finset (Y₂ → R₂))
+          (G₁ : X → Measurement Γ₁ ι) (G₂ : X → Measurement Γ₂ ι)
+          (A : ((X × Y₁) × Y₂) → Measurement (R₁ × R₂) ι)
+          (ψ : EuclideanSpace ℂ (ι × ι)) (η δ : ℝ),
+          D.IsProbability → ‖ψ‖ = 1 → 0 ≤ η → 0 ≤ δ →
+          (∀ x, MIPStarRE.QPBT.Measurement.IsProjective (G₂ x)) →
+          (∀ q, MIPStarRE.QPBT.Measurement.IsProjective (A q)) →
+          HasConditionalCollisionBound D (fun g : Γ₂ => g.val) η →
+          consistencyDefect D
+            (fun q a₁ => heteroKron (((A q).postprocess Prod.fst).effect a₁) 1)
+            (fun q a₁ => heteroKron 1 (((G₁ q.1.1).postprocess
+              (fun g => g.val q.1.2)).effect a₁)) ψ ≤ cIn * δ →
+          consistencyDefect D
+            (fun q a₂ => heteroKron (((A q).postprocess Prod.snd).effect a₂) 1)
+            (fun q a₂ => heteroKron 1 (((G₂ q.1.1).postprocess
+              (fun g => g.val q.2)).effect a₂)) ψ ≤ cIn * δ →
+          consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+            (fun q a => heteroKron 1 ((A q).effect a)) ψ ≤ cIn * δ →
+          consistencyDefect D (fun q a => heteroKron ((A q).effect a) 1)
+            (fun q a => heteroKron 1 (∑ g₁ : Γ₁, ∑ g₂ : Γ₂,
+              if (g₁.val q.1.2, g₂.val q.2) = a then
+                pastedMeasurement (fun g => (G₁ q.1.1).effect g)
+                  (fun g => (G₂ q.1.1).effect g) g₁ g₂ else 0)) ψ ≤ cOut * δp η δ
+
 /-- The palindromic effects form a POVM when each constituent measurement is
 projective. This is `lem:ld-sandwich-measurement`, the measurement assertion
 implicit in `lem:ld-sandwich`; blueprint `lem:ld-sandwich-measurement`, paper
