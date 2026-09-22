@@ -153,28 +153,9 @@ theorem primePauliProj_mul_primePauliProj {p : ℕ} {K ι : Type*} [Field K]
     primePauliProj (p := p) W e * primePauliProj (p := p) W f =
       if e = f then primePauliProj (p := p) W e else 0 := by
   classical
-  ext x z
-  rw [Matrix.mul_apply]
-  simp only [primePauliProj, Matrix.vecMulVec_apply]
-  calc
-    (∑ y : ι → K,
-        (primePauliVec (p := p) W e x * star (primePauliVec (p := p) W e y)) *
-          (primePauliVec (p := p) W f y * star (primePauliVec (p := p) W f z))) =
-        primePauliVec (p := p) W e x *
-          (∑ y : ι → K,
-            star (primePauliVec (p := p) W e y) *
-              primePauliVec (p := p) W f y) *
-          star (primePauliVec (p := p) W f z) := by
-      rw [Finset.mul_sum, Finset.sum_mul]
-      apply Finset.sum_congr rfl
-      intro y _
-      ring
-    _ = _ := by
-      rw [primePauliVec_orthonormal]
-      by_cases hef : e = f
-      · subst f
-        simp [Matrix.vecMulVec_apply]
-      · simp [hef]
+  simp only [primePauliProj, Matrix.vecMulVec_mul_vecMulVec, dotProduct,
+    primePauliVec_orthonormal]
+  by_cases hef : e = f <;> simp [hef]
 
 /-- Each prime-characteristic Pauli projector is self-adjoint. -/
 theorem primePauliProj_conjTranspose {p : ℕ} {K ι : Type*} [Field K]
@@ -395,16 +376,7 @@ theorem posSemidef_primePauliProj {p : ℕ} {K ι : Type*} [Field K]
     [Fintype K] [DecidableEq K] [Fact p.Prime] [Algebra (ZMod p) K]
     [Fintype ι] [DecidableEq ι] (W : Bool) (e : ι → K) :
     (primePauliProj (p := p) W e).PosSemidef := by
-  set A : Matrix Unit (ι → K) ℂ :=
-    Matrix.of (fun (_ : Unit) (x : ι → K) =>
-      star (primePauliVec (p := p) W e x)) with hA
-  have h : primePauliProj (p := p) W e = Aᴴ * A := by
-    ext x y
-    rw [Matrix.mul_apply]
-    simp [hA, primePauliProj, Matrix.vecMulVec_apply,
-      Matrix.conjTranspose_apply]
-  rw [h]
-  exact Matrix.posSemidef_conjTranspose_mul_self A
+  exact Matrix.posSemidef_vecMulVec_self_star (primePauliVec (p := p) W e)
 
 /-- Inverse Fourier expansion of a prime-characteristic Pauli projector.
 The coefficient uses the negative phase, exactly as in
