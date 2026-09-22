@@ -1495,3 +1495,31 @@ workers retain priority through shim capacity. 691's style-repair pipeline has
 refreshed normally; inspect its publication/check receipts before acting.
 696/690 scheduled dependencies remain as recorded in the12:28Z queue. No user
 permission, goal change, key fallback or fabricated review was introduced.
+
+## 2026-09-22T13:16Z approved700 and active repair tails
+
+700 first complete review5278574076 APPROVED exact8089cc88, both phases with0
+findings. meta-gate confirms it already gated; the service must merge it alone
+under the fresh-approval rule. No train was staged.698's actual-parent watcher
+is alive and will handle its publication after that merge, stopping on any real
+conflict. At the snapshot700 was still open, so no merge is yet claimed here.
+
+691's repaired/style head e3f8ce2a61df73247d902e52a22207075cd5aa3e is published
+and its new build passed46s after the normal shared lock. The rest of full CI,
+marked audit and THIRD review remain in its existing v3 pipeline. 696/690 tails
+retain their ordered dependencies. 699/697 repair workers are actually live,
+alongside701; all3 slots are space-d and the key-disabled marker is absent.
+
+New detached /tmp/main-resume697-publication-20260922.sh waits for the active
+register repair's successful exit/receipt, verifies a clean tree and ancestry
+from both087e5bfb and e0dafa73, then performs normal main refresh/loss guard,
+private imports and checked publication. It preserves the original failed
+publisher logs and stops on any new conflict. Output .pr/.head and READY_FOR_CI
+will identify the exact published result and transfer main-fix697 to main-ci.
+Main must then schedule complete CI, marked audit and FIRST independent review;
+no review or source-absorption completion is preclaimed.
+
+The previous cycle was progress through700/699 review results and concrete
+repair admissions; this cycle completes gating evidence and publication-tail
+admission. Earlier retained records are published at1844ad0b with clean primary.
+No owner confirmation or policy exception was needed.
