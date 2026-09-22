@@ -1,5 +1,114 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/701",
+  "id": 5539879733,
+  "node_id": "I_kwDOUJyJf88AAAABSjPbNQ",
+  "number": 701,
+  "title": "feat(QPBT): construct prescribed-answer Magic Square extraction",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-22T12:56:25Z",
+  "updated_at": "2026-09-22T12:56:25Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/688",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-ms-prescribed-extraction-20260922 -->\n### Motivation\n\nIssue688/PR692 retains the false unrestricted Magic Square claim and records\nall source consumers. Two construction targets remain: extraction estimates\nfor the prescribed answer effects, and a justified dependence on the two\nvariable-agreement defects. Completed binary effects are not the prescribed\nsubmeasurements when malformed answers are possible.\n\n### Scope\n\nContinue the explicit targets in audits/2026-09-22_ms-rigidity-adoption.md\nand docs/paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex, using the actual\naudit filename found in the parent if different. Read source08:612-652,\nthm:ms-rigidity, and its sole direct source use at source14:339. Preserve the\nprinted proposition and both independent-copy/rotation counterexamples.\n\n### Exit Criterion\n\nDerive all seven extraction estimates on prescribed effects from the existing\nvalue and two agreement hypotheses, constructing malformed-answer/product\ntransfer bounds internally. Establish the strongest justified error dependence\nand its necessity: examine value-only one-way extraction plus agreement\ntransfer, rather than treating the current uniform square-root dependence as\nalready minimal. Preserve all source/blueprint consumers and truthful scope.\n\nDo not retry the refuted unrestricted theorem, add same-cell game tests, assume\nwell-formed answers or a product-transfer bridge, or mark the gap terminal.\nAny new restricted theorem must state its restriction and remain separate from\nthe original source claim. Independent review and Main's four-condition\nadoption decision are required before terminal status.\n\nMain admits one3600-second whole construction task, retaining all105/172/688\nand later costs, including2067s+915s688 author/integration. No automatic\ncontinuation, game change or budget reset is granted.\n\nAddresses #688, #105, #172, #667",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/701/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/labels{/name}",
@@ -696,7 +805,7 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 0,
+   "total": 1,
    "completed": 0,
    "percent_completed": 0
   },
