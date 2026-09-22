@@ -125,4 +125,82 @@ theorem IsReducedRowEchelon.canonicalComplement_eq_nonpivot_indices
       exact hpivot ⟨i, Fin.ext h⟩
     omega
 
+/-- Independent input rows admit an RREF matrix with exactly the same row span.
+The proof constructs its rows by projection along the intrinsic coordinate
+complement, then verifies the conventional entrywise conditions. This is an
+abstract existence theorem supporting paper `def:canonical-complement`, not a
+Gaussian-elimination algorithm. -/
+theorem exists_isReducedRowEchelon_span_eq
+    (A : Matrix (Fin m) (Fin n) K) (hA : LinearIndependent K A.row) :
+    ∃ (B : Matrix (Fin m) (Fin n) K) (pivot : Fin m ↪o Fin n),
+      IsReducedRowEchelon B pivot ∧
+        Submodule.span K (Set.range B.row) = Submodule.span K (Set.range A.row) := by
+  classical
+  let W := Submodule.span K (Set.range A.row)
+  let C := canonicalComplement W
+  let P := Cᶜ
+  let T := registerSubmodule K C
+  have hcomp : IsCompl W T := isCompl_registerSubmodule_canonicalComplement W
+  have hW : Module.finrank K W = m := by
+    simpa [W] using finrank_span_eq_card hA
+  have hT : Module.finrank K T = C.card := by
+    change Module.finrank K (registerSubmodule K C) = C.card
+    rw [registerSubmodule_eq_spanSubset, Pi.dim_spanSubset]
+    simp
+  have hcard : P.card = m := by
+    have hdim := Submodule.finrank_add_eq_of_isCompl hcomp
+    have hpartition := Finset.card_add_card_compl C
+    rw [hW, hT, Module.finrank_fin_fun] at hdim
+    simp only [Fintype.card_fin] at hpartition
+    dsimp [P]
+    omega
+  let pivot : Fin m ↪o Fin n := P.orderEmbOfFin hcard
+  let B : Matrix (Fin m) (Fin n) K :=
+    fun i => W.projection T hcomp (Pi.single (pivot i) 1)
+  have hmem (i : Fin m) : B.row i ∈ W :=
+    Submodule.projection_apply_mem hcomp _
+  have hpivot (i j : Fin m) : B i (pivot j) = if i = j then 1 else 0 := by
+    have hx := Submodule.sub_projection_mem hcomp (Pi.single (pivot i) (1 : K))
+    change _ ∈ registerSubmodule K C at hx
+    rw [registerSubmodule_eq_spanSubset] at hx
+    have hj : pivot j ∉ C := Finset.mem_compl.mp (P.orderEmbOfFin_mem hcard j)
+    have hz := Pi.mem_spanSubset_iff.mp hx (pivot j) hj
+    change (Pi.single (pivot i) (1 : K) : Fin n → K) (pivot j) - B i (pivot j) = 0 at hz
+    rw [← sub_eq_zero.mp hz]
+    simp [Pi.single_apply, pivot.injective.eq_iff, eq_comm]
+  have hB : IsReducedRowEchelon B pivot := by
+    refine ⟨hpivot, ?_⟩
+    intro i j hj
+    have hz : ∀ (r : ℕ) (hr : r < n), r < (pivot i).val → B i ⟨r, hr⟩ = 0 := by
+      intro r
+      induction r using Nat.strong_induction_on with
+      | h r ih =>
+        intro hr hri
+        let a : Fin n := ⟨r, hr⟩
+        by_cases ha : a ∈ C
+        · apply coordinate_eq_zero_of_prefixRank_eq W a
+          · simpa [C, canonicalComplement] using ha
+          · exact hmem i
+          · intro b hb
+            exact ih b.val hb b.isLt (lt_trans hb hri)
+        · have haP : a ∈ P := Finset.mem_compl.mpr ha
+          have harange : a ∈ Set.range pivot := by
+            rw [Finset.range_orderEmbOfFin]
+            exact haP
+          obtain ⟨l, hl⟩ := harange
+          have hil : i ≠ l := by
+            intro h
+            subst l
+            have heq := congrArg Fin.val hl
+            dsimp [a] at heq
+            omega
+          change B i a = 0
+          rw [← hl, hpivot, if_neg hil]
+    exact hz j.val j.isLt hj
+  refine ⟨B, pivot, hB, ?_⟩
+  apply Submodule.eq_of_le_of_finrank_eq
+  · exact Submodule.span_le.mpr (Set.range_subset_iff.mpr hmem)
+  · rw [finrank_span_eq_card hB.linearIndependent_rows, Fintype.card_fin]
+    exact hW.symm
+
 end MIPStarRE.QPBT
