@@ -254,3 +254,23 @@ pass, and the worktree is clean. Main started
 publication and full CI. A second independent review is still required. The
 RREF correspondence remains open. Actual model work now is 680's repair and
 the admitted 669 review phases; 681 review and 678 re-review wait for capacity.
+
+## Prime Repair Committed
+
+The 680 author completed all six finding dispositions and committed
+`b3ec0041ebb7d27e569883bb86ea464ff02b2c88`, with a clean worktree. The receipt
+is `/tmp/main-space-d-fix680-20260922-result.md`. Shared finite-index character
+orthogonality now lives in `LDT/Preliminaries/FiniteFields.lean`; both prime and
+binary consumers use it. Focused type checks/builds, blueprint render, 2,124
+declaration resolutions, the scope-note PDF, both comparator drift checks and
+normal hooks passed. The source-facing signatures are unchanged.
+
+Canonical regeneration changed only four source-line comments in the QPBT
+Pauli fixture. The author reports no registered statement-closure change, no
+headline target change, no LDT-fixture change and no verification-pin change.
+Complete new-head CI and independent review must still verify the final patch.
+Main started `/tmp/main-space-d-publish680-repair-20260922.sh`: guarded refresh,
+locked full build, checked publication and full CI. It does not admit the second
+review automatically. Both available model slots are now allocated to 669's
+fourth-review phases; independent 681 review and 678/680 re-reviews are the next
+bounded jobs after real vacancies and exact-head green CI.
