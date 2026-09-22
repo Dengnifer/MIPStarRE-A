@@ -134,3 +134,33 @@ Recheck phase completion and actual account reservations before dispatch; do
 not infer capacity merely from the end of an author job, because a queued
 review phase can consume it. The space-d disabled marker remains the mandatory
 key-watch stop condition; there is no fallback key.
+
+## Latest Admission
+
+A later census found only one live account reservation for the remaining PR 680
+review phase, with space-d still enabled. Main immediately admitted
+`/tmp/main-space-d-finish669-20260922.sh`, resuming author thread
+`01a0c7ae-b6f9-76d3-8f23-694c5d485d79` for its explicitly bounded 600-second
+completion. The earlier 900-second timeout remains charged, as do all prior
+repairs and three full reviews. The 679 completion and 678 review remain
+prepared for a later vacancy. The printed-contract stage update is Progress
+Log #27 comment 5772061219.
+
+## Routing Correction and Review Result
+
+The attempted same-thread 669 resume was refused before model admission because
+account routing could not verify its prior model identity. No resume model work
+ran. Main used a fresh linked assignment with the same remaining 600 seconds,
+not another allowance: `/tmp/main-space-d-finish669-fresh-20260922.sh`, session
+`orc-666-20260922-04`, thread `01a0c7c8-7c8d-7223-a6cd-0e1491e0ec33`. Its first
+useful output is observed. The original author, failed resume, preserved draft
+and all cumulative costs remain linked. The unadmitted 679 completion script
+likewise uses a fresh linked assignment rather than an unverifiable resume.
+
+PR 680's first independent review then completed adversely as review 5274718665,
+with six unresolved findings at `97515769` and summary failure. Main immediately
+reassessed the newly free slot and started the prepared independent PR 678
+review at `e8a8bc3e`, then began reading 680's published findings. PR 680 cannot
+be gated or merged until those findings receive a bounded repair and normal
+new-head CI/review. Current useful model work is 669 completion and 678 review;
+679 completion and the eventual 680 repair wait for a real vacancy.
