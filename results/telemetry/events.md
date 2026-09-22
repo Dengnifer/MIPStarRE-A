@@ -9816,3 +9816,12 @@ historical entry above is rewritten.
 ## 2026-09-23
 
 - Owner 2026-09-22 document-dont-prove supersedes remaining intermediate proof goals: three3600s documentation workers707/710/711 are live on space-d, with all ten row/four node briefs prepared. PR702 refresh conflicted after its completed repair and is closed unmerged by comment5779646553; repaired commit, unfinished merge, branches and costs retained. Issues698/704 proof work is deferred and preserved. PR706 repair is on detached CI/review; no new proofs or unsupported leanok marks are admitted. PR707 owns the explicitly authorized minimal terminal-status protocol/checker update; headline faithfulness and other completion criteria remain binding.
+
+- Session `orc-712-20260923-01`: the first blueprint sync probe failed with
+  1,905 missing generated declaration-list entries. Regeneration passed, but
+  a probe overlapping the web renderer then found 254 stale entries because
+  rendering rewrites the ignored `blueprint/lean_decls`. After rendering
+  finished, the normal `--update-lean-decls` then `--ci` sequence passed.
+  Six existing marker warnings remain in unchanged chapters. No checker or
+  Lean source changed. Keep rendering and final sync sequential, as in CI;
+  the failed probes are validation-order evidence, not mathematical failures.
