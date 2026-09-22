@@ -2212,3 +2212,404 @@ space-d shim; pending dispatch wrappers are not counted as live models.
 The records helper most recently refused its train guard again; the earlier
 identified guard matches were real temporary unit-test fixture processes.
 Preserve this telemetry and retry normally when quiet, never bypass the guard.
+
+## 2026-09-22: Pasting publication and first dimension review
+
+Progress:712 completed099f4326ddf4aef328047e000a9a3825bc683c32 in1316s,
+with the four mathematical documentation artifacts and normal focused checks.
+Its17-page PDF and blueprint render were inspected; no Lean/mark changes.
+The publication tail is live, now PR717 atba841d42d14633e539a4786c925ca8ed81a8c710,
+with rendering/paper-gap CI steps passed. No additional row worker was admitted
+while all three space-d slots were occupied by necessary reviews/repairs.
+
+706's SECOND review5280855481 approves code, confirms F1-F4 repaired, but asks
+for three missing existing blueprint dependencies in two prose findings. The
+author continuation was already spent. Under the owner cutoff706 is CLOSED
+unmerged, comment5780224671, with published5edfe0e2, original proofs, repaired
+docs, green CI, both reviews, branches and all costs preserved. This is not a
+claim of a proof defect. The separate Magic Square documentation packet uses
+actual main and receives no additional proof assignment.
+
+716's FIRST review5280897802 has two findings at4e2e7617: F1 is the shared707
+C3 dependency; F2 is a real blueprint mismatch between original prescribed
+point effects and the linked ldPointValuesOrZero completed POVMs. The sole
+documentation continuation is /tmp/main-fix716-firstreview-20260922.md;
+/tmp/main-fix716-after707-20260922.sh waits for the C3 correction's successful
+terminal process, then admits that repair. It must make the Lean-only support
+statement accurate and remove/exempt any unsupported source mark. No new
+proof or theorem weakening; no duplicate common checker implementation.
+Main must integrate reviewed707 before publishing/reviewing repaired716.
+
+696's refresh now has complete CI and strict canonical approval carry5280888430
+from5280333594 atb5348baaadead1548c51a339bc610ce4cfd98d33. Its claim is released
+and it is gated for a standalone service merge; no model review was fabricated.
+707's focused correction and709's single-conflict continuation are confirmed
+dispatched, alongside the remaining documentation review work. The main key
+is not retired. Stage27 remains5779697630 until the next actual stage boundary.
+
+696 is now confirmed service-merged at2026-09-22T16:35:32Z as
+045a657d696380b7e58d68427650465638bb9247. The new merge-boundary27 report uses
+marker main-696-merged-documentary-stage-20260922 and includes the row pipeline,
+706 deferral and outstanding final-artifact checks.713 was admitted at clean
+0eb04963283b74964a2f718813e879e742217010, which contains that merge, when709's
+documentation worker ended and the census showed a free model slot.
+
+709's ONE continuation completed0 in1081s at
+ef1667004b514b055f64104380a0b809532c122a. Its receipt proves the register equals
+the incoming blob with only the approved repository-URL replacement; all21
+statuses and mathematical prose are preserved. New source merges can recreate
+that same mechanical URL conflict. The detached
+/tmp/main-publish709-url-preserving-20260922.sh therefore verifies the sole
+conflict path and byte-for-byte branch=base+URL-only transformation before
+applying that exact transformation to the new incoming blob. Any other change
+fails closed. Normal hooks, merge-loss guard, complete CI and SECOND review
+still apply; no model continuation, mathematical edit or manual PR merge.
+
+The active source/documentation models and queued reviews remain capped at
+three through the space-d shim.707's focused gate repair and709's continuation
+were genuinely dispatched; the latter is now completed. Do not count waiting
+wrappers as active models or treat a quiet live process as stopped.
+
+## 2026-09-22T17:20Z: Common policy publication and completed row repairs
+
+Progress:707's final integration correction completedb3d3a0dc in1279s.
+Corrected gate blob5f10852b205c4bb5035a5d08d39022cae076fe09 accepts the real
+dimension import citation and preserves every other C3 finding and all six
+other criterion records.65 focused tests and875 normal-hook tests passed
+(nine existing skips). The integrated head is
+c9c6240c0de3f7919641589cc9385f0eb88ff604, now published with complete CI and
+SECOND-review tail in /tmp/main-resume-private-build707-20260922.sh.
+
+Both707 and709 publication preflights had reported the same five missing
+new696 declarations. The ad-hoc v2 exporter compiled a fixed list including
+SubLineComplex but omitted the changed Claims dependency; its cached products
+did not expose the new declarations. Neither source nor declaration list was
+deleted or weakened. Guarded new model-free tails use the existing primary
+warm-worktree.sh --build --skip-packages, under the machine-wide full-build
+lock, then actual declaration checking, checked publication, full CI and
+independent review.707 proceeds first;709 is published at6977a886 with its
+own complete CI tail. The old failed preflight logs and clean source merges
+are retained. No live script was edited and no hot cache was written by main.
+
+708 SECOND review5281111695 approvesd3a89eb6, but the actual freshness check
+against current main returned false after696. Its claimed model-free refresh
+/tmp/main-refresh708-approved-20260922.sh now uses the normal private build,
+complete CI/marked audit, strict carry or THIRD review if equality refuses,
+then standalone service merge. No new proof continuation and no manual train.
+
+All three documentation authors ended0:713 completed6cda45af97dfb87745105afb5b6a8067b8300aa7
+in1494s, adding its mathematical note/remark/row/disclosure and a reasoned
+lem:qld-4-13 exemption;716's repair completed0ebadf50dd938fb626fd290b6e110e3f9ba2c702
+in1367s, making completed POVMs explicit and adding a truthful source
+lem:ld-soundness exemption;717's wording repair completed3671fec916589e5874c397039d66b6f756cb3169
+in535s. Their common C3 dependency is honestly still pending merge.
+
+Four model-free publication/review tails are now waiting for ACTUAL707 merge:
+/tmp/main-after707-ready715-20260922 (runtime prefix, generic script),
+ready716, ready717 and ready713. The invoked script is
+/tmp/main-after707-documentary-v1-20260922.sh; each prefix has its own pid/log/exit.
+They verify expected clean heads and ownership, integrate actual main,
+perform normal builds/checks and full CI, then the required independent review.
+715 has only the common-policy first-review finding; no author rewrite is needed.
+
+The three freed model lanes were replenished:714 winning implications,718
+linearity normalization and719 Magic Square, each from clean9a08996f and with
+a3600s whole documentation task. New issues718/719 hold their exact row briefs.
+Quotation and subline documentation, combine-map exemption, the three artifact
+reference fixes and final truthfulness/verification remain prepared work.
+The latest merge-boundary27 report is5780432134 for696. No later completion
+or new stage boundary is asserted.
+
+## 2026-09-22T17:38Z: owner reduces to one Sol worker; canonical documentation merged
+
+The 17:27Z owner instruction supersedes all earlier lane/model allocations:
+space-d only, one main plus one Sol ultra worker, default dispatch/review routing.
+Existing authors finish normally with no continuation. Pending Astra reviews
+707/709 and four after707 launchers were cancelled before model admission;
+their process groups were checked for actual model descendants before TERM.
+All six groups are terminal, no active author or other-project process was killed,
+and prior CI, review artifacts and usage remain intact. New versioned runtime
+scripts leave the old live-script contents unchanged.
+
+708 merged at17:30:29Z as7b9dd8f2e77eb20d59e8fac878d89fe0c9854fa9;
+its exact head8378d489 had green CI and strict independent-review carry5281456386.
+718 finished successfully in785s atc1bf962331cc1e5af13b04ac00b354f7cd3f9838:
+four documentation artifacts, no Lean or mark edits, focused checks/hooks passed.
+Its full CI/publication/review are still pending; common C3 support still needs707.
+714 and719 remain grandfathered live authors; neither receives a continuation.
+
+The default Sol review queue is /tmp/main-sol-review-queue-v1-20260922.sh,
+with exact heads707=c9c6240c0de3f7919641589cc9385f0eb88ff604 and
+709=6977a88685574d03a8abddd1ee377437332217a6. It waits for all QPBT worktree
+model processes to drain before starting; account caps serialize review phases.
+No model overrides, hard classes or hardness reasons are passed. Each phase
+keeps its2700s allowance; no already-green CI is repeated without a changed head.
+The stopped dependent publication tails need model-free replacements or direct
+admission after707 actually merges. Prepared row work and claims remain intact.
+
+## 2026-09-22T17:41Z: completed rows queued for model-free publication
+
+Previous goal turn classified as progress:708 merge evidence and one-Sol
+allocation were recorded on27 as5781107728; forbidden queued Astra launches
+were stopped before admission. Records reached clean main49bbac8a.
+
+Winning implications714 is terminal-success at6bb626c01c807ee798f502ea382e9007bf097d97,
+1187s, four documentation files, normal hooks and focused PDF/web checks passed.
+Magic Square719 has committed76312c5f5aa650322502eb299e9870f1284d479e and is
+finishing its receipt; it is still treated as live until the dispatcher ends.
+No continuation is admitted. The single default Sol707 review remains behind
+the author-drain check, followed by709's already-green second review.
+
+Six live model-free tails now wait for actual707 merge under new immutable
+/tmp/main-after707-publish-only-v2-20260922.sh. Runtime prefixes are
+/tmp/main-after707-publishonly-sol{715,716,717,713,714,718}-20260922.
+Each exact completed head and clean worktree was checked before launch.
+The tails merge actual main, check merge-loss protection, build private outputs
+with the normal locked helper, publish and run full CI. They DO NOT dispatch
+reviewers; they leave exact-head READY_FOR_DEFAULT_SOL_REVIEW receipts.
+The old cancelled tails and review evidence remain preserved.
+
+The snapshot's daemon failures260,479,487,488,533,539 were checked through
+the current repository API: all are closed;260 and479 are merged. None is an
+active restart target. Infra552/554/556/561 remain parked. The live model-free
+merge service still owns gates/trains; main staged none. This is a continuation
+of the existing documentary stage, so no duplicate27 boundary comment is posted.
+
+The final grandfathered author719 then ended0 in1378s with the exact receipt
+/tmp/main-document-magic719-20260922-result.md. Its18-page PDF, web/sync,
+note-style and normal hooks passed. Seven completed dependent rows now have
+publication-only tails, adding runtime prefix
+/tmp/main-after707-publishonly-sol719-20260922 at76312c5f.
+
+The first default-Sol queue ended locally with exit2 on both707 and709 BEFORE
+dispatch because it inherited a non-ultra MIPSTARRE_REVIEW_EFFORT. No new
+reviewer thread or review was produced. Both old logs/exit receipts remain;
+their claims were released after terminal-process verification. With no live
+reader of the helper, its environment cleanup was corrected to unset review
+and requested effort as well as all model/class overrides. New queue
+/tmp/main-sol-review-queue-v2-20260922.sh uses distinct default-effort logs.
+707 revalidated its complete green exact-head CI and entered review.sh; the
+cap1 account router serializes the two review phases using default Sol ultra.
+709 follows it. No grandfathered task got a continuation.
+
+Actual vendor PID4029621 confirms707 uses gpt-5.6-sol, ultra, read-only,
+CODEX_HOME=/home/drx/.cache/mipstarre-dev/codex-home-space-d; only one QPBT
+model worker is active. A speed-setting check found that home's service_tier
+had drifted to default (file mtime13:29:48Z). Under the standing owner fast-mode
+instruction, main restored only that field to fast; no model, key, shim or other
+project configuration changed. The active reviewer continues normally; no claim
+is made that its already-started requests used fast. Future launches read fast.
+Official support was verified at
+https://learn.chatgpt.com/docs/config-file/config-reference and
+https://developers.openai.com/api/docs/guides/fast-mode .
+
+## 2026-09-22T17:50Z: final two row issues and single-lane author queue
+
+Previous goal turn classified as progress: three documentation authors ended
+successfully, seven publication/CI tails were started, default Sol707 review
+actually began, and the standing fast-tier configuration was restored.
+Records reached clean main730da3ff. This turn's status snapshot confirms one
+space-d worker; the other three visible workers belong to QKD. Space-d has no
+retired marker. Historic failed-PR markers remain closed as verified last turn;
+parked infra PRs are not reopened or resumed.
+
+707's default Sol code phase APPROVED with0 findings; its prose phase is live.
+No combined approval or merge is yet asserted.709's second review remains
+next in /tmp/main-sol-review-queue-v2-20260922.sh, live PID4028527.
+
+Created separate documentation issues721 (subline correspondence and its
+qld-xz-lines exemption) and720 (linearity quotation/padding scope), both under
+173 with idempotency keys. Their existing briefs now state actual disposition:
+696 merged045a657d;702 closed UNMERGED with all local/published work retained.
+No source semantics are inferred from the unmerged702 branch.
+
+The model-free /tmp/main-sol-remaining-rows-v1-20260922.sh waits for the actual
+current review-queue PID, then requires707 merged or successful combined
+exact-head review. If707 needs repair, it stops before admitting an author.
+Otherwise it runs721 then720, each one whole3600s task through the new
+/tmp/main-sol-document-row-v2-20260922.sh. That helper uses default Sol routing,
+explicit ultra, one shared operator lock and the cap1 router, removes inherited
+effort/model/class overrides, creates an isolated worktree from actual main at
+admission, and retains all prior budgets. No models launch while the current
+review uses the slot. Main still owns publication, full CI and independent review.
+
+707's second combined review5281669767 then finished CHANGES_REQUESTED:
+code APPROVED0, prose two wording findings in chapter12 (software-consumer
+language and C3/formalization-status reporting inside the mathematical remark).
+The reviewer confirms the prior compression finding is fixed and reports0 new
+equivalence mismatches or stale marks. Required next step is a bounded prose
+repair and THIRD independent review, not proof work or another gate rewrite.
+709's second Sol review is now live, vendor PID4063193. Main has queued
+/tmp/main-sol-fix707-prose-round2-20260922.sh behind that actual review queue,
+using packet /tmp/main-fix707-prose-round2-20260922.md and one3600s Sol task.
+The queued721/720 author driver will refuse its prerequisite because707's
+combined review failed, preserving priority for707; no row author has started.
+
+## 2026-09-22T18:04Z: refresh709, repair707 committed, combine-map documentation admitted
+
+Previous goal turn classified as progress: issues720/721 were created,709's
+second review5281698617 approved0 findings and gated, and707's two prose
+findings were assigned to a default Sol worker. The row-author driver ended
+at its explicit707-approval prerequisite; neither720 nor721 has started.
+
+709 is objectively nonfresh on current main, and the model-free service was
+waiting for a partner/update. The owner-supplied precheck confirms a clean
+merge. New /tmp/main-refresh709-approved-sol-v2-20260922.sh claims709 and
+integrates main ascb22a7e962ec373d83f5270e7bfd7237982b42fa, then performs
+normal locked private build, publication and full exact-head CI. It attempts
+only strict identical-patch carry from the genuine SECOND review5281698617;
+if comparison refuses, it publishes no fabricated approval and leaves a
+READY_FOR_THIRD_DEFAULT_SOL_REVIEW receipt. No train is staged by main.
+
+707's prose worker orc-703-20260923-03 ended0 in393s at
+10a5c675058adb3218e124c73558583786cfdd80. Only chapter12 changed,4 additions
+and11 deletions; both wording findings were addressed. Web, sync, LaTeX lint,
+whitespace and normal hooks passed. The mathematical endpoint distinction,
+external-versus-formal refutation and unresolved rank claims remain explicit.
+Main inspected the diff and exact receipt. No theorem, mark, gate or row changed.
+
+/tmp/main-after-fix707-prose-v1-20260922.sh verifies terminal author success,
+the clean descendant commit, sole changed chapter12 file and unchanged Lean
+links/marks/labels/dependencies before integration. It has merged current main
+cleanly and entered the normal locked private build. Publication/full CI and
+THIRD independent default Sol review follow. Seven dependent row tails still
+wait for actual707 merge. All earlier failed checks and review evidence remain.
+
+The model slot became free during these builds. Created documentation issue722
+under173 for def:combine-map and admitted one3600s default Sol ultra task in a
+fresh issue-722-combine-map-documentation-20260922 worktree. Runtime prefix is
+/tmp/main-sol-document-combine722-20260922, using the node mode of
+/tmp/main-sol-document-row-v2-20260922.sh. The old node brief is the authority:
+preserve merged700 facts, document the source-function discrepancy, add its
+reasoned exemption, preserve all row statuses, no new proofs or698 continuation.
+The same operator lock and cap1 keep future707 review and this worker serialized.
+
+Issue722's actual Sol thread started as01a0ca49-ebbe-7032-b7e8-f00f56f53327.
+Both meta-records attempts returned3 because a live /tmp/tmpyygqm2h4/repo/
+local/bin/pr_train.py unit-test fixture matched the helper's conservative
+train guard. No guard was bypassed. Primary dirt consists only of the pending
+telemetry and the completed707 worker's preserved transcript/usage. The next
+quiet normal records cycle should publish it; no clean-main claim is made here.
+
+## 2026-09-22T18:11Z: fresh709 CI passes; final evidence contract made explicit
+
+Previous goal turn classified as progress:707's prose repair was committed and
+published at199f94a1a3941c0059184068265963920d58afa2 with full CI admitted;
+approved709 was refreshed and published atcb22a7e962ec373d83f5270e7bfd7237982b42fa;
+issue722 was created and its sole Sol documentation worker started.
+The pending telemetry has now been normally published asad537e33, clean.
+
+709's full CI manifest atcb22a7e9 is success, all eight steps complete. Its live
+model-free tail now performs the strict carry check; no carry result is yet
+asserted.707's full CI is still active. Issue722 remains the only model worker;
+its actual parent PID9308 and both CI-tail PIDs were rechecked live. No extra
+key, slot, proof work, train or unsupported approval was introduced.
+
+Reading the actual C5 protocol/checker and docs/comparator.md confirmed that
+the static record may name a verified ancestor, but the owner's final-pin
+requirement is stronger and still applies. Prepared
+/tmp/main-final-truthfulness-and-evidence-20260922.md for the already-required
+final truthfulness pass: preserve historical verification as history, explain
+immutable artifact evidence, update documentation before freezing the final
+library commit, and do not move that commit with a later metadata-only record.
+All actual final gates, delegated checks, snapshots and official comparator
+verification must identify that exact commit; no success or exception is assumed.
+
+709 subsequently passed strict carry5281874215 from its genuine second
+review5281698617 and merged at18:12:41Z as
+6bf80a37ffcd9eeea1891d8c333fd2e3b645dee0. The stage-boundary27 report is
+5781625794. No library PR was manually merged.707's complete CI at199f94a1
+also passed, and its THIRD review was queued behind the still-live722 author.
+
+Precheck against actual main after709 found exactly one707 merge conflict,
+docs/paper-gaps/qpbt-gap-register.md. Before any third reviewer started,
+main verified the pending review process group4119922 contained no model and
+stopped only that model-free queue; its green CI/evidence are retained.
+The replacement /tmp/main-refresh707-after-rename-v2-20260922.sh verifies
+the sole conflict and proves incoming register == merge-base register with
+only the already-approved repository URL substitution. It applies precisely
+that substitution to707's authored register, preserving its mathematics,
+then runs normal merge hooks/loss guard, new-head full CI and THIRD Sol review.
+At this checkpoint the guarded resolution passed and normal commit hooks run;
+no new review round has been consumed by the cancelled queue.
+
+The seven after707 publication-only tails still wait on actual707 merge.
+Their older authored registers can encounter the same rename overlap; inspect
+and preserve their mathematical changes when they integrate. Never edit a live
+Bash helper or silently discard a conflict. Issue722 remains the sole model
+worker and has reached web/sync/declaration checks on its three documentation
+files. Prepared720/721 are unstarted; final artifact/reference and truthfulness
+work remains as recorded above.
+
+## 2026-09-22T18:32Z: guarded row integration tested; combine-map author complete
+
+Previous turn classified as progress:709 merge was recorded on27,707's exact
+URL-only conflict resolution was admitted, and the final evidence packet was
+prepared. Pending telemetry subsequently published normally ascf80e52c.
+
+707 is now published at6c5343c66432f9bfc0a589015428e983cfcde539, including the
+rename integration. Its full CI passed; the THIRD default Sol review pipeline
+is active after722's terminal process. The cancelled199f94a1 review never
+started a model and did not consume a review round.
+
+Issue722's worker ended0 in1521s at13d3f5a599495f6d7d8fc931c02c07979487feff.
+Only chapter15, DEVIATIONS and the exemption file changed. The source global
+map and projection-to-parameter results remain distinguished from unproved
+representative independence on geometric line functions. Focused web/sync,
+declaration checks and hooks passed; all register statuses/marks are unchanged.
+Its model-free publication/full CI runs under
+/tmp/main-fullspeed-publish722-combine722-20260922; read its .pr file for the
+new PR number. No independent review is yet claimed.
+
+The seven old waiting v2 publication process groups were checked to contain no
+model/build/git worker and stopped before any integration. New immutable
+/tmp/main-after707-publish-only-v3-20260922.sh tails are live with tags
+urls715,urls716,urls717,urls713,urls714,urls718,urls719. They still require ACTUAL
+707 merge and do not dispatch reviewers. The helper
+/tmp/main-merge-reviewed-urls-v2-20260922.py first normalizes the approved repo
+URL in native Git's three inputs; only the register gets a narrow fallback for
+adjacent whole rows whose identities/order agree and for which at least one
+side is unchanged from the base. It refuses same-row disagreements or prose
+conflicts, and writes no partial resolution when any path fails.
+
+A real isolated preflight merged715's authored head with prospective707.
+The URL-only v1 helper correctly refused the adjacent square-root/symmetrization
+rows. The v2 helper passed; both whole mathematical rows were then compared
+byte-for-byte to their respective original sides, apart from approved URLs.
+Staged whitespace passed. Evidence is
+/tmp/qpbt-reviewed-url-check.vyq92h/verification.md and merge.log; the disposable
+worktree is removed after the successful test. No actual source branch changed
+in this preflight, and normal hooks/loss guard/full CI/review remain mandatory.
+
+722 published as PR723 at94a4bafeb598688427a95e460e01cbe956c279d8 and has
+detached full CI.707's THIRD independent Sol review is actually running on
+6c5343c6 after that head's green full CI. No additional model was admitted.
+
+The meta merge supervisor PID3313963 reached its configured10h lifetime at
+about18:40Z and is completing its current sleep/iteration. The model-free
+/tmp/main-renew-merge-supervisor-v1-20260922.sh watches that actual PID and
+starts the unchanged /tmp/meta-auto-merge-v3.py only after it exits and no
+other supervisor exists. It refuses deliberate stop, paused/pause-now, daemon
+stop or retired-space-d markers; it clears none. This preserves continuous
+gating/staging without a duplicate supervisor, manual train or model request.
+
+## 2026-09-22T18:46Z: interrupted turn reconciled and next review queued
+
+The preceding interrupted turn made progress: the completed722 change was
+published as723, guarded documentary integrations were installed and tested,
+and supervisor renewal was admitted. Revalidated actual process handles after
+the interruption; no running CI or reviewer was restarted. Records completed
+normally to clean mainb7d9737b.
+
+The original supervisor ended normally; its unchanged replacement is actually
+live as PID394115. The renewal watcher reports that handoff and launched no
+model.707's third review remains live at6c5343c6 in the single space-d slot;
+723's full CI remains live at94a4bafe. Seven v3 publication-only tails remain
+live and still require actual707 merge. No key retirement marker is present.
+
+/tmp/main-review723-after-ci-v1-20260922.sh now waits for the actual723 CI
+parent355156 and a successful terminal receipt, then invokes default Sol
+review on exactly94a4bafe. The shared operator lock keeps it behind707's
+current review; it cannot bypass green CI or create a second model slot.
+Issues720/721 remain prepared but unstarted, and the final packaging/truthfulness
+and immutable comparator evidence sequence remains outstanding.

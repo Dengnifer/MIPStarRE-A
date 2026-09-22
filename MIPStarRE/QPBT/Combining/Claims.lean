@@ -4,7 +4,9 @@ import MIPStarRE.QPBT.Combining.OverlapGap
 import MIPStarRE.QPBT.Combining.ComplexOverlapGap
 import MIPStarRE.QPBT.Combining.Lines.CombinedMeasurement
 import MIPStarRE.QPBT.Combining.Lines.ConcreteXDeficit
+import MIPStarRE.QPBT.Combining.Lines.Construction
 import MIPStarRE.QPBT.Combining.SubLineZDeficit
+import MIPStarRE.QPBT.Combining.SubLineComplex
 import MIPStarRE.QPBT.Combining.UniformLinePoint
 import MIPStarRE.QPBT.Combining.Witnesses
 import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
@@ -12,12 +14,12 @@ import MIPStarRE.QPBT.Games.DistanceTheorems.TensorSupport
 /-!
 # Scalar claims for combining the Pauli bases
 
-This module records auxiliary scalar estimates for the directly indexed subline
-law. Claims 17-1 and 17-3 compare real parts; they do not establish the complex
-modulus comparisons over the source distribution. The Claim 17-2 analogue
-is proved both for real parts and for the complex modulus. The source claims
-remain separate, uncertified blueprint statements until the distribution and
-scalar transport obligations are discharged. Line-polynomial evaluation uses the
+This module records auxiliary real-part and complex-modulus estimates for the
+directly indexed subline law. The complex Claim 17-1 estimate is imported from
+`SubLineComplex`; Claim 17-2 uses the concrete X-Z-X measurement, and Claim 17-3
+uses the proved reality of the Z overlap. The source claims remain separate,
+uncertified blueprint statements until the distribution and evaluation transport
+obligations are discharged. Line-polynomial evaluation uses the
 existing `Option` completion, so no field value is substituted when an evaluation
 is undefined.
 
@@ -25,7 +27,7 @@ is undefined.
 
 The source comparisons are blueprint `lem:claim-17-1`, `lem:claim-17-2`, and
 `lem:claim-17-3`, with paper origin
-`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1209`.
+`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1239`.
 -/
 
 open scoped BigOperators
@@ -659,7 +661,8 @@ theorem subline_remove_X_factor_direct :
 **Scope restriction:** This uses `SubLineWitness` and compares the real part with one.
 It supports, but does not certify, blueprint `lem:claim-17-3`, paper
 `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1204-1239`.
-The source-law and scalar comparison remain separate obligations, recorded in
+The complex scalar comparison is proved below; source-law transport remains
+separate, as recorded in
 `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issue #474) and
 `docs/paper-gaps/qpbt_ld-dimension-divisibility.tex`. -/
 theorem subline_Z_term_near_one_re_direct :
@@ -743,6 +746,77 @@ theorem subline_Z_term_near_one_re_direct :
       have hsm : 0 ≤ 2 * Real.sqrt (P.m : ℝ) :=
         mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
       nlinarith [mul_nonneg hsm hε]
+
+/-- Complex-modulus Z-correlation bound on the same domain as the real-part bound.
+
+**Scope restriction:** This is the directly indexed analogue of paper
+`claim:17-3`, lines 1204--1239. Positivity on opposite registers proves that the
+overlap is real, so the existing real bound gives exactly the same error in
+complex modulus. Its line witness is used only for that consistency estimate;
+the concrete specialization below constructs this witness internally. See
+`docs/paper-gaps/qpbt_subline-claims-line-marginal.tex` (issue #689). -/
+theorem subline_Z_term_near_one_direct :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε δQ δP : ℝ)
+        (S : ProjectiveSetting P ε) (points : CombinedPointsWitness S δQ)
+        (lines : CombinedLinesWitness S points δP) (sublines : SubLineWitness P),
+        ‖(∑ sample ∈ sublines.D.support,
+          (sublines.D.weight sample : ℂ) *
+            (Fintype.card (DirectScalarQ P.extendedDirectLd) : ℂ)⁻¹ *
+              ∑ t : DirectScalarQ P.extendedDirectLd,
+          let z := projZ (directPointToPauli P (sample.1.base + t • sample.1.direction))
+          ∑ fX, ∑ fZ, inner ℂ S.psiHat (applyOperatorToState
+            (S.place .AA' ((lines.T .alice sample.2.1 sample.2.2).effect (fX, fZ)) *
+              S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ))
+            S.psiHat)) - 1‖ ≤
+          C * Real.sqrt (P.m : ℝ) *
+            (Real.rpow δP (1 / 4 : ℝ) + Real.rpow δQ (1 / 4 : ℝ) +
+              Real.rpow ε (1 / 4 : ℝ)) := by
+  obtain ⟨C, hC, hbound⟩ := subline_Z_term_near_one_re_direct
+  refine ⟨C, hC, ?_⟩
+  intro P ε δQ δP S points lines sublines
+  rw [subline_Z_overlap_eq_real_direct S sublines (lines.T .alice),
+    ← Complex.ofReal_one, ← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs]
+  exact hbound P ε δQ δP S points lines sublines
+
+/-- The complex Z estimate for the actual X-Z-X measurement, with its line error
+produced by the existing pasting theorem.
+
+**Scope restriction:** For a polynomially controlled joint point family, the
+line error is obtained from `combined_line_measurement_consistency`, so no
+line witness, equality with the construction, or reality premise is assumed.
+The error scale is that of paper `claim:17-3`, lines 1204--1239, on the directly
+indexed law with completed evaluations. This does not resolve source-law
+transport; see `docs/paper-gaps/qpbt_subline-claims-line-marginal.tex`. -/
+theorem subline_concrete_Z_term_near_one_direct (deltaQ : ℝ → ℝ)
+    (hdeltaQ : IsPolyErr deltaQ) :
+    ∃ deltaP : ℝ → ℝ → ℝ, IsPolyErr₂ deltaP ∧ ∃ C : ℝ, 0 < C ∧
+      ∀ (P : AdmissibleParams) (ε : ℝ) (S : ProjectiveSetting P ε)
+        (_points : CombinedPointsWitness S (deltaQ ε)) (sublines : SubLineWitness P),
+        ‖(∑ sample ∈ sublines.D.support,
+          (sublines.D.weight sample : ℂ) *
+            (Fintype.card (DirectScalarQ P.extendedDirectLd) : ℂ)⁻¹ *
+              ∑ t : DirectScalarQ P.extendedDirectLd,
+          let z := projZ (directPointToPauli P (sample.1.base + t • sample.1.direction))
+          ∑ fX, ∑ fZ, inner ℂ S.psiHat (applyOperatorToState
+            (S.place .AA' ((S.combinedLineMeasurement .alice sample.2.1 sample.2.2).effect
+                (fX, fZ)) *
+              S.place .BA'' (S.expPointEffectAtLineAnswer .bob .Z sample.2.2 z fZ))
+            S.psiHat)) - 1‖ ≤
+          C * Real.sqrt (P.m : ℝ) *
+            (Real.rpow (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ))) (1 / 4 : ℝ) +
+              Real.rpow (deltaQ ε) (1 / 4 : ℝ) + Real.rpow ε (1 / 4 : ℝ)) := by
+  obtain ⟨deltaP, hdeltaP, hconsistent⟩ := combined_line_measurement_consistency deltaQ hdeltaQ
+  obtain ⟨C, hC, hbound⟩ := subline_Z_term_near_one_direct
+  refine ⟨deltaP, hdeltaP, C, hC, ?_⟩
+  intro P ε S points sublines
+  let lines : CombinedLinesWitness S points
+      (deltaP ε (((P.m * P.d : ℕ) : ℝ) / (P.q : ℝ))) :=
+    { T := S.combinedLineMeasurement
+      axis_degree_X := S.combinedLineMeasurement_axis_degree_X
+      axis_degree_Z := S.combinedLineMeasurement_axis_degree_Z
+      consistent := hconsistent P ε S points }
+  exact hbound P ε _ _ S points lines sublines
 
 /-- Compatibility name for the proved real-part ordered-product estimate.
 

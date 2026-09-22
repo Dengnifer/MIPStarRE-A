@@ -128,7 +128,7 @@ Chapter 9 — finish the sandwich-chain corollaries in ComparisonLemmas
 
 Avoid prefixes like `[Chapter 9] ...`: bot-generated branch names inherit those
 characters, and `]` breaks part of the PR automation stack. See
-[`docs/pr_review_management.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/pr_review_management.md)
+[`docs/pr_review_management.md`](https://github.com/Dengnifer/MIPStarRE-QPBT/blob/main/docs/pr_review_management.md)
 for the rationale.
 
 For formalization issues, usually start with `formalization` + `2009.12982`,
@@ -277,7 +277,7 @@ The tool is report-only. Human review decides which flags warrant closing
 the issue, updating its body, or dismissing as a false positive. A weekly
 read-only GitHub Actions wrapper runs the same export-and-audit sequence and
 uploads an artifact only when citations are flagged. See
-[`docs/stale_issue_audit.md`](https://github.com/Dengnifer/MIPStarRE-A/blob/main/docs/stale_issue_audit.md) for
+[`docs/stale_issue_audit.md`](https://github.com/Dengnifer/MIPStarRE-QPBT/blob/main/docs/stale_issue_audit.md) for
 the full workflow.
 
 ---
@@ -386,13 +386,13 @@ Every PR touching Lean code should be reviewed against these criteria:
    names that encode historical formalization status rather than mathematical
    content. When an old public identifier cannot be renamed in the current PR,
    record the required migration in the issue, PR description, or an audit file
-   under [audits/](https://github.com/Dengnifer/MIPStarRE-A/tree/main/audits).
+   under [audits/](https://github.com/Dengnifer/MIPStarRE-QPBT/tree/main/audits).
    New and substantively updated audit files should follow the term norm and
    format in
-   [audits/2026-04-29_audit-document-format.md](https://github.com/Dengnifer/MIPStarRE-A/blob/main/audits/2026-04-29_audit-document-format.md).
+   [audits/2026-04-29_audit-document-format.md](https://github.com/Dengnifer/MIPStarRE-QPBT/blob/main/audits/2026-04-29_audit-document-format.md).
    Do not add an empty pass-through abbreviation merely to introduce a second
    public name.
-   Review-fix PRs must read the relevant audit files under [audits/](https://github.com/Dengnifer/MIPStarRE-A/tree/main/audits)
+   Review-fix PRs must read the relevant audit files under [audits/](https://github.com/Dengnifer/MIPStarRE-QPBT/tree/main/audits)
    before changing names or prose. If an audit marks a naming migration or
    historical-formalization term as in scope for the fix, addressing it or
    explicitly updating the audit trail is a merge blocker.
