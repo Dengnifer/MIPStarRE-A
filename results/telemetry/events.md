@@ -9792,3 +9792,40 @@ historical entry above is rewritten.
   `env -u MIPSTARRE_JOB_CLASS -u MIPSTARRE_HARDNESS_REASON`; no hook is skipped,
   no routing code or test assertion is edited, and both failed runs remain
   charged to this documentation session.
+
+## 2026-09-23 - C3 dimension import citation false positive
+
+- Operator comment 5780049792 on PR #707 and
+  `/tmp/main-707-c3-cross-row-finding-20260922.md` identify a false positive in
+  gate blob `6fa6bee10681b313957c74d052188f85d99f3ee9`. At the clean dimension
+  candidate `4e2e76170356c6b4c98cb2046e2a2f1fc8701278`, register line 30 cites
+  `lem:qld-sublines`, `lem:qld-4-7`, and the `lem:ld-soundness` import. The
+  identifier-intersection check treated that truthful import citation as a
+  changed headline assertion. The documented difference concerns an
+  intermediate seed/dimension obstruction and proof route; the registered
+  headline statement is unchanged.
+- Main admitted session `orc-703-20260923-02` at
+  `3f63f6d663ddfcee394ac13ba04ec2915bc73f77` for one final 3600-second
+  documentation integration correction, in
+  `/tmp/main-fix707-c3-integration-20260922.md`. The gate now checks the terminal
+  vocabulary and nonempty source cell without inferring mathematical scope
+  from identifier occurrence. The protocol leaves that distinction to
+  independent review and retains every headline, comparator and other
+  completion requirement. No source citation, register status, Lean file or
+  blueprint marker changes. The repaired first-review F1 compression-consumer
+  classification and all prior #703 costs, including the preceding author's
+  2221 seconds and both failed fixture runs, remain preserved.
+- Author validation with gate blob `5f10852b205c4bb5035a5d08d39022cae076fe09`
+  reproduces the former failure and removes only the finding at line 30 of
+  the dimension candidate. Its head, clean status and register blob
+  `1f9e9ffb3d4ffb6b2b93939dbf9826aa53b855d7` remain unchanged; its other nine
+  nonterminal rows still fail C3. The 65 focused tests pass, including the
+  real source-cell shape and invalid/missing status checks. C1/C2/C4/C5/C6/C7
+  results are identical before and after the change on this worktree.
+- A read-only GitHub census at 2026-09-22T16:39Z checks published main
+  `0eb04963283b74964a2f718813e879e742217010` and all ten open PR heads. All
+  80 terminal-row occurrences parse, including the dimension, square-root and
+  pasting candidates (#716/#715/#717). Four older infrastructure PR registers
+  have no terminal-status column and receive no terminal certification. These
+  are static author checks, not full CI, independent review or a completion
+  claim. Main retains publication, full CI and SECOND independent review.

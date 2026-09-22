@@ -83,13 +83,21 @@ statement change or an unproved dependency of a headline theorem: in particular,
 `pauli_soundness` remains proved at its printed statement. All requirements of
 C1, C2, C4, C5, C6 and C7 remain in force.
 
-The gate checks the status vocabulary and rejects `documented-deviation` when
-the row's `Source statement` names a registered headline theorem or its blueprint
-label; a missing or blank source cell also fails for that status. Independent
-review establishes the mathematical justification, intermediate scope and
-adequacy of the three documentation artifacts, just as it establishes the four
-adoption conditions for `corrected`. A passing status check does not certify
-those mathematical judgments.
+The gate checks the status vocabulary and requires a nonempty `Source statement`
+cell for `documented-deviation`. A citation of a registered headline theorem or
+its blueprint label does not by itself identify a change to that assertion: an
+intermediate difference may concern its import, application or proof route. For
+example, the dimension-divisibility row cites the `lem:ld-soundness` import while
+documenting the intermediate seed and dimension obstruction; the registered
+headline statement is unchanged. The gate does not infer mathematical scope
+from identifier occurrence. Independent review establishes the intermediate
+scope, mathematical justification and adequacy of all three documentation
+artifacts, just as it establishes the four adoption conditions for `corrected`.
+That review must distinguish an intermediate import or proof-route difference
+from a changed headline assertion or an unproved headline dependency; the latter
+two remain inadmissible under `documented-deviation`. Headline statement
+faithfulness and the comparator requirements of C5 remain binding. A passing
+status check does not certify those mathematical judgments.
 
 **C4 — Blueprint marked.** Every blueprint node of the track that carries
 `\lean{...}` also carries `\leanok`, or appears in the track's exemption table

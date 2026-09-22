@@ -352,7 +352,7 @@ def _table_rows(text: str) -> tuple[int, list[str], list[tuple[int, list[str]]]]
 
 
 def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
-    """C3: every row is terminal; documented deviations are intermediate only."""
+    """C3: check terminal statuses; review certifies intermediate scope."""
 
     crit = Criterion("C3", "paper gaps terminal", PASS)
     path = root / track.gap_register
@@ -383,7 +383,6 @@ def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
     source_column = next(
         (i for i, cell in enumerate(header) if cell.lower() == "source statement"), None
     )
-    headline_identifiers = {identifier for pair in track.headline for identifier in pair}
     bad: list[str] = []
     for number, cells in rows:
         value = cells[column].strip("` ").lower() if column < len(cells) else ""
@@ -398,16 +397,17 @@ def criterion_paper_gaps(root: Path, track: Track) -> Criterion:
                 cells[source_column].strip("` ")
                 if source_column is not None and source_column < len(cells) else ""
             )
-            identifiers = set(re.findall(r"[\w.:-]+", source))
-            if not source or identifiers & headline_identifiers:
+            if not source:
                 bad.append(
                     f"{track.gap_register}:{number}: documented-deviation requires "
-                    "an intermediate Source statement, not a headline or blank cell"
+                    "a nonempty Source statement"
                 )
     crit.notes.append(
         "terminal statuses do not prove printed claims; independent review checks "
         "correction adoption or the justification, intermediate scope, gap note, "
-        "blueprint remark and deviations disclosure of a documented difference"
+        "blueprint remark and deviations disclosure of a documented difference; "
+        "a headline citation alone does not establish a changed assertion, and "
+        "headline statement faithfulness and proved dependencies remain required"
     )
     if bad:
         crit.status = FAIL

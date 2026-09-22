@@ -1744,3 +1744,28 @@ answer-reduction and compression rank guarantees remain unresolved. The gate
 is not added to blocking PR CI. Only the assigned register row changes status;
 historical audits and cumulative cost evidence are preserved. No Lean theorem
 or proof changes, and no new proof campaign follows from this disposition.
+
+## 2026-09-23 - Distinguish headline citations from statement changes
+
+**Trigger:** PR #707 operator comment 5780049792 and main's final integration
+assignment in `/tmp/main-fix707-c3-integration-20260922.md`, recorded in
+`results/telemetry/events.md`, "C3 dimension import citation false positive".
+The real dimension row names the `lem:ld-soundness` import while documenting
+an intermediate obstruction, so the new identifier check rejected one of the
+owner's assigned documentation closures without identifying a headline change.
+
+**Change:** `local/protocols/completion.md` and `scripts/completion_gate.py`
+distinguish a source citation from a mathematical assertion about that source.
+C3 retains its terminal vocabulary and nonempty source requirement, and stops
+inferring headline scope from identifier occurrence. Independent review must
+certify that `documented-deviation` concerns an intermediate difference, with
+the required justification and documentation; a changed headline statement or
+unproved headline dependency remains inadmissible under that status. All other
+completion requirements, including comparator evidence, remain unchanged.
+Regression tests use the real dimension source cell, preserve invalid-status
+checks and verify that the other six criteria still reject their failing inputs.
+
+**Expected effect:** a truthful import or proof-route citation does not prevent
+documentation closure. Static acceptance remains distinct from mathematical
+certification. No register row, Lean statement, blueprint marker or historical
+cost record changes in this correction.
