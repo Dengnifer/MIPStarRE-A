@@ -9429,3 +9429,48 @@ historical entry above is rewritten.
 - Main's telemetry snapshot push raced the681 service merge and checked-push correctly refused a branch that moved during preflight. The snapshot commit stayed local; the merge service then published it and aligned both refs at ea66d146 with a clean checkout. No force push or discarded commit was used. The684 citation follow-up separately timed out124 after clean commit9d28f1bc and a complete receipt; main preserves the timeout/unknown usage and publishes the actual completed work without another author session.
 - The new direct /goal restricts workers to space-d/space-3, four total. Main withdrew relay-1 admission, preserved its rotation directory, set caps4/0/4 and stopped the verified old relay worker after normal-hook commit9734c54c. Wrapper1 and raw records remain; no quota failure or lost work is inferred. Both authorized homes retain ultra/fast. A later external handoff repeats six lanes; main retains the direct goal's resource restriction pending direct steering, without overwriting the handoff.
 - PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
+# 2026-09-22 Main Whole-Task Admission
+
+- Author688 reported owner-sessions.jsonl line751 could not be parsed. Main
+  verified it was the file's sole JSONL error: the historical PR650 review row
+  lacked its final closing brace. Added only that brace; every field, timestamp,
+  review id5255854599, adverse verdict, five findings and601-second charge is
+  unchanged. The original malformed bytes remain in Git history; no session or
+  unknown usage was removed or reclassified. Full JSONL validation now passes.
+
+- CI680's complete cea8800e run failed only the cold axiom-audit fixture among
+  868 tests: outcome `error` instead of the expected `failure`. The fixture has
+  a300-second shared-build-lock wait; concurrent685's build took992s. An
+  isolated unchanged run passed in4.395s. Preserve full failed logs/manifest;
+  queue one complete refreshed retry after685 integration. No partial success
+  status, bypass or source repair is inferred from a passing isolated test.
+- Refreshed685 CI passed, but the operator's canonical dry-carry helper stopped
+  on its missing explicit ultra effort. No model review ran. A separate detached
+  continuation supplies the required effort, performs the marked-declaration
+  axiom audit and the same unchanged-patch carry. Preserve both helper results.
+
+- The09:14Z cycle harvested687's successful462-second author task at908df81c
+  and started its model-free parent-merge/publication/CI/review watcher.
+  Refilled the free lane with mathfix689, one3600-second tranche for the
+  unresolved complex/reality subline steps, preserving118's complete historical
+  costs and semantics. Main's finite admission is recorded in design-decisions
+  and stage comment5774043766. Three actual workers again run on space-d;
+  two refreshed PRs progress through serialized full-build CI. Existing logs
+  and live handles establish waiting, not failed work.
+
+- At09:08Z, the newer owner handoff has space-d main plus3 lanes, other keys
+  reassigned to QKD. Verified sole rotation space-d/3 and caps3/0/3; no alternate
+  key restored. Whole-task Astra/ultra admissions676(3600s),687(2700s),688(3600s)
+  fill the three slots. Eleven C3 and seven C4 entries now have separate briefs
+  and exact exits in completion-packets-20260922.md. Source semantics and all
+  historical budgets remain binding.
+- PR686 merged c70f29df after independent5275842693. PR685 approved5275826301.
+  PR680 fourth review5275958164 confirms source-faithful mathematics and prior
+  repairs, but retains one Mathlib-reuse F1. Main tracks it as687, adjudication
+  5773888104; no fifth review. An isolated cleanup author and model-free
+  unchanged-parent refresh/CI/canonical-adverse-carry run separately.
+- Two nohup-only bootstrap processes disappeared before dispatch, leaving no
+  exit receipt and one incomplete newly created worktree HEAD. Retained logs
+  and branch, restored that empty checkout to its original snapshot, and
+  launched replacements using setsid; all three real sessions registered.
+  No lost author edits or invented worker usage. Stage report5773885415.
