@@ -1,5 +1,114 @@
 [
  {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698",
+  "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
+  "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/labels{/name}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/comments",
+  "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/events",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-A/issues/698",
+  "id": 5539253707,
+  "node_id": "I_kwDOUJyJf88AAAABSipNyw",
+  "number": 698,
+  "title": "feat(QPBT): formalize polynomial functions on geometric lines",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025010884,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/formalization",
+    "name": "formalization",
+    "color": "ededed",
+    "default": false,
+    "description": "Lean formalization of a mathematical statement",
+    "archived_at": null,
+    "archived_by": null
+   },
+   {
+    "id": 12025013584,
+    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/labels/paper-2001.04383",
+    "name": "paper-2001.04383",
+    "color": "ededed",
+    "default": false,
+    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-09-22T12:02:25Z",
+  "updated_at": "2026-09-22T12:02:25Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+   "total": 0,
+   "completed": 0,
+   "percent_completed": 0
+  },
+  "parent_issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/695",
+  "issue_dependencies_summary": {
+   "blocked_by": 0,
+   "total_blocked_by": 0,
+   "blocking": 0,
+   "total_blocking": 0
+  },
+  "body": "<!-- mipstarre-issue-key: qpbt-geometric-line-functions-20260922 -->\n### Motivation\n\nIssue695 derives affine compatibility from the source projection inclusions,\nincluding degenerate directions. Its checked singleton counterexample shows\nthat the existing arbitrary coefficient carrier cannot be identified with the\nsource's polynomial functions: T assigns two values to the same singleton\npoint. This is a representation obstruction, not a refutation of the paper's\ncombining formula for actual functions.\n\n### Scope And Main Decision\n\nContinue695 with a separate faithful carrier of polynomial functions on a\ngeometric line, with bounded polynomial pullbacks. Formalize the source\ncombining function from eq:combine-lines,\nreferences/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989, using\nthe projection construction already proved. Main authorizes this additional\nrepresentation and its algebraic comparison; existing games, strategies,\ncoefficient answers and their probabilities are unchanged.\n\n### Exit Criterion\n\nCover all source line cases, including singletons; prove the combining formula,\ndegree bound, independence from affine choices and polynomial representatives,\nand the adapter for coefficient answers that actually descend to functions.\nMatch def:combine-map to the complete source-domain construction, with explicit\nstatement-integrity and consumer audits and independent review before merge.\nDo not assume descent as an extra source theorem premise: the source input is\nalready a function. The coefficient adapter is a separate restricted result.\n\nMeasurement/game transport for non-descending coefficient answers remains a\nseparate open obligation. Do not discard such outcomes or select parameter zero\nsilently, and do not claim source-law, field-evaluation or error-rate completion.\nAny necessary game change requires another concrete proposal and main decision.\n\nOne3600-second whole task is admitted, preserving all117/118/119/695 costs and\nthe original118 anchor. No automatic continuation or goal change is authorized.\n\nAddresses #695, #667",
+  "closed_by": null,
+  "reactions": {
+   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/698/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+ },
+ {
   "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/697",
   "repository_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A",
   "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-A/issues/697/labels{/name}",
@@ -186,7 +295,7 @@
   "author_association": "OWNER",
   "active_lock_reason": null,
   "sub_issues_summary": {
-   "total": 0,
+   "total": 1,
    "completed": 0,
    "percent_completed": 0
   },
