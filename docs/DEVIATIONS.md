@@ -361,16 +361,33 @@ that is now discharged by a proved transfer.
 
 ### d2. Polynomial error notation and square-root bounds
 
+This entry records a change to the shared scalar contract itself, beyond a
+change of proof method or internal representation. The proved bounds use a
+different convention from the literal printed one.
+
 | | |
 |---|---|
-| **Paper statement** | The `poly(·)` error convention, and the square-root errors of chapter 14 |
-| **Locator** | chapter 4 lines 23–29 |
-| **What differs** | The polynomial-error convention is made precise as **independent prefactor and positive exponent witnesses**. |
-| **Why** | The source's `poly(·)` is informal; a formal statement has to say what is quantified and in which order. Making the witnesses independent is the weakest reading consistent with every use in the paper. |
-| **Lean** | `IsPolyErr`, `MIPStarRE/QPBT/Games/ErrorFunctions.lean:27`; two-variable `IsPolyErr₂`, `ErrorFunctions.lean:44` (see [b4](#b4-the-product-form-error-in-the-pasting-lemma) for the sum-form correction to the latter) |
-| **Blueprint** | `lem:qld-comm-cons`, `lem:qld-comm-line-cons` (`ch14_qpbt_observables.tex`) |
+| **Paper statement** | The coupled `poly(·)` convention applied to the explicit square-root choices in `lem:qld-comm-cons` and `lem:qld-comm-line-cons` |
+| **Locator** | `references/qpbt-paper/04_preliminaries.tex:26-29`; chapter 14 lines 508-520 and 649-676 |
+| **What differs** | The printed `exists C > 0, forall x > 0, f(x) <= C x^C` is replaced by `exists A >= 1, exists r > 0, forall x >= 0, 0 <= f(x) <= A x^r`. The constants precede the inputs. This separates prefactor and exponent and adds nonnegativity and the zero boundary value; neither convention constrains negative inputs. |
+| **Why** | For `f(x) = sqrt(x)`, the printed bound at one forces `C >= 1`, then `sqrt(x)/(C x^C)` is unbounded near zero. Independent witnesses `A = 1`, `r = 1/2` give the existing proved bound, but do not prove the printed contract or justify every use of `poly` in the paper. |
+| **Lean** | `IsPolyErr` in `MIPStarRE/QPBT/Games/ErrorFunctions.lean`; `deltaAnticom_isPolyErr` in `Observables/PointConsistency.lean` and `deltaLine_isPolyErr` in `Observables/LineMeasurement.lean`. `PrintedPolynomialBound` and `PrintedSquareRootPolynomialClaim` in `ErrorFunctions.lean` retain the printed scalar contract as unasserted definitions (PR #675). |
+| **Blueprint** | `lem:qld-comm-cons`, `lem:qld-comm-line-cons`, `rem:qpbt-polynomial-error-convention` (`ch14_qpbt_observables.tex`). Existing marks concern the explicitly stated independent-constant convention. |
 | **Gap note** | [`qpbt_polynomial-error-square-root.tex`](paper-gaps/qpbt_polynomial-error-square-root.tex) |
-| **Printed-claim status** | **restated**; the concrete square-root error witnesses are proved. |
+| **Printed-claim status** | The square-root specialization is **refuted by the mathematical calculation in the note**, retained unasserted in Lean, and not proved or refuted by a Lean theorem. The concrete independent-constant estimates are proved. This does not refute every possible existential operator estimate. |
+| **Terminal status** | **documented-deviation**, for this intermediate gap under the owner's 2026-09-22 documentation instruction, issue #711. Documentary closure does not assert literal equivalence or completion of the whole track. |
+
+The contract is shared by the joint-point and supplied-point line
+constructions. The former proves `K epsilon^(1/8)` with a universal constant;
+the latter require an `IsPolyErr`-controlled function. Established line,
+global-pair, and extraction estimates use these bounds and the separately
+changed two-variable sum contract (see [b4](#b4-the-product-form-error-in-the-pasting-lemma)).
+This documentation does not discharge that pasting discrepancy, the printed
+extended-line rate, the source sampling-law and answer comparisons, or the
+linearity normalization and ancillary-space questions. No global equivalence
+with the paper's complexity or other error uses of `poly` is claimed. The
+PR #675 evidence and earlier budgets are preserved; no theorem statement,
+proof, or game semantics changes in this closure.
 
 ### d3. Raw prescribed-answer effects in the soundness conclusion
 

@@ -1505,6 +1505,40 @@ pairs are established separately, as in Lemmas~\ref{lem:qld-comm-cons}
 and~\ref{lem:qld-comm-line-cons}; later chapters invoke exactly these
 variants.
 
+\begin{remark}[Polynomial error convention]
+\label{rem:qpbt-polynomial-error-convention}
+The asymptotic convention in Section~4 of \cite{Ji2020MIPStar} uses one
+constant $C>0$ in $f(x)\leq Cx^C$ for every $x>0$. This cannot hold for
+$f(x)=\sqrt{x}$: the input $1$ forces $C\geq1$, after which
+$C^{-1}x^{1/2-C}$ is unbounded as $x$ tends to zero. The obstruction already
+occurs on $0<x\leq1$.
+
+Lemmas~\ref{lem:qld-comm-cons} and~\ref{lem:qld-comm-line-cons} explicitly
+use the different convention
+\[
+ \exists A\geq1\ \exists r>0\ \forall x\geq0,\qquad
+ 0\leq f(x)\leq Ax^r.
+\]
+The constants are independent of the input; in those existential error
+statements the function is chosen before the test parameters and strategy.
+The functions are defined on all real arguments, but the bound concerns only
+nonnegative inputs and forces $f(0)=0$. The square-root witnesses satisfy it
+with $A=1$ and $r=1/2$. Their operator estimates also have universal
+multiplicative constants. The formalization marks on these lemmas certify
+the stated convention, not the refuted printed square-root contract.
+
+This distinction also applies to the polynomial errors in the source's
+quantum-linearity argument and the subsequent point, line, and extraction
+estimates. The formal joint-point construction gives $K\eps^{1/8}$ directly
+on the expanded local spaces. Supplied-point line constructions require a
+point-error function satisfying the displayed bound. The separate sum
+convention for two error arguments, the printed extended-line rate, and the
+source sampling-law comparisons are not justified by separating these two
+constants. The discrepancy and the scope of the existing proofs are
+recorded in \cite{gap:qpbt_polynomial-error-square-root}. This is a
+documented deviation; the literal printed scalar claim remains unasserted.
+\end{remark}
+
 \begin{lemma}[Consistency and approximate commutation of the expanded point measurements]
 	\label{lem:qld-comm-cons}
 	\lean{MIPStarRE.QPBT.deltaAnticom, MIPStarRE.QPBT.deltaAnticom_isPolyErr}
