@@ -1090,3 +1090,436 @@ normalization. Third capacity is assigned to693's already queued first review
 as soon as its exact-head CI succeeds. All model dispatches remain space-d only.
 
 Prior stage publication: issue27 comment5775386048; telemetry023a0c59 clean.
+
+## 2026-09-22T11:18Z complete693 checks and three live lanes
+
+PR693 complete exact-head CI passed at90eba77ae53d6ce7f1c88a1819076d6a26f1a99d.
+Build846s, blueprint-sync399s, proof-debt22s, proof-evasion96s; the skipped
+render/source-origin steps follow the unchanged file-area policy. Manifest:
+~/.cache/mipstarre-dev/ci-manifests/pr693-90eba77ae53d6ce7f1c88a1819076d6a26f1a99d.json.
+First reviewer-pr693-20260922-01 now runs via
+/tmp/main-whole-review693-initial687-20260922. This is the independent first
+review of the Mathlib-reuse successor, not another full680 round.
+
+CI required the supplemental marked-blueprint axiom audit. Detached
+/tmp/main-marked-axioms-20260922.sh verified clean/public exact head and all
+CI contexts, ran the real script with --ci, and passed1863 declarations in371
+modules with0 failures. Evidence posted as PR693 comment5775523053; runtime
+/tmp/main-marked-axioms-pr693-20260922. No proof-level mark depends on sorryAx.
+This supplements CI and does not replace independent review. The same generic
+audit is queued by /tmp/main-marked-axioms-after689-20260922.sh after689's
+publication CI completes; check its live handle/result before any retry.
+
+All three actual QPBT slot handles were verified live (694,695,693 review),
+with space-d limit3 and no retired-key marker. The model-free auto loop3313963
+and merge daemon1928886 are alive. 689 normal checked publication is active
+after its successful imports, with main a0dcf8c9 merged under the normal loss
+guard. 691/692 continuation handles await that complete CI in order. No
+additional model task or train was admitted while all three slots are occupied.
+
+Last completed stage record: issue27 comment5775488245; telemetrya0dcf8c9.
+The new build receipt dirtied builds.jsonl normally and is included in this
+cycle's passive telemetry publication. Artifact completion remains unproven.
+
+## 2026-09-22T11:23Z reuse merged, subline published, padding admitted
+
+PR693 first independent review5277289834 APPROVED exact90eba77a with0 findings;
+the prose phase was correctly skipped because this proof-only diff touches no
+blueprint. The service merged693 at11:23:54Z as
+d3bbe111984eec1b970fae39c951e4d5420d9ac6. GitHub merged=true was read back.
+Main's simultaneous meta-gate observed an already closed PR; no hand merge or
+fresh-approval train was used. This discharges680's deferred Mathlib-reuse F1.
+
+689 is now PR696 at e632decffe7c83b820f52ff193794056e4f9b1f5. Normal checked
+publication succeeded and its complete CI is live (ci719970, lake721066 at
+the observation). Runtime /tmp/main-fullspeed-publish689-imports-retry-20260922.
+The required marked-declaration audit and first independent review are queued
+by the existing watchers. 691/692 completed repairs still await this complete
+CI before their own sequential publication/check/review pipelines.
+
+Main opened697 and admitted one3600-second padding construction continuing
+124/129/173, separate from694's normalization evidence. Actual session
+prover-697-20260922-01; worktree issue-697-linearity-padding-20260922 at base
+a159185acc52b82fd2ab377eb8dbdef03c0fc2da. Packet
+/tmp/main-linearity-padding-packet-20260922.md; runtime
+/tmp/main-fullspeed-linearity-padding-20260922. 694 and695 remain live, so all
+three actual QPBT workers again use space-d. No new source-space/game semantics
+or automatic continuation is admitted. Preserve historical shared costs.
+
+690 remains clean at bb607c6f82a9afe8b898c157e96269996ea53f2b, with its existing
+main-fix690 claim retained from the completed integration author. Detached
+/tmp/main-publish690-after691-20260922.sh waits for GitHub's actual691 merged
+commit and for queued692's complete CI. It then verifies ancestry/clean head,
+refreshes through the normal merge/loss guard, exports private imports and
+checked-publishes, runs full CI and marked axioms, and requests the FIRST
+independent algorithm review. Unexpected conflict/failure stops and preserves
+the worktree; do not restart blindly. No live worktree dependency is used.
+
+Previous cycle was progress: required1863-declaration audit and public evidence
+5775523053 completed; stage5775537054 and telemetry0a5dc2d9 published cleanly.
+
+## 2026-09-22T11:30Z exact-commit completion checkpoint
+
+The prior turn made progress (693 merge,697 dispatch,690 guarded watcher);
+stage5775622635 and telemetry7b455187 are published. This turn verified all
+three space-d model handles alive and the696/691/692/690 model-free pipelines
+alive. PR696's build332s and render136s passed; remaining CI continues. No
+additional lane or key was admitted.
+
+Exact7b4551879b08ef035931414095f139a79b8be120 was checked in a clean detached
+worktree .worktrees/completion-7b455187-20260922. The diagnostic required no
+build/cache setup and creates no source change or PR. C1 passes335 Lean files;
+C3 fails10 of21 nonterminal source rows; C4 fails5 of531 linked nodes;
+C6's narrow registered-document check passes. C2/C5/C7 are delegated, not
+automatically passed. Raw result
+/tmp/main-completion-gate-7b455187-isolated-20260922.json and durable report
+completion-check-7b455187-20260922.md. The initial primary report is retained
+separately: automated records changed only three telemetry snapshot files
+during that observation; the isolated rerun supplies the exact-commit result.
+
+Completion packets now accurately mark the general-prime source row and both
+Pauli blueprint entries complete after680/693, while recording the pending
+691/690 implementations. Nothing is waived and the full artifact goal is not
+achieved. Remaining source-law, field-evaluation and printed-rate obligations
+still require actual mathematics; passing a scoped auxiliary is insufficient.
+
+## 2026-09-22T11:37Z verified wait and telemetry publication
+
+All three actual space-d proof handles694/695/697 remain live; recent outputs
+show694/695 performing their final blueprint checks and697 editing its proof.
+These are progress observations, not completed receipts. PR696's unittest
+process757119 was verified live through its fixture work, then its log advanced
+to successful blueprint synchronization. No CI or worker was restarted.
+
+The completion checkpoint is posted on27 as5775727939. Its four local telemetry
+files were retained when meta-records correctly refused active train fixtures;
+main retries publication only after observing those processes clear. No new
+stage boundary occurred, so there is no repeated27 comment. The previous turn
+was progress (isolated exact-commit evidence); this cycle is a verified wait.
+
+The cycle subsequently progressed: PR696 full CI passed at e632decf
+(build332s, render136s, sync432s, proof-debt28s, proof-evasion94s). Its required
+marked audit passed1868 declarations across372 modules with0 failures; evidence
+comment5775800525, runtime /tmp/main-marked-axioms-subline696-20260922. First
+code/prose review /tmp/main-whole-review696-initial689-20260922 is queued for
+actual space-d capacity; the log's "running review" header alone does not
+establish that a fourth worker exists. 694/695/697 still occupy all three slots.
+
+691 refreshed normally from a65426c7 with incoming d79e0d0f and passed the loss
+guard; its continuation proceeds through private import exports and normal
+checked publication. The696 audit finished before any review could approve.
+The completion report is public in d79e0d0f. The first follow-up snapshot push
+refused because CI appended builds.jsonl concurrently; the subsequent normal
+records invocation preserved it and published be1d0ab8 with a clean primary.
+Overall turn classification is progress, not an impasse. No gate was bypassed.
+
+## 2026-09-22T11:45Z author results, source-function decision, and696 repair
+
+694 completed0 after2552s at f78987a8cd22bdb6ba46ac7e7d9b51ed5f2c52a4,
+clean. Seven files+803/-13: both literal/conventional printed claims retained
+and refuted in Lean, corrected theorem for all natural index lengths and real
+errors, full consumer audit, and a mathematical sharp-factor2 proof. Sharpness
+is not falsely advertised as a Lean theorem. Existing operator/measurement/
+common-ancilla proofs stay unchanged; normalization stays pending review/Main
+adoption and padding stays open. Receipt
+/tmp/main-fullspeed-linearity-normalization-20260922-result.md; PR body
+/tmp/main-linearity-normalization-pr-body-20260922.md explicitly asks review
+of correctness, all-consumer sufficiency, minimality and Lean convergence.
+
+695 completed0 after1853s at23207298a8dfecd1026038c1a0d4a6a3362d5828,
+clean, six milestone commits. Five new declarations in LinePolynomial.lean
+derive affine parameters/compatibility from projection inclusion, construct
+the coefficient formula and prove the singleton evaluation obstruction. All
+five closures are standard-only;1881 declaration links and focused consumers
+pass. Arbitrary coefficient T on a singleton has no geometric value; this
+does not refute the source identity for actual functions. C4 stays open.
+Receipt /tmp/main-fullspeed-combine-map-20260922-result.md and audit
+audits/2026-09-22_combining-map-source-domain.md preserve full costs/proposal.
+
+Both detached /tmp/main-publish-source-evidence-20260922.sh instances are live,
+runtime /tmp/main-source-publish694-20260922 and ...publish695.... They verify
+exact clean completed heads, refresh normally, export private imports and
+checked-publish immediately. Full CI remains serial: the already queued690
+publication CI precedes694, then695 follows694's CI; reviews do not block the
+next CI. Each runs required marked axioms and FIRST independent review. CI
+receipts are /tmp/main-source-ci694-20260922 and ...ci695.... Unexpected merge,
+publication or dependency failure stops with evidence. Never blindly retry.
+
+Main separately opened698 under695 and authorized the concrete source-function
+representation proposal,3600s, base23207298 in isolated
+issue-698-geometric-line-functions-20260922. Packet
+/tmp/main-geometric-lines-packet-20260922.md; runtime
+/tmp/main-fullspeed-geometric-lines-20260922. The task adds faithful polynomial
+functions on geometric lines, combines them on the full source domain, proves
+choice/representative independence and supplies a separate descending-coefficient
+adapter. It changes no existing game, strategy, sampling law, answer carrier
+or probability; measurement transport remains open. Full statement/consumer
+audit and independent review are mandatory. All predecessor costs remain.
+
+PR696 first review5277695906 is CHANGES_REQUESTED. Code F1 and prose F1 name
+the SAME sentence in the subline note near304, falsely claiming no new marks
+despite five marked auxiliary entries. Both reviewers confirm the mathematics
+and stated restrictions. Whole2700s note repair now runs via
+/tmp/main-fullspeed-fix696-marks-20260922 from e632decf, packet
+/tmp/main-fix696-marks-packet-20260922.md; preserve all marks/proofs and open
+source claims. Main must publish new-head CI/marked audit and SECOND full review.
+
+691's earlier apparently quiet publication was a live checked-push marker
+audit, not a stopped process. It is now published at
+3ab2724f989ba4b04f51a7c5faad862050699872 with complete CI running through the
+existing repair691 pipeline. 692 and690 continue to wait on their explicit
+dependencies. 697 remains active; its intermediate output reports a checked
+fixed-space padding obstruction, but no completed receipt has yet been adopted.
+Prior stage5775834887 and telemetrye8e87554 were published cleanly.
+
+## 2026-09-22T12:09Z resumed pipelines and single697 continuation
+
+The interrupted turn was progress, with no killed/restarted model task. Its
+stage comment completed as5776169299. Verified publications: issue694 is PR699
+at463feff47f96c89ebbf238e60eac6d8af74bb9a2; issue695 is PR700 at
+8089cc881cbc495759018f097e4e8ca3545de421. Main-ci claims cover their queued full
+CI; existing runtime prefixes main-source-publish694/695 apply. Both ordinary
+checked pushes succeeded after private imports. Neither has independent review
+or source-gap adoption yet.
+
+First697 session finished0 after2094s at
+45039ea9bf8058b2b40fc8eb2aafbf57e3b3ce5c, clean. It proves dimension,
+full-support density and actual ProjectiveSetting obstructions to an automatic
+reserved zero factor, without refuting the source's INITIAL padding permission.
+Its concrete proposal preserves the active Naimark summand and embeds the
+common ancilla into the already allocated Boolean padding. The full absorption
+was not proved. Three auxiliaries have distinct scoped blueprint entries;
+the quotation row remains open. Receipt
+/tmp/main-fullspeed-linearity-padding-20260922-result.md contains the proposal,
+cardinality estimates, five named remaining targets and full historical costs.
+
+Main verified source14:166,371,832,1864 and admits the ONE3600-second continuation
+at45039ea9 to construct that reservation and its state/measurement/error
+transport. Actual prover-697-20260922-02, runtime
+/tmp/main-fullspeed-padding697-continue-20260922, packet
+/tmp/main-padding697-continuation-20260922.md. Keep unrestricted ProjectiveSetting,
+M, games and source quantifiers unchanged; no assumed capacity or transport
+certificate. No automatic further continuation. Existing main-fix697 ownership
+was replaced after verifying the original process was terminal and its tree clean.
+
+The other active assignments are blueprint-689-20260922-02 (696's single note
+defect) and prover-698-20260922-01 (source geometric functions). These are the
+only other space-d workers. PR691 all CI steps now report success at3ab2724f;
+the same repair691 pipeline posts the complete status, runs marked axioms and
+requests the second review. 692/690/source699/700 queues remain intact.
+All retained source decisions were published at94f86baa, clean, before this
+additional receipt. Artifact completion remains open under the unchanged gate.
+
+Later in this cycle696's repair completed0, clean, at
+7b901f08146b820bf5b4349db6d06ee30bdeb760. Its receipt
+/tmp/main-fullspeed-fix696-marks-20260922-result.md resolves both duplicate
+ledger entries with the single truthful note comparison. Detached
+/tmp/main-publish696-after700-20260922.sh waits for source-ci695 (PR700), then
+guardedly refreshes, exports imports, checked-publishes via tag repair696,
+runs full CI/marked audit and SECOND review. Preserve failures if later main
+imports require additional private export hydration; never discard the repair.
+
+691's marked audit passed1870 declarations,0 failures. Second code phase
+reviewer-pr691-20260922-03 APPROVED, with prior index F1 resolved and all ten
+new closures standard-only. Its attempted external lean-conventions fetch was
+automatically rejected; the reviewer used repository rules and the available
+local integrity reference and completed the task without a workaround. Prose
+phase and combined published verdict remain pending. Do not gate a code-phase
+result as a completed approval. The freed lane was consumed by the queued
+review; total actual space-d workers remains at most3.
+
+## 2026-09-22T12:28Z third691 repair and independent CI queue
+
+Second full691 review5278009056 is CHANGES_REQUESTED: code APPROVED; prose F1
+asks only that the reindexing paragraph remove the trailing Lean Fin m jargon,
+leaving its explicit mathematical index set. Prior mathematical index F1 is
+resolved, and no equivalence/status discrepancy was found. New2700s author
+blueprint-676-20260922-03 works from3ab2724f; packet
+/tmp/main-fix691-style-packet-20260922.md, runtime
+/tmp/main-fullspeed-fix691-style-20260922. Keep both earlier rounds/costs.
+After repair, full new-head CI/axioms and THIRD review are required.
+
+The completed-source CI queue no longer waits on an unrelated parent review.
+Main confirmed both699/700 exact published heads and the untouched clean690/696
+trees, checked no source-ci694/695 or algorithm/696 pending publication CI had
+started, and matched each old PID to its exact waiting shell command. Only then
+SIGTERM stopped waiting wrappers1035436,1035459,747212,1258553. All four were
+verified gone. Keep their original logs/.pr/.exit records; this was an intentional
+model-free scheduling replacement, not a worker/key failure or lost publication.
+Claims main-ci699/700 and main-fix690/696 are retained. No source or review changed.
+
+ACTIVE replacement order:
+692 complete CI ->699 complete CI ->700 complete CI ->691 repair complete CI
+->696 repair complete CI ->690 complete CI, with690 ALSO requiring actual691
+merge. Reviews start after their own complete CI and marked audit and need not
+finish before the next independent CI. This avoids the known concurrent-build
+fixture timeout while allowing699/700 review before691's further repair cycle.
+
+- /tmp/main-source-ci-v2-20260922.sh694 and695 are already running, under runtime
+  /tmp/main-source-ci694-v2-20260922 and ...ci695-v2.... They preserve the public
+  heads463feff4/8089cc88, do not republish, retain existing CI claims, and create
+  the original source-ci694/695 .pid/.exit receipts only for actual CI execution.
+  The first waits existing692 publication CI; the second waits real source-ci694.
+- /tmp/main-publish-repairs-v3-20260922.sh691 and696 are running under
+  /tmp/main-publish-repair691-v3-20260922 and ...repair696-v3.... The first waits
+  its style worker and700 CI, then publishes via tagstyle691 and third691 review.
+  The second waits style691 CI, then tagrepair696v2 and second696 review. Both
+  require clean ancestry, normal refresh/loss guard, CI and marked audit.
+- /tmp/main-publish690-after691-v2-20260922.sh is running and replaces the old
+  after691 wrapper. It waits actual691 merge and repair696v2 CI before any
+  mutation to bb607c6f, then normal publication, CI, audit and first review.
+- /tmp/main-export-merged-imports-v2-20260922.sh is a separate helper, leaving
+  the old live helper unchanged. It includes known optional algorithm, linearity
+  claims/padding, line-polynomial and complex-subline modules before root exports;
+  it writes only private worktree objects, never shared caches.
+
+All new shell files passed bash-n; parent PID startup handshakes succeeded.
+Do NOT restart the old waiting wrappers: their publication results remain valid
+but their dependency order is retired. If a new dependency fails, inspect its
+actual process/result and preserve branch work. The previous cycle progressed
+through697's continuation, published699/700 and queued696 repair; retained
+telemetry is now published at6d16297c. This cycle changes real scheduling and
+starts the concrete691 repair; the artifact goal is still unachieved.
+
+## 2026-09-22T12:45Z repaired691, second692 review, and next Magic Square target
+
+691's style worker completed0 after456s at
+69e5d997a6c43cab7df0c32cefecd65e03a5e241, clean. Only the trailing Fin m jargon
+was removed; every mathematical index correspondence and all statements,
+proofs/marks/links remain. The receipt records the inherited generated-list
+staleness separately; publication must regenerate/verify declaration links
+normally. Existing repair691-v3 waits700 CI, then new-head full checks and
+THIRD review. No fourth observation was mislabeled or old costs reset.
+
+692 was verified live posting CI statuses via gh_common; quiet summary output
+was not treated as a stopped process. It then completed full CI at
+e3f224b90fb98d615c0210cdb3de7862f9d42819 and the same pipeline started its
+required marked audit and SECOND reviewers-pr692-20260922-03/04. Both are
+actually dispatched. 699's replacement CI runner began normally after692:
+build61s and render99s passed. The new queue ordering is functioning.
+
+Main opened701 under688 for the remaining Magic Square prescribed-answer and
+agreement-dependence construction. Packet /tmp/main-ms-prescribed-packet-20260922.md;
+one3600-second mathfix task, starting from exact published parent e3f224b9 in
+isolated issue-701-ms-prescribed-extraction-20260922. Preserve all105/172/688
+costs, both counterexamples, the seven original target quantities and pending
+status. Derive malformed/product transfer internally; investigate one-way
+value extraction plus agreement transfer, without asserting minimality from
+finite experiments. No extra source premise, game change or automatic extension.
+
+Detached /tmp/main-start-ms701-when-free-20260922.sh waits for actual live
+space-d marker capacity, then invokes the canonical warmed whole-task bootstrap.
+It does not reserve or alter keys/caps and the shim still enforces admission.
+Runtime after dispatch: /tmp/main-fullspeed-ms-prescribed-20260922. The two692
+reviewers and697 continuation filled all actual slots at the last observation;
+701 is prepared/queued, not falsely reported as already running. 698's model
+handle has ended since the initial observation; harvest its terminal receipt
+before any publication or continuation. No new source adoption is certified.
+
+## 2026-09-22T13:09Z resume:692 merged, completed constructions, two scoped repairs
+
+The interrupted preceding cycle was progress:701 was admitted and actually
+started as mathfix-701-20260922-01;692 completed its second review5278423449
+APPROVED with0 findings and required1864-declaration audit. GitHub confirms
+692 merged at13:05:10Z as74b84fc1f01c5b8863742f84b412cb24b3855369. The service
+completed its publication afterward. A concurrent meta-gate correctly observed
+it already closed. Prior stage5777017993 and decision commit85e9d3ad are public;
+the concurrent telemetry snapshot refusal was subsequently resolved by the
+model-free records service. No source-gap adoption follows from this docs merge.
+
+699 complete CI passed at463feff4, required1871-declaration/372-module audit
+passed0 failures, evidence5776971376. First review5278517118: code APPROVED;
+prose F1 needs the definition-level mark on the two retained printed Props,
+F2 needs statement/proof dependency edges for the ancillary refutations. Both
+are blueprint changes, not Lean/mathematical defects. The valid paper thm:qblr
+reference explains the context-map warning and must not be erased. No terminal
+normalization adoption is made yet. Queued2700s repair packet
+/tmp/main-fix699-blueprint-packet-20260922.md, outer runtime
+/tmp/main-queued-fix699-blueprint-20260922, worker runtime
+/tmp/main-fullspeed-fix699-blueprint-20260922. It starts only when actual slot
+capacity is available, then retains normal CI/marked audit and SECOND review.
+
+700 complete CI passed at8089cc88, required1868-declaration/372-module audit
+passed0 failures, evidence5777095267. Its FIRST code/prose review is active via
+/tmp/main-whole-review700-initial695-20260922. At the13:12Z observation the
+actual slots were701 and the two700 phases. Never exceed the3 space-d limit.
+
+698 source-function author completed0 after3008s at
+ff0242149723d3a8bc01adb9712083cba00cf111, clean. Fifteen declarations in new
+GeometricLineFunctions.lean cover bounded polynomial functions, a finite
+carrier, restriction/reduced representatives, full combining formula/degree,
+representation/affine-choice independence and the exact coefficient descent
+adapter, including singleton lines. Twelve normal-hook milestone commits,
+1896 links, focused consumers/examples and standard axiom closures pass.
+def:combine-map is marked for the actual function construction; existing games,
+measurements, arbitrary coefficient outcomes and source-law/error obligations
+remain unchanged. Receipt /tmp/main-fullspeed-geometric-lines-20260922-result.md.
+Its first independent review must assess both representation and implementation.
+
+697's ONE continuation completed0 after3036s at
+087e5bfb320fde27330ab2d21fc7c84f2ea43f99, initially clean. The first2094s and
+all earlier costs remain. Nine new milestone commits construct reservation
+capacity/ground embedding, bipartite state and actual Option/Boolean strategy
+comparison, PVM/observable extension, local/vector/density errors, two averages
+and reserved Fourier--Naimark rounding. The source six-register/four-placement
+identifications and earlier binary-family construction remain open. No full
+linearity_padding_absorption is introduced or claimed. Receipt
+/tmp/main-fullspeed-padding697-continue-20260922-result.md; combined body
+/tmp/main-linearity-padding-pr-body-20260922.md. There is no automatic additional
+proof session; publish/review this useful completed content before a new decision.
+
+New model-free /tmp/main-publish-completed-source-20260922.sh handles697/698.
+It checked-publishes and emits READY_FOR_CI plus .pr/.head, transfers the retained
+fix claim to main-ci, and ENDS: main must explicitly schedule full CI, marked
+audit and first review at the next available build position. This intentionally
+does not put another independent CI behind690's parent-review wait.
+- 698 runtime /tmp/main-publish-completed698-20260922 is live, waiting for
+  GitHub's actual700 merged commit before any worktree change, then normal
+  refresh/import exports/publication. It preserves exactff024214 until then.
+- 697 runtime /tmp/main-publish-completed697-20260922 STOPPED at a real merge
+  conflict before publication. HEAD087e5bfb; MERGE_HEAD
+  e0dafa73f5bc0a5fb73a60667339ae7b56019796. Sole UU path is
+  docs/paper-gaps/qpbt-gap-register.md. Retain HEAD's updated Linearity quotation
+  row and INCOMING merged692 Magic Square row; statuses stay open/pending.
+  Preserve every other staged incoming file. No PR has been created by this path.
+  Queued2700s integration-only repair packet
+  /tmp/main-fix697-register-merge-packet-20260922.md, outer runtime
+  /tmp/main-queued-fix697-register-merge-20260922, worker runtime
+  /tmp/main-fullspeed-fix697-register-merge-20260922. It reclaims main-fix697
+  only after checking exact parents and predecessor successful terminal receipt.
+  After repair, resume publication with a new exact-head wrapper; never rerun
+  the old publisher's original-head/clean-tree guard blindly.
+
+Both repair waiters use /tmp/main-repair-when-slot-20260922.sh; known live
+workers retain priority through shim capacity. 691's style-repair pipeline has
+refreshed normally; inspect its publication/check receipts before acting.
+696/690 scheduled dependencies remain as recorded in the12:28Z queue. No user
+permission, goal change, key fallback or fabricated review was introduced.
+
+## 2026-09-22T13:16Z approved700 and active repair tails
+
+700 first complete review5278574076 APPROVED exact8089cc88, both phases with0
+findings. meta-gate confirms it already gated; the service must merge it alone
+under the fresh-approval rule. No train was staged.698's actual-parent watcher
+is alive and will handle its publication after that merge, stopping on any real
+conflict. At the snapshot700 was still open, so no merge is yet claimed here.
+
+691's repaired/style head e3f8ce2a61df73247d902e52a22207075cd5aa3e is published
+and its new build passed46s after the normal shared lock. The rest of full CI,
+marked audit and THIRD review remain in its existing v3 pipeline. 696/690 tails
+retain their ordered dependencies. 699/697 repair workers are actually live,
+alongside701; all3 slots are space-d and the key-disabled marker is absent.
+
+New detached /tmp/main-resume697-publication-20260922.sh waits for the active
+register repair's successful exit/receipt, verifies a clean tree and ancestry
+from both087e5bfb and e0dafa73, then performs normal main refresh/loss guard,
+private imports and checked publication. It preserves the original failed
+publisher logs and stops on any new conflict. Output .pr/.head and READY_FOR_CI
+will identify the exact published result and transfer main-fix697 to main-ci.
+Main must then schedule complete CI, marked audit and FIRST independent review;
+no review or source-absorption completion is preclaimed.
+
+The previous cycle was progress through700/699 review results and concrete
+repair admissions; this cycle completes gating evidence and publication-tail
+admission. Earlier retained records are published at1844ad0b with clean primary.
+No owner confirmation or policy exception was needed.

@@ -15,8 +15,9 @@ CI/review. The main checkpoint records live assignments.
    def:generalized-pauli, lem:twisted-commutation, lem:pauli-observable-expansion.
    Exit: general-prime eigenbasis/projectors and both Fourier identities with
    correct phases/normalization and source domain, all downstream consumers,
-   truthful linked marks. Owner: issue673/PR680, fourth review completed; its
-   source-faithful mathematics is checked, final reuse finding tracked separately.
+   truthful linked marks. Completed by merged issue673/PR680; its separately
+   deferred reuse finding is resolved by reviewed and merged PR693. Current
+   completion check7b455187 no longer counts this row as unresolved.
 2. **Combined-lines error term.** Source14:1020-1034, lem:qld-4-13. Exit:
    uniform vanishing bound in m^2 epsilon and md/q on the source domain,
    field-valued evaluations and source distribution, without a witness premise;
@@ -44,12 +45,20 @@ CI/review. The main checkpoint records live assignments.
    prescribed expanded strategy spaces, including every family/ancilla
    quantifier; uniform ancilla alone is insufficient. Preserve the already
    proved common-ancilla theorem and avoid duplicating it.
+   Active whole-task construction owner: issue697, admitted3600s with preserved
+   costs and a separate decision required before any source-space correction.
+   Its one continuation constructed the initial reserve and local transports;
+   full source binary-family and four-placement absorption remain unproved.
+   Both tranches are complete, with no automatic further proof continuation.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean
    convergence under the four unchanged adoption conditions. Source symmetry
    alone is refuted. A bounded dedicated evidence task continues105/172; no
    change of source semantics is preauthorized.
+   688's evidence is published as692. Main admitted701 for the remaining
+   prescribed-effect/one-way extraction and quantitative agreement construction,
+   3600s with inherited costs and pending adoption preserved.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -84,16 +93,19 @@ CI/review. The main checkpoint records live assignments.
 1. **def:canonical-complement.** Source04:303-320. Exit: prefix-rank object
    equals conventional RREF nonpivot object and every retained algorithmic
    assertion in the source-labelled entry is formalized truthfully. Abstract
-   existence is not an executable/complexity proof. Issue676 successor owns it.
+   existence is not an executable/complexity proof. Issue690's implementation
+   and integration are complete; publication waits for691's actual merge.
 2. **lem:canonical-complement.** Source04:342-373. Exit: source-domain
    complementarity for that same canonical object with correspondence derived,
    no assumed bridge. Reuse approved685, not another RREF proof. Can close
    separately if the definition's algorithmic claim remains explicitly open.
+   PR691's completed repair awaits new-head CI and second independent review.
 3. **def:generalized-pauli.** Exit: all linked eigenvectors/projectors cover
-   arbitrary prime characteristic and match source phases/domain. Owned680;
-   no duplicate worker while its review/merge disposition is in progress.
+   arbitrary prime characteristic and match source phases/domain. Completed
+   by merged680; the current completion check confirms the node is marked.
 4. **lem:pauli-observable-expansion.** Exit: both source Fourier identities
-   in arbitrary prime characteristic with no extra bridge. Owned680.
+   in arbitrary prime characteristic with no extra bridge. Completed by
+   merged680; the current completion check confirms the node is marked.
 5. **lem:qld-xz-lines.** Exit: completed-to-field evaluation comparison of
    the proved unconditioned line measurement on the source domain, including
    zero-direction POVM convention; no witness hypothesis. Ties to rows3/11.
@@ -103,6 +115,11 @@ CI/review. The main checkpoint records live assignments.
    existing explicit compatibility assumptions do not discharge this target.
    Active whole-task construction owner: issue695, admitted3600s; any needed
    source definition/game correction returns to main before implementation.
+   695 completed the projection construction and certified the singleton
+   coefficient obstruction. Main separately admitted698 for the faithful
+   source-function carrier and algebraic comparison, with no game change.
+   698 completed that source-function construction atff024214; its scoped
+   source mark awaits parent700 merge, full CI and independent review.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
