@@ -1158,8 +1158,76 @@ $4$, respectively.
 	% the cross-player agreement of the dilated reflections is Lemma lem:ms-varobs-cross-player.
 \end{proof}
 
-\begin{remark}[The strategy class in Theorem~\ref{thm:ms-rigidity}]\label{rem:ms-rigidity-strategy-class}
-	Fix the canonical Mermin--Peres operator solution on $\C^2 \ot \C^2$ --- the nine $\pm 1$ observables $\sigma^X \ot I$, $I \ot \sigma^X$, $\sigma^X \ot \sigma^X$ in the first row, $I \ot \sigma^Z$, $\sigma^Z \ot I$, $\sigma^Z \ot \sigma^Z$ in the second, and $\sigma^X \ot \sigma^Z$, $\sigma^Z \ot \sigma^X$, $\sigma^Y \ot \sigma^Y$ in the third --- and let $\ket{\Omega}$ be the maximally entangled state of two copies of $\C^2 \ot \C^2$. Measuring the three commuting observables of a row or column on a $\mathsf{Constraint}$ question, and the single observable of a cell on a $\mathsf{Variable}$ question, is a symmetric, projective, consistent strategy of value $1$ (Theorem~\ref{thm:ms-from-ac}). Now give each player two copies of $\C^2 \ot \C^2$ paired into two copies of $\ket{\Omega}$, and split the two roles across them: on a constraint question the first player measures copy~$1$ and the second copy~$2$, and on a variable question the first player measures copy~$2$ and the second copy~$1$. Every sampled question pair consists of one constraint and one variable, so the two measurements actually performed are the canonical perfect pair acting on a single copy of $\ket{\Omega}$, and the value is $1$. The two players' $\mathsf{Variable}_1$ observables, however, act on halves of different copies, whose joint reduced state is a product of maximally mixed states, so their correlation is $0$, while the second item of Theorem~\ref{thm:ms-rigidity} forces it to be $1$ at $\eps = \delta = 0$; the same computation applies to $\mathsf{Variable}_5$. Giving each player a flag qubit, putting the two flags in the state $(\ket{01}+\ket{10})/\sqrt2$, and letting each player's flag select which of the two roles it plays turns this into a \emph{symmetric} strategy with the same value and the same vanishing correlations, so a restriction to symmetric strategies (Definition~\ref{def:symmetric-game}) would not repair the source's statement. Agreement of the two players' $\mathsf{Variable}_1$ and $\mathsf{Variable}_5$ measurements on the state, that is, the hypothesis~\eqref{eq:ms-rigidity-consistency} --- exact consistency in the sense of Definition~\ref{def:consistent-measurement} when the strategy is symmetric and $\delta = 0$ --- does force the correlation to be $1$ up to $O(\delta)$, and both strategies above have agreement distance $\Delta_1 = \Delta_5 = 1$ (Definition~\ref{def:ms-variable-agreement}). It is also what the analysis of the Pauli basis test has available when it applies Theorem~\ref{thm:ms-rigidity}: the Magic Square strategy induced at an anticommuting tuple has, on average over the tuple, agreement distances of order $\eps$ by items~1 and~7 of Lemma~\ref{lem:qld-win-implications} (the point measurements are consistent between the players, and each player's point measurement agrees with the other player's variable measurement), once item~1 is conditioned on the anticommutation event and both are passed through the binary relabeling of Definition~\ref{def:ms-variable-agreement}; that analysis uses only the anticommutation consequence for one player. The theorem is therefore stated with that agreement as its hypothesis, for arbitrary and not necessarily symmetric strategies; the class of symmetric consistent strategies named in the owner decision is the case $\delta = 0$. The details are in \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+\begin{remark}[The strategy class in Theorem~\ref{thm:ms-rigidity}]
+  \label{rem:ms-rigidity-strategy-class}
+  The unrestricted prescribed-answer assertion in
+  \cite[Section~7]{Ji2020MIPStar} is false. Fix the canonical Mermin--Peres
+  solution on $\mathcal K=\C^2\otimes\C^2$ and its maximally entangled state
+  $\ket{\Omega}$. Give each player two copies of $\mathcal K$, with state
+  $\ket{\Omega}_{A_1B_1}\otimes\ket{\Omega}_{A_2B_2}$. Alice answers
+  constraints on copy~$1$ and variables on copy~$2$; Bob answers constraints
+  on copy~$2$ and variables on copy~$1$. Each sampled question pair is a
+  constraint--variable pair on a single shared copy, so the value is $1$.
+  But the two players' $\mathsf{Variable}_1$ observables act on independent
+  maximally mixed factors and have correlation
+  \[
+    \langle O_{A,1}\otimes O_{B,1}\rangle_\psi
+      =\frac{\operatorname{tr}(\sigma^X\otimes I)}4
+       \frac{\operatorname{tr}(\sigma^X\otimes I)}4=0.
+  \]
+  The printed conclusion at $\eps=0$ forces this correlation to equal $1$:
+  isometries preserve it, and the two ideal $X$ observables agree on the
+  extracted EPR state. The same contradiction holds for
+  $\mathsf{Variable}_5$ and $Z$.
+
+  Add flag qubits in $(\ket{01}+\ket{10})/\sqrt2$ and use one common
+  measurement family: flag~$0$ selects the first assignment of roles above,
+  and flag~$1$ selects the second. The state is invariant under exchanging
+  the players, each flag branch still wins perfectly, and the variable
+  correlations remain zero. Thus symmetry does not repair the assertion.
+  Both examples use only prescribed answers and have
+  $\Delta_1=\Delta_5=1$ in Definition~\ref{def:ms-variable-agreement}.
+
+  The proved theorem above assumes, for $\eps,\delta\ge0$,
+  \[
+    \operatorname{val}(\mathcal S)\ge1-\eps,\qquad
+    \Delta_1(\mathcal S)\le\delta,\qquad
+    \Delta_5(\mathcal S)\le\delta.
+  \]
+  Its Euclidean state error and its six squared operator distances are
+  bounded by $C(\sqrt\eps+\sqrt\delta)$, with $C=2\cdot10^{12}$; the
+  operator distances are evaluated on the ideal extracted state.
+  The bit effects are completed by assigning wrong-form answers to zero.
+  For a symmetric projective strategy consistent on its state,
+  Corollary~\ref{cor:ms-rigidity-symmetric-consistent} sets $\delta=0$.
+  This recovers the printed error scale on that restricted domain.
+  It does not identify completed effects with prescribed effects, since
+  zero agreement does not eliminate wrong-form answers.
+
+  The soundness argument needs only same-player anticommutation.
+  Lemma~\ref{lem:qld-ms-anticommutator-original-state} bounds each player's
+  squared anticommutator norm for the completed variable observables on the
+  original state by $1183680\eps$, using only value at least $1-\eps$.
+  The two observable orientations and the headline soundness theorems use
+  these bounds, without invoking the agreement-dependent extraction.
+  Point--variable consistency then transfers the anticommutation to the
+  point observables. This establishes the consequence used in the sequel,
+  without asserting the printed simultaneous extraction.
+
+  A separate one-way extraction and its prescribed-answer refinement are
+  retained in the closed, unmerged PR~\#706, not in the present formalization.
+  They give state error $O(\sqrt\eps)$, squared Bob measurement and both
+  anticommutator errors $O(\eps)$, and squared Alice measurement errors
+  $O(\eps+\Delta_j)$ for $j=1,5$. The one-way witness alone compares Bob's
+  variables, with Alice's isometry built from constraints; exchanging roles
+  need not preserve the witness. These results neither prove the printed
+  assertion nor certify global optimality of an error bound.
+  The discrepancy is recorded as a documented deviation in
+  \cite{gap:qpbt_ms-rigidity-symmetric-strategies}, with the separate errors
+  and the retained branch evidence. Definition~\ref{def:ms-rigidity-printed-claim}
+  continues to record the unrestricted prescribed-answer proposition without
+  asserting it. The completion marks on the theorem above certify only its
+  displayed agreement-dependent statement and proof.
 \end{remark}
 
 \begin{definition}[The unasserted printed rigidity claim]
