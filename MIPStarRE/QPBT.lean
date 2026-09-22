@@ -1,4 +1,5 @@
 import MIPStarRE.QPBT.Algebra.Subspaces
+import MIPStarRE.QPBT.Algebra.RowEchelon
 import MIPStarRE.QPBT.Algebra.FieldBasis
 import MIPStarRE.QPBT.Algebra.LowDegreeCode
 import MIPStarRE.QPBT.Algebra.Lines
@@ -18,6 +19,7 @@ import MIPStarRE.QPBT.Algebra.SelfDualBasis
 import MIPStarRE.QPBT.Algebra.SelfDualBasisTheorems
 import MIPStarRE.QPBT.Algebra.LowDegreeCodeTheorems
 import MIPStarRE.QPBT.Algebra.PauliTheorems
+import MIPStarRE.QPBT.Algebra.PrimePauliBasis
 import MIPStarRE.QPBT.Games.DistributionAux
 import MIPStarRE.QPBT.Games.ErrorFunctions
 import MIPStarRE.QPBT.Games.Consistency

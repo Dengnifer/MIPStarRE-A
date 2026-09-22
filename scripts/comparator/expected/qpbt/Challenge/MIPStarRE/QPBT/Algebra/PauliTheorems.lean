@@ -18,7 +18,7 @@ namespace MIPStarRE.QPBT
 section
 open MIPStarRE.LDT MIPStarRE.Quantum
 
--- source: MIPStarRE/QPBT/Algebra/PauliTheorems.lean:704-710  (MIPStarRE.QPBT.qubitPauliProj)
+-- source: MIPStarRE/QPBT/Algebra/PauliTheorems.lean:697-703  (MIPStarRE.QPBT.qubitPauliProj)
 /-- The tensor product of binary Pauli projectors, obtained by specializing
 `pauliProj` to `ZMod 2`. This is the binary target in blueprint
 `lem:pauli-binary`, paper
