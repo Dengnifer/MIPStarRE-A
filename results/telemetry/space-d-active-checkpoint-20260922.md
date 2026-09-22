@@ -1937,3 +1937,66 @@ environment contamination in mocked dispatch tests during normal commit hooks.
 It is retrying with local command-environment cleanup. No skipped hook or
 unrelated workflow patch is authorized; this is not a key failure. Preserve
 the complete merge and all failed-test receipts.
+
+## 2026-09-22T14:58Z algorithm publication,699 gate and comparator-main rule
+
+The preceding turn made progress through704's concrete continuation,702's
+complete repair assignment and696's preserved capacity retry; stage5778589527
+and telemetrye75d32fc are published. The owner's new comparator instruction is
+recorded in completion-packets: final acceptance must bind the FINAL artifact
+library commit on main, and comparator main must be the corresponding verified
+challenge. Never claim the old ecb97d1f acceptance is final for a newer artifact.
+
+Remote refs confirm comparator main360402fd and705's new diagnostic branch
+0f02b0b980041b7ef0f490f9adc18d2a61283121. Through the primary gh_common layer,
+run35741427654 rechecks360402fd on main and35742141249 checks the URL-only0f02
+commit; both were in progress. Historical35638601720 remains a successful
+four-target run. No new run is called successful and no unverified commit is
+promoted. The rename packet was updated with Main's promotion ownership and
+the final-pin requirement, superseding its historical skeleton-main statement.
+After the URL run passes, Main must promote the verified challenge and arrange
+the corresponding reviewed library record without losing the old evidence.
+
+690 repair completed0 after1809s at clean
+337e758260576f6f17605c872334d6e38a96371d. All5703 resolved index entries, both
+parents, proofs and incoming data are preserved. Final normal hooks passed868
+tests,9 skips, in255.297s after two honestly retained failures from inherited
+mock-test model metadata. Clearing only MIPSTARRE_HARDNESS_REASON/JOB_CLASS
+for the commit process fixed the fixture isolation; no policy/model/key change
+or hook skip occurred. All1900 declarations and focused source/blueprint checks
+passed. This remains a merge-only task, not a reset of the2429s original proof
+or its sole integration continuation.
+
+New /tmp/main-publish690-repaired-20260922.sh verified that exact completed
+head and the actual merged691 ancestor. It refreshed normally, passed the loss
+guard and private1900-link check, and is live in checked publication. It records
+the actual new PR/head, queues complete CI after active700 CI, then marked
+audit and FIRST algorithm review. The original failed690 publisher is retained
+and was not restarted. No parent approval substitutes for algorithm review.
+
+700 is refreshed/published at e939704396b4ec074de05a879723996edd7c8c0f, with
+complete CI passed and marked audit1876 declarations/374 modules,0 failures,
+comment5778674075. Strict canonical carry was unavailable; the SECOND actual
+review /tmp/main-whole-review700-second700-20260922 is underway. All old
+approval/review/repair costs remain, and no fresh approval is put in a train.
+
+699 second full review5279778199 approves BOTH code and prose with0 findings
+atd3089cbe. Main verified that exact open PR head, review body, all CI contexts
+and local-review/summary through gh_common, released its completed main-review
+claim, and ran meta-gate; it reports the PR already gated. Service merge remains
+the only merge route. The source-gap adoption decision is still separate.
+
+Operator incident: editing the shared private main-whole-review script while
+older invocations were blocked shifted Bash's input position.699's wrapper
+exited2 with unexpected EOF AFTER publishing its valid review. Current script
+passes bash -n; this was a live-script edit hazard, not malformed review evidence.
+Do not edit it again while readers run. Use a new versioned path for future
+changes. Existing older706/707 wrappers may need the same post-publication
+claim/gate cleanup if they actually exit; never restart their live reviewers
+or infer a failed review from this wrapper error.696 replacement and newer
+700/690 invocations read the current valid version. Main preserved every output
+and completed only699's verified cleanup, without fabricating approval.
+
+Merge daemon1980476 and model-free meta-auto3313963 were verified live despite
+a temporarily quiet daemon log. Space-d has no retired marker; no capacity,
+key, native-agent or infrastructure-PR expansion occurred.
