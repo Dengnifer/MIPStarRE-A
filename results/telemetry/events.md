@@ -9829,3 +9829,79 @@ historical entry above is rewritten.
   have no terminal-status column and receive no terminal certification. These
   are static author checks, not full CI, independent review or a completion
   claim. Main retains publication, full CI and SECOND independent review.
+
+- The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
+  normal hooks/loss guards and all unrelated indexed/staged content preserved.
+  A new guarded pipeline queues publication/full CI/marked audit and strict
+  canonical carry or SECOND independent review.706 full CI and1884-declaration
+  audit passed;703 publication resumed. Direct PID arguments corrected the
+  earlier stale reviewer-assignment description; the physical3-slot count was
+  always accurate.
+- 705's warmed clean tree lost its free slot to a queued reviewer during setup.
+  Canonical account routing exited4 without a reservation or model session.
+  Keep the original logs and setup cost; retry the same initial2700s assignment
+  from exact04e7a7d6 through the normal3600s account wait. No extra worker slot,
+  key, author continuation, model budget reset or hook bypass is involved.
+
+- 704 completed3264s of checked partial construction at eedcde3c. Main admitted
+  its ONE3600s continuation on the actual strategy/rejection/soundness targets
+  and recorded the auxiliary K proposal for continued construction only.
+  Ten proved lemmas and all earlier costs remain; the source row stays open.
+  PR707's complete documentation CI passed.702 first review5279555373 returned
+  seven findings, assigned together to one2700s repair and a later fresh review.
+- 696's code lane waited3600s for capacity and exited4 without a reservation;
+  its prose lane completed with APPROVED. Previous shorthand calling that
+  completed phase code is corrected by the actual phase files. Archive the
+  whole failed run, preserve all costs and re-run canonical review at the same
+  exact head with a7200s capacity wait, unchanged2700s model limits and caps3.
+  This is a model-free capacity failure, not a key retirement or new finding.
+
+- 690's merge repair completed1809s at337e7582 with all source/index content
+  preserved and868 normal hook tests passing. Two prior fixture failures came
+  from inherited job-class/hardness metadata; local test-process isolation
+  fixed them without altering model policy or skipping hooks. A new guarded
+  publication/full-CI/first-review pipeline is live.700's fresh CI and1876-name
+  audit passed, and its canonical carry correctly led to a SECOND full review.
+- 699's published second review5279778199 approves both phases atd3089cbe.
+  Its operator wrapper then exited2 because Main had edited that shared Bash
+  script while it was blocked. Actual review evidence and exact-head CI remain
+  valid; Main verified them, released the claim and confirmed meta-gate state.
+  Never edit a script that live processes may still read; use a new versioned
+  file for future changes. Monitor older706/707 wrappers for the same cleanup
+  need only after their actual termination; preserve all live review work.
+- The owner now requires comparator main to hold the latest verified challenge
+  and final acceptance to pin the final library artifact commit on main.
+  Main verified360402fd on comparator main and the two in-progress official
+  runs35741427654/35742141249. The latter checks705's URL-only0f02b0b9 branch.
+  Keep the existing successful35638601720 evidence and do not promote until
+  the corresponding new run actually passes. The final checklist now binds
+  library artifact commit, pin, official run and comparator main explicitly.
+
+- 699's approved ancestor lacks691's actual source changes, so the live PAR0
+  daemon correctly leaves it unmerged. Main queued normal refresh/full CI and
+  strict canonical carry or THIRD review, with standalone merge only.706's
+  first review published four blueprint findings before the known operator
+  wrapper EOF; both reviewer outputs remain intact and one2700s repair owns
+  all findings.700's second review now approves0 findings;708 CI is active.
+- 705 completed2303s at664f5006. Both full artifact exports passed49 PDF/leak
+  checks but retain three real reference defects. Its40-file rename/fixture
+  diff passed869 hook tests and preserves mathematical/historical content and
+  comparator pins. Checked publication/full CI/first review are queued, and a
+  separate prepared packet addresses the exact remaining artifact references.
+
+- 705's normal refresh merged cleanly at126bde72, but its publication preflight
+  stopped because ignored blueprint/lean_decls did not exist. The new guarded
+  resume regenerates that list through the normal sync command before imports,
+  checked publication and complete CI. No source edit, hook bypass or model
+  repair is needed. Preserve the original failure and clean merge. A temporary
+  records train-guard exit3 cleared before the process census; a normal retry
+  published26b360ee without bypassing the guard or killing a process.
+
+## 2026-09-23
+
+- Owner 2026-09-22 document-dont-prove supersedes remaining intermediate proof goals: three3600s documentation workers707/710/711 are live on space-d, with all ten row/four node briefs prepared. PR702 refresh conflicted after its completed repair and is closed unmerged by comment5779646553; repaired commit, unfinished merge, branches and costs retained. Issues698/704 proof work is deferred and preserved. PR706 repair is on detached CI/review; no new proofs or unsupported leanok marks are admitted. PR707 owns the explicitly authorized minimal terminal-status protocol/checker update; headline faithfulness and other completion criteria remain binding.
+- Documentary follow-up:711 completed2dd2d894 in952s with all four artifacts and focused validation; checked publication/full CI/review is detached. A first712 wrapper used abbreviated53d12daa and correctly failed its exact-head guard before claim/model admission; retained that log/worktree and admitted full53d12daa1ea79aa6c62ef93c3b621a331e1368b0 under separate pasting712 tag. Train precheck found696 clean and708 with one exemption-document conflict:696 gets model-free fresh checks/canonical carry;708 gets a documentation-only C4 integration after710, with no algorithm proof continuation.709 complete CI passed and independent review started. The prior records snapshot push refused a concurrent main move; the normal meta loop then published53d12daa without bypass.
+- C3 integration check before707 publication found a real false positive: staged gate blob6fa6bee10681b313957c74d052188f85d99f3ee9 rejects dimension candidate4e2e76170356c6b4c98cb2046e2a2f1fc8701278 because its Source statement cites the lem:ld-soundness import. This is an intermediate proof-route discrepancy, not a changed headline statement. Operator evidence/comment require correction without dropping truthful citations, weakening other criteria or adding proofs; live707 author remains sole writer. Approved709 refresh meanwhile stopped on one register conflict; preserve207b5cf8/MERGE_HEAD53d12daa and queue its one documentation continuation after708. Normal records retry published1e84e767 cleanly.
+- 707 documentation author completed3f63f6d6 in2221s and708 documentary conflict repair completed26821c36 in692s. Preserve all costs, failed fixture checks and the repaired compression-consumer F1. Operator C3 finding5780049792 remains real on707: one focused3600s documentation-gate correction is admitted before publication, no proof work.708 has a detached full-CI/marked-audit/SECOND-review tail;709 single-register-conflict continuation was released after its verified terminal process. Pending wrappers do not count as model occupancy. Train-guard refusals remain preserved and no guard is bypassed.
+- Documentary progress:712 completed099f4326 in1316s and is published as717 atba841d42, detached CI underway.716 first review5280897802 identifies common707 C3 dependency plus a genuine completed-point-POVM blueprint mismatch; one complete documentation repair is queued after707 correction, no new proof or duplicate gate work.706 second review5280855481 approved Lean code but retained two dependency-link findings after the allowed continuation; closed unmerged under owner cutoff with comment5780224671 and all branches/evidence preserved.696 complete CI and strict canonical carry5280888430 atb5348baa are green and released for standalone service merge.
+- 696 service-merged045a657d at16:35:32Z after complete new-head CI and strict approval carry.709 one continuation completedef166700 in1081s; its exact receipt certifies incoming register content plus the approved URL-only transformation. Main admits a guarded model-free refresh applying only that certified transformation on a sole register conflict, with byte equality against the merge base, normal hooks/loss guard, full CI and SECOND review; any other conflict fails closed.713 starts from0eb04963 containing696 after a verified lane freed. No new proof work, extra keys, reset of costs or manual PR merge.

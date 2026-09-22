@@ -1,16 +1,16 @@
 [
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706",
-  "id": 4603127960,
-  "node_id": "PR_kwDOUJyJf88AAAABEl4omA",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/706",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/706.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/706.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/706",
-  "number": 706,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717",
+  "id": 4604492327,
+  "node_id": "PR_kwDOUJyJf88AAAABEnL6Jw",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/717",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/717.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/717.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/717",
+  "number": 717,
   "state": "open",
   "locked": false,
-  "title": "feat(QPBT): extract prescribed Magic Square effects",
+  "title": "docs(QPBT): document the pasting product-error deviation",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -32,12 +32,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n\nThe printed Magic Square rigidity theorem (`thm:ms-rigidity`, chapter 8,\nlines 620-652) is false for the role-symmetric game. The proved replacement\nused completed effects and a uniform square-root agreement loss. Issue #701\nasks for the prescribed-answer comparison and value-only one-way extraction,\ncontinuing the evidence and accounting of #105, #172, #688 and PR #692.\n\n### Description\n\n- Prove value-only extraction of the state, Bob's variable measurements and\n  Alice's completed constraint-read counterparts using the existing two-pair\n  swap construction.\n- Prove all seven prescribed-answer estimates with separate errors: state\n  `155904*sqrt(epsilon)`; Bob squared distances `5*10^12*epsilon`; Alice\n  squared distances `15*10^12*epsilon + 6*Delta_j`; both squared\n  anticommutators `4*10^12*epsilon`.\n- Derive the requested common `2*10^13*(sqrt(epsilon)+sqrt(delta))` bound\n  from the existing value and two completed-agreement hypotheses. Wrong-form\n  mass is derived from value; product transfer uses actual opposite-player\n  constraints.\n- Record the linear agreement lower bound and the necessity/sufficiency,\n  up to universal constants, of `Delta_j=O(sqrt(epsilon))` for the printed\n  rates. These optimality comparisons are mathematical arguments; no separate\n  Lean optimality theorem is claimed.\n- Add explicitly scoped blueprint entries, a six-theorem axiom audit, and\n  the complete 85-label consumer inventory. Preserve existing public theorem\n  statements, the unasserted printed claim, #692's completion distinction,\n  counterexamples, predecessor costs, and the pending adoption status.\n\n### Testing\n\n- All nine new Lean files, the unchanged Magic Square facade and winning\n  implications, the QPBT umbrella, and the repository root type-check.\n- The six focused axiom audits and all thirteen existing QPBT headline\n  audits pass with exactly `propext`, `Classical.choice`, `Quot.sound`.\n- All 1,890 blueprint declaration links resolve through\n  `lake env lean --run scripts/Checkdecls.lean blueprint/lean_decls`.\n- Blueprint sync, blueprint source conventions, paper-gap style, and the\n  20-page note PDF pass. The PDF has no undefined citations/references.\n  `leanblueprint web` exits zero with fresh-checkout bibliography warnings;\n  sync retains four inherited orphan tags and two inherited missing proof\n  marks outside these new entries.\n- Proof-hole/forbidden-mechanism and 100-column scans are clean; whitespace\n  checks pass. Normal commit hooks run without skips.\n- No full `lake build` or shared-cache write ran. Main owns full CI,\n  independent review, publication and adoption on the final head.\n\n---\nAddresses #701\n",
-  "created_at": "2026-09-22T14:13:33Z",
-  "updated_at": "2026-09-22T14:13:39Z",
+  "body": "### Motivation\n\nThe printed pasting error uses a product contract that the existing\ncounterexample rules out. Issue #712 documents the proved additive bound and\nits actual consumers under the owner's documentary completion instruction.\n\n### Description\n\nCompare the printed product contract with the proved sum contract while\nretaining the three operator hypotheses. Explain the external counterexample,\none-sided argument and heterogeneous consumers, and distinguish the separate\nunproved extended-line rate. Update the mathematical note, blueprint remark,\nsingle register row and DEVIATIONS disclosure. No Lean theorem, proof or\nformalization mark changes. PR #707 supplies the common C3 status support.\n\n### Testing\n\nThe author built and inspected the17-page note PDF and blueprint web,\nchecked note/blueprint style and synchronization, and passed normal hooks at\n099f4326ddf4aef328047e000a9a3825bc683c32. Earlier generated-list failures\nand their successful sequential regeneration are recorded. Full exact-head\nCI and independent review are published separately by the local workflow.\n\n---\nCloses #712\n",
+  "created_at": "2026-09-22T16:36:26Z",
+  "updated_at": "2026-09-22T16:49:27Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "f5a959b9ca5199a38dc2955885c2043617c062f1",
+  "merge_commit_sha": "b7552e029327e401dfaa561ddeb2e358a9e6cd34",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -52,41 +52,19 @@
     "description": "Improvements or additions to documentation",
     "archived_at": null,
     "archived_by": null
-   },
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
-    "archived_at": null,
-    "archived_by": null
    }
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/706/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/491c1d85bc3e460d97be85ff2d7de994ec271f9a",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/717/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/ba841d42d14633e539a4786c925ca8ed81a8c710",
   "head": {
-   "label": "Dengnifer:issue-701-ms-prescribed-extraction-20260922",
-   "ref": "issue-701-ms-prescribed-extraction-20260922",
-   "sha": "491c1d85bc3e460d97be85ff2d7de994ec271f9a",
+   "label": "Dengnifer:issue-712-pasting-deviation-20260922",
+   "ref": "issue-712-pasting-deviation-20260922",
+   "sha": "ba841d42d14633e539a4786c925ca8ed81a8c710",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -176,14 +154,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -197,7 +175,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -213,7 +191,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -221,7 +199,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "2d02385ac8b941bb48e1489a64f7a89b7b2a8cae",
+   "sha": "045a657d696380b7e58d68427650465638bb9247",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -311,14 +289,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -332,7 +310,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -348,35 +326,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/706"
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/717"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/706"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/717"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/706/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/717/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/706/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/717/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/491c1d85bc3e460d97be85ff2d7de994ec271f9a"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/ba841d42d14633e539a4786c925ca8ed81a8c710"
    }
   },
   "author_association": "OWNER",
@@ -385,17 +363,17 @@
   "active_lock_reason": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702",
-  "id": 4602674386,
-  "node_id": "PR_kwDOUJyJf88AAAABElc80g",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/702",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/702.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/702.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/702",
-  "number": 702,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716",
+  "id": 4604337056,
+  "node_id": "PR_kwDOUJyJf88AAAABEnCboA",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/716",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/716.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/716.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/716",
+  "number": 716,
   "state": "open",
   "locked": false,
-  "title": "feat(QPBT/Combining): construct reserved linearity padding",
+  "title": "docs(QPBT): document the dimension-divisibility deviation",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -417,12 +395,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n\nThe source applies quantum linearity using padding chosen in the initial\nstrategy setup (`14_analysis_of_the_pauli_basis_test.tex:160-172,367-372,\n825-832`). Arbitrary fixed `ProjectiveSetting`s need not contain that reserve.\nFor the actual initial Boolean construction, this change constructs a reserve\ninside the existing allocation and proves its initial state, measurement,\nand local error transport. It advances #697 without changing register sizes\nor adding source hypotheses.\n\n### Description\n\n- Prove the capacity estimate from the actual Pauli-answer alphabet and\n  admissibility. Construct an injection of the active Naimark summand times\n  the common ancilla, agreeing with the existing one-hot encoding on the\n  entire ground slice. Its choice precedes the state and all families.\n- Prove exact bipartite state transport and compare the actual Option-indexed\n  and Boolean-padded initial strategies. Both original measurement families\n  intertwine for every question and answer; the arbitrary-strategy consumer\n  remains intact.\n- Extend PVMs by assigning the range complement to zero, and extend exact\n  observables by the identity. Prove pointwise vector and density-weighted\n  squared-error identities, the original-ground-operator comparison, and both\n  finite averages before transporting Fourier--Naimark rounding. The expanded\n  reservation leaves the fixed Pauli register unchanged and preserves `2 delta`.\n- Retain all three predecessor obstructions to automatic reservation in an\n  arbitrary fixed setting. Add separate auxiliary blueprint entries and a\n  complete statement/consumer audit. Preserve the existing common-ancilla\n  proof, normalization work, and independent field-valued point construction.\n\nThe source absorption gap stays open. The six-register state identities and\nfour placement comparisons, the earlier binary orthonormalization on the\nactive subspace, and identification of the transported density/comparator\nwith those source families remain unproved. No restricted auxiliary is\nadvertised as full `linearity_padding_absorption`.\n\n### Testing\n\n- Focused Lean checks pass for `Reservation.lean`, `SetupComparison.lean`,\n  `Extension.lean`, `ReservedRounding.lean`, `Observables/Setup.lean`, the root,\n  `Points.lean`, `Apply.lean`, `Extraction/SourceUnitary.lean`,\n  `Test/Soundness.lean`, and `Test/QubitForm.lean`. The predecessor checks of\n  `Padding.lean` and `Linearity.lean` are retained; both files are unchanged.\n- The new modules have no proof holes, forbidden bypasses, debugging commands,\n  or overlong lines. All 19 audited new/provider/consumer declarations depend\n  only on `propext`, `Classical.choice`, and `Quot.sound`.\n- `leanblueprint web`, final blueprint sync, and the declaration checker pass\n  for all 1,888 entries. Existing unrelated sync warnings remain.\n- Paper-gap reference/style checks pass. The branch duplicate check finds no\n  duplicate among 36 declarations. Normal hooks run on every milestone commit.\n- Full `lake build`, full CI, publication, and independent review are reserved\n  for Main under the assignment.\n\n---\nAddresses #697\n",
-  "created_at": "2026-09-22T13:29:28Z",
-  "updated_at": "2026-09-22T13:55:30Z",
+  "body": "### Motivation\n\nThe source's balanced-seed construction has a dimension-divisibility condition\nthat does not cover every dimension used later. Issue #710 documents the\nactual established soundness conclusions and the different proof route.\n\n### Description\n\nExplain the exact exceptional range, implemented carriers and laws, and the\nsoundness argument used in Lean. Keep unsupported source-import comparisons\nexplicit. Update the mathematical note, two blueprint remarks, this register\nrow and its DEVIATIONS entry to the owner's documented-deviation disposition.\nNo theorem, definition, proof, declaration link or formalization mark changes.\nPR #707 provides the common completion-protocol/checker support.\n\n### Testing\n\nThe author built the 15-page note PDF, checked blueprint web/synchronization\nand normal hooks, and committed719815e9cde5795b24c99b1c5ae04c0790ad6c2d.\nFull exact-head CI and independent review are published separately by the\nlocal workflow.\n\n---\nCloses #710\n",
+  "created_at": "2026-09-22T16:18:32Z",
+  "updated_at": "2026-09-22T16:35:03Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "1911df9e1cff22a6ac324b0378824fbb666f1e3c",
+  "merge_commit_sha": "39950dcfc286e31c19bad83171f8fa8bba03958b",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -437,41 +415,19 @@
     "description": "Improvements or additions to documentation",
     "archived_at": null,
     "archived_by": null
-   },
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
-    "archived_at": null,
-    "archived_by": null
    }
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/702/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/b167f8e1368060201f5bb8fbf7dca961230d10da",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/716/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/4e2e76170356c6b4c98cb2046e2a2f1fc8701278",
   "head": {
-   "label": "Dengnifer:issue-697-linearity-padding-20260922",
-   "ref": "issue-697-linearity-padding-20260922",
-   "sha": "b167f8e1368060201f5bb8fbf7dca961230d10da",
+   "label": "Dengnifer:issue-710-dimension-deviation-20260922",
+   "ref": "issue-710-dimension-deviation-20260922",
+   "sha": "4e2e76170356c6b4c98cb2046e2a2f1fc8701278",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -561,14 +517,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -582,7 +538,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -598,7 +554,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -606,7 +562,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "a98b05d4ab1855487f25d111c59ac392c5b8e4f6",
+   "sha": "1e84e767a1ec2cd372bae224865dcbe55855f419",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -696,14 +652,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -717,7 +673,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -733,35 +689,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/702"
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/716"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/702"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/716"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/702/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/716/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/702/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/716/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/b167f8e1368060201f5bb8fbf7dca961230d10da"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/4e2e76170356c6b4c98cb2046e2a2f1fc8701278"
    }
   },
   "author_association": "OWNER",
@@ -770,17 +726,17 @@
   "active_lock_reason": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700",
-  "id": 4601928764,
-  "node_id": "PR_kwDOUJyJf88AAAABEkvcPA",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/700",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/700.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/700.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/700",
-  "number": 700,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715",
+  "id": 4604289828,
+  "node_id": "PR_kwDOUJyJf88AAAABEm_jJA",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/715",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/715.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/715.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/715",
+  "number": 715,
   "state": "open",
   "locked": false,
-  "title": "feat(QPBT): derive combining parameters from line projections",
+  "title": "docs(QPBT): document the square-root error deviation",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -802,9 +758,372 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n\nThe line combining formula previously required explicit affine compatibility,\nalthough the source assumes only that each projected point lies on its\ncontaining line (`eq:combine-lines`,\n`references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:970-989`).\nProjection inclusion now supplies that compatibility, including constant\nprojections and zero directions. The source definition remains unmarked:\nthe existing coefficient carrier still admits answers without a geometric\nvalue on singleton lines.\n\n### Description\n\nThe new `Combining/LinePolynomial.lean` module proves these declarations in\n`MIPStarRE.QPBT`:\n\n- `exists_affine_parameters_of_linePoints_subset`\n- `exists_isCombineLineCompatible_of_projection_mem`\n- `exists_combineLinePoly_of_projection_mem`\n- `evaluatesTo_zero_direction_iff`\n- `not_evaluatesTo_parameter_on_zero_direction`\n\nParameters for the projected points at zero and one determine the affine\nchange of parameter. The existing combination formula and degree theorem\nthen give degree at most `c+1` and coefficient evaluation for every pair of\ndegree-`c` answers. On a singleton, the answer `T` cannot evaluate because\nparameters zero and one represent the same point but give different values.\nThe audit also distinguishes formal representatives from functions, using\n`T^q-T` over a finite field.\n\nStatement integrity: the geometric theorem has exactly the source projection\nhypothesis, with compatibility derived as a conclusion. The parameter theorem\nuses the current bounded coefficient carrier and proves parameter evaluation\nand degree. The paper instead uses polynomial functions on geometric lines\nand asserts geometric evaluation. Relative to that full claim, the proved\nparameter conclusion is weaker. No existing public theorem header, carrier,\ngame, sampling law, or completion criterion changes.\n\nThree auxiliary blueprint nodes receive statement and proof marks.\n`def:combine-map` retains its original statement and `\\notready`. The focused\naudit records the obstruction, affected consumers, a separate carrier proposal,\nand all preserved predecessor costs:\n`audits/2026-09-22_combining-map-source-domain.md`.\n\nRemaining exit criteria are an explicit correspondence with source polynomial\nfunctions, independence from representatives and affine choices, geometric\nevaluation on all source cases, and any required measurement/game transport\nfor non-descending coefficient answers. Main must separately decide that\ndefinition-level scope; full CI and independent review remain required before\nmerge. This PR does not close the source-definition completion item.\n\n### Testing\n\n- Focused Lean checks passed for the new module, `Combining/Defs.lean`,\n  `Combining/Lines/SubLineConstruct.lean`,\n  `Combining/ExtendedLines/Measurement.lean`, the QPBT umbrella, and the root.\n- All five new axiom closures contain only standard Lean axioms; a scratch\n  harness checks an actual singleton line and the finite-field representative\n  example. Proof-hole and forbidden-token scans have no matches.\n- `lake exe checkdecls blueprint/lean_decls`: all 1881 declarations resolved.\n- Bibliography generation, `leanblueprint web`, LaTeX lint, blueprint sync,\n  and changed-declaration coverage passed. The renderer-generated declaration\n  list was regenerated before the final successful sync; warnings remain in\n  unchanged chapters.\n- Source-statement and whitespace checks passed. Every milestone used normal\n  hooks. No full `lake build` was run; Main owns full CI and independent review.\n\n---\nAddresses #695\n",
-  "created_at": "2026-09-22T12:15:20Z",
-  "updated_at": "2026-09-22T13:15:36Z",
+  "body": "### Motivation\n\nThe printed polynomial-error shorthand couples its coefficient and exponent,\nwhich cannot bound the square root uniformly on positive inputs. Issue #711\ndocuments the intermediate discrepancy under the owner's documentary completion\ninstruction.\n\n### Description\n\nState the source and Lean quantifiers, retain the scalar refutation, and explain\nthe independent coefficient/exponent convention and its actual consumers. Add\nthe blueprint remark, a documented-deviation register disposition and matching\nDEVIATIONS disclosure. No Lean theorem, proof, source mirror or formalization\nmark changes. PR #707 supplies the common completion-protocol/checker support.\n\n### Testing\n\nThe author built the six-page note PDF and blueprint web, checked note style,\nblueprint LaTeX and synchronization, and committed through normal hooks at\n2dd2d894358389094b31b48600a6812041f41cf8. Full exact-head CI and independent\nreview are published separately by the local workflow.\n\n---\nCloses #711\n",
+  "created_at": "2026-09-22T16:13:16Z",
+  "updated_at": "2026-09-22T16:44:40Z",
+  "closed_at": null,
+  "merged_at": null,
+  "merge_commit_sha": "3bf4f1ad5b858bc610f2273f550a2f1d6a1f2cf0",
+  "assignees": [],
+  "requested_reviewers": [],
+  "requested_teams": [],
+  "labels": [
+   {
+    "id": 12015972669,
+    "node_id": "LA_kwDOUJyJf88AAAACzDUxPQ",
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/documentation",
+    "name": "documentation",
+    "color": "0075ca",
+    "default": true,
+    "description": "Improvements or additions to documentation",
+    "archived_at": null,
+    "archived_by": null
+   }
+  ],
+  "milestone": null,
+  "draft": false,
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715/comments",
+  "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/715/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/4ac910dfb08185deedc13eb9ee27c5776687d3e3",
+  "head": {
+   "label": "Dengnifer:issue-711-square-root-deviation-20260922",
+   "ref": "issue-711-square-root-deviation-20260922",
+   "sha": "4ac910dfb08185deedc13eb9ee27c5776687d3e3",
+   "user": {
+    "login": "Dengnifer",
+    "id": 89234078,
+    "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+    "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/Dengnifer",
+    "html_url": "https://github.com/Dengnifer",
+    "followers_url": "https://api.github.com/users/Dengnifer/followers",
+    "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+    "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+    "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+    "repos_url": "https://api.github.com/users/Dengnifer/repos",
+    "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+   },
+   "repo": {
+    "id": 1352436095,
+    "node_id": "R_kgDOUJyJfw",
+    "name": "MIPStarRE-QPBT",
+    "full_name": "Dengnifer/MIPStarRE-QPBT",
+    "private": false,
+    "owner": {
+     "login": "Dengnifer",
+     "id": 89234078,
+     "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+     "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+     "gravatar_id": "",
+     "url": "https://api.github.com/users/Dengnifer",
+     "html_url": "https://github.com/Dengnifer",
+     "followers_url": "https://api.github.com/users/Dengnifer/followers",
+     "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+     "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+     "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+     "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+     "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+     "repos_url": "https://api.github.com/users/Dengnifer/repos",
+     "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+     "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+     "type": "User",
+     "user_view_type": "public",
+     "site_admin": false
+    },
+    "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
+    "description": "QPBT formalization (MIP*=RE), track A: Lean 4 + local agent workflow",
+    "fork": false,
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT",
+    "forks_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/forks",
+    "keys_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/teams",
+    "hooks_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/hooks",
+    "issue_events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/events",
+    "assignees_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/tags",
+    "blobs_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/languages",
+    "stargazers_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/stargazers",
+    "contributors_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/contributors",
+    "subscribers_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/subscribers",
+    "subscription_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/subscription",
+    "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/merges",
+    "archive_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/downloads",
+    "issues_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels{/name}",
+    "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
+    "created_at": "2026-08-31T13:19:26Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
+    "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
+    "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
+    "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
+    "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
+    "homepage": null,
+    "size": 350001,
+    "stargazers_count": 1,
+    "watchers_count": 1,
+    "language": "Lean",
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": false,
+    "has_wiki": true,
+    "has_pages": false,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 82,
+    "license": {
+     "key": "apache-2.0",
+     "name": "Apache License 2.0",
+     "spdx_id": "Apache-2.0",
+     "url": "https://api.github.com/licenses/apache-2.0",
+     "node_id": "MDc6TGljZW5zZTI="
+    },
+    "allow_forking": true,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "has_pull_requests": true,
+    "pull_request_creation_policy": "all",
+    "topics": [],
+    "visibility": "public",
+    "forks": 0,
+    "open_issues": 82,
+    "watchers": 1,
+    "default_branch": "main"
+   }
+  },
+  "base": {
+   "label": "Dengnifer:main",
+   "ref": "main",
+   "sha": "53d12daa1ea79aa6c62ef93c3b621a331e1368b0",
+   "user": {
+    "login": "Dengnifer",
+    "id": 89234078,
+    "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+    "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/Dengnifer",
+    "html_url": "https://github.com/Dengnifer",
+    "followers_url": "https://api.github.com/users/Dengnifer/followers",
+    "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+    "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+    "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+    "repos_url": "https://api.github.com/users/Dengnifer/repos",
+    "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+   },
+   "repo": {
+    "id": 1352436095,
+    "node_id": "R_kgDOUJyJfw",
+    "name": "MIPStarRE-QPBT",
+    "full_name": "Dengnifer/MIPStarRE-QPBT",
+    "private": false,
+    "owner": {
+     "login": "Dengnifer",
+     "id": 89234078,
+     "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+     "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+     "gravatar_id": "",
+     "url": "https://api.github.com/users/Dengnifer",
+     "html_url": "https://github.com/Dengnifer",
+     "followers_url": "https://api.github.com/users/Dengnifer/followers",
+     "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+     "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+     "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+     "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+     "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+     "repos_url": "https://api.github.com/users/Dengnifer/repos",
+     "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+     "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+     "type": "User",
+     "user_view_type": "public",
+     "site_admin": false
+    },
+    "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
+    "description": "QPBT formalization (MIP*=RE), track A: Lean 4 + local agent workflow",
+    "fork": false,
+    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT",
+    "forks_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/forks",
+    "keys_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/teams",
+    "hooks_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/hooks",
+    "issue_events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/events",
+    "assignees_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/tags",
+    "blobs_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/languages",
+    "stargazers_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/stargazers",
+    "contributors_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/contributors",
+    "subscribers_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/subscribers",
+    "subscription_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/subscription",
+    "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/merges",
+    "archive_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/downloads",
+    "issues_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels{/name}",
+    "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
+    "created_at": "2026-08-31T13:19:26Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
+    "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
+    "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
+    "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
+    "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
+    "homepage": null,
+    "size": 350001,
+    "stargazers_count": 1,
+    "watchers_count": 1,
+    "language": "Lean",
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": false,
+    "has_wiki": true,
+    "has_pages": false,
+    "has_discussions": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "disabled": false,
+    "open_issues_count": 82,
+    "license": {
+     "key": "apache-2.0",
+     "name": "Apache License 2.0",
+     "spdx_id": "Apache-2.0",
+     "url": "https://api.github.com/licenses/apache-2.0",
+     "node_id": "MDc6TGljZW5zZTI="
+    },
+    "allow_forking": true,
+    "is_template": false,
+    "web_commit_signoff_required": false,
+    "has_pull_requests": true,
+    "pull_request_creation_policy": "all",
+    "topics": [],
+    "visibility": "public",
+    "forks": 0,
+    "open_issues": 82,
+    "watchers": 1,
+    "default_branch": "main"
+   }
+  },
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715"
+   },
+   "html": {
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/715"
+   },
+   "issue": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/715"
+   },
+   "comments": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/715/comments"
+   },
+   "review_comments": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715/comments"
+   },
+   "review_comment": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
+   },
+   "commits": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/715/commits"
+   },
+   "statuses": {
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/4ac910dfb08185deedc13eb9ee27c5776687d3e3"
+   }
+  },
+  "author_association": "OWNER",
+  "auto_merge": null,
+  "assignee": null,
+  "active_lock_reason": null
+ },
+ {
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709",
+  "id": 4604044782,
+  "node_id": "PR_kwDOUJyJf88AAAABEmwl7g",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/709",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/709.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/709.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/709",
+  "number": 709,
+  "state": "open",
+  "locked": false,
+  "title": "chore(artifact): align references after repository rename",
+  "user": {
+   "login": "Dengnifer",
+   "id": 89234078,
+   "node_id": "MDQ6VXNlcjg5MjM0MDc4",
+   "avatar_url": "https://avatars.githubusercontent.com/u/89234078?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/Dengnifer",
+   "html_url": "https://github.com/Dengnifer",
+   "followers_url": "https://api.github.com/users/Dengnifer/followers",
+   "following_url": "https://api.github.com/users/Dengnifer/following{/other_user}",
+   "gists_url": "https://api.github.com/users/Dengnifer/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/Dengnifer/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/Dengnifer/subscriptions",
+   "organizations_url": "https://api.github.com/users/Dengnifer/orgs",
+   "repos_url": "https://api.github.com/users/Dengnifer/repos",
+   "events_url": "https://api.github.com/users/Dengnifer/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/Dengnifer/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "### Motivation\n\nAfter the rename to `Dengnifer/MIPStarRE-QPBT`, current artifact metadata,\nworkflow defaults, and documentation still named the former repository.\nIssue #705 requires current URLs and anonymization that covers both aliases.\n\n### Description\n\n- Align current instructions, documentation links, site configuration, artifact\n  `SOURCE_REPO`, and the missing-remote sync fallback with the identity returned\n  by the primary `gh_common.py` and GitHub API.\n- Preserve owner-name anonymization for current and historical GitHub URLs;\n  also anonymize the lowercase Pages host. Exercise both aliases in text and\n  PDF leak checks, manifest metadata, and the offline sync fallback.\n- Correct the obsolete instruction treating the current repository's former\n  umbrella spelling as a separate repository. External changes still require\n  owner authorization; append the required protocol/incident records.\n- Isolate the offline command-construction fixture from an inherited escalation\n  reason so the normal commit hook can validate bounded-job tests.\n- Preserve mathematics, paper mirrors, historical records, source issue/PR\n  identifiers, and accepted comparator evidence. The separately authorized\n  comparator URL-only commit was pushed from `360402fdf4a39399f94331452d6e5d0a35c144be`\n  to `0f02b0b980041b7ef0f490f9adc18d2a61283121`, retaining library pin\n  `ecb97d1f66eec1e6fad964f144f78b91ce1fab36` and every other dependency field.\n\n### Testing\n\n- Normal hooks passed: 869 tests, nine skips; the 90 focused packaging/sync/GitHub\n  tests and 19 affected command/model-policy tests also passed. Two initial\n  environment-dependent hook failures and their fixture fix are recorded in\n  `results/telemetry/events.md`.\n- Hook installation, shell syntax, whitespace, gap-note structure, and normal\n  statement-integrity checks passed. `texra-blueprint --root . paper-gaps check`\n  resolved all 43 referenced slugs, with existing verdict-marker warnings.\n- Authored and anonymous exports at `664f5006e7739e9ee33205945dbb13639a84613e`\n  both passed: 962 files, 49 PDFs built and scanned, every project import\n  present, no remaining leak findings, and no surviving anonymous rule text.\n  Both retain one existing link to an excluded audit and two existing missing\n  LDT paper locators; these reports are not claimed clean.\n- Source audit confirmed URL-only changes in 30 files, append-only ledgers,\n  unchanged protected sources/evidence, and a clean library worktree.\n  Parsed comparator TOML/JSON checks preserved every pin; checksums confirmed\n  the original dirty comparator checkout was untouched.\n- Full library CI and independent review remain Main's required merge gates.\n  No Lean/tarball rebuild or new comparator acceptance is claimed. Accepted\n  run `35638601720` remains tied to its original SHA; separately triggered run\n  `35742141249` was last observed in progress.\n\n---\nCloses #705\n",
+  "created_at": "2026-09-22T15:46:35Z",
+  "updated_at": "2026-09-22T16:09:35Z",
   "closed_at": null,
   "merged_at": null,
   "merge_commit_sha": null,
@@ -822,41 +1141,19 @@
     "description": "Improvements or additions to documentation",
     "archived_at": null,
     "archived_by": null
-   },
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
-    "archived_at": null,
-    "archived_by": null
    }
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/700/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/8089cc881cbc495759018f097e4e8ca3545de421",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/709/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/207b5cf8cdeb00449f0034a9680a4187dca4da70",
   "head": {
-   "label": "Dengnifer:issue-695-source-combine-map-20260922",
-   "ref": "issue-695-source-combine-map-20260922",
-   "sha": "8089cc881cbc495759018f097e4e8ca3545de421",
+   "label": "Dengnifer:issue-705-repository-rename-20260922",
+   "ref": "issue-705-repository-rename-20260922",
+   "sha": "207b5cf8cdeb00449f0034a9680a4187dca4da70",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -946,14 +1243,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -967,7 +1264,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -983,7 +1280,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -991,7 +1288,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "94f86baa43b0d24ba18ea55ac14cb06b1e3471db",
+   "sha": "317aa9f4eb625f502043f57398e43f8e80201bf6",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1081,14 +1378,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -1102,7 +1399,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1118,35 +1415,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/700"
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/709"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/700"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/709"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/700/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/709/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/700/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/709/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/8089cc881cbc495759018f097e4e8ca3545de421"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/207b5cf8cdeb00449f0034a9680a4187dca4da70"
    }
   },
   "author_association": "OWNER",
@@ -1155,17 +1452,17 @@
   "active_lock_reason": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699",
-  "id": 4601861700,
-  "node_id": "PR_kwDOUJyJf88AAAABEkrWRA",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/699",
-  "number": 699,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708",
+  "id": 4603679074,
+  "node_id": "PR_kwDOUJyJf88AAAABEmaRYg",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/708",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/708.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/708.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/708",
+  "number": 708,
   "state": "open",
   "locked": false,
-  "title": "fix(QPBT/Combining): complete linearity normalization evidence",
+  "title": "feat(QPBT/Algebra): prove deterministic elimination and its cost",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -1187,12 +1484,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n\nNatarajan--Vidick Theorem 10 (`thm:qblr`, `references/nv-paper/fullpaper.tex:1074-1113`)\nprints an averaged squared operator-distance bound of delta. Its binary\nmeasurement calculation at lines 900-912 instead gives operator bound\n2 delta. The four-point scalar example refutes the printed bound even with\narbitrary ancillary extensions. Issue #694 completes the normalization evidence\ncarried from #124, #129, and #173 for blueprint `thm:linearity`.\n\n### Description\n\n- Retain both the conventional and literal duplicated-density readings as\n  unasserted universal propositions, with every finite input and ancillary\n  space quantified. Prove their negations in Lean using the four-point family:\n  correlation 1/4, error parameter 3/4, and optimal operator error 1.\n- Add the corrected existence theorem for every natural index length and real\n  error parameter. Preserve the existing operator, binary-measurement, and\n  common-ancilla statements and proofs.\n- Prove mathematically that 2 is the least universal multiplicative constant\n  using Boolean quadratic families, and distinguish this from the exact\n  normalization identity and the error of the Fourier-square construction.\n  The asymptotic sharpness argument is not claimed as a Lean theorem.\n- Record all source applications, blueprint references and dependencies, Lean\n  callers, adversarial checks, and historical budget provenance in the note and\n  focused audit. Keep the normalization register pending independent review and\n  main adoption. The separate padding/absorption question remains open.\n\nThe adoption evidence to assess independently is correctness on the full\nprinted domain, sufficiency for every source and blueprint consumer, minimality\nof the factor two, and Lean convergence. Approval of a retained counterexample\nalone does not certify all four conditions or make the pending row terminal.\n\n### Testing\n\n- Focused Lean checks passed for `Combining/Linearity.lean`,\n  `Combining/Linearity/PrintedClaims.lean`, `Combining/Points.lean`,\n  `MIPStarRE/QPBT.lean`, and `MIPStarRE.lean`.\n- Seven targeted axiom-closure checks contain only `propext`,\n  `Classical.choice`, and `Quot.sound`; the changed Lean modules contain no\n  proof holes, axioms, bypass tactics, or debug commands.\n- Blueprint web rendering, synchronization, LaTeX conventions, and all 1886\n  generated declaration resolutions passed. The final web render has no\n  unresolved-label errors or missing bibliography entries. Existing sync\n  warnings outside this change remain.\n- The gap note builds to PDF with resolved references and no overfull boxes;\n  note style and paper-gap reference checks passed. Normal commit hooks passed.\n- Exact enumeration of all scalar Boolean families for index lengths 0 through\n  4 found no violation of the corrected bound. The unbounded sharpness argument\n  is given separately as a proof.\n- Full build, canonical CI, and independent review are reserved for main and\n  have not been run by this author session.\n\n---\nAddresses #694\n",
-  "created_at": "2026-09-22T12:07:57Z",
-  "updated_at": "2026-09-22T14:06:30Z",
+  "body": "### Motivation\n- Complete the executable construction required by #690 and paper `def:canonical-complement` (`references/qpbt-paper/04_preliminaries.tex:303-333`). The existing RREF correspondence identifies the right complement; the source also requires a canonical, efficient elimination algorithm.\n\n### Description\n- Add deterministic Gauss-Jordan elimination on stored finite matrices, choosing columns from left to right and the first eligible nonzero row. Prove that its nonzero rows satisfy the existing RREF predicate and preserve the input row span, that trailing rows vanish, and that the computed nonpivot indices equal `canonicalComplement`. Independent inputs produce `m` pivot rows.\n- Count the actual tabulated field computations and bounded pivot searches. Prove `n*(m+n+2*m*n)` as an upper bound, assigning unit cost to field division, multiplication, subtraction, and equality tests. Intermediate rows are materialized; skipped field tests may be conservatively charged. The input is stored data. No machine-instruction, allocation, or bit-complexity claim is made.\n- Export the algorithm through `MIPStarRE.QPBT`. Add separate blueprint entries for the construction, correctness, and arithmetic bound, with explicit paper-to-Lean index conversion. Mark the source canonical definition and retire only its resolved construction target in the completion and adoption records. The source hypotheses and complement conclusion are unchanged.\n- Record the source-integrity and cost-model evidence in `audits/2026-09-22_issue-690-canonical-elimination.md` and `audits/2026-09-22_issue-690-canonical-integration.md`. Preserve the predecessor RREF/complement proof and all #676/#690 author, repair, CI, and review costs.\n\n### Testing\n- Focused Lean checks passed for `RowEchelonAlgorithm.lean`, `QPBT.lean`, and `MIPStarRE.lean`; the root import products were refreshed only in the worktree. The predecessor also checked `RowEchelon.lean`.\n- `texra-blueprint bbl`, `leanblueprint web`, blueprint LaTeX lint, synchronization, and `lake exe checkdecls blueprint/lean_decls` passed. All 1,889 names resolve. Web rendering has no unresolved-reference warning; synchronization retains only existing warnings in other chapters.\n- A root-import harness verifies standard-axiom closure for all 18 declarations linked by the changed entries. The rerun predecessor harness covers all 28 algorithm declarations, finite-field and rational computations, pivot/row views, charged counts, and degenerate matrices. No proof holes or forbidden proof primitives were introduced.\n- Hook installation and whitespace checks passed; integration uses normal commit hooks. Logs are under `~/.cache/mipstarre-dev/sessions/blueprint-690-20260922-01-*`. The generated declaration list is gitignored.\n- Full CI and independent review remain with main. The combined branch must incorporate PR691's actually merged index-documentation repair before final validation; this integration preserves its assigned paragraphs.\n\n---\nAddresses #690\nContinues #676 without resetting its predecessor work or costs.\n",
+  "created_at": "2026-09-22T15:07:55Z",
+  "updated_at": "2026-09-22T16:54:58Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "bebf0b5b3577f6acd4d7f21efb30b5fe3abc04ff",
+  "merge_commit_sha": "1a70fd28f2a5ed66fa80314aec5fee1819b1efd8",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -1233,15 +1530,15 @@
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/699/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/d3089cbea6cfabe4c0ea97c7b8276be341ed33fb",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/708/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/d3a89eb6690958a60efee55448d7ec94cc8d24a8",
   "head": {
-   "label": "Dengnifer:issue-694-linearity-normalization-20260922",
-   "ref": "issue-694-linearity-normalization-20260922",
-   "sha": "d3089cbea6cfabe4c0ea97c7b8276be341ed33fb",
+   "label": "Dengnifer:issue-690-canonical-elimination-20260922",
+   "ref": "issue-690-canonical-elimination-20260922",
+   "sha": "d3a89eb6690958a60efee55448d7ec94cc8d24a8",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1331,14 +1628,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -1352,7 +1649,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1368,7 +1665,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1376,7 +1673,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "ff6ac05994082608ff0fcd44a74e2da4044155a6",
+   "sha": "ba5a7f874adfeecc9aea60a91f3f56f82ddc111c",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1466,14 +1763,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -1487,7 +1784,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1503,35 +1800,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699"
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/708"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/699"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/708"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/699/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/708/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/699/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/708/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/d3089cbea6cfabe4c0ea97c7b8276be341ed33fb"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/d3a89eb6690958a60efee55448d7ec94cc8d24a8"
    }
   },
   "author_association": "OWNER",
@@ -1540,17 +1837,17 @@
   "active_lock_reason": null
  },
  {
-  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696",
-  "id": 4601421654,
-  "node_id": "PR_kwDOUJyJf88AAAABEkQfVg",
-  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/696",
-  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/696.diff",
-  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/696.patch",
-  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/696",
-  "number": 696,
+  "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707",
+  "id": 4603273404,
+  "node_id": "PR_kwDOUJyJf88AAAABEmBgvA",
+  "html_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/707",
+  "diff_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/707.diff",
+  "patch_url": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/707.patch",
+  "issue_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/707",
+  "number": 707,
   "state": "open",
   "locked": false,
-  "title": "feat(QPBT/Combining): prove complex subline overlap estimates",
+  "title": "docs(QPBT): document nonempty attainment counterexample",
   "user": {
    "login": "Dengnifer",
    "id": 89234078,
@@ -1572,12 +1869,12 @@
    "user_view_type": "public",
    "site_admin": false
   },
-  "body": "### Motivation\n- Claims 17-1 and 17-3 in `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex:1140-1239` require complex scalar estimates. The existing direct-law proofs only supplied real-part bounds for these two claims. Claim 17-1's ordered product can be non-Hermitian, so its squared-norm calculation needs `W` adjoint times `W`.\n\n### Description\n- Prove the complex Claim 17-1 bound for the actual X-Z-X measurement, with constant `2 * sqrt(deltaQ)`, using the existing complex weighted Cauchy-Schwarz and same-placement distance APIs.\n- Prove that the Z overlap is real for any line POVM by positivity on opposite registers. Obtain the complex Z bound with the real estimate's unchanged constant, whose proof permits `2`. For the concrete X-Z-X measurement, derive the polynomial line error and line-consistency data from the existing pasting theorem.\n- Link all five new public declarations through separate auxiliary blueprint entries. State the constructed measurement, completed evaluations, directly indexed law, quantitative hypotheses and constants explicitly; distinguish the general Z estimate's assumed line consistency from the concrete theorem's internal construction. Preserve the real-part entries and all source-claim completion markers.\n- Update the subline gap note, source and consumer audit, and the subline register row. Its status remains `open`: source-law transport, zero-direction evaluation semantics, and the printed extended-line error are not resolved. No Lean hypothesis, game definition, source-law identification or completion criterion is changed.\n\n### Testing\n- `leanblueprint web` passes after bibliography regeneration. Normal declaration-index generation produces 1,871 entries, and `lake exe checkdecls blueprint/lean_decls` resolves all of them. The generated index remains ignored under the repository's existing rules.\n- Source synchronization passes with `--ci --warn-missing-blueprint --fail-on-missing-blueprint`, comparing both changed Lean modules against `ccba9a6756c58c0efa5cda04747e6a97935d71fb`. All five new public declarations have blueprint coverage. Four existing orphan marks in chapter 16 and two existing missing proof marks in chapters 13 and 14 remain advisory warnings.\n- Focused Lean checks pass for `SubLineComplex.lean` and `Claims.lean`. The axiom audit of all five new declarations, five retained scalar declarations, and the line-consistency construction reports only `propext`, `Classical.choice`, and `Quot.sound`.\n- The mathematical author's recorded checks also passed for both re-export files, `ExtendedLines/Estimates.lean`, `Apply.lean`, and the three supplied-witness consumer modules named in the audit. That session validated the gap-note PDF, duplicate names, source headers, file length and proof integrity, plus 100 seeded X-Z-X diagnostics and a commuting zero-distance case.\n- Hook installation, normal pre-commit checks, blueprint LaTeX conventions and whitespace checks pass without skips. No Lean source changes were needed during blueprint integration. Full locked CI, publication and independent review remain with main.\n\n---\nAddresses #689\nAddresses #118\n",
-  "created_at": "2026-09-22T11:22:44Z",
-  "updated_at": "2026-09-22T13:38:17Z",
+  "body": "### Motivation\n\n- The printed `lem:symmetric-strat` asserts attainment of an unbounded-dimension supremum. The existing empty-answer Lean counterexample does not settle its nonempty source domain (`references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:94-132`; #703, #524).\n\n### Description\n\n- Give an explicit nonempty symmetric game with 419 questions and 16 answers, normalized question law, and Boolean predicate. Verify its construction against Slofstra's arXiv:1703.08618v2 and derive value one with no optimal finite-dimensional strategy. Include an executable enumeration of the underlying 184-by-235 binary system.\n- Distinguish the external mathematical refutation from the missing kernel proof. Preserve every Lean declaration, the exact unasserted printed proposition, the given-strategy and positive-slack results, and the register's `open` status. No source definition or completion criterion changes.\n- Trace both direct paper uses, the complete blueprint descendant set, and Lean callers. The value conclusions remain justified; answer reduction's printed entanglement bound needs an additional argument because symmetrization doubles Schmidt rank. Reconcile both predecessor ledgers, including failed attempts, duplicate records, shared costs, and unknown durations.\n- This is a documented mathematical obstruction and a main decision packet, not terminal adoption under C3. Independent review, the concrete external-theorem formalization, and the remaining sufficiency/adoption decisions remain open.\n\n### Testing\n\n- Focused Lean checks of `Games/StrategyClasses.lean`, `Games/Symmetrization.lean`, `Test/AxiomAudit.lean`, and `MIPStarRE/QPBT.lean` passed. Six focused axiom probes use only `propext`, `Classical.choice`, and `Quot.sound`; no proof holes were found in the two support files.\n- Finite-system enumeration and JSON validation passed: 184 rows, 235 variables, GF(2) ranks 180/181, supported-pair mass `1/86480`. These checks do not prove quantum nonattainment.\n- Blueprint web rendering, normal bibliography/declaration-list regeneration, sync, all 1877 declaration links, LaTeX conventions, paper-gap source-key/style checks, and the 14-page note PDF passed. Existing unrelated advisory metadata warnings are recorded in the audit. Initial stale generated entries and a corrected LaTeX alignment failure are also retained there.\n- Normal commit hooks passed at `dbcf558aa7452e4aef854481ce19f40e99dd3fe1`; no full `lake build` or full CI was run. Main owns full CI and independent review.\n\n---\nAddresses #703, #524, #173, #667\n",
+  "created_at": "2026-09-22T14:27:42Z",
+  "updated_at": "2026-09-22T16:21:54Z",
   "closed_at": null,
   "merged_at": null,
-  "merge_commit_sha": "dd34833617483ba1c888bee3cb632ba096962629",
+  "merge_commit_sha": "23382d074c00ef46993eb49598e991d3749aeab1",
   "assignees": [],
   "requested_reviewers": [],
   "requested_teams": [],
@@ -1592,41 +1889,19 @@
     "description": "Improvements or additions to documentation",
     "archived_at": null,
     "archived_by": null
-   },
-   {
-    "id": 12025010884,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8axA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/formalization",
-    "name": "formalization",
-    "color": "ededed",
-    "default": false,
-    "description": "Lean formalization of a mathematical statement",
-    "archived_at": null,
-    "archived_by": null
-   },
-   {
-    "id": 12025013584,
-    "node_id": "LA_kwDOUJyJf88AAAACzL8lUA",
-    "url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/labels/paper-2001.04383",
-    "name": "paper-2001.04383",
-    "color": "ededed",
-    "default": false,
-    "description": "MIP*=RE (arXiv:2001.04383) \u2014 the primary paper of this track",
-    "archived_at": null,
-    "archived_by": null
    }
   ],
   "milestone": null,
   "draft": false,
-  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696/commits",
-  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696/comments",
+  "commits_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707/commits",
+  "review_comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707/comments",
   "review_comment_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}",
-  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/696/comments",
-  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/5b4e80f95f7d9c6b34b7f5cb309205732965c96b",
+  "comments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/707/comments",
+  "statuses_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/a4782a5acc1627ec7ab76cf67592fdd53bea535c",
   "head": {
-   "label": "Dengnifer:issue-689-subline-complex-20260922",
-   "ref": "issue-689-subline-complex-20260922",
-   "sha": "5b4e80f95f7d9c6b34b7f5cb309205732965c96b",
+   "label": "Dengnifer:issue-703-nonempty-attainment-20260922",
+   "ref": "issue-703-nonempty-attainment-20260922",
+   "sha": "a4782a5acc1627ec7ab76cf67592fdd53bea535c",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1716,14 +1991,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -1737,7 +2012,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1753,7 +2028,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -1761,7 +2036,7 @@
   "base": {
    "label": "Dengnifer:main",
    "ref": "main",
-   "sha": "c535429ce836965939afbaf10cdf0b698c2a3295",
+   "sha": "04e7a7d64354df6e2a4a8d03bc6e978284372ebe",
    "user": {
     "login": "Dengnifer",
     "id": 89234078,
@@ -1851,14 +2126,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -1872,7 +2147,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -1888,35 +2163,35 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
   },
   "_links": {
    "self": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707"
    },
    "html": {
-    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/696"
+    "href": "https://github.com/Dengnifer/MIPStarRE-QPBT/pull/707"
    },
    "issue": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/696"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/707"
    },
    "comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/696/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/issues/707/comments"
    },
    "review_comments": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696/comments"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707/comments"
    },
    "review_comment": {
     "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/comments{/number}"
    },
    "commits": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/696/commits"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/pulls/707/commits"
    },
    "statuses": {
-    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/5b4e80f95f7d9c6b34b7f5cb309205732965c96b"
+    "href": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/statuses/a4782a5acc1627ec7ab76cf67592fdd53bea535c"
    }
   },
   "author_association": "OWNER",
@@ -2090,14 +2365,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2111,7 +2386,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2127,7 +2402,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2225,14 +2500,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2246,7 +2521,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2262,7 +2537,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2464,14 +2739,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2485,7 +2760,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2501,7 +2776,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2599,14 +2874,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2620,7 +2895,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2636,7 +2911,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2838,14 +3113,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2859,7 +3134,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -2875,7 +3150,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -2973,14 +3248,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -2994,7 +3269,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -3010,7 +3285,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3212,14 +3487,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -3233,7 +3508,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -3249,7 +3524,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
@@ -3347,14 +3622,14 @@
     "releases_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/releases{/id}",
     "deployments_url": "https://api.github.com/repos/Dengnifer/MIPStarRE-QPBT/deployments",
     "created_at": "2026-08-31T13:19:26Z",
-    "updated_at": "2026-09-22T14:22:30Z",
-    "pushed_at": "2026-09-22T14:22:25Z",
+    "updated_at": "2026-09-22T16:50:35Z",
+    "pushed_at": "2026-09-22T16:55:43Z",
     "git_url": "git://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "ssh_url": "git@github.com:Dengnifer/MIPStarRE-QPBT.git",
     "clone_url": "https://github.com/Dengnifer/MIPStarRE-QPBT.git",
     "svn_url": "https://github.com/Dengnifer/MIPStarRE-QPBT",
     "homepage": null,
-    "size": 335755,
+    "size": 350001,
     "stargazers_count": 1,
     "watchers_count": 1,
     "language": "Lean",
@@ -3368,7 +3643,7 @@
     "mirror_url": null,
     "archived": false,
     "disabled": false,
-    "open_issues_count": 76,
+    "open_issues_count": 82,
     "license": {
      "key": "apache-2.0",
      "name": "Apache License 2.0",
@@ -3384,7 +3659,7 @@
     "topics": [],
     "visibility": "public",
     "forks": 0,
-    "open_issues": 76,
+    "open_issues": 82,
     "watchers": 1,
     "default_branch": "main"
    }
