@@ -47,6 +47,9 @@ CI/review. The main checkpoint records live assignments.
    proved common-ancilla theorem and avoid duplicating it.
    Active whole-task construction owner: issue697, admitted3600s with preserved
    costs and a separate decision required before any source-space correction.
+   Its one continuation constructed the initial reserve and local transports;
+   full source binary-family and four-placement absorption remain unproved.
+   Both tranches are complete, with no automatic further proof continuation.
 6. **Magic Square strategy class.** Source08:612-652, thm:ms-rigidity.
    Exit: all-source-consumer proof, minimal agreement/error correction with
    adversarial checks, exact printed-claim retention and downstream Lean
@@ -115,6 +118,8 @@ CI/review. The main checkpoint records live assignments.
    695 completed the projection construction and certified the singleton
    coefficient obstruction. Main separately admitted698 for the faithful
    source-function carrier and algebraic comparison, with no game change.
+   698 completed that source-function construction atff024214; its scoped
+   source mark awaits parent700 merge, full CI and independent review.
 7. **lem:qld-4-13.** Exit: the source-law, field-evaluation and printed-rate
    targets in rows2/3/11, with the full source quantifiers. Unasserted
    PrintedExtendedLinesWitnessClaim and completed direct law stay separate.
