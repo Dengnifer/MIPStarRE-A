@@ -28,9 +28,15 @@ row-by-row adoption evidence are in the
    uses field-valued evaluations, including its unresolved zero-direction
    convention. See [the subline note](../paper-gaps/qpbt_subline-claims-line-marginal.tex).
 3. `def:combine-map`: global polynomial combination and the coefficient formula
-   are proved; `combineLinePoly_spec` assumes explicit affine compatibility.
-   Derive it from the source line-projection domain and justify evaluations on
-   degenerate lines (`14_analysis_of_the_pauli_basis_test.tex:970-989`).
+   are proved. Issue #695 derives affine compatibility from projection inclusion,
+   including constant projections and zero directions, and proves the parameter
+   formula and degree bound in `exists_combineLinePoly_of_projection_mem`.
+   Field-valued evaluation on the full coefficient carrier is still unavailable:
+   `not_evaluatesTo_parameter_on_zero_direction` proves that the answer `T`
+   has no value on a singleton line. The source uses functions on lines, so
+   carrier correspondence and representative independence remain required
+   (`14_analysis_of_the_pauli_basis_test.tex:970-989`). See
+   [the focused audit](../../audits/2026-09-22_combining-map-source-domain.md).
 4. `lem:qld-4-13`: `PrintedExtendedLinesWitnessClaim` is unasserted and uses
    the directly indexed carrier and completed evaluations. Its error form is
    not established by the proved `C m poly(epsilon,md/q)` auxiliary. See

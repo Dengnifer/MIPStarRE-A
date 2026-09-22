@@ -61,6 +61,8 @@ CI/review. The main checkpoint records live assignments.
    688's evidence is published as692. Main admitted701 for the remaining
    prescribed-effect/one-way extraction and quantitative agreement construction,
    3600s with inherited costs and pending adoption preserved.
+   701 completed both constructions and necessity evidence at e0c8f4ce;
+   publication, complete CI, independent review and Main adoption remain.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -140,3 +142,36 @@ scripts/completion_gate.py check --track qpbt on the exact published commit.
 Retain the official comparator acceptance35638601720 and record677; any required
 pin update follows comparator rules, not an unrecorded local substitute. Only
 all passing completion criteria justify the final27 comment and goal pause.
+
+Issue705 is prepared after the repository rename to MIPStarRE-QPBT: update
+active artifact/workflow references and check anonymization of both aliases,
+while retaining historical evidence and accepted comparator pins. It has no
+worker admission yet and does not activate parked infrastructure PRs.
+
+## 2026-09-22 comparator-main and final-pin requirement
+
+The owner's new standing requirement supersedes the earlier final-comparator
+assumption. Comparator main must hold the latest officially verified challenge.
+After any new pin's official run passes, fast-forward comparator main to that
+challenge commit and update docs/comparator.md as the same operational step.
+At completion, independently verify that its library pin is the FINAL library
+artifact commit on main and comparator main is the exact challenge commit
+accepted by the official run. The historical ecb97d1f acceptance alone no
+longer satisfies that final condition. Preserve it as historical evidence.
+
+Current observed state: main360402fd, accepted by35638601720; its new main run
+35741427654 is in progress.705's URL-only comparator commit0f02b0b9 is on the
+diagnostic branch; run35742141249 is in progress. No promotion or new acceptance
+is claimed yet.705 is now an active worker; its earlier unadmitted description
+above is historical. Main owns verified promotion and the subsequent record,
+and the author must not race that operation. The final completion audit must
+bind the actual artifact commit, external pin, official run and comparator
+main explicitly; C5's delegated result is not proof of these equalities.
+
+705's author is now complete at664f5006 after2303s; publication/CI/review are
+pending. Its authored and anonymous exports built/scanned49 PDFs each with
+zero remaining leak findings, but one excluded-audit link and two LDT source
+locators still fail. /tmp/main-final-artifact-links-20260922.md is the prepared,
+unadmitted whole-task packet for those exact three findings. The final artifact
+must rerun the full export from the actual final commit; this earlier package
+is supporting evidence, not the final submission artifact.
