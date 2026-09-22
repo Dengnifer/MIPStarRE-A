@@ -68,7 +68,9 @@
   as an unasserted proposition using the prescribed bit answers. Same-player
   anticommutation, which is all the soundness argument uses, is already proved
   from winning probability alone. Section~\ref{sec:adoption} distinguishes
-  these facts and the remaining construction targets; the complete dependency
+  these facts and the remaining adoption questions. Issue~\#701 constructs
+  all seven prescribed-answer bounds, with a separate linear agreement term
+  only in Alice's two measurement bounds. The complete dependency
   inventory is in
   \path{audits/2026-09-22_issue-688_ms-adoption.md}.
 \end{itemize}
@@ -78,7 +80,7 @@
 Throughout, $\game^{\MS}$ is the Magic Square game in the role-symmetric
 presentation of the source, $\strategy$ a tensor product strategy for it,
 $\eps \ge 0$ an error parameter, and $\approx_\zeta$ the state-dependent
-approximation recalled in the next section.  Four statements must be kept
+approximation recalled in the next section. Five statements must be kept
 apart.
 \begin{enumerate}
   \item \textbf{Source theorem form.}  For every strategy
@@ -131,6 +133,26 @@ apart.
   Symmetry is not assumed: the proof does not use it, and the
   source's application does not have it in the form the formalization needs
   (Section~\ref{sec:sufficiency}).
+  \item \textbf{Prescribed-answer form with separate errors.} For every
+  arbitrary strategy of value at least $1-\eps$, there is one witness with
+  Euclidean state distance $s$, prescribed-effect squared distances
+  $d^{\mathrm{pre}}_{A,j},d^{\mathrm{pre}}_{B,j}$, and prescribed-observable
+  squared anticommutator distances $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B$,
+  all operator distances evaluated on its ideal state, such that
+  \begin{align*}
+    s &\le 155904\sqrt\eps,\\
+    d^{\mathrm{pre}}_{B,j} &\le 5\cdot10^{12}\eps,\\
+    d^{\mathrm{pre}}_{A,j} &\le 15\cdot10^{12}\eps+6\Delta_j,
+      \qquad j\in\{1,5\},\\
+    a^{\mathrm{pre}}_A,\ a^{\mathrm{pre}}_B &\le 4\cdot10^{12}\eps.
+  \end{align*}
+  The defects $\Delta_j$ are the completed-variable distances of
+  \eqref{eq:defect}; they are measured, not assumed small in this statement.
+  Consequently, under $\Delta_1,\Delta_5\le\delta$, all seven prescribed
+  quantities are at most $2\cdot10^{13}(\sqrt\eps+\sqrt\delta)$.
+  This proves the prescribed-answer counterpart of item~4 while preserving
+  its explicitly restricted domain. Section~\ref{sec:separate-construction}
+  gives the construction and the sharper dependence in the displayed bounds.
 \end{enumerate}
 The formal declaration carrying the corrected form is
 \leanid{MIPStarRE.QPBT.exists\_ms\_rigidity}, with the witness and distance
@@ -825,16 +847,118 @@ source's prescribed-answer anticommutation, with a universal changed constant;
 the assembled Lean prescribed-answer extraction theorem remains a separate
 target below.
 
-An explicit remaining construction target is the prescribed-answer version
-of \leanid{exists\_ms\_rigidity}: the same value and two agreement hypotheses,
-the same witness shape, and all seven bounds for the uncompleted effects at
-$C'(\sqrt\eps+\sqrt\delta)$. A second target for assessing minimality is a
-one-way extraction from value alone, retaining the $O(\sqrt\eps)$ state
-bound and Bob's variable estimates, with Alice's constraint-read estimates;
-\eqref{eq:agreement-transfer} then transfers only the required variable
-comparisons. Neither target is an added theorem assumption or an asserted
-Lean result in this change. They do not make the unrestricted printed claim
-true, nor do they alone authorize a terminal register row.
+Both construction targets identified by the adoption audit are now proved:
+the prescribed-answer counterpart with the existing agreement hypotheses,
+and one-way extraction from value with a separate agreement transfer.
+The latter includes Alice's completed constraint-read effects and Bob's
+completed variable effects; the prescribed-variable comparison follows by
+the mass estimate above. No well-formedness premise is introduced. These
+results do not make the unrestricted printed claim true or authorize a
+terminal register row. The original audit remains the historical record of
+the formerly unasserted targets.
+
+\section{Construction with separate value and agreement errors}
+\label{sec:separate-construction}
+
+On the projective dilation, choose Alice's two logical pairs from her
+constraint reflections: read cells $1,2$ from the first row and cells $5,4$
+from the second row. Bob uses his variable reflections at cells $1,5,2,4$.
+Every cross-player comparison is therefore a sampled constraint--variable
+incidence and has norm error at most $12\sqrt\eps$. A product of two of
+Alice's constraint reflections is within $24\sqrt\eps$ of the reversed
+product of Bob's corresponding variable reflections. Transferring Bob's
+$624\sqrt\eps$ first-pair anticommutator in both directions gives
+$672\sqrt\eps$ for Alice's first pair. Her second pair already has bound
+$624\sqrt\eps$. Similarly, Bob's $96\sqrt\eps$ commutators transfer to
+Alice with bound $144\sqrt\eps$. Thus the existing two-pair swap estimate
+applies with common scale $672\sqrt\eps$. Its factor $116$, and the factor
+$2$ for normalizing the residual vector, give the state constant $155904$.
+The argument uses the solution-group relations of the cited one-way
+self-test; it does not import an unproved external theorem.
+
+Bob's shift-effect intertwining defect is bounded by his anticommutator;
+his phase-effect intertwining is exact. These statements remain true when
+Alice's isometry is changed to the constraint-based one, since tensoring
+with any isometry preserves the relevant Gram matrix. Moving to the ideal
+state and compressing the Naimark dilation give completed squared effect
+errors at most $2\cdot10^{12}\eps$. Tested incidence consistency and
+\eqref{eq:agreement-transfer} then give Alice's completed constraint-read
+errors at most $7\cdot10^{12}\eps$. Applying that same transfer with
+Alice's bare-variable family gives instead
+$7\cdot10^{12}\eps+3\Delta_j$. In particular, agreement never enters the
+state estimate. Interchanging the players gives the other one-way statement,
+with potentially different local isometries and auxiliary state.
+
+For prescribed effects, the proved squared mass bound on the original state
+is $\|R_{A,j}\psi\|^2\le36\eps$ and likewise for Bob. Isometric transport
+and the squared two-term triangle inequality bound its action on the ideal
+state by $72\eps+2s^2$. Removing this vector at outcome zero therefore gives
+\[
+  d^{\mathrm{pre}}_{A,j}\le2d_{A,j}+144\eps+4s^2,
+\]
+and similarly for Bob, which yields the constants in item~5.
+
+The product argument is independent of the measurement agreement. The
+original completed variable observable is within $12\sqrt\eps$ in norm of
+the opposite player's constraint observable at its cell. That observable
+commutes with the wrong-form operator. Hence
+$\|R_{A,1}\hat O_5\psi\|\le18\sqrt\eps$, and the analogous term with
+the variables reversed has the same bound. The prescribed observable is a
+difference of two effects, so the elementary norm bound $2$ suffices for the
+two terms with wrong-form operators on the right. The anticommutator changes
+by at most $60\sqrt\eps$. The existing squared completed anticommutator
+bound $1183680\eps$ gives norm at most $1088\sqrt\eps$, hence prescribed
+norm at most $1148\sqrt\eps$. An anticommutator of two differences of
+contractions has operator norm at most $8$. Moving it to the ideal state
+therefore gives squared error at most $(1148\sqrt\eps+8s)^2$, for each
+player. This proves the two value-only bounds in item~5 without a
+product-mass assumption.
+
+All parameter ranges are included in the uniform corollary. Apply item~5
+with $\eps_0=\min(\eps,1)$, which the value bound permits, and use
+$\eps_0\le\sqrt\eps$. The completed agreement distance is always at most
+$8$, so $\Delta_j\le\delta$ implies
+$\Delta_j\le8\sqrt\delta$ for every $\delta\ge0$. These observations
+give the stated common constant without assuming small errors. The Lean
+declarations and the validation and consumer inventory are recorded in
+\path{audits/2026-09-22_issue-701_ms-prescribed-extraction.md}.%
+\footnote{The principal declarations are
+\leanid{exists\_ms\_one\_way\_rigidity\_with\_constraints},
+\leanid{ms\_variable\_distance\_le\_agreement},
+\leanid{exists\_ms\_prescribed\_rigidity\_separate\_errors}, and
+\leanid{exists\_ms\_rigidity\_prescribed\_answers}, in the namespace
+\leanid{MIPStarRE.QPBT}. They are implemented in the focused support modules
+under \path{MIPStarRE/QPBT/Test/MagicSquareTheorems/}.}
+
+There is a precise necessity statement for the new agreement dependence.
+In the perfect rotation examples of Section~\ref{sec:adoption}, every
+witness with exact state extraction and exact Bob variable comparisons has
+$d^{\mathrm{pre}}_{A,j}=\Delta_j$: the ideal Alice and Bob effects have
+identical actions, and isometric transport preserves the remaining
+difference. Thus a uniform $o(\Delta_j)$ bound on Alice's squared distance
+is impossible while retaining those value-only exact conclusions. Linear
+dependence is sufficient by item~5 and necessary in that stated sense.
+This does not establish optimal numerical constants or joint optimality of
+all value exponents. The independent-copy and role-flag counterexamples
+still refute removal of agreement from all four variable comparisons.
+
+The source's error scale also has a precise agreement threshold. For any
+fixed $L\ge0$, the hypotheses $\Delta_j\le L\sqrt\eps$ suffice for all
+seven printed rates, with common coefficient $2\cdot10^{13}(1+L)$: apply
+item~5 with $\min(\eps,1)$ as above. Conversely, the same wrong-form
+calculation works in the reverse direction,
+$d_{A,j}\le2d^{\mathrm{pre}}_{A,j}+144\eps+4s^2$, and likewise for Bob.
+Substitution in \eqref{eq:agreement-transfer} gives
+\[
+  \Delta_j\le48s^2+6d^{\mathrm{pre}}_{A,j}
+    +6d^{\mathrm{pre}}_{B,j}+864\eps.
+\]
+Thus the seven printed rates imply $\Delta_j=O(\sqrt\eps)$ for
+$0\le\eps\le1$. This proves necessity and sufficiency of that agreement
+order, up to universal constants. Requiring $O(\eps)$ agreement merely to
+retain the printed rates is stronger than necessary. These are mathematical
+corollaries of the displayed transfers; the Lean declarations expose the
+stronger separate-error bounds rather than a separate optimality theorem.
 
 \section{Conclusion}
 
@@ -842,11 +966,13 @@ The unrestricted extraction assertion is false, even for symmetric perfect
 strategies, and is now retained unasserted with its prescribed answers.
 The robust theorem with agreement defects is proved, and the source's
 soundness use is supplied by the stronger value-only anticommutation lemmas.
-The additional agreement hypothesis, the uniform enlarged error, and the
-completed bit effects must nevertheless be compared separately with the
-printed extraction assertion. Historical decision B5 is not a certification
-of the current four adoption conditions. The row remains pending: no game,
-source semantics, completion criterion, or terminal status is changed.
+The prescribed-answer construction is now proved, and separating the errors
+removes agreement from the state, Bob measurements and both anticommutators.
+Alice's two squared errors need only a linear defect term, whose necessity
+with exact value-only state and Bob conclusions is established above.
+Global quantitative minimality and adoption still require assessment;
+historical decision B5 is not a current adoption certificate. The row remains
+pending, and no game, source semantics or completion criterion is changed.
 
 \bibliographystyle{alpha}
 \bibliography{references}

@@ -1183,6 +1183,111 @@ $4$, respectively.
   refutation either; see \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
 \end{definition}
 
+\begin{definition}[Prescribed Magic Square distances]
+  \label{def:ms-prescribed-distances}
+  \lean{MIPStarRE.QPBT.msPrescribedOperatorDistanceA, MIPStarRE.QPBT.msPrescribedOperatorDistanceB, MIPStarRE.QPBT.msPrescribedObservable, MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceA, MIPStarRE.QPBT.msPrescribedAnticommutatorDistanceB, MIPStarRE.QPBT.msConstraintOperatorDistanceA}
+  \leanok
+  \uses{def:ms-game, def:povm-distance, def:EPR}
+  Given local isometries and a unit auxiliary state, write $\Theta$ for their
+  ideal two-EPR-pair state. Let $d^{\mathrm{pre}}_{A,j}$ be the summed squared
+  distance on $\Theta$ between Alice's transported prescribed effects
+  $A^{\mathsf{Variable}_j}_{\mathsf{bit}(b)}$ and the ideal Pauli effects,
+  using $X$ for $j=1$ and $Z$ for $j=5$. Define $d^{\mathrm{pre}}_{B,j}$
+  similarly. Define $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B$ as the squared
+  anticommutator norms on $\Theta$ of the differences of those prescribed
+  effects. These are the six operator quantities in the printed claim.
+  Completed constraint-read distances instead use the binary postprocessing
+  of a constraint answer at a specified cell, assigning malformed single-bit
+  answers to zero. They are distinct from the prescribed-variable distances.
+\end{definition}
+
+\begin{lemma}[Value-only one-way Magic Square extraction]
+  \label{lem:ms-one-way-rigidity}
+  \lean{MIPStarRE.QPBT.exists_ms_one_way_rigidity, MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_constraints, MIPStarRE.QPBT.MagicSquareRigidity.ms_one_way_dilated_state_estimate}
+  \leanok
+  \uses{def:ms-game, def:tensor-product-value, def:EPR, def:ms-prescribed-distances}
+  Let $\eps\ge0$ and let an arbitrary Magic Square strategy have value at
+  least $1-\eps$. There are local isometries and a unit auxiliary state for
+  which the Euclidean state distance is at most $155904\sqrt\eps$, Bob's
+  completed variable measurements at cells $1,5$ have squared distances at
+  most $2\cdot10^{12}\eps$, and Alice's completed constraint-read
+  counterparts, from the first and second rows, have squared distances at
+  most $7\cdot10^{12}\eps$. Every operator comparison is on the ideal state.
+  No variable-agreement hypothesis is assumed. The statement with players
+  interchanged may use a different witness.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{thm:naimark, lem:ms-rigidity-support-second-pair, lem:ms-rigidity-support-joint-state, lem:ms-rigidity-support-marginals, lem:ms-rigidity-support-transfer}
+  Use Alice's constraint reflections at cells $1,5,2,4$ and Bob's variable
+  reflections at those cells in the two-pair swap construction. All four
+  cross-player comparisons are tested incidences. Product transfer gives
+  Alice's first-pair anticommutator bound $672\sqrt\eps$ and the inter-pair
+  commutator bounds $144\sqrt\eps$. The joint estimate and normalization
+  give $2\cdot116\cdot672\sqrt\eps$. Bob's intertwining bounds and
+  compression give his measurements; tested incidence agreement gives
+  Alice's constraint-read comparisons. These are auxiliary statements in
+  the one-way scope of the cited self-test; see
+  \cite{gap:qpbt_ms-rigidity-symmetric-strategies}.
+\end{proof}
+
+\begin{lemma}[Prescribed extraction with explicit agreement error]
+  \label{lem:ms-prescribed-separate-errors}
+  \lean{MIPStarRE.QPBT.exists_ms_prescribed_rigidity_separate_errors, MIPStarRE.QPBT.ms_variable_distance_le_agreement, MIPStarRE.QPBT.exists_ms_one_way_rigidity_with_agreement}
+  \leanok
+  \uses{lem:ms-one-way-rigidity, def:ms-variable-agreement, def:ms-prescribed-distances}
+  Let $\eps\ge0$ and let an arbitrary strategy have value at least
+  $1-\eps$. There is one witness with state distance $s$ and all six
+  prescribed operator distances satisfying
+  \[
+    s\le155904\sqrt\eps,\qquad
+    d^{\mathrm{pre}}_{B,j}\le5\cdot10^{12}\eps,\qquad
+    d^{\mathrm{pre}}_{A,j}\le15\cdot10^{12}\eps+6\Delta_j
+    \quad(j\in\{1,5\}),
+  \]
+  and $a^{\mathrm{pre}}_A,a^{\mathrm{pre}}_B\le4\cdot10^{12}\eps$.
+  Here $\Delta_j$ is the completed-variable agreement distance on the
+  original state; it is not required to be small. More generally, for any
+  witness, its completed distances satisfy
+  $d_{A,j}\le24s^2+3\Delta_j+3d_{B,j}$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:ms-one-way-rigidity, lem:qld-ms-anticommutator-original-state, def:ms-prescribed-distances}
+  The two ideal Pauli effects act identically on the EPR state. Insert the
+  transported original state and apply the squared three-term triangle
+  inequality to obtain the agreement transfer. Wrong-form effects have
+  original squared action at most $36\eps$; removing them at bit zero costs
+  $144\eps+4s^2$ and doubles a completed distance. For products, first move
+  the other variable to its opposite-player constraint observable. The
+  anticommutator changes by at most $60\sqrt\eps$ on the original state,
+  giving prescribed norm at most $1148\sqrt\eps$. Transport to the ideal
+  state costs at most $8s$ in norm. The gap note gives the calculations and
+  the restricted sense in which the linear agreement term is necessary.
+\end{proof}
+
+\begin{corollary}[Prescribed extraction under variable agreement]
+  \label{cor:ms-rigidity-prescribed-answers}
+  \lean{MIPStarRE.QPBT.exists_ms_rigidity_prescribed_answers}
+  \leanok
+  \uses{lem:ms-prescribed-separate-errors, def:ms-variable-agreement}
+  There is a universal constant $C=2\cdot10^{13}$ such that, for every
+  $\eps,\delta\ge0$ and every strategy of value at least $1-\eps$ with
+  $\Delta_1,\Delta_5\le\delta$, one witness satisfies all seven printed
+  quantities, using prescribed effects, at most
+  $C(\sqrt\eps+\sqrt\delta)$. The state quantity is Euclidean and the six
+  operator quantities are squared distances on the ideal state. This is an
+  explicitly restricted corollary; it does not prove the unrestricted
+  proposition of Definition~\ref{def:ms-rigidity-printed-claim}.
+\end{corollary}
+\begin{proof}
+  \leanok
+  \uses{lem:ms-prescribed-separate-errors}
+  Apply the preceding lemma with $\min(\eps,1)\le\sqrt\eps$.
+  The completed agreement distances are at most $8$, so the two agreement
+  hypotheses imply $\Delta_j\le8\sqrt\delta$ for every $\delta\ge0$.
+\end{proof}
+
 % Formalization-support and specialization nodes for Theorem~\ref{thm:ms-rigidity}. None of
 % the four statements below is a named result of the source article: the first two isolate
 % the facts about Definition~\ref{def:ms-variable-agreement} that the formalization proves,
