@@ -16,7 +16,7 @@ Review remains independent and exact-head CI remains required.
 
 | Register row | Brief | Current disposition after the 17:27Z allocation change |
 |---|---|---|
-| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 correction completedb3d3a0dc; publishedc9c6240c has green full CI. Its default Sol SECOND review waits for all grandfathered authors to finish. |
+| Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707 atc9c6240c has green full CI. SECOND review5281669767 approves code with0 findings but requests two chapter12 wording repairs. One Sol prose repair is queued after709, then full CI and THIRD review. |
 | Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 repair0ebadf50 completes F2 and adds the source-node exemption. Common-policy F1 waits for merged707, then publication/CI and SECOND review. |
 | Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | PR715 at4ac910df has green CI; first review's sole finding is common707 support. Refresh/CI waits for merged707, then SECOND review. |
 | Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 completed6cda45af in1494s with one reasoned C4 exemption; publication/FIRST review waits for merged707. |
