@@ -2490,3 +2490,27 @@ local/bin/pr_train.py unit-test fixture matched the helper's conservative
 train guard. No guard was bypassed. Primary dirt consists only of the pending
 telemetry and the completed707 worker's preserved transcript/usage. The next
 quiet normal records cycle should publish it; no clean-main claim is made here.
+
+## 2026-09-22T18:11Z: fresh709 CI passes; final evidence contract made explicit
+
+Previous goal turn classified as progress:707's prose repair was committed and
+published at199f94a1a3941c0059184068265963920d58afa2 with full CI admitted;
+approved709 was refreshed and published atcb22a7e962ec373d83f5270e7bfd7237982b42fa;
+issue722 was created and its sole Sol documentation worker started.
+The pending telemetry has now been normally published asad537e33, clean.
+
+709's full CI manifest atcb22a7e9 is success, all eight steps complete. Its live
+model-free tail now performs the strict carry check; no carry result is yet
+asserted.707's full CI is still active. Issue722 remains the only model worker;
+its actual parent PID9308 and both CI-tail PIDs were rechecked live. No extra
+key, slot, proof work, train or unsupported approval was introduced.
+
+Reading the actual C5 protocol/checker and docs/comparator.md confirmed that
+the static record may name a verified ancestor, but the owner's final-pin
+requirement is stronger and still applies. Prepared
+/tmp/main-final-truthfulness-and-evidence-20260922.md for the already-required
+final truthfulness pass: preserve historical verification as history, explain
+immutable artifact evidence, update documentation before freezing the final
+library commit, and do not move that commit with a later metadata-only record.
+All actual final gates, delegated checks, snapshots and official comparator
+verification must identify that exact commit; no success or exception is assumed.
