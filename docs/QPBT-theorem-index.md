@@ -66,7 +66,8 @@ proof-level `\leanok`.
 For the 13 declarations in `MIPStarRE/QPBT/Test/AxiomAudit.lean`, section 8
 describes the current compile-time check. Section 8 also records a current
 supplemental probe for the five raw-effect declarations added after the broader
-historical probe at commit `838c51b...`. Values on the remaining rows come from
+historical probe at commit `838c51b...`, and a separate current probe for
+`deltaQld_mono_epsilon`. Values on the remaining rows come from
 that historical probe, whose raw output and scope are preserved explicitly.
 
 **Differs?** — whether the Lean statement departs from the printed one:
@@ -197,7 +198,8 @@ is *attained* — is kept visible but not asserted; see section 7.
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
 | `MIPStarRE.QPBT.deltaQld` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:35` | `deltaQld a b ε m d q = a · (m·d)^a · (ε^b + q^(-b) + 2^(-b·m·d))`, the soundness error. | `thm:pauli`, `08:1431-1445` | — | S | no [^vacuity] |
-| `MIPStarRE.QPBT.deltaQld_mono` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:47` | `deltaQld` is monotone in its constant and error arguments. | `14:1402` | `lem:delta-qld-mono-support`, `ch16:1738` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.deltaQld_mono` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:47` | For admissible parameters, increasing `a` and decreasing `b` increases `deltaQld`: `1 ≤ a ≤ a'` and `0 < b' ≤ b` give `deltaQld a b ε m d q ≤ deltaQld a' b' ε m d q`, with `ε` fixed in `[0, 1]`. | `14:1402` | `lem:delta-qld-mono-support`, `ch16:1738` (stmt ✓, proof ✓) | S | support |
+| `MIPStarRE.QPBT.deltaQld_mono_epsilon` | current: `MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean` | For admissible parameters and fixed `a ≥ 1`, `b > 0`, `0 ≤ ε ≤ ε'` gives `deltaQld a b ε m d q ≤ deltaQld a b ε' m d q`, with no upper bound on `ε'`. | — | current: `lem:delta-qld-epsilon-mono-support`, `ch16` (stmt ✓, proof ✓); used by the proof of `thm:pauli-arbitrary-strategy-raw-isometry-support` | current: S (section 8) | support |
 | `MIPStarRE.QPBT.idealState` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:85` | The target state: an auxiliary state tensored with `M = 2^m` qudit EPR pairs. | `def:EPR`, `04:946-955` | — | S | no |
 | `MIPStarRE.QPBT.PauliSoundnessWitness` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:164` | The data the conclusion produces: the two local isometries and the auxiliary state. | `thm:pauli`, `08:1431-1445` | — | S | no |
 | `MIPStarRE.QPBT.pauliOperatorDistanceA` | `MIPStarRE/QPBT/Test/SoundnessDefs.lean:186` | Alice's internal completed-family distance, with every malformed Pauli answer folded into outcome zero. | — | — | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
@@ -418,6 +420,26 @@ The supplemental probe imported `MIPStarRE.QPBT.Test.Soundness` and
 `MIPStarRE.QPBT.Test.Soundness.RawOperatorTransfer`, then ran `#print axioms`
 on those five names. Each result was
 `[propext, Classical.choice, Quot.sound]`.
+
+### Current branch additions
+
+On September 22, 2026, a focused probe at issue #682's base commit
+`d9350aed3cd1c6355067db49d3ac188dad7171c8` elaborated the current
+`MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean` source and then printed the
+axioms of `deltaQld_mono_epsilon`. This supplies the new row's `Ax` value; it
+is not an additional checked-in audit assertion or part of either historical
+probe. The command was:
+
+```bash
+awk '1; END { print "#print axioms MIPStarRE.QPBT.deltaQld_mono_epsilon" }' \
+  MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean | lake env lean --stdin
+```
+
+It exited successfully with:
+
+```text
+'MIPStarRE.QPBT.deltaQld_mono_epsilon' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
 
 ### Regenerating this column
 
