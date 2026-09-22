@@ -9771,3 +9771,48 @@ historical entry above is rewritten.
   whole failed run, preserve all costs and re-run canonical review at the same
   exact head with a7200s capacity wait, unchanged2700s model limits and caps3.
   This is a model-free capacity failure, not a key retirement or new finding.
+
+- 690's merge repair completed1809s at337e7582 with all source/index content
+  preserved and868 normal hook tests passing. Two prior fixture failures came
+  from inherited job-class/hardness metadata; local test-process isolation
+  fixed them without altering model policy or skipping hooks. A new guarded
+  publication/full-CI/first-review pipeline is live.700's fresh CI and1876-name
+  audit passed, and its canonical carry correctly led to a SECOND full review.
+- 699's published second review5279778199 approves both phases atd3089cbe.
+  Its operator wrapper then exited2 because Main had edited that shared Bash
+  script while it was blocked. Actual review evidence and exact-head CI remain
+  valid; Main verified them, released the claim and confirmed meta-gate state.
+  Never edit a script that live processes may still read; use a new versioned
+  file for future changes. Monitor older706/707 wrappers for the same cleanup
+  need only after their actual termination; preserve all live review work.
+- The owner now requires comparator main to hold the latest verified challenge
+  and final acceptance to pin the final library artifact commit on main.
+  Main verified360402fd on comparator main and the two in-progress official
+  runs35741427654/35742141249. The latter checks705's URL-only0f02b0b9 branch.
+  Keep the existing successful35638601720 evidence and do not promote until
+  the corresponding new run actually passes. The final checklist now binds
+  library artifact commit, pin, official run and comparator main explicitly.
+
+- 699's approved ancestor lacks691's actual source changes, so the live PAR0
+  daemon correctly leaves it unmerged. Main queued normal refresh/full CI and
+  strict canonical carry or THIRD review, with standalone merge only.706's
+  first review published four blueprint findings before the known operator
+  wrapper EOF; both reviewer outputs remain intact and one2700s repair owns
+  all findings.700's second review now approves0 findings;708 CI is active.
+- 705 completed2303s at664f5006. Both full artifact exports passed49 PDF/leak
+  checks but retain three real reference defects. Its40-file rename/fixture
+  diff passed869 hook tests and preserves mathematical/historical content and
+  comparator pins. Checked publication/full CI/first review are queued, and a
+  separate prepared packet addresses the exact remaining artifact references.
+
+- 705's normal refresh merged cleanly at126bde72, but its publication preflight
+  stopped because ignored blueprint/lean_decls did not exist. The new guarded
+  resume regenerates that list through the normal sync command before imports,
+  checked publication and complete CI. No source edit, hook bypass or model
+  repair is needed. Preserve the original failure and clean merge. A temporary
+  records train-guard exit3 cleared before the process census; a normal retry
+  published26b360ee without bypassing the guard or killing a process.
+
+## 2026-09-23
+
+- Owner 2026-09-22 document-dont-prove supersedes remaining intermediate proof goals: three3600s documentation workers707/710/711 are live on space-d, with all ten row/four node briefs prepared. PR702 refresh conflicted after its completed repair and is closed unmerged by comment5779646553; repaired commit, unfinished merge, branches and costs retained. Issues698/704 proof work is deferred and preserved. PR706 repair is on detached CI/review; no new proofs or unsupported leanok marks are admitted. PR707 owns the explicitly authorized minimal terminal-status protocol/checker update; headline faithfulness and other completion criteria remain binding.

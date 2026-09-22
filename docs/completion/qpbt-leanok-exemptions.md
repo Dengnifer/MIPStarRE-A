@@ -1,15 +1,18 @@
 # QPBT blueprint exemptions
 
-No permanent exemption is granted by the source-adoption audit of issue #667
+The source-adoption audit of issue #667 granted no permanent exemption
 at source snapshot `e947a49e14080b46642be21ce551d911032a05f4`.
-The table intentionally has no data rows.
+Under the owner's 2026-09-22 documentary disposition, an unsupported intermediate
+source node may remain unmarked with a reasoned exemption recorded here; an
+exemption does not assert that the source claim is proved. This update grants
+no exemption, so the table still has no data rows.
 
 | Blueprint label | Reason |
 |---|---|
 
-The following are unresolved matches, not exemptions. Their continued absence
-of a formalization mark must keep C4 failing. Construction targets and the
-row-by-row adoption evidence are in the
+The following nodes await their separate documentary dispositions. They remain
+unmarked and are not exempted by this update. Their mathematical discrepancies
+and source-adoption evidence are in the
 [gap register](../paper-gaps/qpbt-gap-register.md#source-adoption-audit-2026-09-22).
 
 1. `lem:qld-xz-lines`: the complete unconditioned line construction is proved,
@@ -17,9 +20,15 @@ row-by-row adoption evidence are in the
    uses field-valued evaluations, including its unresolved zero-direction
    convention. See [the subline note](../paper-gaps/qpbt_subline-claims-line-marginal.tex).
 2. `def:combine-map`: global polynomial combination and the coefficient formula
-   are proved; `combineLinePoly_spec` assumes explicit affine compatibility.
-   Derive it from the source line-projection domain and justify evaluations on
-   degenerate lines (`14_analysis_of_the_pauli_basis_test.tex:970-989`).
+   are proved. Issue #695 derives affine compatibility from projection inclusion,
+   including constant projections and zero directions, and proves the parameter
+   formula and degree bound in `exists_combineLinePoly_of_projection_mem`.
+   Field-valued evaluation on the full coefficient carrier is still unavailable:
+   `not_evaluatesTo_parameter_on_zero_direction` proves that the answer `T`
+   has no value on a singleton line. The source uses functions on lines, so
+   carrier correspondence and representative independence remain required
+   (`14_analysis_of_the_pauli_basis_test.tex:970-989`). See
+   [the focused audit](../../audits/2026-09-22_combining-map-source-domain.md).
 3. `lem:qld-4-13`: `PrintedExtendedLinesWitnessClaim` is unasserted and uses
    the directly indexed carrier and completed evaluations. Its error form is
    not established by the proved `C m poly(epsilon,md/q)` auxiliary. See
@@ -45,7 +54,11 @@ machine-instruction, allocation, or bit-complexity claim. The predecessor
 cardinality, independence, basis-independence, and register-subspace results
 remain linked. This discharges the former algorithmic obligation without an
 exemption; see the [integration audit](../../audits/2026-09-22_issue-690-canonical-integration.md).
-Full CI, independent review, and merge of this adoption remain with main.
+The construction and its marks are retained from the approved PR #708 head
+`fea7f2bacd1f2bf01b330a6ecdaeab1064cc6f16`. PR #708 is not merged in the main
+snapshot `53d12daa1ea79aa6c62ef93c3b621a331e1368b0` incorporated here. Full CI
+on the refreshed head, validation of independent-review carry or a fresh review,
+and merge remain with main.
 
 `def:generalized-pauli` is marked, and `lem:pauli-observable-expansion` is
 marked at both statement and proof level. The general-prime eigenvectors,
