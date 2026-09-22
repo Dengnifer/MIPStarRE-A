@@ -860,3 +860,23 @@ ownership extension and unchanged open status in design-decisions. Packet
 /tmp/main-fullspeed-subline689-integration-20260922, same worktree/head. This
 fills the just-freed slot beside688 integration and690. No more automatic
 continuations are granted for688 or689; future results need main evaluation.
+
+## 09:54Z Cycle And Telemetry Syntax Repair
+
+The preceding cycle progressed through685 merge, recovery and two completed
+authors. Current snapshot confirms three live space-d workers (688 integration,
+689 blueprint integration,690 elimination),3/0/3 caps and no retired-key marker.
+All latest direct owner resource instructions agree with this allocation.
+PR680 is now published at66796a9aaee42da1454ca3745b79758f1cbd1854; its retry
+build47s and render61s pass, remaining CI active. Canonical successor is PR691
+at ed5ee0b0f5fe3f0cda7ecf1be18db2514430f46b; build71s and render79s pass,
+remaining CI active before its scheduled independent review. Do not duplicate
+either run or infer a verdict from their intermediate logs.
+
+Main resolved688's reported malformed telemetry row: owner-sessions.jsonl751
+was missing only its closing brace. The exact one-character repair preserves
+all fields of historical review5255854599, including the adverse verdict,
+five findings and601-second duration. All812 nonblank JSONL records now parse;
+comparison against the prior Git blob verifies no other line changed. This
+repairs the accounting parser, not any review verdict or historical charge.
+Original bytes remain in Git history and the incident is logged in events.md.

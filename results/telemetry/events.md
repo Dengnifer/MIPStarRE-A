@@ -9431,6 +9431,13 @@ historical entry above is rewritten.
 - PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
 # 2026-09-22 Main Whole-Task Admission
 
+- Author688 reported owner-sessions.jsonl line751 could not be parsed. Main
+  verified it was the file's sole JSONL error: the historical PR650 review row
+  lacked its final closing brace. Added only that brace; every field, timestamp,
+  review id5255854599, adverse verdict, five findings and601-second charge is
+  unchanged. The original malformed bytes remain in Git history; no session or
+  unknown usage was removed or reclassified. Full JSONL validation now passes.
+
 - CI680's complete cea8800e run failed only the cold axiom-audit fixture among
   868 tests: outcome `error` instead of the expected `failure`. The fixture has
   a300-second shared-build-lock wait; concurrent685's build took992s. An
