@@ -808,3 +808,41 @@ attempt collided with the service's live primary index.lock; no lock was
 removed or force operation used. Inspect normal publication/primary state
 after the service finishes. The CI incident stage comment is updated to include
 this merge and the passed audit rather than duplicating the same stage report.
+
+## Post-Merge Recovery And Magic Square Integration
+
+Actual records synchronization finished aligned/clean at0a48d0d0 despite the
+concurrent checked-push refusal; the daemon published the adopted telemetry.
+Stage comment5774353518 now includes685's merge and both recovery outcomes.
+
+The first canonical successor watcher exited1 on a concurrent git-fetch CAS
+refusal before touching its author head. Its log/exit were moved to
+/tmp/main-publish-canonical676-after685-20260922.failed-fetch.log/.failed-fetch.exit,
+then the same guarded watcher was restarted; the author work is intact.
+
+The680 post685 refresh merged cleanly to477fb87691268eba9b2a2fea297700a218e2c230,
+but checked push refused because this private worktree lacked the newly merged
+Algebra/RowEchelon.olean. No source error was inferred. Original recovery
+exited2 with main-fix680 retained. Detached /tmp/main-resume680-export-20260922.sh
+now compiles just that module into the private worktree, then performs normal
+publication/full CI under /tmp/main-fullspeed-publish680-export-recovery-20260922
+and the existing canonical adverse-carry/adjudication sequence. It changes no
+source, skips no hooks and uses no live-worktree Lake dependency.
+
+orc-688-20260922-01 finished0 after2067s at5ea95b1c9ecf3dd6d5ca6d772c180df4fc4d2e2c,
+three files760+/31-. It retains the exact unasserted prescribed-answer Magic
+Square claim and traces all source/blueprint consumers; it does not certify
+minimality or prescribed-answer extraction. Keep the row pending. Receipt
+/tmp/main-fullspeed-ms688-20260922-result.md includes a precise five-part
+integration patch and all prior accounting, plus a pre-existing malformed
+owner-sessions.jsonl line751 report requiring later reconciliation without loss.
+
+Main released the completed688 author claim and admitted its ONE3600-second
+continuation at the same clean worktree/head. Packet
+/tmp/main-ms688-integration-packet-20260922.md, runtime
+/tmp/main-fullspeed-ms688-integration-20260922. It applies only the specified
+root import, chapter13 summaries and separate printed-claim node, generated
+links and Magic Square register prose, with unchanged pending status. All
+2067s and historical105/172 work remain charged; no further automatic extension.
+This fills the freed space-d lane beside689 and690. Publication/full CI/review
+of the final combined688 change remain main's next action after its receipt.
