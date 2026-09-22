@@ -927,3 +927,69 @@ the first independent whole review. No further author continuation is admitted.
 The accounting repair published aligned and clean atcf20c7a4. Any later
 passive rows are new, not a failed repair. Current production waits and
 worker ownership remain live and bounded; mathematical completion is unproven.
+
+## 680 Merged; Completed Construction Integration
+
+The interrupted cycles made progress; no planned PR draft hold or resource
+change was applied. The10:43Z snapshot confirms space-d only3/0/3, three live
+workers, no retired-key marker, and a live daemon PID1928886. Main did not
+restart live workers or interpret observation delays as failures.
+
+Independent reviewer-680-20260922-01 completed its limited check in767s:
+all edits/imports/contexts, full CI, the four prior reviews and F1 continuity
+verified, no new integration regression. Main published its actual body as
+review5276885422 at66796a9a, retained CHANGES_REQUESTED and posted failure
+summary, then exact-head ADJUDICATION5774986476 deferring only F1 to687.
+The frozen template /tmp/adjudication-680-template-current-20260922.md and
+daemon adj-list entry680 enabled service-only merge. The service merged680
+at10:39:38Z as0ea50f00414df9aeb9b5117c6fa6033187a3f7c7. No fake carry or fifth
+full review occurred; all earlier costs and failed helper logs remain.
+
+691 first review5276705143: code APPROVED, prose one F1 about paper/Lean row,
+column, pivot, prefix and sum indexing. blueprint-676-20260922-01 fixed it in
+582s at3249d6443e3e288730b682cd589c2779208c05e3, only chapter11(+29/-14).
+All markers/links/dependencies and Lean statements are unchanged; web, lint,
+sync,2133 declaration checks and normal hooks pass. Detached
+/tmp/main-publish691-index-fix-20260922.sh now performs guarded main refresh,
+private import exports, complete new-head CI and its SECOND independent whole
+review. It retains main-fix691 on failure; no approval carries across this edit.
+
+690's prover finished0 after2429s at8f55fc058512f43f69c8c869de349613bbf2de59:
+537-line algorithm and202-line audit,12 retained milestone commits. All28
+authored declarations have standard-only axiom closures; executable tests over
+ZMod2/3/5 and rationals, zero dimensions and normal hooks pass. The actual
+materialized algorithm proves RREF, preserved span, canonical nonpivot output
+and cost bound n*(m+n+2*m*n) for charged field operations/zero tests. This is
+author evidence pending independent review, not a bit-complexity certificate.
+Its ONE3600-second blueprint/source integration is now live as
+blueprint-690-20260922-01, runtime /tmp/main-fullspeed-integrate690-v2-20260922,
+packet /tmp/main-integrate690-algorithm-20260922.md. The first bootstrap never
+produced its PID/log/session or a surviving handle; the untouched worktree was
+verified before retry with a startup handshake. Preserve its empty launch log.
+
+689 blueprint continuation completed0 after1071s at
+2560ce2c3adfc953a6150cf84c8622874852c502. All five new declarations have
+explicit direct-law auxiliary coverage; old real results/marks remain intact,
+and source claims and row remain open. Both1684s proof and1071s integration
+costs stay charged to118's existing history. Detached
+/tmp/main-publish689-integrated-20260922.sh waited for692's completed CI,
+then admitted guarded publication/import hydration/full CI/first whole review.
+Publication sublog: /tmp/main-fullspeed-publish689-20260922; inspect before
+any retry, because a write may have completed after this note.
+
+688 is now PR692 at a41b8eeabb177fa99a97b5dcfd81747e6c11944c. Full CI passed
+(build699s, render140s, sync407s); its code/prose reviews are live through
+/tmp/main-whole-review692-ms688-20260922. These two phases plus690 integration
+fill the three actual lanes. Parked infrastructure remains untouched.
+
+687's watcher observed680 merge, refreshed to
+90eba77ae53d6ce7f1c88a1819076d6a26f1a99d, then checked push refused: the leaf
+PrimePauliBasis build succeeded, but the stale umbrella import product made
+checkdecls miss12 correct prime-Pauli names. Do not delete those names. Original
+watcher/publisher exited2, with logs retained. Detached
+/tmp/main-recover687-imports-20260922.sh now exports incoming modules plus both
+QPBT/MIPStarRE umbrellas privately, checks the genuine declaration list, and
+retries normal publication/CI using /tmp/main-fullspeed-publish-tagged-20260922.sh
+with tag imports-retry. It then schedules the successor's first whole review.
+The original live publication helper was copied, not edited in place. The
+same bounded import-export helper serves691's incoming680 dependency graph.

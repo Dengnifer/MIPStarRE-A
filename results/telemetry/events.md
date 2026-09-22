@@ -9431,6 +9431,16 @@ historical entry above is rewritten.
 - PR685's first900-second reviewer timed out124 without a verdict. Main archived the full runtime directory and retained raw session/unknown usage, released the failed claim and admitted one bounded1200-second independent retry on the same green head. No approval or review-budget reset is inferred.
 # 2026-09-22 Main Whole-Task Admission
 
+- Service merged680 as0ea50f00 after actual limited verification5276885422 and
+  exact-head adjudication5774986476, preserving F1 as687 and every earlier
+  full review. The automatic carry had correctly refused changed documentation
+  context; it was never forged or relabelled as approval.
+- The Pauli cleanup's post-parent checked push built its leaf successfully but
+  checkdecls missed12 valid prime-Pauli names through a stale umbrella olean.
+  Preserve the failed run and correct names; export the current private
+  dependency/umbrella products and repeat normal gates. No registry weakening
+  or source edit is the repair for this artifact-cache error.
+
 - Author688 reported owner-sessions.jsonl line751 could not be parsed. Main
   verified it was the file's sole JSONL error: the historical PR650 review row
   lacked its final closing brace. Added only that brace; every field, timestamp,
