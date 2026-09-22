@@ -1,3 +1,13 @@
+---
+title: "Issue 676 canonical-complement source alignment"
+date: 2026-09-21
+purpose: >
+  Audits the agreement between the paper's reduced-row-echelon canonical
+  complement and Lean's intrinsic prefix-rank construction.
+issue: "#676"
+pr: "#678"
+---
+
 # Issue 676 canonical-complement source alignment
 
 ## Verdict
@@ -19,14 +29,20 @@ No definition, game, blueprint mark, exemption, or paper-gap status is changed.
 
 ## Source and Lean audit
 
-The source definition at
-`references/qpbt-paper/04_preliminaries.tex:303-320` has the following domain:
+Under the ambient convention at
+`references/qpbt-paper/04_preliminaries.tex:219-222`, the source definition at
+lines 303-320 has the following domain:
 
-- an arbitrary field `F`;
-- an ambient space `F^n` with its ordered standard basis;
+- a finite field `F`;
+- an ambient space `F^n`, with `n >= 1`, and its ordered standard basis;
 - `m` linearly independent row vectors `v_1, ..., v_m`;
 - the `m x n` row matrix `A` whose row `i` is `v_i`;
 - a reduced row echelon matrix `B` obtained from `A` by row operations.
+
+The definition notes that its Gaussian-elimination algorithm works over
+arbitrary fields. This observation supports Lean's broader field generality,
+but it does not change the paper's ambient finite-field, positive-dimensional
+source domain.
 
 Its pivot set `J` consists of the columns containing the leading `1` of each
 row of `B`, and its canonical complement is the set of standard basis vectors
@@ -34,14 +50,17 @@ with indices outside `J`. The source lemma at lines 342-373 asserts that their
 span complements the row span.
 
 Lean defines `canonicalComplement W` for every submodule
-`W : Submodule K (Fin n -> K)`. An index `j` is included exactly when
+`W : Submodule K (Fin n -> K)` over an arbitrary field `K` and for every `n`,
+including `n = 0`. An index `j` is included exactly when
 restriction from the first `j` coordinates to the first `j + 1` coordinates
 does not increase the finrank of `W`. Thus Lean stores coordinate indices;
 `registerSubmodule` supplies the corresponding span of standard basis vectors.
 The theorem `isCompl_registerSubmodule_canonicalComplement` already proves the
 source lemma's two complementary-subspace conclusions for this intrinsic set.
 
-The Lean domain is a basis-independent generalization of the source domain.
+The Lean domain generalizes the source from finite fields and positive ambient
+dimension to arbitrary fields and all finite dimensions. It also gives a
+basis-independent formulation of the construction.
 Given the source rows, take
 `W = Submodule.span K (Set.range A.row)`. Conversely, every such finite
 submodule has a finite basis. No additional mathematical hypothesis is hidden
@@ -93,10 +112,12 @@ the chosen basis and its ordering.
   nonpivot coordinates.
 - `m = n` with independent rows or `W = top`: every added coordinate increases
   prefix rank, so the complement is empty.
-- `n = 0`: necessarily `m = 0` in the source domain, and both index sets are
-  empty.
+- `n = 0`: this case is outside the paper's positive-dimensional source domain.
+  Lean permits it; its index set is empty, and the corresponding extension of
+  the RREF construction has `m = 0` and no coordinate indices.
 
-These agree with the conventional RREF construction.
+The source-domain cases agree with the conventional RREF construction, and the
+zero-dimensional Lean generalization extends that agreement degenerately.
 
 ## Existing API boundary
 
