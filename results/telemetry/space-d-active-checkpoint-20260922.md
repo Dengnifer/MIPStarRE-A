@@ -764,3 +764,37 @@ type-check; wrappers and final validation continue, and no result is yet
 published or independently reviewed. Author690 has a checked pivot-step
 checkpoint and is proving row-span preservation. Parent-merge watchers for687
 and the canonical lemma remain active; all source/CI/review gates stay intact.
+
+## CI Failure Diagnosed; Bounded Recovery Queued
+
+The same cycle produced final results. CI685 at2b5aefac passed completely:
+build992s, blueprint-sync250s. Its outer helper then stopped before canonical
+carry with `MIPSTARRE_REVIEW_EFFORT must be ultra`; no reviewer ran and no
+verdict was invented. Claim main-review685 remains held. Detached
+/tmp/main-finish685-carry-20260922.sh explicitly sets ultra, runs the required
+marked-blueprint axiom audit, prepares canonical dry carry, verifies/publishes
+approval5275826301 only for the byte-identical patch, releases the claim and
+gates it. Its own log/exit preserve this retry separately from the first helper.
+
+CI680 atcea8800e completed with one failing unittest:
+test_pr_train.TrainTests.test_cold_project_build_catches_axiom_audit_failure.
+At test_pr_train.py609 the last build outcome was `error`, expected `failure`.
+The real fixture uses the shared machine lock with a300s wait; concurrent685
+build took992s. This supports lock contention rather than a Lean defect. The
+isolated unchanged test passed in4.395s (exit0), retained under
+/tmp/main-check680-fixture-20260922. All other680 CI steps passed; the full
+verdict remains failure and requires a complete rerun, not partial promotion.
+
+Detached /tmp/main-recover680-after685-20260922.sh preserves the failed logs
+and manifest in ci-logs/680/cea8800e23b4c6d6a57ba195e143429de5aa35eb-failed-fixture-20260922,
+waits at most3h for actual685 merge, then releases the old main-ci680 claim,
+claims the unchanged refresh and runs full publication/CI under the unique
+/tmp/main-fullspeed-publish680-ci-recovery-20260922 prefix. On success it reuses
+the original canonical adverse-carry/exact-head-adjudication sequence, now
+explicitly configured ultra. Original reviewed head3ac29117 and review5275958164
+stay the evidence source; no fifth review or changed-patch carry is allowed.
+The original680 wrapper exited1 and is no longer live; its failure is preserved.
+
+The prior pending telemetry batch published cleanly at305abb88. New diagnostic
+records follow in the next normal records batch. All three mathematical workers
+remain live; no key failure, extra key, new slot or chsh use occurred.
