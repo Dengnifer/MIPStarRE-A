@@ -1569,3 +1569,315 @@ last observation; no new model task was admitted. 698 remains untouched waiting
 actual700 merge. Retained telemetry is public at c535429c after the fixture
 guard cleared. This turn made progress through diagnosed scheduling, two repair
 receipts and publication tails; completion remains unachieved.
+
+## 2026-09-22T13:29Z canonical lemma merged, new CI heads, two remaining-row tasks
+
+691's THIRD full review5278739717 APPROVED exacte3f8ce2a with0 findings in
+both phases; normal full CI and marked audit were retained. GitHub verifies
+service merge968b0cc3b29c53f1b2ee6ec7feb137f6ae3272a9 at13:30:36Z.
+Main's concurrent meta-gate found it already closed; no hand merge or approved
+train occurred. This discharges the source canonical-complement LEMMA. The
+algorithmic definition remains separate690, cleanbb607c6f awaiting its ordered
+publication slot after700 refresh CI. Its actual parent691 is now merged.
+
+697 is published as PR702 atb167f8e1368060201f5bb8fbf7dca961230d10da,
+with main-ci702 claimed and publication receipt
+/tmp/main-resume697-publication-20260922.{pr,head,exit}. It explicitly preserves
+the full-source absorption gap. Repaired699 is published at
+d3089cbea6cfabe4c0ea97c7b8276be341ed33fb with main-ci699 and exact publication
+receipt /tmp/main-publish699-repair-20260922.{head,exit}. Its mathematical
+content and pending normalization adoption remain unchanged.
+
+New /tmp/main-published-ci-tail-20260922.sh702 and699 are running under
+/tmp/main-published-ci702-20260922 and ...ci699.... They wait successful
+publication, clean exact head and current queue.702 follows the already
+scheduled algorithm690 full CI; repaired699 follows702's complete CI. Each
+publishes a real .ci.pid/.ci.exit, runs marked axioms and then FIRST review
+for702 or SECOND for699. The underlying CI script still validates the public
+head; no old evidence is reused. Queue:696 repair,700 approved refresh,690,
+702,699 repair. This is finite now that690's parent has merged. Review phases
+can proceed independently after their own CI and audit. Unexpected dependency
+failure stops with retained evidence; inspect before retrying.
+
+The two free model slots were filled with independent remaining source rows:
+- mathfix-703-20260922-01,3600s, issue-703-nonempty-attainment-20260922 at
+  429de7f0fa6ca621e4d42ac48f192e984eea49bb. Packet
+  /tmp/main-attainment-packet-20260922.md; runtime
+  /tmp/main-fullspeed-nonempty-attainment-20260922. Settle the genuine nonempty
+  source domain, with actual finite game/exposing-functional and symmetry
+  evidence rather than an empty-answer or mere non-closure argument. Preserve
+  both source consumers, the printed claim and all173/524/601 costs; row stays
+  open until independently reviewed four-condition adoption. No external axiom.
+- prover-704-20260922-01,3600s, issue-704-tensor-code-import-20260922 at the
+  same exact base. Packet /tmp/main-tensor-import-packet-20260922.md; runtime
+  /tmp/main-fullspeed-tensor-import-20260922. Construct527's actual strategy/
+  distribution reduction and weighted rejection bound, validating the source
+  parameter conditions or returning a precise correction proposal. Preserve
+  the independent direct LDT proof and the distinct undefined2m+2 sampling
+  issue. All18/173/527 and related history remains, no new premise or axiom.
+
+Both bootstraps warmed isolated trees, normal hooks checked, actual sessions
+registered; together with701 they use all3 space-d slots. No automatic next
+tranche, source/game change, proof-budget reset or terminal-status edit was
+authorized. The previous turn was progress; this one completes a source merge,
+admits actual remaining-row work and schedules the published heads' full checks.
+
+IMPORTANT later outcome in the same cycle: the original scheduled CI tails
+did NOT remain live. /tmp/main-refresh700-approved-20260922.sh exited1 in a
+real merge conflict BEFORE creating its publisher/CI receipt.700 HEAD is still
+8089cc881cbc495759018f097e4e8ca3545de421, MERGE_HEAD is
+5e6e5d0a639271e688a64601635bc5d560d80d6c. Sole UU path:
+docs/completion/qpbt-leanok-exemptions.md. Incoming691 numbers the four remaining
+obligations and closes its lemma; approved700 adds the derived affine and
+singleton-obstruction paragraph. The exact union is required, retaining open
+combine-map until child698 is reviewed/merged. All other staged incoming source
+and telemetry are preserved. Original refresh log/exit1 are authoritative.
+
+The700 conflict caused /tmp/main-publish690-after691-v3-20260922.sh and both
+original /tmp/main-published-ci702/699-20260922 waiters to exit1 as their guards
+require. Their PIDs were absent and receipts terminal; no observation timeout
+was mistaken for failure and no CI had started. KEEP all their logs and do not
+reuse those prefixes as live pipelines.690 remains untouched cleanbb607c6f,
+actual parent691 merged. Next main action for690: a new guarded publication
+admission independent of the700 conflict, stopping on any real child conflict.
+
+New2700s integration-only700 repair is queued through
+/tmp/main-start700-merge-repair-20260922.sh, runtime
+/tmp/main-queued-fix700-completion-merge-20260922, packet
+/tmp/main-fix700-completion-merge-packet-20260922.md. When a space-d slot frees,
+it verifies exact conflict parents/path and transfers retained main-fix700 to
+the repair. Worker runtime will be
+/tmp/main-fullspeed-fix700-completion-merge-20260922. After its receipt, main
+must prepare a NEW exact-head publisher/CI/strict carry-or-second-review tail;
+the original refresh guard expecting clean8089cc88 must not be restarted.
+
+Independent published702/699 are already rescheduled via
+/tmp/main-published-ci-tail-v2-20260922.sh. Active prefixes:
+/tmp/main-published-ci702-v2-20260922 and ...ci699-v2....702 now follows the
+completed696 repair CI directly, and699 follows702's real .ci.pid/.ci.exit.
+Publication receipts/heads and claims are unchanged.702 actually started full
+CI and posted pending statuses atb167f8e1. Their required marked audits and
+first702/second699 reviews remain in the tails. No conflict-delayed algorithm
+or review is in their build dependency chain. Active PIDs1915287/1915425 were
+verified, along with queued700 repair1915450 and model handles701/703/704.
+Space-d is enabled and no fourth worker was started.
+
+## 2026-09-22T13:46Z algorithm parent integration made concrete
+
+Verified cleanbb607c6f, retained main-fix690 and the actual merged691 parent;
+new /tmp/main-publish690-source-20260922.sh attempted normal publication
+independently of700. It STOPPED exit1 in a real merge before publication/CI.
+HEADbb607c6f82a9afe8b898c157e96269996ea53f2b; MERGE_HEAD
+c394da91813f1156c65b964e47f233042599119f. Exactly three UU paths:
+blueprint/src/chapter/ch11_qpbt_algebra.tex,
+docs/completion/qpbt-leanok-exemptions.md, docs/paper-gaps/qpbt-gap-register.md.
+All algorithm proofs and incoming staged files are untouched. Do not restart
+the clean-original-head publisher or any retired after691 waiter blindly.
+
+Queued2700s integration-only repair:
+/tmp/main-start690-merge-repair-20260922.sh, outer prefix
+/tmp/main-queued-fix690-parent-merge-20260922; packet
+/tmp/main-fix690-parent-merge-packet-20260922.md; worker prefix will be
+/tmp/main-fullspeed-fix690-parent-merge-20260922. On actual space-d capacity
+it checks exact parents and the complete UU list, then transfers retained
+main-fix690 to the repair. Preserve algorithm definitions/correctness/cost and
+marks, incoming691's reviewed row/column/pivot/prefix prose without Fin jargon,
+and merged Pauli evidence. Only three source obligations should remain listed
+in this algorithm branch: qld-xz-lines, combine-map and qld-4-13. Historical
+audit counts remain historical. No Lean proof edit, source/game change, new
+proof tranche, bit-complexity claim or exempted obligation is authorized.
+
+After a successful repair receipt, Main must use a NEW guarded exact-head
+publication tail, full CI/marked audit and FIRST independent algorithm review.
+The stopped source publisher's planned CI-after699 body has not run and is
+not a live queue entry. Keep its log/exit1.702/699-v2 CI remains independent
+and live;702 build57s and render111s passed.701/703/704 are the3 actual model
+slots; both700 and690 integration repairs and696's second review await space.
+Previous stage5777653085 and telemetryc394da91 are published cleanly. This
+cycle is progress, not a repeated impasse or a key failure.
+
+## 2026-09-22T13:53Z repository rename, full702 checks, completed701 construction
+
+The snapshot briefly showed the merge daemon stopped. Read-only investigation
+found the owner-tools event2026-09-22T13:53:47Z records a repository rename from
+Dengnifer/MIPStarRE-A to Dengnifer/MIPStarRE-QPBT and a live-service restart.
+gh_common.py repo-slug confirms the new name; stop markers are absent, daemon
+PID1980476 and meta-auto3313963 are live. Main did not clear a stop or change
+remotes/configuration. Existing PR numbers/commits/history are unchanged.
+An earlier event13:29:48Z attributes a fast-to-default speed change to the owner;
+the actual space-d home now reads modelgpt-6-astra, effortultra,
+service_tierdefault. Keep the configured state and report it accurately; main
+has not changed any key/model/tier. Space-d remains the sole3-slot rotation.
+
+Prepared issue705 and /tmp/main-repository-rename-packet-20260922.md for current
+artifact/workflow references, missing-remote fallback and anonymization of BOTH
+repository aliases. No worker admitted: prioritize existing reviews/integration.
+Do not rewrite immutable paper mirrors, review bodies/captures, historical
+telemetry or accepted comparator SHAs/run; do not rename the comparator repo
+or touch QKD. The new packet changes no runtime configuration or mathematics.
+
+702 full exact-head CI passed b167f8e1 (build57s, render111s, sync362s,
+proof-debt33s, proof-evasion106s), followed by required marked audit1876
+declarations in377 modules with0 failures, evidence5777807908. FIRST review
+/tmp/main-whole-review702-initial697-20260922 is queued behind actual slots.
+Repaired699 CI is now active atd3089cbe and passed build61s/render63s; its
+second review/audit remain in the v2 tail. Neither source gap is adopted.
+
+701 first author completed0 after3326s at
+e0c8f4ceb04c1e2ba77ce9f98dd7ea680204a511, clean,14 files+2122/-19. Both targets
+are proved: prescribed-answer agreement-controlled extraction and value-only
+one-way extraction with constraint counterparts. The stronger universal
+separate-errors theorem constructs ONE witness, with value-only state/Bob/
+anticommutator bounds and Alice errors linear in the intrinsic agreement
+defect. Wrong-form and product transport are derived internally. The receipt
+provides necessity/sufficiency of agreement order sqrt(epsilon) for the seven
+printed rates, with no game change, extra source premise or finite-test-only
+optimality claim. Existing printed false claims/counterexamples remain.
+This is author evidence, not a completed C3 adoption. All105/172/688/701 costs
+are retained, including original2067s+915s688 work and3326s current author.
+
+Receipt /tmp/main-fullspeed-ms-prescribed-20260922-result.md; combined reviewable
+body /tmp/main-ms-prescribed-pr-body-20260922.md; committed audit
+audits/2026-09-22_issue-701_ms-prescribed-extraction.md. No continuation needed
+for the assigned construction targets. Main must evaluate all four adoption
+conditions only after independent mathematical review of the exact result.
+
+New /tmp/main-publish701-source-20260922.sh is live. It verified terminal0,
+clean exacte0c8f4ce and actual692 ancestor, refreshed normally (loss guard passed
+with incoming e8e5d91e), then performs private imports/checked publication.
+It transfers main-fix701 to main-ci for the new PR, waits the already active
+repaired699 full CI, runs its own complete CI/marked audit, and starts FIRST
+review. Exact .pr/.head/exit under the same prefix will identify publication;
+no PR number is assumed in advance. On any real conflict preserve and inspect.
+The released model slot went to a queued reviewer;703/704 continue and the
+700/690 merge repairs retain their capacity waiters. No extra worker was added.
+
+## 2026-09-22T14:15Z nonempty-attainment receipt and independent review queue
+
+The previous stage comment is5777980392 and records published cleanly at
+b4dd22704d5b0b1b24018882d08d8867198d0a7c. Repaired699 full CI passed atd3089cbe
+(build61s, render63s, sync347s, debt24s, evasion94s); its marked audit and second
+review remain in the live v2 tail.702's first and696's second reviews are
+running/queued by phase; no combined new verdict is assumed. Snapshot's old
+adverse review summaries are not new findings.700's approved stale head and
+690's uncommitted parent merge still have live bounded repair waiters. No
+manual train was staged and the infrastructure PRs remain parked.
+
+mathfix-703-20260922-01 completed0 after2165s, clean at
+dbcf558aa7452e4aef854481ce19f40e99dd3fe1. It committed an explicit nonempty
+symmetric nonattainment example using verified external mathematical results,
+finite-system checks and consumer analysis. This is documentation evidence,
+not a kernel nonempty refutation. The exact/approximate representation and
+game-transfer proofs, the answer-reduction Schmidt-rank comparison and C3
+terminal adoption remain open. No Lean axiom, statement weakening, row closure
+or owner permission blocker was introduced. Existing history and unknown costs
+are preserved; the final2165s dispatcher duration supersedes the receipt's
+2094s observation cutoff. No continuation has been admitted.
+
+Prepared /tmp/main-publish703-source-20260922.sh verifies that exact terminal
+head and waits701's actual CI completion to avoid concurrent cold-build fixture
+timeouts. It then refreshes with the loss guard and private import exports,
+uses normal checked publication/full CI, runs the marked audit and starts a
+FIRST independent review. Main retains fix703 until that checked publication;
+the wrapper never treats the source-gap exit criterion as met.701 publication
+is live in its normal pre-push Lake check, not hung or bypassed.
+
+All three actual space-d slots remain occupied; the completed703 slot was
+immediately taken by a queued reviewer.704 continues its first whole-task box.
+The700/690 capacity waiters remain next integration work; no alternate key or
+additional slot was used. The required snapshot completed; historical failed
+markers, old stacks and parked552/554/556/561 need no new action.
+
+The handoff now explicitly authorizes the comparator library-URL rename in
+/home/drx/QPBT-comparator, preserving its pinned commit. Prepared705's packet
+was corrected to include that exact separate-checkout scope, without rewriting
+accepted evidence or renaming the comparator repository.705 remains unadmitted
+behind current mathematical integration and reviews; inspect its clean head
+and ownership before admission. No runtime configuration was changed.
+
+## 2026-09-22T14:23Z exact completion check and queued rename assignment
+
+The previous turn made progress through703's completed evidence,706 checked
+publication and recorded full699 CI. Stage5778109328 and telemetryb819704e
+are published. This turn confirmed all3 actual space-d handles:704 author,
+702 first reviewer and699 second code reviewer.699's required marked audit
+passed1874 declarations/373 modules,0 failures, evidence5777988067; its code
+phase now approves0 findings, with prose still pending.696's completed code
+phase also approves0; the other phase remains queued. Both700 and690 conflict
+repair waiters are live. No stopped worker was inferred from quiet logs.
+
+706 is published at491c1d85bc3e460d97be85ff2d7de994ec271f9a; full CI is live,
+with build67s/render104s/paper-gap1s passed.703's verified live publisher
+waits that actual CI completion before refresh/publication/checks. There is
+no source adoption or completion claim for either PR.
+
+Fresh isolated completion evidence at exactb819704e is recorded in
+results/telemetry/completion-check-b819704e-20260922.md:336 Lean files/no holes,
+10/21 nonterminal source rows and4/533 remaining blueprint nodes. C2/C5/C7
+remain delegated; C6 is only the narrow registered-document check. The691
+merge removed one blueprint obligation. The final artifact goal is unmet.
+
+Owner's explicit rename message confirms705's scope. Comparator inspection
+found the local draft-challenge checkout dirty with older generated files;
+preserve them. The actual official accepted branch is
+issue-662-closure-20260921-diagnostic at360402fdf4a39399f94331452d6e5d0a35c144be,
+confirmed by gh_common's run35638601720 and git ls-remote. origin/main has no
+lakefile.toml; using that skeleton or the stale local a942ecb5 pin would be
+wrong. The packet now requires a separate comparator worktree on the accepted
+branch, asserts ecb97d1f in both dependency files and permits only the owner's
+URL-only commit/push without force or pin changes. Historical accepted evidence
+and the dirty local challenge files stay intact.
+
+/tmp/main-start705-rename-20260922.sh queues one2700s Astra/ultra task after
+both700/690 repair workers have been admitted and a space-d slot is actually
+free. It records a fresh exact library base, creates an isolated warm worktree,
+claims705 and dispatches through the canonical tool with the owner's reason.
+This is one library PR and the explicitly requested comparator URL commit;
+no extra key, slot, model configuration or infrastructure PR is activated.
+
+## 2026-09-22T14:30Z repaired700, full706 checks and capacity admission retry
+
+The previous turn made concrete progress through the isolated completion
+check, authoritative comparator-branch verification and queued705 assignment;
+it was not an impasse. Its #27 comment5778240641 and telemetryef55d21c are
+published. Clarification to its lane description: that paragraph reused the
+earlier reviewer census. Direct process arguments now identify704's author,
+690's merge repair and702's prose review.700's repair ran in a vacated slot
+and completed; at no time was capacity increased beyond three space-d workers.
+
+blueprint-695-20260922-01 completed0 after533s at clean
+a66c9e14b6ca3797dfb19fa31d0d816696f23860. It resolved only the completion-list
+union; all5704 other indexed entries,53 staged incoming paths and both parents
+were preserved, with normal hooks and loss guards passing. The approved source
+content is intact. Receipt:
+/tmp/main-fullspeed-fix700-completion-merge-20260922-result.md. The old failed
+refresh remains terminal; no proof attempt, author continuation or review
+budget was reset.
+
+New /tmp/main-publish700-repaired-20260922.sh verifies this exact completed
+head, waits703's already active publication/CI, and then refreshes, checks
+publication, runs complete CI/marked audit and requests only the strict
+canonical carry from5278574076. If canonical evidence refuses the carry, it
+starts the SECOND independent full review. A703 publication failure does not
+strand this independent pipeline: terminal failure is retained and700 proceeds.
+No fresh approved PR is staged in a train. The runtime canonical carry helper's
+new status URLs now resolve through gh_common.repo_slug; its equality checks
+and immutable review bodies are unchanged.
+
+706 complete CI passed at491c1d85 (build67s, render104s, sync321s, debt15s,
+evasion50s), then marked audit1884 declarations/378 modules passed0 failures,
+evidence5778262538. FIRST review is queued in
+/tmp/main-whole-review706-initial701-20260922.703 publication is now live after
+that CI, with normal refresh/loss guard and all1877 declaration links resolved.
+690 and704 remain active; no completion or new continuation is presumed.
+
+705's first queue created and warmed its exact clean worktree at
+04e7a7d64354df6e2a4a8d03bc6e978284372ebe, then canonical account routing
+exited4: capacity exhausted, no reservation made. A queued702 reviewer had
+taken the physical slot during warming. No705 model worker or token session
+started. Preserve both original exit4/logs and setup cost. Main verified the
+terminal receipts and clean head and prepared
+/tmp/main-retry705-capacity-20260922.sh, retaining the same initial2700s box
+but using the normal3600s account wait. It transfers only the stale retained
+main-fix705 claim, reuses the already warm tree and dispatches with the exact
+owner Astra reason. This is a capacity retry, not a second author attempt.
