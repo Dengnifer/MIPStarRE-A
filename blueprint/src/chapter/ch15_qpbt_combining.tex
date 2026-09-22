@@ -2554,10 +2554,9 @@ obstruction is recorded in Remark~\ref{rem:qld-4-7-divisibility} and
 analyzed, together with candidate repairs, in
 \cite{gap:qpbt_ld-dimension-divisibility}.
 
-% Unmarked, tracked in issue #667. The global polynomial and its degree bound
-% are proved. The line formula currently takes explicit affine compatibility;
-% deriving it from the source projection domain, including degenerate-line
-% evaluations, remains a separate construction target.
+% Unmarked, tracked in issues #667 and #695. Projection inclusion now supplies
+% affine compatibility and the coefficient formula. The coefficient carrier
+% still does not identify all its answers with functions on singleton lines.
 \begin{definition}[The combining map]
 	\label{def:combine-map}
 	\lean{MIPStarRE.QPBT.combinePoly, MIPStarRE.QPBT.combinePoly_eval}
@@ -2595,6 +2594,103 @@ analyzed, together with candidate repairs, in
 	polynomials of degree at most $md$ in the line parameter, and each is
 	multiplied by an affine factor of degree at most one.
 \end{definition}
+
+\begin{lemma}[Formalization support for the combining map: affine parameters]
+	\label{lem:combine-map-affine-parameters}
+	\lean{MIPStarRE.QPBT.exists_affine_parameters_of_linePoints_subset}
+	\lean{MIPStarRE.QPBT.exists_isCombineLineCompatible_of_projection_mem}
+	\leanok
+	\uses{def:line, def:combine-map}
+	This auxiliary isolates the geometric consequence of the projection
+	hypothesis in Definition~\ref{def:combine-map}. Over any field $K$, if
+	$\ell(u,v)\subseteq\ell(u',v')$ in $K^m$, there are $a,b\in K$ such that
+	$u=u'+av'$ and $v=bv'$. Consequently, under the projection inclusions
+	of that definition, there are $a_X,b_X,a_Z,b_Z\in K$ such that
+	\[
+		(u+tv)_W=u_W'+(a_W+b_Wt)v_W',
+		\qquad W\in\{X,Z\},\quad t\in K,
+	\]
+	where $\ell_W=\ell(u_W',v_W')$. No direction is required to be nonzero.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:line}
+	Choose parameters $a,s$ for the points $u$ and $u+v$ on the containing
+	line. Subtracting $u=u'+av'$ from $u+v=u'+sv'$ gives
+	$v=(s-a)v'$. Take $b=s-a$. Apply this argument to each projected line.
+\end{proof}
+
+\begin{lemma}[Formalization support for the combining map: parameter polynomials]
+	\label{lem:combine-map-parameter-polynomial}
+	\lean{MIPStarRE.QPBT.exists_combineLinePoly_of_projection_mem}
+	\leanok
+	\uses{def:line, def:combine-map, def:ideg-deg-polynomials}
+	This auxiliary concerns coefficient polynomials in a line parameter.
+	Let $K$ be a field, let $c\geq0$, and assume the projection inclusions
+	of Definition~\ref{def:combine-map}. There are compatible affine
+	parameters $a_X,b_X,a_Z,b_Z$, independent of the coefficient lists,
+	such that for every $f,g\in K[T]$ of degree at most $c$, the polynomial
+	\[
+		H(T)=(u_\alpha+v_\alpha T)f(a_X+b_XT)
+		      +(u_\beta+v_\beta T)g(a_Z+b_ZT)
+	\]
+	has degree at most $c+1$. Its coefficient list, through degree $c+1$,
+	evaluates at every $t\in K$ to
+	\[
+		H(t)=(u+tv)_\alpha f(a_X+b_Xt)
+		     +(u+tv)_\beta g(a_Z+b_Zt).
+	\]
+	This assertion includes constant projections and zero directions. It
+	does not identify every parameter polynomial with a function on the
+	geometric point set of its line.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{lem:combine-map-affine-parameters, def:combine-map}
+	Construct the affine parameters by the preceding lemma. Affine
+	substitution preserves the degree bound $c$; multiplication by an affine
+	factor raises it by at most one. The coefficient evaluation formula
+	follows by evaluation of the two compositions and their sum.
+\end{proof}
+
+\begin{lemma}[Formalization support for the combining map: singleton evaluation]
+	\label{lem:combine-map-singleton-evaluation}
+	\lean{MIPStarRE.QPBT.evaluatesTo_zero_direction_iff}
+	\lean{MIPStarRE.QPBT.not_evaluatesTo_parameter_on_zero_direction}
+	\leanok
+	\uses{def:ideg-deg-polynomials, def:ld-line-description}
+	For the coefficient interpretation of
+	Definition~\ref{def:ideg-deg-polynomials}, let $\ell=\ell(u_0,0)$ be a
+	line description and let $f$ be a coefficient polynomial of degree at
+	most $c$. It evaluates to $a$ at $u_0$ if and only if
+	$f(t)=a$ for every $t\in\F_q$. If $c\geq1$, the answer $f(T)=T$
+	therefore has no value at $u_0$.
+\end{lemma}
+\begin{proof}
+	\leanok
+	\uses{def:ideg-deg-polynomials}
+	Every parameter represents $u_0$ when the direction is zero. The
+	definition of evaluation thus requires the same value at all
+	parameters. For $f(T)=T$, the parameters zero and one give distinct
+	values.
+\end{proof}
+
+\begin{remark}[The function domain of the combining map]
+	\label{rem:combine-map-function-domain}
+	Equation~\eqref{eq:combine-lines} is well defined for polynomial
+	functions on the geometric lines. The coefficient interpretation in
+	Remark~\ref{rem:deg-line-representatives} also admits answers that do
+	not define such functions, as the preceding lemma shows. Choosing an
+	affine parameter for a singleton does not resolve this discrepancy:
+	for $f(T)=T$, two constant parameter choices give different values.
+	There is also a distinction between formal representatives and their
+	functions even on a nondegenerate line: over $\F_q$, the distinct
+	polynomials $0$ and $T^q-T$ induce the same function. Thus the condition
+	in the preceding lemma is constancy as a function, rather than formal
+	degree zero. The geometric parameter construction does not by itself
+	establish the identification of these carriers; see
+	\cite{gap:qpbt_subline-claims-line-marginal}.
+\end{remark}
 
 \begin{definition}[Formalization support for Definition~\ref{def:combine-map}: the separated locus]
 	\label{def:combine-map-separated-locus}

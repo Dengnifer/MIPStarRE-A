@@ -91,33 +91,42 @@ $S = \mathrm{span}\{(1,1)\}$ has the distinct complements
 $\mathrm{span}\{(1,0)\}$ and $\mathrm{span}\{(0,1)\}$. Given a basis of $S$,
 one may nevertheless single out a \emph{canonical} complement.
 
-% Unmarked, tracked in issue #667; no permanent exemption. `canonicalComplement` fixes the
-% pivot set by the intrinsic prefix-rank characterization instead of running the
-% reduced-row-echelon algorithm this node prescribes. The two agree by the
-% basis-independence paragraph below, but that identification is not itself formalized,
-% so a statement-level mark here would claim the algorithmic presentation as matched.
+% Issue #676: the RREF/prefix-rank correspondence, cardinality, independence and
+% register-subspace assertions are proved. This definition remains unmarked:
+% executable Gaussian elimination and its polynomial arithmetic-operation bound
+% remain obligations. Abstract RREF existence does not certify that algorithm.
+% See audits/2026-09-22_issue-676-canonical-completion.md; no exemption is granted.
 \begin{definition}[Canonical complement]\label{def:canonical-complement}
 	\lean{MIPStarRE.QPBT.canonicalComplement}
+  \lean{MIPStarRE.QPBT.exists_isReducedRowEchelon}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon.canonicalComplement_eq_nonpivot_indices}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon.pivot_indices_eq_of_span_eq}
+  \lean{MIPStarRE.QPBT.card_canonicalComplement_span_rows}
+  \lean{MIPStarRE.QPBT.linearIndependent_canonicalComplement}
+  \lean{MIPStarRE.QPBT.canonicalComplement_registerSubmodule}
+  \lean{MIPStarRE.QPBT.registerSubmodule_canonicalComplement_eq_dotOrthogonal}
 	\uses{def:register-subspace}
 	Let $\hat{E}$ be the standard basis of $V = \F^n$ and let
 	$F = \{v_1, \dots, v_m\} \subset V$ be a set of $m$ linearly independent
-	vectors. Write $v_i = \sum_{j=1}^n a_{i,j}\, \hat{e}_j$, and, using a
+	vectors. Write $v_a = \sum_{b=1}^n A_{a,b}\, \hat{e}_b$, and, using a
 	canonical Gaussian-elimination algorithm valid over arbitrary fields,
-	transform the $m \times n$ matrix $(a_{i,j})$ to reduced row echelon form
-	$(b_{i,j})$. Let $J$ be the set of $m$ column indices containing the leading
-	$1$ entry of each row of $(b_{i,j})$. The \emph{canonical complement of $F$}
+	transform the $m \times n$ matrix $A$ to reduced row echelon form
+	$B$. Let $J$ be the set of $m$ column indices containing the leading
+	$1$ entry of each row of $B$. The \emph{canonical complement of $F$}
 	is the set of $n - m$ standard basis vectors
 	\[
-		F^\perp = \{\hat{e}_j : j \notin J\}\;.
+		F^\perp = \{\hat{e}_b : b \notin J\}\;.
 	\]
 	The canonical complement is a \emph{set} of vectors, not a subspace.
-	% Basis-independence made explicit here: the source defines F^perp through
-	% a basis but does not assert dependence on it; uniqueness of the reduced
-	% row echelon form gives dependence on span(F) alone.
 	Although defined through the basis $F$, it depends only on
-	$\mathrm{span}(F)$ and the ambient standard basis: two bases of the same
-	subspace form the rows of row-equivalent matrices, which have the same
-	reduced row echelon form and hence the same pivot set $J$. The presentation
+	$\mathrm{span}(F)$ and the ambient standard basis. Indeed, if $\pi_k$ is
+	restriction to the first $k$ coordinates, the number of pivots among those
+	coordinates is $\dim\pi_k(\mathrm{span}(F))$. Thus $b$ is a nonpivot
+	coordinate precisely when
+	\[
+		\dim\pi_b(\mathrm{span}(F)) = \dim\pi_{b-1}(\mathrm{span}(F))\;,
+	\]
+	which is independent of the chosen basis and its order. The presentation
 	through Gaussian elimination, adopted by \cite{Ji2020MIPStar}, makes the
 	canonical complement efficiently computable. If $S$ is a register subspace
 	spanned by $\hat{E}_0 \subseteq \hat{E}$, then the canonical complement of
@@ -125,13 +134,56 @@ one may nevertheless single out a \emph{canonical} complement.
 	$S^\perp$.
 \end{definition}
 
-% Unmarked, tracked in issue #667, for the reason recorded above
-% Definition~def:canonical-complement. `isCompl_registerSubmodule_canonicalComplement`
-% proves exactly the displayed conclusion for the prefix-rank complement, and its own
-% docstring places the equivalence with a reduced-row-echelon algorithm outside the
-% statement; the proof below is the row-echelon route and is not the route Lean takes.
+The row indices $a=1,\ldots,m$ and column indices $b=1,\ldots,n$ here and
+in the following decomposition use the one-based numbering of
+\cite{Ji2020MIPStar}. Their zero-based counterparts in Lean are $i=a-1$ and
+$j=b-1$, respectively; the matrix entry $A_{a,b}$ corresponds to the entry
+at $(i,j)$. If $p_a=p_{\mathrm{paper}}(a)$ is the pivot column of row $a$
+and $p_{\mathrm{Lean}}$ is the zero-based pivot map, then
+\[
+  p_{\mathrm{paper}}(a)=p_{\mathrm{Lean}}(a-1)+1\;.
+\]
+The prefix lengths $b$ and $b-1$ therefore become $j+1$ and $j$; a prefix
+length counts coordinates and is not itself a coordinate index. In particular,
+$\pi_0$ restricts to the empty prefix. Similarly, a row sum
+$\sum_{a=1}^m$ becomes the sum of the reindexed terms over
+$i\in\{0,\ldots,m-1\}$.
+
+\begin{lemma}[Explicit RREF decomposition]\label{lem:canonical-complement-rref}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon}
+  \lean{MIPStarRE.QPBT.rowEchelonComponent}
+  \lean{MIPStarRE.QPBT.rowEchelonComponent_mem_span}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon.rowEchelonComponent_pivot}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon.sub_rowEchelonComponent_mem}
+  \lean{MIPStarRE.QPBT.IsReducedRowEchelon.isCompl_span_nonpivot}
+  \leanok
+  \uses{def:canonical-complement, def:complementary}
+  This auxiliary isolates the coordinate calculation in the proof of
+  Lemma~\ref{lem:canonical-complement}; it is not a separate labelled result
+  of \cite{Ji2020MIPStar}. Let $B$ be in reduced row echelon form, with
+  nonzero rows $b_1,\ldots,b_m$ and pivot indices $p_1<\cdots<p_m$.
+  Put $S=\mathrm{span}\{b_a:1\le a\le m\}$ and
+  $T=\mathrm{span}\{\hat e_b:b\notin\{p_1,\ldots,p_m\}\}$.
+  For each $x\in V$, the vector
+  \[
+    v=\sum_{a=1}^m x_{p_a} b_a
+  \]
+  belongs to $S$, agrees with $x$ at every pivot coordinate, and satisfies
+  $x-v\in T$. Moreover $S\cap T=\{0\}$, so $V=S\oplus T$.
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{def:register-subspace, def:complementary}
+  Membership in $S$ follows from the displayed linear combination.
+  Since $b_a(p_c)=\delta_{ac}$, evaluation at $p_c$ gives $v_{p_c}=x_{p_c}$.
+  Hence $x-v$ is supported on the nonpivot coordinates and lies in $T$.
+  If $y=\sum_{a=1}^m c_a b_a$ also lies in $T$, evaluation at $p_a$ gives $c_a=0$
+  for every $a$, whence $y=0$.
+\end{proof}
+
 \begin{lemma}\label{lem:canonical-complement}
-	\lean{MIPStarRE.QPBT.isCompl_registerSubmodule_canonicalComplement}
+	\lean{MIPStarRE.QPBT.isCompl_span_rows_canonicalComplement}
+	\leanok
 	\uses{def:canonical-complement, def:complementary}
 	Let $S$ be the span of linearly independent vectors
 	$F = \{v_1, \dots, v_m\} \subseteq V$, let $F^\perp$ be the canonical
@@ -141,15 +193,16 @@ one may nevertheless single out a \emph{canonical} complement.
 	\]
 \end{lemma}
 \begin{proof}
-	\uses{def:canonical-complement}
-	Let $A = (a_{i,j})$ be the $m \times n$ matrix whose rows are the $v_i$ and
-	write $A = UB$ with $U$ invertible and $B$ in reduced row echelon form, so
-	that the rows of $B$ are linearly independent and span $S$. The restrictions
-	of the rows of $B$ to the columns in $J$ are still linearly independent and
-	span $\F^m$, so for every $u \in V$ there is $v \in S$ that agrees with $u$
-	on the coordinates in $J$. The difference $u - v$ is then supported on the
-	coordinates outside $J$, that is, $u - v \in T$, which proves $S + T = V$.
-	Counting dimensions forces $S \cap T = \{0\}$.
+	\leanok
+	\uses{def:canonical-complement, lem:canonical-complement-rref}
+	Let $A = (A_{a,b})$ be the $m \times n$ matrix whose rows are the $v_a$ and
+	choose an RREF matrix $B$ with $A=UB$ for an invertible $U$.
+	Such a presentation exists because the input rows are independent.
+	The rows of $B$ span $S$, and its nonpivot standard basis vectors are
+	exactly $F^\perp$, by the prefix-dimension characterization in
+	Definition~\ref{def:canonical-complement}.
+	Lemma~\ref{lem:canonical-complement-rref} gives
+	$S+T=V$ and $S\cap T=\{0\}$.
 \end{proof}
 
 \begin{definition}[Canonical linear map with prescribed kernel]\label{def:cl-canonical}
