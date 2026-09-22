@@ -53,6 +53,9 @@ CI/review. The main checkpoint records live assignments.
    convergence under the four unchanged adoption conditions. Source symmetry
    alone is refuted. A bounded dedicated evidence task continues105/172; no
    change of source semantics is preauthorized.
+   688's evidence is published as692. Main admitted701 for the remaining
+   prescribed-effect/one-way extraction and quantitative agreement construction,
+   3600s with inherited costs and pending adoption preserved.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
