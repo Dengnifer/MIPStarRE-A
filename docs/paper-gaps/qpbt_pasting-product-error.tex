@@ -11,7 +11,7 @@
 
 \title{The Product-Form Error in the Two-Measurement Pasting Lemma}
 \author{}
-\date{2026-09-05}
+\date{2026-09-22}
 
 \begin{document}
 \maketitle
@@ -41,8 +41,12 @@
   the source. A dimension-independent one-sided proof using Schmidt mirrors
   is given below. Its state-dependent mirror and norm estimate, as well as the
   distinct-family cross moves and collision bounds, are formalized. The
-  source-facing theorem is proved without the fourth comparison. The proved
-  register-exchange theorem is kept separately and is not its dependency. Tracked in \ghissue{201}.
+  additive theorem is proved without the fourth comparison. The proved
+  register-exchange theorem is kept separately and is not its dependency.
+  The literal product-contract conclusion remains refuted, and its
+  replacement fails the unchanged no-weakened-conclusion adoption condition.
+  The register row remains \texttt{pending}. Tracked in \ghissue{201} and
+  audited for retained-claim evidence in \ghissue{674}.
 \end{itemize}
 
 \section{Key theorem forms}
@@ -58,8 +62,7 @@ at most $\delta$ and the codeword-collision probability is at most $\eta$.
 Under the paper's global convention, the displayed polynomial assertion means
 that there is a universal $C>0$ such that
 \[
-  0 \leq \delta_{\mathrm{pasting}}(\eta,\delta)
-    \leq C(\eta\delta)^C
+  \delta_{\mathrm{pasting}}(\eta,\delta) \leq C(\eta\delta)^C
   \qquad (\eta,\delta>0).
   \tag{product contract}
 \]
@@ -67,6 +70,9 @@ The imported proof instead accumulates terms depending separately on the two
 errors, including $O(\delta^{1/2})$, $O((\delta+\eta)^{1/2})$, and $\eta$.
 A compatible corrected theorem form would use, for example, an upper bound by
 $A(\eta^r+\delta^s)$ for universal $A\geq1$ and $r,s>0$.
+The polynomial shorthand itself is only an upper bound on positive inputs;
+it supplies neither axis values nor an additional nonnegativity condition.
+The corrected predicate supplies both on the closed nonnegative quadrant.
 
 \section{The source assertion}
 
@@ -108,7 +114,32 @@ The asserted universal function $\delta_{\mathrm{pasting}}$ bounds
  \mathrm{Id}\ot J^x_{[g_1(y_1)=a_1,\,g_2(y_2)=a_2]}.
 \end{equation}
 The error function is chosen before the distribution, alphabets, dimension,
-state, and measurements; no constant may depend on these objects.
+state, and measurements. There is a second constant convention to distinguish:
+\texttt{def:consistency}, chapter 6 lines 233--250, defines
+$\simeq_\delta$ using $O(\delta)$, not an exact bound by $\delta$.
+Writing $c_{\rm in}>0$ for a common upper bound on the three input
+constants, the output constant $c_{\rm out}>0$ may depend on
+$c_{\rm in}$ but must be uniform in the errors and measurement data.
+It cannot be silently absorbed into a coupled prefactor and exponent.
+
+The full finite-dimensional assertion is now retained as the unasserted
+\leanid{PrintedPastingClaim} in
+\doclink{MIPStarRE/QPBT/Games/Sandwich.lean}. It chooses the error function
+with \leanid{PrintedPolynomialBound} before the constants and all data,
+then states the collision hypothesis, all three input comparisons bounded
+by $c_{\rm in}\delta$, and the same coarse-grained $G_2G_1G_2$ output
+bounded by $c_{\rm out}\delta_{\rm pasting}(\eta,\delta)$.
+The codeword collections are finite sets of actual functions, rather than
+arbitrary labels whose evaluation maps might identify distinct codewords.
+Finite-type and decidability instances implement finite sums; normalization
+and probability mass are explicit. The shared local matrix space permits
+the same answer measurement on the two registers, without assuming symmetry
+of the state. No assertion for infinite-dimensional families is encoded.
+The well-formed conditional law excludes zero-mass fibers, as in the
+existing collision API. The bound on the error function concerns strictly
+positive inputs, while the three comparisons are retained for nonnegative
+errors. This definition is not a theorem, a new proof assumption, or a
+proof of the product contract.
 
 \section{A two-dimensional counterexample}
 
@@ -139,13 +170,18 @@ answer measurement returns $(1,*)$ with probability $\rho$.  Their final
 consistency defect is therefore $\rho$.  Thus the asserted conclusion would
 require
 \[
-  \rho \leq \delta_{\mathrm{pasting}}(\eta,\rho)
+  \rho \leq c_{\rm out}\delta_{\mathrm{pasting}}(\eta,\rho)
   \qquad\text{for every }\eta>0.
 \]
 The product contract gives the opposite asymptotic bound
 $\delta_{\mathrm{pasting}}(\eta,\rho)\leq C(\eta\rho)^C$.  Since $C>0$, the
-right side tends to zero with $\eta$, which is a contradiction.  As $\rho$ can
+right side, even multiplied by the fixed $c_{\rm out}$, tends to zero with
+$\eta$, which is a contradiction. Here $c_{\rm in}=1$ suffices for all
+three input comparisons. As $\rho$ can
 be arbitrarily small, this failure is not confined to the large-error boundary.
+It uses positive $\eta$ throughout: no extension of the printed scalar
+bound to $\eta=0$ is needed. The very same zero-collision example satisfies
+the hypotheses for every positive collision upper bound.
 
 \section{Comparison with the blueprint and formalization}
 
@@ -454,11 +490,14 @@ the three consistency calculations leading to \texttt{lem:qld-4-13} and
 combined measurement, through \texttt{lem:qld-construct-the-paulis} and
 \texttt{lem:qld-unitary}, ending at the proof of
 \texttt{thm:pauli-appendix}, lines~1862--1876 of the same source file.
-These uses require only the same joint measurement,
-the same directed comparisons, and an unspecified universal polynomial-small
-error. Replacing that error by a sum of positive powers, and then composing
-with $\delta_Q$, remains a sum of positive powers. No use requires the
-particular exponents of the conditional proof.
+For the established route, these uses require the same joint measurement,
+the same directed comparisons, and an additive positive-power error.
+Composing that error with $\delta_Q$ remains a sum of positive powers.
+This observation justifies the established route, not every printed
+intermediate assertion: in particular, it does not establish
+$\operatorname{poly}(m^2\eps,md/q)$ in \texttt{lem:qld-4-13} or the
+source-law comparisons. No established use requires the particular
+exponents of the conditional proof.
 
 The transitive \verb|\uses{}| descendants of the source-labelled blueprint
 node are as follows. Detached proofs must be attached to the declaration
@@ -500,7 +539,10 @@ the induction at lines~1031--1051 of the quantum preliminaries: the first
 family may be a POVM, and one pastes a projective next family at each step.
 The one-sided argument has exactly those hypotheses and retains the same
 ordered sandwich. The additional random index gives the required conditional
-collision bounds. Thus the answer-reduction use also needs no new restriction.
+collision bounds. Thus iteration preserves the ordered measurement and gives
+an additive error estimate without a new operator hypothesis. This is a
+mathematical consumer check, not a Lean proof of the NEEXP answer-reduction
+theorem or of its literal product-form shorthand.
 
 No Lean proof calls the public declaration \leanid{exists\_pasting\_error}
 directly. The concrete line construction instead applies
@@ -525,12 +567,57 @@ marginal comparisons, and joint self-consistency. The restored Lean statement
 has precisely these, together with finite-type and decidability instances and
 an explicit evaluation map; zero-probability conditional fibers are omitted.
 Both conclusions compare $A$ with the same coarse-grained sandwich $J$.
-The verdict is faithful finite-dimensional boundary hypotheses, with the
-separately justified additive scalar correction and a complete proof of the
-generic pasting theorem. The public quantifier order and all three printed
+The operator-domain verdict is faithful finite-dimensional boundary
+hypotheses. The quantitative verdict is a weakened positive-domain
+conclusion: the additive correction does not imply the printed product
+bound. The generic additive theorem has a complete proof, but is not a
+proof of \leanid{PrintedPastingClaim}. The public quantifier order and all three printed
 comparisons are retained; the proof actually does not need joint
 self-consistency.
 The conditional theorem has an extra comparison and is not source-equivalent.
+
+\subsection*{Boundary values and adoption verdict}
+
+The corrected bound forces $\delta_{\rm pasting}(0,0)=0$, but at
+$(0,\delta)$ with $\delta>0$ it permits a positive error. Similarly,
+$(\eta,0)$ need not have zero error under the scalar predicate alone.
+The printed bound specifies neither axis; its obstruction is instead the
+limit through positive inputs at fixed positive $\delta$.
+At the line application, $\rho=md/q>0$ for admissible finite parameters,
+so even a perfect strategy need not receive a zero scalar upper bound.
+All later roots and sums are evaluated on nonnegative arguments.
+
+The four conditions in Section 6 of
+\path{local/protocols/issues-prs.md} have distinct verdicts:
+\begin{enumerate}
+ \item \emph{Correctness.} The additive one-sided theorem is proved. Its
+ Schmidt-mirror argument constructs the missing opposite-register family;
+ it does not assume the fourth comparison. The counterexample is compatible
+ with its bound. The conditional register-exchange theorem is separately
+ proved and is not a dependency of the one-sided theorem.
+ \item \emph{Full consumer sufficiency.} The established line, global-pair,
+ and extraction estimates use the additive bound successfully, as the
+ consumer table records. The literal printed extended-line rate and
+ source-law obligations remain open. Hence sufficiency for every source
+ assertion and every source-labelled blueprint node is not established.
+ \item \emph{Minimality and source semantics.} This condition fails for the
+ existing product-to-sum replacement under the unchanged completion rule C3.
+ The product demands vanishing as either positive input tends to zero with
+ the other fixed. The additive bound drops that demand, and the example
+ proves that it cannot be recovered on the same domain. Even separating the
+ prefactor and exponent of a product would not remove this obstruction.
+ Thus no choice of universal positive exponents within this correction can
+ restore the printed guarantee. Useful final estimates do not make this
+ weaker intermediate conclusion terminal.
+ \item \emph{Lean convergence.} The retained definitions type-check without
+ asserting them. Focused checks concern the existing corrected consumers;
+ they are not a substitute for whole-project CI, independent review, or the
+ three preceding mathematical conditions. Commands and results are recorded
+ in \path{audits/2026-09-22-printed-error-contracts.md}.
+\end{enumerate}
+The existing row remains \texttt{pending}. This retention audit changes no
+predicate, proof statement, game, completion rule, other gap row, or repair
+budget. In particular it does not adopt a different project goal.
 
 \subsection*{Current formal status}
 
