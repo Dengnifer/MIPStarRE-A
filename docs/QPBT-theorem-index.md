@@ -7,18 +7,23 @@ Lean statement departs from the printed one.
 
 The chain this index follows is the one a reviewer needs in order to get from
 the definitions to the headline theorem
-[`pauli_soundness`](#1-headline-results): game and strategies → the Pauli basis
+[`pauli_soundness`](#1-four-registered-headline-results): game and strategies → the Pauli basis
 test → winning implications and the commutation/anticommutation tests →
 combining the two bases → applying the classical low individual degree test →
 extraction → soundness.
 
-**Generated from commit `838c51b78f30b2dc8b0d9c696ce6f4970731f733`** (the
-`github/main` of 2026-09-19, after PRs 633, 634, 648, 657 and 658 landed).
-Every row was read off that tree; nothing here is carried over from an earlier
-report. The previous revision of this file pinned
-`c6c8c2f2d34add9aebf15872f50a0f18039e4d46`; the Lean locators are unchanged
-between the two commits, the blueprint locators moved by the line counts the
-intervening chapters gained.
+**Audited source snapshot:** `abb98018ec07d6ba5896907f5675f716c6e07a05`
+(`github/main` on September 21, 2026). The mathematical locators, four
+registered targets, and 13 checked axiom assertions in this index refer to that
+commit. The broader external axiom probe from commit
+`838c51b78f30b2dc8b0d9c696ce6f4970731f733` is retained in section 8 as dated
+historical evidence; it is not relabelled as a check of the current snapshot.
+Every unqualified file-and-line locator and blueprint status mark below is
+frozen to the audited snapshot. Post-snapshot changes are confined to paragraphs
+headed "Current branch additions" or to table clauses explicitly prefixed
+`current:`; a mixed cell also prefixes its historical value with `snapshot:`.
+Current additions use stable declaration and blueprint labels rather than being
+attributed retroactively to the audited commit.
 
 ---
 
@@ -28,7 +33,7 @@ intervening chapters gained.
 declared at in this commit. Permalink base:
 
 ```
-https://github.com/Dengnifer/MIPStarRE-A/blob/838c51b78f30b2dc8b0d9c696ce6f4970731f733/<file>#L<line>
+https://github.com/Dengnifer/MIPStarRE-A/blob/abb98018ec07d6ba5896907f5675f716c6e07a05/<file>#L<line>
 ```
 
 **Paper** — file and line range under `references/qpbt-paper/`, given as the
@@ -52,13 +57,17 @@ file names. The pairing is not guessed: it is the node's own `\lean{…}` tag.
 `stmt`/`proof` record whether that node carries a statement-level and a
 proof-level `\leanok`.
 
-**Ax** — the axioms the declaration depends on, from `#print axioms`:
+**Ax** — the axioms reported for the declaration:
 
 - **S** = `[propext, Classical.choice, Quot.sound]`, the three standard Lean
   axioms. No `sorryAx`, and no project axiom: the Lean tree declares none.
 - **P** = `[propext]` only.
 
-Section 8 gives the raw probe output and the command that regenerates it.
+For the 13 declarations in `MIPStarRE/QPBT/Test/AxiomAudit.lean`, section 8
+describes the current compile-time check. Section 8 also records a current
+supplemental probe for the five raw-effect declarations added after the broader
+historical probe at commit `838c51b...`. Values on the remaining rows come from
+that historical probe, whose raw output and scope are preserved explicitly.
 
 **Differs?** — whether the Lean statement departs from the printed one:
 
@@ -73,19 +82,38 @@ Section 8 gives the raw probe output and the command that regenerates it.
 
 ---
 
-## 1. Headline results
+## 1. Four registered headline results
 
 | Lean declaration | file:line | What it says | Paper | Blueprint | Ax | Differs? |
 |---|---|---|---|---|---|---|
 | `MIPStarRE.QPBT.pauli_soundness` | `MIPStarRE/QPBT/Test/Soundness.lean:53` | There are universal constants `a ≥ 1`, `0 < b < 1` such that every strategy for the Pauli basis test that wins with probability at least `1 - ε` admits local isometries and an auxiliary state under which the state and both players' raw prescribed-answer Pauli effects are within `deltaQld a b ε m d q` of the ideal ones. | `thm:pauli`, `08:1431-1445` | `thm:pauli`, `ch13:1581` (stmt ✓, proof —) | S | no [^route] |
 | `MIPStarRE.QPBT.pauli_soundness_qubit` | `MIPStarRE/QPBT/Test/QubitForm.lean:423` | The same conclusion restated over qubit EPR pairs and qubit Pauli observables, using that the admissible field sizes are powers of two. | `cor:pauli-binary`, `08:1469-1487` | `cor:pauli-binary`, `ch13:1606` (stmt ✓, proof ✓) | S | no [^binary] |
 | `MIPStarRE.QPBT.exists_spcc_value_one` | `MIPStarRE/QPBT/Test/Completeness.lean:266` | For every admissible parameter tuple the symmetrized Pauli basis test has a symmetric, projective, consistent, commuting strategy of value exactly 1. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
-| `MIPStarRE.QPBT.honestStrategy_isSPCC` | `MIPStarRE/QPBT/Test/Completeness.lean:220` | The honest strategy built from the ideal Pauli measurements is SPCC. | `lem:pauli-completeness`, `08:1232-1234` | `lem:pauli-completeness`, `ch13:1553` (stmt ✓, proof ✓) | S | no |
 | `MIPStarRE.QPBT.exists_ld_soundness` | `MIPStarRE/QPBT/Test/LowDegreeGameTheorems.lean:82` | Quantum soundness of the simultaneous classical low individual degree test, in the source's own **seed-indexed** shape: a projective strategy of value `1 - ε` is close to one measuring simultaneous low-degree polynomials, at the source's error `deltaLd`. Proved separately, for every `k`; it is **not** the low-degree input the soundness chain consumes — that is the directly indexed carrier in [section 6](#6-combining-the-two-bases-and-extraction). | `lem:ld-soundness`, `08:413-440` | `lem:ld-soundness`, `ch13:245` (stmt ✓, proof —) | S | no [^ldroute] |
 
-[^route]: The statement is the printed one. What the proof route replaces is
-    below it: the carriers of `lem:qld-sublines`, `lem:qld-4-13` and
-    `lem:qld-4-7` use a **directly indexed** line space at dimension `2m+2`
+These are the four targets registered by the candidate split QPBT comparator
+challenge. `MIPStarRE.QPBT.honestStrategy_isSPCC` is a supporting completeness
+declaration and is one of the nine additional current axiom-audit assertions;
+it is not a fifth registered headline target.
+
+### Current branch additions
+
+After the audited snapshot, the `thm:pauli` node acquired a proof-level
+`\leanok`. Its attached proof invokes the formalization-support node
+`thm:pauli-arbitrary-strategy-raw-isometry-support`, linked to
+`MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds`. That helper has
+the full `ε ≥ 0` domain and concludes the state estimate and both raw
+prescribed-answer operator estimates, so it is the direct dependency of the
+certified proof rather than a completed-family surrogate.
+
+[^route]: At the audited snapshot, the statement is the printed one and only
+    the statement-level formalization mark is present. The post-snapshot proof
+    mark records the completed argument through the directly indexed low-degree
+    game, Naimark dilation, and transfer to the raw prescribed-answer effects.
+    The printed seed-indexed derivation remains unmarked in the blueprint. In
+    the completed argument, the carriers corresponding to `lem:qld-sublines`,
+    `lem:qld-4-13` and `lem:qld-4-7` use a **directly indexed** line space at
+    dimension `2m+2`
     instead of the source's seed-indexed one, because the source's own side
     condition `2m+2 ∣ q` is unsatisfiable. Documented in
     [`qpbt_ld-dimension-divisibility.tex`](paper-gaps/qpbt_ld-dimension-divisibility.tex).
@@ -180,9 +208,9 @@ is *attained* — is kept visible but not asserted; see section 7.
 | `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/ProjectiveSetting.lean:37` | Completed-family soundness estimates for **projective** strategies. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | `thm:pauli-projective-setting-isometry-support`, `ch16:1467` (stmt ✓, proof ✓) | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 | `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/NaimarkAssembly.lean:47` | The completed-family estimates for an **arbitrary** strategy, via Naimark dilation. | `thm:pauli`, `08:1431-1445` | `thm:pauli-arbitrary-strategy-isometry-support`, `ch16:1585` (stmt ✓, proof ✓) | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 | `MIPStarRE.QPBT.pauli_isometry_bounds_extend_epsilon` | `MIPStarRE/QPBT/Test/Soundness/EpsReduction.lean:101` | Extension of the completed-family estimates to every `ε ≥ 0`. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | — | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:393` | Alice's raw distance is at most twice the completed distance plus the state-error and malformed-answer terms. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:499` | Bob's symmetric completed-to-raw estimate. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
-| `MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:658` | Source-facing arbitrary-strategy estimates for both raw Pauli families, with the transfer loss absorbed into the existential prefactor of `deltaQld` and the full `ε ≥ 0` domain. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | proof of `thm:pauli`, `ch16` | S | no; repair: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:393` | Alice's raw distance is at most twice the completed distance plus the state-error and malformed-answer terms. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: proof of `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:499` | Bob's symmetric completed-to-raw estimate. | `thm:pauli`, `08:1438-1443`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: proof of `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` | S | support: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
+| `MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds` | `MIPStarRE/QPBT/Test/Soundness/RawOperatorTransfer.lean:658` | Source-facing arbitrary-strategy estimates for both raw Pauli families, with the transfer loss absorbed into the existential prefactor of `deltaQld` and the full `ε ≥ 0` domain. | `thm:pauli`, `08:1431-1445`; `14:1862-1876` | snapshot: proof of `thm:pauli`, `ch16:1626`; current: `thm:pauli-arbitrary-strategy-raw-isometry-support`, `ch16` (stmt ✓, proof ✓) | S | no; repair: [`qpbt_raw-pauli-effects`](paper-gaps/qpbt_raw-pauli-effects.tex) |
 
 [^vacuity]: A reviewer's fair question is whether the conclusion is ever
     non-trivial. The constants `a, b` are existentially quantified exactly as in
@@ -313,14 +341,13 @@ zero-direction completion, reversed observable indices, and a label typo.
 
 ## 7. The two printed claims recorded as non-asserted `Prop`s
 
-Two sentences of the source could not be proved as printed and are not known to
-be false as mathematics. Rather than delete them, weaken them silently, or leave
-a `sorry` behind, each is recorded as a **`Prop`-valued definition**: the printed
-statement stays in the Lean tree, in the source's own words, and is never
-asserted. Stating a proposition is not proving it, so nothing downstream depends
-on either, and neither site carries proof debt.
-
-Both landed on 2026-09-19 and are the reason the tree now has zero `sorry`.
+Two problematic source claims are retained as **`Prop`-valued definitions**.
+Declaring a proposition records its type; it does not assert or prove the
+proposition. Neither definition is consumed as a premise by `pauli_soundness`.
+They do not have identical status, however: the extended-lines definition
+preserves only the printed error expression on a corrected formal carrier,
+whereas the symmetric-attainment definition is intentionally referenced by a
+theorem refuting its universal form on the current Lean domain.
 
 ### 7.1 The printed form of `lem:qld-4-13`
 
@@ -329,7 +356,7 @@ Both landed on 2026-09-19 and are the reason the tree now has zero `sorry`.
 | Printed claim, unasserted | `MIPStarRE.QPBT.PrintedExtendedLinesWitnessClaim`, `MIPStarRE/QPBT/Combining/Apply.lean:108` |
 | Paper | `lem:qld-4-13`, `14:1020-1034` |
 | Blueprint | `lem:qld-4-13`, `ch15:2773` — no statement-level `\leanok` |
-| What it claims | Extended-line measurements at the error `poly(m²ε, md/q)`. |
+| What it preserves | The printed error expression `poly(m²ε, md/q)` for extended-line measurements. It is **not** the paper statement verbatim: it uses directly indexed questions, the directly indexed line-point law, an `Option`-completed answer alphabet, and the corrected sum-form `IsPolyErr₂` contract. |
 | Why it is not proved | Neither of the two derivations printed in the source delivers that error. The first yields `C·m·poly(ε, md/q)`; the second would yield `m²·poly(ε, md/q)` and additionally relies on a distributional decomposition the cited sub-line lemma does not supply. |
 | Proved corrected form | `MIPStarRE.QPBT.exists_extendedLinesWitness_established`, `MIPStarRE/QPBT/Combining/Apply.lean:237` — the first route's error form, and what the rest of the chain uses. |
 | Obstruction, proved | `MIPStarRE.QPBT.not_exists_combining_quarter_power_bound`, `MIPStarRE/QPBT/Combining/ErrorObstruction.lean:37` — the `m·ε^(1/4)` term cannot be absorbed into the printed arguments. |
@@ -345,44 +372,64 @@ Both landed on 2026-09-19 and are the reason the tree now has zero `sorry`.
 | What it claims | A game of value exactly `1 - ε` has a symmetric projective strategy *attaining* value `1 - ε`. |
 | Why it is not proved | Two independent defects. The source's argument builds a strategy above every strict lower bound and never at the bound, so the printed sentence asserts that a supremum over unbounded finite dimension is attained — which the source does not establish. And on the Lean domain, where the answer alphabet may be empty, the printed sentence is outright **false** at `ε = 1`. |
 | Proved corrected form | `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx`, `MIPStarRE/QPBT/Games/Symmetrization.lean:139` — for every `ε' > ε`, with `Nonempty G.Answer`; with the slack form `exists_symmetric_projective_strategy_of_lt_value` (`Symmetrization.lean:110`). |
-| Refutation, proved | `MIPStarRE.QPBT.not_forall_printedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:952`, from the empty-answer game `SymmetrizationObstruction.emptyAnswerGame` (`StrategyClasses.lean:915`). |
+| Refutation, proved | `MIPStarRE.QPBT.not_forall_printedSymmetricProjectiveAttainmentClaim`, `MIPStarRE/QPBT/Games/StrategyClasses.lean:952`, explicitly applies the `Prop` definition to the empty-answer game `SymmetrizationObstruction.emptyAnswerGame` (`StrategyClasses.lean:915`). This refutes the unrestricted claim on the Lean domain; it does not settle attainment for nonempty answer alphabets. |
 | Note / issue | [`qpbt_symmetrization-attainment.tex`](paper-gaps/qpbt_symmetrization-attainment.tex), issue #524; landed in PR 634. |
 
 ---
 
 ## 8. Axioms
 
-Every theorem listed above was checked with `#print axioms` against this commit.
-The result is uniform: **the three standard Lean axioms and nothing else**. No
-declaration depends on `sorryAx`, and the Lean tree declares no axiom of its
-own: at this commit `MIPStarRE/` contains zero `axiom` declarations and zero
-`sorry` occurrences outside prose.
+At the audited source snapshot, the checked-in module
+`MIPStarRE/QPBT/Test/AxiomAudit.lean` makes 13 compile-time assertions. Each
+assertion prints the declaration's axiom closure and fails elaboration unless
+the closure is exactly `{propext, Classical.choice, Quot.sound}`. In
+particular, it rejects `sorryAx` and any project-introduced axiom.
 
-The four `P` rows need only `propext`: `AdmissibleParams` and `LdParams` are
-structure *types*, and a structure's type constant needs no more;
-`nonVacuousParams` builds a term of one from numerals, and
-`nonempty_admissibleParams` is that term boxed. Their projections and every
-theorem about them are `S`.
+The four registered headline targets and nine supporting assertions are:
 
-Every row of this index now carries a probed value: the `—` that
-`pauliBasisTestSymm` used to carry has been replaced by the probe's own answer,
-`S`.
+| Declaration | Role |
+|---|---|
+| `MIPStarRE.QPBT.pauli_soundness` | registered headline target |
+| `MIPStarRE.QPBT.pauli_soundness_qubit` | registered headline target |
+| `MIPStarRE.QPBT.exists_ld_soundness` | registered headline target |
+| `MIPStarRE.QPBT.exists_spcc_value_one` | registered headline target |
+| `MIPStarRE.QPBT.honestStrategy_isSPCC` | completeness support |
+| `MIPStarRE.QPBT.exists_combinedLinesWitness` | combining support |
+| `MIPStarRE.QPBT.exists_extendedLinesWitness_established` | corrected combining result |
+| `MIPStarRE.QPBT.exists_globalPairWitness` | combining support |
+| `MIPStarRE.QPBT.exists_actual_rounded_global_pair_error_bound` | combining error bound |
+| `MIPStarRE.QPBT.exists_projective_setting_isometry_bounds` | projective extraction support |
+| `MIPStarRE.QPBT.exists_arbitrary_strategy_isometry_bounds` | arbitrary-strategy assembly |
+| `MIPStarRE.QPBT.pauli_soundness_deltaQld_ofExtractionWitness` | extraction-to-soundness support |
+| `MIPStarRE.QPBT.exists_symmetric_projective_strategy_approx` | corrected symmetrization result |
+
+Five raw-effect declarations in section 4 were added after the historical
+probe below. They are not additional checked-in audit assertions, but a direct
+probe at source snapshot `abb98018...` reported the same standard closure for
+each:
+
+- `MIPStarRE.QPBT.rawPauliOperatorDistanceA`
+- `MIPStarRE.QPBT.rawPauliOperatorDistanceB`
+- `MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed`
+- `MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed`
+- `MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds`
+
+The supplemental probe imported `MIPStarRE.QPBT.Test.Soundness` and
+`MIPStarRE.QPBT.Test.Soundness.RawOperatorTransfer`, then ran `#print axioms`
+on those five names. Each result was
+`[propext, Classical.choice, Quot.sound]`.
 
 ### Regenerating this column
 
-The probe deliberately lives **outside** the worktree, so that the index can be
-checked without adding a module to the build. (A checked-in audit module that
-CI builds is proposed separately, in PR 655; if it lands, that module — not
-this section — becomes the authoritative per-commit record, and the block below
-becomes a snapshot.)
+Build the checked-in audit module directly:
 
 ```bash
-# in a warm checkout of this commit
-lake env lean scripts/probe/AxiomProbe.lean
+lake build MIPStarRE.QPBT.Test.AxiomAudit
 ```
 
-where the probe is a file importing `MIPStarRE.QPBT` and listing the names. The
-minimal form for a single declaration is:
+The same target is explicit in GitHub CI and in `local/bin/ci.sh`; the module is
+deliberately not imported by the ordinary `MIPStarRE.QPBT` umbrella. A minimal
+manual check for one declaration remains:
 
 ```lean
 import MIPStarRE.QPBT
@@ -390,7 +437,7 @@ import MIPStarRE.QPBT
 -- 'MIPStarRE.QPBT.pauli_soundness' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
-Two cautions, both learned while producing this index:
+Two cautions apply to manual probes:
 
 1. `lake env lean` **does not rebuild**. If the `.lake/build` oleans are older
    than the checkout, the probe silently reports on the stale environment. Build
@@ -398,13 +445,15 @@ Two cautions, both learned while producing this index:
 2. A name that is missing from the environment is a signal, not a nuisance: it
    means the module holding it was not rebuilt.
 
-### Raw output
+### Historical broader probe
 
-Produced by the probe at commit `838c51b78f30b2dc8b0d9c696ce6f4970731f733`,
-in one run over a freshly built `MIPStarRE.QPBT`. Format:
-`AX <requested name> <resolved name> [<axioms>]`. Every row of the previous
-revision was re-probed at this commit and none changed; the twelve rows after
-`exists_extractionWitness` are the ones this revision adds.
+The raw block below was produced at commit
+`838c51b78f30b2dc8b0d9c696ce6f4970731f733` by an external probe over a freshly
+built `MIPStarRE.QPBT`. It covers more declarations than the 13 checked-in
+assertions and remains useful dated evidence for the remaining `Ax` cells. It
+is not evidence that those additional declarations were re-probed at the
+current source snapshot. Format:
+`AX <requested name> <resolved name> [<axioms>]`.
 
 ```text
 AX	Game	MIPStarRE.QPBT.Game	[propext, Classical.choice, Quot.sound]
@@ -502,9 +551,8 @@ AX	pauli_soundness_nontrivial	MIPStarRE.QPBT.pauli_soundness_nontrivial	[propext
 - The **LDT** track (`MIPStarRE/LDT/`), which QPBT imports for the classical
   low individual degree machinery, and the `MIPStarRE/Quantum/` support layer.
 - The QPBT declarations not on the path from the definitions to
-  `pauli_soundness` — the great majority of the tree. The full declaration ↔
-  blueprint cross-reference is `blueprint/lean_decls` (1,006 entries at this
-  commit).
+  `pauli_soundness` — the great majority of the tree. The generated declaration
+  to blueprint cross-reference is `blueprint/lean_decls`.
 - A uniform non-triviality rate: section 4.1 shows the conclusion is
   non-trivial along an explicit parameter family at `ε = 0`, not that it is
   non-trivial at fixed parameters for small `ε > 0`.
