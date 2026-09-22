@@ -15,15 +15,15 @@ dispatch.sh. Review remains independent and exact-head CI remains required.
 | Register row | Brief | Admission at 15:52Z |
 |---|---|---|
 | Symmetrization attainment | /tmp/main-document-symmetrization-20260922.md | PR707, issue703; live continuation at a4782a5a. Also owns minimal common C3 protocol/checker support and review5280263427 F1. |
-| Dimension divisibility | /tmp/main-document-dimension-20260922.md | Issue710 completed719815e9 in1323s with all four artifacts; publication/full CI/FIRST review detached. |
+| Dimension divisibility | /tmp/main-document-dimension-20260922.md | PR716 at4e2e7617 has green CI and first review5280897802. One documentation repair follows707's common gate correction; F2 makes completed point effects explicit. |
 | Polynomial square-root convention | /tmp/main-document-square-root-20260922.md | Issue711; author completed2dd2d894 in952s, all four artifacts; publication/full CI/FIRST review tail admitted. |
-| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 prepared, not admitted. |
+| Combined-line error | /tmp/main-document-combined-lines-20260922.md | Issue713 admitted at0eb04963 after a real lane freed; canonical dispatch controls actual capacity. |
 | Linearity normalization | /tmp/main-document-linearity-normalization-20260922.md | Prepared; PR699 merged as317aa9f4, no further proof. |
 | Linearity quotation | /tmp/main-document-linearity-quotation-20260922.md | Prepared; PR702 refresh conflicts, deferred. |
-| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Prepared; PR706's completed prose repair goes through CI and one clean review if feasible. |
-| Pasting product error | /tmp/main-document-pasting-product-20260922.md | Issue712 admitted from53d12daa; orc-712-20260923-01 now live after capacity became available. |
+| Magic Square rigidity | /tmp/main-document-magic-square-20260922.md | Prepared; PR706 closed unmerged after second review and the allowed continuation, branch preserved. Use only actual main. |
+| Pasting product error | /tmp/main-document-pasting-product-20260922.md | Issue712 completed099f4326 in1316s; now PR717 atba841d42 with detached CI/FIRST review pipeline. |
 | Winning implications | /tmp/main-document-winning-implications-20260922.md | Issue714 prepared, not admitted. |
-| Subline claims | /tmp/main-document-subline-20260922.md | Prepared; PR696 approved at5b4e80f9, no further proof. |
+| Subline claims | /tmp/main-document-subline-20260922.md | Prepared; PR696 merged045a657d with complete fresh CI and canonical approval carry. Use its actual merged direct-law statements; no further proof. |
 
 ## Blueprint nodes
 
