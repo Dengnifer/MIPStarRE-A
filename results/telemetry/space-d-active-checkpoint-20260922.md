@@ -1751,3 +1751,46 @@ review. Exact .pr/.head/exit under the same prefix will identify publication;
 no PR number is assumed in advance. On any real conflict preserve and inspect.
 The released model slot went to a queued reviewer;703/704 continue and the
 700/690 merge repairs retain their capacity waiters. No extra worker was added.
+
+## 2026-09-22T14:15Z nonempty-attainment receipt and independent review queue
+
+The previous stage comment is5777980392 and records published cleanly at
+b4dd22704d5b0b1b24018882d08d8867198d0a7c. Repaired699 full CI passed atd3089cbe
+(build61s, render63s, sync347s, debt24s, evasion94s); its marked audit and second
+review remain in the live v2 tail.702's first and696's second reviews are
+running/queued by phase; no combined new verdict is assumed. Snapshot's old
+adverse review summaries are not new findings.700's approved stale head and
+690's uncommitted parent merge still have live bounded repair waiters. No
+manual train was staged and the infrastructure PRs remain parked.
+
+mathfix-703-20260922-01 completed0 after2165s, clean at
+dbcf558aa7452e4aef854481ce19f40e99dd3fe1. It committed an explicit nonempty
+symmetric nonattainment example using verified external mathematical results,
+finite-system checks and consumer analysis. This is documentation evidence,
+not a kernel nonempty refutation. The exact/approximate representation and
+game-transfer proofs, the answer-reduction Schmidt-rank comparison and C3
+terminal adoption remain open. No Lean axiom, statement weakening, row closure
+or owner permission blocker was introduced. Existing history and unknown costs
+are preserved; the final2165s dispatcher duration supersedes the receipt's
+2094s observation cutoff. No continuation has been admitted.
+
+Prepared /tmp/main-publish703-source-20260922.sh verifies that exact terminal
+head and waits701's actual CI completion to avoid concurrent cold-build fixture
+timeouts. It then refreshes with the loss guard and private import exports,
+uses normal checked publication/full CI, runs the marked audit and starts a
+FIRST independent review. Main retains fix703 until that checked publication;
+the wrapper never treats the source-gap exit criterion as met.701 publication
+is live in its normal pre-push Lake check, not hung or bypassed.
+
+All three actual space-d slots remain occupied; the completed703 slot was
+immediately taken by a queued reviewer.704 continues its first whole-task box.
+The700/690 capacity waiters remain next integration work; no alternate key or
+additional slot was used. The required snapshot completed; historical failed
+markers, old stacks and parked552/554/556/561 need no new action.
+
+The handoff now explicitly authorizes the comparator library-URL rename in
+/home/drx/QPBT-comparator, preserving its pinned commit. Prepared705's packet
+was corrected to include that exact separate-checkout scope, without rewriting
+accepted evidence or renaming the comparator repository.705 remains unadmitted
+behind current mathematical integration and reviews; inspect its clean head
+and ownership before admission. No runtime configuration was changed.
