@@ -88,11 +88,17 @@ while independent completion criteria remain pending. Comments and strings are
 removed before this scan, and the generated comparator challenge lies outside
 the QPBT Lean root.
 
-The source-size figures above are reproduced with:
+The QPBT source-size figures above are reproduced from the audited snapshot
+with:
 
 ```bash
-find MIPStarRE/QPBT -type f -name '*.lean' | wc -l
-find MIPStarRE/QPBT -type f -name '*.lean' -print0 | xargs -0 wc -l | tail -1
+snapshot=abb98018ec07d6ba5896907f5675f716c6e07a05
+git ls-tree -r --name-only "$snapshot" -- MIPStarRE/QPBT \
+  | awk '/[.]lean$/ { count++ } END { print count + 0 }'
+git ls-tree -r --name-only "$snapshot" -- MIPStarRE/QPBT \
+  | awk '/[.]lean$/ { print }' \
+  | while IFS= read -r path; do git show "$snapshot:$path"; done \
+  | wc -l
 ```
 
 ### Axiom audit
@@ -141,11 +147,13 @@ carrier differences, counterexample scope, and corrected alternatives are in
 
 ### Independent comparator status
 
-Independent four-target comparator acceptance is **pending**. Preliminary
-official run `35621468975`, using source revision `a3683e9b`, passed the real
-landrun, nanoda, and Lean-kernel checks. That run did not use the required
-service-merged-main library pin, so it is preliminary evidence rather than
-acceptance of the current artifact. A run with that final pin remains pending.
+The canonical [comparator verification record](docs/comparator.md#current-verification-status)
+documents successful independent four-target acceptance. Official run
+`35638601720` completed on September 21, 2026 UTC using the service-merged-main
+library commit `ecb97d1f66eec1e6fad964f144f78b91ce1fab36`, with real landrun, nanoda,
+and Lean's kernel enabled. As that record explains, the result verifies closure
+equality at the pinned commit; it is not a source-faithfulness certificate or a
+claim that the QPBT track is complete.
 
 ## Build and check
 

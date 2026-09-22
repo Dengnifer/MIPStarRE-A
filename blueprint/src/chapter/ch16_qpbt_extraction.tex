@@ -1622,7 +1622,49 @@ final soundness argument. The omitted step in the source is discussed in
   $21a^2$ and the same exponent.
 \end{proof}
 
-\begin{theorem}[Formalization support for raw prescribed-answer bounds]
+\begin{theorem}[Formalization support for prescribed-answer transfer]
+  \label{thm:pauli-prescribed-answer-transfer-support}
+  \lean{MIPStarRE.QPBT.raw_pauli_operator_distanceA_le_completed}
+  \lean{MIPStarRE.QPBT.raw_pauli_operator_distanceB_le_completed}
+  \leanok
+  \uses{def:pauli-win-predicate, def:admissible, def:tensor-product-value,
+    def:EPR, def:povm-distance}
+  This is not a named statement of the source article; it isolates the
+  comparison between the completed Pauli effects used internally and the
+  effects attached directly to the prescribed answers in
+  Theorem~\ref{thm:pauli}. Let $S$ be a Pauli-test strategy with value at least
+  $1-\eps$, let $w$ be soundness data for $S$, and suppose that its state
+  distance is at most $\delta$. For $W\in\{X,Z\}$, write
+  $d_{\mathrm A}^{\mathrm{comp}}(W)$ and
+  $d_{\mathrm B}^{\mathrm{comp}}(W)$ for the two completed squared
+  Pauli-family distances, and write $d_{\mathrm A}^{\mathrm{pres}}(W)$ and
+  $d_{\mathrm B}^{\mathrm{pres}}(W)$ for the corresponding distances formed
+  from the prescribed-answer effects. Then
+  \begin{align*}
+    d_{\mathrm A}^{\mathrm{pres}}(W)
+      &\leq 2d_{\mathrm A}^{\mathrm{comp}}(W)+4\delta^2
+        +4|\mathcal E_{\mathrm{Pauli}}|\eps,\\
+    d_{\mathrm B}^{\mathrm{pres}}(W)
+      &\leq 2d_{\mathrm B}^{\mathrm{comp}}(W)+4\delta^2
+        +4|\mathcal E_{\mathrm{Pauli}}|\eps,
+  \end{align*}
+  where $|\mathcal E_{\mathrm{Pauli}}|$ is the number of oriented edge types in
+  the Pauli basis test.
+\end{theorem}
+\begin{proof}
+  \leanok
+  \uses{def:pauli-win-predicate, def:povm-distance}
+  Completion changes only the zero effect, to which it adds the total
+  malformed-answer effect. Rejection on the relevant oriented Pauli--point
+  edge bounds the state weight of that effect by
+  $|\mathcal E_{\mathrm{Pauli}}|\eps$. The state-distance hypothesis and
+  contractivity bound its action on the ideal state by
+  $2\delta^2+2|\mathcal E_{\mathrm{Pauli}}|\eps$. Applying the squared triangle
+  inequality at outcome zero and summing over all prescribed answers gives the
+  two displayed estimates.
+\end{proof}
+
+\begin{theorem}[Formalization support for prescribed-answer bounds]
   \label{thm:pauli-arbitrary-strategy-raw-isometry-support}
   \lean{MIPStarRE.QPBT.exists_arbitrary_strategy_raw_isometry_bounds}
   \leanok
@@ -1647,22 +1689,24 @@ final soundness argument. The omitted step in the source is discussed in
 \begin{proof}
   \leanok
   \uses{thm:pauli-arbitrary-strategy-isometry-support,
+    thm:pauli-prescribed-answer-transfer-support,
     lem:delta-qld-scalar-absorption-support,
-    lem:delta-qld-mono-support}
+    lem:delta-qld-mono-support,
+    lem:delta-qld-epsilon-mono-support}
   First suppose $0\leq\eps\leq1$ and apply
   Theorem~\ref{thm:pauli-arbitrary-strategy-isometry-support}. For either
   player, the completed zero effect is the prescribed zero effect plus the
   malformed-answer effect, while every nonzero completed effect equals its
   prescribed counterpart. Rejection on the two oriented Pauli--point edges
   bounds the malformed-answer mass by a universal multiple of $\eps$. The two
-  completed-to-raw estimates therefore bound each prescribed-answer distance
-  by $2\delta+4\delta^2+c\eps$ for a universal constant $c$, where $\delta$ is
-  the completed-family robustness bound. Enlarging the universal prefactor
-  absorbs this expression, and monotonicity brings the unchanged state estimate
-  to the same scale. If $\eps>1$, apply the result at error $1$, using
-  nonnegativity of the strategy value, and then use monotonicity in the error
-  parameter. This gives the prescribed-answer estimates on the full domain
-  $\eps\geq0$.
+  estimates comparing the completed and prescribed-answer effects therefore
+  bound each prescribed-answer distance by
+  $2\delta+4\delta^2+c\eps$ for a universal constant $c$, where $\delta$ is the
+  completed-family robustness bound. Enlarging the universal prefactor absorbs
+  this expression, and monotonicity brings the unchanged state estimate to the
+  same scale. If $\eps>1$, apply the result at error $1$, using nonnegativity of
+  the strategy value, and then use monotonicity in the error parameter. This
+  gives the prescribed-answer estimates on the full domain $\eps\geq0$.
 \end{proof}
 
 The results above complete the directly indexed argument used in the proof of
@@ -1792,6 +1836,30 @@ brought to a common scale.
 	\leanok
 	\uses{def:admissible}
 	Admissibility gives $md \ge 1$ and $q \ge 1$, so $a(md)^a \le a'(md)^{a'}$. In the bracket, $\eps^b \le \eps^{b'}$ because $0 \le \eps \le 1$ and $0 < b' \le b$; $q^{-b} \le q^{-b'}$ because $q \ge 1$ and $-b \le -b'$; and $2^{-bmd} \le 2^{-b'md}$ because $md \ge 0$ and $-bmd \le -b'md$. Both factors are nonnegative, so the two products compare factorwise.
+\end{proof}
+
+The next statement is also formalization-only. It records the monotonicity in
+the error parameter used to pass from the substantive range $0\leq\eps\leq1$
+to the full error domain of Theorem~\ref{thm:pauli}.
+
+\begin{lemma}[Monotonicity of the robustness bound in the error parameter]
+  \label{lem:delta-qld-epsilon-mono-support}
+  \lean{MIPStarRE.QPBT.deltaQld_mono_epsilon}
+  \leanok
+  \uses{def:admissible}
+  Let $(q,m,d)$ be an admissible parameter tuple, let $a\geq1$ and $b>0$, and
+  let $0\leq\eps\leq\eps'$. Then
+  \[
+    \delta_{\mathrm{qld}}^{a,b}(\eps,m,d,q)
+      \leq \delta_{\mathrm{qld}}^{a,b}(\eps',m,d,q).
+  \]
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{def:admissible}
+  Only the summand $\eps^b$ depends on the error parameter. Its monotonicity on
+  the nonnegative reals, together with the nonnegativity of the prefactor
+  $a(md)^a$, gives the result.
 \end{proof}
 
 The next statement is likewise not a named result of the source article.  It
