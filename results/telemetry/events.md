@@ -9695,3 +9695,79 @@ historical entry above is rewritten.
   cleanbb607c6f with its parent already merged; its old v3 waiter is terminal
   and needs a fresh publication admission, not a blind restart. All three
   model slots remain701/703/704; the700 repair waits actual space-d capacity.
+
+- The13:46Z cycle re-admitted690 publication independently after verifying
+  its cleanbb607c6f and actual merged691 parent. Normal refresh stopped on
+  three documentation conflicts, with HEADbb607c6f and MERGE_HEADc394da91.
+  Every proof and staged incoming file is preserved. A2700s integration-only
+  worker is queued to combine the algorithm/cost entries, reviewed parent
+  indices, merged Pauli coverage and accurate completion lists. It changes no
+  proof or source semantics and receives no new mathematical tranche. The
+  previous turn made progress through691 merge and702 CI; current progress
+  makes690's actual integration obstacle concrete and assigned. 702's live
+  build57s/render111s passed; independent CI and three source workers continue.
+
+- The13:53Z cycle observed a brief service stop during the repository rename.
+  gh_common.py repo-slug now resolves Dengnifer/MIPStarRE-QPBT; the daemon is
+  running again as1980476 and meta-auto remains3313963. Main changed no stop
+  file, remote, key or runtime config. The owner-tools event log records the
+  rename and an earlier speed-tier adjustment; actual space-d config is still
+  Astra/ultra with service_tier=default. Preserve that observed owner-managed
+  configuration rather than reporting new workers as fast or undoing it.
+  Prepared unadmitted issue705 covers current artifact/workflow references and
+  both aliases in anonymization, preserving all historical review/comparator data.
+- 702 full CI completed successfully and its required1876-declaration/377-module
+  audit passed0 failures (5777807908); first review is queued. Repaired699 CI
+  started independently and passed build61s/render63s.701 completed0 after3326s
+  at e0c8f4ce,14 files+2122/-19, both requested prescribed/one-way constructions
+  and separate-error necessity evidence. Main started guarded publication/full
+  CI-after699/first review; source adoption stays pending. All earlier costs
+  and false printed claims are retained. The previous turn was progress through
+  concrete690 integration; this turn harvests completed mathematics and checks.
+
+- The14:15Z cycle harvested703's clean documentation result atdbcf558a after
+  2165s. Its explicit nonempty counterexample remains mathematical evidence:
+  kernel representation/game transfers and the consumer rank comparison are
+  unresolved, and unchanged C3 remains open. Prepared checked publication/full
+  CI/first review after701 CI; no new proof tranche or closure was inferred.
+  Repaired699 full CI passed. All3 space-d model slots are occupied by704 and
+  queued review phases;700/690 merge repairs retain their live waiters. The
+  rename packet705 now includes the owner's explicit comparator library-URL
+  change while preserving pins, history and the official acceptance record.
+
+- The14:23Z exact completion check atb819704e confirms336 Lean files/no holes,
+  10/21 nonterminal source rows and4/533 unmarked blueprint nodes after691.
+  No exemption or goal change was made. Comparator rename preflight found a
+  dirty old draft-challenge checkout, while the verified accepted run is on
+  issue-662-closure-20260921-diagnostic at360402fd.705's packet now preserves
+  those local leftovers and uses an isolated accepted-branch checkout, with
+  the ecb97d1f pin unchanged. One2700s rename task is queued behind admission
+  of700/690's repair workers.699 marked audit passed1874 declarations and its
+  new code review approved0 findings; prose remains pending. All3 space-d
+  slots were verified occupied, with no traffic moved to another key.
+
+- The14:30Z cycle harvested700's integration repair:533s, clean a66c9e14,
+  normal hooks/loss guards and all unrelated indexed/staged content preserved.
+  A new guarded pipeline queues publication/full CI/marked audit and strict
+  canonical carry or SECOND independent review.706 full CI and1884-declaration
+  audit passed;703 publication resumed. Direct PID arguments corrected the
+  earlier stale reviewer-assignment description; the physical3-slot count was
+  always accurate.
+- 705's warmed clean tree lost its free slot to a queued reviewer during setup.
+  Canonical account routing exited4 without a reservation or model session.
+  Keep the original logs and setup cost; retry the same initial2700s assignment
+  from exact04e7a7d6 through the normal3600s account wait. No extra worker slot,
+  key, author continuation, model budget reset or hook bypass is involved.
+
+- 704 completed3264s of checked partial construction at eedcde3c. Main admitted
+  its ONE3600s continuation on the actual strategy/rejection/soundness targets
+  and recorded the auxiliary K proposal for continued construction only.
+  Ten proved lemmas and all earlier costs remain; the source row stays open.
+  PR707's complete documentation CI passed.702 first review5279555373 returned
+  seven findings, assigned together to one2700s repair and a later fresh review.
+- 696's code lane waited3600s for capacity and exited4 without a reservation;
+  its prose lane completed with APPROVED. Previous shorthand calling that
+  completed phase code is corrected by the actual phase files. Archive the
+  whole failed run, preserve all costs and re-run canonical review at the same
+  exact head with a7200s capacity wait, unchanged2700s model limits and caps3.
+  This is a model-free capacity failure, not a key retirement or new finding.
