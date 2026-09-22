@@ -16,16 +16,19 @@ says how to check that mechanically.
 Detail for each row lives in a mathematical note under `docs/paper-gaps/`. The
 machine-readable index of those notes is
 [`docs/paper-gaps/qpbt-gap-register.md`](paper-gaps/qpbt-gap-register.md), which
-currently indexes 19 of the 21 notes: `qpbt_subline-claims-line-marginal.tex`
-(row c8) and `qpbt_combined-points-field-valued.tex` (row d1) have no register
-entry yet, so for those two rows this page, not the register, is the complete
-record. The policy that governs when a note must be written is
-[`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). The 21 rows below cover
-the 21 current `qpbt_*.tex` notes one-to-one. This page is a summary of those
-notes, not a replacement for them.
+currently indexes 19 of the 21 notes. The two unindexed notes are
+`qpbt_subline-claims-line-marginal.tex`, which supports rows c8 and c10, and
+`qpbt_combined-points-field-valued.tex`, which supports row d1; for these
+entries this page is the reviewer-facing index in place of a register row. The
+policy that governs when a note must be written is
+[`docs/paper-gaps/policy.tex`](paper-gaps/policy.tex). The 22 rows below cover
+the 21 current `qpbt_*.tex` notes; row c10 shares the subline note with c8 and
+adds a focused audit of the combining-map carrier. This page is a summary of
+those notes and audits, not a replacement for them.
 
-Every row below was checked against `github/main` at commit `f976bec2`.
-Line numbers are from that commit.
+The pre-existing rows were checked against `github/main` at commit `f976bec2`.
+Row c10 was checked against merged main at commit `5074eef1`. Line numbers in
+each row are from its stated commit.
 
 ## How to read the table
 
@@ -202,7 +205,8 @@ draw (`policy.tex`, §"When to Write a Note"), is between a **boundary
 hypothesis** — positivity, nonemptiness, decidability, a field-model instance —
 which is a faithful encoding of the domain the paper works in, and a
 hypothesis that **supplies an unproved step** of the paper's argument. Rows c1
-and c7 are the latter and say so.
+and c7 are the latter and say so. Row c10 records an unresolved carrier
+correspondence rather than an adopted side condition.
 
 ### c1. The strategy class in Magic Square rigidity
 
@@ -334,6 +338,19 @@ kernel-certified Lean instance. The note says so.
 | **Blueprint** | `lem:ld-sandwich`, `rem:ld-sandwich-indexing` (`ch12_qpbt_games.tex`) |
 | **Gap note** | [`qpbt_ld-sandwich-indexing.tex`](paper-gaps/qpbt_ld-sandwich-indexing.tex) |
 | **Printed-claim status** | **refuted** as printed (the identification); corrected statement proved. |
+
+### c10. The line-function domain of the combining map
+
+| | |
+|---|---|
+| **Paper statement** | The line-restricted combining map `eq:combine-lines` in `def:combine-map` |
+| **Locator** | `references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex`, chapter 14 lines 970–989 |
+| **What differs** | The global polynomial combination is proved, as is a coefficient-level operation in a line parameter. Projection inclusion supplies compatible affine parameters, and the resulting parameter polynomial has degree at most `md+1` and satisfies the displayed affine-weighted formula. The source, however, takes polynomial **functions on geometric lines**. The current bounded-coefficient carrier has not been shown to descend to that function carrier independently of affine parameter choices and polynomial representatives. |
+| **Why** | The source explicitly permits singleton lines, and its admissible regime has `md ≥ 1`. For source lines `ℓ_X=ℓ_Z={0}`, an extended singleton with base `(0,0,1,0)`, and coefficient answers `f(T)=T`, `g(T)=0`, compatible affine choices produce the distinct parameter polynomials `0`, `1`, and `T`; the last has no field value at the singleton point under the current evaluation relation. This refutes a total evaluation-preserving identification of the coefficient carrier with the source domain, not the source formula for genuine functions on lines. |
+| **Lean (what is proved)** | Global map `combinePoly` and `combinePoly_mem_polyFunc`, `MIPStarRE/QPBT/Combining/Defs.lean:81` and `:149`; projection-to-parameter construction `exists_combineLinePoly_of_projection_mem`, `MIPStarRE/QPBT/Combining/LinePolynomial.lean:77`; singleton obstruction `not_evaluatesTo_parameter_on_zero_direction`, `LinePolynomial.lean:120` |
+| **Blueprint** | `def:combine-map` remains unmarked under its reasoned C4 exemption in [`docs/completion/qpbt-leanok-exemptions.md`](completion/qpbt-leanok-exemptions.md); the proved support nodes are `lem:combine-map-affine-parameters`, `lem:combine-map-parameter-polynomial`, and `lem:combine-map-singleton-evaluation`, followed by `rem:combine-map-function-domain` (`ch15_qpbt_combining.tex`) |
+| **Evidence** | [`audits/2026-09-22_combining-map-source-domain.md`](../audits/2026-09-22_combining-map-source-domain.md) and [`qpbt_subline-claims-line-marginal.tex`](paper-gaps/qpbt_subline-claims-line-marginal.tex) |
+| **Printed-claim status** | **unproved** in the source-shaped function carrier. The source identity is not refuted; the global map and the parameter-polynomial operation are proved. |
 
 ---
 
@@ -526,6 +543,11 @@ this repository.
   the directly indexed subline law to the source's seed-indexed law remains
   open, as do the source-law complex forms of the scalar claims. The directly
   indexed estimates, including the complex second claim, are proved.
+- [c10](#c10-the-line-function-domain-of-the-combining-map): the coefficient
+  answer carrier has not been descended to functions on geometric lines in a
+  way independent of affine choices and polynomial representatives. The
+  global combining map and the projection-to-parameter operation used by Lean
+  are proved; the missing carrier correspondence is not assumed.
 
 Row [c4](#c4-prime-characteristic-and-binary-pauli-scope) separately records
 the general-prime eigenvectors and projectors defined by `primePauliVec` and
