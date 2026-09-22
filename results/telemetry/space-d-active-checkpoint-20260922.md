@@ -1695,3 +1695,59 @@ and live;702 build57s and render111s passed.701/703/704 are the3 actual model
 slots; both700 and690 integration repairs and696's second review await space.
 Previous stage5777653085 and telemetryc394da91 are published cleanly. This
 cycle is progress, not a repeated impasse or a key failure.
+
+## 2026-09-22T13:53Z repository rename, full702 checks, completed701 construction
+
+The snapshot briefly showed the merge daemon stopped. Read-only investigation
+found the owner-tools event2026-09-22T13:53:47Z records a repository rename from
+Dengnifer/MIPStarRE-A to Dengnifer/MIPStarRE-QPBT and a live-service restart.
+gh_common.py repo-slug confirms the new name; stop markers are absent, daemon
+PID1980476 and meta-auto3313963 are live. Main did not clear a stop or change
+remotes/configuration. Existing PR numbers/commits/history are unchanged.
+An earlier event13:29:48Z attributes a fast-to-default speed change to the owner;
+the actual space-d home now reads modelgpt-6-astra, effortultra,
+service_tierdefault. Keep the configured state and report it accurately; main
+has not changed any key/model/tier. Space-d remains the sole3-slot rotation.
+
+Prepared issue705 and /tmp/main-repository-rename-packet-20260922.md for current
+artifact/workflow references, missing-remote fallback and anonymization of BOTH
+repository aliases. No worker admitted: prioritize existing reviews/integration.
+Do not rewrite immutable paper mirrors, review bodies/captures, historical
+telemetry or accepted comparator SHAs/run; do not rename the comparator repo
+or touch QKD. The new packet changes no runtime configuration or mathematics.
+
+702 full exact-head CI passed b167f8e1 (build57s, render111s, sync362s,
+proof-debt33s, proof-evasion106s), followed by required marked audit1876
+declarations in377 modules with0 failures, evidence5777807908. FIRST review
+/tmp/main-whole-review702-initial697-20260922 is queued behind actual slots.
+Repaired699 CI is now active atd3089cbe and passed build61s/render63s; its
+second review/audit remain in the v2 tail. Neither source gap is adopted.
+
+701 first author completed0 after3326s at
+e0c8f4ceb04c1e2ba77ce9f98dd7ea680204a511, clean,14 files+2122/-19. Both targets
+are proved: prescribed-answer agreement-controlled extraction and value-only
+one-way extraction with constraint counterparts. The stronger universal
+separate-errors theorem constructs ONE witness, with value-only state/Bob/
+anticommutator bounds and Alice errors linear in the intrinsic agreement
+defect. Wrong-form and product transport are derived internally. The receipt
+provides necessity/sufficiency of agreement order sqrt(epsilon) for the seven
+printed rates, with no game change, extra source premise or finite-test-only
+optimality claim. Existing printed false claims/counterexamples remain.
+This is author evidence, not a completed C3 adoption. All105/172/688/701 costs
+are retained, including original2067s+915s688 work and3326s current author.
+
+Receipt /tmp/main-fullspeed-ms-prescribed-20260922-result.md; combined reviewable
+body /tmp/main-ms-prescribed-pr-body-20260922.md; committed audit
+audits/2026-09-22_issue-701_ms-prescribed-extraction.md. No continuation needed
+for the assigned construction targets. Main must evaluate all four adoption
+conditions only after independent mathematical review of the exact result.
+
+New /tmp/main-publish701-source-20260922.sh is live. It verified terminal0,
+clean exacte0c8f4ce and actual692 ancestor, refreshed normally (loss guard passed
+with incoming e8e5d91e), then performs private imports/checked publication.
+It transfers main-fix701 to main-ci for the new PR, waits the already active
+repaired699 full CI, runs its own complete CI/marked audit, and starts FIRST
+review. Exact .pr/.head/exit under the same prefix will identify publication;
+no PR number is assumed in advance. On any real conflict preserve and inspect.
+The released model slot went to a queued reviewer;703/704 continue and the
+700/690 merge repairs retain their capacity waiters. No extra worker was added.

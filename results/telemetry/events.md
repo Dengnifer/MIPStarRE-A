@@ -9706,3 +9706,21 @@ historical entry above is rewritten.
   previous turn made progress through691 merge and702 CI; current progress
   makes690's actual integration obstacle concrete and assigned. 702's live
   build57s/render111s passed; independent CI and three source workers continue.
+
+- The13:53Z cycle observed a brief service stop during the repository rename.
+  gh_common.py repo-slug now resolves Dengnifer/MIPStarRE-QPBT; the daemon is
+  running again as1980476 and meta-auto remains3313963. Main changed no stop
+  file, remote, key or runtime config. The owner-tools event log records the
+  rename and an earlier speed-tier adjustment; actual space-d config is still
+  Astra/ultra with service_tier=default. Preserve that observed owner-managed
+  configuration rather than reporting new workers as fast or undoing it.
+  Prepared unadmitted issue705 covers current artifact/workflow references and
+  both aliases in anonymization, preserving all historical review/comparator data.
+- 702 full CI completed successfully and its required1876-declaration/377-module
+  audit passed0 failures (5777807908); first review is queued. Repaired699 CI
+  started independently and passed build61s/render63s.701 completed0 after3326s
+  at e0c8f4ce,14 files+2122/-19, both requested prescribed/one-way constructions
+  and separate-error necessity evidence. Main started guarded publication/full
+  CI-after699/first review; source adoption stays pending. All earlier costs
+  and false printed claims are retained. The previous turn was progress through
+  concrete690 integration; this turn harvests completed mathematics and checks.

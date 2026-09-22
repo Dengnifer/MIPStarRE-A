@@ -61,6 +61,8 @@ CI/review. The main checkpoint records live assignments.
    688's evidence is published as692. Main admitted701 for the remaining
    prescribed-effect/one-way extraction and quantitative agreement construction,
    3600s with inherited costs and pending adoption preserved.
+   701 completed both constructions and necessity evidence at e0c8f4ce;
+   publication, complete CI, independent review and Main adoption remain.
 7. **Pasting product error.** Source06:504-525, lem:pasting. Exit: a source
    contract meeting unchanged C3, all QPBT and answer-reduction uses, actual
    minimality/semantics argument and printed-claim retention. PR675 retains
@@ -140,3 +142,8 @@ scripts/completion_gate.py check --track qpbt on the exact published commit.
 Retain the official comparator acceptance35638601720 and record677; any required
 pin update follows comparator rules, not an unrecorded local substitute. Only
 all passing completion criteria justify the final27 comment and goal pause.
+
+Issue705 is prepared after the repository rename to MIPStarRE-QPBT: update
+active artifact/workflow references and check anonymization of both aliases,
+while retaining historical evidence and accepted comparator pins. It has no
+worker admission yet and does not activate parked infrastructure PRs.
