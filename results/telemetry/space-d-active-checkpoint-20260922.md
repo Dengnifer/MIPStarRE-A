@@ -570,3 +570,197 @@ four-lane/no-other-key restriction remains the applied authorization. Main
 has not overwritten that concurrently maintained handoff or re-enabled a key
 on the basis of the conflicting resource text. No pause condition or DONE
 condition occurred; the goal remains active.
+
+## Three-Lane Whole Tasks And Final Pauli Disposition
+
+At09:08Z the authoritative external handoff has newer owner allocations at
+08:53:22Z and08:56:28Z: QPBT uses space-d only, main plus3 lanes, caps3/0/3.
+Other healthy keys belong to the owner's QKD project. Main verified the sole
+rotation directory is space-d with limit3 and did not re-enable any other key.
+Existing code/prose680 workers finished normally; there is no pause condition.
+The earlier four/six-lane records above are superseded, not erased.
+
+PR686 merged as c70f29df7b6a5f9a718f7dbee672c7b5aa0e52eb after independent
+approval5275842693. PR685 remains approved by5275826301 atf5300f2094d545415fa09e738203c61832279998.
+The model-free meta-auto-merge-v3 loop is live and owns train staging; main
+has not raced it. Its last report had685 as one stale approved candidate.
+
+PR680 fourth/final review5275958164 at3ac291177420fd70d11e7dedfccae57fc039037a
+found no mathematical defect, no statement drift and all ten prior findings
+resolved. Code requests F1 reuse of two Mathlib outer-product lemmas; prose
+approves. Complete eight-step exact-head CI is green. Main accepted F1 as
+issue687 and posted terminal ADJUDICATION5773888104, retaining the adverse
+verdict. No fifth full review is authorized. A separate successor owns F1.
+
+Three detached Astra/ultra whole tasks now run through canonical dispatch,
+with the owner's exact full-speed hardness reason and shim-selected space-d:
+
+- orc-676-20260922-05:3600s, canonical-complement completion, branch/worktree
+  issue-676-canonical-completion-20260922, basef5300f20. Runtime
+  /tmp/main-fullspeed-canonical676-v2-20260922, brief
+  /tmp/main-canonical-completion-packet-20260922.md. Owns the two canonical
+  blueprint obligations, preserving the distinction between RREF algebra and
+  executable/complexity claims; no duplicate RREF proof or false mark.
+- orc-687-20260922-01:2700s, only the Pauli Mathlib-reuse successor,
+  issue-687-pauli-mathlib-reuse-v2-20260922, base3ac29117. Runtime
+  /tmp/main-fullspeed-reuse687-v2-20260922, brief
+  /tmp/main-pauli-reuse-packet-20260922.md. Normal independent successor gates.
+- orc-688-20260922-01:3600s, Magic Square adoption evidence continuing105/172,
+  issue-688-ms-adoption-20260922, base7a5aba59. Runtime
+  /tmp/main-fullspeed-ms688-20260922, brief
+  /tmp/main-ms-adoption-packet-20260922.md. One explicit finite evidence
+  tranche, preserving all earlier costs/anchors, not authority to alter the
+  game or terminal statuses, or retry the refuted unrestricted theorem.
+
+All three worktrees passed worktree-setup and hook checks before dispatch.
+Initial nohup-only bootstraps were interrupted before model dispatch; preserved
+logs have no exit receipt. Replacements use setsid. The first687 directory
+contained only.git; its existing branch was preserved and its incomplete HEAD
+and checkout were restored to the original3ac29117 snapshot. It is unassigned;
+the actual author owns only the v2 path. No authored work was discarded.
+
+The18 individual C3/C4 briefs and exact exits are now recorded in
+results/telemetry/completion-packets-20260922.md. Stage comment5773885415
+reports686,680 disposition, the latest allocation and bounded688 admission.
+
+Detached MODEL-FREE pipeline /tmp/main-refresh-adjudicated680-20260922.sh
+owns frozen-parent680 refresh/publication and full CI. It can carry only the
+unchanged adverse fourth review, verified by the canonical whitespace-sensitive
+patch hash, then derive an exact-head adjudication and service template. It
+never invokes a fifth reviewer or merges. Publication/CI sublog prefix is
+/tmp/main-fullspeed-publish680-adjudication-20260922; investigate failures with
+the claim retained before any retry. Success releases680 to the merge service.
+All worker and review costs remain charged; final artifact verification and
+the exact-commit completion gate remain outstanding.
+
+The final records attempt refused with `train running` (exit3), so the latest
+checkpoint/events/decision rows remain pending normal publication. Do not
+bypass that guard; the auto loop and next main cycle retry when quiet. All
+three actual PID markers are present under keyrot/space-d; the parent680
+refresh has advanced through its guarded merge and is in checked publication.
+
+## Approved RREF Refresh
+
+The09:11Z cycle is progress after the preceding three admissions: the live
+census confirms all three workers on space-d, load50/128, no space-d retirement.
+The handoff's latest08:56:28Z space-d-only allocation remains newer than the
+03:35Z relay-layout relay message. Historical needs-attention/failed markers
+are not current QPBT work; parked infrastructure stays parked.
+
+PR685 has waited as a single stale approved candidate across several merger
+ticks. Its local/public f5300f20 head is clean and unclaimed, so main starts
+/tmp/main-refresh-approved685-20260922.sh: detached model-free refresh,
+checked publication, complete CI and canonical carry of approval5275826301
+only if the whitespace-sensitive patch is unchanged. No extra worker or model
+review is consumed. The publication sublog prefix is
+/tmp/main-fullspeed-publish685-approved-refresh-20260922. Claims are retained
+on failure for inspection. The actual merge remains exclusively the service's
+job; no fresh approved head is placed in a train. Parent680's detached pipeline
+continues independently. Current authors own different worktrees and files.
+
+## Pauli Cleanup Complete; Complex Subline Task Admitted
+
+The09:14Z cycle is progress. orc-687-20260922-01 completed successfully in462s
+at908df81cfdac13ee559a406ad2197e56a71ea763; clean branch
+issue-687-pauli-mathlib-reuse-v2-20260922. Exactly two proof bodies changed,
+4 insertions/32 deletions. Focused Lean, nine standard-only axiom closures,
+statement-header comparison and normal hooks pass. Initial stale private
+FiniteFields.olean was rebuilt locally, with no shared-cache mutation.
+The duplicate scan's inherited projector/observable signature match is recorded
+as a type-only false positive, not falsely reported as a clean scan. Receipt:
+/tmp/main-fullspeed-reuse687-v2-20260922-result.md.
+
+Detached model-free /tmp/main-publish687-after680-20260922.sh waits for actual
+PR680 merge (bounded3h, polls30s, stops on space-d retirement or unmerged closure),
+then runs guarded refresh/publication and complete CI for the narrow successor.
+On green CI it invokes /tmp/main-whole-review-20260922.sh: independent Astra
+ultra2700s per phase with owner hardness reason and account admission. It never
+reviews the parent a fifth time. Runtime prefix is the script path without.sh;
+later publication prefix /tmp/main-fullspeed-publish687-20260922. Claim687 stays
+with main until publication. No PR or review for687 is yet claimed complete.
+
+The freed lane now runs mathfix-689-20260922-01,3600s on space-d after warm
+setup/hook checks. Worktree/branch issue-689-subline-complex-20260922 at
+ccba9a6756c58c0efa5cda04747e6a97935d71fb; packet
+/tmp/main-subline-complex-packet-20260922.md; runtime
+/tmp/main-fullspeed-subline689-20260922. It owns complex Claim17-1 and reality
+for Claim17-3 in the direct-law Combining/Claims surface. Existing Claim17-2
+is reused. No source-law/game/zero-direction change or false completion mark.
+Main explicitly admitted one finite additional118 tranche in design-decisions
+and stage comment5774043766 before dispatch. The13 recorded mathfix118 rows
+total26509s; this is a subset, not an exhaustive cross-issue total. Original
+anchor,10/19931s historical baseline, later attempts and all related work remain
+charged. No automatic extension. Dispatch warned no declaration claim was yet
+registered; the packet requires duplicate checks before new proofs.
+
+At09:18Z the other two worker PIDs3597257/3603248 are live. PR680 has published
+cea8800e23b4c6d6a57ba195e143429de5aa35eb and is in complete CI. PR685 has
+published2b5aefaca6eb07022645bfdc4e55e20d2deb5e09 and is waiting on the shared
+full-build lock held by live PID3685345. These are verified live waits, not
+failed jobs; do not restart or duplicate them. Latest resource assignment is
+space-d only3/0/3; load was67/128, no chsh admission. The status snapshot's
+parked infrastructure and historical markers remain outside current work.
+
+## Canonical Lemma Finished; Elimination Algorithm Admitted
+
+The09:21Z cycle began as a verified live wait and produced a completed author
+result: orc-676-20260922-05 exited0 after1220s at
+7c9d311279d67ebf5fd51bcdc91ec0ecad037e3e. Exactly four files,411+/34-, clean
+worktree. The source-facing complementarity proof derives its RREF data from
+row independence, and adds the source pivot-coordinate component, cardinality,
+independence and register-subspace conclusions. Focused Lean/ten standard-only
+axiom closures, boundary examples, blueprint web/sync and1879 declarations
+passed. The lemma receives its supported marks; the efficient-algorithm part of
+def:canonical-complement remains unmarked. Author's completion gate still fails
+(six unmarked nodes on that branch); no whole-track completion is claimed.
+Receipt /tmp/main-fullspeed-canonical676-v2-20260922-result.md and body
+/tmp/main-canonical-completion-body-20260922.md are retained.
+
+Detached model-free /tmp/main-publish-canonical676-after685-20260922.sh owns
+its publication after actual685 merge, with a bounded3h wait and key/closure
+guards. It requires the clean exact7c9d3112 author head, then guarded merge,
+checked publication, complete CI and an independent2700s whole review. Prefix
+is its filename without.sh; canonical predecessor costs/reviews are retained.
+Claim676 remains main-fix until publication; this is a new successor PR, not
+another full review of the approved685 patch.
+
+Main immediately filled the freed slot with issue690, branch/worktree
+issue-690-canonical-elimination-20260922 based on immutable7c9d3112. The new
+3600-second prover task owns only RowEchelonAlgorithm.lean and its audit; it
+reuses the existing algebra and proves executable deterministic elimination,
+RREF/row-span correctness and a polynomial bound for its actual field/zero-test
+operations. Packet /tmp/main-canonical-algorithm-packet-20260922.md; runtime
+/tmp/main-fullspeed-algorithm690-20260922. All676 costs persist. No choice-based
+efficiency claim, source weakening, extra dependencies or premature mark.
+
+The other two worker processes remain live on space-d. CI680's build succeeded
+in568s, blueprint-render52s and paper-gaps1s; remaining steps continue. CI685
+waits for the still-live shared CI/full-build lock. The meta merge loop remains
+sole train stager; no duplicated model review, build or manual merge was run.
+
+Algorithm successor is live as prover-690-20260922-01 on space-d, PID3901474;
+the stage comment is5774178956. Records publication currently returns3 because
+the guard sees an actual pr_train.py subprocess of scripts/tests unittest
+inside /tmp/tmphei1uj03/repo (PID3927004, parent3858384), not a production train.
+No active production train marker exists. Preserve the guard and pending
+telemetry; retry after the tests finish rather than kill tests or bypass gates.
+
+## 09:32Z Verified Live Wait
+
+Previous cycle made progress by completing676 and admitting690. This cycle
+confirms live worker PIDs3603248/3786407/3901474, all on space-d with3/0/3
+caps; no free lane or key-retirement condition. The latest direct owner message
+now explicitly confirms that same three-lane allocation. No new dispatch,
+duplicate review or train staging is needed while all slots are occupied.
+
+CI680 remains live at PID3685345. Its blueprint-sync log has one unittest
+failure indicator but no final traceback/verdict yet; do not call it passed or
+restart the active suite. Inspect the final failure before deciding an
+environment repair or code task. CI685 still waits on the same lock. The
+records guard again sees the suite's temporary pr_train.py subprocess, so
+pending passive telemetry remains locally preserved for publication when quiet.
+Author689 reports both the complex first estimate and averaged Z-reality proof
+type-check; wrappers and final validation continue, and no result is yet
+published or independently reviewed. Author690 has a checked pivot-step
+checkpoint and is proving row-span preservation. Parent-merge watchers for687
+and the canonical lemma remain active; all source/CI/review gates stay intact.
