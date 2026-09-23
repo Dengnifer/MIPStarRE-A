@@ -222,15 +222,33 @@ and c7 are the latter and say so.
 |---|---|
 | **Paper statement** | `thm:ms-rigidity`, quantified over **every** strategy of value `1 − ε` |
 | **Locator** | chapter 8 lines 612–652 |
-| **What differs** | An added hypothesis: the two players' `Variable₁` and `Variable₅` measurements agree on the state up to a defect `δ`. The conclusion replaces `√ε` by `√ε + √δ`. A second, non-mathematical deviation: the source reads its `approx` convention on the original state `ψ` while applying it to *transported* operators, so the blueprint and Lean read it on the extracted ideal state `Θ`. |
-| **Why** | The source statement is **false**. A perfect strategy answering the two orientations of each constraint–variable edge on independent entangled copies violates the conclusion at `ε = 0`, and so does its symmetric role-flag version — so restricting to symmetric strategies does not repair it. The added consistency hypothesis does. |
-| **Lean** | `exists_ms_rigidity`, `MIPStarRE/QPBT/Test/MagicSquareTheorems.lean:637`, with explicit constant `C = 2·10¹²`; defect `msVariableConsistencyDefect`, `MagicSquareTheorems/Rigidity/Consistency.lean:90`; specialization `exists_ms_rigidity_of_symmetric_consistent` is the case `δ = 0`, which is the source's display verbatim |
-| **Blueprint** | `thm:ms-rigidity`, `rem:ms-rigidity-strategy-class` (`ch13_qpbt_test.tex`), statement and proof both `\leanok` |
+| **What differs** | For `ε, δ ≥ 0` and value at least `1 − ε`, the merged extraction theorem adds `Δ₁, Δ₅ ≤ δ`, where `Δⱼ` is the summed squared cross-player distance of the completed binary effects. It bounds the Euclidean state error and six squared operator distances by `C(√ε + √δ)`. Wrong-form answers are assigned to bit zero; the source names the prescribed bit effects. The transported operator distances are read on the ideal state `Θ`, correcting the source's ill-typed reference to the original state `ψ`. |
+| **Why** | The source statement is **false**. Independent entangled copies for the two constraint–variable orientations give value one but cross-player variable correlations zero, whereas the printed conclusion at `ε = 0` forces correlation one. Anticorrelated role flags make the same counterexample symmetric. Both examples use only prescribed answers and have `Δ₁ = Δ₅ = 1`. |
+| **Merged Lean results** | `exists_ms_rigidity` in `MIPStarRE/QPBT/Test/MagicSquareTheorems.lean`, with `C = 2·10¹²`, and `exists_ms_rigidity_of_symmetric_consistent`, assuming a symmetric projective strategy consistent on its state. The latter sets `δ = 0` and recovers the printed error scale for completed effects on that restricted domain; it does not recover the prescribed-answer display verbatim. |
+| **Retained one-way results** | PR #706 was closed unmerged at `5edfe0e21cb75a2c696718d8378fe298b47a462c`. There `exists_ms_one_way_rigidity` extracts the state and Bob's completed variables from value alone, with Alice's isometry built from constraints. `exists_ms_prescribed_rigidity_separate_errors` gives state error `155904√ε`, squared Bob measurement errors `5·10¹²ε`, squared Alice measurement errors `15·10¹²ε + 6Δⱼ`, and squared anticommutator errors `4·10¹²ε` for both players. These declarations are preserved branch evidence, absent from the admitted main tree. |
+| **Blueprint** | `thm:ms-rigidity`, `cor:ms-rigidity-symmetric-consistent`, and `rem:ms-rigidity-strategy-class` in `ch13_qpbt_test.tex`. Existing theorem/proof marks certify the displayed restricted results. `def:ms-rigidity-printed-claim` marks only the definition of an unasserted proposition. |
 | **Gap note** | [`qpbt_ms-rigidity-symmetric-strategies.tex`](paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex) |
-| **Printed-claim status** | **refuted** as printed; corrected statement proved, and the source's display is recovered exactly at `δ = 0`. |
+| **Printed-claim status** | **Refuted** mathematically as printed; `PrintedMagicSquareRigidityClaim` remains unasserted and has no Lean refutation theorem. The corrected extraction is a different statement. |
+| **Documentary status** | `documented-deviation`, issue #719, under the owner's 2026-09-22 documentation instruction. This closes only the intermediate documentation gap; it does not certify source adoption, global optimality, or track completion. |
 
 This hypothesis **supplies a missing condition**, not a boundary encoding. It
-was adopted by owner decision B5 (archived owner inbox #26).
+was adopted by owner decision B5 (archived owner inbox #26); that history does
+not establish that the uniform `√δ` loss is minimal. Zero agreement also does
+not force the mass of wrong-form answers to vanish.
+
+The headline soundness proofs use the merged value-only bounds
+`WinImplications.msVarObs_anticommutator_le` and
+`WinImplications.msVarObsA_anticommutator_le`: each player's squared
+anticommutator norm for completed variable observables on the original state
+is at most `1183680ε`. These feed both observable orientations and the
+point-observable transfers without using the corrected extraction theorem.
+The source's use of rigidity therefore has the needed anticommutation
+consequence, although its simultaneous extraction assertion is false.
+
+The [gap note](paper-gaps/qpbt_ms-rigidity-symmetric-strategies.tex) separates
+these merged facts from PR #706's retained constructions and review evidence.
+Its documentary closure leaves all earlier budgets, attempts and evidence
+intact; no further proof work or completion-policy change is made here.
 
 ### c2. Dimension divisibility in the classical test instantiation
 
