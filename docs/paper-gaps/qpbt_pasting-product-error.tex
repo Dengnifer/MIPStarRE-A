@@ -11,43 +11,39 @@
 
 \title{The Product-Form Error in the Two-Measurement Pasting Lemma}
 \author{}
-\date{2026-09-22}
+\date{2026-09-23}
 
 \begin{document}
 \maketitle
 
 \section{At a glance}
 
-\begin{itemize}
-  \item \textbf{Difficulty.} Medium.  The operator estimate imported by the
-  source now has a one-sided proof, but its stated two-variable polynomial contract is
-  contradicted by a two-dimensional example at every fixed positive input
-  consistency error.
-  \item \textbf{Estimated weight.} Correcting the scalar contract changes one
-  shared predicate. The conditional quantitative estimates are now formalized;
-  the Schmidt construction, norm estimate, measurement transport, and
-  distinct-family cross moves and collision bounds are now also formalized.
-  The averaged mirror estimate, distinct-family commutator comparison, and
-  one-sided error assembly are now also formalized.
-  \item \textbf{Mathlib/project split.} The obstruction is elementary real
-  analysis and finite-dimensional measurement theory.  The repaired proof is
-  primarily project-local consistency and Cauchy--Schwarz calculus.
-  \item \textbf{Key mathematical inputs.} A positive real power tends to zero
-  at zero, while a fixed positive consistency error need not decrease with the
-  collision error.
-  The discrepancy is tracked in \ghissue{196}.
-  \item \textbf{Current verdict.} The additive scalar correction is retained.
-  The claimed symmetric domain of the operator lemma is not established by
-  the source. A dimension-independent one-sided proof using Schmidt mirrors
-  is given below. Its state-dependent mirror and norm estimate, as well as the
-  distinct-family cross moves and collision bounds, are formalized. The
-  additive theorem is proved without the fourth comparison. The proved
-  register-exchange theorem is kept separately and is not its dependency.
-  The literal product-contract conclusion remains refuted, and its
-  replacement fails the unchanged no-weakened-conclusion adoption condition.
-  The register row remains \texttt{pending}. Tracked in \ghissue{201} and
-  audited for retained-claim evidence in \ghissue{674}.
-\end{itemize}
+The printed product bound is false: a two-dimensional example has fixed
+positive output defect even as its collision upper bound tends to zero.
+The existing finite-dimensional proof establishes a sum bound for the same
+sandwiched measurement, with exactly the three printed operator hypotheses.
+Its Schmidt-mirror construction requires neither state symmetry nor a
+reversed marginal comparison.
+
+\textbf{Difficulty and estimated weight.} The scalar obstruction is elementary;
+the existing operator proof has moderate complexity. This documentary
+disposition requires no further proof implementation. The product claim is
+retained as an unasserted proposition, and its counterexample below is an
+external mathematical calculation, not a kernel-certified refutation.
+
+\textbf{Mathlib/project split and key mathematical inputs.} Mathlib supplies
+finite-dimensional spectral theory and real-power estimates. The project
+supplies the Schmidt construction, consistency calculus, and
+Cauchy--Schwarz estimates without a factor depending on dimension or the
+number of codewords.
+
+\textbf{Current verdict.} This intermediate discrepancy is a terminal
+\texttt{documented-deviation} under the owner's 2026-09-22 documentary
+instruction, tracked in \ghissue{712}. The weaker additive conclusion is
+disclosed, not identified with the printed product conclusion. The separate
+printed extended-line rate remains unproved. Earlier mathematical and
+retained-claim evidence remains in \ghissue{196}, \ghissue{201}, and
+\ghissue{674}.
 
 \section{Key theorem forms}
 
@@ -68,11 +64,24 @@ that there is a universal $C>0$ such that
 \]
 The imported proof instead accumulates terms depending separately on the two
 errors, including $O(\delta^{1/2})$, $O((\delta+\eta)^{1/2})$, and $\eta$.
-A compatible corrected theorem form would use, for example, an upper bound by
-$A(\eta^r+\delta^s)$ for universal $A\geq1$ and $r,s>0$.
+The existing corrected predicate requires universal $A\geq1$ and $r,s>0$
+such that
+\[
+  0\leq\delta_{\mathrm{pasting}}(\eta,\delta)
+    \leq A(\eta^r+\delta^s)\qquad(\eta,\delta\geq0).
+  \tag{sum contract}
+\]
+The proved one-sided theorem supplies the explicit choice
+\[
+  \delta_{\mathrm{pasting}}(\eta,\delta)
+    =(3C+19)(\eta^{1/4}+\delta^{1/8}),
+\]
+where $C\geq1$ is the universal coarse-commutator constant. This conclusion
+is weaker on positive inputs than the printed product contract.
 The polynomial shorthand itself is only an upper bound on positive inputs;
 it supplies neither axis values nor an additional nonnegativity condition.
-The corrected predicate supplies both on the closed nonnegative quadrant.
+The corrected predicate adds nonnegativity and bounds on the axes; only
+the value at the joint origin is forced to be zero.
 
 \section{The source assertion}
 
@@ -181,7 +190,10 @@ three input comparisons. As $\rho$ can
 be arbitrarily small, this failure is not confined to the large-error boundary.
 It uses positive $\eta$ throughout: no extension of the printed scalar
 bound to $\eta=0$ is needed. The very same zero-collision example satisfies
-the hypotheses for every positive collision upper bound.
+the hypotheses for every positive collision upper bound. This is an external
+refutation of the retained proposition: the repository does not contain a
+Lean theorem asserting the negation of \leanid{PrintedPastingClaim}. Type-checking
+that proposition's definition does not verify this counterexample.
 
 \section{Comparison with the blueprint and formalization}
 
@@ -192,8 +204,10 @@ The source-facing declaration
 \leanid{exists\_pasting\_error} in
 \doclink{MIPStarRE/QPBT/Games/Sandwich.lean} now has the three printed
 comparisons and a completed one-sided proof with the documented additive
-error correction. Its source-labelled blueprint entry has a proof-complete
-marker. The separately proved conditional theorem
+error correction. The blueprint remark
+\texttt{rem:pasting-product-error} specifies that the existing markers on
+\texttt{lem:pasting} certify this additive statement only. They do not
+certify the retained printed product claim. The separately proved conditional theorem
 \leanid{exists\_pasting\_error\_of\_register\_exchange} has its own explicitly
 conditional blueprint entry; it is not a dependency of the one-sided theorem.
 
@@ -388,9 +402,10 @@ in the two cross moves gives
 \[
  K\leq C\delta+m+2\eta+2\sqrt{4\delta+2\eta}+2\sqrt{4\delta}.
 \]
-This is the distinct-family estimate
-\leanid{commutator\_mass\_fine\_le\_distinct\_families} applied to the
-constructed mirror. The pinched reduction bounds the final defect by
+This is the distinct-family commutator estimate applied to the constructed
+mirror.\footnote{The formal estimate is
+\leanid{commutator\_mass\_fine\_le\_distinct\_families}.}
+The pinched reduction bounds the final defect by
 $2\delta+\sqrt K$.
 
 For the final scalar calculation on $[0,1]^2$, Lean uses the convenient
@@ -449,8 +464,9 @@ Its unit-interval restriction is used only to reuse a conservative scalar
 majorant and is discharged by the trivial bound outside that interval in
 \leanid{exists\_pasting\_error}. It is not a restriction of the public theorem.
 
-The separate conditional result
-\leanid{exists\_pasting\_error\_of\_register\_exchange} still assumes
+The separate conditional register-exchange theorem still
+assumes\footnote{Its declaration is
+\leanid{exists\_pasting\_error\_of\_register\_exchange}.}
 \begin{equation}\label{eq:pasting-1-sym}
  (G_2)^x_{[\operatorname{eval}_{y_2}(\cdot)=a_2]}\ot\mathrm{Id}
  \simeq_\delta\mathrm{Id}\ot A^{x,y_1,y_2}_{a_2}.
@@ -460,6 +476,28 @@ source-domain correction is withdrawn: the mirror proof shows that no
 additional operator hypothesis is necessary. The original forward hypotheses
 are weaker than either register-exchange or state-symmetry restrictions and
 are sufficient. No mathematical definition or game specification is changed.
+
+\subsection*{Independent local spaces}
+
+The concrete line construction uses the heterogeneous version of this
+argument: $A$ acts on $\mathcal H_A$, the two codeword measurements act on
+$\mathcal H_B$, and the unit state lies in
+$\mathcal H_A\otimes\mathcal H_B$. Only the two forward comparisons are
+needed. Adjoin fixed unit basis vectors to realize both local spaces in
+$\mathcal H_A\otimes\mathcal H_B$. The resulting state $\Psi$ has the
+same norm as $\psi$, and for every pair of local operators $H,B$,
+\[
+ \operatorname{Re}\langle\Psi| (H\otimes I)\otimes(I\otimes B)|\Psi\rangle
+   =\operatorname{Re}\langle\psi|H\otimes B|\psi\rangle.
+\]
+Thus every input and output consistency defect is unchanged, as are
+projectivity, coarse-graining, and the ordered product $G_2G_1G_2$.
+The common-space theorem applies with the same error function; no comparison
+with an identical copy of $A$ on Bob's original space is needed. This is
+proved auxiliary mathematics, not an extra hypothesis on a paper
+theorem.\footnote{See \leanid{exists\_pasting\_error\_heterogeneous} and the
+norm and consistency-preservation lemmas in
+\doclink{MIPStarRE/QPBT/Games/Sandwich/Pasting/Heterogeneous.lean}.}
 
 \subsection*{Use analysis}
 
@@ -482,6 +520,29 @@ symmetric domain for the general operator lemma. The mirror proof leaves
 $J$ unchanged, so the definition of the joint line measurement $T$ and every
 subsequent use of its consistency, positivity, and completeness are unchanged.
 
+In the Lean application, the sampling law is conditioned on a nonzero
+$X$-line direction, with retained mass $\mu\in[1/2,1]$. If $p(\eps)$ bounds
+the supplied point error and $c\geq1$ is the marginal-comparison constant,
+the second input to pasting is
+$[8p(\eps)+c(\eps+\sqrt\eps)]/\mu$. The first input is $\eta=md/q$.
+Restoring the discarded part of the original line-point law gives the bound
+\[
+ \mu\,\delta_{\mathrm{pasting}}\!\left(
+   \frac{md}{q},\frac{8p(\eps)+c(\eps+\sqrt\eps)}{\mu}\right)
+   +\frac{1}{2q}.
+\]
+The discarded mass is added, not multiplied into the error. The comparisons
+use completed evaluations, whose extra answer records undefined evaluation,
+and the opposite local spaces may have different dimensions. A sum of
+positive powers bounds this expression after truncation by the universal
+defect bound $1$. It does not identify completed evaluations with the printed
+field-valued comparisons.\footnote{The actual pasting call and restoration
+are \leanid{exists\_combinedLine\_conditioned\_defect\_le} and
+\leanid{exists\_combinedLine\_restored\_defect\_le} in
+\doclink{MIPStarRE/QPBT/Combining/Lines/Construction.lean}; the scalar bound
+is \leanid{exists\_conditioned\_polynomial\_bound} in
+\doclink{MIPStarRE/QPBT/Combining/ErrorBounds.lean}.}
+
 This is one direct application, not a single dependent theorem. The
 \texttt{lem:qld-xz-lines} conclusion is used for restricted line laws, for
 the combined line construction following \texttt{lem:qld-sublines}, and for
@@ -500,7 +561,7 @@ source-law comparisons. No established use requires the particular
 exponents of the conditional proof.
 
 The transitive \verb|\uses{}| descendants of the source-labelled blueprint
-node are as follows. Detached proofs must be attached to the declaration
+node include the following. Detached proofs must be attached to the declaration
 named by \verb|\proves{}|, not to the nearest preceding declaration;
 otherwise the final soundness theorem and its descendants are missed.
 Chapter numbers identify the files under \path{blueprint/src/chapter/}:
@@ -545,19 +606,22 @@ mathematical consumer check, not a Lean proof of the NEEXP answer-reduction
 theorem or of its literal product-form shorthand.
 
 No Lean proof calls the public declaration \leanid{exists\_pasting\_error}
-directly. The concrete line construction instead applies
-\leanid{exists\_pasting\_error\_heterogeneous}, obtained from the same
-one-sided marginal-consistency theorem. The consumers
+directly. The concrete line construction instead applies its heterogeneous
+auxiliary, obtained from the same one-sided marginal-consistency theorem.
+Both the supplied-point and universal combined-line constructors are
+proved,\footnote{These are
 \leanid{exists\_combinedLinesWitness\_ofPointsWitness} and
 \leanid{exists\_combinedLinesWitness} in
-\doclink{MIPStarRE/QPBT/Combining/Lines.lean} are now proved, as are the
-directly indexed extended-line construction, the global-pair construction,
-and the final extraction theorems. These proofs leave the printed extended-line
+\doclink{MIPStarRE/QPBT/Combining/Lines.lean}.}
+as are the directly indexed extended-line construction, the global-pair
+construction, and the final extraction theorems. These proofs leave the printed extended-line
 rate and the source-law comparisons open, as recorded in
 \path{docs/paper-gaps/qpbt_combined-lines-error-term.tex}. The renamed
 conditional theorem retains its proof and internal dependencies; the
-one-sided theorem has no dependence on it. All import consumers of the
-changed pasting modules passed the recorded focused checks summarized below.
+one-sided theorem has no dependence on it. The historical focused checks
+and full consumer inventory are recorded in
+\path{audits/2026-09-22-printed-error-contracts.md}; those checks are not
+rerun or extended by this documentation task.
 
 \subsection*{Statement integrity}
 
@@ -576,7 +640,7 @@ comparisons are retained; the proof actually does not need joint
 self-consistency.
 The conditional theorem has an extra comparison and is not source-equivalent.
 
-\subsection*{Boundary values and adoption verdict}
+\subsection*{Boundary values and documentary disposition}
 
 The corrected bound forces $\delta_{\rm pasting}(0,0)=0$, but at
 $(0,\delta)$ with $\delta>0$ it permits a positive error. Similarly,
@@ -587,49 +651,43 @@ At the line application, $\rho=md/q>0$ for admissible finite parameters,
 so even a perfect strategy need not receive a zero scalar upper bound.
 All later roots and sums are evaluated on nonnegative arguments.
 
-The four conditions in Section 6 of
-\path{local/protocols/issues-prs.md} have distinct verdicts:
-\begin{enumerate}
- \item \emph{Correctness.} The additive one-sided theorem is proved. Its
- Schmidt-mirror argument constructs the missing opposite-register family;
- it does not assume the fourth comparison. The counterexample is compatible
- with its bound. The conditional register-exchange theorem is separately
- proved and is not a dependency of the one-sided theorem.
- \item \emph{Full consumer sufficiency.} The established line, global-pair,
- and extraction estimates use the additive bound successfully, as the
- consumer table records. The literal printed extended-line rate and
- source-law obligations remain open. Hence sufficiency for every source
- assertion and every source-labelled blueprint node is not established.
- \item \emph{Minimality and source semantics.} This condition fails for the
- existing product-to-sum replacement under the unchanged completion rule C3.
- The product demands vanishing as either positive input tends to zero with
- the other fixed. The additive bound drops that demand, and the example
- proves that it cannot be recovered on the same domain. Even separating the
- prefactor and exponent of a product would not remove this obstruction.
- Thus no choice of universal positive exponents within this correction can
- restore the printed guarantee. Useful final estimates do not make this
- weaker intermediate conclusion terminal.
- \item \emph{Lean convergence.} The retained definitions type-check without
- asserting them. Focused checks concern the existing corrected consumers;
- they are not a substitute for whole-project CI, independent review, or the
- three preceding mathematical conditions. Commands and results are recorded
- in \path{audits/2026-09-22-printed-error-contracts.md}.
-\end{enumerate}
-The existing row remains \texttt{pending}. This retention audit changes no
-predicate, proof statement, game, completion rule, other gap row, or repair
-budget. In particular it does not adopt a different project goal.
+There are two distinct mathematical verdicts. The additive one-sided theorem
+is proved, with no extra operator hypothesis and with the original sandwich.
+The printed product conclusion is false by the preceding calculation. Even
+independent positive exponents in a product would still force vanishing as
+$\eta$ tends to zero at fixed positive $\delta$, so separating the prefactor
+and exponent cannot repair this particular obstruction. The sum contract
+deliberately relinquishes that guarantee. It is not source-equivalent, and
+no optimality of its exponents is asserted.
+
+The established line, global-pair, and extraction estimates use the sum
+bound. Their success does not prove every printed intermediate assertion:
+the extended-line rate and source-law identifications remain separate
+deviations. Likewise, the secondary answer-reduction discussion is a
+mathematical use analysis, not a formalized theorem.
+
+Under the owner's 2026-09-22 instruction to document this intermediate
+discrepancy without further proof work, its register row has terminal status
+\texttt{documented-deviation}. The supporting artifacts are this note,
+the matching blueprint remark \texttt{rem:pasting-product-error}, and
+Section~b4 of \path{docs/DEVIATIONS.md}; the existing unasserted
+\leanid{PrintedPolynomialBound} and \leanid{PrintedPastingClaim} remain
+intact. This disposition supersedes the earlier pending adoption verdict
+for this row. It neither declares the weaker conclusion source-equivalent
+nor certifies track completion, the headline theorem, or any other gap row.
 
 \subsection*{Current formal status}
 
-The one-sided theorem \leanid{exists\_pasting\_error} is proved by the
-Schmidt-mirror construction, independently of the conditional
-register-exchange theorem. The recorded focused type-checks and kernel
-dependency checks establish that the source-facing pasting theorem and its
-mirror and commutator estimates have no proof-hole dependency. The blueprint
-declarations and standalone note also passed their recorded checks; these
-checks do not assert completion of the separate combining and extraction
-results. Superseded validation reports and session accounting are preserved
-in \path{local/briefs/205-pasting-validation-history.md}.
+The existing one-sided theorem \leanid{exists\_pasting\_error} is proved by
+the Schmidt-mirror construction, independently of the conditional
+register-exchange theorem. The focused type-checks and standard-axiom checks
+recorded in \path{audits/2026-09-22-printed-error-contracts.md} cover the
+additive theorem and its heterogeneous consumers. They certify neither the
+printed product proposition nor the external counterexample. Earlier
+validation reports and session accounting remain preserved in
+\path{local/briefs/205-pasting-validation-history.md}. This documentary
+revision changes no Lean declaration and makes no claim of a new kernel
+check, full CI run, or independent review.
 
 \subsection*{Proof of the conditional register-exchange statement}
 
@@ -703,14 +761,14 @@ proved by the mirror argument above.
 
 \section{Conclusion}
 
-The literal product-form interpretation of
-$\operatorname{poly}(\eta,\delta)$ makes the stated pasting lemma false.  This
-is a theorem-level scalar discrepancy, not a missing formal-library lemma.  The
-natural repair is to adopt a multivariate polynomial-smallness convention that
-allows separate positive powers of the input errors, matching the terms in the
-imported proof.  Adding an unadvertised coupling hypothesis between $\eta$ and
-$\delta$ would also avoid the counterexample, but would strengthen the source
-theorem and is therefore not the preferred repair.
+The literal product-form pasting claim is false by an external
+two-dimensional calculation. The existing Lean theorem proves the same
+operator conclusion with the weaker sum bound
+$(3C+19)(\eta^{1/4}+\delta^{1/8})$ and the three printed hypotheses; its
+one-sided proof constructs a Schmidt mirror. The printed claim remains
+unasserted. This row is terminal as a \texttt{documented-deviation}, with
+the quantitative loss disclosed and the separate printed extended-line rate
+still unproved.
 
 \bibliographystyle{alpha}
 \bibliography{references}

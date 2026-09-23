@@ -149,17 +149,27 @@ carried in the blueprint statement and in a remark beside it.
 | | |
 |---|---|
 | **Paper statement** | `lem:pasting` |
-| **Locator** | chapter 6 lines 504–525 |
+| **Locator** | `references/qpbt-paper/06_nonlocal_games_and_mipstar.tex`, lines 504–525; product convention in `04_preliminaries.tex`, lines 26–29 |
 | **What differs** | The source's *product-form* two-variable polynomial error contract is replaced by a *sum* bound `C(η^r + δ^s)` on the closed nonnegative quadrant. |
-| **Why** | The product form is contradicted by an explicit two-dimensional strategy at every fixed positive consistency error. The sum form is what the imported proof of Fact 4.35 actually produces. |
-| **Lean** | `exists_pasting_error`, `MIPStarRE/QPBT/Games/Sandwich.lean:205`, with explicit `δp η δ = (3C + 19)(η^(1/4) + δ^(1/8))`; contract `IsPolyErr₂`, `MIPStarRE/QPBT/Games/ErrorFunctions.lean:44` |
-| **Blueprint** | `lem:pasting` (`ch12_qpbt_games.tex`) |
+| **Why** | A two-dimensional strategy has output defect `δ = ρ > 0` for every positive collision upper bound `η`. The printed `K(ηρ)^K` tends to zero with `η`, even after a fixed output big-O factor. This external counterexample does not use the unspecified value on the axis `η = 0`. |
+| **Lean (proved)** | `exists_pasting_error` in `MIPStarRE/QPBT/Games/Sandwich.lean` retains the three printed comparisons and proves the same sandwich conclusion with `(3C + 19)(η^(1/4) + δ^(1/8))`. `IsPolyErr₂` in `Games/ErrorFunctions.lean` states the sum contract. The Schmidt-mirror proof needs only the two forward comparisons; it assumes neither state symmetry nor the reversed comparison. |
+| **Lean (printed form)** | `PrintedPolynomialBound` in `Games/ErrorFunctions.lean` retains the literal scalar predicate; `PrintedPastingClaim` in `Games/Sandwich.lean` retains the finite-dimensional operator assertion, its quantifier order, and input/output big-O constants. These are Prop-valued definitions, not assertions of the printed claim. |
+| **Blueprint** | `lem:pasting`, `rem:pasting-product-error`, and `lem:pasting-heterogeneous` (`ch12_qpbt_games.tex`); the existing marks certify the additive theorem only. |
 | **Gap note** | [`qpbt_pasting-product-error.tex`](paper-gaps/qpbt_pasting-product-error.tex) |
-| **Printed-claim status** | **refuted** (the product form); corrected contract proved. |
+| **Printed-claim status** | **refuted externally** by the note's calculation; there is no Lean refutation theorem for `PrintedPastingClaim`. The additive replacement is proved and relinquishes the printed guarantee of vanishing with either input separately. |
+| **Documentary disposition** | **documented-deviation**, issue #712, under the owner's 2026-09-22 instruction. This terminal intermediate-row status does not certify the printed claim or track completion. Checked against the admitted snapshot `53d12daa1ea79aa6c62ef93c3b621a331e1368b0`. |
 
-This correction propagates: the printed error expressions of `lem:qld-4-13` and
-`lem:qld-xz-lines` are qualified accordingly in the blueprint and in the
-docstrings of six declarations.
+The concrete line construction uses `exists_pasting_error_heterogeneous`,
+which adjoins fixed basis vectors to independent local spaces and preserves
+all consistency defects. It keeps the X-Z-X sandwich by taking the inner
+family to be Z and the outer family X. Conditioning on nonzero X directions
+and then restoring the discarded mass gives a sum bound for completed
+evaluations. Restricted-line estimates, the directly indexed extended-line
+construction, global pairs, and extraction use that additive control. The
+printed `poly(m²ε, md/q)` extended-line rate and its source-law comparisons
+remain separate unproved assertions in [a1](#a1-the-error-form-of-the-combined-lines-lemma).
+Iteration for the secondary NEEXP answer-reduction argument is explained
+mathematically in the note; it is not claimed as a Lean proof of that theorem.
 
 ### b5. The binary factor index in the qudit-to-qubit isomorphism
 

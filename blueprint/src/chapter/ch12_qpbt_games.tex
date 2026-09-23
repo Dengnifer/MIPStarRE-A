@@ -1074,6 +1074,45 @@ postprocessing, and operator-contraction steps used to formalize
 	contraction estimate on each fiber.
 \end{proof}
 
+\begin{remark}[The quantitative deviation in pasting]
+  \label{rem:pasting-product-error}
+  In Lemma~\ref{lem:pasting} and its auxiliary results below, the
+  two-variable polynomial notation denotes a nonnegative error bounded by
+  $A(\eta^r+\delta^s)$ on $\eta,\delta\geq0$, with universal $A\geq1$
+  and $r,s>0$. The proved choice is
+  \[
+    \delta_{\mathrm{pasting}}(\eta,\delta)
+      =(3C+19)(\eta^{1/4}+\delta^{1/8}),
+  \]
+  where $C\geq1$ is the coarse-commutator constant. The formalization
+  marks certify this additive statement. They do not certify the printed
+  product bound $\delta_{\mathrm{pasting}}(\eta,\delta)\leq K(\eta\delta)^K$
+  for one universal $K>0$ on positive inputs.
+
+  Indeed, on the state
+  $\sqrt{1-\rho}\ket{0,0}+\sqrt\rho\ket{1,1}$ with $0<\rho<1$, take
+  singleton question and codeword sets, with identity codeword effects.
+  Let the first answer be binary, the second a singleton, and the first
+  codeword constantly zero. Use the standard-basis joint answer measurement.
+  Its first marginal defect and the pasted defect are both $\rho$; the
+  second marginal defect, joint self-consistency defect, and collision
+  probability are zero. Thus every positive collision upper bound $\eta$
+  is admissible, while the product bound tends to zero as $\eta$ does.
+  The cited note \cite{gap:qpbt_pasting-product-error} gives a mathematical
+  counterexample. This refutation has not been formally verified; the printed
+  assertion is recorded without being asserted.
+
+  The additive proof constructs a Schmidt mirror from the state and the
+  second codeword measurement. It uses the two forward comparisons in
+  \eqref{eq:pasting-1}; the public statement also retains
+  \eqref{eq:pasting-2}. Neither state symmetry nor the reversed comparison
+  \eqref{eq:pasting-1-sym} is assumed. Adjoining fixed basis vectors extends
+  the same estimate to independent local spaces with unchanged defects.
+  This is the version used by the concrete line construction. Its use of
+  completed evaluations and the separate unproved extended-line rate in
+  Lemma~\ref{lem:qld-4-13} are not resolved by the additive error estimate.
+\end{remark}
+
 % The source (references/qpbt-paper/06_nonlocal_games_and_mipstar.tex:504-505) quantifies
 % the pairwise-agreement hypothesis over every pair (x, y_1), including pairs carrying
 % probability zero under D, on which no conditional distribution of y_2 is defined; the
