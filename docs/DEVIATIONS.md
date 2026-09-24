@@ -136,13 +136,16 @@ carried in the blueprint statement and in a remark beside it.
 | | |
 |---|---|
 | **Paper statement** | Natarajan–Vidick equation (3) and Theorem 10, as quoted by the source |
-| **Locator** | chapter 14 lines 711–725; `references/nv-paper/` |
-| **What differs** | The squared operator-distance conclusion is corrected from `δ` to `2δ`. |
-| **Why** | The provider's exact operator bound is off by the factor two; the quotation's own `approx_δ` notation absorbs constant factors, so this is the provider's error, not a quotation slip. |
-| **Lean** | `exists_exactly_linear_observables`, `MIPStarRE/QPBT/Combining/Linearity.lean:93` (`≤ 2δ` operator form); companion `exists_exactly_linear_observables_binaryObservableDistSq` (`≤ δ` measurement form) |
-| **Blueprint** | `thm:linearity`, `rem:linearity-import` (`ch15_qpbt_combining.tex`) |
+| **Locator** | `references/nv-paper/fullpaper.tex:866–912`, equation (3) (`eq:dist_observables`), and lines 1074–1113 (`thm:qblr`); QPBT chapter 14 lines 711–725 and the application at 825–875 |
+| **What differs** | The squared operator-distance conclusion is corrected from `δ` to `2δ`, equivalently squared binary-measurement distance at most `δ`; equation (3) gives half the squared operator distance. |
+| **Why** | The provider identifies these two distances and loses a factor of two. The four-point scalar family has correlation `1/4` and optimal operator error `1`, even with arbitrary ancillas, so it refutes the printed bound at `δ = 3/4`. The quotation's `approx_δ` notation absorbs constant factors. |
+| **Lean** | `exists_exactly_linear_observables_of_correlation` in `MIPStarRE/QPBT/Combining/Linearity.lean:69` proves the corrected bound for every natural index length and real error; the existing operator and binary-measurement forms remain proved. `Stability.lean:207` proves equality of construction error and mean multiplicative defect. `PrintedClaims.lean:144,176` proves the four-point lower bound and attainment by the identity representation; both printed distance readings are retained as unasserted propositions and refuted at lines 201 and 232. |
+| **Optimality** | The quadratic scalar family in the note proves mathematically that `2` is the least universal multiplicative coefficient; no asymptotic Lean sharpness theorem is claimed. The four-point optimum is `1`, whereas the Fourier–Naimark construction has error `3/2` there. |
+| **Consumers** | NV's later application uses an unspecified robustness constant. In QPBT, a fiberwise squared defect `η` gives correlation `1 − η/2` and corrected error at most `η`, preserving the averaged estimate. The only Lean call to the operator-bound theorem is its binary-measurement companion; the unrestricted and common-ancilla forms have no external callers. `exists_combinedPointsWitness` and `exists_extendedQ` use the independent field-valued proof. This comparison does not prove absorption of an ancilla into the fixed strategy. |
+| **Blueprint** | `thm:linearity`, `rem:linearity-distance-normalization`, `lem:linearity-unrestricted-parameters`, `def:linearity-printed-claim`, `lem:linearity-four-point-obstruction` (`ch15_qpbt_combining.tex`) |
 | **Gap note** | [`qpbt_linearity-distance-normalization.tex`](paper-gaps/qpbt_linearity-distance-normalization.tex) |
-| **Printed-claim status** | **refuted** (the constant as printed); corrected statement proved. |
+| **Printed-claim status** | **refuted** for both the standard and literal duplicated-density readings; the corrected bounds are proved. The merged evidence is PR [#699](https://github.com/Dengnifer/MIPStarRE-QPBT/pull/699), commit `317aa9f4eb625f502043f57398e43f8e80201bf6`. |
+| **Completion status** | `documented-deviation`, solely for normalization under the owner's 2026-09-22 documentation instruction, issue [#718](https://github.com/Dengnifer/MIPStarRE-QPBT/issues/718). This supersedes this row's earlier strict-adoption completion requirement, preserves its historical evidence, and leaves the separate quotation/padding gap open. It is not proof of the false printed constant. |
 
 ### b4. The product-form error in the pasting lemma
 

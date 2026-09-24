@@ -396,10 +396,21 @@ assembled by Fourier averaging.
 	$f_k(x,y)=(-1)^{x\cdot y}$ on $\mathbb F_2^{2k}$ have correlation
 	$4^{-k}$ and best possible error $2(1-2^{-k})$, even with arbitrary
 	ancillas. The ratio to $1-4^{-k}$ tends to $2$. This sharpness proof is
-	mathematical, not a claim of a formalized asymptotic theorem. The
-	Fourier--Naimark construction need not attain the best error for an
-	individual family. The normalization register remains pending independent
-	review and adoption, separately from the open padding obligation.
+	mathematical, not a claim of a formalized asymptotic theorem. For the
+	four-point family of Lemma~\ref{lem:linearity-four-point-obstruction},
+	the optimal operator error is $1$ at correlation $1/4$ and $\delta=3/4$;
+	the identity representation attains it. In contrast, the exact
+	distance/defect identity of Lemma~\ref{lem:boolean-representation-stability}
+	gives error $3/2$ for the Fourier--Naimark construction. Thus the sharp
+	universal coefficient does not assert optimality of that construction for
+	each input. The corrected estimates suffice for the fiberwise application
+	in Remark~\ref{rem:linearity-import}: a mean squared defect $\eta$ gives
+	correlation $1-\eta/2$ and output error at most $\eta$. The combined-point
+	proof below uses the independent field-valued construction instead.
+	This closes the normalization discrepancy as a documented
+	constant/convention deviation, not a proof of the printed operator bound;
+	the two printed propositions remain unasserted and refuted. The separate
+	state-preserving padding obligation remains open.
 \end{remark}
 
 \begin{definition}[Unasserted printed linearity propositions]
