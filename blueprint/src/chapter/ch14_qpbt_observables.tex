@@ -1125,9 +1125,10 @@ extracts from the strategy.
 	preserves all the state-dependent norms, giving the final assertion.
 \end{proof}
 
-\begin{remark}[Source corrections]
+\begin{remark}[Winning implications and evaluation conventions]
 	\label{rem:qld-win-implications-typos}
-	Two typographical slips in the source are corrected above. In
+	The algebraic corrections and the evaluation convention have different
+	status. In
 	item~\ref{enu:qld-ms} of Lemma~\ref{lem:qld-win-implications} the
 	source writes the expectation over $\omega$ subject to the condition
 	$\tr((r_X \cdot u_X) \cdot (r_Z \cdot u_Z)) \neq 0$, omitting the map
@@ -1143,17 +1144,18 @@ extracts from the strategy.
 	% recorded in the comment at that lemma; no alias label is defined.
 	In addition, the source proof of Lemma~\ref{lem:qld-win-implications}
 	restricts attention to the case $6md \leq q$ and disposes of the
-	remaining parameters by an appeal to Theorem~\ref{thm:pauli}, the
-	theorem whose proof the lemma is part of; that argument does not
-	establish the unrestricted statement of the lemma, and for $d = 0$ the
-	probability bound it invokes is false
-	(Remark~\ref{rem:omega-anticomm-prob-correction}). The proof given
-	above instead uses the lower bounds of
-	Lemma~\ref{fact:omega-anticomm-prob} on the probabilities of the
-	commuting and anticommuting events, which are universal constants for
-	every admissible parameter tuple, so no restriction on the parameters
-	is needed.
-	Finally, the source states item~\ref{enu:qld-ld} of
+	remaining parameters by making the final error in
+	Theorem~\ref{thm:pauli} trivial. That argument does not establish the
+	unrestricted statement of the intermediate lemma. The proof above uses
+	the exact probability
+	$\Pr[\gamma\ne0]=\frac12(1-q^{-1})^{m+1}$ from
+	Lemma~\ref{fact:omega-anticomm-prob}. Since $m\mid q$ gives
+	$1\leq m\leq q$, the commuting and anticommuting events have probabilities
+	at least $1/2$ and $1/16$, respectively. The degree-zero counterexample
+	to a printed probability bound in
+	Remark~\ref{rem:omega-anticomm-prob-correction} is outside the source
+	domain $m,d\geq1$; it does not refute the winning lemma there.
+	The substantive difference is that the source states item~\ref{enu:qld-ld} of
 	Lemma~\ref{lem:qld-win-implications} with answer summation over
 	$a \in \F_q$ only, implicitly reading the evaluation classes of the
 	line measurement as a complete measurement. Under the coefficient
@@ -1163,11 +1165,41 @@ extracts from the strategy.
 	direction --- a case the question distribution produces with positive
 	probability (Remark~\ref{rem:ld-win-zero-direction}) --- while the
 	relation $\simeq_\eps$ of Definition~\ref{def:consistency} is defined
-	for POVMs. Item~\ref{enu:qld-ld} therefore completes both families by
-	an explicit $\bot$ outcome; the same implicit completeness assumption
-	occurs in the source proof of the statement corresponding to
-	Lemma~\ref{lem:qld-comm-line-cons}, whose proof below invokes the
-	completed families instead.  These corrections are collected in
+	for POVMs. The adopted win predicate requires $f(t)=a$ for every parameter
+	$t$ representing the sampled point. On a singleton line this accepts exactly
+	answers inducing the constant function $a$ on $\F_q$; it does not require
+	a constant coefficient representative. For example, the allowed answer
+	$f(T)=T$ at a zero-direction diagonal question with
+	$(q,m,d)=(2,1,1)$ has no evaluation at its point. This illustrates a local
+	evaluation obstruction, not a high-success counterexample to the lemma.
+	Item~\ref{enu:qld-ld} completes the line family by the effect of all
+	non-evaluating answers and the point family by the zero $\bot$ effect.
+	The added line effect contributes to both the consistency defect and
+	the squared-distance sum. Its control uses the universal acceptance
+	clause; it cannot be justified by a typographical correction alone.
+	The complete typed measurements first send malformed answers of the
+	common answer alphabet to fixed valid answers, as in
+	Definition~\ref{def:strategy-observables}; their mass is controlled by
+	rejection. This is separate from adjoining the evaluation outcome $\bot$.
+
+	The established estimates suffice for the subsequent construction with
+	these conventions. The observable proof uses the value-only
+	anticommutator estimate of
+	Lemma~\ref{lem:qld-ms-anticommutator-original-state}, not the unrestricted
+	printed Magic Square extraction assertion. The signed commutation estimate
+	yields the commuting expanded observables of Lemma~\ref{lem:qld-comm-cons},
+	and the completed low-degree comparison supplies
+	Lemma~\ref{lem:qld-comm-line-cons}. The field-valued combined points and
+	completed line measurements feed the directly indexed extended-line
+	construction of Lemma~\ref{lem:qld-4-13-established}, followed by the
+	global polynomial-pair measurement and Pauli extraction. The source's
+	extended seed-indexed law and its printed extended-line error are separate
+	questions; this implication argument does not establish them.
+	The verdict is a documented deviation: the existing marks on the winning
+	lemmas concern their stated completed families and the specified game.
+	They do not establish identification with the printed source's
+	field-only evaluation and acceptance convention on zero directions. The
+	detailed comparison and the limits of the known counterexamples are in
 	\cite{gap:qpbt_win-implications-corrections}.
 \end{remark}
 

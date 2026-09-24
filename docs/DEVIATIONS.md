@@ -176,15 +176,41 @@ docstrings of six declarations.
 
 ### b6. Corrections to the Pauli-test winning implications
 
+This row was updated against `9a08996fe424e0440ae644b26f3136aca579a0ae`
+on 2026-09-23 for issue #714. Its documentary closure distinguishes proved
+algebraic repairs from the unresolved evaluation and game identification.
+
 | | |
 |---|---|
-| **Paper statement** | `lem:qld-win-implications`, `lem:qld-win-implications-obs` |
-| **Locator** | chapter 14 lines 197–362 |
-| **What differs** | Five corrections: the conditioning phase, a circular parameter reduction, the zero-direction completion, reversed observable indices, and a label typo. |
-| **Why** | The circular reduction cannot be formalized as printed; the remaining four are transcription errors. |
+| **Paper statement** | `lem:qld-win-implications`, `len:qld-win-implications-obs` (the blueprint corrects `len` to `lem`) |
+| **Locator** | chapter 14 lines 197–362; coefficient answers and the low-degree decider at chapter 8 lines 337–386 |
+| **What differs** | The conditioning phase uses indicator vectors, the reversed observable product keeps each basis's own indices, and exact probabilities replace the reduction through the final theorem's error. Separately, the actual game universally checks a coefficient answer at every parameter representing a point on a zero-direction line. The line-evaluation family has an added non-evaluating outcome; the point family has zero effect there. Complete typed measurements first fold malformed answers into fixed valid answers. |
+| **Why** | The exact anticommuting probability is `(1-1/q)^(m+1)/2`, at least `1/16` on the admissible domain, while commuting has probability at least `1/2`. No assumption `6md <= q` is needed. A singleton line has many parameters, and a coefficient answer inducing a nonconstant function has no point-determined evaluation. This is a substantive acceptance/evaluation convention, not a transcription error. Completion contributes the missing mass to the consistency defect and squared distance. |
+| **Lean** | The seven `win_*` implications, their distance companions, and `pointObs_self_consistent` and both twisted-commutation orientations in `MIPStarRE/QPBT/Observables/WinImplications.lean` are proved for the formal game and completed typed measurements. The observable argument uses value-only Magic Square anticommutator estimates on the original state. |
 | **Blueprint** | `lem:qld-win-implications`, `lem:qld-win-implications-obs`, `rem:qld-win-implications-typos` (`ch14_qpbt_observables.tex`) |
 | **Gap note** | [`qpbt_win-implications-corrections.tex`](paper-gaps/qpbt_win-implications-corrections.tex) |
-| **Printed-claim status** | **refuted** (in the five listed places); the `win_*` and observable implication statements match and are proved. |
+| **Printed-claim status** | **unproved** as an identification of the printed field-only evaluation/game convention with the completed formal one. The algebraic/probability repairs and the implications for the actual formal game are proved. The register status `documented-deviation` closes documentation only; it asserts neither that every printed implication is false nor that the semantic difference is discharged. |
+
+The phase mismatch has a counterexample within the source domain: at
+`(q,m,d)=(2,1,1)`, `u_X=u_Z=0` and `r_X=r_Z=1`, the expression without
+indicator vectors is zero but the game phase is one. At the same admissible
+parameters, the allowed diagonal answer `f(T)=T` on a singleton line has no
+evaluation under the universal convention. This second example concerns a
+local answer, not a high-success strategy contradicting the winning lemma.
+The separate probability counterexample at `(2,1,0)` is outside the source's
+positive-degree domain.
+
+Downstream, the proved estimates yield expanded commuting observables and
+completed expanded-line comparisons, then field-valued combined points and
+the directly indexed extended-line construction with established error
+`C m poly(epsilon,md/q)`. That construction supplies the global polynomial-pair
+measurement and extraction witness; point–Pauli consistency also supplies the
+evaluated-Pauli comparisons. The final transfer reaches the raw prescribed
+Pauli effects of both soundness theorems. This route does not establish the
+printed extended seed law, field-only POVM identification, or printed
+extended-line error; the separate rows recording those differences retain
+their status. No theorem statement, game definition, or formalization mark
+is changed by this documentary disposition.
 
 ### b7. Triangle estimates and isometry transfer in Pauli extraction
 
@@ -519,6 +545,11 @@ this repository.
 
 **What remains genuinely open**, and where it sits:
 
+- [b6](#b6-corrections-to-the-pauli-test-winning-implications): identification
+  of the completed evaluation and universal zero-direction acceptance
+  convention with the printed source is unresolved. The intermediate row is
+  terminal as documented deviation; that status supplies no source-equivalence
+  proof and does not change the actual formal game.
 - [a1](#a1-the-error-form-of-the-combined-lines-lemma): the printed
   `poly(m²ε, md/q)` combined-lines form, with the source's seed-indexed law and
   field-valued evaluation sum, is not proved. The established auxiliary uses
