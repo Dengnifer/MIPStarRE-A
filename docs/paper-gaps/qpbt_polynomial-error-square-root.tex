@@ -9,7 +9,7 @@
 
 \title{Polynomial Error Notation and Square-Root Bounds}
 \author{}
-\date{2026-09-22}
+\date{2026-09-23}
 
 \begin{document}
 \maketitle
@@ -20,52 +20,62 @@
   \item \textbf{Difficulty.} Low.  The paper's global polynomial shorthand
   couples two constants in a way that excludes a square-root function used
   explicitly later in the same paper.
-  \item \textbf{Estimated weight.} The existing predicate separates prefactor
-  and exponent. The present audit retains the printed contract and checks its
-  consumers; it changes no existing predicate or theorem statement.
+  \item \textbf{Estimated weight.} Documentation only. The independent
+  prefactor and exponent, the concrete estimates, and the unasserted printed
+  contract are already present; no predicate, theorem, or proof is changed.
   \item \textbf{Mathlib/project split.} The obstruction is elementary real
-  analysis.  Mathlib's real-power API will discharge concrete downstream
-  witnesses, while the corrected convention is project-local.
+  analysis. Mathlib's real-power API justifies the existing concrete
+  witnesses, while the replacement convention is project-local.
   \item \textbf{Key Mathlib inputs.} The downstream witnesses use the
   \path{Real.rpow} API.  The obstruction here is the elementary fact that no
   constant $C>0$ can bound $\sqrt{x}$ by $C x^C$ for every $x>0$.
-  \item \textbf{Current verdict.} The independent-constant estimates are
-  proved, but are not equivalent to the printed convention. The register row
-  remains \texttt{pending}: retaining a proposition is not proving it, and
-  the unchanged completion condition does not make a weakened scalar
-  conclusion terminal. This evidence audit is tracked by
-  \href{https://github.com/Dengnifer/MIPStarRE-QPBT/issues/674}{GitHub issue \#674}.
+  \item \textbf{Current verdict.} \texttt{documented-deviation}. The
+  independent-constant estimates are proved, but are not equivalent to the
+  printed convention. The printed square-root claim is refuted by the
+  calculation below and remains unasserted in Lean. Documentary closure of
+  this intermediate gap does not certify the literal source claim.\footnote{
+  The owner's 2026-09-22 instruction, ``document, don't prove'', is applied
+  to this row by issue \#711. The earlier retention and consumer audit is
+  \path{audits/2026-09-22-printed-error-contracts.md}, issue \#674, merged in
+  \href{https://github.com/Dengnifer/MIPStarRE-QPBT/pull/675}{PR \#675}.
+  Its mathematical evidence and earlier repair budgets are unchanged.}
 \end{itemize}
 
 \section{Key theorem forms}
 
-The paper's shorthand asks for one universal constant $C>0$ such that
+For a fixed real-valued function $f$, the paper's one-variable shorthand is
 \[
-  f(x) \leq Cx^C \qquad (x>0).
+  \exists C>0\ \forall x>0,\qquad f(x) \leq Cx^C.
 \]
-The formal one-parameter convention instead asks for constants $A\geq1$ and
-$r>0$ such that
+The formal one-parameter convention for $f:\mathbb R\to\mathbb R$ is
 \[
-  0\leq f(x)\leq Ax^r \qquad (x\geq0).
+  \exists A\geq1\ \exists r>0\ \forall x\geq0,\qquad
+  0\leq f(x)\leq Ax^r.
 \]
 This form includes $f(x)=\sqrt{x}$ by taking $A=1$ and $r=1/2$.
+The witnesses are chosen before the input $x$; they cannot vary with it.
+In the existential QPBT error theorems the function, and hence its power
+bound, is chosen before all field parameters, strategies, and error inputs.
 The printed inequality is required only on positive inputs. It does not
 prescribe $f(0)$, nor does the polynomial shorthand itself add a lower bound
 on $f$. In contrast, the formal convention includes nonnegativity and forces
 $f(0)=0$. Thus the comparison includes a domain change as well as the
-separation of the constants.
+separation of the constants. Both conventions quantify real-valued functions;
+the formal bound imposes no condition at negative arguments. They are not
+equivalent predicates on such functions.
 
 \section{The source convention}
 
-The asymptotic conventions of \cite[lines~23--29]{Ji2020MIPStar} define
+The asymptotic conventions of \cite[Section~4, Asymptotics]{Ji2020MIPStar} define
 $f(x)=\operatorname{poly}(x)$ using the same constant as prefactor and
 exponent.  Later, the Pauli basis analysis explicitly obtains
 $\delta_{\mathrm{acom}}(\eps)=\sqrt{\eps}$ and
 $\delta_{\mathrm{Line}}(\eps)=\sqrt{\eps}$ at lines~508--520 and 649--676 of
 the chapter-14 source mirror.\footnote{The corresponding files are
-\path{references/qpbt-paper/04_preliminaries.tex} and
+\path{references/qpbt-paper/04_preliminaries.tex:26--29} and
 \path{references/qpbt-paper/14_analysis_of_the_pauli_basis_test.tex}.  The
-formal correction is tracked in
+square-root choices conclude the proofs of \texttt{lem:qld-comm-cons} and
+\texttt{lem:qld-comm-line-cons}. The discrepancy is tracked in
 \href{https://github.com/Dengnifer/MIPStarRE-QPBT/issues/16}{GitHub issue \#16}
 and descends from \localissue{0002}.}
 
@@ -75,18 +85,26 @@ would imply $C\geq1$.  For such a constant,
   \frac{\sqrt{x}}{Cx^C}=C^{-1}x^{1/2-C}
 \]
 is unbounded as $x$ decreases to zero, contradicting the proposed inequality
-on all positive inputs.
+on all positive inputs. The same obstruction already occurs on $0<x\leq1$;
+it does not depend on the formal convention's value at zero. This refutes
+the stated square-root choice under the literal scalar shorthand, not the
+operator conclusions with a different error contract.
 
 \section{Comparison with the blueprint and formalization}
 
-The blueprint uses the paper's local assertions that the relevant errors
-are polynomial in $\eps$, including the displayed square-root choices.
+The blueprint explicitly uses independent constants in the expanded point
+and line lemmas, and explains the distinction in its polynomial error
+remark.\footnote{Blueprint \texttt{lem:qld-comm-cons},
+\texttt{lem:qld-comm-line-cons}, and
+\path{rem:qpbt-polynomial-error-convention}.}
 The formal helper separates prefactor and exponent.\footnote{The helper is
 \leanid{IsPolyErr} in
 \doclink{MIPStarRE/QPBT/Games/ErrorFunctions.lean}.}
 This preserves decay by a positive power, but changes the literal scalar
 content of any theorem that uses the convention. It is not an equivalence
-with the printed definition.
+with the printed definition. Formalization marks on the two blueprint lemmas
+refer to their explicitly stated replacement convention, not to the printed
+coupled-constant assertion.
 
 The finite-arity source convention is retained as
 \leanid{PrintedPolynomialBound} in the same file:
@@ -98,22 +116,55 @@ The one-variable square-root specialization is separately retained as
 \leanid{PrintedSquareRootPolynomialClaim}. These are unasserted
 \texttt{Prop}-valued definitions. The latter records the scalar choice,
 not a substitute for the operator conclusions of the two cited lemmas.
-Neither declaration is a theorem or a hypothesis of a proof. The actual
-square-root witnesses remain justified only for the unchanged independent
-constant predicate.\footnote{The witnesses are
+Neither declaration is a theorem or a hypothesis of a proof. In particular,
+the mathematical refutation above is not represented by a Lean theorem
+negating the retained proposition. The actual square-root witnesses are
+proved for the existing independent-constant predicate.\footnote{The witnesses are
 \leanid{deltaAnticom\_isPolyErr} in
 \doclink{MIPStarRE/QPBT/Observables/PointConsistency.lean} and
 \leanid{deltaLine\_isPolyErr} in
 \doclink{MIPStarRE/QPBT/Observables/LineMeasurement.lean}.}
 
+Both functions are exactly $\sqrt\eps$. Mathlib identifies this with the
+real power $\eps^{1/2}$ on nonnegative inputs, so the scalar witnesses are
+$A=1$, $r=1/2$. The associated operator estimates have their own universal
+multiplicative constants, chosen before the test parameters and strategies.
+The point result gives self-consistency with error $O(\eps)$ and
+commutation with error $O(\sqrt\eps)$. The line result gives its three
+consistency comparisons with the common error $O(\sqrt\eps)$, including
+all directed opposite placements. The line evaluation comparison uses the
+formal completed answer alphabet, including the outcome for an undefined
+evaluation; this scalar note does not identify it with an uncompleted
+source comparison.\footnote{The existential results are
+\leanid{exists\_deltaAnticom} and \leanid{exists\_deltaLine}, in the same
+files as their scalar witnesses. Their conclusions are
+\leanid{ExpandedPointConclusions} and \leanid{ExpandedLineConclusions}.}
+
 \section{Consumers and boundary values}
 
-The square-root witnesses enter the joint-point construction
-\path{lem:qld-4-10}, where roots and products of positive-power errors
-are combined. The expanded-line witness is also an input to
-\texttt{lem:qld-xz-lines}. Pasting then introduces a second error argument
-$\rho=md/q$; its additive convention is a separate discrepancy, not a
-consequence of separating the one-variable constants. The resulting line
+The square-root estimates enter the joint-point construction
+\texttt{lem:qld-4-10}. The source's proof uses successive roots and
+quantum linearity under the same polynomial shorthand. The existing Lean
+construction instead combines the field-valued point measurements directly
+and proves an error $K\eps^{1/8}$, with one universal $K\geq1$ chosen
+before the setting. This is another concrete independent-constant bound.
+It does not resolve the distinct normalization and ancillary-space
+questions in the quoted linearity argument.\footnote{The construction is
+\leanid{exists\_combinedPointsWitness} in
+\doclink{MIPStarRE/QPBT/Combining/Points.lean}; its proof route is explained
+in \path{docs/paper-gaps/qpbt_combined-points-field-valued.tex}.}
+
+The expanded-line witness is also an input to \texttt{lem:qld-xz-lines}.
+The point-error bound is a shared contract: supplied-point versions of the
+line and extended-line constructors take a function satisfying
+\leanid{IsPolyErr}, whereas the existential constructors first produce
+that controlled function. They do not accept an arbitrary uncontrolled
+point error. Pasting introduces a second error argument $\rho=md/q$.
+The shared two-variable predicate bounds a nonnegative function by
+$B(x^s+y^t)$ for all $x,y\geq0$, with $B\geq1$ and $s,t>0$ chosen
+before the inputs. The replacement of a product by this sum is a separate
+discrepancy, not a consequence of separating prefactor and exponent. This
+note does not close the pasting-product row. The resulting line
 estimates enter the restricted-line averages, Claims 17-1--17-3, the
 established extended-line construction, and the global-pair estimate
 \texttt{lem:qld-4-7}. Finally the pulling-apart and extraction estimates
@@ -125,6 +176,16 @@ the explicit robustness function.\footnote{Paper chapter 14,
 The source/blueprint/Lean consumer table is in
 \path{audits/2026-09-22-printed-error-contracts.md}; the two-variable
 comparison is in \path{docs/paper-gaps/qpbt_pasting-product-error.tex}.}
+
+The established extended-line estimate is $C m g(\eps,md/q)$ for a
+function $g$ with the sum bound just described. It concerns directly
+indexed lines and completed answers. Neither the printed
+$g(m^2\eps,md/q)$ rate nor the source sampling-law and answer comparisons
+follow merely from changing the scalar convention. The global-pair and
+extraction estimates instead absorb the established errors into
+$a(md)^a(\eps^b+q^{-b}+2^{-bmd})$, with universal constants. Those
+existing absorption results support the formal soundness conclusions;
+they do not certify the missing intermediate source assertions.
 
 At $\eps=0$ both concrete square-root witnesses vanish. The joint-point
 error also vanishes by its independent-constant bound. A two-variable line
@@ -142,39 +203,38 @@ product bound for arbitrarily large size parameters. Those occurrences are
 distinguished in the consumer inventory; this audit does not certify a
 global change of source notation.
 
-\section{Four-condition adoption verdict}
+\section{Documented scope}
 
-\begin{enumerate}
- \item \emph{Correctness.} The square-root functions satisfy the corrected
- bound on the closed nonnegative half-line. The printed
- coupled-constant assertion fails by the calculation above. The stronger
- zero-input requirement is checked for the concrete witnesses, not inferred
- from the printed convention.
- \item \emph{Full consumer sufficiency.} The corrected QPBT estimates support
- the established line, global-pair, and extraction route. They do not prove
- the printed extended-line rate or the missing source-law comparisons, and
- do not justify replacing every global use of \texttt{poly}. Thus the
- all-source-consumers adoption condition is not established.
- \item \emph{Minimality and source semantics.} Independent constants admit
- $\sqrt{x}$, which the printed contract excludes even on $0<x\leq1$.
- This is a genuine relaxation on positive inputs, together with an added
- boundary requirement. It fails literal semantic preservation; usefulness
- downstream does not satisfy the unchanged no-weakened-conclusion condition.
- \item \emph{Lean convergence.} The retained definitions and focused
- consumer checks are evidence about elaboration and the existing corrected
- proofs, not proofs of the retained claim. Whole-project CI and independent
- review remain separate requirements. Exact commands and results accompany
- the consumer inventory.
-\end{enumerate}
+The established facts are the independent-constant square-root estimates,
+their zero boundary values, and the downstream bounds with the contracts
+described above. The retained printed propositions and the consumer
+inventory were independently reviewed in PR~\#675. That review concerned
+retention and documentation, not equivalence of the conventions or adoption
+of a literal source correction.\footnote{The reviewed head was
+\texttt{b7ebf9532831aa00cd1fb21f30f3215be7cb4b29}; the review receipt is
+\path{results/telemetry/sessions/reviewer-pr675-20260922-01.last.md}.
+The audit records the focused Lean and axiom checks. These are prior
+validation evidence, not new proof work in this documentary closure.}
+
+Separating the constants admits positive-domain functions excluded by the
+printed formula, while nonnegativity and the zero boundary add conditions
+absent from that formula. Thus neither literal semantic preservation nor
+full-paper sufficiency is claimed. The mathematical limitations identified
+by the earlier adoption audit remain valid. The terminal classification
+here records the discrepancy and the proved replacement under the owner's
+documentation instruction; it does not assert that the earlier strict
+adoption conditions have been met.
 
 \section{Conclusion}
 
-The single-constant shorthand is incompatible with the paper's own
-square-root choices. Independent constants give mathematically valid
-estimates but not the same printed contract. Under the unchanged adoption
-and completion rules this note does not authorize a terminal status.
-The row remains \texttt{pending}; no theorem, game, completion rule, or
-earlier repair budget is changed by the retention audit.
+The single-constant shorthand is incompatible with the paper's explicit
+square-root choices. Independent constants give proved local estimates
+under a different scalar contract. This intermediate gap is closed as
+\texttt{documented-deviation}, with the printed claim visible and
+unasserted. The separate pasting, extended-line, sampling-law, and
+linearity limitations remain as described above. No theorem statement,
+proof, game, or earlier repair budget is changed, and no conclusion about
+completion of the whole QPBT track follows from this row.
 
 \bibliographystyle{alpha}
 \bibliography{references}
